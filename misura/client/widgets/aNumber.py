@@ -71,6 +71,8 @@ class aNumber(ActiveWidget):
 			target=self.spinbox.value()
 		if self.double: target=float(target)
 		else: target=int(target)
+		# Remove focus from spinbox, so everything can be updated
+		self.slider.setFocus()
 		self.set(target)
 
 	def sliderPush(self, target=None):
@@ -83,9 +85,10 @@ class aNumber(ActiveWidget):
 
 	def update(self, minmax=True):
 		print 'updating',self.prop
-#		if self.spinbox.hasFocus():
-#			print 'aNumber.update has focus - skipping'
-#			return
+		# Block remote updates while editing
+		if self.spinbox.hasFocus():
+			print 'aNumber.update has focus - skipping'
+			return
 		self.spinbox.blockSignals(True)
 		# Update minimum and maximum
 		if self.slider and minmax: 
