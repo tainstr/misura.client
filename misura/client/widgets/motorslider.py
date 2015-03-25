@@ -1,0 +1,93 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+from PyQt4 import QtGui, QtCore
+from aNumber import aNumber
+from active import ActiveObject
+
+class MotorSlider(aNumber):
+	def __init__(self, server, remObj, parent=None):
+		prop=remObj.gete('goingTo')
+		self.started=0
+		self.target=0
+		self.position=0
+		aNumber.__init__(self,server, remObj, prop, parent,slider_class=QtGui.QScrollBar)
+		self.pos_obj=ActiveObject(server, remObj, remObj.gete('position'))
+		self.connect(self.pos_obj, QtCore.SIGNAL('selfchanged'), self.update_position)
+		if self.slider:
+			self.slider.setTracking(False)
+			self.slider.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+			self.connect(self.slider, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
+		self.label_widget.setSizePolicy(QtGui.QSizePolicy.Maximum,QtGui.QSizePolicy.Maximum)
+		self.menu=QtGui.QMenu()
+		self.spinact=QtGui.QWidgetAction(self.menu)
+		self.spinact.setDefaultWidget(self.spinbox)
+		self.labelact=QtGui.QWidgetAction(self.menu)
+		self.labelact.setDefaultWidget(self.label_widget)
+		self.menu.addAction(self.spinact)
+		self.menu.addAction(self.labelact)
+
+		
+	def showMenu(self, pt):
+		self.menu.popup(self.mapToGlobal(pt))
+		
+	def enterEvent(self,e):
+		print 'ENTER EVENT',self.handle
+#		self.get()
+		self.update()
+		return QtGui.QWidget.enterEvent(self,e)
+		
+	def setOrientation(self, direction):
+		if self.slider:
+			self.slider.setInvertedAppearance(direction!=QtCore.Qt.Horizontal)
+		return aNumber.setOrientation(self, direction)
+		
+	def update_position(self, pos):
+		self.update(position=pos)
+		
+	def update(self, *a, **k):
+		s=k.pop('position', None)
+		if s:
+			k['minmax']=False
+		r=aNumber.update(self,*a, **k)
+		if not hasattr(self, 'menu'):
+			print 'MotorSlider not fully initialized'
+			return r
+		# If 'position' argument was not passed, 
+		# force pos_obj to re-register itself
+		step=1
+		if self.slider:
+			step=self.slider.singleStep()
+		if s is None:
+			self.pos_obj.register()
+			s=self.position # keep old value
+		d=abs(1.*self.current-self.started)
+		if self.target!=self.current:
+			self.target=self.current
+			self.started=s
+		elif self.current==s or d==0:
+			self.started=s
+			d=0
+		if d<=5*step:
+			self.started=s
+#			self.menu.hide()
+			s=100
+			# Stop forced updates
+#			self.pos_obj.force_update=False
+		else:
+			s=100*(1-abs(self.current-s)/d)
+			# Start forced updates
+#			self.pos_obj.force_update=True
+		msg='%i%%' % abs(s)
+		self.label_widget.label.setText(msg)
+		return r
+	
+class MotorSliderAction(QtGui.QWidgetAction):
+	def __init__(self,server,remObj,parent=None):
+		QtGui.QWidgetAction.__init__(self,parent)
+		self.wdg=MotorSlider(server,remObj)
+		self.setDefaultWidget(self.wdg)
+		
+	def showEvent(self, event):
+		self.wdg.get()
+		return QtGui.QWidgetAction.showEvent(self, event)
+		

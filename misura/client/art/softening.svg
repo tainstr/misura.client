@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="64px"
+   height="64px"
+   id="svg3095"
+   version="1.1"
+   inkscape:version="0.48.0 r9654"
+   sodipodi:docname="Nuovo documento 4">
+  <defs
+     id="defs3097" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="5.5"
+     inkscape:cx="6.6363636"
+     inkscape:cy="32"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:document-units="px"
+     inkscape:grid-bbox="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1600"
+     inkscape:window-height="823"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1">
+    <sodipodi:guide
+       orientation="0,1"
+       position="34.727273,56.545455"
+       id="guide3183" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata3100">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer">
+    <g
+       id="g3179"
+       transform="translate(11.644672,2.9090909)">
+      <rect
+         inkscape:export-ydpi="150"
+         inkscape:export-xdpi="150"
+         inkscape:export-filename="/home/daniele/Documenti/RightAngle.png"
+         y="30.946777"
+         x="3.4208601"
+         height="19.983456"
+         width="34.552757"
+         id="rect3755-7-0"
+         style="fill:#000000;fill-opacity:1;stroke:none" />
+      <path
+         style="fill:#000000;stroke:#000000;stroke-width:0.11227184px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 3.4983179,30.893377 c -0.0784,-8.21304 6.9962201,-12.6008 17.7985701,-12.48408 10.80235,0.1168 16.63995,4.18136 16.65767,12.87424 0.0232,11.48608 -34.3467901,11.09544 -34.4562401,-0.3904 z"
+         id="path5028-7"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="szss" />
+    </g>
+    <g
+       transform="matrix(0.09946792,-0.12532408,0.12532408,0.09946792,125.64428,-68.243515)"
+       id="g4070-4"
+       style="stroke:#0011fd;stroke-opacity:1"
+       inkscape:transform-center-x="-3.3995598"
+       inkscape:transform-center-y="-4.8776437">
+      <path
+         inkscape:connector-curvature="0"
+         id="path3271-0"
+         d="m -686.39109,-103.78494 c 0,141.382887 0,143.663256 0,143.663256 l 38.76627,-43.3270124 0,0 0,0 0,0"
+         style="fill:none;stroke:#0011fd;stroke-width:16.70000076;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path3271-8-8"
+         d="m -702.88374,-103.78207 c 0,141.382882 0,143.663252 0,143.663252 L -741.65,-3.4458378 l 0,0 0,0 0,0"
+         style="fill:none;stroke:#0011fd;stroke-width:16.70000076;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    </g>
+    <g
+       transform="matrix(-0.09946792,-0.12532408,-0.12532408,0.09946792,-61.395553,-68.425333)"
+       id="g4070-4-4"
+       style="stroke:#0011fd;stroke-opacity:1"
+       inkscape:transform-center-x="3.3995654"
+       inkscape:transform-center-y="-4.8776439">
+      <path
+         inkscape:connector-curvature="0"
+         id="path3271-0-2"
+         d="m -686.39109,-103.78494 c 0,141.382887 0,143.663256 0,143.663256 l 38.76627,-43.3270124 0,0 0,0 0,0"
+         style="fill:none;stroke:#0011fd;stroke-width:16.70000076;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path3271-8-8-2"
+         d="m -702.88374,-103.78207 c 0,141.382882 0,143.663252 0,143.663252 L -741.65,-3.4458378 l 0,0 0,0 0,0"
+         style="fill:none;stroke:#0011fd;stroke-width:16.70000076;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    </g>
+    <rect
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.18861486px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect2985-4"
+       width="63.530422"
+       height="10.115923"
+       x="0.59842545"
+       y="53.851128"
+       inkscape:export-filename="/home/daniele/Documenti/RightAngle.png"
+       inkscape:export-xdpi="150"
+       inkscape:export-ydpi="150" />
+  </g>
+</svg>
