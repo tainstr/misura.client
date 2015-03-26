@@ -2,7 +2,7 @@
 """SPEC File for PyInstaller - Windows Binary"""
 from glob import glob
 import os.path
-from misura4.client.parameters import pathClient
+from misura.client.parameters import pathClient
 from veusz import utils as vutils
 
 console=True
@@ -15,7 +15,7 @@ vzd=res+'..\\'
 
 rthooks=[cli+'\\installer\\rthook_pyqt4.py']
 # Hidden imports
-him=['misura4.canon','misura4.canon.csutil','misura4.client','cv2','scipy.special._ufuncs_cxx','astropy'  ]
+him=['misura.canon','misura.canon.csutil','misura.client','cv2','scipy.special._ufuncs_cxx','astropy'  ]
 # Excluded imports
 exim=['Tkinter']
 Analyses=[]

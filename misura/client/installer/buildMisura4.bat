@@ -6,12 +6,12 @@ set pyinst=pyinstaller
 set python=C:\Python27\python.exe
 
 
-set sourceDir=%codeBase%\misura4
+set sourceDir=%codeBase%\misura
 set clientDir=%sourceDir%\client
 set canonDir=%sourceDir%\canon
 set veuszDir=%codeBase%\veusz
 
-set installerDir=%codeBase%\misura4\client\installer
+set installerDir=%codeBase%\misura\client\installer
 set specFile=%installerDir%\client_windows_pyinst.spec
 set out=%installerDir%\dist
 
