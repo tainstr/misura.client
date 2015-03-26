@@ -72,7 +72,12 @@ class aNumber(ActiveWidget):
 		if self.double: target=float(target)
 		else: target=int(target)
 		# Remove focus from spinbox, so everything can be updated
-		self.slider.setFocus()
+		if self.spinbox.hasFocus():
+			if self.slider:
+				self.slider.setFocus()
+			elif self.parent():
+				self.parent().setFocus()
+			
 		self.set(target)
 
 	def sliderPush(self, target=None):

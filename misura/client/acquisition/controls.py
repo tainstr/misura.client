@@ -162,14 +162,13 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		else:
 			self._async(self._stop,True)
 		self.show_prog("Stopping current test")
-# 		self.updateActions()
 
 	def validate(self):
 		"""Show a confirmation dialog immediately before starting a new test"""
 		#TODO: generalize
 		if self.remote['name'] in ['horizontal','vertical','flex']:
 			val,st=QtGui.QInputDialog.getDouble(self,self.mtr("Confirm initial sample dimension"),
-											self.mtr("Initial dimension"),
+											self.mtr("Initial dimension (micron)"),
 											self.remote.sample0['initialDimension'])
 			if not st:
 				return False

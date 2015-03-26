@@ -576,8 +576,13 @@ class ThermalCycleDesigner(QtGui.QSplitter, widgets.Linguist):
 		self.buttons.addWidget(self.tcc)
 		self.connect(self.tcc.combo,  QtCore.SIGNAL('currentIndexChanged(int)'), self.refresh)
 		self.connect(self.tcc,  QtCore.SIGNAL('changed()'), self.refresh)
-		self.connect(self.tcc.bSave, QtCore.SIGNAL('clicked(bool)'), self.apply )
-		
+		# Disconnect save button from default call
+		self.tcc.disconnect(self.tcc.bSave, QtCore.SIGNAL('clicked(bool)'), self.tcc.save_current)
+		# Connect to apply_and_save
+		self.connect(self.tcc.bSave, QtCore.SIGNAL('clicked(bool)'), self.apply_and_save)
+		# Remove edit button
+		self.tcc.lay.removeWidget(self.tcc.bEdit)
+		self.tcc.bEdit.hide()
 		self.main_layout.addWidget(self.buttonBar)
 		
 	def addTable(self, crv=None):
@@ -610,6 +615,10 @@ class ThermalCycleDesigner(QtGui.QSplitter, widgets.Linguist):
 		crv=self.table.curve()
 		self.remote.set('curve', crv)
 		self.refresh()
+		
+	def apply_and_save(self):
+		self.apply()
+		self.tcc.save_current()
 		
 	def loadCSV(self):
 		fname=QtGui.QFileDialog.getOpenFileName(self, 'Choose a *.csv file containing a time-temperature curve', '', "CSV Files (*.csv)")
