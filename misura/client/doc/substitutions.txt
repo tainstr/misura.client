@@ -1,0 +1,10 @@
+.. include:: <isonum.txt>
+
+.. |m| replace:: Misura\ |trade|
+.. |m4| replace:: Misura\ |trade| 4
+.. |M| replace:: |m|
+.. |M4| replace:: |m4|
+.. |win| replace:: Microsoft Windows\ |trade|
+.. |u| replace:: Canonical Ubuntu\ |trade| GNU/Linux
+.. |ults| replace:: Ubuntu\ |trade| 14.04 LTS
+.. |py| replace:: Python\ |trade|

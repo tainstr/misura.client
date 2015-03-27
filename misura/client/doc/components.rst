@@ -1,0 +1,18 @@
+.. include:: substitutions.txt
+
+Shared Components
+==================================
+
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+   
+   components/client_conf.rst
+   components/thermal_cycle
+   components/configuration
+   components/navigator
+   components/metadata
+   
+   
+   
