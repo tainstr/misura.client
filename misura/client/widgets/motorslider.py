@@ -26,9 +26,23 @@ class MotorSlider(aNumber):
 		self.labelact.setDefaultWidget(self.label_widget)
 		self.menu.addAction(self.spinact)
 		self.menu.addAction(self.labelact)
-
+		self.cfact=self.menu.addAction(self.mtr('Configure'), self.hide_show)
+		self.cfact.setCheckable(True)
+		self.cf=False
+		
+	def hide_show(self):
+		"""Hide/show configuration dialog"""
+		from .. import conf
+		if not self.cf:
+			self.cf=conf.Interface(self.server, self.remObj)
+		if not self.cf.isVisible():
+			self.cf.show()
+		else:
+			self.cf.hide()
 		
 	def showMenu(self, pt):
+		if self.cf:
+			self.cfact.setChecked(self.cf.isVisible())
 		self.menu.popup(self.mapToGlobal(pt))
 		
 	def enterEvent(self,e):

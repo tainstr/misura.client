@@ -189,14 +189,15 @@ class MenuBar(widgets.Linguist,QtGui.QMenuBar):
 		self.settings.clear()
 		self.showInstrumentConf=functools.partial(self.hideShow, 'iconf')
 		act=self.settings.addAction('Instrument', self.showInstrumentConf)
-		self.objects['iconf']=functools.partial(conf.Interface, self.server,  self.remote)
+#		self.objects['iconf']=functools.partial(conf.Interface, self.server,  self.remote)
+		self.objects['iconf']=functools.partial(conf.TreePanel, self.remote, None, self.remote)
 		self.lstActions.append((act, self.remote))
 		
 		###### DEVICES SubMenu
 		self.devices=self.settings.addMenu('Devices')
 		self.connect(self.devices, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
 		paths=self.remote['devices']
-
+		
 		for path in paths:
 			role,path=path
 			lst=self.server.searchPath(path)
@@ -221,7 +222,8 @@ class MenuBar(widgets.Linguist,QtGui.QMenuBar):
 		self.lstActions.append((act, 'mconf'))
 	
 	def addDevConf(self, obj, role):
-		self.objects[obj]=functools.partial(conf.Interface, self.server, obj)
+#		self.objects[obj]=functools.partial(conf.Interface, self.server, obj)
+		self.objects[obj]=functools.partial(conf.TreePanel, obj, None, obj)
 		f=functools.partial(self.hideShow, obj)
 		act=self.devices.addAction('%s (%s)' % (role, obj['name']), f)
 		self.lstActions.append((act, obj))
