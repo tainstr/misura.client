@@ -10,11 +10,12 @@ class MotorSlider(aNumber):
 		self.started=0
 		self.target=0
 		self.position=0
-		aNumber.__init__(self,server, remObj, prop, parent,slider_class=QtGui.QScrollBar)
+		aNumber.__init__(self,server, remObj, prop, parent)#,slider_class=QtGui.QScrollBar)
 		self.pos_obj=ActiveObject(server, remObj, remObj.gete('position'))
 		self.connect(self.pos_obj, QtCore.SIGNAL('selfchanged'), self.update_position)
 		if self.slider:
 			self.slider.setTracking(False)
+			self.slider.setFocusPolicy(QtCore.Qt.ClickFocus)
 			self.slider.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 			self.connect(self.slider, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
 		self.label_widget.setSizePolicy(QtGui.QSizePolicy.Maximum,QtGui.QSizePolicy.Maximum)
@@ -31,20 +32,26 @@ class MotorSlider(aNumber):
 		self.menu.popup(self.mapToGlobal(pt))
 		
 	def enterEvent(self,e):
-		print 'ENTER EVENT',self.handle
-#		self.get()
 		self.update()
 		return QtGui.QWidget.enterEvent(self,e)
 		
 	def setOrientation(self, direction):
+		r=aNumber.setOrientation(self, direction)
+		# TODO: merge in aNumber?
 		if self.slider:
-			self.slider.setInvertedAppearance(direction!=QtCore.Qt.Horizontal)
-		return aNumber.setOrientation(self, direction)
+			self.lay.setContentsMargins(0, 0, 0, 0)
+			self.lay.setSpacing(0)
+			self.slider.setContentsMargins(0, 0, 0, 0)
+#			a=direction==QtCore.Qt.Horizontal
+#			self.slider.setInvertedAppearance(not a)
+#			self.slider.setInvertedControls(a)
+		return r
 		
 	def update_position(self, pos):
 		self.update(position=pos)
 		
 	def update(self, *a, **k):
+		print 'MotorSlider.update', self.slider.singleStep(), self.slider.pageStep()
 		s=k.pop('position', None)
 		if s:
 			k['minmax']=False

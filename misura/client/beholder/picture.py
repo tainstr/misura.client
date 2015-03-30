@@ -10,6 +10,7 @@ from misura.client.live import registry, FrameProcessor, SampleProcessor
 from motionplane import SensorPlane
 from sample_picture import SamplePicture
 import calibration
+from time import sleep
 
 class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 	"""Display widget for camera frames"""
@@ -17,6 +18,13 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 	sampleProcessor=False
 	processor=False
 	
+	@property
+	def inv(self):
+		inv=0
+		if self.remote.encoder.has_key('invert'):
+			inv=self.remote.encoder['invert']
+		return inv
+		
 	def __init__(self, remote, server, parent=None,
 				frameProcessor=False, sampleProcessor=False):
 		QtGui.QGraphicsView.__init__(self, parent)
@@ -25,6 +33,7 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 		self.objects={}
 		self.conf_win={}
 		self.conf_act={}
+		self.motor_ctrl={}
 		self.samples=[]
 		self.parent = parent
 		self.setBackgroundBrush(QtGui.QBrush(QtCore.Qt.lightGray))
@@ -41,11 +50,9 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 		self.plane.setPos(0, 0)
 		
 		self.setScene(self.gscene)
-		inv=0
-		if self.remote.encoder.has_key('invert'):
-			inv=self.remote.encoder['invert']
-		if inv!=0 :
-			self.rotate(inv*90.)
+
+		if self.inv!=0 :
+			self.rotate(self.inv*90.)
 		
 		self.saveDir = False
 		self.saveN = 0
@@ -101,6 +108,23 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 	def set_crop(self, x, y, w, h):
 		"""Broadcast new image crop value to all overlays. It is used as the region of interest."""
 		self.plane.set_crop(x, y, w, h)
+		g={'x':w, 'y':h}
+		if self.inv:
+			g={'y':w, 'x':h}
+		for c in ('x', 'y'):
+			m=self.motor_ctrl.get(c, False)
+			if not m: continue
+			enc=self.plane.enc(c)
+			if not enc: continue
+			# Calc new tick interval for camera
+			ps=abs(int(1.*g[c]/enc['align'])) # page step
+			ps=max(ps, 50)# at least 50 steps
+			s=int(0.2*ps) # single step
+			s=max(s, 10) # at least 10 steps
+			m.slider.setPageStep(ps)
+			m.slider.setSingleStep(s)
+			m.remObj.setattr(m.handle, 'step', s)
+			print 'MOTOR STEP', c, ps, s, g[c], enc['align']
 		for smp in self.samples:
 			smp.update({'crop':[x, y, w, h]})
 		
@@ -272,9 +296,14 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 		self.add_motion_actions(self.mmenu)
 		# Other stuff
 		self.menu.addAction('Save frame', self.save_frame)
-		
+	
+	
 	def add_motion_actions(self,menu):
 		"""Create menu actions for motion control"""
+		cpos={'x':'bottom','y':'left'}
+#		if self.inv!=0:
+#			cpos={'x':'left','y':'bottom'}
+		self.motor_ctrl={}
 		def add_coord(name):
 			enc=getattr(self.remote.encoder,name)
 			m=enc['motor']
@@ -295,7 +324,8 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 			if name in ('x','y'):
 				slider=widgets.MotorSlider(self.server,obj,self.parent)
 				slider.spinbox.hide()
-				self.parent.setControl(slider,{'x':'bottom','y':'left'}[name])
+				self.parent.setControl(slider,cpos[name])
+				self.motor_ctrl[name]=slider
 				
 			act=widgets.aBooleanAction(obj, obj.gete('moving'), parent=submenu)
 			submenu.addAction(act)
@@ -403,13 +433,11 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 	def updateFrame(self, i, x, y, w,h, data, img=False):
 		"""Called when a new frame is available from processor"""
 		# Nota: non posso usare direttamente QPixmap.loadFromData per via di un memory leak in Qt
-		print 'updateFrame',i,x,y
 		if img: 
 			qimg=data
 		else:
 			qimg = QtGui.QImage()
 			qimg.loadFromData(data)
-		print 'updating frame for sample',i,len(self.samples)
 		if len(self.samples)==0 or i>=len(self.samples):
 			self.reconnectSample()
 			return
@@ -419,7 +447,6 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 		smp.pix = QtGui.QPixmap.fromImage(qimg)
 		smp.pixItem.setPixmap(smp.pix)
 		smp.update({'roi':[x,y,w,h]})
-		print 'frameUpdated',i
 		self.emit(QtCore.SIGNAL('frameUpdated()'))
 		
 		

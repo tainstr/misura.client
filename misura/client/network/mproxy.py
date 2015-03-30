@@ -107,7 +107,7 @@ class MisuraProxy(object):
 	"""Time of last remote call - use for logging"""
 	_smartnaming=False
 	"""Triggers remote get/set requests when accessing to un-protected local attributes"""
-	_protect=set(['conn_add','to_root','toPath','root','connect','paste','copy','describe',
+	_protect=set(['remObj','conn_add','to_root','toPath','root','connect','paste','copy','describe',
 				'info','lastlog','get','from_column','parent','child','call','devices'])
 	"""Local names which must not be accessed remotely"""
 	sep='/'
@@ -142,21 +142,23 @@ class MisuraProxy(object):
 		self._Method__name='MAINSERVER'
 		# Compile a list of both remote callable methods and remote walkable objects
 		d={'MAINSERVER':[]}
-		for entry in self.remObj.system.listMethods():
-			if entry.count(self.sep)==0:
-				d['MAINSERVER'].append(entry)
-				continue
-			entry=entry.split(self.sep)
-			part=entry[0]
-			if part not in d['MAINSERVER']:
-				d['MAINSERVER'].append(part)
-			if len(entry)==1: continue
-			for e in entry[1:]:
-				if not d.has_key(part):
-					d[part]=[]
-				if e not in d[part]:
-					d[part].append(e)
-				part+=self.sep+e
+		#FIXME: this will cause memory leak on labor2...
+		if self._smartnaming:
+			for entry in self.remObj.system.listMethods():
+				if entry.count(self.sep)==0:
+					d['MAINSERVER'].append(entry)
+					continue
+				entry=entry.split(self.sep)
+				part=entry[0]
+				if part not in d['MAINSERVER']:
+					d['MAINSERVER'].append(part)
+				if len(entry)==1: continue
+				for e in entry[1:]:
+					if not d.has_key(part):
+						d[part]=[]
+					if e not in d[part]:
+						d[part].append(e)
+					part+=self.sep+e
 		self._remoteDict=d
 		self._dtime=self.remObj.time()-time()
 		return oldname

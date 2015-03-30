@@ -57,6 +57,10 @@ class SensorPlane(QtGui.QGraphicsItem):
 	def boundingRect(self):
 		return self.box.boundingRect()
 		
+	def enc(self, coord):
+		"""Return remote encoder proxy for `coord`"""
+		return getattr(self.remote.encoder,coord,None)
+		
 	def pos(self,coord=None,new=None):
 		"""Return/set the pixel position"""
 		if coord is None:

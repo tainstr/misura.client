@@ -76,6 +76,6 @@ class Overlay(QtGui.QGraphicsItem):
 		return True
 	
 	def boundingRect(self):
-		return QtCore.QRectF(0,0,0,0)
+#		return QtCore.QRectF(0,0,0,0)
 		return self.parentItem().boundingRect()
 		

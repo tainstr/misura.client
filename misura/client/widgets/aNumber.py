@@ -89,7 +89,7 @@ class aNumber(ActiveWidget):
 		self.set(target)
 
 	def update(self, minmax=True):
-		print 'updating',self.prop
+#		print 'updating',self.prop
 		# Block remote updates while editing
 		if self.spinbox.hasFocus():
 			print 'aNumber.update has focus - skipping'
@@ -117,7 +117,7 @@ class aNumber(ActiveWidget):
 			else: 
 				cur=int(cur)
 			self.setRange(self.min,self.max,self.step)
-			print 'aNumber.update', self.handle,cur,self.current,self.spinbox.maximum(),self.spinbox.minimum()
+#			print 'aNumber.update', self.handle,cur,self.current,self.spinbox.maximum(),self.spinbox.minimum()
 			self.spinbox.setValue(cur)
 # 			self.setRange(self.min, self.max, self.step)
 			if self.slider: 
@@ -170,7 +170,7 @@ class aNumber(ActiveWidget):
 		self.step=step
 		self.divider=1
 		self.spinbox.setSingleStep(step*self.divider)
-		print 'aNumber.setRange',self.handle,min,max,step,cur
+#		print 'aNumber.setRange',self.handle,min,max,step,cur
 		if self.slider:
 			self.slider.setMaximum(max*self.divider)
 			self.slider.setMinimum(min*self.divider)
