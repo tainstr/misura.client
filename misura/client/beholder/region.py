@@ -101,7 +101,8 @@ class BoxRegion(Overlay):
 		if not self.validate():
 			print 'BoxRegion not validated' 
 			return False
-		r = self.get()
+#		r = self.get()
+		r=self.current[self._opt]
 		if r is None:
 			print 'Region UP error: no values', r
 		x, y, w, h=r

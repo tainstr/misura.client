@@ -98,8 +98,9 @@ class aNumber(ActiveWidget):
 		# Update minimum and maximum
 		if self.slider and minmax: 
 			self.slider.blockSignals(True)
-			self.prop=self.remObj.gete(self.handle)
-			self.current=self.prop['current']
+			#FIXME: These two lines causes incredible slowdown!
+			#self.prop=self.remObj.gete(self.handle)
+			#self.current=self.prop['current']
 			self.setRange( self.prop.get('min', None),  
 						self.prop.get('max', None), 
 						self.prop.get('step', False))

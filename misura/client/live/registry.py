@@ -115,37 +115,21 @@ class KidRegistry(QtCore.QThread):
 		if self.progress.progress:
 			self.progress.progress.emit(QtCore.SIGNAL('selfchanged'), cur)
 		for kid,ws in self.rid.items():
+			t= self.times.get(kid, 0)
 			do=False
-			# Search for forced updates
+			# Search for valid entry and forced update
 			for w in ws[:]:
-				if w==self.progress.progress: continue
-				try:
-					if w.force_update:
-						# Reconnect xmlrpc proxy in this thread
-						obj=w.remObj.copy()
-						obj.connect()
-						# Perform possibly slow comm
-						cur=obj.get(w.handle)
-						# Emit just the new value
-						w.emit(QtCore.SIGNAL('selfchanged'), cur)
-						continue
-				except:
-					# If an exception is raised (typically, RuntimeError)
-					# unregister the widget. 
-					# (eg: C++ object has been deleted, but python reference still exists)
-					print_exc()
-					self.rid[kid].remove(w)
-					del w
-					if len(self.rid[kid])==0:
-						del self.rid[kid]
-						del self.times[kid]
+				if w==self.progress.progress: 
 					continue
-				do=True
+				do=1
+				if w.force_update:
+					t=-1	# force mapdate to update this value
 				break
+			# Just progresses
 			if not do:
 				continue
 			# Aggregate request
-			request.append((kid, self.times.get(kid, 0)))
+			request.append((kid,t))
 		return request
 		
 	@lockme

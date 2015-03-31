@@ -23,6 +23,7 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 		inv=0
 		if self.remote.encoder.has_key('invert'):
 			inv=self.remote.encoder['invert']
+		self._inv=inv # cached inv
 		return inv
 		
 	def __init__(self, remote, server, parent=None,
@@ -34,6 +35,8 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 		self.conf_win={}
 		self.conf_act={}
 		self.motor_ctrl={}
+		self._res={'x':-1, 'y':-1}
+		self._inv=0
 		self.samples=[]
 		self.parent = parent
 		self.setBackgroundBrush(QtGui.QBrush(QtCore.Qt.lightGray))
@@ -104,30 +107,45 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 		self.connect(self.processor,QtCore.SIGNAL('crop(int,int,int,int)'), self.set_crop)
 		self.termProcessor = lambda * foo: self.processor.toggle_run(False)
 		self.connect(self, QtCore.SIGNAL('destroyed(QObject)'), self.termProcessor) 
-		
+	
+	
 	def set_crop(self, x, y, w, h):
 		"""Broadcast new image crop value to all overlays. It is used as the region of interest."""
 		self.plane.set_crop(x, y, w, h)
 		g={'x':w, 'y':h}
-		if self.inv:
+		if self._inv:
 			g={'y':w, 'x':h}
+		# Update motor control stepping
 		for c in ('x', 'y'):
+			# skip if equal to cached resolution
+			if g[c]==self._res[c]:
+				continue
+			# skip if no motor control defined
 			m=self.motor_ctrl.get(c, False)
-			if not m: continue
+			if not m: 
+				continue
 			enc=self.plane.enc(c)
-			if not enc: continue
+			if not enc: 
+				continue
 			# Calc new tick interval for camera
-			ps=abs(int(1.*g[c]/enc['align'])) # page step
+			align=enc['align']
+			ps=abs(int(1.*g[c]/align)) # page step
 			ps=max(ps, 50)# at least 50 steps
 			s=int(0.2*ps) # single step
 			s=max(s, 10) # at least 10 steps
-			m.slider.setPageStep(ps)
-			m.slider.setSingleStep(s)
-			m.remObj.setattr(m.handle, 'step', s)
-			print 'MOTOR STEP', c, ps, s, g[c], enc['align']
+			# Invert controls and appearance?
+			invc=align>0 and m.slider.orientation()==QtCore.Qt.Horizontal
+			# Skip if no change
+			if ps!=m.slider.pageStep() or s!=m.slider.singleStep() or invc!=m.slider.invertedControls():
+				m.slider.setPageStep(ps)
+				m.slider.setSingleStep(s)
+				m.slider.setInvertedControls(invc)
+				m.slider.setInvertedAppearance(invc)
+				m.remObj.setattr(m.handle, 'step', s)
+		self._res=g # cache resolution
+		# Update all overlays
 		for smp in self.samples:
 			smp.update({'crop':[x, y, w, h]})
-		
 		
 	def setSampleProcessor(self,rp=False):
 		"""Create or set the thread receiving sample information from the remote camera"""

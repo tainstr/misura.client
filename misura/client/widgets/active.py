@@ -172,7 +172,7 @@ class Active(Linguist):
 			self.emitChanged()
 		elif self.current!=rem:
 			self.current=rem
-			self.emitChanged()		
+			self.emitChanged()
 
 	def get(self, *args):
 		rem=self.remObj.get(self.handle, *args)

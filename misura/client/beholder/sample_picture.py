@@ -127,6 +127,8 @@ class SamplePicture(QtGui.QGraphicsItem):
 
 	def update(self,multiget):
 		"""Update all visible overlay with new dictionary"""
+		if len(multiget)==0:
+			return False
 		print 'updating sample'
 		roi=multiget.get('roi',False)
 		if roi:
@@ -134,7 +136,6 @@ class SamplePicture(QtGui.QGraphicsItem):
 			if x<0: x=0
 			if y<0: y=0
 			self.setPos(x,y)
-# 			self.roi.setPos(0,0)
 		for ov in self.overlays:
 			if ov.isVisible():
 				try:
@@ -142,6 +143,7 @@ class SamplePicture(QtGui.QGraphicsItem):
 				except:
 					print 'Overlay update error'
 					print_exc()
+		return True
 		
 	@property
 	def opt(self):

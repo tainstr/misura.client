@@ -65,7 +65,6 @@ class MotorSlider(aNumber):
 		self.update(position=pos)
 		
 	def update(self, *a, **k):
-		print 'MotorSlider.update', self.slider.singleStep(), self.slider.pageStep()
 		s=k.pop('position', None)
 		if s:
 			k['minmax']=False
