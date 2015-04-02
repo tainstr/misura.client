@@ -17,8 +17,8 @@ Contents:
    :maxdepth: 2
    
    install
+   instruments
    browser
-   live
    components
    views
    glossary
