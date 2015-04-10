@@ -306,12 +306,18 @@ class ThermalCurveModel(widgets.Linguist, QtCore.QAbstractTableModel):
 		print ent0
 		if self.mode=='points':
 			D=(t-t0)
-			R=(T-T0)/D
+			if D==0: R=0
+			else:
+				R=(T-T0)/D
 		elif self.mode=='ramp':
-			D=(T-T0)/R
+			if R==0: D=0
+			else:
+				D=(T-T0)/R
 			t=t0+D
 		elif self.mode=='dwell':
-			R=(T-T0)/D
+			if D==0: R=0
+			else:
+				R=(T-T0)/D
 			t=t0+D
 		if D<0 or t<t0:
 			print 'Impossible duration!'

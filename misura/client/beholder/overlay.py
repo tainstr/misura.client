@@ -51,9 +51,9 @@ class Overlay(QtGui.QGraphicsItem):
 		self.moving = False
 		
 	def slot_update(self,multiget):
+		"""Slot to update current value from a multiget result dispatched by a SampleProcessor."""
 		if self.moving: 
 			return False
-#		self.current={}
 		for opt in self.opt:
 			if not multiget.has_key(opt):
 				continue
@@ -65,7 +65,7 @@ class Overlay(QtGui.QGraphicsItem):
 		return False
 		
 	def up(self):
-		"""Read and redraw server values."""
+		"""Redraw using current value."""
 		pass
 	
 	def validate(self):
@@ -76,6 +76,6 @@ class Overlay(QtGui.QGraphicsItem):
 		return True
 	
 	def boundingRect(self):
-#		return QtCore.QRectF(0,0,0,0)
-		return self.parentItem().boundingRect()
+		return QtCore.QRectF(0,0,0,0)
+#		return self.parentItem().boundingRect()
 		

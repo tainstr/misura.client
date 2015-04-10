@@ -80,17 +80,19 @@ class DeriveDatasetPlugin(plugins.DatasetPlugin):
 		order = fields['order']
 		method = fields['method']
 		smooth=fields['smooth']
-		y=np.array(ds_y.data)
 		ds_x=None
+		if smooth>0:
+			ds_y=SmoothDatasetPlugin.smooth(ds_y,smooth,'hanning')
 		if fields['ds_x']!='':
 			# Derive with respect to X
 			ds_x = np.array(helper.getDataset(fields['ds_x']).data)
+			if smooth>0:
+				ds_x=SmoothDatasetPlugin.smooth(ds_x,smooth,'hanning')
 			out=self.xyderive(ds_x,ds_y,order,method)
 		else:
 			# Derive with respect to point indexes
 			out=self.derive(ds_y,method,order)
-		if smooth>0:
-			out=SmoothDatasetPlugin.smooth(out,smooth,'hanning')
+
 		self.ds_out.update(data=out)
 		return [self.ds_out]
 

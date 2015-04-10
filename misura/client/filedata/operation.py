@@ -38,7 +38,7 @@ def getUsedPrefixes(doc):
 		if lf is None:
 			print 'no linked file for ',ds.name
 			continue
-		print 'found linked file',lf.filename,lf.prefix
+#		print 'found linked file',lf.filename,lf.prefix
 		p[lf.filename]=lf
 	print 'getUsedPrefixes',p,doc.data.keys()
 	return p
@@ -188,8 +188,6 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		if not t: return	
 		t.done(pid)
 		
-		
-	@profile
 	def doImport(self):
 		"""Import data.  Returns a list of datasets which were imported."""
 		# Linked file

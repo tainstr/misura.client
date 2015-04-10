@@ -28,6 +28,7 @@ from ..filedata import RemoteFileProxy
 from misura.canon import csutil
 
 subWinFlags=QtCore.Qt.CustomizeWindowHint|QtCore.Qt.WindowTitleHint|QtCore.Qt.WindowMinMaxButtonsHint
+
 roles={'motorBase':'Base Position', 'motorHeight':'Height Position',
                 'motorRight':'Right Position', 'motorLeft':'Left Position',
                 'focus':'Focus adjust', 'motor':'Position', 'camera':'Main',
@@ -75,10 +76,6 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		self.serverDock.setWindowTitle(self.serverSelector.label)
 		self.serverDock.setWidget(self.serverSelector)
 		self.addDockWidget(QtCore.Qt.TopDockWidgetArea,self.serverDock)
-		
-	def close(self):
-		self.timer.stop()
-		return QtGui.QMainWindow.close(self)
 		
 	def rem(self, d, w=False):
 		"""Removes a widget by name"""
@@ -208,7 +205,7 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		
 		
 
-	@csutil.profile
+#	@csutil.profile
 	def setInstrument(self, remote, server=False):
 		if server is not False:
 			self.setServer(server)

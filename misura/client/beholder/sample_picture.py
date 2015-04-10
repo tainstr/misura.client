@@ -114,6 +114,9 @@ class SamplePicture(QtGui.QGraphicsItem):
 		
 		self.show()
 		
+	def boundingRect(self):
+		return self.pixItem.boundingRect()
+		
 	def close(self):
 		for ov in self.overlays:
 			ov.hide()
