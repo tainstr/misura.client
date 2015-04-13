@@ -26,7 +26,7 @@ class TestWindow(acquisition.MainWindow):
 			
 		self.graphWin.show()
 #		self.summaryPlot.default_plot()
-		
+		self.removeToolBar(self.controls)
 		self.connect(self.play, QtCore.SIGNAL('set_idx(int)'),self.set_idx)
 		self.connect(self.snapshotsTable,QtCore.SIGNAL('set_idx(int)'),self.play.set_idx)
 		
