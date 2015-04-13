@@ -18,6 +18,7 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		self.remote=remote
 		print 'Controls: init'
 		self.server=remote.parent()
+		self.iniAct=self.addAction('New', self.new)
 		self.startAct=self.addAction('Start', self.start)
 		self.stopAct=self.addAction('Stop', self.stop)
 		print 'Controls: aobj'
@@ -52,6 +53,7 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		r=bool(r)
 		self.stopAct.setEnabled(r)
 		self.startAct.setEnabled(r^1)
+		self.iniAct.setEnabled(r^1)
 		if self.motor is not False:
 			self.motor.update()
 		return r
@@ -162,6 +164,9 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		else:
 			self._async(self._stop,True)
 		self.show_prog("Stopping current test")
+		
+	def new(self):
+		self.parent().init_instrument()
 
 	def validate(self):
 		"""Show a confirmation dialog immediately before starting a new test"""
