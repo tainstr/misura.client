@@ -153,7 +153,6 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 			                               qm.Save|qm.Discard|qm.Abort, qm.Save)
 			if btn==qm.Abort:
 				qm.information(self, 'Nothing done.',  'Action aborted. The measurement maybe still running.')
-# 				self.updateActions()
 				return False
 		else:
 			btn=qm.Discard

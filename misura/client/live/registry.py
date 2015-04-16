@@ -111,7 +111,6 @@ class KidRegistry(QtCore.QThread):
 		request=[]
 		# Force progress update
 		cur=self.obj.get('progress')
-		print 'got progress', cur
 		if self.progress.progress:
 			self.progress.progress.emit(QtCore.SIGNAL('selfchanged'), cur)
 		for kid,ws in self.rid.items():

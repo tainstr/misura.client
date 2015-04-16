@@ -84,9 +84,10 @@ class ImportParamsMisura(base.ImportParamsBase):
 def not_interpolated(proxy,col,startt,endt):
 	"""Retrieve `col` from `proxy` and extend its time range from `startt` to `endt`"""
 	print 'not interpolating col',col,startt,endt
+	# Take first point to get column start time
 	zt=proxy.col(col,0)
 	if zt is None or len(zt)==0:
-		print 'Skipping column: no data',col
+		print 'Skipping column: no data',col, zt
 		return False, False
 	zt=zt[0]
 	data0=np.array(proxy.col(col,(0,None)))
@@ -119,7 +120,6 @@ def interpolated(proxy,col,ztime_sequence):
 # 	zt=proxy.col(col,0)
 # 	if len(zt)==0:
 	if tdata is False:
-		print 'Skipping column: no data',col
 		return False
 # 	zt=zt[0]
 # 	data0=np.array(proxy.col(col,(0,None)))
@@ -127,6 +127,7 @@ def interpolated(proxy,col,ztime_sequence):
 # 	data=data0.view(np.float64).reshape((len(data0),2))
 # 	tdata=data.transpose()
 	t,val=tdata[0],tdata[1]
+	print 'ius',col,  t, val
 	f=InterpolatedUnivariateSpline(t,val,k=1)
 	r=f(ztime_sequence)
 	return r
@@ -336,8 +337,10 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 			elif col=='t':
 				data=time_sequence
 			elif not interpolating:
+				print 'not interpolating', pcol
 				data=not_interpolated(self.proxy,col,startt,endt)[1] # Take values column
 			else:
+				print 'interpolating', pcol
 				data=interpolated(self.proxy,col,ztime_sequence)
 				
 			if data is False:

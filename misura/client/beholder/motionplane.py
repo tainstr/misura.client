@@ -51,7 +51,6 @@ class SensorPlane(QtGui.QGraphicsItem):
 		self.cropBox.setPen(pen)
 		
 	def set_crop(self,x,y,w,h):
-		print 'updating cropping rect',x,y,w,h
 		self.cropBox.setRect(x,y,w,h)
 		
 	def boundingRect(self):

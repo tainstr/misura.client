@@ -132,7 +132,6 @@ class SamplePicture(QtGui.QGraphicsItem):
 		"""Update all visible overlay with new dictionary"""
 		if len(multiget)==0:
 			return False
-		print 'updating sample'
 		roi=multiget.get('roi',False)
 		if roi:
 			x,y=roi[:2]

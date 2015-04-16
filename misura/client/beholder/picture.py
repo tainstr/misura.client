@@ -66,11 +66,6 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 		self.addActions()
 		self.connect(self.menu, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
 		
-		# If sample number changes, must redraw ROI
-		self.aobj=widgets.ActiveObject(self.remote.root, self.remote, self.remote.gete('nSamples'))
-		self.connect(self.aobj, QtCore.SIGNAL('changed()'), self.reconnectSample)
-		self.aobj.isVisible=self.isVisible
-		
 		self.setFrameProcessor(frameProcessor)
 		self.setSampleProcessor(sampleProcessor)
 		self.reconnectSample()

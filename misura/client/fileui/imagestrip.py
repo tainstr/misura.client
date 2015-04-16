@@ -264,14 +264,17 @@ class ImageSlider(QtGui.QWidget):
 		if self.slider.slider.maximum()==0: return
 		self.disconnect(self.slider,QtCore.SIGNAL('set_idx(int)'),self.set_idx)
 		self.disconnect(self.strip,QtCore.SIGNAL('set_idx(int)'),self.set_idx)
+		self.emit(QtCore.SIGNAL('set_idx(int)'),idx)
 		self.slider.set_idx(idx)
 		self.strip.set_idx(idx)
-		self.emit(QtCore.SIGNAL('set_idx(int)'),idx)
 		self.connect(self.slider,QtCore.SIGNAL('set_idx(int)'),self.set_idx)
 		self.connect(self.strip,QtCore.SIGNAL('set_idx(int)'),self.set_idx)
 		
 	def set_time(self,t):
-		idx=self.slider.decoder.get_time(t)
+		if self.slider.decoder:
+			idx=self.slider.decoder.get_time(t)
+		else:
+			idx=int(t)
 		self.set_idx(idx)
 
 

@@ -266,7 +266,6 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 		same = units.from_base.get(kgroup, {u:lambda v: v}).keys()
 		print kgroup, same
 		for u1 in same:
-			print 'building menu', u1
 			p = functools.partial(self.set_unit, convert=u1)
 			act = un.addAction(self.mtr(u1), p)
 			act.setCheckable(True)
