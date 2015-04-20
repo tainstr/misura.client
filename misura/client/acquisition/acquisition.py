@@ -311,8 +311,6 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		self.tasks.done(pid)
 
 	def addCamera(self, obj, role='',analyzer='hsm'):
-		#FIXME: old, nonsense
-# 		obj['Analysis_instrument']=analyzer 
 		pic=beholder.ViewerControl(obj,self.server, parent=self)
 		pic.role=role
 		win=self.centralWidget().addSubWindow(pic, subWinFlags)
@@ -325,7 +323,7 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 #		self.connect(pic, QtCore.SIGNAL('updatedROI()'), win.repaint)
 		self.cameras[role]=(pic, win)
 		
-	retry=5
+	retry=10
 	def _resetFileProxy(self,retry=0):
 		"""Resets acquired data widgets"""
 		QtGui.qApp.processEvents()
@@ -348,6 +346,10 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 			self.tasks.jobs(self.retry,'Waiting for data')
 			self.tasks.done('Test initialization')
 			self.tasks.job(retry,'Waiting for data')
+			QtGui.qApp.processEvents()
+			if retry<5:
+				sleep(retry/2.)
+				return self._resetFileProxy(retry=retry+1)
 			if retry>self.retry:
 				self.tasks.done('Waiting for data')
 				QtGui.QMessageBox.critical(self,self.mtr('Impossible to retrieve the ongoing test data'),

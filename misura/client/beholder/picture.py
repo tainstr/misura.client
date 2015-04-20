@@ -71,7 +71,7 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 		self.reconnectSample()
 		# Monitor number of samples
 		self.nsmp_obj=widgets.ActiveObject(self.server, self.remote, self.remote.gete('nSamples'), self)
-		self.nsmp_obj.isVisible=self.isVisible
+		self.nsmp_obj.register()
 		self.connect(self.nsmp_obj, QtCore.SIGNAL('changed()'), self.reconnectSample)
 		
 	def close(self):

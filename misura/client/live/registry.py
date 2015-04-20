@@ -81,6 +81,7 @@ class KidRegistry(QtCore.QThread):
 			self.rid[kid]=[]
 			self.times[kid]=0
 		if w in self.rid[kid]:
+			print 'Already registered', kid, w
 			return kid
 		self.rid[kid].append(w)
 		return kid

@@ -23,8 +23,8 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		self.stopAct=self.addAction('Stop', self.stop)
 		print 'Controls: aobj'
 		self.aobj=widgets.ActiveObject(self.server, self.server, self.server.gete('isRunning'), self)
-		self.aobj.isVisible=self.isVisible
 		self.aobj.force_update=True
+		self.aobj.register()
 		self.name=self.remote['name'].lower()
 		print 'Controls: ', self.name
 		if self.name=='post':

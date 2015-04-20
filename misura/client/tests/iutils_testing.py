@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os
-from misura.client import m4script
 import sys
 from PyQt4 import QtGui, QtCore
 def determine_path ():

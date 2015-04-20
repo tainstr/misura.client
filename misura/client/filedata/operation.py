@@ -117,15 +117,8 @@ def interpolated(proxy,col,ztime_sequence):
 	"""Retrieve `col` from `proxy` and interpolate it around `ztime_sequence`"""
 	print 'interpolating col',col
 	tdata=not_interpolated(proxy,col,ztime_sequence[0],ztime_sequence[-1])
-# 	zt=proxy.col(col,0)
-# 	if len(zt)==0:
 	if tdata is False:
 		return False
-# 	zt=zt[0]
-# 	data0=np.array(proxy.col(col,(0,None)))
-	#FIXME: now superfluous
-# 	data=data0.view(np.float64).reshape((len(data0),2))
-# 	tdata=data.transpose()
 	t,val=tdata[0],tdata[1]
 	print 'ius',col,  t, val
 	f=InterpolatedUnivariateSpline(t,val,k=1)
@@ -238,7 +231,7 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		header=self.proxy.header(['Array'],'/summary') # Will list only Array-type descending from /summary
 		autoload=[]
 		excluded=[]
-		print 'got header',header
+		print 'got header',len(header)
 		# Match rules
 		for h in header[:]:
 			exc=False
@@ -255,8 +248,8 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 				header.remove(h)
 				excluded.append(h)
 		print 'got autoload',autoload
-		print 'got excluded',excluded
-		print 'got header clean',header
+		print 'got excluded',len(excluded)
+		print 'got header clean',len(header)
 		LF.header=header
 		self.jobs(len(header))
 		names=[]

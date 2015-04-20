@@ -31,10 +31,11 @@ class MeasureInfo(QtGui.QTabWidget):
 		self.results=QtGui.QWidget(self)
 		self.addTab(self.results, 'Results') #Add a tab to correct inizialization og qTabWidget
 		self.nobj=widgets.ActiveObject(self.server, self.remote.measure, self.remote.measure.gete('nSamples'), parent=self)
+		self.nobj.register()
 		self.connect(self.nobj, QtCore.SIGNAL('changed()'), self.refreshSamples)
 		self.connect(self, QtCore.SIGNAL("currentChanged(int)"), self.tabChanged)
-#		self.nobj.emitOptional=self.refreshSamples
-		self.nobj.isVisible=self.isVisible
+		self.connect(self, QtCore.SIGNAL("currentChanged(int)"), self.refreshSamples)
+		
 	
 	def tabChanged(self):
 		currentTab=self.currentWidget()
@@ -59,8 +60,15 @@ class MeasureInfo(QtGui.QTabWidget):
 										QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
 			if r==QtGui.QMessageBox.Yes:
 				self.thermalCycleView.apply()
-
+				
+	nsmp=0
 	def refreshSamples(self, *foo):
+#		nsmp=self.remote.measure['nSamples']
+		nsmp=self.nobj.current
+		if self.nsmp==nsmp:
+			print 'NO CHANGE in samples number', self.nsmp, nsmp
+			return False
+		self.nsmp=nsmp
 		self.clear()
 		if not self.fixedDoc:
 			self.statusView=status.Status(self.server, self.remote, parent=self)
@@ -70,14 +78,14 @@ class MeasureInfo(QtGui.QTabWidget):
 		self.addTab(self.measureView, 'Measure')
 		self.addTab(self.thermalCycleView, 'Thermal Cycle')
 		print 'REFRESH SAMPLES', self.remote.measure['nSamples']
-		for i in range(self.remote.measure['nSamples']):
+		for i in range(self.nsmp):
 			sample=getattr(self.remote, 'sample'+str(i), False)
 			if not sample: 
 				print 'Missing sample object nr.', i
 				continue
 			self.addTab(conf.Interface(self.remote.parent(),sample, sample.describe(), self), 'Sample'+str(i))
 		self.addTab(self.results, 'Results')
-		
+		return True
 		
 	def up_isRunning(self):
 		if self.statusView.wg_isRunning.current:

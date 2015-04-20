@@ -77,11 +77,8 @@ class Active(Linguist):
 		self.readonly=self.type=='ReadOnly' or 'ReadOnly' in self.attr
 		self.hard='Hard' in self.attr
 		self.hot='Hot' in self.attr
-
 		self.label=self.tr(self.name)
 		
-#		self.register()
-	
 		# Update the widget whenever the manager gets reconnected
 		network.manager.connect(network.manager, QtCore.SIGNAL('connected()'), self.reconnect, QtCore.Qt.QueuedConnection)
 		
