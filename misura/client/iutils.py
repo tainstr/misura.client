@@ -78,8 +78,8 @@ def initTranslations(app):
 		print 'translations not available'
 	
 def initNetwork():
-	# Avvio il manager di rete
-	network.manager.start()
+	"""Start zeroconf network scanner - deprecated"""
+	#network.manager.start()
 	
 def initRegistry():
 	# Avvio il registro

@@ -44,6 +44,9 @@ class ViewerControl(QtGui.QWidget):
 		
 	def close(self):
 		print 'ViewerControl.close'
+		for ctrl in self.controls.itervalues():
+			widget.close()
+			self.lay.removeWidget(widget)
 		self.viewer.close()
 		
 	def setControl(self, widget, position, tooltip='', inversion=0):

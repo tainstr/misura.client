@@ -24,6 +24,7 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		print 'Controls: aobj'
 		self.aobj=widgets.ActiveObject(self.server, self.server, self.server.gete('isRunning'), self)
 		self.aobj.isVisible=self.isVisible
+		self.aobj.force_update=True
 		self.name=self.remote['name'].lower()
 		print 'Controls: ', self.name
 		if self.name=='post':

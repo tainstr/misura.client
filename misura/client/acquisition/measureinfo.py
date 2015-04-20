@@ -65,6 +65,8 @@ class MeasureInfo(QtGui.QTabWidget):
 		if not self.fixedDoc:
 			self.statusView=status.Status(self.server, self.remote, parent=self)
 			self.addTab(self.statusView, 'Status')
+			self.connect(self.statusView.wg_isRunning, QtCore.SIGNAL('changed()'), self.up_isRunning)
+			self.up_isRunning()
 		self.addTab(self.measureView, 'Measure')
 		self.addTab(self.thermalCycleView, 'Thermal Cycle')
 		print 'REFRESH SAMPLES', self.remote.measure['nSamples']
@@ -77,3 +79,8 @@ class MeasureInfo(QtGui.QTabWidget):
 		self.addTab(self.results, 'Results')
 		
 		
+	def up_isRunning(self):
+		if self.statusView.wg_isRunning.current:
+			self.tabBar().setStyleSheet("background-color:red;")
+		else:
+			self.tabBar().setStyleSheet("background-color:green;")
