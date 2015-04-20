@@ -1,0 +1,54 @@
+
+=================================
+Test Configuration and Data
+=================================
+The most relevant configuration options used for the test run and output results are displayed in the right **Test Configuration** area. 
+
+---------------------
+Measure overview
+---------------------
+The first **Measure** tab contains the list of options regarding the test run. 
+
+Detect the following:
+	
+* **Name**: Name of the test run, set by the operator anytime before the end of the test.
+* **Operator**: the login name used by the operator who started the test.
+* **Type**: The type of the test (usually ``Standard`` or ``Calibration``).
+* **Elapsed time**: the total duration of the test.
+
+
+---------------------
+Thermal cycle
+---------------------
+
+This tab contains a table with points defining the thermal cycle and a graph with a cartesian representation. 
+
+The graph displays two curves: the red line is the setpoint temperature; the blue line is the heating rate. 
+
+If you cannot see the axes and their labels, enlarge the application window and the Test Configuration area. 
+
+---------------------
+Sample data
+---------------------
+
+Most relevant data in the Sample0 tab are:
+	
+* **Name**: if set, the name the operator gave to this specific sample. It is mainly useful for multi-sample measurement.
+* **Initial sample dimension**: the operator must set this value to the initial sample length, measured with another instrument (eg: a digital micrometer).
+* **Record frames/profiles**: did the operator required full frames and (x,y) sample profiles to be recorded onto the output file? They are usually turned off. 
+
+You can ignore *Border angle, Motion start, Total displacement, Cumulative error* options an all their nested options, as they are only useful during live acquisition. 
+
+
+---------------------
+Results
+---------------------
+The Results tab displays the Navigator tree component. It is the tree of recorded datasets (curves), organized by groups. Each group represents a part of the instrument or of the measurement. 
+
+For example:
+	
+* /|instr| element represents the |instrn| instrument itself. It generates no datasets, but contains one sample (**sample0**).
+* /kiln element represents the furnace, and contains datasets regarding temperature control (T, temperature; S, setpoint; P, power; etc).
+
+We will see it in detail in next sections, as it is the most powerful and versatile component of the interface.
+

@@ -2,34 +2,20 @@
 .. |smp| replace:: ``Microscope Sample File 1.h5``
 .. |smpvid| replace:: ``Microscope Sample Video 1.avi``
 .. |smprep| replace:: ``Microscope Sample Report 1.pdf``
-
-.. _qs-hsm:
+.. |instr| replace:: ``hsm``
+.. |instrn| replace:: Heating Microscope
+	
 Quick Start: Browsing a Microscope file 
 ========================================
 
-This Demo will guide you through the data analysis of an Hot Stage Microscope (HSM) output file. 
+This Demo will guide you through the data analysis of an Heating Microscope (HSM) output file. 
 
 In order to follow the tutorial you should:
 	
 * Download and Install Misura\ |trade|.
 * Get the sample file |smp| and save it to a known location (eg: your Desktop)
 
-=========================
-Opening the output file
-=========================
-
-1. Run ``archive.exe`` application from the folder where you extracted |m|, or run the link you created on your desktop.
-2. In the **Recent data sources** window, under the first column **Recent files**, click on **Open** button.
-3. Browse to the location where you downloaded |smp|, select and open it.
-4. The loading process will start. If the file is considerably big (several GB) or located on network or slow storage drive, it may take several seconds to open.
-5. The file is displayed on a new tab, on the right of the **Databases** tab.
-
-The test file tab is divided in four areas:
-
-* A menu bar and tools bar in the upper part of the window
-* A right area called **Test Configuration**. It is divided in at least 4 vertical tabs: **Measure**, **Thermal Cycle**, **Sample0** and **Results**.
-* A central area displaying movable and resizable sub-windows, where you see the **Data Plot** window.
-* A bottom area called **Snapshots** containing sample frames. 
+.. include:: quickstart/opening.txt
 
 =================================
 Test Configuration and Data

@@ -14,3 +14,4 @@ Contents:
 		
 		browser/quickstart_hsm
 		browser/quickstart_vertical
+		browser/quickstart_horizontal

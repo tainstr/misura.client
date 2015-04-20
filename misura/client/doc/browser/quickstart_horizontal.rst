@@ -1,13 +1,12 @@
 .. include:: ../substitutions.txt
-.. |smp| replace:: ``Vertical Dilatometer Sample File 1.h5``
-.. |smprep| replace:: ``Vertical Dilatometer Sample Report 1.pdf``
-.. |instr| replace:: vertical
-.. |instrn| replace:: Vertical Dilatometer
+.. |smp| replace:: ``Horizontal Dilatometer Sample File 1.h5``
+.. |smprep| replace:: ``Horizontal Dilatometer Sample Report 1.pdf``
+.. |instr| replace:: ``horizontal``
+.. |instrn| replace:: Horizontal Dilatometer
 
-Quick Start: Browsing a Vertical Dilatometer file 
-========================================
-
-This Demo will guide you through the data analysis of an Vertical Dilatometer output file. 
+Quick Start: Browsing an |instrn| file 
+=======================================================
+This Demo will guide you through the data analysis of an |instrn| output file. 
 
 .. include:: quickstart/opening.txt
 .. include:: quickstart/config.txt
@@ -42,13 +41,13 @@ You can freely move any axis by clicking on it and dragging.
 ---------------------------------------------------
 Viewing dilatation as Percentile
 ---------------------------------------------------
-The ``/vertical/sample0/d`` dataset represents dilatation. 
+The ``/``\ |instr|\ ``/sample0/d`` dataset represents dilatation. 
 It is recorded in microns, but is frequently useful to analyze it as a percentile of the total initial length of the sample.
 The initial length was measured with a manual digital micrometer, and set before starting the test.
 
 Follow these steps to convert the curve to percentile:
 
-1. Locate the ``d`` (``/vertical/sample0/d``) element in the Navigator tree under Results tab.
+1. Locate the ``d`` (``/``\ |instr|\ ``/sample0/d``) element in the Navigator tree under Results tab.
 2. Right-click and select **Percentile**.
 3. A dialog will appear. Click **Apply**. 
 4. A new temporary label in the dialog confirms the dataset was created (Done). Click **Close**.
