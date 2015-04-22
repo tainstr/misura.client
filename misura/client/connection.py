@@ -122,7 +122,7 @@ class ServerWidget(Linguist,QtGui.QWidget):
 		self.menu.popup(self.mapToGlobal(pt))
 		
 class ServerSelector(Linguist, QtGui.QToolBox):
-	"""Presenta e mantiene aggiornata una lista di server misura cui è possibile connettersi."""
+	"""Presents and keeps updated a list of available servers"""
 	def __init__(self, parent=None, context='Local'):
 		Linguist.__init__(self, context)
 		QtGui.QToolBox.__init__(self, parent)
@@ -139,6 +139,7 @@ class ServerSelector(Linguist, QtGui.QToolBox):
 			if wg in [0,None]: break
 			wg.close(); del wg
 			self.removeItem(idx)
+		
 		for key, srv in network.manager.servers.iteritems():
 			wg=ServerWidget(srv,self)
 			self.addItem(wg,wg.label)

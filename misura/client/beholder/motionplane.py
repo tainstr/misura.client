@@ -39,6 +39,9 @@ class SensorPlane(QtGui.QGraphicsItem):
 		self.timer.setInterval(200)
 		self.timer.connect(self.timer,QtCore.SIGNAL('timeout()'),self.motion_update)
 		
+	def paint(self,*a,**kw):
+		return None
+		
 	def unscale(self,factor):
 		f=1./factor
 		pen=self.pre.pen()

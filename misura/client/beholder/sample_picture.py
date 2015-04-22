@@ -162,3 +162,6 @@ class SamplePicture(QtGui.QGraphicsItem):
 		assert val==[]
 		for ov in self.overlays:
 			ov.hide()
+			
+	def paint(self,*a,**kw):
+		return None

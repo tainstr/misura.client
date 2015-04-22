@@ -7,6 +7,8 @@ from time import sleep
 from traceback import print_exc
 from PyQt4 import QtCore
 
+from info import ServerInfo
+
 try:
 	from misura.client import pybonjour
 except:

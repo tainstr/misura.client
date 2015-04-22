@@ -76,6 +76,9 @@ class RecentInterface(Linguist):
 		self.name=category
 		if self.name=='m3database': 
 			self.name='Misura3 database'
+			self.label=self.name
+		else:
+			self.label='Recent {}'.format(self.name.capitalize())
 		self.sig_select=QtCore.SIGNAL('select(QString)')
 	
 	def getNameSigList(self):

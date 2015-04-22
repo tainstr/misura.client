@@ -14,12 +14,15 @@ from .. import network
 from .. import widgets, beholder
 from .. import fileui, filedata, navigator
 from ..misura3 import m3db
-from ..connection import ServerSelector, LiveLog
+from .. import connection
+from ..clientconf import confdb
+from ..confwidget import RecentWidget
 from .menubar import MenuBar
 from .selector import InstrumentSelector
 from .measureinfo import MeasureInfo
 from .controls import Controls
 from .delay import DelayedStart 
+
 
 from .. import graphics
 from ..database import UploadThread
@@ -72,7 +75,9 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 	def add_server_selector(self):
 		"""Server selector dock widget"""
 		self.serverDock=QtGui.QDockWidget(self.centralWidget())
-		self.serverSelector=ServerSelector(self.serverDock)
+# 		self.serverSelector=connection.ServerSelector(self.serverDock)
+		self.serverSelector=RecentWidget(confdb,'server',self.serverDock)
+		self.connect(self.serverSelector,self.serverSelector.sig_select,self.set_addr)
 		self.serverDock.setWindowTitle(self.serverSelector.label)
 		self.serverDock.setWidget(self.serverSelector)
 		self.addDockWidget(QtCore.Qt.TopDockWidgetArea,self.serverDock)
@@ -93,6 +98,11 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		#TODO: reset ops should be performed server-side
 		self.remote.measure['uid']=''
 		self.resetFileProxy()
+		
+	def set_addr(self,addr):
+		"""Open server by address"""
+		s=connection.addrConnection(addr)
+		self.setServer(s)
 
 	def setServer(self, server=False):
 		print 'Setting server to',server
@@ -110,7 +120,7 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		if self.fixedDoc:
 			self.logDock.setWidget(fileui.OfflineLog(self.fixedDoc.proxy,self.logDock))
 		else:
-			self.logDock.setWidget(LiveLog(self.logDock))		
+			self.logDock.setWidget(connection.LiveLog(self.logDock))		
 		self.addDockWidget(QtCore.Qt.BottomDockWidgetArea,self.logDock)
 		
 		self.setMenuBar(self.myMenuBar)
@@ -343,6 +353,8 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 			sleep(.1)
 			return self._resetFileProxy(retry=0)
 		else:
+			if not self.server['isRunning']: 
+				retry=5
 			self.tasks.jobs(self.retry,'Waiting for data')
 			self.tasks.done('Test initialization')
 			self.tasks.job(retry,'Waiting for data')

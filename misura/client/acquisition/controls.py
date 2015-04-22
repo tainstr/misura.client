@@ -49,6 +49,8 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		return registry.tasks
 
 	def updateActions(self):
+		if self.parent().fixedDoc:
+			return False
 		r=self.server['isRunning']
 		print 'updateActions',r
 		r=bool(r)
@@ -57,6 +59,12 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		self.iniAct.setEnabled(r^1)
 		if self.motor is not False:
 			self.motor.update()
+# 		c=(1,0,0,1) if r else (0,1,0,1) 
+# 		g=QtGui.QRadialGradient(0.5,0.5,0.99,0.5,0.5)
+# 		g.setCoordinateMode(QtGui.QGradient.ObjectBoundingMode)
+# 		g.setColorAt(0,QtGui.QColor.fromRgbF(0,0,0,0))
+# 		g.setColorAt(1,QtGui.QColor.fromRgbF(*c))
+# 		self.parent().area.setBackground(QtGui.QBrush(g))
 		return r
 		
 	def enterEvent(self, ev):
