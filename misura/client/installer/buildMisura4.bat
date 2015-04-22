@@ -15,6 +15,10 @@ set installerDir=%codeBase%\misura\client\installer
 set specFile=%installerDir%\client_windows_pyinst.spec
 set out=%installerDir%\dist
 
+REM Recreate dist output directory
+del /q "%out%"
+mkdir "%out%"
+
 C:
 cd %installerDir%
 %pyinst% -y %specFile%
