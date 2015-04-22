@@ -141,4 +141,13 @@ class NetworkManager(QtCore.QThread):
 		obj=self.remote.copy()
 		obj.connect()
 		return obj
+		
+	def set_remote(self, server=None):
+		self.remote=server
+		if not server:
+			self.connected=False
+			return False
+		self.connected=True
+		return True
+		
 	

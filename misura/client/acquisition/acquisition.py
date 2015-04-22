@@ -102,6 +102,10 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 	def set_addr(self,addr):
 		"""Open server by address"""
 		s=connection.addrConnection(addr)
+		network.manager.set_remote(s)
+		registry.toggle_run(False)
+		registry.set_manager(network.manager)
+		registry.toggle_run(True)
 		self.setServer(s)
 
 	def setServer(self, server=False):
@@ -446,13 +450,14 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		if not self._lock.acquire(False):
 			print 'ANOTHER RESETFILEPROXY IS RUNNING!'
 			return
+		print 'MainWindow.resetFileProxy: Stopping registry'
 		registry.toggle_run(False)
 		r=False
 		try:
 			r=self._resetFileProxy(*a,**k)
 		except:
 			print_exc()
-		print 'Restarting registry'
+		print 'MainWindow.resetFileProxy: Restarting registry'
 		registry.toggle_run(True)
 		self.tasks.done('Waiting for data')
 		self.tasks.hide()

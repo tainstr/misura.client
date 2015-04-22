@@ -232,12 +232,12 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 			cmd="insert into "+tabname+" values ("+q+")"
 			# insert table rows
 			for i,row in enumerate(tab):
-				print 'saving',i,row,nosave
+#				print 'saving',i,row,nosave
 				if row[0] in nosave: 
-					print 'Not saving',tabname,row[0]
+#					print 'Not saving',tabname,row[0]
 					continue
 				row=[i]+row
-				print 'inserting',tabname, row
+#				print 'inserting',tabname, row
 				cursor.execute(cmd, row)
 		cursor.close()
 		self.conn.commit()

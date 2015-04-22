@@ -48,13 +48,18 @@ class KidRegistry(QtCore.QThread):
 		self.manager=False
 			
 	@lockme
-	def set_manager(self,man):
+	def set_manager(self,man=None):
 		self.manager=man
 		self.taskswg=Tasks()
 		self.connect(self, QtCore.SIGNAL('set_server(PyQt_PyObject)'), self.taskswg.progress.set_server)
 		if man is not None:
 			if man.remote:
+				print 'KidRegistry.set_manager with remote', man.remote
 				self.emit(QtCore.SIGNAL('set_server(PyQt_PyObject)'), man.remote)
+			else:
+				print 'KidRegistry.set_manager without remote', man.remote
+		else:
+			print 'KidRegistry.set_manager set to None', man
 	
 	@property
 	def progress(self):
@@ -187,15 +192,16 @@ class KidRegistry(QtCore.QThread):
 		self.emit(QtCore.SIGNAL('cycle()'))
 		if self.obj is False:
 			if not self.manager:
-				print 'No manager registered.'
+				print 'KidRegistry.control_loop: No manager registered.'
 				return False
 			if not self.manager.remote:
+				print 'KidRegistry.control_loop: no remote manager'
 				return False
 			self.obj=self.manager.remote.copy()
 			self.obj.connect()
 			self.emit(QtCore.SIGNAL('set_server(PyQt_PyObject)'), self.obj)
 		if not net.connected:
-			print 'Not connected' 
+			print 'KidRegistry.control_loop: Not connected' 
 			return False
 		if self.doc and (self.doc is not self.lastdoc):
 			if self.doc.proxy:
@@ -215,7 +221,7 @@ class KidRegistry(QtCore.QThread):
 	def run(self):
 		"""Execution entry for the registry thread.
 		Will call control_loop() until self.stream is True."""
-		print 'Starting registry in new thread'
+		print 'Starting registry in new thread', len(self.rid)
 		self.setPriority(QtCore.QThread.IdlePriority)
 		t0=time()
 #		self.obj=False
@@ -223,6 +229,7 @@ class KidRegistry(QtCore.QThread):
 		self.lastdoc=False
 		while self.stream:
 			# Sleep only if loops are shorter than interval
+			print 'KidRegistry.run', len(self.rid)
 			t=time()
 			d=self.interval-(t-t0)
 			if d>0:	sleep(d)
@@ -239,13 +246,14 @@ class KidRegistry(QtCore.QThread):
 		"""Start/stop KID reading thread"""
 		if auto==None: 
 			auto=self.stream^1
+		print 'KidRegistry.toggle_run', auto
 		if auto==True:
 			self.stream=True
 			if not self.isRunning():
 				self.start()
 		elif auto==False:
 			self.stream=False
-			if self.isRunning():
-				self.quit()
+#			if self.isRunning():
+#				self.quit()
 
 #registry=KidRegistry()
