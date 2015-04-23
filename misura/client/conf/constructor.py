@@ -3,12 +3,12 @@
 """Programmatic interface construction utilities"""
 from PyQt4 import QtGui, QtCore
 import functools
-from misura.client import widgets
-from misura.client import parameters as params
-from misura.canon.option import sorter, prop_sorter
-from misura.client.live import registry
-
 from misura.canon import option
+from misura.canon.option import sorter, prop_sorter
+
+from .. import widgets
+from ..import parameters as params
+
 
 def desc2html(desc):
 	"""Crea una rappresentazione HTML del dizionario di descrizione."""

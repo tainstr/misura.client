@@ -120,7 +120,6 @@ def interpolated(proxy,col,ztime_sequence):
 	if tdata is False:
 		return False
 	t,val=tdata[0],tdata[1]
-	print 'ius',col,  t, val
 	f=InterpolatedUnivariateSpline(t,val,k=1)
 	r=f(ztime_sequence)
 	return r

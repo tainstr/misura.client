@@ -15,13 +15,16 @@ import units
 import parameters as params
 
 default_desc={}
+
 ao(default_desc,'lang',**{'name':"Client Language",
 	'current':'sys',
 	'type':'Chooser',
 	'options':['sys','en','it','fr','es','ru']
 	})
-
 ao(default_desc,'refresh',**{'name':'Remote Server Refresh Rate (ms)', 'current':2000,	'max':20000,	'min':100, 'type':'Integer'})
+
+ao(default_desc,'database',**{'name':'Default Database', 'current':'',	'max':20000,	'min':100, 'type':'FilePath'})
+ao(default_desc,'autodownload',**{'name':'Auto-download finished tests', 'current':True, 'type':'Boolean'})
 ao(default_desc,'hserver',**{'name':'Recent Servers', 'current':5,	'max':20,	'min':0, 'type':'Integer'})
 ao(default_desc,'saveLogin',**{'name':'Save User/Password by Default', 'current':True, 'type':'Boolean'})
 ao(default_desc,'hdatabase',**{'name':'Recent Database Files', 'current':10,	'max':100,	'min':1, 'type':'Integer'})
@@ -72,6 +75,12 @@ ao(default_desc, 'rule_style','Table',rule_style,'Formatting')
 
 recent_tables='server,database,file,m3database'.split(',')
 
+def tabname(name):
+	if name in recent_tables:
+		return 'recent_'+name
+	return name
+
+
 class RulesTable(object):
 	"""Helper object for matching a string in a list of rules."""
 	def __init__(self,tab=[]):
@@ -117,11 +126,14 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 		self.nosave_server=[]
 		if not path:
 			return None
-		if new: self.create(path)
-		elif not os.path.exists(path): 
-			self.create(os.path.expanduser('~/misuraconf.sqlite'))
-		else:
-			self.load(path)
+		# Ensure missing if new
+		if os.path.exists(path) and new:
+			os.remove(path)
+		# Missing but not new: create default path
+		elif not new:
+			path=os.path.expanduser('~/misuraconf.sqlite')
+		# Load/create
+		self.load(path)
 		
 	_rule_style=RulesTable()
 	@property
@@ -154,51 +166,46 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 		
 	def reset_rules(self):
 		self._rule_style=False
-		self._rule_dataset=False		
-		self._rule_unit=False	
-		
-	def create(self,path):
-		"""Create a new client configuration database"""
-		if os.path.exists(path):
-			os.remove(path)
-		conn=sqlite3.connect(path)
-		cursor=conn.cursor()
-		cursor.execute("create table recent_server (i integer, address text, user text, password text)")
-		cursor.execute("create table recent_database (i integer, path text)")
-		cursor.execute("create table recent_file (i integer, path text, name text)")
-		cursor.execute("create table recent_m3database (i integer, path text)")
-		for key,val in default_desc.iteritems():
-			self.store.desc[key]=option.Option(**val)
-		self.desc=self.store.desc
-		self.store.write_table(cursor,"conf")
-		cursor.close()
-		conn.commit()
-		self.load(path)
-		
+		self._rule_dataset=False
+		self._rule_unit=False
 	
 	def load(self,path=False):
-		"""Load an existent client configuration database"""
-		#TODO: Gestione file vuoti o errati!
+		"""Load an existent client configuration database, or create a new one."""
 		print 'LOAD',path
 		self.nosave_server=[]
 		self.close()
 		if path: self.path=path
-		if not os.path.exists(self.path): 
-			return self.create(self.path)
 		self.conn=sqlite3.connect(self.path)
 		self.conn.text_factory=unicode
-		desc=default_desc.copy()
 		cursor=self.conn.cursor()
-		try:
-			desc.update(self.store.read_table(cursor,'conf'))
-		except:
-			print_exc()			
-		self.desc=desc
-		print 'desc set to',self.desc
+		
+		# Chron tables
+		cursor.execute("create table if not exists recent_server (i integer, address text, user text, password text)")
+		cursor.execute("create table if not exists recent_database (i integer, path text)")
+		cursor.execute("create table if not exists recent_file (i integer, path text, name text)")
+		cursor.execute("create table if not exists recent_m3database (i integer, path text)")
+
+		# Configuration table
+		isconf=cursor.execute("select 1 from sqlite_master where type='table' and name='conf'").fetchone()
+		if isconf:
+			desc=default_desc.copy()
+			try:
+				desc.update(self.store.read_table(cursor,'conf'))
+			except:
+				print_exc()			
+			self.desc=desc
+			print 'Loaded configuration',self.desc
+		else:
+			print 'Recreating client configuration'
+			for key,val in default_desc.iteritems():
+				self.store.desc[key]=option.Option(**val)
+			self.desc=self.store.desc
+			self.store.write_table(cursor,"conf")	
+			
 		# Load recent files in memory
 		for name in recent_tables:
-			tabname='recent_'+name
-			cursor.execute("select * from "+tabname)
+			name='recent_'+name
+			cursor.execute("select * from "+name)
 			r=cursor.fetchall()
 			r=list(set(r))
 			# Sort by key
@@ -206,38 +213,50 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 			# Pop key
 			r=[list(e[1:]) for e in r]
 #			print 'read',name,r
-			setattr(self,tabname,r)
+			setattr(self,name,r)
 		cursor.close()
+		self.conn.commit()
 		self.emit(QtCore.SIGNAL('load()'))
 		self.reset_rules()
-
+		
+	def get_table(self,name):
+		"""Return table `name` as list"""
+		cursor=self.conn.cursor()
+		cursor.execute("select * from "+name)
+		r=cursor.fetchall()
+		r=list(set(r))
+		# Sort by key
+		r=sorted(r, key=lambda e: e[0])
+		# Pop key
+		r=[list(e[1:]) for e in r]
+		cursor.close()
+		return r
 		
 	def save(self,path=False):
 		"""Save to an existent client configuration database."""
 		print 'SAVING'
-		if path: self.create(path)
 		cursor=self.conn.cursor()
 		self.store.write_table(cursor,'conf',desc=self.desc)
 		for name in recent_tables:
-			tabname="recent_"+name
-			tab=getattr(self,tabname,[])
+			tname="recent_"+name
+			tab=getattr(self,tname,[])
 			nosave=getattr(self,'nosave_'+name,[])
 			if nosave is None: nosave=[]
-			print tabname,tab,nosave
-			cursor.execute("delete from "+tabname)
+			print tname,tab,nosave
+			cursor.execute("delete from "+tname)
 			if len(tab)==0: continue
 			# Prepare the query
 			q='?,'*len(tab[0])
 			q+='?'
-			cmd="insert into "+tabname+" values ("+q+")"
+			cmd="insert into "+tname+" values ("+q+")"
 			# insert table rows
 			for i,row in enumerate(tab):
 #				print 'saving',i,row,nosave
 				if row[0] in nosave: 
-#					print 'Not saving',tabname,row[0]
+#					print 'Not saving',tname,row[0]
 					continue
 				row=[i]+row
-#				print 'inserting',tabname, row
+#				print 'inserting',tname, row
 				cursor.execute(cmd, row)
 		cursor.close()
 		self.conn.commit()
@@ -246,8 +265,8 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 	def mem(self,name,*arg):
 		"""Memoize a recent datum"""
 		print 'mem',name,arg
-		tabname="recent_"+name
-		tab=getattr(self,tabname)
+		tname=tabname(name)
+		tab=getattr(self,tname)
 		# Avoid saving duplicate values
 		arg=list(unicode(a) for a in arg)
 		if arg in tab:
@@ -257,7 +276,7 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 		lim=self.desc['h'+name]['current']
 		if len(tab)>lim:
 			tab.pop(0)
-		setattr(self,tabname,tab)
+		setattr(self,tname,tab)
 		self.emit(QtCore.SIGNAL('mem()'))
 		self.save()
 		return True
@@ -265,14 +284,14 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 	def rem(self,name,key):
 		"""Forget a recent datum"""
 		key=str(key)
-		tabname="recent_"+name
-		tab=getattr(self,tabname)
+		tname=tabname(name)
+		tab=getattr(self,tname)
 		v=[r[0] for r in tab]
 		if key not in v: 
 			return False
 		i=v.index(key)
 		tab.pop(i)
-		setattr(self,tabname,tab)
+		setattr(self,tname,tab)
 		self.emit(QtCore.SIGNAL('rem()'))
 		self.save()
 		return True

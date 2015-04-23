@@ -6,3 +6,4 @@ for name in API_NAMES:
     sip.setapi(name, API_VERSION)
   
 # Test commit 2
+from parameters import determine_path

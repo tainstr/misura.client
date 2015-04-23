@@ -7,7 +7,7 @@ import sys
 from time import sleep
 import signal
 
-from misura.client import parameters as  params
+import parameters as  params
 import network 
 from live import registry # needed for initialization
 from clientconf import confdb, settings
@@ -228,12 +228,14 @@ def getOpts():
 		r[opt]=val
 	return r
 
+# CONNECTION SHORTCUTS
 def default(host='localhost', port=3880, user='admin', password='admin'):
 	addr='https://{}:{}/RPC'.format(host,port)
 	network.getConnection(addr,user,password,smart=True)
 	return network.manager.remote
 
 def from_argv():
+	"""Get connection from command line arguments"""
 	import sys, getopt
 	print 'from argv', sys.argv
 	opts, args=getopt.getopt(sys.argv[1:], 'h:p:u:w:')

@@ -11,7 +11,7 @@ import shutil
 
 import numpy as np
 
-from misura.client import parameters as params
+from .. import parameters as params
 from misura.canon import  bitmap
 from misura.canon import reference
 from misura.canon import indexer

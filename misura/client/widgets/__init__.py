@@ -34,7 +34,7 @@ def build(server, remObj, prop, parent=None):
 		return False
 	obj=False
 	try:
-		if T in ['String', 'ReadOnly', 'Date']:
+		if T in ['String', 'ReadOnly', 'Date','FilePath']:
 			if prop['handle']=='material':
 				obj=aMaterial(*arg)
 			else:

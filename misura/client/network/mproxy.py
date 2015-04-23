@@ -107,7 +107,7 @@ class MisuraProxy(object):
 	"""Time of last remote call - use for logging"""
 	_smartnaming=False
 	"""Triggers remote get/set requests when accessing to un-protected local attributes"""
-	_protect=set(['remObj','conn_add','to_root','toPath','root','connect','paste','copy','describe',
+	_protect=set(['remObj','conn_addr','data_addr','to_root','toPath','root','connect','paste','copy','describe',
 				'info','lastlog','get','from_column','parent','child','call','devices'])
 	"""Local names which must not be accessed remotely"""
 	sep='/'
@@ -128,6 +128,10 @@ class MisuraProxy(object):
 	def conn_addr(self):
 		auth='https://{}:{}@'.format(self.user, self.password)
 		return self.addr.replace('https://', auth)
+	
+	@property
+	def data_addr(self):
+		return self.conn_addr.replace('/RPC','/data')
 		
 	def __str__(self):
 		return '%r %s@%s /%s (%s)' % (self,self.user,self.addr,self._Method__name,self.remObj._Method__name)

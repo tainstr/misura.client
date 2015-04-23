@@ -9,7 +9,7 @@ from time import time
 from PyQt4 import QtCore
 from traceback import print_exc
 
-def determine_path ():
+def determine_path (root=False):
 	if hasattr(sys, 'frozen'):
 		# for pyinstaller/py2app compatability
 		resdir = os.path.dirname(os.path.abspath(sys.executable))
@@ -18,7 +18,8 @@ def determine_path ():
 			resdir = os.path.join(resdir, '..', 'Resources')
 		return resdir
 	else:
-		root = __file__
+		if root is False:
+			root=__file__
 		if os.path.islink (root):
 			root = os.path.realpath (root)
 		return os.path.dirname (os.path.abspath (root))

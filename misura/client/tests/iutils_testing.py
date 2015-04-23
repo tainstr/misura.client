@@ -104,7 +104,7 @@ from misura.client import network
 import threading
 
 class FakeProxy(network.MisuraProxy):
-	addr='//testing'
+	addr='https://testing/RPC'
 	"""Remote server address"""
 	user='test'
 	"""User name"""
@@ -146,3 +146,5 @@ class FakeProxy(network.MisuraProxy):
 	
 	def to_root(self):
 		return FakeProxy(self.remObj.root)
+	
+
