@@ -16,7 +16,7 @@ set specFile=%installerDir%\client_windows_pyinst.spec
 set out=%installerDir%\dist
 
 REM Recreate dist output directory
-del /q "%out%"
+del /q /s "%out%"
 mkdir "%out%"
 
 C:
@@ -28,5 +28,5 @@ xcopy %out%\archive\* %out%\misura4
 xcopy %out%\acquisition\* %out%\misura4
 
 REM Deploy step
-del /q "%deployDir%\misura4" 
+del /q /s "%deployDir%\misura4" 
 xcopy /E /Y /I "%out%\misura4" "%deployDir%\misura4"
