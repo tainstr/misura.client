@@ -45,7 +45,7 @@ class aBooleanAction(QtGui.QAction):
 		self.prop=prop
 		self.handle=prop['handle']
 		self.connect(self, QtCore.SIGNAL('hovered()'), self.get)
-		self.connect(self, QtCore.SIGNAL('toggled(bool)'), self.set)
+		self.connect(self, QtCore.SIGNAL('triggered(bool)'), self.set)
 		if parent:
 			self.connect(parent, QtCore.SIGNAL('aboutToShow()'), self.get)
 		
