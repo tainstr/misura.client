@@ -108,7 +108,7 @@ class MisuraProxy(object):
 	_smartnaming=False
 	"""Triggers remote get/set requests when accessing to un-protected local attributes"""
 	_protect=set(['remObj','conn_addr','data_addr','to_root','toPath','root','connect','paste','copy','describe',
-				'info','lastlog','get','from_column','parent','child','call','devices'])
+				'info','lastlog','get','from_column','parent','child','call','devices','roledev'])
 	"""Local names which must not be accessed remotely"""
 	sep='/'
 	def __init__(self, addr='', user='',password='', proxy=False):
@@ -389,4 +389,16 @@ class MisuraProxy(object):
 		for name, path in self.list():
 			r.append(self.child(path))
 		return r
-
+	
+	def roledev(self,opt):
+		"""Return the device object associated with role option `opt`"""
+		p=self[opt]
+		if p is False: 
+			return False
+		p=p[0]
+		if p in ('None',None):
+			return False
+		obj=self.root.toPath(p)
+		if not obj:
+			return False
+		return obj

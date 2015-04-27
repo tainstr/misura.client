@@ -20,7 +20,7 @@ from ..confwidget import RecentWidget
 from .menubar import MenuBar
 from .selector import InstrumentSelector
 from .measureinfo import MeasureInfo
-from .controls import Controls
+from .controls import Controls, MotionControls
 from .delay import DelayedStart 
 
 
@@ -83,7 +83,7 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		self.addDockWidget(QtCore.Qt.TopDockWidgetArea,self.serverDock)
 		
 	def rem(self, d, w=False):
-		"""Removes a widget by name"""
+		"""Removes a dock widget by name"""
 		d=getattr(self, d, False)
 		if not d: return
 		self.removeDockWidget(d)
@@ -309,6 +309,12 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 				if an=='post': an='post'
 				if role=='NoRole': role='Camera'
 				self.addCamera(obj, role, an)
+		
+		# Add motion controls toolbar
+		if not self.fixedDoc:
+			self.mcontrols=MotionControls(self.remote, parent=self)
+			self.addToolBar(QtCore.Qt.BottomToolBarArea, self.mcontrols)
+			self.toolbars.append(self.mcontrols)
 		
 		# Connect to "id" property
 		self.tasks.job(-1,pid,'Document')

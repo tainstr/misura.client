@@ -31,10 +31,6 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 			self.addAction('Machine Database', parent.showIDB)
 			self.addAction('Test File', parent.openFile)
 			self.addAction('Misura3 Database', parent.showDB3)
-		if self.server.kiln['motorStatus']>=0:
-			print 'Controls: Adding motorStatus'
-			self.motor=widgets.build(self.server, self.server.kiln, self.server.kiln.gete('motorStatus'))
-			self.addWidget(self.motor)
 		print 'Controls.updateActions()'
 		self.updateActions()
 		print 'Controls end init'
@@ -57,8 +53,6 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		self.stopAct.setEnabled(r)
 		self.startAct.setEnabled(r^1)
 		self.iniAct.setEnabled(r^1)
-		if self.motor is not False:
-			self.motor.update()
 # 		c=(1,0,0,1) if r else (0,1,0,1) 
 # 		g=QtGui.QRadialGradient(0.5,0.5,0.99,0.5,0.5)
 # 		g.setCoordinateMode(QtGui.QGradient.ObjectBoundingMode)
@@ -188,7 +182,42 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 			self.remote.sample0['initialDimension']=val
 		return True
 		
+class MotionControls(widgets.Linguist,QtGui.QToolBar):
+	"""Motion toolbar"""
+	mute=False
+	motor=False
+	#cycleNotSaved=False
+	def __init__(self, remote, parent=None):
+		widgets.Linguist.__init__(self,context='Acquisition')
+		QtGui.QToolBar.__init__(self, parent)
+		self.remote=remote
+		self.server=remote.parent()
 		
+		if self.server.kiln['motorStatus']>=0:
+			self.kmotor=widgets.build(self.server, self.server.kiln, self.server.kiln.gete('motorStatus'))
+			self.kmotor.label_widget.label.setText('Furnace:')
+			self.kmotor.lay.insertWidget(0,self.kmotor.label_widget)
+			self.addWidget(self.kmotor)
 		
+		paths={}
+		# Collect all focus paths
+		for pic,win in self.parent().cameras.itervalues():
+			print pic
+			print pic.remote
+			print pic.remote.encoder
+			print pic.remote.encoder.focus
+			
+			obj=pic.remote.encoder.focus.roledev('motor')
+			if not obj: continue
+			paths[obj['fullpath']]=obj
+		for obj in paths.itervalues():
+			self.add_focus(obj)
+			
+	def add_focus(self,obj):
+# 		slider=widgets.MotorSlider(self.server,obj,self.parent())
+		slider=widgets.build(self.server, obj, obj.gete('goingTo'))
+		slider.lay.insertWidget(0,slider.label_widget)
+		slider.label_widget.label.setText('    Focus:')
+		self.addWidget(slider)
 		
-		
+			

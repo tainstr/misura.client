@@ -318,6 +318,7 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 #			cpos={'x':'left','y':'bottom'}
 		self.motor_ctrl={}
 		def add_coord(name):
+			# TODO: replace with enc.roledev('motor')
 			enc=getattr(self.remote.encoder,name)
 			m=enc['motor']
 			if m is False:
