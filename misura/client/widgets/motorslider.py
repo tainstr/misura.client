@@ -65,6 +65,8 @@ class MotorSlider(aNumber):
 		self.update(position=pos)
 		
 	def update(self, *a, **k):
+		if self.slider and self.slider.paused:
+			return False
 		s=k.pop('position', None)
 		if s:
 			k['minmax']=False

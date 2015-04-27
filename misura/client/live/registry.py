@@ -167,7 +167,7 @@ class KidRegistry(QtCore.QThread):
 					continue
 			if kid=='/progress' and self.progress:
 				self.progress.emit(QtCore.SIGNAL('selfchanged'), nval)
-		print 'Registry.update_all', len(updated)
+# 		print 'Registry.update_all', len(updated)
 		return updated
 		
 	def force_redraw(self):
@@ -195,7 +195,7 @@ class KidRegistry(QtCore.QThread):
 				print 'KidRegistry.control_loop: No manager registered.'
 				return False
 			if not self.manager.remote:
-				print 'KidRegistry.control_loop: no remote manager'
+# 				print 'KidRegistry.control_loop: no remote manager'
 				return False
 			self.obj=self.manager.remote.copy()
 			self.obj.connect()
@@ -229,7 +229,7 @@ class KidRegistry(QtCore.QThread):
 		self.lastdoc=False
 		while self.stream:
 			# Sleep only if loops are shorter than interval
-			print 'KidRegistry.run', len(self.rid)
+# 			print 'KidRegistry.run', len(self.rid)
 			t=time()
 			d=self.interval-(t-t0)
 			if d>0:	sleep(d)
@@ -239,7 +239,7 @@ class KidRegistry(QtCore.QThread):
 			except:
 				print_exc()
 				sleep(1)
-		print 'KidRegistry.run END',self.stream
+ 		print 'KidRegistry.run END',self.stream
 
 	
 	def toggle_run(self, auto=None):
