@@ -3,7 +3,7 @@
 """Interfaces for local and remote file access"""
 from misura.client.connection import addrConnection
 from misura.canon.indexer import SharedFile
-from cPickle import dumps,loads
+from cPickle import loads
 import functools
 import xmlrpclib
 from misura.canon import option

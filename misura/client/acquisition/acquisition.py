@@ -6,6 +6,7 @@ import tables
 from time import sleep
 import threading
 from traceback import print_exc
+import os
 
 
 from ..live import registry
@@ -23,6 +24,9 @@ from .measureinfo import MeasureInfo
 from .controls import Controls, MotionControls
 from .delay import DelayedStart 
 
+# Synchronization stuff
+from .. import sync
+from ...canon import indexer
 
 from .. import graphics
 from ..database import UploadThread
@@ -91,14 +95,7 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		if not w: return
 		w=getattr(self, w,False)
 		if w: w.deleteLater()
-		
-	def stopped_nosave(self):
-		"""Reset the instrument, completely discarding acquired data and remote file proxy"""
-		print "STOPPED_NOSAVE"
-		#TODO: reset ops should be performed server-side
-		self.remote.measure['uid']=''
-		self.resetFileProxy()
-		
+				
 	def set_addr(self,addr):
 		"""Open server by address"""
 		s=connection.addrConnection(addr)
@@ -217,8 +214,6 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		QtCore.QThreadPool.globalInstance().start(r)
 		print 'active threads:', QtCore.QThreadPool.globalInstance().activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount()
 		
-		
-
 #	@csutil.profile
 	def setInstrument(self, remote, server=False):
 		if server is not False:
@@ -258,8 +253,9 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		print 'Cleaned toolbars'
 		self.controls=Controls(self.remote, parent=self)
 		print 'Created controls'
-		self.connect(self.controls, QtCore.SIGNAL('stopped_nosave()'),self.stopped_nosave)
-		self.connect(self.controls, QtCore.SIGNAL('started()'),self.resetFileProxy)
+		self.controls.stopped_nosave.connect(self.stopped_nosave)
+		self.controls.stopped.connect(self.stopped)
+		self.controls.started.connect(self.resetFileProxy)
 		self.controls.mute=bool(self.fixedDoc)
 		self.addToolBar(self.controls)
 		self.toolbars.append(self.controls)
@@ -343,6 +339,35 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 #		self.connect(pic, QtCore.SIGNAL('updatedROI()'), win.repaint)
 		self.cameras[role]=(pic, win)
 		
+# 	@csutil.lockme
+	def set_doc(self,doc):
+		pid='Data display'
+		self.tasks.jobs(10,pid)
+		self.doc=doc
+		self.tasks.job(-1,pid,'Setting document in live registry')
+		registry.set_doc(doc)
+		
+		print 'snapshotsTable'
+		self.tasks.job(-1,pid,'Sync snapshots with document')
+		self.snapshotsTable.set_doc(doc)
+		
+		print 'summaryPlot'
+		self.tasks.job(-1,pid,'Sync graph with document')
+		self.summaryPlot.set_doc(doc)
+		
+		print 'navigator'
+		self.tasks.job(-1,pid,'Sync document tree')
+		self.navigator.set_doc(doc)
+
+		print 'dataTable'
+		self.tasks.job(-1,pid,'Sync data table')
+		self.dataTable.set_doc(doc)
+		print 'connect'
+		self.connect(self.snapshotsTable,QtCore.SIGNAL('set_time(float)'),self.summaryPlot.set_time)
+		self.connect(self.snapshotsTable,QtCore.SIGNAL('set_time(float)'),self.navigator.set_time)
+		self.connect(self.summaryPlot,QtCore.SIGNAL('move_line(float)'),self.snapshotsTable.set_time)
+		self.tasks.done(pid)
+		
 	retry=10
 	def _resetFileProxy(self,retry=0):
 		"""Resets acquired data widgets"""
@@ -384,7 +409,10 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 				self.tasks.done('Waiting for data')
 				return False
 			print 'resetFileProxy to live ',fid
-			live=self.server.storage.test.live
+			live_uid=self.server.storage.test.live.get_uid()
+			if not live_uid:
+				return False
+			live=getattr(self.server.storage.test,live_uid)
 			if not live.has_node('/conf'):
 				live.load_conf()
 			if not live.has_node('/conf'):
@@ -418,36 +446,6 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		doc.up=True
 		print 'RESETFILEPROXY',doc.filename,doc.data.keys(),doc.up
 		self.set_doc(doc)
-		
-		
-# 	@csutil.lockme
-	def set_doc(self,doc):
-		pid='Data display'
-		self.tasks.jobs(10,pid)
-		self.doc=doc
-		self.tasks.job(-1,pid,'Setting document in live registry')
-		registry.set_doc(doc)
-		
-		print 'snapshotsTable'
-		self.tasks.job(-1,pid,'Sync snapshots with document')
-		self.snapshotsTable.set_doc(doc)
-		
-		print 'summaryPlot'
-		self.tasks.job(-1,pid,'Sync graph with document')
-		self.summaryPlot.set_doc(doc)
-		
-		print 'navigator'
-		self.tasks.job(-1,pid,'Sync document tree')
-		self.navigator.set_doc(doc)
-
-		print 'dataTable'
-		self.tasks.job(-1,pid,'Sync data table')
-		self.dataTable.set_doc(doc)
-		print 'connect'
-		self.connect(self.snapshotsTable,QtCore.SIGNAL('set_time(float)'),self.summaryPlot.set_time)
-		self.connect(self.snapshotsTable,QtCore.SIGNAL('set_time(float)'),self.navigator.set_time)
-		self.connect(self.summaryPlot,QtCore.SIGNAL('move_line(float)'),self.snapshotsTable.set_time)
-		self.tasks.done(pid)
 
 # 	@csutil.profile
 	@csutil.unlockme
@@ -469,23 +467,9 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		self.tasks.hide()
 		return r
 
-	def createAction(self, text, slot=False, shortcut=False,  icon=False, tip=False, checkable=False, signal="triggered()"):
-		action=QtGui.QAction(text, self)
-		if icon: action.setIcon(QtGui.QIcon(":%s.png" % icon))
-		if shortcut: action.setShortcut(shortcut)
-		if tip:
-			action.setToolTip(tip)
-			action.setStatusTip(tip)
-		if slot: self.connect(action, QtCore.SIGNAL("signal"), slot)
-		if checkable: action.setCheckable(True)
-		return action
-
-	def addActions(self, target, actions):
-		for action in actions:
-			if actions is None:
-				target.addSeparator()
-			else:
-				target.addAction(action)
+	###########
+	### Start/Stop utilities
+	###########
 	
 	def delayed_start(self):
 		"""Configure delayed start"""
@@ -496,6 +480,43 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		self.delayed=DelayedStart(self.server)
 		self.delayed.show()
 		
+	def stopped_nosave(self):
+		"""Reset the instrument, completely discarding acquired data and remote file proxy"""
+		print "STOPPED_NOSAVE"
+		#TODO: reset ops should be performed server-side
+		self.remote.measure['uid']=''
+		self.resetFileProxy()
+		
+	def stopped(self):
+		"""Offer option to download the remote file"""
+		#HTTPS data url
+		uid=self.remote.measure['uid']
+		url=sync.dataurl(self.server,uid)
+		dbpath=confdb['database']
+		db=False
+		# NO db: ask to specify custom location
+		if not os.path.exists(dbpath):
+			dbpath=False
+			outfile=QtGui.QFileDialog.getSaveFileName(self,	self.mtr("Download finished test as"))
+			outfile=str(outfile)
+			if not len(outfile):
+				return False
+			auto=True
+		else:
+			auto=confdb['autodownload']
+		# Ask if it's not automatic
+		if not auto:
+			auto=QtGui.QMessageBox.question(self,self.mtr("Download finished test?"),
+									self.mtr("Would you like to save the finished test?"))
+			if auto!=QtGui.QMessageBox.Ok:
+				return False
+		#TODO: Must wait that current file is closed!!!
+		# Must download
+		sy=sync.DownloadThread(url,outfile,dbpath)
+		sy.set_tasks(self.tasks)
+		sy.start()
+		# Keep a reference
+		self._download_thread=sy
 
 	###########
 	### Post-analysis

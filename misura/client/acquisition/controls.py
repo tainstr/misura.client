@@ -6,11 +6,19 @@ from .. import conf, widgets
 from ..live import registry
 from ..database import ProgressBar 
 import measureinfo
+from ..clientconf import confdb
 
 class Controls(widgets.Linguist,QtGui.QToolBar):
 	"""Start/stop toolbar"""
 	mute=False
 	motor=False
+	isRunning=None
+	"""Local running status"""
+	paused=False
+	"""Do not update actions"""
+	started=QtCore.pyqtSignal()
+	stopped=QtCore.pyqtSignal()
+	stopped_nosave=QtCore.pyqtSignal()
 	#cycleNotSaved=False
 	def __init__(self, remote, parent=None):
 		widgets.Linguist.__init__(self,context='Acquisition')
@@ -34,17 +42,22 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		print 'Controls.updateActions()'
 		self.updateActions()
 		print 'Controls end init'
-		self.connect(self,QtCore.SIGNAL('stopped()'),self.hide_prog)
-		self.connect(self,QtCore.SIGNAL('started()'),self.hide_prog)
+		self.stopped.connect(self.hide_prog)
+		self.stopped_nosave.connect(self.hide_prog)
+		self.started.connect(self.hide_prog)
 		self.connect(self, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
 		self.connect(self.aobj, QtCore.SIGNAL('changed()'), self.updateActions)
 		self.connect(self, QtCore.SIGNAL('warning(QString,QString)'), self.warning)
 		
 	@property
 	def tasks(self):
+		"""Shortcut to pending tasks dialog"""
 		return registry.tasks
 
 	def updateActions(self):
+		"""Update status visualization and notify third-party changes"""
+		if self.paused:
+			return self.isRunning
 		if self.parent().fixedDoc:
 			return False
 		r=self.server['isRunning']
@@ -53,6 +66,16 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		self.stopAct.setEnabled(r)
 		self.startAct.setEnabled(r^1)
 		self.iniAct.setEnabled(r^1)
+		if self.isRunning is not None and self.isRunning!=r:
+			if r:
+				msg='A new test was started'
+				sig=self.started
+			else:
+				msg='Finished test'
+				sig=self.stopped
+			QtGui.QMessageBox.warning(self,msg,msg)
+			sig.emit()
+		self.isRunning=r
 # 		c=(1,0,0,1) if r else (0,1,0,1) 
 # 		g=QtGui.QRadialGradient(0.5,0.5,0.99,0.5,0.5)
 # 		g.setCoordinateMode(QtGui.QGradient.ObjectBoundingMode)
@@ -76,7 +99,9 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		return True
 	
 		
-	def warning(self,title,msg):
+	def warning(self,title,msg=False):
+		"""Display a warning message box and update actions"""
+		if not msg: msg=title
 		QtGui.QMessageBox.warning(self, title, msg)
 		self.updateActions()
 		
@@ -98,19 +123,23 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		
 	def _start(self):
 		# Renovate the connection: we are in a sep thread!
+		self.paused=True
 		rem=self.remote.copy()
 		rem.connect()
 		try:
 			msg=rem.start_acquisition()
-			self.emit(QtCore.SIGNAL('started()'))
+			self.started.emit()
 		except:
 			msg=format_exc()
 			print msg
+		self.paused=False
+		self.started.emit()
 		if not self.mute:
 			self.emit(QtCore.SIGNAL('warning(QString,QString)'),
 					'Start Acquisition', 
-					'Result: '+msg)
-		self.emit(QtCore.SIGNAL('started()'))	
+					'Result: '+msg)		
+			
+		
 
 	def start(self):
 		self.mainWin=self.parent()
@@ -122,18 +151,24 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		if self.updateActions():
 			self.warning('Already running', 'Acquisition is already running. Nothing to do.')
 			return False
+		self.isRunning=True
 		self._async(self._start)
 		self.show_prog("Starting new test")
 		return True
 		
 	def _stop(self,mode):
+		self.paused=True
 		rem=self.remote.copy()
 		rem.connect()
 		try:	
 			msg=rem.stop_acquisition(mode)
 		except:	
 			msg=format_exc()
-		self.emit(QtCore.SIGNAL('stopped()'))
+		if mode:
+			self.stopped.emit()
+		else:
+			self.stopped_nosave.emit()
+		self.paused=False
 		if self.mute:
 			return
 		
@@ -159,9 +194,10 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 				return False
 		else:
 			btn=qm.Discard
-		
+			
+		self.isRunning=False
 		if btn==qm.Discard:
-			self.emit(QtCore.SIGNAL('stopped_nosave()'))
+			self.stopped_nosave.emit()
 			self._async(self._stop,False)
 		else:
 			self._async(self._stop,True)

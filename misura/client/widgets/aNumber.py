@@ -207,7 +207,7 @@ class aNumber(ActiveWidget):
 			m=max((cur-d,m))
 			M=min((cur+d,M))
 			step=step/d
-		print 'Setting range',m,M,step
+# 		print 'Setting range',m,M,step
 		if self.double: 
 			self.divider=10.**self.spinbox.decimals()
 		else:

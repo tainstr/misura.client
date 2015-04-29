@@ -64,6 +64,8 @@ class PendingTasks(QtGui.QWidget):
 class LocalTasks(Linguist,QtGui.QWidget):
 	"""Global server 'progress' option widget. This is a RoleIO pointing to the real 'Progress'-type option being performed"""
 	ch=QtCore.pyqtSignal()
+	sig_done=QtCore.pyqtSignal(str)
+	sig_done0=QtCore.pyqtSignal()
 	def __init__(self):
 		Linguist.__init__(self)
 		QtGui.QWidget.__init__(self)
@@ -103,8 +105,8 @@ class LocalTasks(Linguist,QtGui.QWidget):
 		self.connect(self,QtCore.SIGNAL('job(int,QString)'),self._job)
 		self.connect(self,QtCore.SIGNAL('job(int)'),self._job)
 		
-		self.connect(self,QtCore.SIGNAL('done(QString)'),self._done)
-		self.connect(self,QtCore.SIGNAL('done()'),self._done)
+		self.sig_done.connect(self._done)
+		self.sig_done0.connect(self._done)
 		print 'LocalTasks initialized'
 		
 	def __len__(self):
@@ -193,7 +195,7 @@ class LocalTasks(Linguist,QtGui.QWidget):
 	
 	def done(self,pid='Operation'):
 		"""Thread-safe call for _done()"""
-		self.emit(QtCore.SIGNAL('done(QString)'),pid)
+		self.sig_done.emit(pid)
 		
 class Tasks(Linguist,QtGui.QWidget):
 	def __init__(self):
