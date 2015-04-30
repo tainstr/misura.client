@@ -202,7 +202,7 @@ class QuickOps(object):
 		"""Load or reload a dataset"""
 		p=ImportParamsMisura(filename=node.linked.filename,
 							rule_exc=' *',
-							rule_load=node.m_col,
+							rule_load=node.m_col+'$',
 							rule_unit=clientconf.confdb['rule_unit'])
 		op=OperationMisuraImport(p)
 		self.doc.applyOperation(op)

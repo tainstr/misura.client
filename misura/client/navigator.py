@@ -13,7 +13,6 @@ import fileui
 import units
 from clientconf import confdb
 
-
 class StylesMenu(widgets.Linguist, QtGui.QMenu):
 	def __init__(self, doc, node):
 		QtGui.QMenu.__init__(self, self.mtr('Styles'))
@@ -21,9 +20,6 @@ class StylesMenu(widgets.Linguist, QtGui.QMenu):
 		self.node = node
 		self.addAction(self.mtr('Colorize'), self.colorize)
 		
-		
-		
-
 class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 	"""List of currently opened misura Tests and reference to datasets names"""
 	previous_selection = False
@@ -319,6 +315,7 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 		
 	def update_dataset_menu(self, node):
 		istime = node.path == 't' or node.path.endswith(':t')
+		print 'update_dataset_menu', node.path
 		self.dataset_menu.clear()
 		if istime:
 			self.act_load = False
@@ -370,6 +367,7 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 		sel = self.selectedIndexes()
 		n = len(sel)
 		node = self.model().data(self.currentIndex(), role=Qt.UserRole)
+		print 'showContextMenu', node.path
 		if not node.parent:
 			self.update_base_menu()
 			menu = self.base_menu
