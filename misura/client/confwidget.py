@@ -104,7 +104,7 @@ class RecentInterface(Linguist):
 		
 	def new(self,*a):
 		if self.category in ['server']:
-			path=QtGui.QInputDialog.getText(self, self.mtr('Specify a new server address'), self.mtr('Address'),text='https://IP/RPC')[0]
+			path=QtGui.QInputDialog.getText(self, self.mtr('Specify a new server address'), self.mtr('Address'),text='https://IP:3880/RPC')[0]
 		else:
 			tab=getattr(self.conf,'recent_'+self.category)
 			print 'new: tab',self.category,tab

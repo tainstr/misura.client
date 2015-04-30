@@ -175,8 +175,8 @@ class LocalTasks(Linguist,QtGui.QWidget):
 		
 	def job(self,step,pid='Operation',label=''):
 		"""Thread-safe call for _job()"""
-		self.emit(QtCore.SIGNAL('job(int,QString,QString)'),step,pid,label)		
-		
+		self.emit(QtCore.SIGNAL('job(int,QString,QString)'),
+				step,pid,label)		
 	
 	def _done(self,pid='Operation'):
 		"""Complete job `pid`"""

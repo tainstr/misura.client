@@ -60,13 +60,16 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 			return self.isRunning
 		if self.parent().fixedDoc:
 			return False
-		r=self.server['isRunning']
-		print 'updateActions',r
+		# Always reconnect in case it is called in a different thread
+		rem=self.server.copy()
+		rem.connect()
+		r=rem['isRunning']
 		r=bool(r)
 		self.stopAct.setEnabled(r)
 		self.startAct.setEnabled(r^1)
 		self.iniAct.setEnabled(r^1)
 		if self.isRunning is not None and self.isRunning!=r:
+			print 'Controls.updateActions',self.isRunning,r
 			if r:
 				msg='A new test was started'
 				sig=self.started
@@ -75,6 +78,7 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 				sig=self.stopped
 			QtGui.QMessageBox.warning(self,msg,msg)
 			sig.emit()
+		# Locally remember remote status
 		self.isRunning=r
 # 		c=(1,0,0,1) if r else (0,1,0,1) 
 # 		g=QtGui.QRadialGradient(0.5,0.5,0.99,0.5,0.5)
@@ -89,12 +93,13 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		return 
 		
 	def _async(self,method,*a,**k):
+		"""Execute `method` in global thread pool, passing `*a`,`**k` arguments."""
 		r=widgets.RunMethod(method,*a,**k)
 		QtCore.QThreadPool.globalInstance().start(r)
 		return True
 	
-	def __async(self,method,*a,**k):
-		"""SYNC"""
+	def _sync(self,method,*a,**k):
+		"""Synchronously execute `method`,passing `*a`,`**k` arguments."""
 		method(*a,**k)
 		return True
 	
@@ -138,8 +143,6 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 			self.emit(QtCore.SIGNAL('warning(QString,QString)'),
 					'Start Acquisition', 
 					'Result: '+msg)		
-			
-		
 
 	def start(self):
 		self.mainWin=self.parent()

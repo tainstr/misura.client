@@ -22,96 +22,6 @@ def urlauth(url):
 	url=url[:i]+url[e:]
 	return user,passwd,url
 
-class DownloadThread(QtCore.QThread):
-	dlStarted=QtCore.pyqtSignal(str,str)
-	"""Emitted when a new download is started. url, local path."""
-	dlFinished=QtCore.pyqtSignal(str,str)
-	"""Finished download - url, local path"""
-	dlSize=QtCore.pyqtSignal(int)
-	"""New total download dimension for current file (bytes)"""
-	dlDone=QtCore.pyqtSignal(int)
-	"""Already downloaded bytes"""
-	aborted=False
-	def __init__(self,url=False,outfile=False,dbpath=False,parent=None):
-		QtCore.QThread.__init__(self,parent)
-		self.url=url
-		self.outfile=outfile
-		self.dbpath=False
-		
-	@property
-	def pid(self):
-		"""Task identification name"""
-		return 'Download: {} to {}'.format(self.url,self.outfile)
-		
-	def task_new(self,size):
-		self.tasks.jobs(size,self.pid)
-		
-	def task_up(self,done):
-		self.tasks.job(done,self.pid)
-		
-	def task_end(self,*foo):
-		self.tasks.done(self.pid)
-		
-	def set_tasks(self,tasks=None):
-		self.tasks=tasks
-		if tasks is None:
-			self.dlSize.disconnect(self.task_new)
-			self.dlDone.disconnect(self.task_up)
-			self.dlFinished.disconnect(self.task_end)
-			return False
-		self.dlSize.connect(self.task_new)
-		self.dlDone.connect(self.task_up)
-		self.dlFinished.connect(self.task_end)
-		self.tasks.sig_done.connect(self.abort)
-		return True
-				
-	def abort(self,pid=False):
-		if (not pid) or (pid==self.pid):
-			self.aborted=True
-		return self.aborted
-	
-	def download_url(self,url,outfile):
-		"""Download from url and save to outfile path"""
-		print 'download url',url,outfile
-		user,passwd,url=urlauth(url)
-		self.dlStarted.emit(url,outfile)
-		# Connection to data
-		auth_handler= urllib2.HTTPBasicAuthHandler()
-		auth_handler.add_password(realm='MISURA', uri=url, user=user, passwd=passwd)
-		opener = urllib2.build_opener(auth_handler)
-		# ...and install it globally so it can be used with urlopen.
-		urllib2.install_opener(opener)
-		req = urllib2.urlopen(url)
-		dim=int(req.info().getheaders('Content-Length')[0])
-		self.dlSize.emit(dim)
-		CHUNK = 16 * 1024
-		done=0
-		with open(outfile, 'wb') as fp:
-			while not self.aborted:
-				chunk = req.read(CHUNK)
-				if not chunk: break
-				fp.write(chunk)
-				done+=len(chunk)
-				print 'DONE',done,dim
-				self.dlDone.emit(done)
-		# Remove if aborted
-		if self.aborted:
-			print 'ABORTED. Removing local file:',outfile
-			os.remove(outfile)
-		# Append to db if defined
-		elif self.dbpath and os.path.exists(self.dbpath):
-			db=indexer.Indexer(self.dbpath)
-			db.appendFile(outfile)
-			db.close()
-		self.dlFinished.emit(url,outfile)
-		return True
-		
-	def run(self):
-		"""Download the configured file in a separate thread"""
-		if False in (self.url,self.outfile):
-			print 'Impossible to download',self.url,self.outfile
-		self.download_url(self.url,self.outfile)
-		
 def remote_dbdir(server):
 	"""Calc remote database directory path"""
 	# Filter away the misura.sqlite filename
@@ -134,7 +44,185 @@ def dataurl(server,uid):
 		p='/'+p
 	# Prepend remote HTTPS/data path
 	url=server.data_addr+p
-	return url
+	return url,p
+
+class DownloadThread(QtCore.QThread):
+	dlStarted=QtCore.pyqtSignal(str,str)
+	"""Emitted when a new download is started. (url, local path)"""
+	dlFinished=QtCore.pyqtSignal(str,str)
+	"""Finished download - url, local path. (url, local path)"""
+	dlAborted=QtCore.pyqtSignal(str,str)
+	"""Aborted download - url, local path. (url, local path)"""
+	dlSize=QtCore.pyqtSignal(int)
+	"""New total download dimension for current file (bytes)"""
+	dlDone=QtCore.pyqtSignal(int)
+	"""Already downloaded bytes"""
+	dlWaiting=QtCore.pyqtSignal(str,str,int)
+	"""Waiting to reserve the file uid for download. (url, local path,progress)"""
+	aborted=False
+	retry=30
+	def __init__(self,url=False,outfile=False,uid=False,server=False,dbpath=False,parent=None):
+		QtCore.QThread.__init__(self,parent)
+		self.url=url
+		self.outfile=outfile
+		self.dbpath=dbpath
+		self.uid=uid
+		self.server=server
+		"""Retry times for UID reservation"""
+		
+	@property
+	def pid(self):
+		"""Task identification name"""
+		return 'Download: {} \nto {}'.format(self.url,self.outfile)
+	
+	@property
+	def wpid(self):
+		"""Waiting task id"""
+		return 'Waiting: {} \nto {}'.format(self.url,self.outfile)
+		
+	def task_new(self,size):
+		"""Start new download task"""
+		self.tasks.jobs(size,self.pid)
+		# End waiting task, if started
+		self.tasks.done(self.wpid)
+		
+	def task_up(self,done):
+		"""Update current download task"""
+		self.tasks.job(done,self.pid)
+		
+	def task_end(self,*foo):
+		"""End current download task"""
+		self.tasks.done(self.pid)
+		self.tasks.done(self.wpid)
+		
+	def task_wait(self,url,outfile,progress):
+		"""Manage an UID reservation task"""
+		if progress==0:
+			# Start a new waiting task
+			self.tasks.jobs(self.retry,self.wpid)
+		else:
+			self.tasks.job(progress,self.wpid)
+			
+	def abort(self,pid=False):
+		"""Set the current download as aborted"""
+		if (not pid) or (pid==self.pid):
+			self.aborted=True
+		return self.aborted
+		
+	def set_tasks(self,tasks=None):
+		"""Install a graphical pending task manager for this thread"""
+		self.tasks=tasks
+		if tasks is None:
+			self.dlSize.disconnect(self.task_new)
+			self.dlDone.disconnect(self.task_up)
+			self.dlFinished.disconnect(self.task_end)
+			self.dlAborted.disconnect(self.task_end)
+			self.dlWaiting.disconnect(self.task_wait)
+			return False
+		self.dlSize.connect(self.task_new)
+		self.dlDone.connect(self.task_up)
+		self.dlFinished.connect(self.task_end)
+		self.dlAborted.connect(self.task_end)
+		self.dlWaiting.connect(self.task_wait)
+		self.tasks.sig_done.connect(self.abort)
+		return True
+				
+	def download_url(self,url,outfile):
+		"""Download from url and save to outfile path"""
+		print 'download url',url,outfile
+		self.url=url
+		self.outfile=outfile
+		user,passwd,url=urlauth(url)
+		self.dlStarted.emit(url,outfile)
+		# Connection to data
+		auth_handler= urllib2.HTTPBasicAuthHandler()
+		auth_handler.add_password(realm='MISURA', uri=url, user=user, passwd=passwd)
+		opener = urllib2.build_opener(auth_handler)
+		# ...and install it globally so it can be used with urlopen.
+		urllib2.install_opener(opener)
+		req = urllib2.urlopen(url)
+		dim=int(req.info().getheaders('Content-Length')[0])
+		self.dlSize.emit(dim)
+		CHUNK = 16 * 1024
+		done=0
+		with open(outfile, 'wb') as fp:
+			while not self.aborted:
+# 				sleep(0.1) # Throttle
+				chunk = req.read(CHUNK)
+				if not chunk: break
+				fp.write(chunk)
+				done+=len(chunk)
+				print 'DONE',done,dim
+				self.dlDone.emit(done)
+		# Remove if aborted
+		if self.aborted:
+			print 'ABORTED. Removing local file:',outfile
+			os.remove(outfile)
+			self.dlAborted.emit(url,outfile)
+		# Append to db if defined
+		elif self.dbpath and os.path.exists(self.dbpath):
+			db=indexer.Indexer(self.dbpath)
+			db.appendFile(outfile)
+			db.close()
+		self.dlFinished.emit(url,outfile)
+		return True
+	
+	def download_uid(self,server,uid,outfile,retry=20):
+		"""Download test `uid` from `server` storage."""
+		url,loc=dataurl(server,uid)
+		self.url=url
+		# Autocalc outfile from dbpath
+		if not outfile and self.dbpath:
+			loc=loc.split('/')
+			outfile=os.path.dirname(self.dbpath)
+			outfile=os.path.join(outfile,*loc)
+			# Create nested directory structure
+			d=os.path.dirname(outfile)
+			if not os.path.exists(d):
+				os.makedirs(d)
+		if not outfile:
+			raise BaseException('Output file was not specified')
+		self.outfile=outfile
+		# Try to reserve the file for download
+		itr=0
+		self.retry=retry
+		# Remove other reservations and close file
+		while not server.storage.test.free(uid) and not self.aborted:
+			self.dlWaiting.emit(url,outfile,itr)
+			sleep(1)
+			if itr>=self.retry:
+				break
+			print 'Waiting for uid reservation',uid
+			itr+=1
+		if self.aborted:
+			print 'Aborted waiting for uid reservation',uid
+			self.dlAborted.emit(url,outfile)
+			return False
+		# Reserve again
+		server.storage.test.reserve(uid)
+		# Abort if not reserved
+		if not server.storage.test.is_reserved(uid):
+			print 'Cannot reserve UID for download',uid,url
+			self.dlAborted.emit(url,outfile)
+			return False
+		self.download_url(url,outfile)
+		# Free uid for remote opening and next download
+		server.storage.test.free(uid)
+		return True
+		
+		
+	def run(self):
+		"""Download the configured file in a separate thread"""
+		if (not (self.outfile or self.dbpath)) or not ((self.uid and self.server) or self.url):
+			print 'Impossible to download',self.url,self.uid,self.server,self.outfile
+		if self.uid:
+			# Reconnect because we are in a different thread
+			self.server.connect()
+			self.download_uid(self.server,self.uid,self.outfile)
+		elif self.url:
+			self.download_url(self.url,self.outfile)
+		
+
 
 class Sync(DownloadThread):
 	"""Synchronization thread running in background and checking presence remote test ids in local db"""

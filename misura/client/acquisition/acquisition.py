@@ -491,11 +491,10 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		"""Offer option to download the remote file"""
 		#HTTPS data url
 		uid=self.remote.measure['uid']
-		url=sync.dataurl(self.server,uid)
 		dbpath=confdb['database']
-		db=False
 		# NO db: ask to specify custom location
 		if not os.path.exists(dbpath):
+			print 'DATABASE PATH DOES NOT EXIST',dbpath
 			dbpath=False
 			outfile=QtGui.QFileDialog.getSaveFileName(self,	self.mtr("Download finished test as"))
 			outfile=str(outfile)
@@ -504,15 +503,16 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 			auto=True
 		else:
 			auto=confdb['autodownload']
+			outfile=False
 		# Ask if it's not automatic
 		if not auto:
 			auto=QtGui.QMessageBox.question(self,self.mtr("Download finished test?"),
 									self.mtr("Would you like to save the finished test?"))
 			if auto!=QtGui.QMessageBox.Ok:
-				return False
+				return False	
 		#TODO: Must wait that current file is closed!!!
 		# Must download
-		sy=sync.DownloadThread(url,outfile,dbpath)
+		sy=sync.DownloadThread(outfile=outfile,uid=uid,server=self.server,dbpath=dbpath)
 		sy.set_tasks(self.tasks)
 		sy.start()
 		# Keep a reference

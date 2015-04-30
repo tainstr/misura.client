@@ -70,9 +70,15 @@ class KidRegistry(QtCore.QThread):
 		return self.taskswg.tasks
 
 	@lockme
-	def set_doc(self,doc):
+	def set_doc(self,doc=False):
+		"""Install new document `doc`"""
+		if not doc and self.doc:
+			self.dicconnect(self,QtCore.SIGNAL('update()'),self.doc.update)
+			self.lastdoc=False
+			print 'KidRegistry.set_doc CLEARED'
 		self.doc=doc
-		self.connect(self,QtCore.SIGNAL('update()'),self.doc.update)
+		if doc:
+			self.connect(self,QtCore.SIGNAL('update()'),self.doc.update)
 
 #	@lockme
 	def register(self, w):
@@ -239,7 +245,7 @@ class KidRegistry(QtCore.QThread):
 			except:
 				print_exc()
 				sleep(1)
- 		print 'KidRegistry.run END',self.stream
+		print 'KidRegistry.run END',self.stream
 
 	
 	def toggle_run(self, auto=None):
