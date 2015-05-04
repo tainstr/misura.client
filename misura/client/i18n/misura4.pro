@@ -1,21 +1,19 @@
- 
-SOURCES += /opt/misura4/client/acquisition.py
-SOURCES += /opt/misura4/client/balance_gui.py
-SOURCES += /opt/misura4/client/beholder_gui.py
-SOURCES += /opt/misura4/client/bonjour_test.py
-SOURCES += /opt/misura4/client/hsm.py
-SOURCES += /opt/misura4/client/__init__.py
-SOURCES += /opt/misura4/client/iutils.py
-SOURCES += /opt/misura4/client/listview.py
-SOURCES += /opt/misura4/client/m4script.py
-SOURCES += /opt/misura4/client/mconf.py
-SOURCES += /opt/misura4/client/morla_gui.py
-SOURCES += /opt/misura4/client/odlt.py
-SOURCES += /opt/misura4/client/parameters.py
-SOURCES += /opt/misura4/client/resources.py
-SOURCES += /opt/misura4/client/smaug_gui.py
-SOURCES += /opt/misura4/client/thermal_cycle.py
-SOURCES += /opt/misura4/client/widgets.py
+
+SOURCES += /opt/misura4/misura/client/clientconf.py
+SOURCES += /opt/misura4/misura/client/colors.py
+SOURCES += /opt/misura4/misura/client/confwidget.py
+SOURCES += /opt/misura4/misura/client/connection.py
+SOURCES += /opt/misura4/misura/client/database.py
+SOURCES += /opt/misura4/misura/client/__init__.py
+SOURCES += /opt/misura4/misura/client/iutils.py
+SOURCES += /opt/misura4/misura/client/language_sync.py
+SOURCES += /opt/misura4/misura/client/linguist.py
+SOURCES += /opt/misura4/misura/client/loadUnload.py
+SOURCES += /opt/misura4/misura/client/navigator.py
+SOURCES += /opt/misura4/misura/client/parameters.py
+SOURCES += /opt/misura4/misura/client/pybonjour.py
+SOURCES += /opt/misura4/misura/client/units.py
+SOURCES += /opt/misura4/misura/client/video.py
 TRANSLATIONS += static_it.ts
 TRANSLATIONS += static_de.ts
 TRANSLATIONS += static_es.ts

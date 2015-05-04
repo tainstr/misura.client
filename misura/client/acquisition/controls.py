@@ -246,7 +246,7 @@ class MotionControls(widgets.Linguist,QtGui.QToolBar):
 			print pic.remote.encoder
 			print pic.remote.encoder.focus
 			
-			obj=pic.remote.encoder.focus.roledev('motor')
+			obj=pic.remote.encoder.focus.role2dev('motor')
 			if not obj: continue
 			paths[obj['fullpath']]=obj
 		for obj in paths.itervalues():

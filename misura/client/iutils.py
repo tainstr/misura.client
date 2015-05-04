@@ -22,7 +22,6 @@ if params.linguist:
 	linguist=open(rt, 'w')
 
 
-
 network.manager.connect(network.manager,
 	QtCore.SIGNAL('connected(QString,QString,QString,bool)'),
 	confdb.mem_server)

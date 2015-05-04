@@ -4,11 +4,26 @@
 from PyQt4 import QtGui
 from traceback import print_exc
 
-def tr_mask(s):
-	return s.replace('-', '.|line|.').replace('_', '.|unsc|.').replace('\uc9f8', '.|deg|.')
+# maskmap={u'-': '.$line$.',
+# 		u'_': '.$unsc$.',
+# 		u'°': '.$deg$.',
+# 		u'\u03bc':'.$micro$.',
+# 		u'\u2030':'.$permille$.',
+# 		u'²':'.$^2$.',
+# 		u'³':'.$^3$.',
+# 		}
+# unmaskmap={}
+# for k,v in maskmap.iteritems():
+# 	unmaskmap[v]=k
+# 
+# def tr_mask(s):
+# 	return s.replace('-', '.|line|.').replace('_', '.|unsc|.').replace('\uc9f8', '.|deg|.')
+# 
+# def tr_unmask(s):
+# 	return s.replace('.|line|.', '-').replace('.|unsc|.', '_').replace('.|deg|.', '\uc9f8')
 
-def tr_unmask(s):
-	return s.replace('.|line|.', '-').replace('.|unsc|.', '_').replace('.|deg|.', '\uc9f8')
+
+context_separator=':$ctx$:'
 
 class Linguist(object):
 	def __init__(self, context='Main'):
@@ -24,17 +39,13 @@ class Linguist(object):
 		except:
 			print_exc()
 			tr=mstr
-		tr=tr_unmask(tr)
-		#se il linguist è attivo, annota tutte le stringhe non tradotte
+# 		tr=tr_unmask(tr)
+		#If linguist is active, annotate any untranslated sting
 		from misura.client import iutils
 		if iutils.linguist and tr==ostr:
 			ostr=ostr.replace('\n', '$newline$')
-#			try:	ostr=ostr.encode('ascii')
-#			except:
-#				print 'Linguist:',print_exc()
-#				return ostr
-			print 'writing',self.context+'::'+ostr
-			iutils.linguist.write(self.context+'::'+ostr+'\n')
+			print 'writing',self.context+context_separator+ostr
+			iutils.linguist.write(self.context+context_separator+ostr+'\n')
 			iutils.linguist.flush()
 		return tr
 	

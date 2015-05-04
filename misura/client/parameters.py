@@ -35,7 +35,7 @@ pathArt=os.path.join(pathClient,'art' )
 print 'pathArt',pathArt
 locale=QtCore.QLocale.system().name()
 locale=str(locale.split('_')[0]).lower()
-linguist=False
+linguist=True
 
 MAX=10**10
 MIN=-MAX

@@ -1,9 +1,9 @@
 #!/bin/bash
-"""Aggiunta automatica di tutti i file interfaccia per pylupdate4"""
+#"""Aggiunta automatica di tutti i file interfaccia per pylupdate4"""
 
 pro='./misura4.pro'
 echo '' > $pro
-for f in `ls /opt/misura4/client/*.py`
+for f in `ls /opt/misura4/misura/client/*.py`
 	do echo "SOURCES += $f" >> $pro
 	echo "SOURCES += $f"
 	done
