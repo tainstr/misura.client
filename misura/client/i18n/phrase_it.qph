@@ -1,0 +1,839 @@
+<!DOCTYPE QPH>
+<QPH language="it">
+<phrase>
+    <source>Control type</source>
+    <target>Tipo di Controllo</target>
+</phrase>
+<phrase>
+    <source>Department</source>
+    <target>Dipartimento</target>
+</phrase>
+<phrase>
+    <source>Stop the test at the end of the thermal cycle</source>
+    <target>Termina la prova alla fine del ciclo termico</target>
+</phrase>
+<phrase>
+    <source>Kiln Serial Number</source>
+    <target>Numero Seriale del forno</target>
+</phrase>
+<phrase>
+    <source>Flex Motion Controller</source>
+    <target>Controllo movimento del Flex</target>
+</phrase>
+<phrase>
+    <source>Focus Motion Controller</source>
+    <target>Controllore di movimento del Focus</target>
+</phrase>
+<phrase>
+    <source>Include complete instrument configuration</source>
+    <target>Includi la configurazione completa dello strumento</target>
+</phrase>
+<phrase>
+    <source>Camera</source>
+    <target>Videocamera</target>
+</phrase>
+<phrase>
+    <source>Pre-Processing</source>
+    <target>Pre-Elaborazione</target>
+</phrase>
+<phrase>
+    <source>Rotation</source>
+    <target>Rotazione</target>
+</phrase>
+<phrase>
+    <source>True</source>
+    <target>Vero</target>
+</phrase>
+<phrase>
+    <source>Contact Qualification</source>
+    <target>Qualifica del Contatto</target>
+</phrase>
+<phrase>
+    <source>Number of connected stepperboards</source>
+    <target>Numero di schede motori connesse</target>
+</phrase>
+<phrase>
+    <source>Small</source>
+    <target>Piccolo</target>
+</phrase>
+<phrase>
+    <source>Light frequency filter</source>
+    <target>Filtra la frequenza della luce</target>
+</phrase>
+<phrase>
+    <source>Add a comment</source>
+    <target>Aggiungi un commento</target>
+</phrase>
+<phrase>
+    <source>Online help for &amp;amp;amp;quot;%1&amp;amp;amp;quot;</source>
+    <target>Aiuto in linea per &amp;amp;amp;quot;%1&amp;amp;amp;quot;</target>
+</phrase>
+<phrase>
+    <source>eMail List</source>
+    <target>Lista di eMail</target>
+</phrase>
+<phrase>
+    <source>Right Camera Motion Controller</source>
+    <target>Controllore movimento per telecamera di destra</target>
+</phrase>
+<phrase>
+    <source>Analysis</source>
+    <target>Analisi</target>
+</phrase>
+<phrase>
+    <source>Kiln Type</source>
+    <target>Tipo di Forno</target>
+</phrase>
+<phrase>
+    <source>False</source>
+    <target>Falso</target>
+</phrase>
+<phrase>
+    <source>Sample Thermoregulator</source>
+    <target>Termoregolatore del campione</target>
+</phrase>
+<phrase>
+    <source>Mixed</source>
+    <target>Misto</target>
+</phrase>
+<phrase>
+    <source>Right Camera</source>
+    <target>Telecamera di destra</target>
+</phrase>
+<phrase>
+    <source>Log level</source>
+    <target>Livello di log</target>
+</phrase>
+<phrase>
+    <source>Description</source>
+    <target>Descrizione</target>
+</phrase>
+<phrase>
+    <source>Height Camera Motion Controller</source>
+    <target>Controllore movimento per la telecamera dell&amp;amp;amp;apos;altezza</target>
+</phrase>
+<phrase>
+    <source>Auto Gain</source>
+    <target>Guadagno automatico</target>
+</phrase>
+<phrase>
+    <source>Save images</source>
+    <target>Salva le immagini</target>
+</phrase>
+<phrase>
+    <source>Test</source>
+    <target>Prova</target>
+</phrase>
+<phrase>
+    <source>Big</source>
+    <target>Grande</target>
+</phrase>
+<phrase>
+    <source>Scanning for video cameras</source>
+    <target>Ricerca di periferiche video in corso</target>
+</phrase>
+<phrase>
+    <source>Show contour derivative (D)</source>
+    <target>Mostra la derivata del contorno (D)</target>
+</phrase>
+<phrase>
+    <source>Analytical method</source>
+    <target>Metodo Analitico</target>
+</phrase>
+<phrase>
+    <source>Organization</source>
+    <target>Organizzazione</target>
+</phrase>
+<phrase>
+    <source>temp-based</source>
+    <target>base-temperatura</target>
+</phrase>
+<phrase>
+    <source>Perform analysis simulation</source>
+    <target>Esegui una simulazione d&amp;amp;amp;apos;analisi</target>
+</phrase>
+<phrase>
+    <source>best</source>
+    <target>migliore</target>
+</phrase>
+<phrase>
+    <source>Weighting system</source>
+    <target>Misura ponderale</target>
+</phrase>
+<phrase>
+    <source>Test Description</source>
+    <target>Descrizione della prova</target>
+</phrase>
+<phrase>
+    <source>Softening point</source>
+    <target>Punto di Rammollimento</target>
+</phrase>
+<phrase>
+    <source>Weighting system present</source>
+    <target>È presente un sistema di misura ponderale</target>
+</phrase>
+<phrase>
+    <source>Draw slice from border analysis</source>
+    <target>Disegna la sezione dall&amp;amp;amp;apos;analisi di bordo</target>
+</phrase>
+<phrase>
+    <source>Check for modification</source>
+    <target>Rileggi valore</target>
+</phrase>
+<phrase>
+    <source>Scanning for serial devices</source>
+    <target>Ricerca di periferiche seriali in corso</target>
+</phrase>
+<phrase>
+    <source>Device path</source>
+    <target>Percorso periferica</target>
+</phrase>
+<phrase>
+    <source>HTTP Proxy</source>
+    <target>Proxy HTTP</target>
+</phrase>
+<phrase>
+    <source>Choose a name</source>
+    <target>Scegli un nome</target>
+</phrase>
+<phrase>
+    <source>Choose a name</source>
+    <target>Scegli un nome</target>
+</phrase>
+<phrase>
+    <source>Elapsed time</source>
+    <target>Tempo trascorso</target>
+</phrase>
+<phrase>
+    <source>Elapsed time</source>
+    <target>Tempo trascorso</target>
+</phrase>
+<phrase>
+    <source>Serial Number</source>
+    <target>Numero Seriale</target>
+</phrase>
+<phrase>
+    <source>White Level for B/W conversion</source>
+    <target>Livello di bianco per la conversione B/N</target>
+</phrase>
+<phrase>
+    <source>Estimated time of arrival</source>
+    <target>Tempo previsto al termine della prova</target>
+</phrase>
+<phrase>
+    <source>Left Camera</source>
+    <target>Videocamera Sinistra</target>
+</phrase>
+<phrase>
+    <source>Height Camera</source>
+    <target>Telecamera Altezza</target>
+</phrase>
+<phrase>
+    <source>Brightness</source>
+    <target>Luminosità</target>
+</phrase>
+<phrase>
+    <source>Version</source>
+    <target>Versione</target>
+</phrase>
+<phrase>
+    <source>Vertical</source>
+    <target>Verticale</target>
+</phrase>
+<phrase>
+    <source>Output change rate limit, %/s</source>
+    <target></target>
+</phrase>
+<phrase>
+    <source>Output change rate limit, %/s</source>
+    <target>Limita velocità di variazione, %/s</target>
+</phrase>
+<phrase>
+    <source>Misura4 File Import</source>
+    <target>Importazione File Misura4</target>
+</phrase>
+<phrase>
+    <source>Video Capture Interfaces</source>
+    <target>Interfacce di acquisizione video</target>
+</phrase>
+<phrase>
+    <source>Peripherals Settings</source>
+    <target>Configurazione Periferiche</target>
+</phrase>
+<phrase>
+    <source>Status</source>
+    <target>Stato</target>
+</phrase>
+<phrase>
+    <source>Select weighting system $newline$ to configure from the sub tree</source>
+    <target>Seleziona la bilancia da configurare dall&amp;amp;amp;apos;elenco</target>
+</phrase>
+<phrase>
+    <source>Select which camera to configure from the sub tree</source>
+    <target>Seleziona la videocamera da configurare dall&amp;amp;amp;apos;elenco</target>
+</phrase>
+<phrase>
+    <source>Thermoregulators</source>
+    <target>Termoregolatori</target>
+</phrase>
+<phrase>
+    <source>Network configuration</source>
+    <target>Configurazione di Rete</target>
+</phrase>
+<phrase>
+    <source>General Information</source>
+    <target>Informazioni Generali</target>
+</phrase>
+<phrase>
+    <source>Customer information</source>
+    <target>Informazioni sul Cliente</target>
+</phrase>
+<phrase>
+    <source>Equipment identification</source>
+    <target>Identificazione della Strumentazione</target>
+</phrase>
+<phrase>
+    <source>Peripherals</source>
+    <target>Periferiche</target>
+</phrase>
+<phrase>
+    <source>Misura Configuration Panel</source>
+    <target>Pannello di Configurazione di Misura</target>
+</phrase>
+<phrase>
+    <source>Instrument Configuration</source>
+    <target>Configurazione dello Strumento</target>
+</phrase>
+<phrase>
+    <source>Instrument Configuration</source>
+    <target>Configurazione dello Strumento</target>
+</phrase>
+<phrase>
+    <source>Weighting systems</source>
+    <target>Sistemi di pesata</target>
+</phrase>
+<phrase>
+    <source>Select motion controller $newline$ to configure from the sub tree</source>
+    <target>Seleziona il controllore di movimento $newline$ da configurare dall&amp;amp;amp;apos;albero</target>
+</phrase>
+<phrase>
+    <source>Motion Controllers</source>
+    <target>Controllori Movimento</target>
+</phrase>
+<phrase>
+    <source>curve:hroi</source>
+    <target>Regione di Interesse: Altezza</target>
+</phrase>
+<phrase>
+    <source>curve:circleErr</source>
+    <target>Errore Fitting Circolare</target>
+</phrase>
+<phrase>
+    <source>curve:camA</source>
+    <target>Position Camera A</target>
+</phrase>
+<phrase>
+    <source>Opened Misura4 Tests</source>
+    <target>Prove Misura Aperte</target>
+</phrase>
+<phrase>
+    <source>curve:wroi</source>
+    <target>Regione di Interesse: Larghezza</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_kP</source>
+    <target>PID: Proporzionale</target>
+</phrase>
+<phrase>
+    <source>curve:vsym</source>
+    <target>Simmetria Verticale</target>
+</phrase>
+<phrase>
+    <source>curve:Sint</source>
+    <target>Sinterizzazione</target>
+</phrase>
+<phrase>
+    <source>curve:yroi</source>
+    <target>Regione di Interesse: Y0</target>
+</phrase>
+<phrase>
+    <source>curve:Vol</source>
+    <target>Volume</target>
+</phrase>
+<phrase>
+    <source>curve:Ang</source>
+    <target>Angolo di Contatto</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_slope</source>
+    <target>Velocità di Riscaldamento</target>
+</phrase>
+<phrase>
+    <source>curve:ymass</source>
+    <target>Centro di Massa: Y</target>
+</phrase>
+<phrase>
+    <source>curve:angle</source>
+    <target>Angolo Correttivo</target>
+</phrase>
+<phrase>
+    <source>curve:pot</source>
+    <target>Potenziale di Scorrimento</target>
+</phrase>
+<phrase>
+    <source>curve:angR</source>
+    <target>Angolo Destro</target>
+</phrase>
+<phrase>
+    <source>curve:adh</source>
+    <target>Adesione</target>
+</phrase>
+<phrase>
+    <source>Commit data to test file</source>
+    <target>Salva i dati nella prova</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_Ts</source>
+    <target>Temperatura Campione</target>
+</phrase>
+<phrase>
+    <source>curve:Mov</source>
+    <target>Movimenti</target>
+</phrase>
+<phrase>
+    <source>curve:circlePart</source>
+    <target>Circonferenza Esistente</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_Tk</source>
+    <target>Temperatura Camera</target>
+</phrase>
+<phrase>
+    <source>curve:Sur</source>
+    <target>Superficie</target>
+</phrase>
+<phrase>
+    <source>curve:angB</source>
+    <target>Angolo Alto Sinistro</target>
+</phrase>
+<phrase>
+    <source>curve:anerr</source>
+    <target>Errori d&amp;amp;amp;apos;Analisi</target>
+</phrase>
+<phrase>
+    <source>curve:camera_pos</source>
+    <target>Posizione Telecamera</target>
+</phrase>
+<phrase>
+    <source>Plot</source>
+    <target>Grafico</target>
+</phrase>
+<phrase>
+    <source>curve:angC</source>
+    <target>Angolo Alto Destro</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_Te</source>
+    <target>Temperatura Ambiente</target>
+</phrase>
+<phrase>
+    <source>curve:angL</source>
+    <target>Angolo di Contatto Sinistro</target>
+</phrase>
+<phrase>
+    <source>curve:xmass</source>
+    <target>Centro di Massa: X</target>
+</phrase>
+<phrase>
+    <source>curve:Area</source>
+    <target>Area</target>
+</phrase>
+<phrase>
+    <source>curve:rdn</source>
+    <target>Rotondità</target>
+</phrase>
+<phrase>
+    <source>curve:A</source>
+    <target>Area</target>
+</phrase>
+<phrase>
+    <source>curve:camera_posMargin</source>
+    <target>Margine Positivo</target>
+</phrase>
+<phrase>
+    <source>Convert to/from %</source>
+    <target>Converti a/da %</target>
+</phrase>
+<phrase>
+    <source>Update view</source>
+    <target>Aggiorna Vista</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_T</source>
+    <target>Temperatura</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_S</source>
+    <target>Setpoint</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_P</source>
+    <target>Potenza</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_rate</source>
+    <target>Velocità di Riscaldamento</target>
+</phrase>
+<phrase>
+    <source>curve:xroi</source>
+    <target>Regione di Interesse: X0</target>
+</phrase>
+<phrase>
+    <source>curve:P</source>
+    <target>Perimetro</target>
+</phrase>
+<phrase>
+    <source>curve:spher</source>
+    <target>Sfericità</target>
+</phrase>
+<phrase>
+    <source>curve:Flex</source>
+    <target>Flessione</target>
+</phrase>
+<phrase>
+    <source>curve:camera_negMargin</source>
+    <target>Margine Negativo</target>
+</phrase>
+<phrase>
+    <source>Set Initial Dimension</source>
+    <target>Dimensione Iniziale</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_D</source>
+    <target>Fattore Dissipativo</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_var</source>
+    <target>Var</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_C</source>
+    <target>Fattore Capacitivo</target>
+</phrase>
+<phrase>
+    <source>curve:Width</source>
+    <target>Larghezza Base</target>
+</phrase>
+<phrase>
+    <source>Delete</source>
+    <target>Cancella</target>
+</phrase>
+<phrase>
+    <source>curve:cohe</source>
+    <target>Coesione</target>
+</phrase>
+<phrase>
+    <source>curve:e</source>
+    <target>Eccentricità</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_kD</source>
+    <target>PID: Derivativo</target>
+</phrase>
+<phrase>
+    <source>curve:rgn</source>
+    <target>Rugosità</target>
+</phrase>
+<phrase>
+    <source>Reload</source>
+    <target>Ricarica</target>
+</phrase>
+<phrase>
+    <source>curve:Ratio</source>
+    <target>Rapporto</target>
+</phrase>
+<phrase>
+    <source>curve:radius</source>
+    <target>Raggio</target>
+</phrase>
+<phrase>
+    <source>curve:h</source>
+    <target>Altezza</target>
+</phrase>
+<phrase>
+    <source>Misura Navigator</source>
+    <target>Navigatore Misura</target>
+</phrase>
+<phrase>
+    <source>curve:kiln_kI</source>
+    <target>PID: Integrale</target>
+</phrase>
+<phrase>
+    <source>curve:t</source>
+    <target>tempo</target>
+</phrase>
+<phrase>
+    <source>curve:iD</source>
+    <target>Indice Finale Destro</target>
+</phrase>
+<phrase>
+    <source>curve:w</source>
+    <target>Larghezza Base</target>
+</phrase>
+<phrase>
+    <source>curve:iB</source>
+    <target>Punto Alto Sinistro</target>
+</phrase>
+<phrase>
+    <source>curve:iC</source>
+    <target>Punto Alto Destro</target>
+</phrase>
+<phrase>
+    <source>View</source>
+    <target>Visualizza</target>
+</phrase>
+<phrase>
+    <source>curve:iA</source>
+    <target>Punto Iniziale Sinistro</target>
+</phrase>
+<phrase>
+    <source>Close</source>
+    <target>Chiudi</target>
+</phrase>
+<phrase>
+    <source>curve:camera_movCorrection</source>
+    <target>Correzione di Movimento</target>
+</phrase>
+<phrase>
+    <source>curve:hsym</source>
+    <target>Simmetria Orizzontale</target>
+</phrase>
+<phrase>
+    <source>curve:hsym</source>
+    <target>Simmetria Orizzontale</target>
+</phrase>
+<phrase>
+    <source>dbcol:file</source>
+    <target>File</target>
+</phrase>
+<phrase>
+    <source>Disconnect</source>
+    <target>Disconnetti</target>
+</phrase>
+<phrase>
+    <source>Recent servers</source>
+    <target>Server Recenti</target>
+</phrase>
+<phrase>
+    <source>dbcol:comment</source>
+    <target>Commento</target>
+</phrase>
+<phrase>
+    <source>dbcol:serial</source>
+    <target>Seriale</target>
+</phrase>
+<phrase>
+    <source>Save</source>
+    <target>Salva</target>
+</phrase>
+<phrase>
+    <source>dbcol:flavour</source>
+    <target>Tipo</target>
+</phrase>
+<phrase>
+    <source>Recent databases:</source>
+    <target>Archivi Recenti:</target>
+</phrase>
+<phrase>
+    <source>dbcol:id</source>
+    <target>Breve</target>
+</phrase>
+<phrase>
+    <source>Recent files:</source>
+    <target>Prove Recenti:</target>
+</phrase>
+<phrase>
+    <source>dbcol:nSamples</source>
+    <target>Campioni</target>
+</phrase>
+<phrase>
+    <source>dbcol:uid</source>
+    <target>Id Unico</target>
+</phrase>
+<phrase>
+    <source>Recent files</source>
+    <target>Test Recenti</target>
+</phrase>
+<phrase>
+    <source>Restart</source>
+    <target>Riavvia</target>
+</phrase>
+<phrase>
+    <source>dbcol:name</source>
+    <target>Nome</target>
+</phrase>
+<phrase>
+    <source>dbcol:date</source>
+    <target>Data</target>
+</phrase>
+<phrase>
+    <source>Configuration File:</source>
+    <target>File di Configurazione:</target>
+</phrase>
+<phrase>
+    <source>Reload</source>
+    <target>Ricarica</target>
+</phrase>
+<phrase>
+    <source>dbcol:instrument</source>
+    <target>Strumento</target>
+</phrase>
+<phrase>
+    <source>Open a new </source>
+    <target>Apri nuovo</target>
+</phrase>
+<phrase>
+    <source>Recent Misura3 databases</source>
+    <target>Archivi Misura3 Recenti</target>
+</phrase>
+<phrase>
+    <source>Shutdown</source>
+    <target>Arresta</target>
+</phrase>
+<phrase>
+    <source>dbcol:elapsed</source>
+    <target>Durata</target>
+</phrase>
+<phrase>
+    <source>Recent servers:</source>
+    <target>Server Recenti:</target>
+</phrase>
+<phrase>
+    <source>Clear list</source>
+    <target>Dimentica</target>
+</phrase>
+<phrase>
+    <source>Open</source>
+    <target>Apri</target>
+</phrase>
+<phrase>
+    <source>Recent databases</source>
+    <target>Archivi Recenti</target>
+</phrase>
+<phrase>
+    <source>Recent databases</source>
+    <target>Archivi Recenti</target>
+</phrase>
+<phrase>
+    <source>curve:Area</source>
+    <target>Area</target>
+</phrase>
+<phrase>
+    <source>curve:Ratio</source>
+    <target>Rapporto</target>
+</phrase>
+<phrase>
+    <source>curve:Width</source>
+    <target>Base</target>
+</phrase>
+<phrase>
+    <source>Misura Navigator</source>
+    <target>Navigatore Misura</target>
+</phrase>
+<phrase>
+    <source>curve:t</source>
+    <target>tempo</target>
+</phrase>
+<phrase>
+    <source>curve:Sint</source>
+    <target>Sinterizzazione</target>
+</phrase>
+<phrase>
+    <source>curve:Ang</source>
+    <target>Angolo</target>
+</phrase>
+<phrase>
+    <source>Description</source>
+    <target>Descrizione</target>
+</phrase>
+<phrase>
+    <source>Misura4 Database</source>
+    <target>Database Misura4</target>
+</phrase>
+<phrase>
+    <source>Query:</source>
+    <target>Ricerca:</target>
+</phrase>
+<phrase>
+    <source>Rebuild</source>
+    <target>Ricostruisci</target>
+</phrase>
+<phrase>
+    <source>Download As...</source>
+    <target>Scarica come...</target>
+</phrase>
+<phrase>
+    <source>Refresh</source>
+    <target>Aggiorna</target>
+</phrase>
+<phrase>
+    <source>Server Selector</source>
+    <target>Selezione Server</target>
+</phrase>
+<phrase>
+    <source>Connect</source>
+    <target>Connetti</target>
+</phrase>
+<phrase>
+    <source>Test Echo Logging</source>
+    <target>Prova Echo</target>
+</phrase>
+<phrase>
+    <source>Download</source>
+    <target>Scarica</target>
+</phrase>
+<phrase>
+    <source>Apply</source>
+    <target>Applica</target>
+</phrase>
+<phrase>
+    <source>Misura4 Database: </source>
+    <target>Database Misura4:</target>
+</phrase>
+<phrase>
+    <source>Connection Status</source>
+    <target>Stato Connessione</target>
+</phrase>
+<phrase>
+    <source>Delete</source>
+    <target>Cancella</target>
+</phrase>
+<phrase>
+    <source>View Tests</source>
+    <target>Visualizza Test</target>
+</phrase>
+<phrase>
+    <source>New Database</source>
+    <target>Nuovo Database</target>
+</phrase>
+<phrase>
+    <source>New Database</source>
+    <target>Nuovo Database</target>
+</phrase>
+<phrase>
+    <source>Open File</source>
+    <target>Apri File</target>
+</phrase>
+<phrase>
+    <source>File</source>
+    <target>File</target>
+</phrase>
+<phrase>
+    <source>Open Database</source>
+    <target>Apri Database</target>
+</phrase>
+<phrase>
+    <source>View Databases</source>
+    <target>Visualizza i Database </target>
+</phrase>
+</QPH>

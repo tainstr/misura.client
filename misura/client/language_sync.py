@@ -170,36 +170,201 @@ def collect():
 		out.write('{}\t{}\n'.format(h,tr))
 	out.close()
 	return translations.values()
-		
 
-# from misura.client.linguist import context_separator
-context_separator=':$ctx$:'
+######################
+# CLIENT CODE ANALYSIS - From Veusz pyqt_find_translatable
+######################
+import ast
+import sys
+import os
+
+
+class Message(object):
+	'''A translatable string.'''
+	def __init__(self, string, filename=None, lineno=None, comment=None):
+		self.string = string
+		self.filename = filename
+		self.lineno = lineno
+		self.comment = comment
+
+class PythonMessageVisitor(ast.NodeVisitor):
+	'''A visitor which visits function calls and definitions in source.'''
+
+	def __init__(self, filename, outmessages, verbose=True):
+		'''filename is file being read
+		If set, mapping of context to Messages will be returned in
+		outmessages.'''
+
+		self.filename = filename
+
+		# map translation functions to contexts
+		self.fn2context = {}
+		# arguments for functions
+		self.fnargs = {}
+
+		self.messages = outmessages
+		self.verbose = verbose
+
+	def visit_Call(self, obj):
+		'''Function call made.'''
+
+		# this needs to be called to walk the tree
+		self.generic_visit(obj)
+
+		try:
+			fn = obj.func.id
+		except AttributeError:
+			# no name known
+			return
+
+		if fn not in self.fn2context:
+			return
+
+		if len(obj.args)+len(obj.keywords) not in (1,2,3) or len(obj.args) < 1:
+			sys.stderr.write(
+				'WARNING: Translatable call to %s in %s:%i '
+				'requires 1 to 3 parameters\n' %
+				(repr(fn), self.filename, obj.lineno))
+			return
+
+		# convert arguments to text
+		try:
+			args = [a.s for a in obj.args]
+			keywords = dict([(a.arg, a.value.s) for a in obj.keywords])
+		except AttributeError:
+			sys.stderr.write(
+				'WARNING: Parameter to translatable function '
+				'%s in %s:%i is not string\n' %
+				(repr(fn), self.filename, obj.lineno))
+			return
+
+		# defaults
+		text = args[0]
+		context = self.fn2context[fn]
+		comment = None
+
+		# examine any unnamed arguments
+		ctxidx = self.fnargs[fn].index('context')
+		if len(args) > ctxidx:
+			context = args[ctxidx]
+		disidx = self.fnargs[fn].index('disambiguation')
+		if len(args) > disidx:
+			comment = args[disidx]
+
+		# now look at named arguments which override defaults
+		context = keywords.get('context', context)
+		comment = keywords.get('disambiguation', comment)
+
+		# create new message
+		if context not in self.messages:
+			self.messages[context] = []
+		self.messages[context].append(
+			Message(text, filename=self.filename, lineno=obj.lineno,
+					comment=comment) )
+
+		if self.verbose:
+			sys.stdout.write(
+				'Found text %s (context=%s, disambiguation=%s) in %s:%i\n' %
+				(repr(text), repr(context), repr(comment),
+				 self.filename, obj.lineno))
+
+	def visit_FunctionDef(self, obj):
+		'''Function definition made.'''
+
+		# this needs to be called to walk the tree
+		self.generic_visit(obj)
+
+		try:
+			name = obj.name
+		except AttributeError:
+			return
+
+		args = obj.args
+		# want a three-parameter function with two default values
+		if len(args.args) != 3 or len(args.defaults) != 2:
+			return
+
+		argids = [a.id.lower() for a in args.args]
+		# only functions with disambiguation and context as optional arguments
+		if 'disambiguation' not in argids or 'context' not in argids:
+			return
+
+		contextidx = argids.index('context')
+		try:
+			context = args.defaults[contextidx-1].s
+		except AttributeError:
+			sys.stderr.write(
+				"WARNING: Translation function definition %s in "
+				"%s:%i does not have default string for 'context'\n" %
+				(repr(name), self.filename, obj.lineno))
+			return
+
+		if name in self.fn2context:
+			sys.stderr.write(
+				'WARNING: Duplicate translation function %s '
+				'in %s:%i\n' % (repr(name), self.filename, obj.lineno))
+			return
+
+		if self.verbose:
+			sys.stdout.write(
+				'Found translation function %s with default '
+				'context %s in %s:%i\n' %
+				(repr(name), repr(context), self.filename, obj.lineno))
+
+		# map function name to default context
+		self.fn2context[name] = context
+		self.fnargs[name] = argids
+		
+def python_find_strings(filename, retn, verbose=True,
+					gcontext={'_':'misura'},
+					gargs={'_':('text','disambiguation','context')}):
+	'''Update output in retn with strings in filename.'''
+
+	if verbose:
+		sys.stdout.write('Examining file %s\n' % repr(filename))
+	with open(filename) as f:
+		source = f.read()
+
+	tree = ast.parse(source, filename)
+
+	v = PythonMessageVisitor(filename, retn, verbose=verbose)
+	v.fn2context=gcontext.copy()
+	v.fnargs=gargs.copy()
+	v.visit(tree)
+	
+def scan_client_source(path,out=False):
+	retn={}
+	for root, dirs, files in os.walk(path):
+		for fn in files:
+			if not fn.endswith('.py'): continue
+			fp=os.path.join(root,fn)
+			print 'Scanning',fp
+			python_find_strings(fp,retn)
+	# Simplify output
+	if not out: out={}
+	for ctx, msgs in retn.iteritems():
+		if not out.has_key(ctx): out[ctx]=[]
+		out[ctx]+=[msg.string for msg in msgs]
+	return out
+
+######################
+# END OF CLIENT CODE ANALYSIS 
+######################
+from misura.client.parameters import pathClient
 
 def language_sync():
 	"""Merge all translatable strings from runtime requests, code analysis, already translated code."""
 	# Translation contexts
 	contexts={'Option':{}}
-	# Collect from runtime
-# 	rt=os.path.join(pathLang,'runtime.dat')
-# 	if os.path.exists(rt):
-# 		runtime=open(rt,'r').read().splitlines()
-# 		# purge duplicates
-# 		runtime=list(set(runtime))
-# 
-# 		for e in runtime:
-# 			c,e=e.split(context_separator)
-# 			e.replace('$newline$', '\n')
-# 			if not contexts.has_key(c):
-# 				contexts[c]={}
-# 			contexts[c][mescape(e)]=('', '')
-	# Collect from code analysis
+
+	# Collect from server code analysis
 	trcode=collect()
-	out=open(os.path.join(pathLang,'static.dat'),'w')
 	for v in trcode:
 		v=mescape(v)
-		out.write('{}\n'.format(v))
 		contexts['Option'][v]=('','')
-	out.close()
+	
+	# Collect from client code analysis
+	scan_client_source(pathClient)
 	
 	statistics={}
 	for l in langs:

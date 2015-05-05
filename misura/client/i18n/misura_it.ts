@@ -12,828 +12,6 @@
     </message>
 </context>
 <context>
-    <name>Section</name>
-
-    <message>
-        <source>inFo</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Select weighting system$newline$  to configure from the sub tree</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Video Capture Interfaces</source>
-	<translation>Interfacce di acquisizione video</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Peripherals Settings</source>
-	<translation>Configurazione Periferiche</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>flex</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>odht</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>1A</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Test</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Server Selection</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>ini</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>kiln</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>cs</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>3A</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Main</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>eq</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Atun</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Status</source>
-	<translation>Stato</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Pre-Processing</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>PV</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Select weighting system $newline$ to configure from the sub tree</source>
-	<translation>Seleziona la bilancia da configurare dall&amp;amp;apos;elenco</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>iP</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Current Connection Status</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Thermoregulators</source>
-	<translation>Termoregolatori</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Scan now for new motion controllers</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Select motion controller$newline$  to configure from the sub tree</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>InST</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Network configuration</source>
-	<translation>Configurazione di Rete</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Customer Informatio</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>net</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Configuration</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Test Metadata</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Scan now for new weighting systems</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Select which camera to configure from the sub tree</source>
-	<translation>Seleziona la videocamera da configurare dall&amp;amp;apos;elenco</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>run</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Equipment identification</source>
-	<translation>Identificazione della Strumentazione</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Select motion controller $newline$ to configure from the sub tree</source>
-	<translation>Seleziona il controllore di movimento $newline$ da configurare dall&amp;amp;apos;albero</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>AL</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Analysis</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>hsm</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Motion</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Select thermoregulator$newline$ to configure from the sub tree</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Network Configuration</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Select thermoregulator $newline$ to configure from the sub tree</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Peripherals</source>
-	<translation>Periferiche</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Security</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Misura Configuration Panel</source>
-	<translation>Pannello di Configurazione di Misura</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>cmS</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>oP</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Instrument Configuration</source>
-	<translation>Configurazione dello Strumento</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Customer Information</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Weighting systems</source>
-	<translation>Sistemi di pesata</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>HA</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Equipment Identification</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>SP</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Pid</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>PrOG</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>General Information</source>
-	<translation>Informazioni Generali</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Ctrl+S</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Scan now for new thermoregulators</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>odlt</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Customer information</source>
-	<translation>Informazioni sul Cliente</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Motion Controllers</source>
-	<translation>Controllori Movimento</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>On.Off</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>2A</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-</context>
-<context>
-    <name>Graphics</name>
-
-    <message>
-        <source>curve:hroi</source>
-	<translation>Regione di Interesse: Altezza</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Sur</source>
-	<translation>Superficie</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:circleErr</source>
-	<translation>Errore Fitting Circolare</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:camA</source>
-	<translation>Position Camera A</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Opened Misura4 Tests</source>
-	<translation>Prove Misura Aperte</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:wroi</source>
-	<translation>Regione di Interesse: Larghezza</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:vsym</source>
-	<translation>Simmetria Verticale</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Sint</source>
-	<translation>Sinterizzazione</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:yroi</source>
-	<translation>Regione di Interesse: Y0</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Vol</source>
-	<translation>Volume</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Ang</source>
-	<translation>Angolo di Contatto</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_slope</source>
-	<translation>Velocità di Riscaldamento</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:ymass</source>
-	<translation>Centro di Massa: Y</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:angle</source>
-	<translation>Angolo Correttivo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:pot</source>
-	<translation>Potenziale di Scorrimento</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_var</source>
-	<translation>Var</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:angR</source>
-	<translation>Angolo Destro</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:adh</source>
-	<translation>Adesione</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Commit data to test file</source>
-	<translation>Salva i dati nella prova</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_Ts</source>
-	<translation>Temperatura Campione</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Mov</source>
-	<translation>Movimenti</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:circlePart</source>
-	<translation>Circonferenza Esistente</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:angC</source>
-	<translation>Angolo Alto Destro</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:angB</source>
-	<translation>Angolo Alto Sinistro</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:anerr</source>
-	<translation>Errori d&amp;amp;apos;Analisi</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:camera_pos</source>
-	<translation>Posizione Telecamera</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Plot</source>
-	<translation>Grafico</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_Tk</source>
-	<translation>Temperatura Camera</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_Te</source>
-	<translation>Temperatura Ambiente</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:angL</source>
-	<translation>Angolo di Contatto Sinistro</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:xmass</source>
-	<translation>Centro di Massa: X</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Area</source>
-	<translation>Area</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:rdn</source>
-	<translation>Rotondità</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:A</source>
-	<translation>Area</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Convert to/from %</source>
-	<translation>Converti a/da %</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Update view</source>
-	<translation>Aggiorna Vista</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_T</source>
-	<translation>Temperatura</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_S</source>
-	<translation>Setpoint</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_P</source>
-	<translation>Potenza</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_rate</source>
-	<translation>Velocità di Riscaldamento</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:xroi</source>
-	<translation>Regione di Interesse: X0</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:P</source>
-	<translation>Perimetro</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:spher</source>
-	<translation>Sfericità</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Flex</source>
-	<translation>Flessione</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:camera_negMargin</source>
-	<translation>Margine Negativo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Set Initial Dimension</source>
-	<translation>Dimensione Iniziale</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_D</source>
-	<translation>Fattore Dissipativo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:camera_posMargin</source>
-	<translation>Margine Positivo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_C</source>
-	<translation>Fattore Capacitivo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Width</source>
-	<translation>Larghezza Base</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Delete</source>
-	<translation>Cancella</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:cohe</source>
-	<translation>Coesione</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:e</source>
-	<translation>Eccentricità</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_kD</source>
-	<translation>PID: Derivativo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:rgn</source>
-	<translation>Rugosità</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>View</source>
-	<translation>Visualizza</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Reload</source>
-	<translation>Ricarica</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Ratio</source>
-	<translation>Rapporto</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:radius</source>
-	<translation>Raggio</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:h</source>
-	<translation>Altezza</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Misura Navigator</source>
-	<translation>Navigatore Misura</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_kI</source>
-	<translation>PID: Integrale</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:t</source>
-	<translation>tempo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:iD</source>
-	<translation>Indice Finale Destro</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:w</source>
-	<translation>Larghezza Base</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:iB</source>
-	<translation>Punto Alto Sinistro</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:iC</source>
-	<translation>Punto Alto Destro</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:kiln_kP</source>
-	<translation>PID: Proporzionale</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:iA</source>
-	<translation>Punto Iniziale Sinistro</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Close</source>
-	<translation>Chiudi</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:camera_movCorrection</source>
-	<translation>Correzione di Movimento</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:hsym</source>
-	<translation>Simmetria Orizzontale</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-</context>
-<context>
     <name>Option</name>
 
     <message>
@@ -862,18 +40,6 @@
 
     <message>
         <source>ciao</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Setpoint 5</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Test ID</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -999,12 +165,6 @@
     </message>
 
     <message>
-        <source>Step (steps to forced ouput)</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>SP1</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -1060,6 +220,12 @@
 
     <message>
         <source>Heat hysteresis</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Setpoint 9</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1173,12 +339,6 @@
     </message>
 
     <message>
-        <source>Heating output</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Delay Period (sec)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -1223,12 +383,6 @@
     <message>
         <source>Camera</source>
 	<translation>Videocamera</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Draw analysis statistics</source>
-	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -1293,6 +447,12 @@
     </message>
 
     <message>
+        <source>PV maximun</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Holdback type for setpoint rate limit</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -1335,7 +495,7 @@
     </message>
 
     <message>
-        <source>L Type</source>
+        <source>Latching</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1485,7 +645,7 @@
     </message>
 
     <message>
-        <source>Logic 2 output (current program)</source>
+        <source>Test ID</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1504,6 +664,12 @@
 
     <message>
         <source>Session</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Alarm 4 hysteresis</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1539,7 +705,7 @@
     </message>
 
     <message>
-        <source>Height camera and motor are aligned</source>
+        <source>Base Camera Motion Controller</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1611,13 +777,13 @@
     </message>
 
     <message>
-        <source>Manual reset PID2</source>
+        <source>Stopping</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Stopping</source>
+        <source>Alarm 2 hysteresis</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1672,7 +838,7 @@
 
     <message>
         <source>Status</source>
-	<translation type="unfinished"></translation>
+	<translation>Stato</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -1708,12 +874,6 @@
 
     <message>
         <source>Kelvin</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>PV minimun</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1827,12 +987,6 @@
     </message>
 
     <message>
-        <source>Digital output</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Not reset</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -1894,6 +1048,12 @@
 
     <message>
         <source>none</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Run</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1983,12 +1143,6 @@
     </message>
 
     <message>
-        <source>Cutback high PID2</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Linear fitting domain</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -1997,6 +1151,12 @@
     <message>
         <source>Servo to SP</source>
 	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Light frequency filter</source>
+	<translation>Filtra la frequenza della luce</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -2067,7 +1227,7 @@
     </message>
 
     <message>
-        <source>Communication timeout (ms)</source>
+        <source>Find base using derivative method (FBD)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2115,6 +1275,12 @@
     </message>
 
     <message>
+        <source>/Min</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>SP2</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -2122,12 +1288,6 @@
 
     <message>
         <source>Half power</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Program time remaining</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2182,12 +1342,6 @@
 
     <message>
         <source>Flip Horizontally</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Configuration of lower readout display</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2331,6 +1485,18 @@
     </message>
 
     <message>
+        <source>Direct</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>% PID min</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Kiln Temperature</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -2397,7 +1563,7 @@
     </message>
 
     <message>
-        <source>Target setpoint (if in manual mode)</source>
+        <source>Invert X&amp;amp;amp;lt;-&amp;amp;amp;gt;Y</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2415,7 +1581,7 @@
     </message>
 
     <message>
-        <source>Full scale low</source>
+        <source>Draw analysis statistics</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2667,7 +1833,7 @@
     </message>
 
     <message>
-        <source>drop</source>
+        <source>Heating output</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2697,6 +1863,12 @@
     </message>
 
     <message>
+        <source>DC retransmission</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Dwell Units</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -2710,6 +1882,12 @@
 
     <message>
         <source>Cool (Brabender) deadband</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>ModBus</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2829,7 +2007,7 @@
     </message>
 
     <message>
-        <source>Setpoint rate limit units</source>
+        <source>Full scale low</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2973,7 +2151,7 @@
     </message>
 
     <message>
-        <source>Latching</source>
+        <source>L Type</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2991,7 +2169,7 @@
     </message>
 
     <message>
-        <source>Programmable event outputs</source>
+        <source>Alarm 1 setpoint value</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3093,6 +2271,12 @@
     </message>
 
     <message>
+        <source>Online help for &amp;amp;amp;amp;amp;quot;%1&amp;amp;amp;amp;amp;quot;</source>
+	<translation>Aiuto in linea per &amp;amp;amp;amp;amp;quot;%1&amp;amp;amp;amp;amp;quot;</translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Global Reset Release</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -3141,6 +2325,12 @@
     </message>
 
     <message>
+        <source>Setpoint 8</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Motion correction</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -3178,12 +2368,6 @@
 
     <message>
         <source>Left Upper Angle</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>dfdsg</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3232,12 +2416,6 @@
 
     <message>
         <source>N Type</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Program cycles remaining</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3309,7 +2487,7 @@
     </message>
 
     <message>
-        <source>Input type</source>
+        <source>Instrument Type</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3347,6 +2525,12 @@
     <message>
         <source>Minimun electrical output</source>
 	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Log level</source>
+	<translation>Livello di log</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -3477,7 +2661,13 @@
     </message>
 
     <message>
-        <source>Holback type program</source>
+        <source>VP (No feedback)</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Cutback high PID1</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3652,7 +2842,7 @@
 
     <message>
         <source>Height Camera Motion Controller</source>
-	<translation>Controllore movimento per la telecamera dell&amp;amp;apos;altezza</translation>
+	<translation>Controllore movimento per la telecamera dell&amp;amp;amp;amp;amp;apos;altezza</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -3789,6 +2979,12 @@
     </message>
 
     <message>
+        <source>9600</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Save cycle as...</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -3807,7 +3003,7 @@
     </message>
 
     <message>
-        <source>% PID min</source>
+        <source>time-based</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3909,8 +3105,8 @@
     </message>
 
     <message>
-        <source>Light frequency filter</source>
-	<translation>Filtra la frequenza della luce</translation>
+        <source>Target setpoint (if in manual mode)</source>
+	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -3963,19 +3159,7 @@
     </message>
 
     <message>
-        <source>Online help for &amp;amp;quot;%1&amp;amp;quot;</source>
-	<translation>Aiuto in linea per &amp;amp;quot;%1&amp;amp;quot;</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Hours</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>PV</source>
+        <source>Water</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4007,12 +3191,6 @@
     <message>
         <source>Big</source>
 	<translation>Grande</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>/Hour</source>
-	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -4071,12 +3249,6 @@
     </message>
 
     <message>
-        <source>PV feedforward</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>local</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -4089,7 +3261,7 @@
     </message>
 
     <message>
-        <source>Current osition</source>
+        <source>Manual reset PID1</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4161,7 +3333,7 @@
     </message>
 
     <message>
-        <source>On</source>
+        <source>Both</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4179,13 +3351,7 @@
     </message>
 
     <message>
-        <source>Logging reset</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Retransmitted value high</source>
+        <source>Ramp Units</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4222,12 +3388,6 @@
 
     <message>
         <source>Alarm 1 hysteresis</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Ratio setpoint</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4275,18 +3435,6 @@
     </message>
 
     <message>
-        <source>SP13</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Logic 7 output (current program)</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Dummy factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -4305,7 +3453,7 @@
     </message>
 
     <message>
-        <source>Setpoint 7</source>
+        <source>SP10</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4396,7 +3544,7 @@
 
     <message>
         <source>Perform analysis simulation</source>
-	<translation>Esegui una simulazione d&amp;amp;apos;analisi</translation>
+	<translation>Esegui una simulazione d&amp;amp;amp;amp;amp;apos;analisi</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -4413,14 +3561,14 @@
     </message>
 
     <message>
-        <source>SP15</source>
-	<translation type="unfinished"></translation>
+        <source>best</source>
+	<translation>migliore</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>best</source>
-	<translation>migliore</translation>
+        <source>lower step</source>
+	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -4431,7 +3579,7 @@
     </message>
 
     <message>
-        <source>ModBus</source>
+        <source>Digital output</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4449,7 +3597,7 @@
     </message>
 
     <message>
-        <source>Run</source>
+        <source>PV</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4479,12 +3627,6 @@
     </message>
 
     <message>
-        <source>Heater current (With PDSIO mode 2)</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Thermocouple type5</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -4503,7 +3645,7 @@
     </message>
 
     <message>
-        <source>Water</source>
+        <source>Hours</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4551,13 +3693,13 @@
     </message>
 
     <message>
-        <source>Custom mV</source>
+        <source>Alarm 3 hysteresis</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>lower step</source>
+        <source>Step (steps to forced ouput)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4587,7 +3729,7 @@
     </message>
 
     <message>
-        <source>Alarm 3 hysteresis</source>
+        <source>Custom mV</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4833,12 +3975,6 @@
     </message>
 
     <message>
-        <source>Selected program number</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Low</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -4858,12 +3994,6 @@
 
     <message>
         <source>Kiln position after acquisition</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>RTD</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5002,12 +4132,6 @@
 
     <message>
         <source>Feedforward trim limit</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Autotune enable</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5175,7 +4299,7 @@
     </message>
 
     <message>
-        <source>Base Camera Motion Controller</source>
+        <source>Height camera and motor are aligned</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5205,7 +4329,7 @@
     </message>
 
     <message>
-        <source>flex</source>
+        <source>PV minimun</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5247,8 +4371,8 @@
     </message>
 
     <message>
-        <source>Relay ouput</source>
-	<translation type="unfinished"></translation>
+        <source>Draw slice from border analysis</source>
+	<translation>Disegna la sezione dall&amp;amp;amp;amp;amp;apos;analisi di bordo</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -5271,13 +4395,13 @@
     </message>
 
     <message>
-        <source>Seconds</source>
+        <source>Logic 2 output (current program)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Find base using derivative method (FBD)</source>
+        <source>Communication timeout (ms)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5301,7 +4425,7 @@
     </message>
 
     <message>
-        <source>Hi Hi (&amp;gt;15K)</source>
+        <source>Configuration of lower readout display</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5332,6 +4456,12 @@
 
     <message>
         <source>Frame timestamp</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Hi (&amp;amp;amp;amp;gt;5K)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5427,6 +4557,12 @@
     </message>
 
     <message>
+        <source>Current osition</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Is cooling</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -5439,7 +4575,7 @@
     </message>
 
     <message>
-        <source>Alarm 1 setpoint value</source>
+        <source>Programmable event outputs</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5464,6 +4600,12 @@
 
     <message>
         <source>Preferred heating thermoregulator</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Seconds</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5511,6 +4653,12 @@
     </message>
 
     <message>
+        <source>Setpoint 7</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Max difference between setpoint and temperature</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -5541,7 +4689,7 @@
     </message>
 
     <message>
-        <source>both ends</source>
+        <source>Track</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5667,7 +4815,7 @@
     </message>
 
     <message>
-        <source>Ramp Units</source>
+        <source>Retransmitted value high</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5727,6 +4875,12 @@
     </message>
 
     <message>
+        <source>Forced manual output</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Input 2 linearised value</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -5740,6 +4894,12 @@
 
     <message>
         <source>SiC</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Recent Servers</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5764,12 +4924,6 @@
 
     <message>
         <source>Band</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Ramp (rate)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5811,7 +4965,7 @@
     </message>
 
     <message>
-        <source>Dipslayed reading high</source>
+        <source>Invert X&amp;amp;lt;-&amp;amp;gt;Y</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5829,7 +4983,13 @@
     </message>
 
     <message>
-        <source>Forced manual output</source>
+        <source>dfdsg</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Instrument units</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5883,8 +5043,8 @@
     </message>
 
     <message>
-        <source>Draw slice from border analysis</source>
-	<translation>Disegna la sezione dall&amp;amp;apos;analisi di bordo</translation>
+        <source>Relay ouput</source>
+	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -6027,12 +5187,6 @@
     </message>
 
     <message>
-        <source>4800</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Retrasmission of SP</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -6051,8 +5205,8 @@
     </message>
 
     <message>
-        <source>Left Camera</source>
-	<translation>Videocamera Sinistra</translation>
+        <source>drop</source>
+	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -6069,13 +5223,13 @@
     </message>
 
     <message>
-        <source>Square root mA</source>
-	<translation type="unfinished"></translation>
+        <source>Left Camera</source>
+	<translation>Videocamera Sinistra</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>PSDIO output</source>
+        <source>/Hour</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6177,7 +5331,7 @@
     </message>
 
     <message>
-        <source>Custom(factory)</source>
+        <source>Logic 7 output (current program)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6189,7 +5343,7 @@
     </message>
 
     <message>
-        <source>Setpoint 8</source>
+        <source>Ramp (rate)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6231,7 +5385,7 @@
     </message>
 
     <message>
-        <source>PV maximun</source>
+        <source>Setpoint 1</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6255,7 +5409,7 @@
     </message>
 
     <message>
-        <source>Alarm 4 hysteresis</source>
+        <source>Setpoint 5</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6297,6 +5451,12 @@
     </message>
 
     <message>
+        <source>On</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Eccentricity</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -6321,20 +5481,26 @@
     </message>
 
     <message>
+        <source>PSDIO output</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Base camera and motor are aligned</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>% PID max</source>
+        <source>Heat/cool deadband</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Log level</source>
-	<translation>Livello di log</translation>
+        <source>Selected program number</source>
+	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -6388,6 +5554,12 @@
 
     <message>
         <source>Output Power</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>% PID max</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6447,6 +5619,12 @@
     </message>
 
     <message>
+        <source>Holback type program</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Wb Kr</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -6471,7 +5649,7 @@
     </message>
 
     <message>
-        <source>Recent Servers</source>
+        <source>Program time remaining</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6508,6 +5686,12 @@
 
     <message>
         <source>Retry chances</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Program time</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6555,6 +5739,12 @@
     </message>
 
     <message>
+        <source>Custom(factory)</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Filter iterations</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -6592,12 +5782,6 @@
 
     <message>
         <source>PID Algorithm</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Hi (&amp;gt;5K)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6657,13 +5841,7 @@
     </message>
 
     <message>
-        <source>Both</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Instrument Type</source>
+        <source>Input type</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6711,7 +5889,7 @@
     </message>
 
     <message>
-        <source>Heat/cool deadband</source>
+        <source>Logging reset</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6813,7 +5991,7 @@
     </message>
 
     <message>
-        <source>VP (No feedback)</source>
+        <source>PV feedforward</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6837,7 +6015,7 @@
     </message>
 
     <message>
-        <source>DC retransmission</source>
+        <source>Manual reset PID2</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6849,7 +6027,13 @@
     </message>
 
     <message>
-        <source>/Min</source>
+        <source>Dipslayed reading high</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Heater current (With PDSIO mode 2)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6861,7 +6045,7 @@
     </message>
 
     <message>
-        <source>Cutback high PID1</source>
+        <source>SP13</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6873,7 +6057,7 @@
     </message>
 
     <message>
-        <source>time-based</source>
+        <source>Autotune enable</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6891,7 +6075,7 @@
     </message>
 
     <message>
-        <source>Instrument units</source>
+        <source>SP15</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6910,6 +6094,12 @@
 
     <message>
         <source>Last write error</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>flex</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -6939,7 +6129,7 @@
     </message>
 
     <message>
-        <source>Manual reset PID1</source>
+        <source>Square root mA</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7017,6 +6207,12 @@
     </message>
 
     <message>
+        <source>Setpoint rate limit units</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Williams-Landel-Ferry</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -7059,7 +6255,7 @@
     </message>
 
     <message>
-        <source>Track</source>
+        <source>both ends</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7089,7 +6285,7 @@
     </message>
 
     <message>
-        <source>SP10</source>
+        <source>Program cycles remaining</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7149,7 +6345,7 @@
     </message>
 
     <message>
-        <source>9600</source>
+        <source>4800</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7161,7 +6357,7 @@
     </message>
 
     <message>
-        <source>Program time</source>
+        <source>Cutback high PID2</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7179,7 +6375,7 @@
     </message>
 
     <message>
-        <source>Setpoint 9</source>
+        <source>RTD</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7245,7 +6441,7 @@
     </message>
 
     <message>
-        <source>Alarm 2 hysteresis</source>
+        <source>Ratio setpoint</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7305,7 +6501,7 @@
     </message>
 
     <message>
-        <source>Direct</source>
+        <source>Hi Hi (&amp;amp;amp;amp;gt;15K)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7335,7 +6531,7 @@
     </message>
 
     <message>
-        <source>Setpoint 1</source>
+        <source>Invert X&amp;lt;-&amp;gt;Y</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7365,345 +6561,6 @@
     </message>
 </context>
 <context>
-    <name>Client</name>
-
-    <message>
-        <source>dbcol:file</source>
-	<translation>File</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Disconnect</source>
-	<translation>Disconnetti</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Recent servers</source>
-	<translation>Server Recenti</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>dbcol:comment</source>
-	<translation>Commento</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>dbcol:serial</source>
-	<translation>Seriale</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Save</source>
-	<translation>Salva</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>dbcol:flavour</source>
-	<translation>Tipo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Recent databases:</source>
-	<translation>Archivi Recenti:</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>dbcol:id</source>
-	<translation>Breve</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Recent files:</source>
-	<translation>Prove Recenti:</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>dbcol:nSamples</source>
-	<translation>Campioni</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>dbcol:uid</source>
-	<translation>Id Unico</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Recent files</source>
-	<translation>Test Recenti</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Restart</source>
-	<translation>Riavvia</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>dbcol:name</source>
-	<translation>Nome</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>dbcol:date</source>
-	<translation>Data</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Configuration File:</source>
-	<translation>File di Configurazione:</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Reload</source>
-	<translation>Ricarica</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>dbcol:instrument</source>
-	<translation>Strumento</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Open a new </source>
-	<translation>Apri nuovo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Recent Misura3 databases</source>
-	<translation>Archivi Misura3 Recenti</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Shutdown</source>
-	<translation>Arresta</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>dbcol:elapsed</source>
-	<translation>Durata</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Recent servers:</source>
-	<translation>Server Recenti:</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Recent databases</source>
-	<translation>Archivi Recenti</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Open</source>
-	<translation>Apri</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Clear list</source>
-	<translation>Dimentica</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-</context>
-<context>
-    <name>graphics</name>
-
-    <message>
-        <source>curve:Area</source>
-	<translation>Area</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Ratio</source>
-	<translation>Rapporto</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Width</source>
-	<translation>Base</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Misura Navigator</source>
-	<translation>Navigatore Misura</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:t</source>
-	<translation>tempo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Sint</source>
-	<translation>Sinterizzazione</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>curve:Ang</source>
-	<translation>Angolo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-</context>
-<context>
-    <name>Configuration</name>
-
-    <message>
-        <source>Description</source>
-	<translation>Descrizione</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-</context>
-<context>
-    <name>Local</name>
-
-    <message>
-        <source>Misura4 Database</source>
-	<translation>Database Misura4</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Query:</source>
-	<translation>Ricerca:</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Rebuild</source>
-	<translation>Ricostruisci</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Download As...</source>
-	<translation>Scarica come...</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Refresh</source>
-	<translation>Aggiorna</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Server Selector</source>
-	<translation>Selezione Server</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Connect</source>
-	<translation>Connetti</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Apply</source>
-	<translation>Applica</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Download</source>
-	<translation>Scarica</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Test Echo Logging</source>
-	<translation>Prova Echo</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Misura4 Database: </source>
-	<translation>Database Misura4:</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Delete</source>
-	<translation>Cancella</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Connection Status</source>
-	<translation>Stato Connessione</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-</context>
-<context>
-    <name>Acquisition</name>
-
-    <message>
-        <source>View Tests</source>
-	<translation>Visualizza Test</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>New Database</source>
-	<translation>Nuovo Database</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Open File</source>
-	<translation>Apri File</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>File</source>
-	<translation>File</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Open Database</source>
-	<translation>Apri Database</translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>View Databases</source>
-	<translation>Visualizza i Database </translation>
-	<translatorcomment></translatorcomment>
-    </message>
-</context>
-<context>
     <name>misura</name>
 
     <message>
@@ -7719,13 +6576,13 @@
     </message>
 
     <message>
-        <source>Enable Post-Analysis</source>
-	<translation type="unfinished"></translation>
+        <source>Department</source>
+	<translation>Dipartimento</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Calibration factor</source>
+        <source>Knots number for spline approximation (% perimeter)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7767,12 +6624,6 @@
     </message>
 
     <message>
-        <source>Function button</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Derivative resolution (% length)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -7780,7 +6631,7 @@
 
     <message>
         <source>Kiln Serial Number</source>
-	<translation type="unfinished"></translation>
+	<translation>Numero Seriale del forno</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -7816,6 +6667,12 @@
 
     <message>
         <source>Surface</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Time reference for fps calculation</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7857,14 +6714,14 @@
     </message>
 
     <message>
-        <source>Department</source>
+        <source>Enable Post-Analysis</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Camera</source>
-	<translation type="unfinished"></translation>
+	<translation>Videocamera</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -7887,13 +6744,7 @@
     </message>
 
     <message>
-        <source>High power limit</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Power Step</source>
+        <source>Lossy JPEG</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -7905,26 +6756,32 @@
     </message>
 
     <message>
-        <source>Driver version</source>
+        <source>Max acquisition frequency</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Setpoint target</source>
+        <source>Maximum Heating Rate</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Broken frames</source>
+        <source>Rotation</source>
+	<translation>Rotazione</translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Acquisition Role</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Perform analysis simulation</source>
-	<translation type="unfinished"></translation>
+	<translation>Esegui una simulazione d&amp;amp;amp;amp;amp;apos;analisi</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -7953,12 +6810,6 @@
     </message>
 
     <message>
-        <source>Enable delayed start</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Sample 0 path</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -7977,13 +6828,13 @@
     </message>
 
     <message>
-        <source>Channel 2</source>
-	<translation type="unfinished"></translation>
+        <source>Contact Qualification</source>
+	<translation>Qualifica del Contatto</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Request for Region Transformation</source>
+        <source>Initialization Order</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -8050,7 +6901,7 @@
 
     <message>
         <source>Number of connected stepperboards</source>
-	<translation type="unfinished"></translation>
+	<translation>Numero di schede motori connesse</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -8085,13 +6936,19 @@
     </message>
 
     <message>
-        <source>Fitting-filtering iterations</source>
+        <source>Latency</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Apply to any other sample</source>
+        <source>Stopping</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Free</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -8122,7 +6979,7 @@
 
     <message>
         <source>Status</source>
-	<translation type="unfinished"></translation>
+	<translation>Stato</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -8254,12 +7111,6 @@
 
     <message>
         <source>Left sample holder distance from middle camera, um</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Sample detection refining (% length)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -8427,7 +7278,7 @@
     </message>
 
     <message>
-        <source>Eurotherm Thermoregulator</source>
+        <source>List of available SimMotor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -8469,13 +7320,7 @@
     </message>
 
     <message>
-        <source>Enable FLEX Optical Fleximeter</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Y8</source>
+        <source>Sphere</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -8493,7 +7338,7 @@
     </message>
 
     <message>
-        <source>Thermal cycle</source>
+        <source>Wb Kg</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -8529,7 +7374,7 @@
     </message>
 
     <message>
-        <source>Retry chances</source>
+        <source>Right sample holder distance from middle camera, um</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -8577,7 +7422,7 @@
     </message>
 
     <message>
-        <source>Current Right absolute calibration factor</source>
+        <source>List of available instruments</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -8589,7 +7434,7 @@
     </message>
 
     <message>
-        <source>Opened</source>
+        <source>Total displacement</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -8668,7 +7513,7 @@
 
     <message>
         <source>eMail List</source>
-	<translation type="unfinished"></translation>
+	<translation>Lista di eMail</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -8698,7 +7543,7 @@
 
     <message>
         <source>Kiln Type</source>
-	<translation type="unfinished"></translation>
+	<translation>Tipo di Forno</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -8811,12 +7656,6 @@
     </message>
 
     <message>
-        <source>Invert X&amp;lt;-&amp;gt;Y</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Electronic Rolling</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -8859,13 +7698,19 @@
     </message>
 
     <message>
-        <source>Initialization Order</source>
+        <source>Request for Region Transformation</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Output voltage</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>60Hz</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -8937,7 +7782,7 @@
     </message>
 
     <message>
-        <source>60Hz</source>
+        <source>Current Right absolute calibration factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9015,7 +7860,7 @@
     </message>
 
     <message>
-        <source>Interval</source>
+        <source>Dissipative Output Component</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9033,7 +7878,7 @@
     </message>
 
     <message>
-        <source>Is furnace closed?</source>
+        <source>Stability Duration</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9099,7 +7944,7 @@
     </message>
 
     <message>
-        <source>Thermocouple type5</source>
+        <source>Height shrinking for Sintering</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9213,7 +8058,7 @@
     </message>
 
     <message>
-        <source>Sphere</source>
+        <source>Y8</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9237,7 +8082,7 @@
     </message>
 
     <message>
-        <source>Dissipative Output Component</source>
+        <source>Interval</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9279,12 +8124,6 @@
     </message>
 
     <message>
-        <source> Flip Vertically</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Stability Calculation Interval</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -9309,7 +8148,7 @@
     </message>
 
     <message>
-        <source>Perturbate Exponential propagation factor</source>
+        <source>Port</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9369,19 +8208,19 @@
     </message>
 
     <message>
-        <source>Stability Duration</source>
+        <source>Is furnace closed?</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Max acquisition frequency</source>
+        <source>Driver version</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Maximum Heating Rate</source>
+        <source>Setpoint target</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9405,7 +8244,7 @@
     </message>
 
     <message>
-        <source>Free</source>
+        <source>Apply to any other sample</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9424,12 +8263,6 @@
 
     <message>
         <source>Class hierarchy</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Aperture size for square filter</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9472,7 +8305,7 @@
 
     <message>
         <source>Analytical method</source>
-	<translation type="unfinished"></translation>
+	<translation>Metodo Analitico</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -9490,12 +8323,12 @@
 
     <message>
         <source>Organization</source>
-	<translation type="unfinished"></translation>
+	<translation>Organizzazione</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Rotation</source>
+        <source>Broken frames</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9597,12 +8430,6 @@
     </message>
 
     <message>
-        <source>List of available instruments</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Left Contact Angle</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -9633,7 +8460,7 @@
     </message>
 
     <message>
-        <source>Height shrinking for Sintering</source>
+        <source>Thermocouple type5</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9657,6 +8484,12 @@
     </message>
 
     <message>
+        <source>Reset</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Integral Factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -9675,13 +8508,13 @@
     </message>
 
     <message>
-        <source>Manual</source>
+        <source>Automatic image crop</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Automatic image crop</source>
+        <source>Manual</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9706,7 +8539,7 @@
 
     <message>
         <source>Weighting system</source>
-	<translation type="unfinished"></translation>
+	<translation>Misura ponderale</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -9831,7 +8664,7 @@
     </message>
 
     <message>
-        <source>Simulated Left camera position</source>
+        <source>Derivative Factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9951,7 +8784,7 @@
     </message>
 
     <message>
-        <source>Time reference for fps calculation</source>
+        <source>Enable FLEX Optical Fleximeter</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9969,7 +8802,7 @@
     </message>
 
     <message>
-        <source>Contact Qualification</source>
+        <source>Channel 2</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -9993,7 +8826,7 @@
     </message>
 
     <message>
-        <source>Latency</source>
+        <source>Sample detection refining (% length)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10006,7 +8839,7 @@
 
     <message>
         <source>Weighting system present</source>
-	<translation type="unfinished"></translation>
+	<translation>È presente un sistema di misura ponderale</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -10059,13 +8892,19 @@
     </message>
 
     <message>
-        <source>List of available SimMotor</source>
+        <source>Eurotherm Thermoregulator</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Exponential</source>
+        <source>Perturbate Dissipative Constant</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Is Connected</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10185,7 +9024,7 @@
     </message>
 
     <message>
-        <source>Port</source>
+        <source>Perturbate Exponential propagation factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10233,7 +9072,7 @@
     </message>
 
     <message>
-        <source>Acquisition Role</source>
+        <source>Function button</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10282,12 +9121,12 @@
 
     <message>
         <source>HTTP Proxy</source>
-	<translation type="unfinished"></translation>
+	<translation>Proxy HTTP</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Circle fitting precision (% of perimeter to use)</source>
+        <source>MoSi2</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10299,7 +9138,7 @@
     </message>
 
     <message>
-        <source>Volume</source>
+        <source>SiC</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10312,7 +9151,7 @@
 
     <message>
         <source>Elapsed time</source>
-	<translation type="unfinished"></translation>
+	<translation>Tempo trascorso</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -10323,7 +9162,7 @@
     </message>
 
     <message>
-        <source>Derivative Factor</source>
+        <source>Simulated Left camera position</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10342,7 +9181,7 @@
 
     <message>
         <source>Serial Number</source>
-	<translation type="unfinished"></translation>
+	<translation>Numero Seriale</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -10371,7 +9210,7 @@
     </message>
 
     <message>
-        <source>Reset</source>
+        <source>Aperture size for square filter</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10384,12 +9223,12 @@
 
     <message>
         <source>White Level for B/W conversion</source>
-	<translation type="unfinished"></translation>
+	<translation>Livello di bianco per la conversione B/N</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Perturbate Dissipative Constant</source>
+        <source>Exponential</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10431,7 +9270,7 @@
     </message>
 
     <message>
-        <source>Is Connected</source>
+        <source>Power Step</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10593,7 +9432,7 @@
     </message>
 
     <message>
-        <source>Knots number for spline approximation (% perimeter)</source>
+        <source>Calibration factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10623,7 +9462,7 @@
     </message>
 
     <message>
-        <source>Lossy JPEG</source>
+        <source>High power limit</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10659,7 +9498,7 @@
     </message>
 
     <message>
-        <source>Stopping</source>
+        <source>Fitting-filtering iterations</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10689,6 +9528,12 @@
     </message>
 
     <message>
+        <source>Shutter Type</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>D Phase (sec)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -10713,13 +9558,13 @@
     </message>
 
     <message>
-        <source>Wb Kg</source>
+        <source>Thermal cycle</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Right sample holder distance from middle camera, um</source>
+        <source>Retry chances</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10731,7 +9576,7 @@
     </message>
 
     <message>
-        <source>Total displacement</source>
+        <source>Opened</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10833,6 +9678,12 @@
     </message>
 
     <message>
+        <source>Invert X&amp;amp;amp;amp;lt;-&amp;amp;amp;amp;gt;Y</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Enable Jain Adaptive Threshold (JAT)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -10893,7 +9744,7 @@
     </message>
 
     <message>
-        <source>Measurement error</source>
+        <source>Enable delayed start</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -10930,6 +9781,12 @@
 
     <message>
         <source>Last write error</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Measurement error</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -11013,13 +9870,13 @@
     </message>
 
     <message>
-        <source>MoSi2</source>
+        <source>Circle fitting precision (% of perimeter to use)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>SiC</source>
+        <source>Volume</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -11037,7 +9894,7 @@
     </message>
 
     <message>
-        <source>Stop on consecutive image analysis errors</source>
+        <source>Pixel depth, 16/32</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -11073,7 +9930,7 @@
     </message>
 
     <message>
-        <source>Shutter Type</source>
+        <source> Flip Vertically</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -11145,7 +10002,7 @@
     </message>
 
     <message>
-        <source>Pixel depth, 16/32</source>
+        <source>Stop on consecutive image analysis errors</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
