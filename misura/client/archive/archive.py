@@ -1,24 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
-
-from misura.client import widgets
-from misura.client import confwidget
-from misura.client import filedata
-from misura.client import misura3
-from misura.client.clientconf import confdb
+from .. import _
+from .. import confwidget
+from .. import filedata
+from .. import misura3
+from ..clientconf import confdb
 from misura.client.database import getDatabaseWidget, getRemoteDatabaseWidget
 import menubar
 import testwindow
 
 		
 
-class MainWindow(QtGui.QMainWindow,widgets.Linguist):
+class MainWindow(QtGui.QMainWindow):
 	"""Apertura file singoli, database locali, database remoti."""
 
 	def __init__(self, parent=None):
 		super(QtGui.QMainWindow, self).__init__(parent)
-		widgets.Linguist.__init__(self,context="Archive")
 		self.tab=QtGui.QTabWidget()
 		self.area=QtGui.QMdiArea()
 		self.tab.addTab(self.area,'Databases')
@@ -26,7 +24,7 @@ class MainWindow(QtGui.QMainWindow,widgets.Linguist):
 		self.tab.setDocumentMode(True)
 		self.setCentralWidget(self.tab)
 		self.setMinimumSize(800,600)
-		self.setWindowTitle(self.mtr('Misura Browser'))
+		self.setWindowTitle(_('Misura Browser'))
 		self.myMenuBar=menubar.ArchiveMenuBar(parent=self)
 		self.setMenuWidget(self.myMenuBar)	
 		

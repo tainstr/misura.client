@@ -12,12 +12,11 @@ class ScriptEditor(QtGui.QDialog):
 		self.setLayout(self.lay)
 		
 		self.active=active
-		self.mtr=active.mtr
-		self.setWindowTitle(self.mtr("Script Editor"))
+		self.setWindowTitle(_("Script Editor"))
 		self.menu=QtGui.QMenuBar(self)
 		self.menu.setMinimumHeight(25)
-		self.menu.addAction(self.mtr('Validate'),self.validate)
-		self.menu.addAction(self.mtr('Save'),self.save)
+		self.menu.addAction(_('Validate'),self.validate)
+		self.menu.addAction(_('Save'),self.save)
 		self.area=QtGui.QTextEdit()
 		self.area.setReadOnly(False)
 		self.area.setPlainText(self.active.adapt2gui(self.active.current))
@@ -39,9 +38,9 @@ class ScriptEditor(QtGui.QDialog):
 		val=unicode(self.current)
 		err,line,col=self.active.remObj.validate_script_text(val)
 		if line<0: return True
-		msg="%s\n%s\n%s %i, col: %i" % (self.mtr("Validation failed for the following reason:"),
-									err,self.mtr("Found at line:"),line,col)
-		QtGui.QMessageBox.warning(self,self.mtr("Validation error"),msg)
+		msg="%s\n%s\n%s %i, col: %i" % (_("Validation failed for the following reason:"),
+									err,_("Found at line:"),line,col)
+		QtGui.QMessageBox.warning(self,_("Validation error"),msg)
 		pos=0
 		line-=1
 		for i,ent in enumerate(val.splitlines()):
@@ -64,7 +63,7 @@ class aScript(ActiveWidget):
 	"""Elemento grafico per una proprietà stringa di testo"""
 	def __init__(self, server, path,  prop, parent=None):
 		ActiveWidget.__init__(self, server,path,  prop, parent)
-		self.button=QtGui.QPushButton(self.mtr("Edit"),self)
+		self.button=QtGui.QPushButton(_("Edit"),self)
 		self.connect(self.button,QtCore.SIGNAL('clicked()'),self.show_editor)
 		self.lay.addWidget(self.button)
 

@@ -8,7 +8,7 @@ from active import *
 class aBoolean(ActiveWidget):
 	def __init__(self, server, path,  prop, parent=None):
 		ActiveWidget.__init__(self, server,path,  prop, parent)
-		self.chk=QtGui.QCheckBox(self.mtr('False'), parent=parent)
+		self.chk=QtGui.QCheckBox(_('False'), parent=parent)
 		self.lay.addWidget(self.chk)
 		# Cause immediate update after complete init
 		self.emit(QtCore.SIGNAL('selfchanged()'))
@@ -26,12 +26,12 @@ class aBoolean(ActiveWidget):
 	def update(self):
 		if self.current:
 			self.chk.setChecked(QtCore.Qt.Checked)
-			self.chk.setText(self.mtr('True'))
+			self.chk.setText(_('True'))
 			if self.handle=='isRunning':
 				self.chk.setStyleSheet("background-color:red; color:white;");
 		else:
 			self.chk.setChecked(QtCore.Qt.Unchecked)
-			self.chk.setText(self.mtr('False'))
+			self.chk.setText(_('False'))
 			if self.handle=='isRunning':
 				self.chk.setStyleSheet("background-color:green; color:white;");
 		self.chk.update(self.chk.visibleRegion ())

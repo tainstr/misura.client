@@ -4,12 +4,7 @@
 
 from time import sleep, time
 from cPickle import loads
-import threading
-from traceback import print_exc
-from misura.canon import option
-from misura.canon.csutil import lockme, profile
-from misura.client.network import manager as net
-from misura.client.linguist import Linguist
+from .. import _
 from PyQt4 import QtGui, QtCore
 
 

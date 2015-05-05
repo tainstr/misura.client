@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
-from misura.client import conf
+from misura.client import conf,_
 import picture
 import dialog
 import sys
@@ -100,7 +100,7 @@ class CameraController(conf.Interface):
 		self.controls = []
 		self.viewerDialog=False
 		
-		self.stream = QtGui.QPushButton(self.mtr("View camera"))
+		self.stream = QtGui.QPushButton(_("View camera"))
 		
 		print self.sectionsMap
 		self.sectionsMap['Main'].lay.addWidget(self.stream)

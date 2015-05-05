@@ -6,6 +6,7 @@ import functools
 from misura.canon import option
 from misura.canon.option import sorter, prop_sorter
 
+from .. import _
 from .. import widgets
 from ..import parameters as params
 
@@ -79,9 +80,8 @@ def orgSections(prop_dict):
 
 
 
-class Section(widgets.Linguist, QtGui.QWidget):
+class Section(QtGui.QWidget):
 	def __init__(self, server, remObj, prop_list, parent=None, context='Option'):
-		widgets.Linguist.__init__(self, context)
 		QtGui.QWidget.__init__(self, parent)
 		prop_list.sort(prop_sorter)
 		self.p=[]
@@ -113,7 +113,7 @@ class Section(widgets.Linguist, QtGui.QWidget):
 		self.connect(more,QtCore.SIGNAL('clicked()'),p)	
 		out=QtGui.QWidget()
 		lay=QtGui.QHBoxLayout()
-#		lay.addWidget(QtGui.QLabel(self.mtr(wg.label)+': '))
+#		lay.addWidget(QtGui.QLabel(_(wg.label)+': '))
 		lay.addWidget(wg)
 		lay.addWidget(more)
 		out.setLayout(lay)	
@@ -150,10 +150,9 @@ class Section(widgets.Linguist, QtGui.QWidget):
 		return True
 
 		
-class Interface(widgets.Linguist, QtGui.QTabWidget):
+class Interface(QtGui.QTabWidget):
 	"""Interfaccia grafica ad un dizionario di configurazione."""
 	def __init__(self,  server, remObj, prop_dict=False, parent=None, context='Option'):
-		widgets.Linguist.__init__(self, context='Section')
 		QtGui.QTabWidget.__init__(self, parent)
 		self.server=server
 		self.remObj=remObj
@@ -170,7 +169,7 @@ class Interface(widgets.Linguist, QtGui.QTabWidget):
 		self.redraw()
 		if self.sectionsMap['Main'].widgetsMap.has_key('preset'):
 			self.connect(self.sectionsMap['Main'].widgetsMap['preset'], QtCore.SIGNAL('changed'), self.update)
-			self.scSave=QtGui.QShortcut(QtGui.QKeySequence(self.mtr('Ctrl+S')), self)
+			self.scSave=QtGui.QShortcut(QtGui.QKeySequence(_('Ctrl+S')), self)
 			self.connect(self.scSave, QtCore.SIGNAL('activated()'), self.sectionsMap['Main'].widgetsMap['preset'].save_current)
 			
 		self.menu=QtGui.QMenu(self)
@@ -194,7 +193,7 @@ class Interface(widgets.Linguist, QtGui.QTabWidget):
 		if self.prop_dict.has_key(sname):
 			if self.prop_dict[sname]['type']=='Section':
 				sname=self.prop_dict[sname]['name']
-		self.addTab(area, self.mtr(sname))
+		self.addTab(area, _(sname))
 		
 		for section, prop_list in self.sections.iteritems():
 			if section=='Main': continue
@@ -207,7 +206,7 @@ class Interface(widgets.Linguist, QtGui.QTabWidget):
 			if self.prop_dict.has_key(sname):
 				if self.prop_dict[sname]['type']=='Section':
 					sname=self.prop_dict[sname]['name']
-			self.addTab(area, self.mtr(sname))
+			self.addTab(area, _(sname))
 				
 		# se c'è solo una sezione, nascondo la tabBar
 		if len(self.sections.keys())==1:

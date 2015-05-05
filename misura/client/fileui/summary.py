@@ -3,7 +3,7 @@
 """Tabular view of data in a MisuraDocument"""
 import os
 
-from misura.client import iutils
+from .. import iutils,_
 from misura.client import widgets
 from misura.client.clientconf import settings
 #TODO: these functions should be generalized and applied also by the navigator. THey should also present data in hierarchy (not plain).
@@ -12,11 +12,10 @@ from PyQt4.QtCore import Qt
 voididx=QtCore.QModelIndex()
 
 
-class SummaryModel(QtCore.QAbstractTableModel,widgets.Linguist):
+class SummaryModel(QtCore.QAbstractTableModel):
 	_rowCount=0
 	_loaded=[]
 	def __init__(self,*a,**k):
-		widgets.Linguist.__init__(self,"Acquisition")
 		QtCore.QAbstractTableModel.__init__(self,*a,**k)
 		
 	def set_doc(self,doc):
@@ -64,7 +63,7 @@ class SummaryModel(QtCore.QAbstractTableModel,widgets.Linguist):
 			return 
 		if role==QtCore.Qt.DisplayRole:
 			h=self._loaded[section]
-			return self.mtr('curve:'+h)
+			return _('curve:'+h)
 		
 	def rowCount(self,parent):
 		if not self.doc: return 0
@@ -127,10 +126,9 @@ class SummaryModel(QtCore.QAbstractTableModel,widgets.Linguist):
 			i+=1	
 		f.close()
 
-class SummaryHeader(widgets.Linguist,QtGui.QHeaderView):
+class SummaryHeader(QtGui.QHeaderView):
 	def __init__(self, orientation=QtCore.Qt.Horizontal, parent=None):
 		QtGui.QHeaderView.__init__(self,orientation,parent=parent)
-		widgets.Linguist.__init__(self,context='Data')
 		self.setMovable(True)
 		self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.connect(self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.show_menu)
@@ -180,19 +178,18 @@ class SummaryHeader(widgets.Linguist,QtGui.QHeaderView):
 		self.point=pt
 		QtGui.qApp.processEvents()
 		self.menu.clear()
-		self.menu.addAction(self.mtr('Hide'),self.hide)
+		self.menu.addAction(_('Hide'),self.hide)
 		#TODO: offer checkable entries to restore hidden columns
-		self.menu.addAction(self.mtr('Show more'),self.show_more)
-		self.menu.addAction(self.mtr('Export'),self.export)
+		self.menu.addAction(_('Show more'),self.show_more)
+		self.menu.addAction(_('Export'),self.export)
 		self.menu.popup(self.mapToGlobal(pt))
 
 	
-class SummaryView(widgets.Linguist,QtGui.QTableView):
+class SummaryView(QtGui.QTableView):
 	def __init__(self,parent=None):
-		widgets.Linguist.__init__(self,"Acquisition")
 		QtGui.QTableView.__init__(self,parent=None)
 		self.setHorizontalHeader(SummaryHeader(parent=self))
-		self.setWindowTitle(self.mtr("Data Table"))
+		self.setWindowTitle(_("Data Table"))
 		
 	def set_doc(self,doc,key=False):
 		m=SummaryModel()

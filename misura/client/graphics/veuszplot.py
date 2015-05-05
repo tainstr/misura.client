@@ -6,8 +6,8 @@ from veusz import qtall as qt4
 from PyQt4 import QtGui, QtCore
 
 
-from misura.client import widgets, filedata
-
+from .. import widgets, filedata
+from .. import _
 MAX=10**5
 MIN=-10**5
 import veusz.plugins
@@ -214,14 +214,13 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
 		self.document.model.set_page(page.path)	
 		
 
-class VeuszPlot(QtGui.QWidget, widgets.Linguist):
+class VeuszPlot(QtGui.QWidget):
 	"""Simple Veusz graph for live plotting"""
 	__pyqtSignals__ =('smallPlot()', 'bigPlot()')
 	vzactions={}
 	documentOpened = qt4.pyqtSignal()
 	def __init__(self, parent=None):
 		QtGui.QWidget.__init__(self, parent)
-		widgets.Linguist.__init__(self, 'graphics')
 		self.menus={'edit.select':QtGui.QMenu()} # fake
 		self._menuBar=QtGui.QMenuBar()
 		self._menuBar.hide()

@@ -27,8 +27,8 @@ class PresetManager(aChooser):
 		self.prevIdx=0
 
 	def add(self, *args):
-		n, ok=QtGui.QInputDialog.getText(self, self.mtr("Save as..."),
-									self.mtr("Specify new preset name:"),
+		n, ok=QtGui.QInputDialog.getText(self, _("Save as..."),
+									_("Specify new preset name:"),
 									QtGui.QLineEdit.Normal,'default')
 		if ok:
 			r=self.remObj.call(self.save_handle, str(n))

@@ -26,7 +26,7 @@ class MotorSlider(aNumber):
 		self.labelact.setDefaultWidget(self.label_widget)
 		self.menu.addAction(self.spinact)
 		self.menu.addAction(self.labelact)
-		self.cfact=self.menu.addAction(self.mtr('Configure'), self.hide_show)
+		self.cfact=self.menu.addAction(_('Configure'), self.hide_show)
 		self.cfact.setCheckable(True)
 		self.cf=False
 		

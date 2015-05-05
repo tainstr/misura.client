@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
-
+from .. import _
 from .. import filedata
 from .. import fileui
 from .. import acquisition
@@ -53,7 +53,7 @@ class TestWindow(acquisition.MainWindow):
 		# Menu Bar mod
 		self.myMenuBar.connectTo.hide()
 		self.myMenuBar.help.hide()
-		self.actStandard=self.myMenuBar.measure.addAction(self.mtr('Re-evaluate standards'),self.re_standard)
+		self.actStandard=self.myMenuBar.measure.addAction(_('Re-evaluate standards'),self.re_standard)
 		
 		self.menuVersions=fileui.VersionMenu(self.fixedDoc.proxy)
 		self.myMenuBar.measure.addMenu(self.menuVersions)

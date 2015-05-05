@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # CHIARIRE QUESTI IMPORT!!!
 from PyQt4 import QtGui,QtCore
-from widgets.active import Linguist, Autoupdater
+from widgets.active import Autoupdater
+from misura.client import _
 import network
 from clientconf import confdb
 from live import registry
@@ -30,25 +31,22 @@ class Inc(object):
 		self.n+=1 
 		return self.n
 
-
-#TODO: opzione se salvare o meno i dati di connessione.
-class LoginWindow(Linguist, QtGui.QDialog):
+class LoginWindow(QtGui.QDialog):
 	def __init__(self, addr, user='username', password='password', globalconn=True, parent=None, context='Local'):
-		Linguist.__init__(self, context)
 		QtGui.QDialog.__init__(self, parent)
 		self.setWindowTitle('Login Required')
 		self.lay=QtGui.QGridLayout(self)
 		self.setLayout(self.lay)
 		self.addr=addr
-		self.userLbl=QtGui.QLabel(self.mtr('User Name')+':')
-		self.pwdLbl=QtGui.QLabel(self.mtr('Password:')+':')
+		self.userLbl=QtGui.QLabel(_('User Name')+':')
+		self.pwdLbl=QtGui.QLabel(_('Password:')+':')
 		self.user=QtGui.QLineEdit(user)
 		self.password=QtGui.QLineEdit(password)
-		self.ckSave=QtGui.QCheckBox(self.mtr('Save login'),self)
+		self.ckSave=QtGui.QCheckBox(_('Save login'),self)
 		from misura.client import iutils
 		self.ckSave.setCheckState(2*confdb['saveLogin'])
 		self.ok=QtGui.QPushButton('Ok')
-		self.ko=QtGui.QPushButton(self.mtr('Cancel'))
+		self.ko=QtGui.QPushButton(_('Cancel'))
 		self.connect(self.ok, QtCore.SIGNAL('clicked()'), self.tryLogin)
 		self.connect(self.ko, QtCore.SIGNAL('clicked()'), self.reject)
 		self.lay.addWidget(QtGui.QLabel('Destination:'), 1, 0)
@@ -84,9 +82,8 @@ class LoginWindow(Linguist, QtGui.QDialog):
 		return False
 
 #TODO: migliorare stile e gestire con confdb anziché con lista in network.manager.
-class ServerWidget(Linguist,QtGui.QWidget):
+class ServerWidget(QtGui.QWidget):
 	def __init__(self,info,parent=None):
-		Linguist.__init__(self, 'Local')
 		QtGui.QWidget.__init__(self,parent)
 		self.info=info
 		self.lay=QtGui.QVBoxLayout(self)
@@ -106,7 +103,7 @@ class ServerWidget(Linguist,QtGui.QWidget):
 		lbl('Host:',r.i(),0)	;	lbl(info.host,r.n,1)	;	lbl('Capabilities:',r.n,2)	; lbl(cap,r.n,3)
 		lbl('Port:',r.i(),0)	; 	lbl(str(info.port),r.n,1);	lbl('User:',r.n,2)	; lbl(info.user,r.n,3)
 		self.lay.addWidget(self.grid)
-		self.button=QtGui.QPushButton(self.mtr('Connect'),self)
+		self.button=QtGui.QPushButton(_('Connect'),self)
 		self.lay.addWidget(self.button)
 		self.connect(self.button,QtCore.SIGNAL('pressed()'),self.doConnection)
 		self.menu=QtGui.QMenu(self)
@@ -121,14 +118,13 @@ class ServerWidget(Linguist,QtGui.QWidget):
 	def showMenu(self, pt):
 		self.menu.popup(self.mapToGlobal(pt))
 		
-class ServerSelector(Linguist, QtGui.QToolBox):
+class ServerSelector(QtGui.QToolBox):
 	"""Presents and keeps updated a list of available servers"""
 	def __init__(self, parent=None, context='Local'):
-		Linguist.__init__(self, context)
 		QtGui.QToolBox.__init__(self, parent)
 		self.connect(network.manager, QtCore.SIGNAL('found(QString)'), self.redraw, QtCore.Qt.QueuedConnection)
 		self.connect(network.manager, QtCore.SIGNAL('lost(QString)'), self.redraw, QtCore.Qt.QueuedConnection)
-		self.label=self.mtr('Server Selector')
+		self.label=_('Server Selector')
 		self.redraw()
 
 	def redraw(self):
@@ -148,11 +144,10 @@ class ServerSelector(Linguist, QtGui.QToolBox):
 		
 
 
-class ConnectionStatus(Linguist, QtGui.QWidget):
+class ConnectionStatus(QtGui.QWidget):
 	def __init__(self, parent=None, context='Local'):
-		Linguist.__init__(self, context)
 		QtGui.QWidget.__init__(self, parent)
-		self.label=self.mtr('Connection Status')
+		self.label=_('Connection Status')
 		self.setWindowTitle(self.label)
 		self.lay=QtGui.QVBoxLayout()
 		self.setLayout(self.lay)
@@ -165,7 +160,7 @@ class ConnectionStatus(Linguist, QtGui.QWidget):
 		self.lay.addWidget(self.log)
 		
 		self.echo=QtGui.QLineEdit(self)
-		self.echo.setPlaceholderText(self.mtr("Test Echo Logging"))
+		self.echo.setPlaceholderText(_("Test Echo Logging"))
 		self.echo.setMaxLength(50)
 		self.lay.addWidget(self.echo)
 		self.connect(self.echo,QtCore.SIGNAL('returnPressed()'),self.sendEcho)
@@ -185,14 +180,13 @@ class ConnectionStatus(Linguist, QtGui.QWidget):
 from time import strftime, time
 from datetime import datetime
 
-class LiveLog(QtGui.QTextEdit, Autoupdater, Linguist):
+class LiveLog(QtGui.QTextEdit, Autoupdater):
 	def __init__(self, parent=None):
 		QtGui.QTextEdit.__init__(self, parent)
-		Linguist.__init__(self, 'Local')
 		self.setReadOnly(True)
 		self.setLineWrapMode(self.NoWrap)
 		self.nlog=0
-		self.label=self.mtr('Log')
+		self.label=_('Log')
 		self.menu=QtGui.QMenu(self)
 		self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.connect(self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)

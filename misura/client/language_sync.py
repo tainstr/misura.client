@@ -172,24 +172,26 @@ def collect():
 	return translations.values()
 		
 
-from misura.client.linguist import context_separator
+# from misura.client.linguist import context_separator
+context_separator=':$ctx$:'
+
 def language_sync():
 	"""Merge all translatable strings from runtime requests, code analysis, already translated code."""
 	# Translation contexts
 	contexts={'Option':{}}
 	# Collect from runtime
-	rt=os.path.join(pathLang,'runtime.dat')
-	if os.path.exists(rt):
-		runtime=open(rt,'r').read().splitlines()
-		# purge duplicates
-		runtime=list(set(runtime))
-
-		for e in runtime:
-			c,e=e.split(context_separator)
-			e.replace('$newline$', '\n')
-			if not contexts.has_key(c):
-				contexts[c]={}
-			contexts[c][mescape(e)]=('', '')
+# 	rt=os.path.join(pathLang,'runtime.dat')
+# 	if os.path.exists(rt):
+# 		runtime=open(rt,'r').read().splitlines()
+# 		# purge duplicates
+# 		runtime=list(set(runtime))
+# 
+# 		for e in runtime:
+# 			c,e=e.split(context_separator)
+# 			e.replace('$newline$', '\n')
+# 			if not contexts.has_key(c):
+# 				contexts[c]={}
+# 			contexts[c][mescape(e)]=('', '')
 	# Collect from code analysis
 	trcode=collect()
 	out=open(os.path.join(pathLang,'static.dat'),'w')

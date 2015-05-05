@@ -3,17 +3,16 @@
 """Configuration interface for misura.
 Global instrument parametrization and setup."""
 from PyQt4 import QtGui, QtCore
-from misura.client import widgets
 import constructor
-from devtree import ServerView 
-from misura.client import network
-from misura.client.clientconf import confdb
-from misura.client.connection import ServerSelector, ConnectionStatus, addrConnection
-from misura.client.confwidget import ClientConf, RecentMenu
+from devtree import ServerView
+from .. import _ 
+from .. import network
+from ..clientconf import confdb
+from ..connection import ServerSelector, ConnectionStatus, addrConnection
+from ..confwidget import ClientConf, RecentMenu
 		
-class TreePanel(widgets.Linguist, QtGui.QSplitter):
+class TreePanel( QtGui.QSplitter):
 	def __init__(self, server=False,parent=None,select=False):
-		widgets.Linguist.__init__(self, context='Section')
 		QtGui.QSplitter.__init__(self, parent)
 		self.remote=server
 		self.server=server.root
@@ -93,13 +92,12 @@ class TreePanel(widgets.Linguist, QtGui.QSplitter):
 		print "page ok"
 
 				
-class MConf(widgets.Linguist, QtGui.QMainWindow):
+class MConf( QtGui.QMainWindow):
 	tree=False
 	fixed_path=False
 	def __init__(self, server=False,fixed_path=False, parent=None):
-		widgets.Linguist.__init__(self, context='Section')
 		QtGui.QMainWindow.__init__(self, parent)
-		self.setWindowTitle(self.mtr('Misura Configuration Panel'))
+		self.setWindowTitle(_('Misura Configuration Panel'))
 		self.setGeometry(100, 100, 800, 600)
 		self.tab=QtGui.QTabWidget(self)
 		self.setCentralWidget(self.tab)
@@ -112,7 +110,7 @@ class MConf(widgets.Linguist, QtGui.QMainWindow):
 		self.connect(self.menu,QtCore.SIGNAL('server_restart()'),self.server_restart)
 		self.connect(self.menu, QtCore.SIGNAL('select(QString)'), self.setAddr)
 		self.cmenu=QtGui.QMenu('Client')
-		self.cmenu.addAction(self.mtr('Configuration'),self.clientConf)
+		self.cmenu.addAction(_('Configuration'),self.clientConf)
 		self.menuBar().addMenu(self.menu)
 		self.menuBar().addMenu(self.cmenu)
 		self.connect(network.manager, QtCore.SIGNAL('connected()'), self.resetServer)
@@ -124,9 +122,9 @@ class MConf(widgets.Linguist, QtGui.QMainWindow):
 	def getIP(self):
 		ss=ServerSelector(self.menu)
 		self.connect(network.manager, QtCore.SIGNAL('connected()'), ss.close)
-		self.tab.addTab(ss, self.mtr('Server Selection'))
+		self.tab.addTab(ss, _('Server Selection'))
 		self.tab.setCurrentIndex(self.tab.count()-1)
-		self.tab.addTab(ConnectionStatus(self),self.mtr('Current Connection Status'))
+		self.tab.addTab(ConnectionStatus(self),_('Current Connection Status'))
 		self.server=network.manager.remote
 		
 	def setAddr(self,addr):
@@ -159,7 +157,7 @@ class MConf(widgets.Linguist, QtGui.QMainWindow):
 			del self.tree
 		self.tree=TreePanel(self.server, parent=self)
 		print self.tree.view.model().item.children
-		self.tab.addTab(self.tree,self.mtr("Tree Panel"))
+		self.tab.addTab(self.tree,_("Tree Panel"))
 		self.tab.setCurrentIndex(2)
 		
 	def clientConf(self):

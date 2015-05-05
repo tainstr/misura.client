@@ -6,26 +6,24 @@ import functools
 import veusz.document as document
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
-
-import widgets
+from misura.client import _
 import filedata
 import fileui
 import units
 from clientconf import confdb
 
-class StylesMenu(widgets.Linguist, QtGui.QMenu):
+class StylesMenu(QtGui.QMenu):
 	def __init__(self, doc, node):
-		QtGui.QMenu.__init__(self, self.mtr('Styles'))
+		QtGui.QMenu.__init__(self, _('Styles'))
 		self.doc = doc
 		self.node = node
-		self.addAction(self.mtr('Colorize'), self.colorize)
+		self.addAction(_('Colorize'), self.colorize)
 		
-class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
+class Navigator(filedata.QuickOps, QtGui.QTreeView):
 	"""List of currently opened misura Tests and reference to datasets names"""
 	previous_selection = False
 	
 	def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=filedata.dstats.loaded, cols=1):
-		widgets.Linguist.__init__(self, context=context)
 		QtGui.QTreeView.__init__(self, parent)
 		self.status = status
 		self.ncols = cols
@@ -51,25 +49,25 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 			self.acts_status = []
 			for i, s in enumerate(filedata.dstats):
 				name = filedata.dstats._fields[i]
-				act = self.base_menu.addAction(self.mtr(name.capitalize()), self.set_status)
+				act = self.base_menu.addAction(_(name.capitalize()), self.set_status)
 				act.setCheckable(True)
 				if s == status:
 					act.setChecked(True)
 				self.acts_status.append(act)
 			
-			self.act_del=self.base_menu.addAction(self.mtr('Delete'), self.deleteChildren)
-			self.base_menu.addAction(self.mtr('Update view'), self.refresh)
+			self.act_del=self.base_menu.addAction(_('Delete'), self.deleteChildren)
+			self.base_menu.addAction(_('Update view'), self.refresh)
 
 			######
 			# File menu
 			self.file_menu = QtGui.QMenu(self)
-			self.file_menu.addAction(self.mtr('Thermal Legend'), self.thermalLegend)
-			self.file_menu.addAction(self.mtr('Intercept all curves'), self.intercept)
-			self.file_menu.addAction(self.mtr('View'), self.viewFile)
-			self.file_menu.addAction(self.mtr('Reload'), self.reloadFile)
-			self.file_menu.addAction(self.mtr('Close'), self.closeFile)
-			self.file_menu.addAction(self.mtr('Commit data to test file'), self.commit)
-			self.file_menu.addAction(self.mtr('Update view'), self.refresh)
+			self.file_menu.addAction(_('Thermal Legend'), self.thermalLegend)
+			self.file_menu.addAction(_('Intercept all curves'), self.intercept)
+			self.file_menu.addAction(_('View'), self.viewFile)
+			self.file_menu.addAction(_('Reload'), self.reloadFile)
+			self.file_menu.addAction(_('Close'), self.closeFile)
+			self.file_menu.addAction(_('Commit data to test file'), self.commit)
+			self.file_menu.addAction(_('Update view'), self.refresh)
 			self.ver_menu = self.file_menu.addMenu('Load Version')
 
 			######
@@ -87,8 +85,8 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 			####
 			# Binary
 			self.bin_menu = QtGui.QMenu(self)
-			self.bin_menu.addAction(self.mtr('Correct'), self.correct)
-			self.bin_menu.addAction(self.mtr('Delete selection'), self.deleteDatas)
+			self.bin_menu.addAction(_('Correct'), self.correct)
+			self.bin_menu.addAction(_('Delete selection'), self.deleteDatas)
 			
 		else:
 			self.connect(self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.refresh)
@@ -108,7 +106,7 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 	def set_doc(self, doc):
 		self.doc = doc
 		self.cmd = document.CommandInterface(self.doc)
-		self.setWindowTitle(self.mtr('Opened misura Tests'))
+		self.setWindowTitle(_('Opened misura Tests'))
 		self.mod = self.doc.model
 		self.mod.ncols = self.ncols
 		self.setModel(self.mod)
@@ -204,17 +202,17 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 	
 	def update_sample_menu(self, node):
 		self.sample_menu.clear()
-		self.sample_menu.addAction(self.mtr('Intercept all curves'), self.intercept)
+		self.sample_menu.addAction(_('Intercept all curves'), self.intercept)
 		if '/hsm/' in node.path:
-			self.sample_menu.addAction(self.mtr('Show Characteristic Points'), self.showPoints)
+			self.sample_menu.addAction(_('Show Characteristic Points'), self.showPoints)
 			# Check minimum conditions for surface tension plugin
 			j=0; k=['beta','r0','Vol']
 			for kj in k: j+=node.children.has_key(kj)
 			if j==len(k):
-				self.sample_menu.addAction(self.mtr('Surface tension'), self.surface_tension)
-			self.sample_menu.addAction(self.mtr('Report'), self.report)
-			self.sample_menu.addAction(self.mtr('Render video'), self.render)
-		self.sample_menu.addAction(self.mtr('Delete'), self.deleteChildren)
+				self.sample_menu.addAction(_('Surface tension'), self.surface_tension)
+			self.sample_menu.addAction(_('Report'), self.report)
+			self.sample_menu.addAction(_('Render video'), self.render)
+		self.sample_menu.addAction(_('Delete'), self.deleteChildren)
 		return self.sample_menu
 	
 	##############
@@ -223,7 +221,7 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 			
 	def add_load(self, node, menu):
 		"""Add load/unload action"""
-		self.act_load = self.dataset_menu.addAction(self.mtr('Load'), self.load)
+		self.act_load = self.dataset_menu.addAction(_('Load'), self.load)
 		self.act_load.setCheckable(True)
 		if node.linked is None:
 			self.act_load.setVisible(False)
@@ -233,21 +231,21 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 		
 	def add_plotted(self, node, menu):
 		"""Add plot/unplot action"""
-		self.act_plot = menu.addAction(self.mtr('Plot'), self.plot)
+		self.act_plot = menu.addAction(_('Plot'), self.plot)
 		self.act_plot.setCheckable(True)
 		plotpath = self.model().is_plotted(node.path)
 		self.act_plot.setChecked(len(plotpath) > 0)
 		
 	def add_percentile(self, node, menu):
 		"""Add percentile conversion action"""
-		self.act_percent = menu.addAction(self.mtr('Set Initial Dimension'), self.setInitialDimension)
-		self.act_percent = self.dataset_menu.addAction(self.mtr('Percentile'), self.convertPercentile)
+		self.act_percent = menu.addAction(_('Set Initial Dimension'), self.setInitialDimension)
+		self.act_percent = self.dataset_menu.addAction(_('Percentile'), self.convertPercentile)
 		self.act_percent.setCheckable(True)		
 		self.act_percent.setChecked(node.m_percent)
 			
 	def add_keep(self, node, menu):
 		"""Add on-file persistence action"""
-		self.act_keep = self.dataset_menu.addAction(self.mtr('Saved on test file'), self.keep)
+		self.act_keep = self.dataset_menu.addAction(_('Saved on test file'), self.keep)
 		self.act_keep.setCheckable(True)	
 		self.act_keep.setChecked(node.m_keep)
 		
@@ -257,13 +255,13 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 		u = node.unit
 		if not u:
 			return
-		un = menu.addMenu(self.mtr('Units'))
+		un = menu.addMenu(_('Units'))
 		kgroup, f, p = units.get_unit_info(u, units.from_base)
 		same = units.from_base.get(kgroup, {u:lambda v: v}).keys()
 		print kgroup, same
 		for u1 in same:
 			p = functools.partial(self.set_unit, convert=u1)
-			act = un.addAction(self.mtr(u1), p)
+			act = un.addAction(_(u1), p)
 			act.setCheckable(True)
 			if u1 == u:
 				act.setChecked(True)
@@ -276,13 +274,13 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 		if not len(plotpath) > 0:
 			return
 		wg = self.doc.resolveFullWidgetPath(plotpath[0])
-		self.style_menu = menu.addMenu(self.mtr('Style'))
-		self.act_color = self.style_menu.addAction(self.mtr('Colorize'), self.colorize)
+		self.style_menu = menu.addMenu(_('Style'))
+		self.act_color = self.style_menu.addAction(_('Colorize'), self.colorize)
 		self.act_color.setCheckable(True)
 
-		self.act_save_style = self.style_menu.addAction(self.mtr('Save style'), self.save_style)
+		self.act_save_style = self.style_menu.addAction(_('Save style'), self.save_style)
 		self.act_save_style.setCheckable(True)
-		self.act_delete_style = self.style_menu.addAction(self.mtr('Delete style'), self.delete_style)
+		self.act_delete_style = self.style_menu.addAction(_('Delete style'), self.delete_style)
 		if len(wg.settings.Color.points):
 			self.act_color.setChecked(True)
 		if confdb.rule_style(node.path):
@@ -290,13 +288,13 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 			
 	def add_rules(self, node, menu):
 		"""Add loading rules sub menu"""
-		self.rule_menu = menu.addMenu(self.mtr('Rules'))
+		self.rule_menu = menu.addMenu(_('Rules'))
 		self.act_rule = []
 		self.func_rule = []
 
 		def gen(name,idx):
 			f=functools.partial(self.change_rule,act=1)
-			act = self.rule_menu.addAction(self.mtr(name),f)
+			act = self.rule_menu.addAction(_(name),f)
 			act.setCheckable(True)
 			self.act_rule.append(act)
 			self.func_rule.append(f)
@@ -324,25 +322,25 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 			
 		self.add_plotted(node, self.dataset_menu)
 		
-		self.dataset_menu.addAction(self.mtr('Edit'), self.edit_dataset)
+		self.dataset_menu.addAction(_('Edit'), self.edit_dataset)
 		
-		self.dataset_menu.addAction(self.mtr('Intercept this curve'), self.intercept)
+		self.dataset_menu.addAction(_('Intercept this curve'), self.intercept)
 		if istime:
 			self.act_percent = False
 		else:
 			self.add_percentile(node, self.dataset_menu)
-			self.dataset_menu.addAction(self.mtr('Smoothing'), self.smooth)
-			self.dataset_menu.addAction(self.mtr('Derivatives'), self.derive)
-			self.dataset_menu.addAction(self.mtr('Linear Coefficient'), self.coefficient)
+			self.dataset_menu.addAction(_('Smoothing'), self.smooth)
+			self.dataset_menu.addAction(_('Derivatives'), self.derive)
+			self.dataset_menu.addAction(_('Linear Coefficient'), self.coefficient)
 			self.add_styles(node,self.dataset_menu)
 			self.add_rules(node,self.dataset_menu)
 		if '/hsm/sample' in node.path:
-			self.dataset_menu.addAction(self.mtr('Characteristic points'), self.showPoints)	
+			self.dataset_menu.addAction(_('Characteristic points'), self.showPoints)	
 		if istime:
 			self.act_keep = False
 		else:
 			self.add_keep(node, self.dataset_menu)
-			self.dataset_menu.addAction(self.mtr('Delete'), self.deleteData)
+			self.dataset_menu.addAction(_('Delete'), self.deleteData)
 			
 		self.add_unit(node, self.dataset_menu)
 		return self.dataset_menu
@@ -353,14 +351,14 @@ class Navigator(widgets.Linguist, filedata.QuickOps, QtGui.QTreeView):
 	def update_derived_menu(self, node):
 		self.der_menu.clear()
 		self.add_plotted(node, self.der_menu)
-		self.der_menu.addAction(self.mtr('Edit'), self.edit_dataset)
-		self.der_menu.addAction(self.mtr('Intercept this curve'), self.intercept)
-		self.der_menu.addAction(self.mtr('Smoothing'), self.smooth)
-		self.der_menu.addAction(self.mtr('Derivatives'), self.derive)
-		self.der_menu.addAction(self.mtr('Linear Coefficient'), self.coefficient)
-		self.der_menu.addAction(self.mtr('Overwrite parent'), self.overwrite)
+		self.der_menu.addAction(_('Edit'), self.edit_dataset)
+		self.der_menu.addAction(_('Intercept this curve'), self.intercept)
+		self.der_menu.addAction(_('Smoothing'), self.smooth)
+		self.der_menu.addAction(_('Derivatives'), self.derive)
+		self.der_menu.addAction(_('Linear Coefficient'), self.coefficient)
+		self.der_menu.addAction(_('Overwrite parent'), self.overwrite)
 		self.add_keep(node, self.der_menu)
-		self.der_menu.addAction(self.mtr('Delete'), self.deleteData)	
+		self.der_menu.addAction(_('Delete'), self.deleteData)	
 		return self.der_menu
 		
 	def showContextMenu(self, pt):

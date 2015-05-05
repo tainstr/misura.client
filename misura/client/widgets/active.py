@@ -8,7 +8,7 @@ import collections
 from misura.client import network
 from misura.client import units
 from misura.client.clientconf import confdb
-from misura.client.linguist import Linguist
+from .. import _
 from misura.client.live import registry
 
 from PyQt4 import QtGui, QtCore
@@ -59,14 +59,13 @@ class RunMethod(QtCore.QRunnable):
 		
 
 
-class Active(Linguist):
+class Active(object):
 	interval=200
 	last_async_get=0
 	force_update=False
 	current=None
 	"""Current server-side value"""
 	def __init__(self, server, remObj, prop, context='Option', connect=True):
-		Linguist.__init__(self, context)
 		self.server=server
 		self.remObj=remObj
 		self.path=remObj._Method__name
@@ -77,7 +76,7 @@ class Active(Linguist):
 		self.readonly=self.type=='ReadOnly' or 'ReadOnly' in self.attr
 		self.hard='Hard' in self.attr
 		self.hot='Hot' in self.attr
-		self.label=self.tr(self.name)
+		self.label=_(self.name)
 		
 		# Update the widget whenever the manager gets reconnected
 		network.manager.connect(network.manager, QtCore.SIGNAL('connected()'), self.reconnect, QtCore.Qt.QueuedConnection)
@@ -206,9 +205,8 @@ class ActiveObject(Active, QtCore.QObject):
 	def emit(self, *a, **k):
 		return QtCore.QObject.emit(self, *a, **k)
 		
-class LabelWidget(Linguist,QtGui.QWidget):
+class LabelWidget(QtGui.QWidget):
 	def __init__(self, parent,context='Option'):
-		Linguist.__init__(self, context)
 		QtGui.QWidget.__init__(self,parent=parent)
 		self.active=parent
 		prop=parent.prop
@@ -238,23 +236,23 @@ class LabelWidget(Linguist,QtGui.QWidget):
 		self.units={}
 		u=self.unit
 		if u!='None' and type(u)==type(''):
-			un=self.menu.addMenu(self.mtr('Units'))
+			un=self.menu.addMenu(_('Units'))
 			kgroup,f,p=units.get_unit_info(u,units.from_base)
 			same=units.from_base.get(kgroup,{u:lambda v: v}).keys()
 			print kgroup, same
 			for u1 in same:
 				p=functools.partial(self.set_unit,u1)
-				act=un.addAction(self.mtr(u1),p)
+				act=un.addAction(_(u1),p)
 				act.setCheckable(True)
 				if u1==u:
 					act.setChecked(True)
 				self.units[u1]=(act,p)
 			
 			
-		self.menu.addAction(self.mtr('Set default value'), parent.set_default)
-		self.menu.addAction(self.mtr('Check for modification'), parent.get)
-		self.menu.addAction(self.mtr('Option Info'), self.show_info)
-		self.menu.addAction(self.mtr('Online help for "%s"') % parent.handle, parent.emitHelp)
+		self.menu.addAction(_('Set default value'), parent.set_default)
+		self.menu.addAction(_('Check for modification'), parent.get)
+		self.menu.addAction(_('Option Info'), self.show_info)
+		self.menu.addAction(_('Online help for "%s"') % parent.handle, parent.emitHelp)
 
 		self.label=QtGui.QLabel()
 		self.label.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -297,7 +295,7 @@ class LabelWidget(Linguist,QtGui.QWidget):
 		u=self.unit
 		if u and isinstance(u, collections.Hashable):
 			sym=units.hsymbols.get(u,False)
-		msg=unicode(self.mtr(self.active.name))
+		msg=unicode(_(self.active.name))
 		if sym:
 			msg+=u' ({})'.format(sym)
 		self.label.setText(msg)

@@ -2,13 +2,11 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
 from traceback import format_exc
-from .. import conf, widgets
+from .. import widgets, _
 from ..live import registry
 from ..database import ProgressBar 
-import measureinfo
-from ..clientconf import confdb
 
-class Controls(widgets.Linguist,QtGui.QToolBar):
+class Controls(QtGui.QToolBar):
 	"""Start/stop toolbar"""
 	mute=False
 	motor=False
@@ -21,7 +19,6 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 	stopped_nosave=QtCore.pyqtSignal()
 	#cycleNotSaved=False
 	def __init__(self, remote, parent=None):
-		widgets.Linguist.__init__(self,context='Acquisition')
 		QtGui.QToolBar.__init__(self, parent)
 		self.remote=remote
 		print 'Controls: init'
@@ -213,21 +210,20 @@ class Controls(widgets.Linguist,QtGui.QToolBar):
 		"""Show a confirmation dialog immediately before starting a new test"""
 		#TODO: generalize
 		if self.remote['name'] in ['horizontal','vertical','flex']:
-			val,st=QtGui.QInputDialog.getDouble(self,self.mtr("Confirm initial sample dimension"),
-											self.mtr("Initial dimension (micron)"),
+			val,st=QtGui.QInputDialog.getDouble(self,_("Confirm initial sample dimension"),
+											_("Initial dimension (micron)"),
 											self.remote.sample0['initialDimension'])
 			if not st:
 				return False
 			self.remote.sample0['initialDimension']=val
 		return True
 		
-class MotionControls(widgets.Linguist,QtGui.QToolBar):
+class MotionControls(QtGui.QToolBar):
 	"""Motion toolbar"""
 	mute=False
 	motor=False
 	#cycleNotSaved=False
 	def __init__(self, remote, parent=None):
-		widgets.Linguist.__init__(self,context='Acquisition')
 		QtGui.QToolBar.__init__(self, parent)
 		self.remote=remote
 		self.server=remote.parent()

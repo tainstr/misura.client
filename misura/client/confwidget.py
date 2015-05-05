@@ -1,33 +1,32 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui,QtCore
-from misura.client.widgets.active import Linguist
+from misura.client import _
 from misura.client.clientconf import confdb, settings
 import functools
 import os
 
-class Path(Linguist,QtGui.QWidget):
+class Path(QtGui.QWidget):
 	def __init__(self,path,parent=None):
 		QtGui.QWidget.__init__(self,parent)
-		Linguist.__init__(self,context='Client')
 		self.lay=QtGui.QHBoxLayout()
 		self.setLayout(self.lay)
-		self.lay.addWidget(QtGui.QLabel(self.mtr('Configuration File:')))
+		self.lay.addWidget(QtGui.QLabel(_('Configuration File:')))
 		self.line=QtGui.QLineEdit(self)
 		self.line.setText(path)
 		self.lay.addWidget(self.line)
 		self.button=QtGui.QPushButton(self)	
-		self.button.setText(self.mtr('Open'))
+		self.button.setText(_('Open'))
 		self.lay.addWidget(self.button)
 		self.connect(self.button,QtCore.SIGNAL('clicked()'),self.change)
 		
 		self.btn_reload=QtGui.QPushButton(self)	
-		self.btn_reload.setText(self.mtr('Reload'))
+		self.btn_reload.setText(_('Reload'))
 		self.lay.addWidget(self.btn_reload)
 		self.connect(self.btn_reload,QtCore.SIGNAL('clicked()'),self.reload)
 		
 		self.btn_save=QtGui.QPushButton(self)	
-		self.btn_save.setText(self.mtr('Save'))
+		self.btn_save.setText(_('Save'))
 		self.lay.addWidget(self.btn_save)
 		self.connect(self.btn_save,QtCore.SIGNAL('clicked()'),self.save)
 		
@@ -38,15 +37,14 @@ class Path(Linguist,QtGui.QWidget):
 		confdb.save()
 		
 	def change(self):
-		path=QtGui.QFileDialog.getOpenFileName(parent=self, caption=self.mtr("Client configuration path"))
+		path=QtGui.QFileDialog.getOpenFileName(parent=self, caption=_("Client configuration path"))
 		if not path: return
 		self.line.setText(path)
 		self.reload()
 		
-class ClientConf(Linguist,QtGui.QWidget):
+class ClientConf(QtGui.QWidget):
 	def __init__(self,parent=None):
 		QtGui.QWidget.__init__(self,parent)
-		Linguist.__init__(self,context='Client')
 		self.lay=QtGui.QVBoxLayout()
 		self.setLayout(self.lay)
 		self.path=Path(confdb.path,self)
@@ -67,10 +65,9 @@ class ClientConf(Linguist,QtGui.QWidget):
 		self.lay.addWidget(self.conf)
 		settings.setValue('/Configuration',path)
 		
-class RecentInterface(Linguist):
+class RecentInterface(object):
 	"""Common functions"""
 	def __init__(self,conf,category):
-		Linguist.__init__(self,context='Client')
 		self.category=category
 		self.conf=conf
 		self.name=category
@@ -104,14 +101,14 @@ class RecentInterface(Linguist):
 		
 	def new(self,*a):
 		if self.category in ['server']:
-			path=QtGui.QInputDialog.getText(self, self.mtr('Specify a new server address'), self.mtr('Address'),text='https://IP:3880/RPC')[0]
+			path=QtGui.QInputDialog.getText(self, _('Specify a new server address'), _('Address'),text='https://IP:3880/RPC')[0]
 		else:
 			tab=getattr(self.conf,'recent_'+self.category)
 			print 'new: tab',self.category,tab
 			d=''
 			if len(tab)>0:
 				d=os.path.dirname(tab[-1][0])
-			path=QtGui.QFileDialog.getOpenFileName(self, self.mtr("Open a new ")+self.category, d)
+			path=QtGui.QFileDialog.getOpenFileName(self, _("Open a new ")+self.category, d)
 		if not path: return
 		self.emit(QtCore.SIGNAL('new(QString)'),path)
 		self.emit(QtCore.SIGNAL('select(QString)'),path)	
@@ -122,7 +119,7 @@ class RecentMenu(RecentInterface, QtGui.QMenu):
 	def __init__(self,conf,category,parent=None):
 		QtGui.QMenu.__init__(self,parent=parent)
 		RecentInterface.__init__(self,conf,category)
-		self.setTitle(self.mtr('Recent '+self.name+'s'))
+		self.setTitle(_('Recent '+self.name+'s'))
 		self.redraw()
 		self.connect(self.conf,QtCore.SIGNAL('mem()'),self.redraw)
 		self.connect(self.conf,QtCore.SIGNAL('rem()'),self.redraw)
@@ -135,12 +132,12 @@ class RecentMenu(RecentInterface, QtGui.QMenu):
 			p=functools.partial(self.emit, QtCore.SIGNAL('select(QString)'), sig)
 			self.addAction(name,p)
 		self.addSeparator()
-		self.addAction(self.mtr("Clear list"),self.clear_recent)
-		self.addAction(self.mtr("Open")+'...',self.new)
+		self.addAction(_("Clear list"),self.clear_recent)
+		self.addAction(_("Open")+'...',self.new)
 		if self.category=='server':
-			self.addAction(self.mtr('Disconnect'),self.server_disconnect)
-			self.addAction(self.mtr('Restart'),self.server_restart)
-			self.addAction(self.mtr('Shutdown'),self.server_shutdown)
+			self.addAction(_('Disconnect'),self.server_disconnect)
+			self.addAction(_('Restart'),self.server_restart)
+			self.addAction(_('Shutdown'),self.server_shutdown)
 			
 	def server_disconnect(self):
 		self.emit(QtCore.SIGNAL('server_disconnect()'))
@@ -154,7 +151,7 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
 	def __init__(self,conf,category,parent=None):
 		QtGui.QWidget.__init__(self,parent)
 		RecentInterface.__init__(self,conf,category)
-		self.setWindowTitle(self.mtr('Recent '+self.name+'s:'))
+		self.setWindowTitle(_('Recent '+self.name+'s:'))
 		self.lay=QtGui.QVBoxLayout()
 		
 		self.lay.addWidget(QtGui.QLabel('Recent '+self.name+'s:'))
@@ -165,7 +162,7 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
 		self.connect(self.conf,QtCore.SIGNAL('rem()'),self.redraw)
 		self.lay.addWidget(self.list)
 		
-		self.button=QtGui.QPushButton(self.mtr('Open')+'...',parent=self)
+		self.button=QtGui.QPushButton(_('Open')+'...',parent=self)
 		self.connect(self.button,QtCore.SIGNAL('clicked()'),self.new)
 		self.lay.addWidget(self.button)
 		

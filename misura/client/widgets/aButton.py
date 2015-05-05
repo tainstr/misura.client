@@ -13,9 +13,9 @@ class aButton(ActiveWidget):
 		
 	def msg(self):
 		r=self.current
-		if r is True: r=self.mtr('Done')
-		elif r is False: r=self.mtr('Failed')
-		QtGui.QMessageBox.information(self, self.mtr('Operation Result'), str(r))
+		if r is True: r=_('Done')
+		elif r is False: r=_('Failed')
+		QtGui.QMessageBox.information(self, _('Operation Result'), str(r))
 			
 	def enterEvent(self, event):
 		"""Override auto-update when mouse enters."""

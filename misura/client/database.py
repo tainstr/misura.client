@@ -4,16 +4,14 @@ from PyQt4 import QtCore,QtGui
 import os
 import datetime
 import functools
-
-from widgets.active import Linguist
+from misura.client import _
 from misura.canon import csutil, indexer
 from misura.client.clientconf import settings
 from misura.client.connection import addrConnection
 
-class DatabaseModel(Linguist,QtCore.QAbstractTableModel):
+class DatabaseModel(QtCore.QAbstractTableModel):
 	def __init__(self, remote=False,tests=[], header=[]):
 		QtCore.QAbstractTableModel.__init__(self)
-		Linguist.__init__(self,context='Client')
 		self.remote=remote
 		self.tests=tests
 		self.header=header
@@ -46,7 +44,7 @@ class DatabaseModel(Linguist,QtCore.QAbstractTableModel):
 		if not self.remote: return
 		self.tests=self.remote.query(conditions)
 		self.header=self.remote.header()
-		self.sheader=[self.mtr('dbcol:'+h) for h in self.header]
+		self.sheader=[_('dbcol:'+h) for h in self.header]
 		QtCore.QAbstractTableModel.reset(self)
 
 class DatabaseHeader(QtGui.QHeaderView):
@@ -100,15 +98,14 @@ class DatabaseTable(QtGui.QTableView):
 		#name,index,file
 		return row[ncol], row[icol], row[fcol],row[fuid]
 
-class DatabaseWidget(Linguist,QtGui.QWidget):
+class DatabaseWidget(QtGui.QWidget):
 	def __init__(self, remote=False, parent=None):
 		QtGui.QWidget.__init__(self, parent)
-		Linguist.__init__(self,context='Local')
 		self.remote=remote
 		loc=remote.addr
 		if loc=='LOCAL': loc=remote.dbPath
-		self.setWindowTitle(self.mtr('misura Database: ')+loc)
-		self.label=self.mtr('misura Database')
+		self.setWindowTitle(_('misura Database: ')+loc)
+		self.label=_('misura Database')
 		self.lay=QtGui.QVBoxLayout()
 		self.setLayout(self.lay)
 		self.menu=QtGui.QMenuBar(self)
@@ -125,20 +122,20 @@ class DatabaseWidget(Linguist,QtGui.QWidget):
 		wg.setLayout(lay)
 		self.lay.addWidget(wg)
 		
-		lay.addWidget(QtGui.QLabel(self.mtr('Query:')))
+		lay.addWidget(QtGui.QLabel(_('Query:')))
 		self.qfilter=QtGui.QComboBox(self)
 		lay.addWidget(self.qfilter)
 		self.nameContains=QtGui.QLineEdit(self)
 		lay.addWidget(self.nameContains)
-		self.doQuery=QtGui.QPushButton(self.mtr('Apply'),parent=self)
+		self.doQuery=QtGui.QPushButton(_('Apply'),parent=self)
 		lay.addWidget(self.doQuery)
 		self.connect(self.doQuery,QtCore.SIGNAL('clicked()'),self.query)
 
-		self.menu.addAction(self.mtr('Download'), self.download)
-		self.menu.addAction(self.mtr('Download As...'), self.downloadAs)
-		self.menu.addAction(self.mtr('Remove'), self.remove)
-		self.menu.addAction(self.mtr('Refresh'), self.up)
-		self.menu.addAction(self.mtr('Rebuild'), self.rebuild)
+		self.menu.addAction(_('Download'), self.download)
+		self.menu.addAction(_('Download As...'), self.downloadAs)
+		self.menu.addAction(_('Remove'), self.remove)
+		self.menu.addAction(_('Refresh'), self.up)
+		self.menu.addAction(_('Rebuild'), self.rebuild)
 		self.bar=QtGui.QProgressBar(self)
 		self.lay.addWidget(self.bar)
 		self.bar.hide()
@@ -154,11 +151,11 @@ class DatabaseWidget(Linguist,QtGui.QWidget):
 		sh=self.table.model().sheader
 		hh=self.table.horizontalHeader()
 		self.qfilter.clear()
-		self.qfilter.addItem(self.mtr('None'),'')
+		self.qfilter.addItem(_('None'),'')
 		for i,h in enumerate(header):
 			print 'qfilter',i,h
 			if hh.isSectionHidden(i): continue
-			self.qfilter.addItem(self.mtr(sh[i]),h)
+			self.qfilter.addItem(_(sh[i]),h)
 			
 		
 	def query(self):
@@ -234,11 +231,10 @@ class DatabaseWidget(Linguist,QtGui.QWidget):
 		self.remote.remove(uid)
 		self.up()
 
-class ProgressBar(Linguist, QtGui.QWidget):
+class ProgressBar( QtGui.QWidget):
 	def __init__(self, title='Operation in progress', label=' '*100, status='Ready', parent=None, context='Undefined'):
-		Linguist.__init__(self, context)
 		QtGui.QWidget.__init__(self, parent)
-		self.setWindowTitle(self.mtr(title))
+		self.setWindowTitle(_(title))
 		self.lay=QtGui.QVBoxLayout(self)
 		self.bar=QtGui.QProgressBar(self)
 		self.bar.setValue(0)

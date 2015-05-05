@@ -13,7 +13,7 @@ import veusz.document as document
 import veusz.setting as setting
 from veusz import veusz_main
 
-from .. import widgets
+from .. import _
 from .. import misura3
 from .. import filedata
 from .. import plugin
@@ -22,7 +22,6 @@ from ..plugin import * #??? devo importarlo per pyinstaller...!
 from .. import navigator
 from ..clientconf import confdb
 from ..database import getDatabaseWidget, getRemoteDatabaseWidget, ProgressBar
-import plot
 import veuszplot
 from ..confwidget import RecentMenu, ClientConf
 
@@ -94,16 +93,15 @@ safe.append(imp)
 document.CommandInterface.safe_commands=safe
 document.CommandInterface.Importmisura=misura_import
 	
-class misuraInterface(widgets.Linguist, CustomInterface, QtCore.QObject):
+class misuraInterface(CustomInterface, QtCore.QObject):
 	"""MainWindow methods useful for misura specific widgets and actions"""
 	def __init__(self, mainwindow):
-		widgets.Linguist.__init__(self, context='Graphics')
 		CustomInterface.__init__(self, mainwindow, 'misura')
 		QtCore.QObject.__init__(self, parent=mainwindow)
 		
 		# Navigator
 		self.openedFilesDock=QtGui.QDockWidget(self.mw.centralWidget())
-		self.openedFilesDock.setWindowTitle(self.mtr('Misura Navigator'))
+		self.openedFilesDock.setWindowTitle(_('Misura Navigator'))
 		self.openedFiles=navigator.Navigator(parent=self.openedFilesDock, doc=self.mw.document,  mainwindow=self.mw)
 		self.openedFilesDock.setWidget(self.openedFiles)
 		self.openedFilesDock.setObjectName('misuranavigator')
@@ -266,10 +264,9 @@ class misuraInterface(widgets.Linguist, CustomInterface, QtCore.QObject):
 		self.openedFiles.refresh()
 		return dsnames
 
-class Misura3Interface(widgets.Linguist, CustomInterface, QtCore.QObject):
+class Misura3Interface(CustomInterface, QtCore.QObject):
 	"""MainWindow methods useful for Misura3 specific widgets and actions"""
 	def __init__(self, mainwindow):
-		widgets.Linguist.__init__(self, context='Graphics')
 		CustomInterface.__init__(self, mainwindow, 'Misura3')
 		QtCore.QObject.__init__(self, parent=mainwindow)
 		
@@ -307,7 +304,7 @@ class Misura3Interface(widgets.Linguist, CustomInterface, QtCore.QObject):
 
 from misura.client.filedata import MisuraDocument
 
-class Graphics(widgets.Linguist, MainWindow):
+class Graphics(MainWindow):
 	"""Main Graphics window, derived directly from Veusz"""
 	#FIXME: patch to Veusz for dynamic document substitution!
 	@property
@@ -318,7 +315,6 @@ class Graphics(widgets.Linguist, MainWindow):
 		"""Block overwrites! (hack!)"""
 		return
 	def __init__(self,*a):
-		widgets.Linguist.__init__(self, context='Graphics')
 		loadIcons()
 		print 'Load Icons OK'
 		self._document=MisuraDocument()

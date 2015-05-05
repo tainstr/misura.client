@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
-from active import ActiveWidget, getRemoteDev
+from active import ActiveWidget, getRemoteDev,_
 from aString import aString
+
 
 class Role(ActiveWidget):
 	def __init__(self, *a, **k):
@@ -10,9 +11,9 @@ class Role(ActiveWidget):
 		self.subwin={} # goto() subwindos mapping
 		self.button=QtGui.QPushButton('None')
 		self.bmenu=QtGui.QMenu()
-		self.bmenu.addAction(self.mtr('Change'), self.edit)
-		self.bmenu.addAction(self.mtr('Unset'), self.unset)
-		self.bmenu.addAction(self.mtr('Go to'), self.goto)
+		self.bmenu.addAction(_('Change'), self.edit)
+		self.bmenu.addAction(_('Unset'), self.unset)
+		self.bmenu.addAction(_('Go to'), self.goto)
 		self.button.setMenu(self.bmenu)
 		self.lay.addWidget(self.button)
 		self.isIO=self.type.endswith('IO')
@@ -78,7 +79,7 @@ class Role(ActiveWidget):
 class RoleDialog(QtGui.QDialog):
 	def __init__(self, parent):
 		QtGui.QDialog.__init__(self, parent=parent)
-		self.setWindowTitle(parent.mtr('Select an object for this Role'))
+		self.setWindowTitle(_('Select an object for this Role'))
 		self.lay=QtGui.QVBoxLayout()
 		self.setLayout(self.lay)
 		self.wg=parent
@@ -103,14 +104,14 @@ class RoleEditor(QtGui.QWidget):
 		self.w=role_widget
 		from misura.client.conf import ServerView
 		self.tree=ServerView(role_widget.server)
-		self.lay.addRow(self.w.mtr('Select object'), self.tree)
+		self.lay.addRow(_('Select object'), self.tree)
 		# preset chooser
 		self.config=QtGui.QComboBox(parent=self)
-		self.lay.addRow(self.w.mtr('Configuration preset'), self.config)
+		self.lay.addRow(_('Configuration preset'), self.config)
 		# IO chooser
 		if self.w.isIO:
 			self.io=QtGui.QComboBox(parent=self)
-			self.lay.addRow(self.w.mtr('Option name'), self.io)
+			self.lay.addRow(_('Option name'), self.io)
 		self.connect(self.tree.selectionModel(), 
 					QtCore.SIGNAL('currentChanged(QModelIndex,QModelIndex)'), 
 					self.select)

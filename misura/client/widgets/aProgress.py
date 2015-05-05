@@ -42,7 +42,7 @@ class RoleProgress(ActiveWidget):
 	"""Global server 'progress' option widget. This is a RoleIO pointing to the real 'Progress'-type option being performed"""
 	def __init__(self, server, remObj, prop, parent=None,slider_class=QtGui.QSlider):
 		ActiveWidget.__init__(self, server, remObj, prop, parent)
-		self.setWindowTitle(self.mtr('Remote Operation in Progress'))
+		self.setWindowTitle(_('Remote Operation in Progress'))
 		# Base widget
 		self.bw=QtGui.QWidget(parent=self)
 		self.blay=QtGui.QVBoxLayout()
@@ -52,7 +52,7 @@ class RoleProgress(ActiveWidget):
 		self.log.setLineWrapMode(self.log.NoWrap)
 		self.log.setFont(QtGui.QFont('TypeWriter',  7, 50, False))
 		self.log.hide()
-		self.more=QtGui.QPushButton(self.mtr('Log'), parent=self)
+		self.more=QtGui.QPushButton(_('Log'), parent=self)
 		self.connect(self.more, QtCore.SIGNAL('clicked()'), self.toggle_log)
 		
 

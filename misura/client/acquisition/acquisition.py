@@ -8,7 +8,7 @@ import threading
 from traceback import print_exc
 import os
 
-
+from .. import _
 from ..live import registry
 from .. import network
 
@@ -26,7 +26,6 @@ from .delay import DelayedStart
 
 # Synchronization stuff
 from .. import sync
-from ...canon import indexer
 
 from .. import graphics
 from ..database import UploadThread
@@ -44,7 +43,7 @@ roles={'motorBase':'Base Position', 'motorHeight':'Height Position',
                 'angleHeight':'Height Inclination','angleBase':'Base Inclination',
                 'angleRight':'Right Inclination','angleLeft':'LeftInclination'}
 
-class MainWindow(QtGui.QMainWindow, widgets.Linguist):
+class MainWindow(QtGui.QMainWindow):
 	"""Generalized Acquisition Interface"""
 	remote=None
 	doc=False
@@ -61,7 +60,6 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 	
 	def __init__(self, doc=False, parent=None):
 		super(MainWindow, self).__init__(parent)
-		widgets.Linguist.__init__(self,context='Acquisition')
 		self._lock=threading.Lock()
 		self.cameras={}
 		self.toolbars=[]
@@ -70,7 +68,7 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		self.area=QtGui.QMdiArea()
 		self.setCentralWidget(self.area)
 		self.setMinimumSize(800,600)
-		self.setWindowTitle(self.mtr('Misura Live'))
+		self.setWindowTitle(_('Misura Live'))
 		self.myMenuBar=MenuBar(parent=self)
 		self.setMenuWidget(self.myMenuBar)
 		self.connect(network.manager, QtCore.SIGNAL('connected()'), self.setServer)	
@@ -399,8 +397,8 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 				return self._resetFileProxy(retry=retry+1)
 			if retry>self.retry:
 				self.tasks.done('Waiting for data')
-				QtGui.QMessageBox.critical(self,self.mtr('Impossible to retrieve the ongoing test data'),
-						self.mtr("""A communication error with the instrument does not allow to retrieve the ongoing test data.
+				QtGui.QMessageBox.critical(self,_('Impossible to retrieve the ongoing test data'),
+						_("""A communication error with the instrument does not allow to retrieve the ongoing test data.
 						Please restart the client and/or stop the test."""))
 				return False
 			fid=self.remote.measure['uid']
@@ -496,7 +494,7 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 		if not os.path.exists(dbpath):
 			print 'DATABASE PATH DOES NOT EXIST',dbpath
 			dbpath=False
-			outfile=QtGui.QFileDialog.getSaveFileName(self,	self.mtr("Download finished test as"))
+			outfile=QtGui.QFileDialog.getSaveFileName(self,	_("Download finished test as"))
 			outfile=str(outfile)
 			if not len(outfile):
 				return False
@@ -506,8 +504,8 @@ class MainWindow(QtGui.QMainWindow, widgets.Linguist):
 			outfile=False
 		# Ask if it's not automatic
 		if not auto:
-			auto=QtGui.QMessageBox.question(self,self.mtr("Download finished test?"),
-									self.mtr("Would you like to save the finished test?"))
+			auto=QtGui.QMessageBox.question(self,_("Download finished test?"),
+									_("Would you like to save the finished test?"))
 			if auto!=QtGui.QMessageBox.Ok:
 				return False	
 		#TODO: Must wait that current file is closed!!!

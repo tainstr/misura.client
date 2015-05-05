@@ -1,18 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Versioning management utilities"""
-from misura.client import widgets
+from .. import _
 import functools
 from PyQt4 import QtGui, QtCore
 
-class VersionMenu(QtGui.QMenu,widgets.Linguist):
+class VersionMenu(QtGui.QMenu):
 	"""Available object versions menu"""
 	versionChanged=QtCore.pyqtSignal(('QString'))
 	
 	def __init__(self,proxy,parent=None):
 		QtGui.QMenu.__init__(self,parent=parent)
-		widgets.Linguist.__init__(self, 'Local')
-		self.setTitle(self.mtr('Version'))
+		self.setTitle(_('Version'))
 		self.proxy=proxy
 		self.redraw()
 		self.connect(self,QtCore.SIGNAL('aboutToShow()'),self.redraw)
@@ -35,11 +34,11 @@ class VersionMenu(QtGui.QMenu,widgets.Linguist):
 				act.setChecked(True)
 			# Keep in memory
 			self.loadActs.append((p,act))		
-		act=self.addAction(self.mtr('New version'),self.new_version)
+		act=self.addAction(_('New version'),self.new_version)
 		self.loadActs.append((self.new_version,act))
-		act=self.addAction(self.mtr('Save configuration'),self.save_version)
+		act=self.addAction(_('Save configuration'),self.save_version)
 		self.loadActs.append((self.save_version,act))
-		self.actValidate=self.addAction(self.mtr('Check signature'),self.signature)
+		self.actValidate=self.addAction(_('Check signature'),self.signature)
 		
 	def load_version(self,v):
 		"""Load selected version"""
@@ -51,7 +50,7 @@ class VersionMenu(QtGui.QMenu,widgets.Linguist):
 		# Try to create a new version
 		if self.proxy.get_version()=='':
 			if not self.new_version():
-				QtGui.QMessageBox.critical(self,self.mtr("Not saved"),self.mtr("Cannot overwrite original version"))
+				QtGui.QMessageBox.critical(self,_("Not saved"),_("Cannot overwrite original version"))
 				return False
 		self.proxy.save_conf()
 		self.proxy.flush()
@@ -59,7 +58,7 @@ class VersionMenu(QtGui.QMenu,widgets.Linguist):
 		
 	def new_version(self):
 		"""Create a new version"""
-		name,st=QtGui.QInputDialog.getText(self, self.mtr('Version name'), self.mtr('Choose a name for this version'))
+		name,st=QtGui.QInputDialog.getText(self, _('Version name'), _('Choose a name for this version'))
 		if not st: return False
 		self.proxy.create_version(unicode(name))
 		return True
@@ -68,8 +67,8 @@ class VersionMenu(QtGui.QMenu,widgets.Linguist):
 		"""Check file signature"""
 		r=self.proxy.verify()
 		if not r:
-			QtGui.QMessageBox.critical(self,self.mtr("Signature check failed"),self.mtr("Test data cannot be trusted."))
+			QtGui.QMessageBox.critical(self,_("Signature check failed"),_("Test data cannot be trusted."))
 		else:
-			QtGui.QMessageBox.information(self,self.mtr("Signature check succeeded"),self.mtr("Test data is genuine."))
+			QtGui.QMessageBox.information(self,_("Signature check succeeded"),_("Test data is genuine."))
 
 		

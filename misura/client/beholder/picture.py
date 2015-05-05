@@ -5,14 +5,14 @@ from PyQt4 import QtGui, QtCore
 from misura.client import widgets
 import overlay
 import functools
-from misura.client import conf, widgets
-from misura.client.live import registry, FrameProcessor, SampleProcessor
+from misura.client import conf
+from misura.client.live import FrameProcessor, SampleProcessor
 from motionplane import SensorPlane
 from sample_picture import SamplePicture
 import calibration
 from time import sleep
 
-class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
+class ViewerPicture(QtGui.QGraphicsView):
 	"""Display widget for camera frames"""
 	role='camera'
 	sampleProcessor=False
@@ -29,7 +29,6 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 	def __init__(self, remote, server, parent=None,
 				frameProcessor=False, sampleProcessor=False):
 		QtGui.QGraphicsView.__init__(self, parent)
-		widgets.Linguist.__init__(self,context='Client')
 		self.windows={}
 		self.objects={}
 		self.conf_win={}
@@ -240,7 +239,7 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 			fp=obj['fullpath']
 		if txt is False:
 			txt='Configure'
-		act=menu.addAction(self.mtr(txt),functools.partial(self.configure_object, obj))
+		act=menu.addAction(_(txt),functools.partial(self.configure_object, obj))
 		act.setCheckable(True)
 		self.conf_act[fp]=act	
 		return act
@@ -260,38 +259,38 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 		self.menus={}
 		
 		# Controls Menu
-		self.imenu = self.menu.addMenu(self.mtr('Imaging'))
+		self.imenu = self.menu.addMenu(_('Imaging'))
 		self.add_imaging_actions(self.imenu)
 
 		#########
 		# Analysis menu
 		#########
-		self.amenu = self.menu.addMenu(self.mtr('Analysis'))
+		self.amenu = self.menu.addMenu(_('Analysis'))
 		
 		# General view entries
 		self.roiAct = self.amenu.addAction('View Regions', 
 										functools.partial(self.over_by_name,'roi'))
 		self.roiAct.setCheckable(True)
 		
-		self.profileAct = self.amenu.addAction(self.mtr('Profile'),
+		self.profileAct = self.amenu.addAction(_('Profile'),
 											functools.partial(self.over_by_name,'profile'))
 		self.profileAct.setCheckable(True)
 		
-		self.labelAct = self.amenu.addAction(self.mtr('Values Label'), 
+		self.labelAct = self.amenu.addAction(_('Values Label'), 
 											functools.partial(self.over_by_name,'label'))
 		self.labelAct.setCheckable(True)
 		
-		self.pointsAct = self.amenu.addAction(self.mtr('Points'), 
+		self.pointsAct = self.amenu.addAction(_('Points'), 
 											functools.partial(self.over_by_name,'points'))
 		
 		# Shape entries
 		self.pointsAct.setCheckable(True)
 
-		self.baseHeightAct = self.amenu.addAction(self.mtr('Base and Height'), 
+		self.baseHeightAct = self.amenu.addAction(_('Base and Height'), 
 											functools.partial(self.over_by_name,'baseHeight'))
 		self.baseHeightAct.setCheckable(True)
 
-		self.circleAct = self.amenu.addAction(self.mtr('Circle Fitting'), 
+		self.circleAct = self.amenu.addAction(_('Circle Fitting'), 
 											functools.partial(self.over_by_name,'circle'))
 		self.circleAct.setCheckable(True)
 		
@@ -305,7 +304,7 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 		#########
 		# Motion menu
 		#########
-		self.mmenu=self.menu.addMenu(self.mtr('Motion'))
+		self.mmenu=self.menu.addMenu(_('Motion'))
 		self.add_motion_actions(self.mmenu)
 		# Other stuff
 		self.menu.addAction('Save frame', self.save_frame)
@@ -332,7 +331,7 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 			obj=self.server.toPath(path)
 			if obj is None:
 				return False
-			submenu=menu.addMenu(self.mtr(name.capitalize()))
+			submenu=menu.addMenu(_(name.capitalize()))
 			act=widgets.MotorSliderAction(self.server,obj,submenu)
 			submenu.addAction(act)
 			if name in ('x','y'):
@@ -503,7 +502,7 @@ class ViewerPicture(widgets.Linguist,QtGui.QGraphicsView):
 			# Menu structure for samples
 			m=self.menus.get(name,False)
 			if m is False:
-				m=self.menu.addMenu(self.mtr('Sample ')+str(i))
+				m=self.menu.addMenu(_('Sample ')+str(i))
 				self.menus[name]=m
 			m.clear()
 			self.add_conf_action(m,sample,fp)

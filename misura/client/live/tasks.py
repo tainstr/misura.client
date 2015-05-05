@@ -2,14 +2,8 @@
 # -*- coding: utf-8 -*-
 """Pending tasks feedback"""
 
-from time import sleep, time
-from cPickle import loads
-import threading
-from traceback import print_exc
-from misura.canon import option
 from misura.canon.csutil import lockme, profile
-from misura.client.network import manager as net
-from misura.client.linguist import Linguist
+from .. import _
 import functools
 from PyQt4 import QtGui, QtCore
 
@@ -61,17 +55,16 @@ class PendingTasks(QtGui.QWidget):
 		
 			
 
-class LocalTasks(Linguist,QtGui.QWidget):
+class LocalTasks(QtGui.QWidget):
 	"""Global server 'progress' option widget. This is a RoleIO pointing to the real 'Progress'-type option being performed"""
 	ch=QtCore.pyqtSignal()
 	sig_done=QtCore.pyqtSignal(str)
 	sig_done0=QtCore.pyqtSignal()
 	def __init__(self):
-		Linguist.__init__(self)
 		QtGui.QWidget.__init__(self)
 		self.lay=QtGui.QHBoxLayout()
 		self.setLayout(self.lay)
-		self.setWindowTitle(self.mtr('Local Operations in Progress'))
+		self.setWindowTitle(_('Local Operations in Progress'))
 		# Base widget
 		self.bw=QtGui.QWidget(parent=self)
 		self.blay=QtGui.QVBoxLayout()
@@ -81,7 +74,7 @@ class LocalTasks(Linguist,QtGui.QWidget):
 		self.log.setLineWrapMode(self.log.NoWrap)
 		self.log.setFont(QtGui.QFont('TypeWriter',  7, 50, False))
 		self.log.hide()
-		self.more=QtGui.QPushButton(self.mtr('Log'), parent=self)
+		self.more=QtGui.QPushButton(_('Log'), parent=self)
 		self.connect(self.more, QtCore.SIGNAL('clicked()'), self.toggle_log)
 		
 
@@ -197,13 +190,12 @@ class LocalTasks(Linguist,QtGui.QWidget):
 		"""Thread-safe call for _done()"""
 		self.sig_done.emit(pid)
 		
-class Tasks(Linguist,QtGui.QWidget):
+class Tasks(QtGui.QWidget):
 	def __init__(self):
-		Linguist.__init__(self)
 		QtGui.QWidget.__init__(self)
 		self.lay=QtGui.QVBoxLayout()
 		self.setLayout(self.lay)
-		self.setWindowTitle(self.mtr('Pending Operations'))
+		self.setWindowTitle(_('Pending Operations'))
 		self.tasks=LocalTasks()
 		self.lay.addWidget(self.tasks)
 		self.progress=PendingTasks()

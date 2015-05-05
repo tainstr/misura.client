@@ -154,9 +154,8 @@ class aTableModel(QtCore.QAbstractTableModel):
 		self.up()
 		
 
-class aTableView(Linguist,QtGui.QTableView):
+class aTableView(QtGui.QTableView):
 	def __init__(self, parent=None):
-		Linguist.__init__(self, "Local")
 		QtGui.QTableView.__init__(self, parent)
 		self.curveModel=aTableModel(parent)
 		self.setModel(self.curveModel)
@@ -168,11 +167,11 @@ class aTableView(Linguist,QtGui.QTableView):
 		self.menu=QtGui.QMenu(self)
 		self.rowAfter=partial(self.addRow,1)
 		self.rowBefore=partial(self.addRow,-1)
-		self.menu.addAction(self.mtr('Add row after'),self.rowAfter)
-		self.menu.addAction(self.mtr('Add row before'),self.rowBefore)
-		self.menu.addAction(self.mtr('Delete row'),self.remRow)
+		self.menu.addAction(_('Add row after'),self.rowAfter)
+		self.menu.addAction(_('Add row before'),self.rowBefore)
+		self.menu.addAction(_('Delete row'),self.remRow)
 		self.menu.addSeparator()
-		self.menu.addAction(self.mtr('Update'),self.curveModel.up)
+		self.menu.addAction(_('Update'),self.curveModel.up)
 		self.connect(self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
 		
 	def showMenu(self, pt):

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from .. import widgets, network, conf
+from .. import network, conf, _
 from ..clientconf import confdb
 from ..connection import LoginWindow, addrConnection
 from ..confwidget import RecentMenu
@@ -9,11 +9,10 @@ from .. import parameters as params
 from PyQt4 import QtGui, QtCore
 import functools
 
-class MenuBar(widgets.Linguist,QtGui.QMenuBar):
+class MenuBar(QtGui.QMenuBar):
 	"""Menu principali"""
 	def __init__(self, server=False, parent=None):
 		QtGui.QMenuBar.__init__(self, parent)
-		widgets.Linguist.__init__(self,context='Acquisition')
 		self.remote=False
 		self.server=server
 		self.windows={}
@@ -24,9 +23,9 @@ class MenuBar(widgets.Linguist,QtGui.QMenuBar):
 			self.set_acquisition_mode()
 		else:
 			self.set_archive_mode()
-		self.measure=self.addMenu(self.mtr('Measure'))
+		self.measure=self.addMenu(_('Measure'))
 		self.connect(self.measure, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
-		self.settings=self.addMenu(self.mtr('Settings'))
+		self.settings=self.addMenu(_('Settings'))
 		self.connect(self.settings, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
 		if self.fixedDoc is False:
 			self.measure.setEnabled(False)
@@ -42,16 +41,16 @@ class MenuBar(widgets.Linguist,QtGui.QMenuBar):
 		return self.parent().fixedDoc		
 	
 	def set_acquisition_mode(self):
-		self.connectTo=self.addMenu(self.mtr('Connect'))
+		self.connectTo=self.addMenu(_('Connect'))
 		self.servers=RecentMenu(confdb,'server',self)
 		self.servers.setTitle('Server')
 		self.connect(self.servers,QtCore.SIGNAL('select(QString)'),self.setAddr)
 		self.connectTo.addMenu(self.servers)
 		self.instruments=self.connectTo.addMenu('Instruments')
 		self.instruments.setEnabled(False)
-		self.actLogout=self.connectTo.addAction(self.mtr('Logout'), self.logout)
+		self.actLogout=self.connectTo.addAction(_('Logout'), self.logout)
 		self.actLogout.setEnabled(False)
-		self.actShutdown=self.connectTo.addAction(self.mtr('Shutdown'), self.shutdown)
+		self.actShutdown=self.connectTo.addAction(_('Shutdown'), self.shutdown)
 		self.actShutdown.setEnabled(False)
 	
 	def set_archive_mode(self):

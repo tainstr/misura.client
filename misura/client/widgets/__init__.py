@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Elementi grafici avanzati per la modifica delle proprietà di configurazione sul server misura"""
 from PyQt4 import QtGui,QtCore
-from active import Linguist, Active, ActiveObject, ActiveWidget,Autoupdater, info_dialog, RunMethod
+from active import Active, ActiveObject, ActiveWidget,Autoupdater, info_dialog, RunMethod
 import os
 from traceback import print_exc
 from aBoolean import aBoolean,  aBooleanAction

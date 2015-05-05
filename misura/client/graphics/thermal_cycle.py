@@ -3,7 +3,7 @@
 """Designer per il ciclo termico."""
 import numpy as np
 from numpy import array
-
+from .. import _
 from .. import widgets
 from .. import parameters as params
 import plot
@@ -32,8 +32,7 @@ class ThermalCyclePlot(plot.VeuszPlot):
 	def setup(cls,cmd,graph='/time/time',
 					T='tc',R='tc1',
 					xT='x',yT='y',aT='y',
-					xR='x1',yR='y1',aR='y1',
-					mtr=lambda a:a):
+					xR='x1',yR='y1',aR='y1'):
 		"""Setup a ThermalCyclePlot on `graph` destination"""
 		cmd.SetData(xT, [])
 		cmd.SetData(yT, [])
@@ -60,13 +59,13 @@ class ThermalCyclePlot(plot.VeuszPlot):
 		
 		# Axis
 		cmd.To(graph)	
-		cmd.Set('x/label', str(mtr("Time (min)")))
-		cmd.Set(aT+'/label', str(mtr("Temperature (\deg C)")))
+		cmd.Set('x/label', str(_("Time (min)")))
+		cmd.Set(aT+'/label', str(_("Temperature (\deg C)")))
 		cmd.Set(aT+'/Label/color', 'red')
 		cmd.Set(T+'/MarkerFill/color', 'red')
 		cmd.Set(T+'/PlotLine/color', 'red')
 		
-		cmd.Set(aR+'/label', str(mtr("Rate (\deg C/min)")))
+		cmd.Set(aR+'/label', str(_("Rate (\deg C/min)")))
 		cmd.Set(aR+'/Label/color', 'blue')
 		cmd.Set(aR+'/otherPosition', 1)
 		cmd.Set(R+'/thinfactor', 2)
@@ -76,7 +75,7 @@ class ThermalCyclePlot(plot.VeuszPlot):
 	def __init__(self, parent=None):
 		plot.VeuszPlot.__init__(self, parent=parent)
 		self.set_doc()
-		ThermalCyclePlot.setup(self.cmd,mtr=self.mtr)
+		ThermalCyclePlot.setup(self.cmd)
 		self.plot.setPageNumber(2)
 
 	
@@ -158,17 +157,16 @@ class TimeSpinBox(QtGui.QDoubleSpinBox):
 		
 # Nota: colCHK deve sempre essere l'ultima colonna (indice + alto)
 colTIME=0; colTEMP=1; colRATE=2; colDUR=3; colCHK=4
-class ThermalCurveModel(widgets.Linguist, QtCore.QAbstractTableModel):
+class ThermalCurveModel(QtCore.QAbstractTableModel):
 	"""Data model for thermal cycle editing"""
 	sigModeChanged=QtCore.pyqtSignal()
 	
 	def __init__(self, crv=None):
-		widgets.Linguist.__init__(self, 'Option')
 		QtCore.QAbstractTableModel.__init__(self)
 		self.dat=[]
 		header=[]
 		for s in ['Time', 'Temperature', 'Heating Rate', 'Duration', 'Checkpoint']:
-			header.append(self.mtr(s))
+			header.append(_(s))
 		self.header=header
 		self.mode='ramp'
 		self.editable=(colTEMP, colCHK)
@@ -416,10 +414,9 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
 			QtGui.QItemDelegate.setModelData(self, editor, model, index)
 			
 
-class ThermalCurveTable(widgets.Linguist, QtGui.QTableView):
+class ThermalCurveTable(QtGui.QTableView):
 	"""Table view of a thermal cycle."""
 	def __init__(self, parent=None):
-		widgets.Linguist.__init__(self, 'Option')
 		QtGui.QTableView.__init__(self, parent)
 		self.curveModel=ThermalCurveModel()
 		self.setModel(self.curveModel)
@@ -431,16 +428,16 @@ class ThermalCurveTable(widgets.Linguist, QtGui.QTableView):
 		self.connect(self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
 		self.menu=QtGui.QMenu(self)
 		m=self.menu
-		m.addAction(self.mtr('Insert point'), self.newRow)
-		m.addAction(self.mtr('Insert checkpoint'), self.newCheckpoint)
-		m.addAction(self.mtr('Insert movement'), self.newMove)
-		a=m.addAction(self.mtr('Insert parametric heating'), self.newParam)
+		m.addAction(_('Insert point'), self.newRow)
+		m.addAction(_('Insert checkpoint'), self.newCheckpoint)
+		m.addAction(_('Insert movement'), self.newMove)
+		a=m.addAction(_('Insert parametric heating'), self.newParam)
 		a.setEnabled(False)
-		m.addAction(self.mtr('Remove current row'), self.delRow)
+		m.addAction(_('Remove current row'), self.delRow)
 		m.addSeparator()
-		self.rti=m.addAction(self.mtr('Rate/Temperature mode'), self.curveModel.mode_ramp)
-		self.tti=m.addAction(self.mtr('Time/Temperature mode'),self.curveModel.mode_points)
-		self.dti=m.addAction(self.mtr('Duration/Temperature mode'), self.curveModel.mode_dwell)
+		self.rti=m.addAction(_('Rate/Temperature mode'), self.curveModel.mode_ramp)
+		self.tti=m.addAction(_('Time/Temperature mode'),self.curveModel.mode_points)
+		self.dti=m.addAction(_('Duration/Temperature mode'), self.curveModel.mode_dwell)
 		self.curveModel.sigModeChanged.connect(self.updateMenu)
 		self.connect(self.menu, QtCore.SIGNAL('aboutToShow()'), self.updateMenu)
 		for act in self.rti, self.tti, self.dti:
@@ -487,8 +484,8 @@ class ThermalCurveTable(widgets.Linguist, QtGui.QTableView):
 		
 	def newMove(self):
 		items=['>move,close','>move,open']
-		labels=[self.mtr('Close furnace'),self.mtr('Open furnace')]
-		item,ok=QtGui.QInputDialog.getItem(self,self.mtr('Select furnace movement event'),self.mtr('Event type:'),labels,0,False)
+		labels=[_('Close furnace'),_('Open furnace')]
+		item,ok=QtGui.QInputDialog.getItem(self,_('Select furnace movement event'),_('Event type:'),labels,0,False)
 		if not ok:
 			return
 		val=labels.index(item)
@@ -496,8 +493,8 @@ class ThermalCurveTable(widgets.Linguist, QtGui.QTableView):
 		self.insert_event(val)
 		
 	def newCheckpoint(self):
-		delta,ok=QtGui.QInputDialog.getDouble(self,self.mtr('Define a setpoint tolerance'),
-											self.mtr('Temperature-Setpoint tolerance:'),
+		delta,ok=QtGui.QInputDialog.getDouble(self,_('Define a setpoint tolerance'),
+											_('Temperature-Setpoint tolerance:'),
 											3,0.1)
 		if not ok:
 			return
@@ -514,10 +511,9 @@ class ThermalCurveTable(widgets.Linguist, QtGui.QTableView):
 		self.model().removeRows(crow)
 		
 		
-class ThermalCycleDesigner(QtGui.QSplitter, widgets.Linguist):
+class ThermalCycleDesigner(QtGui.QSplitter):
 	"""The configuration interface widget. It builds interactive controls to deal with a misura configuration object (options, settings, peripherals configurations, etc)."""
 	def __init__(self, remote, parent=None):
-		widgets.Linguist.__init__(self, 'Option')
 #		QtGui.QWidget.__init__(self, parent)
 		QtGui.QSplitter.__init__(self, parent)
 		self.setOrientation(QtCore.Qt.Vertical)

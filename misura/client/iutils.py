@@ -15,12 +15,6 @@ signal.signal(signal.SIGINT, signal.SIG_DFL) # cattura i segnali
 
 app=None
 translators=[]
-linguist=False
-if params.linguist: 
-	rt=os.path.join(params.pathLang, 'runtime.dat')
-	print 'Opening linguist file',rt
-	linguist=open(rt, 'w')
-
 
 network.manager.connect(network.manager,
 	QtCore.SIGNAL('connected(QString,QString,QString,bool)'),
@@ -53,7 +47,7 @@ def saveAddress():
 #	settings.setValue('/ServerName', net.name)
 
 def initClient():
-	global translators, app,  linguist,confdb, registry
+	global translators, app,  confdb, registry
 	app = QtGui.QApplication.instance()
 	app.connect(app, QtCore.SIGNAL('aboutToQuit()'), closeApp)
 	app.connect(app, QtCore.SIGNAL('lastWindowClosed()'), closeApp)
@@ -94,8 +88,8 @@ stylesheet=""
 
 def initApp(name='misura', org="Expert System Solutions", domain="expertsystemsolutions.it",client=True,qapp=False):
 	"""Inzializzazione generale di una applicazione misura Client.
-	Creazione QApplication, installazione dei traduttori, inizializzazione file linguist."""
-	global translators, app,  linguist
+	Creazione QApplication, installazione dei traduttori"""
+	global translators, app
 	app=qapp
 	if not app:
 		app = QtGui.QApplication(sys.argv)
@@ -116,14 +110,6 @@ def closeApp():
 	sleep(1)
 	network.manager.terminate()
 	network.closeConnection()
-	if linguist: 
-#		print 'updating languages'
-		linguist.close()
-#		import language_sync
-#		language_sync.language_sync()
-
-
-
 
 def xcombinations(items, n):
 	# Origine:

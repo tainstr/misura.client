@@ -6,7 +6,7 @@ sip.setapi('QString', 2)
 from veusz import document
 import veusz.setting
 import veusz.utils
-from misura.client import widgets
+from .. import _
 from entry import DatasetEntry
 
 from PyQt4 import QtCore,QtGui
@@ -52,11 +52,10 @@ def print_ent(ent):
 from veusz.setting import controls
 void=None
 voididx=QtCore.QModelIndex()
-class DocumentModel(widgets.Linguist,QtCore.QAbstractItemModel):
+class DocumentModel(QtCore.QAbstractItemModel):
 	changeset=0
 	_plots=False
 	def __init__(self, doc, status=dstats,refresh=True,cols=2):
-		widgets.Linguist.__init__(self,context='Graphics')
 		QtCore.QAbstractItemModel.__init__(self)
 		self.ncols=cols
 		self.status=status
@@ -174,9 +173,9 @@ class DocumentModel(widgets.Linguist,QtCore.QAbstractItemModel):
 			return 
 		if role==QtCore.Qt.DisplayRole:
 			if section==0:
-				return self.mtr('Dataset')
+				return _('Dataset')
 			#TODO!
-			return self.mtr('Value')
+			return _('Value')
 		
 	def decorate(self,ent,role):
 		"""Find text color and icon decorations for dataset ds"""
@@ -228,7 +227,7 @@ class DocumentModel(widgets.Linguist,QtCore.QAbstractItemModel):
 			if isinstance(node, DatasetEntry):
 				if role==Qt.DisplayRole:
 					s='curve:'+node.path.replace('summary/','')
-					t=self.mtr(s)
+					t=_(s)
 					if s==t: t=node.legend
 					return t
 			elif isinstance(node,NodeEntry):

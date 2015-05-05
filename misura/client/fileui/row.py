@@ -1,17 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tree visualization of variables at a given time"""
-from misura.client import iutils,filedata
-from misura.client import widgets
+from .. import _
 import functools
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 
-class RowView(widgets.Linguist,QtGui.QTreeView):
+class RowView(QtGui.QTreeView):
 	def __init__(self,parent=None):
 		QtGui.QTreeView.__init__(self, parent)
-		widgets.Linguist.__init__(self,context='Data')
 		self.setUniformRowHeights(True)
 		self.devmenu={}
 		self.curveMap={}
@@ -46,7 +44,7 @@ class RowView(widgets.Linguist,QtGui.QTreeView):
 		if node!=None:
 			if node.status>0:
 				menu=QtGui.QMenu(self)
-				menu.addAction(self.mtr('Hide this result'), functools.partial(self.hide_show,node.col))
+				menu.addAction(_('Hide this result'), functools.partial(self.hide_show,node.col))
 				menu.popup(self.mapToGlobal(pt))
 				return
 		# Rebuild the menu

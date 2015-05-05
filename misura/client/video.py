@@ -10,7 +10,6 @@ except:
 
 from ..canon import csutil, reference
 
-from widgets import Linguist
 import platform
 
 from PyQt4 import QtGui,QtCore
@@ -84,38 +83,37 @@ def export(sh,frame='/hsm/sample0/frame',
 	out.release()
 	return True
 	
-class VideoExporter(Linguist,QtGui.QDialog):
+class VideoExporter(QtGui.QDialog):
 	def __init__(self,sh,src='/hsm/sample0',parent=None):
-		Linguist.__init__(self,'Video')
 		QtGui.QDialog.__init__(self,parent=parent)
-		self.setWindowTitle(self.mtr('Video Export Configuration'))
+		self.setWindowTitle(_('Video Export Configuration'))
 		self.lay=QtGui.QFormLayout()
 		self.setLayout(self.lay)
 		self.sh=sh
 		
 		self.src=QtGui.QLineEdit()
 		self.src.setText(src)
-		self.lay.addRow(self.mtr("Sample source"),self.src)
+		self.lay.addRow(_("Sample source"),self.src)
 		
 		self.ext=QtGui.QComboBox()
 		self.ext.addItem("profile")
 		self.ext.addItem("frame")
 		self.ext.setCurrentIndex(0)
-		self.lay.addRow(self.mtr("Rendering source"),self.ext)
+		self.lay.addRow(_("Rendering source"),self.ext)
 		
 ##		self.meta=QtGui.QListWidget()
 ##		for k in ['Sintering','Softening','Sphere','HalfSphere','Melting']:
 ##			it=QtGui.QListWidgetItem(k)
 ##			it.setCheckState(0)
 ##			self.meta.addItem(it)
-##		self.lay.addRow(self.mtr("Render metadata"),self.meta)
+##		self.lay.addRow(_("Render metadata"),self.meta)
 ##		
 ##		self.vals=QtGui.QListWidget()
 ##		for k in ['T','Vol','h']:
 ##			it=QtGui.QListWidgetItem(k)
 ##			it.setCheckState(0)
 ##			self.vals.addItem(it)
-##		self.lay.addRow(self.mtr("Render values"),self.vals)
+##		self.lay.addRow(_("Render values"),self.vals)
 		
 		if 'Linux' in platform.platform():
 			self.frm=QtGui.QComboBox()
@@ -123,7 +121,7 @@ class VideoExporter(Linguist,QtGui.QDialog):
 			self.frm.addItem('XVID')
 			self.frm.addItem('MJPG')
 			self.frm.setCurrentIndex(0)
-			self.lay.addRow(self.mtr("Output Video Codec"),self.frm)
+			self.lay.addRow(_("Output Video Codec"),self.frm)
 		else:
 			self.frm=False
 		
@@ -131,11 +129,11 @@ class VideoExporter(Linguist,QtGui.QDialog):
 		self.fps.setMinimum(1)
 		self.fps.setMaximum(100)
 		self.fps.setValue(50)
-		self.lay.addRow(self.mtr("Framerate"),self.fps)
+		self.lay.addRow(_("Framerate"),self.fps)
 		
 		self.out=QtGui.QLineEdit()
 		self.out.setText(sh.get_path()+'.avi')
-		self.lbl_out=QtGui.QPushButton(self.mtr("Output file"))
+		self.lbl_out=QtGui.QPushButton(_("Output file"))
 		self.lbl_out.pressed.connect(self.change_output)
 		self.lay.addRow(self.lbl_out,self.out)
 		
@@ -149,7 +147,7 @@ class VideoExporter(Linguist,QtGui.QDialog):
 	def export(self):
 		"""Start export thread"""
 		prog=QtGui.QProgressBar()
-		self.lay.addRow(self.mtr('Rendering:'),prog)
+		self.lay.addRow(_('Rendering:'),prog)
 		src=str(self.src.text())
 		ext=str(self.ext.currentText())
 		if self.frm:
@@ -170,7 +168,7 @@ class VideoExporter(Linguist,QtGui.QDialog):
 			self.prog.setValue(0)
 	
 	def change_output(self):
-		new=QtGui.QFileDialog.getSaveFileName(self,self.mtr("Video output file"),filter=self.mtr("Video (*avi)"))
+		new=QtGui.QFileDialog.getSaveFileName(self,_("Video output file"),filter=_("Video (*avi)"))
 		if len(new):
 			self.out.setText(new)
 	

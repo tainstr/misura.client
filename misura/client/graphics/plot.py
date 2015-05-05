@@ -171,8 +171,8 @@ class Plot(VeuszPlot):
 		self.set_idx()
 		
 	def save_to_file(self):
-		name=QtGui.QFileDialog.getSaveFileName(self,self.mtr('Save this plot to file'),
-											self.mtr('Choos a filename and format where to save the file.'),
+		name=QtGui.QFileDialog.getSaveFileName(self,_('Save this plot to file'),
+											_('Choos a filename and format where to save the file.'),
 											filter='Veusz (*.vsz);;Images (*.png *.jpg);;Vector (*svg *pdf *eps)')
 		name=unicode(name)
 		if len(name)==0:
