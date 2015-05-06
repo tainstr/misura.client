@@ -1,7 +1,7 @@
 # System library imports.
 from PyQt4 import QtGui
 from pygments import formatters, lexer, lexers, styles
-
+from .. import _
   
   
 def get_tokens_unprocessed(self, text, stack=('root',)):

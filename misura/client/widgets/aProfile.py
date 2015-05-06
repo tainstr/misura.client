@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Basic plot of an image profile path"""
-
+from .. import _
 from misura.client.widgets.active import *
 import numpy as np
 import cPickle as pickle

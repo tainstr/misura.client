@@ -3,7 +3,7 @@
 from PyQt4 import QtCore, QtGui
 from active import ActiveWidget, getRemoteDev,_
 from aString import aString
-
+from .. import _
 
 class Role(ActiveWidget):
 	def __init__(self, *a, **k):

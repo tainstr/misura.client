@@ -7,7 +7,7 @@ from traceback import print_exc
 from misura.client.parameters import MAX,MIN
 from misura.client.widgets.active import ActiveWidget
 import math
-
+from .. import _
 
 class aProgress(ActiveWidget):
 	def __init__(self, server, remObj, prop, parent=None):

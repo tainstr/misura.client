@@ -3,7 +3,7 @@
 """Pending tasks feedback"""
 
 from misura.canon.csutil import lockme, profile
-from .. import _
+from misura.client import _
 import functools
 from PyQt4 import QtGui, QtCore
 

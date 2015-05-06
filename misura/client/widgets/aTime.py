@@ -3,7 +3,7 @@
 """Date and Time widget"""
 from time import time
 from active import *
-
+from .. import _
 
 
 class aTime(ActiveWidget):

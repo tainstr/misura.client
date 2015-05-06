@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from functools import partial
 from PyQt4 import QtGui, QtCore
-from misura.client import widgets
+from misura.client import widgets, _
 import overlay
 import functools
 from misura.client import conf
@@ -300,7 +300,9 @@ class ViewerPicture(QtGui.QGraphicsView):
 		# Pixel Calibration 
 		self.calAct = self.amenu.addAction('Pixel Calibration', self.calibration)
 		self.calAct.setCheckable(True)
-		
+		# Remove tool action if modification is not allowed
+		if not self.remote.check_write('Analysis_umpx'):
+			self.amenu.removeAction(self.calAct)
 		#########
 		# Motion menu
 		#########

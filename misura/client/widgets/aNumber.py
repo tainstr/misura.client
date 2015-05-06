@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from .. import _
 from PyQt4 import QtCore,QtGui
 from traceback import print_exc
 from misura.client.parameters import MAX,MIN

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui,QtCore
 from misura.client.widgets.active import *
+from .. import _
 import highlighter
 
 class ScriptEditor(QtGui.QDialog):

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from misura.client.widgets.active import *
+from .. import _
 
 class aString(ActiveWidget):
 	"""Graphical element for interacting with a text string"""

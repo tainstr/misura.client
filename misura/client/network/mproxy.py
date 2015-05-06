@@ -92,6 +92,10 @@ class MisuraProxy(object):
 	"""User name"""
 	password=False
 	"""User password"""
+	_readLevel=0
+	"""Read level"""
+	_writeLevel=0
+	"""Write level"""
 	_remoteDict={}
 	"""Remote methods and object paths"""
 	_refresh_interval=0
@@ -144,6 +148,8 @@ class MisuraProxy(object):
 		self.remObj._ServerProxy__allow_none=True
 		self.remObj._Method__name='MAINSERVER'
 		self._Method__name='MAINSERVER'
+		a=self.remObj.echo('').split('=')
+		self._readLevel,self._writeLevel=int(a[2].split(',')[0]),int(a[3].split(',')[0])
 		# Compile a list of both remote callable methods and remote walkable objects
 		d={'MAINSERVER':[]}
 		#FIXME: this will cause memory leak on labor2...
@@ -224,6 +230,8 @@ class MisuraProxy(object):
 		self._dtime=obj._dtime
 		self._protect=obj._protect
 		self._smartnaming=obj._smartnaming
+		self._readLevel=obj._readLevel
+		self._writeLevel=obj._writeLevel
 		# Restore smartnaming, if it was enabled
 		if oldsmart:
 			self._smartnaming=True

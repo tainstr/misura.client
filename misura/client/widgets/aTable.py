@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from .. import _
 from misura.client.widgets.active import *
 from functools import partial
 class aTablePointDelegate(QtGui.QItemDelegate):

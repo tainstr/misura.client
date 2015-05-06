@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from misura.client.widgets.active import *
 from aChooser import aChooser
-
+from .. import _
 
 class PresetManager(aChooser):
 	def __init__(self, remObj, parent=None, context='Option',

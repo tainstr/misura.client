@@ -8,8 +8,8 @@ import threading
 from traceback import print_exc
 from misura.canon import option
 from misura.canon.csutil import lockme, profile
-from ..network import manager as net
-from .. import _
+from misura.client.network import manager as net
+from misura.client import _
 from PyQt4 import QtGui, QtCore
 from tasks import Tasks
 

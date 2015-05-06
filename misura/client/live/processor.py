@@ -4,7 +4,7 @@
 
 from time import sleep, time
 from cPickle import loads
-from .. import _
+from misura.client import _
 from PyQt4 import QtGui, QtCore
 
 

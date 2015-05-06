@@ -4,6 +4,8 @@
 from PyQt4 import QtGui,QtCore
 from active import Active, ActiveObject, ActiveWidget,Autoupdater, info_dialog, RunMethod
 import os
+
+from .. import _
 from traceback import print_exc
 from aBoolean import aBoolean,  aBooleanAction
 from aButton import aButton
@@ -22,7 +24,6 @@ from presets import PresetManager
 from role import Role,  RoleEditor,  RoleDialog
 from cycle import ThermalCycleChooser
 from motorslider import MotorSlider, MotorSliderAction
-
 
 def build(server, remObj, prop, parent=None):
 	"""Build a property widget based on a property dict"""

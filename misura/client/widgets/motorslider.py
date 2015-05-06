@@ -3,7 +3,7 @@
 from PyQt4 import QtGui, QtCore
 from aNumber import aNumber
 from active import ActiveObject
-
+from .. import _
 class MotorSlider(aNumber):
 	def __init__(self, server, remObj, parent=None):
 		prop=remObj.gete('goingTo')

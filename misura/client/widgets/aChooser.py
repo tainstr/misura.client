@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from .. import _
 from PyQt4 import QtGui,QtCore
 from misura.client.widgets.active import ActiveWidget
 

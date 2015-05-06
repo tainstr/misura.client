@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys
 from active import *
-
+from .. import _
 
 
 class aBoolean(ActiveWidget):

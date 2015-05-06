@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from misura.client.widgets.active import *
-
+from .. import _
 from presets import PresetManager
 
 

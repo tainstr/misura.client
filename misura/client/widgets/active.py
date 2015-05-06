@@ -73,7 +73,8 @@ class Active(object):
 		
 		for p in 'current', 'type', 'handle', 'factory_default', 'attr', 'readLevel', 'writeLevel', 'name', 'kid':
 			setattr(self, p, prop[p])
-		self.readonly=self.type=='ReadOnly' or 'ReadOnly' in self.attr
+		self.readonly=(self.type=='ReadOnly') or ('ReadOnly' in self.attr) or (self.remObj._writeLevel<self.writeLevel)
+		
 		self.hard='Hard' in self.attr
 		self.hot='Hot' in self.attr
 		self.label=_(self.name)
