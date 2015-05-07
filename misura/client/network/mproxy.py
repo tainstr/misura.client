@@ -149,7 +149,7 @@ class MisuraProxy(object):
 		self.remObj._Method__name='MAINSERVER'
 		self._Method__name='MAINSERVER'
 		a=self.remObj.echo('').split('=')
-		self._readLevel,self._writeLevel=int(a[2].split(',')[0]),int(a[3].split(',')[0])
+		self._readLevel,self._writeLevel=int(a[1].split(',')[0]),int(a[2].split(',')[0])
 		# Compile a list of both remote callable methods and remote walkable objects
 		d={'MAINSERVER':[]}
 		#FIXME: this will cause memory leak on labor2...
