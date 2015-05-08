@@ -26,8 +26,8 @@ from ColorizePlugin import ColorizePlugin
 
 # Misura specific plugins
 from InitialDimensionPlugin import InitialDimensionPlugin
-from PercentilePlugin import PercentilePlugin, percentile_conversion
-from UnitsConverterTool import UnitsConverterTool, units_conversion
+from PercentilePlugin import PercentilePlugin
+from UnitsConverterTool import UnitsConverterTool
 
 from ThermalCyclePlugin  import ThermalCyclePlugin, drawCycleOnGraph
 from ShapesPlugin import ShapesPlugin

@@ -2,46 +2,10 @@
 # -*- coding: utf-8 -*-
 """Changes measurement unit to a dataset."""
 import veusz.plugins as plugins
-import numpy as np
-from copy import copy
 import veusz.document as document
 import utils
 from .. import units
 from misura.client.iutils import get_plotted_tree
-from PercentilePlugin import percentile_conversion
-
-def units_conversion(ds,to_unit):
-	from_unit=getattr(ds, 'unit',False)
-	if not from_unit or to_unit in ['None','',None,False]:
-		raise plugins.DatasetPluginException('Selected dataset does not have a measurement unit.') 
-	# Implicit To-From percentile conversion 
-	from_group=units.known_units[from_unit]
-	to_group=units.known_units[to_unit]
-	if from_group!=to_group:
-		if 'part' not in (from_group,to_group):
-			raise plugins.DatasetPluginException('Incompatible conversion: from {} to {}'.format(from_unit,to_unit))
-		ds1=percentile_conversion(ds)
-		if to_group=='part':
-			from_unit='percent'
-		elif from_group=='part':
-			# Guess default unit for destination dimension
-			from_unit=getattr(ds,'old_unit',units.user_defaults[to_group])
-	else:
-		# No implicit percentile conversion
-		ds1=copy(ds)
-			
-	out=units.Converter.convert(from_unit,to_unit,np.array(ds1.data))
-	ini=getattr(ds,'m_initialDimension',0)
-	old_unit=getattr(ds,'old_unit',from_unit)
-	old_group=units.known_units[old_unit]
-	if ini and (old_group==to_group==from_group) and 'part'!=to_group:
-		ini1=units.Converter.convert(from_unit,to_unit,ini)
-		ds.m_initialDimension=ini1
-		ds1.m_initialDimension=ini1
-		print 'converting m_initialDimension',ini,ini1
-	ds1.data=plugins.numpyCopyOrNone(out)
-	ds1.unit=to_unit
-	return ds1
 
 class UnitsConverterTool(utils.OperationWrapper,plugins.ToolsPlugin):
 	"""Convert between measurement units"""
@@ -78,7 +42,7 @@ class UnitsConverterTool(utils.OperationWrapper,plugins.ToolsPlugin):
 		if not ds:
 			raise plugins.DatasetPluginException('Dataset not found'+fields['ds'])
 
-		ds1=units_conversion(ds,fields['convert'])
+		ds1=units.convert(ds,fields['convert'])
 		self.ops.append(document.OperationDatasetSet(fields['ds'],ds1))
 		self.apply_ops()
 		

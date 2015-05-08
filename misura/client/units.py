@@ -104,7 +104,6 @@ def get_unit_info(unit, units):
 
 
 class Converter(object):
-	
 	from_server=lambda val:val
 	'''Convert `val` from server-side unit into client-side unit'''
 	to_client=from_server
@@ -180,4 +179,75 @@ class Converter(object):
 		"""Derivative for server->client conversion"""
 		return self.d
 
+import veusz.plugins as plugins
+from copy import copy
+import numpy as np
+def convert(ds,to_unit):
+	"""Convert dataset `ds` to `to_unit`"""
+	from_unit=getattr(ds, 'unit',False)
+	if not from_unit or to_unit in ['None','',None,False]:
+		raise plugins.DatasetPluginException('Selected dataset does not have a measurement unit.') 
+	# Implicit To-From percentile conversion 
+	from_group=known_units[from_unit]
+	to_group=known_units[to_unit]
+	if from_group!=to_group:
+		if 'part' not in (from_group,to_group):
+			raise plugins.DatasetPluginException('Incompatible conversion: from {} to {}'.format(from_unit,to_unit))
+		ds1=percentile_conversion(ds)
+		if to_group=='part':
+			from_unit='percent'
+		elif from_group=='part':
+			# Guess default unit for destination dimension
+			from_unit=getattr(ds,'old_unit',user_defaults[to_group])
+	else:
+		# No implicit percentile conversion
+		ds1=copy(ds)
+			
+	out=Converter.convert(from_unit,to_unit,np.array(ds1.data))
+	ini=getattr(ds,'m_initialDimension',0)
+	old_unit=getattr(ds,'old_unit',from_unit)
+	old_group=known_units[old_unit]
+	if ini and (old_group==to_group==from_group) and 'part'!=to_group:
+		ini1=Converter.convert(from_unit,to_unit,ini)
+		ds.m_initialDimension=ini1
+		ds1.m_initialDimension=ini1
+		print 'converting m_initialDimension',ini,ini1
+	ds1.data=plugins.numpyCopyOrNone(out)
+	ds1.unit=to_unit
+	return ds1
+	
+def percentile_conversion(ds,action='Invert',auto=True):
+	cur=getattr(ds, 'm_percent',False)
+	# invert action
+	if action=='Invert':
+		if cur: action='To Absolute'
+		else: action='To Percent'
+		print 'percentile_conversion doing',action,cur
 		
+	ini=getattr(ds, 'm_initialDimension',False)
+	out=np.array(ds.data)
+	# Auto initial dimension
+	if not ini:
+		if not auto or action!='To Percent':
+			raise plugins.DatasetPluginException('Selected dataset does not have an initial dimension set. \
+		Please first run "Initial dimension..." tool.')
+		ds.m_initialDimension=out[:5].mean()
+		
+	# Evaluate if the conversion is needed 
+	# based on the current status and the action requested by the user
+	if action=='To Absolute':
+		out=out*ds.m_initialDimension/100.
+		ds.m_percent=False
+		u=getattr(ds,'unit','percent')
+		# If current dataset unit is not percent, convert to
+		out=Converter.convert(u,'percent',out)	
+		ds.unit=getattr(ds,'old_unit',False)
+		ds.old_unit=u
+	elif action=='To Percent':
+		out=100.*out/ds.m_initialDimension
+		ds.m_percent=True
+		ds.old_unit=ds.unit
+		ds.unit='percent'
+	ds1=copy(ds)
+	ds1.data=plugins.numpyCopyOrNone(out)
+	return ds1

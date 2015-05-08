@@ -15,7 +15,16 @@ class aChooser(ActiveWidget):
 		self.redraw(reget=False)
 		self.lay.addWidget(self.combo)
 		self.connect(self.combo,  QtCore.SIGNAL('currentIndexChanged(int)'), self.set)
-
+		
+	def enterEvent(self, event):
+		"""Update the widget anytime the mouse enters its area.
+		This must be overridden in one-shot widgets, like buttons."""
+		if self.type=='FileList':
+			self.redraw()
+		else:
+			self.get()
+		return 
+		
 	def redraw(self, reget=True):
 		self.combo.blockSignals(True)
 		# Cleans combo entries

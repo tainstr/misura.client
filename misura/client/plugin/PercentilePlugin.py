@@ -3,49 +3,13 @@
 """Tools and plugins for Veusz, providing Misura Thermal Analysis functionality"""
 import veusz.plugins as plugins
 from PyQt4 import QtGui, QtCore
-import numpy
-import scipy
 import veusz.document as document
 import utils
-from copy import copy
+
 from misura.client.iutils import get_plotted_tree
 from .. import units
 
-def percentile_conversion(ds,action='Invert',auto=True):
-	cur=getattr(ds, 'm_percent',False)
-	# invert action
-	if action=='Invert':
-		if cur: action='To Absolute'
-		else: action='To Percent'
-		print 'percentile_conversion doing',action,cur
-		
-	ini=getattr(ds, 'm_initialDimension',False)
-	out=numpy.array(ds.data)
-	# Auto initial dimension
-	if not ini:
-		if not auto or action!='To Percent':
-			raise plugins.DatasetPluginException('Selected dataset does not have an initial dimension set. \
-		Please first run "Initial dimension..." tool.')
-		ds.m_initialDimension=out[:5].mean()
-		
-	# Evaluate if the conversion is needed 
-	# based on the current status and the action requested by the user
-	if action=='To Absolute':
-		out=out*ds.m_initialDimension/100.
-		ds.m_percent=False
-		u=getattr(ds,'unit','percent')
-		# If current dataset unit is not percent, convert to
-		out=units.Converter.convert(u,'percent',out)	
-		ds.unit=getattr(ds,'old_unit',False)
-		ds.old_unit=u
-	elif action=='To Percent':
-		out=100.*out/ds.m_initialDimension
-		ds.m_percent=True
-		ds.old_unit=ds.unit
-		ds.unit='percent'
-	ds1=copy(ds)
-	ds1.data=plugins.numpyCopyOrNone(out)
-	return ds1
+
 	
 	
 class PercentilePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
@@ -83,7 +47,7 @@ class PercentilePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		if not ds:
 			raise plugins.DatasetPluginException('Dataset not found'+fields['ds'])
 		
-		ds1=percentile_conversion(ds,fields['action'],fields['auto'])
+		ds1=units.percentile_conversion(ds,fields['action'],fields['auto'])
 		
 		self.ops.append(document.OperationDatasetSet(fields['ds'],ds1))
 		self.apply_ops()

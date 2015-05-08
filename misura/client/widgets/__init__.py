@@ -47,7 +47,7 @@ def build(server, remObj, prop, parent=None):
 			obj=aScript(server, remObj, prop, parent)
 		elif T=='Boolean':
 			obj=aBoolean(*arg)
-		elif T in ['Chooser', 'Menu']:
+		elif T in ['Chooser', 'Menu', 'FileList']:
 			obj=aChooser(*arg)
 		elif T=='Preset':
 			obj=PresetManager(remObj)

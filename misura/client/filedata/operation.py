@@ -22,7 +22,7 @@ from .. import iutils, live
 from .. import clientconf
 
 from misura.canon.csutil import profile 
-from ..plugin import units_conversion
+from .. import units
 
 from PyQt4 import QtCore
 
@@ -120,6 +120,9 @@ def interpolated(proxy,col,ztime_sequence):
 	if tdata is False:
 		return False
 	t,val=tdata[0],tdata[1]
+	if val is False or len(val)==0:
+		print 'INTERPOLATING EMPTY COLUMN', col
+		return val
 	f=InterpolatedUnivariateSpline(t,val,k=1)
 	r=f(ztime_sequence)
 	return r
@@ -203,7 +206,7 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 			self.proxy=getFileProxy(self.filename)
 		else:
 			print 'COPY FILE PROXY'
- 			#self.proxy=fp.copy()
+			#self.proxy=fp.copy()
 			self.proxy=fp
 		self.job(1,'Reading file','Configuration')
 		if not self.proxy.isopen():
@@ -292,7 +295,12 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		interpolating=True
 		if doc.data.has_key(self.prefix+'t'):
 			print 'Document already have a time sequence for this prefix',self.prefix
-			time_sequence=doc.data[self.prefix+'t'].data
+			ds=doc.data[self.prefix+'t']
+			try:
+				ds=units.convert(ds, 'second')
+			except:
+				pass
+			time_sequence=ds.data
 		if len(time_sequence)==0:
 			time_sequence=np.linspace(0,elapsed-1,elapsed)
 		else:
@@ -380,7 +388,7 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 				nu=self.rule_unit(col)
 				if u and nu:
 					print 'Converting to unit',col,ds.unit,nu
-					ds=units_conversion(ds,nu[0])
+					ds=convert(ds,nu[0])
 			
 			# Find out the sample index to which this dataset refers
 			var, idx=iutils.namingConvention(col)
