@@ -4,6 +4,7 @@
 from PyQt4 import QtGui, QtCore
 from math import sqrt
 from hook import HookPoint
+from .. import _, widgets
 
 colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (0, 125, 125), (125, 125, 0), (125, 0, 125)]*3
 
@@ -36,26 +37,37 @@ class CalibrationTool(QtGui.QDialog):
 		self.remote = remote
 		self.old_umpx = float(remote['Analysis_umpx'])
 		self.factor = self.old_umpx
-		self.setWindowTitle(u'Pixel Calibration')
+		self.vfactor = self.old_umpx
+		self.setWindowTitle(_('Pixel Calibration'))
 		self.lay = QtGui.QFormLayout()
 		self.setLayout(self.lay)
 		
+		# Connect to the sample analyzer calibrationLength property
+		self.sample=self.remote.role2dev('smp0')
+		self.rpl=widgets.build(self.remote.root,self.sample.analyzer,self.sample.analyzer.gete('calibrationLength'))
+		self.lay.addRow(self.rpl.label_widget,self.rpl)
+		
 		self.pxLen = QtGui.QLabel('', self)
-		self.lay.addRow('Pixel Length:', self.pxLen)
+		self.lay.addRow(_('Visual Pixel Length')+':', self.pxLen)
+		self.visFactor = QtGui.QLabel('', self)
+		self.lay.addRow(_('Visual factor')+':', self.visFactor)	
+		
 		self.oldFactor = QtGui.QLabel('%.2f' % self.old_umpx, self)
-		self.lay.addRow('Old factor:', self.oldFactor)
+		self.lay.addRow(_('Old factor)')+':', self.oldFactor)
 		self.oldUm = QtGui.QLabel('', self)
-		self.lay.addRow('Old length:', self.oldUm)
+		self.lay.addRow(_('Old length')+':', self.oldUm)
 		self.newUm = QtGui.QDoubleSpinBox(self)
 		self.newUm.setMinimum(0.5)
 		self.newUm.setMaximum(50000)
 		self.newUm.setValue(250)
 		self.newUm.setSingleStep(0.5)
 		self.newUm.setSuffix(u" \u00b5m")
-		self.lay.addRow('New length:', self.newUm)
+		self.lay.addRow(_('New length')+':', self.newUm)
+
+		
 		self.newFactor = QtGui.QLabel('', self)
-		self.lay.addRow('New factor:', self.newFactor)
-		self.okBtn = QtGui.QPushButton('Set new factor', self)
+		self.lay.addRow(_('New factor')+':', self.newFactor)
+		self.okBtn = QtGui.QPushButton(_('Set new factor'), self)
 		self.lay.addRow('', self.okBtn)
 		
 		self.connect(self.okBtn, QtCore.SIGNAL('clicked()'), self.ok)
@@ -64,7 +76,9 @@ class CalibrationTool(QtGui.QDialog):
 		
 	def showEvent(self, e):
 		self.old_umpx = float(self.remote['Analysis_umpx'])
+		self.sample.analyzer['calibration']=True
 		self.factor = self.old_umpx
+		self.vfactor = self.old_umpx
 		r = self.pixItem.boundingRect()
 		w, h = r.width(), r.height()
 		self.w, self.h = w, h
@@ -104,7 +118,8 @@ class CalibrationTool(QtGui.QDialog):
 		self.cleanUp()
 		self.done(0)
 		
-	def sync(self, *foo):
+	def vis_sync(self):
+		# Calculating visual length/factor
 		x1, y1, x2, y2 = self.x1, self.y1, self.x2, self.y2
 		self.line.setLine(x1, y1, x2, y2)
 		# Coefficiente angolare retta perpendicolare a self.line:
@@ -140,14 +155,22 @@ class CalibrationTool(QtGui.QDialog):
 		self.pxLen.setText(u'%.2f px' % ln)
 		self.oldFactor.setText(u'%.2f \u00b5m/px' % self.old_umpx)
 		self.oldUm.setText(u'%.2f \u00b5m' % (ln * self.old_umpx))
-		self.factor = self.newUm.value() / ln
+		self.vfactor = self.newUm.value() / ln
+		self.visFactor.setText(u'%.2f \u00b5m/px' % self.vfactor)
+		
+	def sync(self, *foo):
+		self.rpl.update()
+		self.vis_sync()
+		self.factor=self.newUm.value()/self.rpl.current
 		self.newFactor.setText(u'%.2f \u00b5m/px' % self.factor)
+		
 		
 	def closeEvent(self, e):
 		self.cleanUp()
 		return QtGui.QDialog.closeEvent(self, e)
 		
 	def cleanUp(self, *foo):
+		self.sample.analyzer['calibration']=False
 		s = self.pixItem.scene()
 		lst = self.pt1, self.pt2, self.line, self.stop1, self.stop2
 		for item in lst:

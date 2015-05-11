@@ -106,7 +106,7 @@ class MotorSlider(aNumber):
 class MotorSliderAction(QtGui.QWidgetAction):
 	def __init__(self,server,remObj,parent=None):
 		QtGui.QWidgetAction.__init__(self,parent)
-		self.wdg=MotorSlider(server,remObj)
+		self.wdg=MotorSlider(server,remObj,parent=parent)
 		self.setDefaultWidget(self.wdg)
 		
 	def showEvent(self, event):

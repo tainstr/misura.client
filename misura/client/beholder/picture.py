@@ -58,7 +58,7 @@ class ViewerPicture(QtGui.QGraphicsView):
 		
 		self.saveDir = False
 		self.saveN = 0
-			
+		
 		self.calibrationTool = calibration.CalibrationTool(self.plane, self.remote)
 		
 		self.menu = QtGui.QMenu(self)
@@ -337,7 +337,7 @@ class ViewerPicture(QtGui.QGraphicsView):
 			act=widgets.MotorSliderAction(self.server,obj,submenu)
 			submenu.addAction(act)
 			if name in ('x','y'):
-				slider=widgets.MotorSlider(self.server,obj,self.parent)
+				slider=widgets.MotorSlider(self.server,obj,parent=self.parent)
 				slider.spinbox.hide()
 				self.parent.setControl(slider,cpos[name])
 				self.motor_ctrl[name]=slider

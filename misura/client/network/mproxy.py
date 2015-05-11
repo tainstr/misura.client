@@ -401,7 +401,7 @@ class MisuraProxy(object):
 	def role2dev(self,opt):
 		"""Return the device object associated with role option `opt`"""
 		p=self[opt]
-		if p is False: 
+		if not p: 
 			return False
 		p=p[0]
 		if p in ('None',None):

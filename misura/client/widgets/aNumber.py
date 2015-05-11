@@ -47,7 +47,7 @@ class aNumber(ActiveWidget):
 		# If max/min are defined, create the slider widget
 		self.slider=False
 		if None not in [max, min]:
-			self.slider = slider_class(QtCore.Qt.Horizontal, self)
+			self.slider = slider_class(QtCore.Qt.Horizontal, parent=self)
 			self.slider.zoom.connect(self.setZoom)
 			self.lay.addWidget(self.slider)
 		# Identify float type from type or current/max/min/step
