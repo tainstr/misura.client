@@ -48,7 +48,9 @@ class ViewerControl(QtGui.QWidget):
 			if ctrl is None: continue
 			ctrl.close()
 			self.lay.removeWidget(ctrl)
+			ctrl.destroy()
 		self.viewer.close()
+		self.viewer=False
 		
 	def setControl(self, widget, position, tooltip='', inversion=0):
 		"""Set a slider widget in the given position. Available positions: upper, bottom, left, right"""
@@ -78,6 +80,7 @@ class ViewerControl(QtGui.QWidget):
 		self.lay.removeWidget(wdg)
 		wdg.hide()
 		wdg.close()
+		wdg.destroy()
 		self.controls[position]=None
 		
 	def delControls(self):
@@ -89,7 +92,7 @@ class ViewerControl(QtGui.QWidget):
 
 class CameraController(conf.Interface):
 	"""An interface widget adding the "View Camera" button"""
-	
+	viewerDialog=False
 	def __init__(self, server, remote, suffix='', parent=None):
 		print 'CameraController.__init__', server, remote
 		self.remote = remote
@@ -112,11 +115,14 @@ class CameraController(conf.Interface):
 	def toggle_stream(self, do=None):
 		"""Activate/deactivate camera viewing"""
 		print 'CameraController.toggle_stream', self.remote, self.server, self.viewerDialog
-		if self.viewerDialog:
+		if self.viewerDialog and self.viewerDialog.viewer:
 			self.viewerDialog.close()
-			self.viewerDialog=False
-		self.viewerDialog = dialog.ViewerDialog(self.server,self.remote, parent=None)
+		self.viewerDialog=False
+		self.viewerDialog = dialog.ViewerDialog(self.server,self.remote, parent=self)
 		self.viewerDialog.show()
 		self.viewerDialog.toggle_stream(True)
+		self.connect(self, QtCore.SIGNAL('destroyed()'), self.viewerDialog.close)
 
-
+	def close(self):
+		if self.viewerDialog:
+			self.viewerDialog.close()

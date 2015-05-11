@@ -55,6 +55,7 @@ class ViewerDialog(QtGui.QDialog):
 		print 'ViewerDialog.close'
 		self.toggle_stream(do=False)
 		self.viewer.close()
+		self.control.close()
 		self.done(0)
 		
 	def updateFPS(self, fps):
@@ -79,6 +80,8 @@ class ViewerDialog(QtGui.QDialog):
 	def toggle_stream(self, do=None):
 		"""Activate/deactivate camera viewing"""
 		print 'ViewerDialog.toggle_stream', do
+		if not self.viewer:
+			return 
 		if do == None:
 			self.toggle_stream(do=self.viewer.processor.stream ^ 1)
 			return

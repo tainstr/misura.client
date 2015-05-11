@@ -10,7 +10,7 @@ class MotorSlider(aNumber):
 		self.started=0
 		self.target=0
 		self.position=0
-		aNumber.__init__(self,server, remObj, prop, parent) #,slider_class=QtGui.QScrollBar)
+		aNumber.__init__(self,server, remObj, prop, parent)
 		self.pos_obj=ActiveObject(server, remObj, remObj.gete('position'))
 		self.connect(self.pos_obj, QtCore.SIGNAL('selfchanged'), self.update_position)
 		if self.slider:

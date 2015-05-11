@@ -177,13 +177,7 @@ class Interface(QtGui.QTabWidget):
 		self.connect(self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
 		
 	def redraw(self, foo=0):
-		if self.sectionsMap:
-			for wg in self.sectionsMap.itervalues():
-				print 'destroy', wg
-				wg.destroy()
-			for i in range(self.count()):
-				print 'remove tab'
-				self.removeTab(self.currentIndex())
+		self.close()
 		wg=Section(self.server, self.remObj, self.sections['Main'], parent=self)
 		self.sectionsMap={'Main':wg}
 		area=QtGui.QScrollArea(self)
@@ -214,6 +208,16 @@ class Interface(QtGui.QTabWidget):
 		
 		for sec in self.sectionsMap.itervalues():
 			self.widgetsMap.update(sec.widgetsMap)
+			
+	def close(self):
+		if not self.sectionsMap:
+			return 
+		for wg in self.sectionsMap.itervalues():
+			wg.close()
+			wg.destroy()
+		for i in range(self.count()):
+			print 'remove tab'
+			self.removeTab(self.currentIndex())			
 		
 	def update(self):
 		for s, sec in self.sectionsMap.iteritems():
@@ -225,7 +229,7 @@ class Interface(QtGui.QTabWidget):
 		self.menu.popup(self.mapToGlobal(pt))
 		
 	def show_details(self):
-		"""Mostra una tabella HTML contenente tutta la configurazione."""
+		"""Show full configuration as HTML table"""
 		self.desc=self.remObj.describe()
 		widgets.info_dialog(desc2html(self.desc), 'Details for Object: %s' % self.desc.get('name',{'current':'Object'})['current'], parent=self)
 		

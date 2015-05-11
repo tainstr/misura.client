@@ -50,10 +50,10 @@ class TreePanel( QtGui.QSplitter):
 		
 	def setPage(self,widget,title=False,keepCurrent=False):
 		if not title: title=''
-#		# Close current tab
 		current=self.tab.currentIndex()
 		if current>=0 and not keepCurrent:
 			print 'Removing current tab'
+			self.tab.currentWidget().close()
 			self.closeTab(current)
 		elif current<0: current=0
 		print 'Inserting tab',current
@@ -83,7 +83,7 @@ class TreePanel( QtGui.QSplitter):
 		mro=obj['mro']
 		if 'Camera' in mro:
 			from misura.client import beholder
-			page=beholder.CameraController(self.server, obj)
+			page=beholder.CameraController(self.server, obj,parent=self)
 		# Otherwise, generic Interface:
 		else:
 			page=constructor.Interface(self.server, obj, obj.describe(), parent=self)

@@ -59,7 +59,7 @@ class ViewerPicture(QtGui.QGraphicsView):
 		self.saveDir = False
 		self.saveN = 0
 		
-		self.calibrationTool = calibration.CalibrationTool(self.plane, self.remote)
+		self.calibrationTool = False
 		
 		self.menu = QtGui.QMenu(self)
 		self.addActions()
@@ -87,6 +87,8 @@ class ViewerPicture(QtGui.QGraphicsView):
 			print 'quitting'
 			self.sampleProcessor.wait()
 		self.sampleProcessor=False
+		if self.calibrationTool:
+			self.calibrationTool.close()
 		
 	def setFrameProcessor(self,fp=False):
 		"""Create or set the thread receiving frames from the remote camera"""
@@ -205,7 +207,10 @@ class ViewerPicture(QtGui.QGraphicsView):
 	def updateActions(self):
 		"""Set actions status."""
 		self.streamAct.setChecked(self.processor.isRunning())
-		self.calAct.setChecked(self.calibrationTool.isVisible())
+		if self.calibrationTool:
+			self.calAct.setChecked(self.calibrationTool.isVisible())
+		else:
+			self.calAct.setChecked(False)
 		for fp,win in self.conf_win.iteritems():
 			act=self.conf_act[fp]
 			act.setChecked(2*win.isVisible())
@@ -393,10 +398,10 @@ class ViewerPicture(QtGui.QGraphicsView):
 	def calibration(self): 
 		"""Show/hide the pixel calibration tool"""
 		#TODO: coherent way to fire caltool in multicrop mode
-		if self.calibrationTool.isVisible():
+		if self.calibrationTool:
 			self.calibrationTool.close()
-		else:
-			self.calibrationTool.show()
+		self.calibrationTool=calibration.CalibrationTool(self.plane, self.remote)
+		self.calibrationTool.show()
 		
 	def save_frame(self):
 		"""Save current frame"""
