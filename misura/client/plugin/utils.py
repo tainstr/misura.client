@@ -6,15 +6,17 @@ import veusz.document as document
 import numpy as np
 
 
-def searchFirstOccurrence(base, typename,direction=0):
+def searchFirstOccurrence(base, typename, direction=0):
 	"""Search for the nearest occurrence of a widget of type `typename` starting from base. 
 	The search can be restricted to upward (`direction`=-1), downward (`direction`=1) or both (`direction`=0)."""
-	if base.typename==typename:
+	if isinstance(typename,str):
+		typename=[typename]
+	if base.typename in typename:
 		return base
 	# Search down in the object tree
 	if direction>=0:
 		for obj in base.children:
-			if obj.typename==typename:
+			if obj.typename in typename:
 				return obj
 		
 		for obj in base.children:

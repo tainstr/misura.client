@@ -295,6 +295,6 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
 		r=p.apply(cmd,{'x':xT,'y':yT,'currentwidget':'/temperature/temp'})
 		return r
 
-
+#INTENTIONALLY NOT PUBLISHED
 #plugins.toolspluginregistry.append(PlotDatasetPlugin)
 #plugins.toolspluginregistry.append(DefaultPlotPlugin)

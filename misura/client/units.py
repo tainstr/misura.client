@@ -121,6 +121,8 @@ class Converter(object):
 		"""Direct conversion of `val` from `from_unit` to `to_unit`, without issuing a class instance"""
 		if from_unit in ('None', None):
 			return val
+		if from_unit==to_unit:
+			return val
 		if to_unit==None:
 			dom=known_units[from_unit]
 			to_unit=user_defaults[dom]
@@ -217,6 +219,7 @@ def convert(ds,to_unit):
 	return ds1
 	
 def percentile_conversion(ds,action='Invert',auto=True):
+	ds=copy(ds)
 	cur=getattr(ds, 'm_percent',False)
 	# invert action
 	if action=='Invert':
@@ -248,6 +251,5 @@ def percentile_conversion(ds,action='Invert',auto=True):
 		ds.m_percent=True
 		ds.old_unit=ds.unit
 		ds.unit='percent'
-	ds1=copy(ds)
-	ds1.data=plugins.numpyCopyOrNone(out)
-	return ds1
+	ds.data=plugins.numpyCopyOrNone(out)
+	return ds

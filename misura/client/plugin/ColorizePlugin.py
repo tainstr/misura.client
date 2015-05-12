@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -Set curve color markers"""
+"""Set curve color markers"""
 import veusz.plugins as plugins
 
 import utils 

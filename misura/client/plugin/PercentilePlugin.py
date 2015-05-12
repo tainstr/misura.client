@@ -48,7 +48,7 @@ class PercentilePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 			raise plugins.DatasetPluginException('Dataset not found'+fields['ds'])
 		
 		ds1=units.percentile_conversion(ds,fields['action'],fields['auto'])
-		
+		ds=ds1
 		self.ops.append(document.OperationDatasetSet(fields['ds'],ds1))
 		self.apply_ops()
 		print 'Converted %s %s using initial dimension %.2f.' % (fields['ds'], fields['action'], ds.m_initialDimension)

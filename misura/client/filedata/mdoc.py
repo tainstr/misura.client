@@ -148,7 +148,8 @@ class MisuraDocument(document.Document):
 			self.instrument_name=self.proxy.conf['runningInstrument']
 		instr=getattr(self.proxy.conf,self.instrument_name)
 		lastt=self.data['t'].data[-1]
-		
+		tu=getattr(self.data['t'],'unit','second')
+		lastt=units.Converter.convert(tu,'second',lastt)
 		if self.zerotime<0:
 			self.zerotime=instr['zerotime']
 		elp=root.time()-self.zerotime
@@ -158,7 +159,8 @@ class MisuraDocument(document.Document):
 			print 'Update not needed',elp,lastt
 			return []
 		print 'Update needed: %.2f>%.2f doc' % (elp,lastt)
-		nt=[elp] # New time point
+		# New time point in time units
+		nt=[units.Converter.convert('second',tu,elp)]
 		k=[]
 		header=self.proxy.header(['Array'],'/summary')
 		for h in header[:]:

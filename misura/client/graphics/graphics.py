@@ -332,7 +332,7 @@ class Graphics(MainWindow):
 		
 	def setupDefaultDoc(self):
 		"""Make default temperature/time pages"""
-		veuszplot.makeDefaultDoc(self.cmd,title=True)
+		plugin.makeDefaultDoc(self.cmd,title=True)
 		self.loadDefaultStylesheet()
 		self.loadDefaultCustomDefinitions()	
 		

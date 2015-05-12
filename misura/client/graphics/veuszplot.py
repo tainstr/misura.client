@@ -6,11 +6,10 @@ from veusz import qtall as qt4
 from PyQt4 import QtGui, QtCore
 
 
-from .. import widgets, filedata
+from .. import filedata, plugin
 from .. import _
 MAX=10**5
 MIN=-10**5
-import veusz.plugins
 import veusz.setting.settingdb as setdb
 import veusz.windows.treeeditwindow as treeeditwindow
 import veusz.document as document
@@ -18,7 +17,6 @@ from veusz.dialogs import dataeditdialog
 
 import veusz.windows.plotwindow as plotwindow
 import veusz.setting as setting
-from misura.client import plugin
 
 from functools import partial
 
@@ -273,7 +271,7 @@ class VeuszPlot(QtGui.QWidget):
 		if os.path.exists('/opt/misura/misura/client/art/plot.vst'):
 			self.ci.run("Load('/opt/misura/misura/client/art/plot.vst')")
 		
-		makeDefaultDoc(self.cmd)
+		plugin.makeDefaultDoc(self.cmd)
 		
 		# Override the zoompage action in order to fit the plot into widget dimension.
 		zp=self.plot.vzactions['view.zoompage']
@@ -363,55 +361,6 @@ class VeuszPlot(QtGui.QWidget):
 		return dialog
 
 
-class MakeDefaultDoc(plugin.utils.OperationWrapper, veusz.plugins.ToolsPlugin):
-	def __init__(self):
-		"""Make list of fields."""
-		
-		self.fields = [veusz.plugins.FieldBool("title", descr="Make title label", default=False)
-					]
-		
-	def apply(self,cmd,fields={'title':False}):
-		self.ops=[]
-		doc=cmd.document
-		self.doc=doc
-		self.doc.wipe()
-		self.ops.append((document.OperationWidgetAdd(doc.basewidget,'page',name='temperature')))
-		self.ops.append((document.OperationWidgetAdd(doc.basewidget,'page',name='time')))
-		self.apply_ops(descr='MakeDefaultPlot: Pages')
-		temp=doc.basewidget.getChild('temperature')
-		time=doc.basewidget.getChild('time')
-		self.ops.append((document.OperationWidgetAdd(temp,'graph',name='temp')))
-		self.ops.append((document.OperationWidgetAdd(time,'graph',name='time')))
-		self.apply_ops(descr='MakeDefaultPlot: Graphs') 
-		gtemp=temp.getChild('temp')
-		gtime=time.getChild('time')
-		
-		if fields['title']:
-			self.ops.append((document.OperationWidgetAdd(time,'label',name='title')))
-			self.ops.append((document.OperationWidgetAdd(temp,'label',name='title')))
-			self.apply_ops(descr='MakeDefaultPlot: Labels')
-			
-		self.dict_toset(doc.basewidget, {'width':'20cm','height':'20cm'})
-		labels=['Time (s)',u'Temperature (°C)']
-		for i,g in enumerate([gtime,gtemp]):
-			y=g.getChild('y')
-			if y is not None:
-				self.ops.append(document.OperationWidgetDelete(y))
-			props={'rightMargin':'1.5cm','leftMargin':'1.5cm','bottomMargin':'1.5cm','topMargin':'1.5cm'}
-			self.dict_toset(g, props)
-			self.toset(g.getChild('x'),'label',labels[i])
-			if not fields['title']:
-				print 'Skipping title creation'
-				continue
-			self.toset(g,'topMargin','1.5cm')
-			props={'xPos':0.1,'yPos':0.96,'label':'Title'}
-			self.dict_toset(g.parent.getChild('title'), props)
-		self.apply_ops('MakeDefaultDoc: Custom')
-#		doc.setModified(True)
-#		doc.setModified(False)
-		
-def makeDefaultDoc(cmd,title=False):
-	"""Make default temperature/time pages"""
-	p=MakeDefaultDoc()
-	p.apply(cmd,{'title':title})
+
+
 
