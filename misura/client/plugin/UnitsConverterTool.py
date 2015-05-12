@@ -59,6 +59,12 @@ class UnitsConverterTool(utils.OperationWrapper,plugins.ToolsPlugin):
 			print 'Propagating to',cvt
 			cvt+=dslist
 			upax.append(axp)
+		# If time dataset, propagate to all time datasets
+		if ds.m_var=='t':
+			for k,nds in self.doc.data.iteritems():
+				if k==fields['ds']: continue
+				if nds.m_var!='t': continue
+				cvt.append(k)
 		cvt=list(set(cvt))
 		# Create a non-propagating unit conversion operation for each dataset found
 		for nds in cvt:
