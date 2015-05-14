@@ -137,7 +137,7 @@ class MenuBar(QtGui.QMenuBar):
 		self.remote=remote
 		self.lstActions=[]
 		parent=self.parent()
-		name=self.remote['name']
+		name=self.remote['devpath']
 		for act, aname in self.lstInstruments:
 			if aname==name:
 				act.setCheckable(True)

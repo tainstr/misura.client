@@ -23,7 +23,7 @@ class Status(QtGui.QWidget):
 			wg=widgets.build(server, server.kiln,server.kiln.gete(opt))
 			wg.force_update=True
 			self.lay.addRow(wg.label_widget, wg)
-		n=remObj['name']
+		n=remObj['devpath']
 		opt=False
 		if n!='kiln':
 			if n=='hsm':

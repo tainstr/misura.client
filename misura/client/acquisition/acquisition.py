@@ -218,7 +218,7 @@ class MainWindow(QtGui.QMainWindow):
 			self.setServer(server)
 		self.instrumentDock.hide()
 		self.remote=remote
-		name=self.remote['name']
+		name=self.remote['devpath']
 		self.name=name
 		print 'Setting remote',remote,self.remote,name
 		self.setWindowTitle('misura Acquisition: %s (%s)' % (name, self.remote['comment']))

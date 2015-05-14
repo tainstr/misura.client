@@ -6,7 +6,7 @@ from .. import conf, widgets
 import status
 
 class MeasureInfo(QtGui.QTabWidget):
-	"""Configurazione della misura e dei campioni"""
+	"""Measurement and samples configuration"""
 	def __init__(self, remote, fixedDoc=False,  parent=None):
 		self.fromthermalCycleView=False
 		self.fixedDoc=fixedDoc
@@ -17,15 +17,10 @@ class MeasureInfo(QtGui.QTabWidget):
 		# Configurazione della Misura
 		self.server=remote.parent()
 		self.measureView=conf.Interface(self.server,remote.measure, remote.measure.describe(), parent=self)
-		# Configurazione Ciclo Termico:
-		p=self.remote.parent()
-		k=False
-		try:
-			k=p.kiln['name']
-		except:
-			pass
-		if k:
-			self.thermalCycleView=thermal_cycle.ThermalCycleDesigner(remote.parent().kiln, parent=self)
+		# Thermal cycle - only if a kiln obj exists
+		p=self.remote.root
+		if p.has_child('kiln'):
+			self.thermalCycleView=thermal_cycle.ThermalCycleDesigner(p.kiln, parent=self)
 		else:
 			self.thermalCycleView=QtGui.QWidget(self)
 		self.results=QtGui.QWidget(self)

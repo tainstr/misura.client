@@ -30,7 +30,7 @@ class Controls(QtGui.QToolBar):
 		self.aobj=widgets.ActiveObject(self.server, self.server, self.server.gete('isRunning'), self)
 		self.aobj.force_update=True
 		self.aobj.register()
-		self.name=self.remote['name'].lower()
+		self.name=self.remote['devpath'].lower()
 		print 'Controls: ', self.name
 		if self.name=='post':
 			self.addAction('Machine Database', parent.showIDB)
@@ -209,7 +209,7 @@ class Controls(QtGui.QToolBar):
 	def validate(self):
 		"""Show a confirmation dialog immediately before starting a new test"""
 		#TODO: generalize
-		if self.remote['name'] in ['horizontal','vertical','flex']:
+		if self.remote['devpath'] in ['horizontal','vertical','flex']:
 			val,st=QtGui.QInputDialog.getDouble(self,_("Confirm initial sample dimension"),
 											_("Initial dimension (micron)"),
 											self.remote.sample0['initialDimension'])
