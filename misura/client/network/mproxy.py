@@ -356,13 +356,18 @@ class MisuraProxy(object):
 		obj._toMethodName(self.sep.join(lst))
 		return obj
 	
-	def from_column(self,col):
+	def from_column(self,col0):
 		"""Returns the object able to return the column `col` and the column option name"""
 		sp=self.sep
+		# Remove ':' prefix
+		col=col0.split(':')
+		col=col[0] if len(col)==1 else col[1]
 		if col.startswith(sp+'summary'+sp): 
 				col=col[9:]
 		v=col.split(sp)
+		if v[0]=='': v.pop(0)
 		name=v.pop(-1)
+		print 'from_column', col0, v, name
 		obj=self.toPath(v)
 		return obj,name
 	

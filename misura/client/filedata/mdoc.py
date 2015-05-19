@@ -111,7 +111,7 @@ class MisuraDocument(document.Document):
 			print 'No data loaded in document',self.data
 			self.reloadData()
 			return False
-		if len(self.data['t'])<idx:
+		if len(self.data['0:t'])<idx:
 			self.update()
 		meta={}
 		for col in cols:
@@ -133,7 +133,7 @@ class MisuraDocument(document.Document):
 			return []
 		if not proxy:
 			proxy=self.proxy
-		if not self.data.has_key('t'):
+		if not self.data.has_key('0:t'):
 			print 'Time dataset is missing. Reloading.',self.data.keys()
 			self._lock.release()
 			dsnames=self.reloadData()
@@ -147,8 +147,8 @@ class MisuraDocument(document.Document):
 		if not self.instrument_name:
 			self.instrument_name=self.proxy.conf['runningInstrument']
 		instr=getattr(self.proxy.conf,self.instrument_name)
-		lastt=self.data['t'].data[-1]
-		tu=getattr(self.data['t'],'unit','second')
+		lastt=self.data['0:t'].data[-1]
+		tu=getattr(self.data['0:t'],'unit','second')
 		lastt=units.Converter.convert(tu,'second',lastt)
 		if self.zerotime<0:
 			self.zerotime=instr['zerotime']
@@ -168,7 +168,7 @@ class MisuraDocument(document.Document):
 			if r: r=r[0]
 			if r==1:
 				header.remove(h)
-		header=[h[1:] for h in header] # remove initial /
+		header=[h.replace('/summary/', '0:') for h in header] # remove initial /
 		header=set(header)
 		ks=set(self.data.keys())
 		dh=header-ks
@@ -188,7 +188,7 @@ class MisuraDocument(document.Document):
 			if not getattr(ds, 'm_col', False):
 				# Not a misura dataset
 				continue
-			if col=='t': 
+			if col=='0:t': 
 				updata=nt
 			else:
 				# Ask last point
