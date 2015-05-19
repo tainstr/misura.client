@@ -42,9 +42,7 @@ m4names=[ 'hsm/sample0/e', 'hsm/sample0/h',
 		'hsm/sample0/adh', 'hsm/sample0/circleErr', 'hsm/sample0/angle', 'hsm/sample0/xmass', 
 		'hsm/sample0/angR', 'hsm/sample0/ymass', 'hsm/sample0/angL', 
 		'hsm/sample0/angB', 'hsm/sample0/angC', 'hsm/sample0/vsym', 'hsm/sample0/rdn', 
-		'hsm/sample0/Vol', 'hsm/sample0/Sur']
-
-m4names=['summary/'+n for n in m4names]+['t']
+		'hsm/sample0/Vol', 'hsm/sample0/Sur', 't']
 
 class TestOperationMisuraImport(unittest.TestCase):
 	"""Tests the operation of importing a misura file, either native or exported from misura3."""	
@@ -78,9 +76,9 @@ class TestOperationMisuraImport(unittest.TestCase):
 		print imp.outnames
 		print doc.data.keys()
 		# autoload
-		self.assertGreater(len(doc.data['summary/hsm/sample0/h']),10)
+		self.assertGreater(len(doc.data['hsm/sample0/h']),10)
 		# no load: ds present but empty
-		self.assertEqual(len(doc.data['summary/hsm/sample0/e']),0)
+		self.assertEqual(len(doc.data['hsm/sample0/e']),0)
 		self.assertSetEqual(set(m4names)-set(imp.outnames),set([]))
 		self.check_doc(doc,nativem4)
 		
@@ -94,9 +92,9 @@ class TestOperationMisuraImport(unittest.TestCase):
 		print imp.outnames
 		print doc.data.keys()
 		# autoload
-		self.assertGreater(len(doc.data['summary/hsm/sample0/h']),10)
+		self.assertGreater(len(doc.data['hsm/sample0/h']),10)
 		# no load: ds present but empty
-		self.assertEqual(len(doc.data['summary/hsm/sample0/e']),0)
+		self.assertEqual(len(doc.data['hsm/sample0/e']),0)
 		
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4b))
 		imp.do(doc)

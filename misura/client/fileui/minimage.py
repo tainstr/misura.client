@@ -130,14 +130,14 @@ class MiniImage(QtGui.QWidget):
 		p=self.decoder.datapath.split('/') 
 		# Remove last name (/profile or /frame)
 		p.pop(-1)
-		p='summary'+'/'.join(p)
+		p='/'.join(p)
 		print 'update_info',p
 		
 		# Document-based index
 		idx=csutil.find_nearest_val(self.doc.data['t'].data,self.t)
 		for k in self.meta.keys():
 			if k=='T':
-				p1='summary/kiln/'+k
+				p1='kiln/'+k
 			else:
 				p1=p+'/'+k
 			ds=self.doc.data.get(p1,None)

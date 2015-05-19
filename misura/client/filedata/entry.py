@@ -10,13 +10,20 @@ dstats=collections.namedtuple('DocumentModelEntryStatus',('available loaded'))(0
 
 def iterpath(name,parent=False,splt=sep):
 	v=name.split(splt)
+	# Split the prefix, if found
+	if ':' in v[0]:
+		g=v[0].split(':')
+		v=g+v[1:]
+#		parent, first=v[0].split(':')
+#		v[0]=first
+		
 	# Recursively build the path
 	isLeaf=False
 	for i,sub in enumerate(v):
 		if not parent and i==1:
 			parent=v[0]
 		elif parent:
-			parent=splt.join(v[:i])	
+			parent=v[0]+':'+splt.join(v[1:i])	
 		if i==len(v)-1:
 			isLeaf=True
 		yield sub,parent,isLeaf
@@ -86,11 +93,21 @@ class NodeEntry(object):
 		"""Node full path/dataset name"""
 		if self._path:
 			return self._path
+		# Root and file entries
 		if not self.parent:
-			return self._name
-		if not self.parent.parent:
-			return self._name
-		self._path=self.splt.join([self.parent.path,self._name])
+			self._path=self._name
+			print 'Root entry', self._name
+		# File entry
+		elif not self.parent.parent:
+			self._path= self._name
+			print 'File entry', self._name
+		# First level entries (t, groups)
+		elif not self.parent.parent.parent:
+			self._path=self.parent.path+':'+self._name
+			print 'First level', self._path
+		# Normal entries
+		else:
+			self._path=self.splt.join([self.parent.path,self._name])
 		return self._path
 	
 	@path.setter
@@ -99,9 +116,7 @@ class NodeEntry(object):
 		
 	@property
 	def ds(self):
-		"""Retrieve the original dataset from the document,
-		not keeping any reference to it"""
-		return self.doc.data.get(self.path,False)
+		return False
 	
 	@property
 	def unit(self):
@@ -193,9 +208,6 @@ class NodeEntry(object):
 		"""Insert a pure node"""
 		splt=self.splt
 		ds=self.doc.data.get(path,False)
-		# Do not insert derived datasets!
-# 		if hasattr(ds,'getPluginData'):
-# 			return
 		if self.parent:
 			assert self.path.startswith(path)
 			# Cut away the common part
@@ -204,14 +216,14 @@ class NodeEntry(object):
 		linked=False
 		print 'going to insert',path
 		for sub, parent, leaf in iterpath(path):
-			print sub,parent,leaf,repr(item.path),repr(item._name),id(parent)
+			print 'iterating', sub,parent,leaf,repr(item.path),repr(item._name),id(parent)
 			# Remember the first part of the path (summary, 0:summary, etc)
 			if not parent:
 				linked=sub
 			if leaf:
 				item=DatasetEntry(doc=self.doc,name=sub,parent=item)
 				# Propagate the linked file to the first part of the path
-				if item.ds.linked:
+				if item.ds and item.ds.linked:
 					linked_item=self.root.get(linked,None)
 					if linked_item.linked==False:
 						linked_item.linked=item.ds.linked
@@ -223,7 +235,7 @@ class NodeEntry(object):
 			
 	def remove(self,child):
 		k=child._name
-		print 'removing ',k,self.path,self._children
+		print 'removing ',k, self.path
 		if not self._children.has_key(k):
 			print 'Asking to remove non existent node',k,'from',self.path
 			return False
@@ -281,10 +293,11 @@ class NodeEntry(object):
 		h=doc.data.keys()
 		for dn in h:
 			d=doc.data[dn]
+			dn1=dn
 			if hasattr(d, 'm_var'):
 				dn1=d.m_var
 			elif dn.startswith('summary'+self.splt):
-				dn1=dn[7+len(self.splt):] 
+				dn1=dn[7+len(self.splt):]
 			self.names[dn]=dn1
 			status=default_status
 			if len(d)==0 and default_status>=0:
@@ -307,6 +320,12 @@ class DatasetEntry(NodeEntry):
 	"""A wrapper object to represent a dataset by name and document, 
 	without actually keeping any reference to it."""
 	_parents=[]
+	
+	@property
+	def ds(self):
+		"""Retrieve the original dataset from the document,
+		not keeping any reference to it"""
+		return self.doc.data.get(self.path,False)
 	
 	@property
 	def status(self):

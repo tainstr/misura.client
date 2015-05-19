@@ -187,7 +187,7 @@ class Plot(VeuszPlot):
 		"""Moves the position line according to the requested point sequence index."""
 		self.idx_disconnect()
 		if seq<0: seq=self.idx
-		for g,dsn in (('/time/time/','t'), ('/temperature/temp/','summary/kiln/T')):
+		for g,dsn in (('/time/time/','t'), ('/temperature/temp/','kiln/T')):
 			print self.document.data.keys()
 			ds=self.document.data[dsn]
 			if seq>=len(ds.data): return
@@ -224,7 +224,7 @@ class Plot(VeuszPlot):
 	
 	def move_line_temp(self):
 		rel=self.move_line('/temperature/temp')
-		idx=csutil.find_nearest_val(self.document.data['summary/kiln/T'].data, rel, seed=self.idx)
+		idx=csutil.find_nearest_val(self.document.data['kiln/T'].data, rel, seed=self.idx)
 		t=self.document.data['t'].data[idx]
 		self.emit(QtCore.SIGNAL('move_line(float)'),t)
 

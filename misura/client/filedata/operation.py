@@ -71,6 +71,7 @@ class ImportParamsMisura(base.ImportParamsBase):
 	"""
 	defaults=deepcopy(base.ImportParamsBase.defaults)
 	defaults.update( {
+		'prefix':'0:', 
 		'version': -1, # means latest
 		'reduce': False,
 		'reducen': 1000,
@@ -137,6 +138,7 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 	rule_exc=False
 	rule_inc=False
 	rule_load=False
+	_rule_load=False
 	rule_unit=False
 	def __init__(self, params):
 		"""Create an import operation on the filename. Update defines if keep old data or completely wipe it."""
@@ -160,6 +162,7 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		self.rule_load=False
 		if len(params.rule_load)>0:
 			r=params.rule_load.replace('\n','|')
+			self._rule_load=r
 			print 'Load rule',r
 			self.rule_load=re.compile(r)
 		self.rule_unit=clientconf.RulesTable(params.rule_unit)
@@ -312,15 +315,16 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		startt=ztime_sequence[0]
 		endt=ztime_sequence[-1]
 		outds={}
-		for p, col in enumerate(['t']+header):
-			print 'Importing column', p, col,elapsed
+		for p, col0 in enumerate(['t']+header):
+			print 'Importing column', p, col0,elapsed
+			col=col0.replace('/summary/', '/')
 			mcol=col
 			if mcol.startswith(sep): mcol=mcol[1:]
 			if mcol.endswith(sep): mcol=mcol[:-1]
 			pcol=self.prefix + mcol
 			m_var=col.split('/')[-1]
 			# Set m_update 
-			if m_var=='t' or col in autoload:
+			if m_var=='t' or col0 in autoload:
 				print 'Set for update',col
 				m_update=True
 			else:

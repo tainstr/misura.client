@@ -18,7 +18,7 @@ class MeasureInfo(QtGui.QTabWidget):
 		self.server=remote.parent()
 		self.measureView=conf.Interface(self.server,remote.measure, remote.measure.describe(), parent=self)
 		# Thermal cycle - only if a kiln obj exists
-		p=self.remote.root
+		p=self.server
 		if p.has_child('kiln'):
 			self.thermalCycleView=thermal_cycle.ThermalCycleDesigner(p.kiln, parent=self)
 		else:

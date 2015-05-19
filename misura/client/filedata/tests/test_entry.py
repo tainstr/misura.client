@@ -26,6 +26,7 @@ def tearDownModule():
 
 from3=os.path.join(iut.data_dir,'m3_hsm.h5')
 nativem4=os.path.join(iut.data_dir,'post_m3.h5')
+nativem4='/opt/local_data/vertical/VerticalDilatometer_3.h5'
 
 m3names=['t', 'kiln_T', 'smp0_Sint', 'smp0_Ang', 'smp0_Ratio', 'smp0_Area','kiln_S', 'kiln_P', 'smp0_Width']
 
@@ -60,7 +61,7 @@ class TestDatasetPluginEntry(unittest.TestCase):
 		print 'check',root,maxst
 		self.assertTrue(root.status,maxst)
 	
-	def test_dpe(self):
+	def _test_dpe(self):
 		dpar=Ds('parent')
 		dsub=Ds('sub')
 		doc=Doc()
@@ -75,6 +76,15 @@ class TestDatasetPluginEntry(unittest.TestCase):
 		self.check(fold)
 		sub.status=3
 		self.check(fold,3)
+		
+	def test_import(self):
+		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
+		doc=document.Document()
+		imp.do(doc)
+		print imp.outnames
+		print doc.data.keys()
+		root=filedata.NodeEntry()
+		root.set_doc(doc)
 		
 		
 		

@@ -15,9 +15,9 @@ from .. import units
 default_curves=['T', 'P','S', 'h', 'Vol', 'd', 'err']
 an_default_curves=['T', 'Vol', 'd', 'Dil',  'Sint', 'Flex']
 
-power_axes={'summary/kiln/P':'Power','summary/kiln/kP':'Power','summary/kiln/kI':'Power',
-		'summary/kiln/kD':'Power','summary/kiln/pC':'Power','summary/kiln/pD':'Power',
-		'summary/kiln/T':'Temperature','summary/kiln/S':'Temperature'}
+power_axes={'kiln/P':'Power','kiln/kP':'Power','kiln/kI':'Power',
+		'kiln/kD':'Power','kiln/pC':'Power','kiln/pD':'Power',
+		'kiln/T':'Temperature','kiln/S':'Temperature'}
 
 #FIXME: add also misura names along camA/camB (which are Misura3)
 bounded_axes={'odlt':{'camA':'Dil','camB':'Dil','const':'pos'},
@@ -43,9 +43,7 @@ def dataset_curve_name(ds):
 			sampleName=ds.m_smp['name']
 		else:
 			sampleName=ds.linked.instr.measure['name']
-	dsname=getattr(ds,'m_name',ds.name()).replace("/", ":")
-	if dsname.startswith('summary:'):
-		dsname=dsname[8:]
+	dsname=getattr(ds,'m_name',ds.name()).replace('summary/', '').replace("/", ":")
 	dsvar=getattr(ds,'m_var','')
 	fileName='' if ds.linked is None else os.path.basename(ds.linked.filename)
 	if sampleName:
@@ -271,7 +269,7 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
 			print 'Checking', ds, var
 			if var=='t': 
 				timeds=ds
-			elif re.search('/kiln/T$',ds1): 
+			elif re.search('kiln/T$',ds1): 
 				tempds=ds
 			elif rp and rp.search(ds1): 
 				vars.append(ds)

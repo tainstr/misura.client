@@ -37,22 +37,23 @@ ao(default_desc,'units','Table',[[('Dimension', 'String'), ('Unit', 'String')]]+
 
 ao(default_desc,'rule','Section','Dataset Rules','Dataset Rules')
 
-rule_exc=r'''^(/summary)?/beholder/
-^(/summary)?/hydra/
-^(/summary)?/morla/
+rule_exc=r'''^(/summary/)?beholder/
+^(/summary/)?hydra/
+^(/summary/)?morla/
 /regulator/
-/analyzer/'''
+/analyzer/
+/autoroi/'''
 ao(default_desc,'rule_exc','TextArea',rule_exc,'Ignore datasets')
 
 rule_inc=''
 ao(default_desc,'rule_inc','TextArea',rule_inc,'Force inclusion')
 
-rule_load=r'''/hsm/sample\d/h$
-/hsm/sample\d/Vol$
+rule_load=r'''hsm/sample\d/h$
+hsm/sample\d/Vol$
 /sample\d/d$
-/kiln/T$
-/kiln/S$
-/kiln/P$'''
+^(/summary/)?kiln/T$
+^(/summary/)?kiln/S$
+^(/summary/)?kiln/P$'''
 ao(default_desc,'rule_load','TextArea',rule_load,'Force loading')
 
 rule_unit=[
@@ -62,9 +63,9 @@ rule_unit=[
 		]
 ao(default_desc,'rule_unit','Table',rule_unit,'Dataset units')
 
-rule_plot=r'''/hsm/sample\d/Vol$
+rule_plot=r'''hsm/sample\d/Vol$
 /sample\d/d$
-/kiln/T$'''
+^(/summary/)?kiln/T$'''
 ao(default_desc,'rule_plot','TextArea',rule_plot,'Auto Plot')
 
 rule_style=[[('Rule','String'), ('Range','String'),('Scale','Float'),

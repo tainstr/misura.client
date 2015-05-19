@@ -202,7 +202,7 @@ class QuickOps(object):
 		"""Load or reload a dataset"""
 		p=ImportParamsMisura(filename=node.linked.filename,
 							rule_exc=' *',
-							rule_load=node.m_col+'$',
+							rule_load='^(/summary)?'+node.ds.m_col+'$',
 							rule_unit=clientconf.confdb['rule_unit'])
 		op=OperationMisuraImport(p)
 		self.doc.applyOperation(op)
@@ -362,7 +362,7 @@ class QuickOps(object):
 		if page.startswith('/time'):
 			names=[y.linked.prefix+'t']  
 		else:
-			names=[y.linked.prefix+'summary/kiln/T']
+			names=[y.linked.prefix+'kiln/T']
 		return names
 	
 	def dsnode(self,node):
@@ -462,9 +462,9 @@ class QuickOps(object):
 	def correct(self,nodes=[]):
 		"""Call the CurveOperationPlugin on the current nodes"""
 		ds0,node0=self.dsnode(nodes[0])
-		T0=node0.linked.prefix+'summary/kiln/T'
+		T0=node0.linked.prefix+'kiln/T'
 		ds1,node1=self.dsnode(nodes[1])
-		T1=node1.linked.prefix+'summary/kiln/T'
+		T1=node1.linked.prefix+'kiln/T'
 		from misura.client import plugin
 		p=plugin.CurveOperationPlugin(ax=T0,ay=ds0.name(),bx=T1,by=ds1.name())
 		#TODO: TC comparison?
@@ -490,7 +490,7 @@ class QuickOps(object):
 		R0=dR0.name()
 		ddil,ndil=self.dsnode(smp['Vol'])
 		dil=ddil.name()
-		T=nbeta.linked.prefix+'summary/kiln/T'
+		T=nbeta.linked.prefix+'kiln/T'
 		out=nbeta.linked.prefix+'gamma'
 		if not self.doc.data.has_key(T):
 			T=''

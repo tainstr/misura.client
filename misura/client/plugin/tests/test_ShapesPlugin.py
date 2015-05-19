@@ -46,8 +46,8 @@ class ShapesPlugin(unittest.TestCase):
 		print doc.data.keys()
 		doc.model.refresh()
 		tree=doc.model.tree
-		print 'tree child',tree.get('summary').children
-		entry=tree.traverse('summary/hsm/sample0/h')
+		print 'tree child',tree.get('').children
+		entry=tree.traverse('hsm/sample0/h')
 		self.assertTrue(entry!=False)
 		print 'found entry',entry
 		self.do(doc,entry)

@@ -55,7 +55,7 @@ class ColorizePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 			elif c.settings.xData.endswith('T'):
 				x='t'
 			elif c.settings.xData.endswith('t'):
-				x='summary/kiln/T'
+				x='kiln/T'
 			if x:
 				if len(xds.linked.prefix):
 					x=xds.linked.prefix+':'+x	

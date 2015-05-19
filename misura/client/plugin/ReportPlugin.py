@@ -160,7 +160,7 @@ class ReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 		# initial shape
 		self.dict_toset(page.getChild('initial'),{'dataset':smp_path+'/profile',
  				'filename':test.params.filename,'target':0})
-		T=doc.data[test.prefix+'summary/kiln/T'].data[0]
+		T=doc.data[test.prefix+'kiln/T'].data[0]
 		self.toset(page.getChild('lbl_initial'),'label','Initial, {}{{\\deg}}C'.format(int(T)))
 		
 
@@ -179,8 +179,8 @@ class ReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 		
 		# Volume plotting
 		self.ops.append(document.OperationToolsPlugin(PlotPlugin.PlotDatasetPlugin(),
-					{'x':[test.prefix+'summary/kiln/T'],
-					'y':[test.prefix+'summary'+smp_path+'/Vol'],
+					{'x':[test.prefix+'kiln/T'],
+					'y':[test.prefix+smp_path+'/Vol'],
 					'currentwidget':'/report/temp'}
 					))
 		self.apply_ops()

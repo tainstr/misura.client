@@ -163,6 +163,7 @@ class CalibrationTool(QtGui.QDialog):
 		self.vis_sync()
 		self.factor=self.newUm.value()/self.rpl.current
 		self.newFactor.setText(u'%.2f \u00b5m/px' % self.factor)
+		print "Factor", self.factor
 		
 		
 	def closeEvent(self, e):
