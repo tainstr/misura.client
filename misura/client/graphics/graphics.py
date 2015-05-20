@@ -164,6 +164,7 @@ class misuraInterface(CustomInterface, QtCore.QObject):
 			return
 		print 'update_page',page.path
 		self.openedFiles.model().set_page(page.path)
+		print 'done model.set_page'
 		for p in self.mw.document.basewidget.children:
 			if not p.typename=='page': continue
 			self.update_title(p)

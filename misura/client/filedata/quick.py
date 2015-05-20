@@ -200,9 +200,12 @@ class QuickOps(object):
 	###
 	def _load(self, node):
 		"""Load or reload a dataset"""
+		p=node.path
+		if ':' in p:
+			p=p.split(':')[1]
 		p=ImportParamsMisura(filename=node.linked.filename,
 							rule_exc=' *',
-							rule_load='^(/summary)?'+node.ds.m_col+'$',
+							rule_load='^(/summary/)?'+p+'$',
 							rule_unit=clientconf.confdb['rule_unit'])
 		op=OperationMisuraImport(p)
 		self.doc.applyOperation(op)

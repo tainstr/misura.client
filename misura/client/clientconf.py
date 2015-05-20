@@ -39,8 +39,6 @@ ao(default_desc,'rule','Section','Dataset Rules','Dataset Rules')
 
 rule_exc=r'''^(/summary/)?beholder/
 ^(/summary/)?hydra/
-^(/summary/)?morla/
-/regulator/
 /analyzer/
 /autoroi/'''
 ao(default_desc,'rule_exc','TextArea',rule_exc,'Ignore datasets')

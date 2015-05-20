@@ -98,7 +98,6 @@ class MainWindow(QtGui.QMainWindow):
 		self.connect(self.m3db,QtCore.SIGNAL('select(QString)'),self.open_file)
 		confdb.mem_m3database(path)
 		self.m3db.show()
-		
 				
 	def close_tab(self,idx):
 		print 'Tab close requested',idx
