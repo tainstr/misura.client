@@ -428,7 +428,8 @@ class DocumentModel(QtCore.QAbstractItemModel):
 			if leaf is True:
 				break
 			if not parent:
-				child=sub
+				continue
+#				child=sub
 			else:
 				child=self.splt.join([parent,sub])
 			m=curveMap.get(child,False)

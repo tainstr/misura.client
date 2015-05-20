@@ -38,7 +38,7 @@ class TestPlot(unittest.TestCase):
 		self.nav.set_doc(doc)
 		self.p.updateCurvesMenu()
 		self.p.updateCurveActions()
-		self.p.hide_show('summary/hsm/sample0/Vol')
+		self.p.hide_show('0:hsm/sample0/Vol')
 		if __name__=='__main__':
 			self.p.show()
 			app.exec_()

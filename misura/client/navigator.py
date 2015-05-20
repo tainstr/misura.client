@@ -148,6 +148,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 		if self.model().paused:
 			return False
 		self.expandAll()
+		return False
 		print 'restoring previous selection', self.previous_selection
 		if self.previous_selection:
 			node = self.model().tree.traverse(self.previous_selection)
