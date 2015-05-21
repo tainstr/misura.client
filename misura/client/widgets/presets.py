@@ -12,12 +12,12 @@ class PresetManager(aChooser):
 		self.preset_handle=preset_handle
 		self.save_handle=save_handle
 		self.remove_handle=remove_handle
-
-		self.bSave=QtGui.QPushButton('Save')
+		#TODO: make a menu, add Rename, View, etc
+		self.bSave=QtGui.QPushButton(_('Save'))
 		self.bSave.setMaximumWidth(40)
 		self.connect(self.bSave, QtCore.SIGNAL('clicked(bool)'), self.save_current)
 
-		self.bDel=QtGui.QPushButton('Del')
+		self.bDel=QtGui.QPushButton(_('Del'))
 		self.bDel.setMaximumWidth(40)
 		self.connect(self.bDel, QtCore.SIGNAL('clicked(bool)'), self.remove)
 

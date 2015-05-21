@@ -510,7 +510,7 @@ class MainWindow(QtGui.QMainWindow):
 				return False	
 		#TODO: Must wait that current file is closed!!!
 		# Must download
-		sy=sync.DownloadThread(outfile=outfile,uid=uid,server=self.server,dbpath=dbpath)
+		sy=sync.TransferThread(outfile=outfile,uid=uid,server=self.server,dbpath=dbpath)
 		sy.set_tasks(self.tasks)
 		sy.start()
 		# Keep a reference

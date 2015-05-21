@@ -20,6 +20,7 @@ from aScript import aScript
 from aTable import aTable
 from aProfile import aProfile
 from aTime import aTime, aDelay
+from aFileList import aFileList
 from presets import PresetManager
 from role import Role,  RoleEditor,  RoleDialog
 from cycle import ThermalCycleChooser
@@ -40,6 +41,8 @@ def build(server, remObj, prop, parent=None):
 				obj=aMaterial(*arg)
 			else:
 				obj=aString(*arg)
+		elif T=='FileList':
+			obj=aFileList(*arg)
 		elif T=='TextArea':
 			obj=aString(server, remObj, prop, parent, extended=True)
 		elif T=='Script':

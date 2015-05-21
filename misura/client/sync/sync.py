@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Database synchronization service and widget"""
 import os
-import urllib2
+import urllib2, urllib
 
 from time import sleep
 from traceback import print_exc
@@ -46,7 +46,7 @@ def dataurl(server,uid):
 	url=server.data_addr+p
 	return url,p
 
-class DownloadThread(QtCore.QThread):
+class TransferThread(QtCore.QThread):
 	dlStarted=QtCore.pyqtSignal(str,str)
 	"""Emitted when a new download is started. (url, local path)"""
 	dlFinished=QtCore.pyqtSignal(str,str)
@@ -61,14 +61,14 @@ class DownloadThread(QtCore.QThread):
 	"""Waiting to reserve the file uid for download. (url, local path,progress)"""
 	aborted=False
 	retry=30
-	def __init__(self,url=False,outfile=False,uid=False,server=False,dbpath=False,parent=None):
+	def __init__(self,url=False,outfile=False,uid=False,server=False,dbpath=False,post=False,parent=None):
 		QtCore.QThread.__init__(self,parent)
 		self.url=url
 		self.outfile=outfile
 		self.dbpath=dbpath
 		self.uid=uid
 		self.server=server
-		"""Retry times for UID reservation"""
+		self.post=post
 		
 	@property
 	def pid(self):
@@ -126,20 +126,24 @@ class DownloadThread(QtCore.QThread):
 		self.dlWaiting.connect(self.task_wait)
 		self.tasks.sig_done.connect(self.abort)
 		return True
+	
+	def prepare_opener(self,url):
+		user,passwd,url=urlauth(url)
+		# Connection to data
+		auth_handler= urllib2.HTTPBasicAuthHandler()
+		auth_handler.add_password(realm='MISURA', uri=url, user=user, passwd=passwd)
+		opener = urllib2.build_opener(auth_handler)
+		# ...and install it globally so it can be used with urlopen.
+		urllib2.install_opener(opener)		
+		return url
 				
 	def download_url(self,url,outfile):
 		"""Download from url and save to outfile path"""
 		print 'download url',url,outfile
 		self.url=url
 		self.outfile=outfile
-		user,passwd,url=urlauth(url)
+		url=self.prepare_opener(url)
 		self.dlStarted.emit(url,outfile)
-		# Connection to data
-		auth_handler= urllib2.HTTPBasicAuthHandler()
-		auth_handler.add_password(realm='MISURA', uri=url, user=user, passwd=passwd)
-		opener = urllib2.build_opener(auth_handler)
-		# ...and install it globally so it can be used with urlopen.
-		urllib2.install_opener(opener)
 		req = urllib2.urlopen(url)
 		dim=int(req.info().getheaders('Content-Length')[0])
 		self.dlSize.emit(dim)
@@ -156,7 +160,7 @@ class DownloadThread(QtCore.QThread):
 				self.dlDone.emit(done)
 		# Remove if aborted
 		if self.aborted:
-			print 'ABORTED. Removing local file:',outfile
+			print 'Download ABORTED. Removing local file:',outfile
 			os.remove(outfile)
 			self.dlAborted.emit(url,outfile)
 		# Append to db if defined
@@ -209,13 +213,55 @@ class DownloadThread(QtCore.QThread):
 		# Free uid for remote opening and next download
 		server.storage.test.free(uid)
 		return True
-		
+	
+	def upload(self,url,localfile,post):
+		"""
+		`url` like .../RPC/full/obj/path
+		`post` {'opt':,'filename':False}
+		"""
+		opt=post['opt']
+		remotefile=post.get('filename',False)
+		if not remotefile:
+			remotefile=os.path.basename(localfile)
+		url=self.prepare_opener(url)
+		self.dlStarted.emit(url,localfile)
+		CHUNK = 16 * 1024
+		fp=open(localfile, 'rb')
+		fp.seek(0,2)
+		dim=fp.tell()
+		fp.seek(0)
+		done=0
+		self.dlSize.emit(dim)
+		while fp:
+			if self.aborted:
+				data=''
+			else:
+				data=fp.read(CHUNK)
+			enc=urllib.urlencode({'opt' : opt,
+	                         'filename'  : remotefile,
+	                         'data':data})
+			print 'urlopen',url,opt,remotefile
+			content = urllib2.urlopen(url=url, data=enc).read()
+			print 'Transferred chunk',content
+			done+=len(data)
+			if len(data)==0:
+				fp.close()
+				fp=False
+			self.dlDone.emit(done)
+			sleep(0.1)
+		# Remove if aborted
+		if self.aborted:
+			print 'Upload ABORTED at',done
+			self.dlAborted.emit(url,localfile)
+		self.dlFinished.emit(url,localfile)		
 		
 	def run(self):
 		"""Download the configured file in a separate thread"""
-		if (not (self.outfile or self.dbpath)) or not ((self.uid and self.server) or self.url):
-			print 'Impossible to download',self.url,self.uid,self.server,self.outfile
-		if self.uid:
+		if (not (self.outfile or self.dbpath)) or not ((self.uid and self.server) or self.url) or not (self.post and self.outfile and self.url):
+			print 'Impossible to download',self.url,self.uid,self.server,self.outfile,self.post
+		if self.post:
+			self.upload(self.url,self.outfile,self.post)
+		elif self.uid:
 			# Reconnect because we are in a different thread
 			self.server.connect()
 			self.download_uid(self.server,self.uid,self.outfile)
@@ -224,14 +270,14 @@ class DownloadThread(QtCore.QThread):
 		
 
 
-class Sync(DownloadThread):
+class Sync(TransferThread):
 	"""Synchronization thread running in background and checking presence remote test ids in local db"""
 	chunk=25
 	waiting=QtCore.pyqtSignal(int)
 	"""Update total number of files queued for approval"""
 	
 	def __init__(self,server,parent=None):
-		DownloadThread.__init__(self,parent=parent)
+		TransferThread.__init__(self,parent=parent)
 		self.enabled=False
 		self.server=server
 		self.remote_dbdir=remote_dbdir(server)
