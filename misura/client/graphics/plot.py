@@ -187,15 +187,17 @@ class Plot(VeuszPlot):
 		"""Moves the position line according to the requested point sequence index."""
 		self.idx_disconnect()
 		if seq<0: seq=self.idx
-		for g,dsn in (('/time/time/','t'), ('/temperature/temp/','kiln/T')):
+		for g,dsn in (('/time/time/','0:t'), ('/temperature/temp/','0:kiln/T')):
 			print self.document.data.keys()
 			ds=self.document.data[dsn]
 			if seq>=len(ds.data): return
 			xval=ds.data[seq]
 			xax=self.document.resolveFullWidgetPath(g+'x')
+			xax.computePlottedRange(force=True)
 			rg=xax.getPlottedRange()
 			# Calc relative position with respect to X axis
 			rel=(xval-rg[0])/(rg[1]-rg[0])
+			print 'Red bar relative position:',rel,xval,rg,xax.autorange,xax.plottedrange
 			self.cmd.To(g+'idx')
 			self.cmd.Set('xPos',rel)
 			self.cmd.Set('length',1.)
@@ -205,7 +207,7 @@ class Plot(VeuszPlot):
 	def set_time(self,t):
 		"""Moves the position line according to the requested point in time"""
 		self.t=t
-		idx=csutil.find_nearest_val(self.document.data['t'].data, t, seed=self.idx)
+		idx=csutil.find_nearest_val(self.document.data['0:t'].data, t, seed=self.idx)
 		print 'Setting time t'
 		self.set_idx(idx)
 		
@@ -213,7 +215,7 @@ class Plot(VeuszPlot):
 		wg=self.doc.resolveFullWidgetPath(g+'/idx')
 		xax=self.document.resolveFullWidgetPath(g+'/x')
 		rg=xax.getPlottedRange()
-		rel=wg.settings.xPos[0]*(rg[1]-rg[0])
+		rel=wg.settings.xPos[0]*(rg[1]-rg[0])+rg[0]
 		print 'move_line',g,wg.settings.xPos,rg,rel
 		return rel
 		
@@ -224,7 +226,7 @@ class Plot(VeuszPlot):
 	
 	def move_line_temp(self):
 		rel=self.move_line('/temperature/temp')
-		idx=csutil.find_nearest_val(self.document.data['kiln/T'].data, rel, seed=self.idx)
-		t=self.document.data['t'].data[idx]
+		idx=csutil.find_nearest_val(self.document.data['0:kiln/T'].data, rel, seed=self.idx)
+		t=self.document.data['0:t'].data[idx]
 		self.emit(QtCore.SIGNAL('move_line(float)'),t)
 

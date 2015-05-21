@@ -58,7 +58,8 @@ class SynchroPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		# Y Arrays
 		yref=doc.data[ref.settings.yData].data
 		# Keep Y Dataset for translation update
-		yds=doc.data[trans.settings.yData]	
+		yds_name=trans.settings.yData
+		yds=doc.data[yds_name]	
 		ytr=yds.data
 		
 		#Search the nearest X value on ref X-array
@@ -85,7 +86,7 @@ class SynchroPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 			# Change copy's values
 			ydsn.data=new
 			# Set original dataset to copied one
-			op=document.OperationDatasetSet(yds.name(),ydsn)
+			op=document.OperationDatasetSet(yds_name,ydsn)
 			doc.applyOperation(op) 
 			return True
 		

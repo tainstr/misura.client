@@ -14,6 +14,13 @@ from proxy import getFileProxy
 
 ism=isinstance
 
+def docname(ds):
+	"""Get dataset name by searching in parent document data"""
+	for name, obj in ds.document.data.iteritems():
+		if obj==ds:
+			return name
+	return None
+
 def node(func):
 	"""Decorator for functions which should get currentIndex node if no arg is passed"""	
 	@functools.wraps(func)
@@ -31,7 +38,7 @@ def node(func):
 		if n is False:
 			n=self.model().data(self.currentIndex(), role=Qt.UserRole)
 		elif isinstance(n,document.Dataset):
-			n=n.name() # convert to path string
+			n=docname(n)
 		# If node was expressed as/converted to string, get its corresponding tree entry
 		if isinstance(n,str) or isinstance(n, unicode):
 			print 'traversing node',n
@@ -418,7 +425,7 @@ class QuickOps(object):
 	def edit_dataset(self,node=False):
 		"""Slot for opening the dataset edit window on the currently selected entry"""
 		ds,y=self.dsnode(node)
-		name=ds.name()
+		name=node.path
 		print 'name',name
 		dialog=self.mainwindow.slotDataEdit(name)
 		if ds is not y:
@@ -469,7 +476,7 @@ class QuickOps(object):
 		ds1,node1=self.dsnode(nodes[1])
 		T1=node1.linked.prefix+'kiln/T'
 		from misura.client import plugin
-		p=plugin.CurveOperationPlugin(ax=T0,ay=ds0.name(),bx=T1,by=ds1.name())
+		p=plugin.CurveOperationPlugin(ax=T0,ay=node0.path,bx=T1,by=node0.path)
 		#TODO: TC comparison?
 		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
 		self.mainwindow.showDialog(d)
@@ -488,11 +495,11 @@ class QuickOps(object):
 			return False
 		smp=nodes[0].children
 		dbeta,nbeta=self.dsnode(smp['beta'])
-		beta=dbeta.name()
+		beta=nbeta.path
 		dR0,nR0=self.dsnode(smp['r0'])
-		R0=dR0.name()
+		R0=nR0.path
 		ddil,ndil=self.dsnode(smp['Vol'])
-		dil=ddil.name()
+		dil=ndil.path
 		T=nbeta.linked.prefix+'kiln/T'
 		out=nbeta.linked.prefix+'gamma'
 		if not self.doc.data.has_key(T):

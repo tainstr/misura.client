@@ -45,8 +45,8 @@ class ColorizePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		if g is None or g.typename!='graph':
 			print 'found',g,c
 			raise plugins.ToolsPluginException('Error: Curve is not contained in a graph.')
-		
-		ds=self.doc.data.get(fields['x'],False)
+		pts=fields['x']
+		ds=self.doc.data.get(pts,False)
 		if not ds:
 			xds=self.doc.data.get(c.settings.xData,False)
 			x=False
@@ -60,10 +60,10 @@ class ColorizePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 				if len(xds.linked.prefix):
 					x=xds.linked.prefix+':'+x	
 				ds=self.doc.data.get(x,False)
+				pts=x
 				
 		if not ds:
 			raise plugins.ToolsPluginException('Error: Cannot find a proper coloring dataset.')	
-		pts=ds.name()
 		# Undo
 		if c.settings.Color.points==pts:
 			self.toset(c, 'Color/points','')

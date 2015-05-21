@@ -122,7 +122,7 @@ class MiniImage(QtGui.QWidget):
 	
 	def update_info(self):
 		"""Update info label"""
-		if not self.doc.data.has_key('t'):
+		if not self.doc.data.has_key('0:t'):
 			print 'No time dataset still'
 			self.lbl_info.hide()
 			return False
@@ -134,12 +134,12 @@ class MiniImage(QtGui.QWidget):
 		print 'update_info',p
 		
 		# Document-based index
-		idx=csutil.find_nearest_val(self.doc.data['t'].data,self.t)
+		idx=csutil.find_nearest_val(self.doc.data['0:t'].data,self.t)
 		for k in self.meta.keys():
 			if k=='T':
-				p1='kiln/'+k
+				p1='0:kiln/'+k
 			else:
-				p1=p+'/'+k
+				p1='0:'+p+'/'+k
 			ds=self.doc.data.get(p1,None)
 			if ds is None:
 				print 'update_info: no target dataset was found',k,p1

@@ -92,7 +92,7 @@ class TestSummaryVersioning(unittest.TestCase):
 #		otm.index(1,0,otm.root)
 		# Reload links
 		otm.pause()
-		LF=doc.data['t'].linked
+		LF=doc.data['0:t'].linked
 		LF.reloadLinks(doc)
 		otm.pause(False)
 		otm.refresh()

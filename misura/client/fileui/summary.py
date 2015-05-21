@@ -68,7 +68,7 @@ class SummaryModel(QtCore.QAbstractTableModel):
 	def rowCount(self,parent):
 		if not self.doc: return 0
 		if not self.doc.data.has_key('t'): return 0
-		self._rowCount=len(self.doc.data['t'].data)
+		self._rowCount=len(self.doc.data['0:t'].data)
 		return self._rowCount
 	
 	def data(self, index, role=QtCore.Qt.DisplayRole):

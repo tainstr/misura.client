@@ -120,7 +120,8 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
 				
 			# Getting curve data
 			xtr=doc.data[obj.settings.xData].data
-			yds=doc.data[obj.settings.yData]
+			yds_name=obj.settings.yData
+			yds=doc.datay[yds_name]
 			ytr=yds.data
 			#Search the nearest X value on trans X-array
 			dst=np.abs(xtr-pos)
@@ -136,7 +137,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
 				# Change copy's values
 				ydsn.data=new
 				# Set original dataset to copied one
-				op=document.OperationDatasetSet(yds.name(),ydsn)
+				op=document.OperationDatasetSet(yds_name,ydsn)
 				self.ops.append(op)
 				# Remember translation
 				if not self.trcum.has_key(obj.path):
@@ -193,14 +194,15 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
 		for uc,d in self.trcum.iteritems():
 			obj=self.document.resolveFullWidgetPath(uc)
 			print 'restoring curve',uc,d,obj
-			yds=self.document.data[obj.settings.yData]
+			yds_name=obj.settings.yData
+			yds=self.document.data[yds_name]
 			new=yds.data+d
 			# Create a copy of the dataset
 			ydsn=copy.copy(yds)	
 			# Change copy's values
 			ydsn.data=new
 			# Set original dataset to copied one
-			op=document.OperationDatasetSet(yds.name(),ydsn)
+			op=document.OperationDatasetSet(yds_name,ydsn)
 			self.ops.append(op)
 		print 'axmap',self.axmap
 		for uc,(newax,oldax,(minVal,maxVal)) in self.axmap.iteritems():

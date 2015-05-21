@@ -50,15 +50,15 @@ class ShapesPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		print 'ShapesPlugin searching',p
 		conf=False
 		vds=[]
-		if smpe.ds:
-			conf=getattr(smpe.ds,'m_conf',False)
-			vds.append(smpe.ds.name())
-		else:
-			for k,ent in smpe.children.iteritems():
-				conf=getattr(ent.ds,'m_conf',False)
-				if not conf: continue
-				if len(ent.ds)>0:
-					vds.append(ent.ds.name())
+# 		if smpe.ds:
+# 			conf=getattr(smpe.ds,'m_conf',False)
+# 			vds.append(smpe.ds.name())
+# 		else:
+		for k,ent in smpe.children.iteritems():
+			conf=getattr(ent.ds,'m_conf',False)
+			if not conf: continue
+			if len(ent.ds)>0:
+				vds.append(ent.path)
 		if not conf or len(vds)==0:
 			raise plugins.ToolsPluginException('No metadata found for '+p)
 		print 'Found datasets',vds

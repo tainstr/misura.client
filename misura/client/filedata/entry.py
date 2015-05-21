@@ -397,7 +397,7 @@ class DatasetEntry(NodeEntry):
 		if len(self.parents)==1:
 			return self.parent.m_var
 		if not isinstance(self.ds,document.datasets.Dataset1DPlugin):
-			return getattr(ds,'m_var',ds.name())
+			return getattr(ds,'m_var',self.path)
 		pm=ds.pluginmanager
 		vars=','.join(self.vars)
 		if pm.plugin.name=='Coefficient':
@@ -413,10 +413,10 @@ class DatasetEntry(NodeEntry):
 		if getattr(self.ds,'m_smp',False) is not False: 
 			return self.ds.m_var
 		if not isinstance(self.ds,document.datasets.Dataset1DPlugin):
-			return getattr(self.ds,'m_var',self.ds.name())
+			return getattr(self.ds,'m_var',self.path)
 		pm=self.ds.pluginmanager
 		if pm.plugin.name=='SmoothData':
-			name=getattr(self.parent,'m_var',self.parent.name())
+			name=getattr(self.parent,'m_var',self.parent.path)
 			return 'Smooth(%i,%s)' % (pm.fields['window'],name)
 		else:
 			return '%s(%s)' % (pm.plugin.name,','.join(self.vars))

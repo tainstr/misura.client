@@ -50,19 +50,19 @@ class MisuraDocument(unittest.TestCase):
 # 		# This will import only a half of the points
 # 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
 # 		imp.do(doc)
-		nt=len(doc.data['t'].data)
+		nt=len(doc.data['0:t'].data)
 		nh=len(doc.data['hsm.sample0.h'].data)
-		lastt=doc.data['t'].data[-1]
-		print 'first import',doc.data['t'].data
+		lastt=doc.data['0:t'].data[-1]
+		print 'first import',doc.data['0:t'].data
 		# Restore the original elapsed value
 		f.set_node_attr('/conf','elapsed',self.original_elapsed)
 		# Try to update
 		r=doc.update()
 		print 'updated',r
-		print 'second import',doc.data['t'].data
-		nt1=len(doc.data['t'].data)
+		print 'second import',doc.data['0:t'].data
+		nt1=len(doc.data['0:t'].data)
 		nh1=len(doc.data['hsm.sample0.h'].data)
-		lastt1=doc.data['t'].data[-1]
+		lastt1=doc.data['0:t'].data[-1]
 		self.assertEqual([nt1,nh1],[2*nt,2*nh])	
 		self.assertLess(abs(2*lastt-lastt1),doc.interval)
 		# Empty update

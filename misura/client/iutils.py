@@ -253,7 +253,7 @@ def get_plotted_tree(base,m=False):
 				continue
 			if not m['plot'].has_key(wg.path):
 				m['plot'][wg.path]=[]
-			m['plot'][wg.path].append(ds.name())
+			m['plot'][wg.path].append(dsn)
 			if not m['dataset'].has_key(dsn):
 				m['dataset'][dsn]=[]
 			m['dataset'][dsn].append(wg.path)
@@ -272,7 +272,7 @@ def get_plotted_tree(base,m=False):
 			axpath=wg.parent.path+'/'+wg.settings.yAxis
 			if not m['axis'].has_key(axpath):
 				m['axis'][axpath]=[]
-			m['axis'][axpath].append(ds.name())
+			m['axis'][axpath].append(dsn)
 		elif wg.typename=='axis':
 # 			print 'get_plotted_tree found axis',wg.path
 			if wg.settings.direction!='vertical': continue

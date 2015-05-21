@@ -33,7 +33,7 @@ for key in bounded_axes.keys():
 	bounded_axes[key]=d
 	
 
-def dataset_curve_name(ds):
+def dataset_curve_name(ds,dsn):
 	"""Generation of unambiguous and traceable curve and axis names"""
 	sampleName=''
 	if getattr(ds,'m_smp',False):
@@ -43,7 +43,7 @@ def dataset_curve_name(ds):
 			sampleName=ds.m_smp['name']
 		else:
 			sampleName=ds.linked.instr.measure['name']
-	dsname=getattr(ds,'m_name',ds.name()).replace('summary/', '').replace("/", ":")
+	dsname=getattr(ds,'m_name',dsn).replace('summary/', '').replace("/", ":")
 	dsvar=getattr(ds,'m_var','')
 	fileName='' if ds.linked is None else os.path.basename(ds.linked.filename)
 	if sampleName:
@@ -118,31 +118,29 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		self.apply_ops('PlotDataset:Associate')
 		return True
 	
-	def auto_percentile(self,ds,gname,ax_name):
+	def auto_percentile(self,ds,dsn,gname,ax_name):
 		"""Find if the dataset ds should be converted to percentile based on other datasets sharing the same Y ax."""
 		g=self.doc.resolveFullWidgetPath(gname)
 		tree=get_plotted_tree(g)
 		dslist=tree['axis'].get(g.path+'/'+ax_name,[])
 		pc=getattr(ds,'m_percent',None)
 		if pc is None:
-			print 'No m_percent attribute defined',ds.name()
+			print 'No m_percent attribute defined',dsn
 			return False
 		if getattr(ds,'m_initialDimension',None) is None:
-			print 'No initial dimension defined',ds.name()
+			print 'No initial dimension defined',dsn
 			return False
 		cvt=None
-		dsn=ds.name()
 		for nds in dslist:
 			if nds==dsn: continue # itself
 			cvt=getattr(self.doc.data[nds],'m_percent',None)
 			if cvt is not None: break
 		if cvt is None or cvt==pc:
-#			print 'NOT CONVERTING',ds.name(),cvt,pc,dslist,tree['axis'],ax_name
 			return False
 		# A conversion should happen
 		print 'CONVERTING',cvt,pc
 		self.ops.append(document.OperationToolsPlugin(PercentilePlugin.PercentilePlugin()
-							,{'ds':ds.name(),'propagate':False,'action':'Invert'}))
+							,{'ds':dsn,'propagate':False,'action':'Invert'}))
 		return True
 
 	def apply(self, cmd, fields):
@@ -185,16 +183,16 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 			dsx=doc.data[x]
 			# If the ds is recursively derived, substitute it by its entry
 			if not hasattr(ds,'m_smp'):
-				print 'Retrieving ent',ds.name()
+				print 'Retrieving ent',y
 				for eid,entry in doc.ent.items(): #warining: can change size during iter!
-					if entry.path==ds.name():
+					if entry.path==y:
 						print 'Found entry',entry,entry.parents,entry.m_var
 						ds=entry
 						break
 					print 'Skipping',eid,entry.path,entry.name
 					
 			# Get the curve and axis name
-			cname, ax_name,ax_lbl=dataset_curve_name(ds)
+			cname, ax_name,ax_lbl=dataset_curve_name(ds,y)
 			# Find if the curve should attach to a different ax
 			bax=bounded_axes.get(ds.linked.instrument)
 			if bax: bax=bax.get(ds.m_var,False)
@@ -208,7 +206,7 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 			
 			gname=g.path
 			
-			self.auto_percentile(ds, gname, ax_name)
+			self.auto_percentile(ds, y, gname, ax_name)
 
 			self.initCurve(name=cname, xData=x, yData=y, yAxis=ax_name, axisLabel=ax_lbl, idx=0, graph=gname)
 			if gname not in gnames: gnames.append(gname)

@@ -36,19 +36,6 @@ def resolve_plugin(doc,ds,ent,name=False):
 		return ent, entry
 	return ent, False
 
-
-	
-def print_datasets(entry,pre):
-	"""Recursive datasets printing"""
-	for sub in entry.children.itervalues():
-		print pre,sub.name()
-		print_datasets(sub,pre+'\t')
-
-def print_ent(ent):
-	for name,ds in ent.iteritems():
-		print ds.path, id(ds.ds)
-		print_datasets(ds,'\t')
-
 from veusz.setting import controls
 void=None
 voididx=QtCore.QModelIndex()
@@ -85,7 +72,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
 		
 	def set_time(self,t):
 		"""Changes current values to requested time `t`"""
-		idx=find_nearest_val(self.doc.data['t'].data, t, seed=self.idx)
+		idx=find_nearest_val(self.doc.data['0:t'].data, t, seed=self.idx)
 		print 'Setting time t',t,idx
 		self.set_idx(idx)
 		return True

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import sys
 from misura.client import iutils
-from misura.canon import csutil
 from misura.client import graphics
 import veusz.utils.vzdbus as vzdbus
 import veusz.utils.vzsamp as vzsamp

@@ -392,7 +392,7 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 				nu=self.rule_unit(col)
 				if u and nu:
 					print 'Converting to unit',col,ds.unit,nu
-					ds=convert(ds,nu[0])
+					ds=units.convert(ds,nu[0])
 			
 			# Find out the sample index to which this dataset refers
 			var, idx=iutils.namingConvention(col)
@@ -489,7 +489,7 @@ class MisuraCaptureStream(capture.CaptureStream):
 		self.measurename=LF.title
 		
 		
-		lastt=self.data['t'].data[-1]
+		lastt=self.data['0:t'].data[-1]
 		elp=self.proxy.get_node_attr('/conf','elapsed')
 		# interval rounding
 		elp=(elp//self.interval)*self.interval
