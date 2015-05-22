@@ -10,7 +10,7 @@ from ..sync import TransferThread
 class aFileList(aChooser):
 	
 	def __init__(self, *a,**kw):
-
+		"""Widget representing a FileList option type, allowing to upload a new file via the stream interface."""
 		aChooser.__init__(self, *a,**kw)
 		#TODO: make menu and add Download, Delete, Rename,... like in presets.
 		self.bSend=QtGui.QPushButton('Send')
@@ -21,6 +21,7 @@ class aFileList(aChooser):
 		self.transfer=False
 
 	def send(self, *args):
+		"""Upload local file"""
 		n=QtGui.QFileDialog.getOpenFileName(parent=self,caption=_("Upload File"))
 		if len(n)==0 or not os.path.exists(n):
 			print 'File Upload Aborted'

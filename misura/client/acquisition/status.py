@@ -10,7 +10,6 @@ class Status(QtGui.QWidget):
 		self.lay.setLabelAlignment(QtCore.Qt.AlignRight)
 		self.lay.setRowWrapPolicy(QtGui.QFormLayout.WrapLongRows)
 		wg=widgets.build(server, server,server.gete('isRunning'))
-		self.wg_isRunning=wg
 		self.lay.addRow(wg.label_widget, wg)
 		for opt in 'name', 'elapsed':
 			wg=widgets.build(server, remObj.measure,remObj.measure.gete(opt))

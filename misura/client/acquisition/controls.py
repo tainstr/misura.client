@@ -26,10 +26,7 @@ class Controls(QtGui.QToolBar):
 		self.iniAct=self.addAction('New', self.new)
 		self.startAct=self.addAction('Start', self.start)
 		self.stopAct=self.addAction('Stop', self.stop)
-		print 'Controls: aobj'
-		self.aobj=widgets.ActiveObject(self.server, self.server, self.server.gete('isRunning'), self)
-		self.aobj.force_update=True
-		self.aobj.register()
+		
 		self.name=self.remote['devpath'].lower()
 		print 'Controls: ', self.name
 		if self.name=='post':
@@ -43,8 +40,15 @@ class Controls(QtGui.QToolBar):
 		self.stopped_nosave.connect(self.hide_prog)
 		self.started.connect(self.hide_prog)
 		self.connect(self, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
-		self.connect(self.aobj, QtCore.SIGNAL('changed()'), self.updateActions)
 		self.connect(self, QtCore.SIGNAL('warning(QString,QString)'), self.warning)
+		registry.system_kid_changed.connect(self.system_kid_slot)
+		
+	def system_kid_slot(self,kid):
+		"""Slot processing system_kid_changed signals from KidRegistry.
+		Calls updateActions if /isRunning is received."""
+		print 'system_kid_slot: received',kid
+		if kid=='/isRunning':
+			self.updateActions()
 		
 	@property
 	def tasks(self):

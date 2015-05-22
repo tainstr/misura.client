@@ -3,7 +3,9 @@
 from PyQt4 import QtGui, QtCore
 from ..graphics import thermal_cycle
 from .. import conf, widgets
+from ..live import registry
 import status
+
 
 class MeasureInfo(QtGui.QTabWidget):
 	"""Measurement and samples configuration"""
@@ -68,7 +70,7 @@ class MeasureInfo(QtGui.QTabWidget):
 		if not self.fixedDoc:
 			self.statusView=status.Status(self.server, self.remote, parent=self)
 			self.addTab(self.statusView, 'Status')
-			self.connect(self.statusView.wg_isRunning, QtCore.SIGNAL('changed()'), self.up_isRunning)
+			registry.system_kid_changed.connect(self.system_kid_slot)
 			self.up_isRunning()
 		self.addTab(self.measureView, 'Measure')
 		self.addTab(self.thermalCycleView, 'Thermal Cycle')
@@ -81,9 +83,13 @@ class MeasureInfo(QtGui.QTabWidget):
 			self.addTab(conf.Interface(self.remote.parent(),sample, sample.describe(), self), 'Sample'+str(i))
 		self.addTab(self.results, 'Results')
 		return True
+	
+	def system_kid_slot(self,kid):
+		if kid=='/isRunning':
+			self.up_isRunning()
 		
 	def up_isRunning(self):
-		if self.statusView.wg_isRunning.current:
+		if registry.values.get('/isRunning',False):
 			self.tabBar().setStyleSheet("background-color:red;")
 		else:
 			self.tabBar().setStyleSheet("background-color:green;")

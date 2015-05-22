@@ -27,12 +27,19 @@ class KidRegistry(QtCore.QThread):
 	"""Remote progress dialog"""
 	tasks=False
 	"""Local tasks dialog"""
+	system_kids=set(['/isRunning'])
+	"""Set of forced update system kids. These are always updated."""
+	#TODO: add queued_kids, a way to asynchronous one-time-update 
+	system_kid_changed=QtCore.pyqtSignal(str)
+	"""Signal emitted when a system kid changes."""
 	def __init__(self):
 		QtCore.QThread.__init__(self)
 		self.rid={}
 		"""Dict KID:[awg0,awg1,...]"""
 		self.times={}
 		"""Dict KID: last update server time"""
+		self.values={}
+		"""Dict KID: value"""
 		self.obj=False
 		"""MisuraProxy"""
 		self.curves={}
@@ -141,6 +148,9 @@ class KidRegistry(QtCore.QThread):
 				continue
 			# Aggregate request
 			request.append((kid,t))
+		# Force special requests:
+		for kid in self.system_kids:
+			request.append((kid,self.times.get(kid, 0)))
 		return request
 		
 	@lockme
@@ -165,6 +175,7 @@ class KidRegistry(QtCore.QThread):
 			ws=self.rid.get(kid, [])
 			# forget all widgets for this kid
 			self.rid[kid]=[] 
+			self.values[kid]=nval
 			for w in ws:
 				try:
 					w.emit(QtCore.SIGNAL('selfchanged'), nval)
@@ -173,6 +184,9 @@ class KidRegistry(QtCore.QThread):
 					continue
 			if kid=='/progress' and self.progress:
 				self.progress.emit(QtCore.SIGNAL('selfchanged'), nval)
+			# Notify system kid changes
+			if kid in self.system_kids:
+				self.system_kid_changed.emit(kid)
 # 		print 'Registry.update_all', len(updated)
 		return updated
 		

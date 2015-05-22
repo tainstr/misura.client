@@ -297,7 +297,8 @@ class MainWindow(QtGui.QMainWindow):
 			if not lst: continue
 			obj=self.server.toPath(lst)
 			if obj is None: continue
-			role=obj['role'][self.name]
+# 			role=obj['role'][self.name]
+			role='NoRole'
 			if 'Camera' in obj['mro']:
 				an=name.lower()
 				if an=='post': an='post'
