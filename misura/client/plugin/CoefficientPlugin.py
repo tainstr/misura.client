@@ -58,12 +58,8 @@ class CoefficientPlugin(plugins.DatasetPlugin):
 		xds=helper.getDataset(fields['ds_x'])
 		yds=helper.getDataset(fields['ds_y'])
 		x=xds.data; y=yds.data
-		# Get the original document in the dataset
-#		ydso=helper._doc.data[fields['ds_y']]
-#		# Read if percentile flag is set, and convert to absolute
-#		percent=getattr(ydso, 'm_percent', False)
-#		if percent:	y=y*ydso.m_initialDimension/100.
-		if percent!=0.:
+		# If percent, convert to absolute
+		if percent!=0. and getattr(yds, 'm_percent', False):
 			y*=percent/100.
 		# Search the beginning of the coefficient
 		chk=numpy.abs(x-start)
@@ -87,11 +83,11 @@ class CoefficientPlugin(plugins.DatasetPlugin):
 		#TODO: multiple ramps
 		# Detect the maximum temperature
 		# and start a new coefficient point
-
 		if recon=='Stop':
 			out[j:]=0.
 		elif recon=='Restart':
 			out[j:]=(y[j:]-ymax)/(x[j:]-xmax)/(percent+ymax)
+		# Smooth output curve
 		if smooth>0 and smode=='Output':
 			out[i:j]=SmoothDatasetPlugin.smooth(out[i:j],smooth,'hanning')
 		self.ds_out.update(data=out)

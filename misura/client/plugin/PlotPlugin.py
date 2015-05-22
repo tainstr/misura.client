@@ -186,7 +186,7 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 				print 'Retrieving ent',y
 				for eid,entry in doc.ent.items(): #warining: can change size during iter!
 					if entry.path==y:
-						print 'Found entry',entry,entry.parents,entry.m_var
+						print 'Found entry',entry,entry.parents,entry.path
 						ds=entry
 						break
 					print 'Skipping',eid,entry.path,entry.name
@@ -194,8 +194,13 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 			# Get the curve and axis name
 			cname, ax_name,ax_lbl=dataset_curve_name(ds,y)
 			# Find if the curve should attach to a different ax
-			bax=bounded_axes.get(ds.linked.instrument)
-			if bax: bax=bax.get(ds.m_var,False)
+			bax=False
+			if ds.linked:
+				ins=getattr(ds.linked, 'instrument', False)
+				if ins:
+					bax=bounded_axes.get(ins, False)
+			if bax: 
+				bax=bax.get(getattr(ds, 'm_var', False),False)
 			if bax:	
 				ax_name='ax:'+bax
 				ax_lbl=bax
