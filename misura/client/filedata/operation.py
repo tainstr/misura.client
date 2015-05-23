@@ -105,8 +105,9 @@ def not_interpolated(proxy,col,startt,endt):
 		data=np.concatenate((ap,data))
 	# Extend towards end
 	s=data[-1][0]
-	if s<endt:
-		d=endt-s
+	d=int(endt-s)
+	if d>2:
+		print 'Extending towards end',s,endt,d
 		apt=np.linspace(s+1,endt+1,d)
 		vals=np.ones(d)*data[-1][1]
 		ap=np.array([apt,vals]).transpose()
@@ -269,7 +270,7 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		print 'build', idx+1, 'samples',LF.samples
 		elapsed=int(instrobj.measure['elapsed'])+1
 		zerotime=int(instrobj['zerotime'])
-		end=elapsed+zerotime
+		end=0
 		# Correct elapsed time
 		#FIXME: SLOW. Elapsed should be correct!
 		for p, col in enumerate(header[:]):
@@ -281,17 +282,20 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 				e=self.proxy.col_at(col,-1,raw=True)[0]
 				if e>end: end=e
 				z=self.proxy.col_at(col,0,raw=True)[0]
-				if 0<z<zerotime or zerotime<=0: zerotime=z 
+				# Update also zerotime, but only if absolute (>zerotime/10.)
+				if zerotime/10.<z<zerotime or zerotime<=0: 
+					zerotime=z 
 			except:
 				print_exc()
 				print 'removing column',col
 				header.remove(col)
 				continue
-		delta=end-zerotime
-		# Keep latest point
-		if delta>elapsed: 
-			elapsed=delta
-		elapsed=int(elapsed)+1
+			
+		if end>zerotime:
+			delta=end-zerotime
+		else:
+			delta=end
+		elapsed=int(max(delta,elapsed))+1
 		print 'got elapsed',elapsed
 		# Create time dataset
 		time_sequence=[]
@@ -311,7 +315,11 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		if len(time_sequence)==0:
 			print 'No time_sequence! Aborting.',instrobj.measure['elapsed']
 			return []
-		ztime_sequence=time_sequence+zerotime # translated time sequence
+		# Detect if time sequence needs to be translated or not.
+		if end>zerotime:
+			ztime_sequence=time_sequence+zerotime # translated time sequence
+		else:
+			ztime_sequence=time_sequence
 		startt=ztime_sequence[0]
 		endt=ztime_sequence[-1]
 		outds={}

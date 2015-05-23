@@ -469,7 +469,7 @@ def convert(dbpath, tcode=False, outdir=False,img=True,force=True, keep_img=True
 	node.close()
 	
 	# Set attributes
-	outFile.root.conf.attrs.version=0
+	outFile.root.conf.attrs.version='3.0.0'
 	outFile.root.conf.attrs.instrument=instr
 	outFile.root.conf.attrs.date=tdate
 	outFile.root.conf.attrs.serial=hashlib.md5(dbpath).hexdigest()
