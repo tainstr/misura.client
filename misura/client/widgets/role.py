@@ -1,22 +1,41 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
-from active import ActiveWidget, getRemoteDev,_
-from aString import aString
+from active import ActiveWidget, getRemoteDev
 from .. import _
 
 class Role(ActiveWidget):
 	def __init__(self, *a, **k):
 		ActiveWidget.__init__(self, *a, **k)
+		self.isIO=self.type.endswith('IO')
 		self.subwin={} # goto() subwindos mapping
-		self.button=QtGui.QPushButton('None')
 		self.bmenu=QtGui.QMenu()
-		self.bmenu.addAction(_('Change'), self.edit)
+		chAct=self.bmenu.addAction(_('Change'), self.edit)
 		self.bmenu.addAction(_('Unset'), self.unset)
 		self.bmenu.addAction(_('Go to'), self.goto)
-		self.button.setMenu(self.bmenu)
-		self.lay.addWidget(self.button)
-		self.isIO=self.type.endswith('IO')
+		if self.isIO:
+			# Should draw and display instead the referred widget!
+			from misura.client.widgets import build
+			opt=self.prop['options']
+			obj=self.server.toPath(opt[0])
+			if obj and opt[2]:
+				self.value=build(self.server,obj,obj.gete(opt[2]))
+				self.value.label_widget.hide()
+				#TODO: manage units menu
+			else:
+				self.value=QtGui.QLabel('?')
+			self.button=self.bmenu.addAction('{}: {} : {}'.format(*opt))
+			self.iobutton=QtGui.QPushButton()
+			self.iobutton.setMenu(self.bmenu)
+			self.iobutton.setSizePolicy(QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.MinimumExpanding)
+			self.iobutton.setMaximumWidth(25)
+			self.lay.addWidget(self.value)
+			self.lay.addWidget(self.iobutton)
+		else:
+			self.button=QtGui.QPushButton('None')
+			self.button.setMenu(self.bmenu)
+			self.lay.addWidget(self.button)
+		
 		self.emit(QtCore.SIGNAL('selfchanged()'))
 #		self.connect(self.button, QtCore.SIGNAL('clicked()'), self.edit)
 		
@@ -42,9 +61,10 @@ class Role(ActiveWidget):
 		self.subwin[p]=v
 		return True
 		
-		
 	def  adapt2gui(self, val):
 		"""Convert the Role list into a string"""
+		if self.isIO:
+			return str(val)
 		# Evaluate if to shorten the fullpath by adding an ellipsis at the beginning
 		if self.current in [None, 'None']:
 			return 'None'
@@ -59,6 +79,9 @@ class Role(ActiveWidget):
 		
 	def update(self):
 		"""Update text in the button and help tooltip."""
+		if self.isIO:
+			self.value.setText(str(self.current))
+			return
 		if self.current in [None, 'None']:
 			self.button.setText('None')
 			self.button.setToolTip('Error: Undefined value')

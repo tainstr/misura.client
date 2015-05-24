@@ -47,7 +47,10 @@ class Role(unittest.TestCase):
 		self.assertFalse(hasattr(e, 'io'))
 		
 	def test_io(self):
-		w=widgets.build(self.root, self.root.kiln, self.root.kiln.gete('tcs'))
+		#FIXME: update to new IO logic!
+		self.root.kiln._readLevel=5
+		self.root.kiln._writeLevel=5
+		w=widgets.build(self.root, self.root.kiln, self.root.kiln.gete('Ts'))
 		self.assertEqual(w.current, None)
 		self.assertEqual(w.button.text(), 'None')
 		w.get()
