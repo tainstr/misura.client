@@ -5,45 +5,22 @@ from active import ActiveWidget, getRemoteDev
 from .. import _
 
 class Role(ActiveWidget):
+	isIO=False
+	bmenu_hide=False
 	def __init__(self, *a, **k):
 		ActiveWidget.__init__(self, *a, **k)
 		self.isIO=self.type.endswith('IO')
 		self.subwin={} # goto() subwindos mapping
-		self.bmenu=QtGui.QMenu()
-		chAct=self.bmenu.addAction(_('Change'), self.edit)
-		self.bmenu.addAction(_('Unset'), self.unset)
-		self.bmenu.addAction(_('Go to'), self.goto)
-		if self.isIO:
-			# Should draw and display instead the referred widget!
-			from misura.client.widgets import build
-			opt=self.prop['options']
-			obj=self.server.toPath(opt[0])
-			if obj and opt[2]:
-				self.value=build(self.server,obj,obj.gete(opt[2]))
-				self.value.label_widget.hide()
-				#TODO: manage units menu
-			else:
-				self.value=QtGui.QLabel('?')
-			self.button=self.bmenu.addAction('{}: {} : {}'.format(*opt))
-			self.iobutton=QtGui.QPushButton()
-			self.iobutton.setMenu(self.bmenu)
-			self.iobutton.setSizePolicy(QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.MinimumExpanding)
-			self.iobutton.setMaximumWidth(25)
-			self.lay.addWidget(self.value)
-			self.lay.addWidget(self.iobutton)
-		else:
-			self.button=QtGui.QPushButton('None')
-			self.button.setMenu(self.bmenu)
-			self.lay.addWidget(self.button)
+		self.bmenu.setText('None')
+		self.bmenu.setMaximumWidth(1000)
+		self.emenu.addAction(_('Change'), self.edit)
+		self.emenu.addAction(_('Unset'), self.unset)
+		self.emenu.addAction(_('Go to'), self.goto)
 		
 		self.emit(QtCore.SIGNAL('selfchanged()'))
-#		self.connect(self.button, QtCore.SIGNAL('clicked()'), self.edit)
 		
 	def unset(self):
-		r=['None','default']
-		if self.isIO:
-			r.append('None')
-		self.set(r)
+		self.set(['None','default'])
 		
 	def goto(self):
 		p=self.current[0]
@@ -73,31 +50,99 @@ class Role(ActiveWidget):
 		if d>4:
 			val[0]='...'+val[0][d:]
 		r='{}: {}'
-		if self.isIO:
-			r='{}: {} : {}'
 		return r.format(*val)
 		
 	def update(self):
 		"""Update text in the button and help tooltip."""
-		if self.isIO:
-			self.value.setText(str(self.current))
-			return
 		if self.current in [None, 'None']:
-			self.button.setText('None')
-			self.button.setToolTip('Error: Undefined value')
+			self.bmenu.setText('None')
+			self.bmenu.setToolTip('Error: Undefined value')
 			return
-		self.button.setText(self.adapt2gui(self.current))
+		self.bmenu.setText(self.adapt2gui(self.current))
 		tt='Object: {}\nPreset: {}'
-		if self.isIO:
-			tt+='\nOption: {}'
 		tt=tt.format(*self.current)
-		self.button.setToolTip(tt)
+		self.bmenu.setToolTip(tt)
 		
 	def edit(self):
 		"""Opens the Role editing dialog."""
 		d=RoleDialog(self)
-		r=d.exec_()
+		return d.exec_()
 		
+
+class RoleIO(ActiveWidget):
+	isIO=True
+	value=None
+	def __init__(self, *a, **k):
+		ActiveWidget.__init__(self, *a, **k)
+		self.subwin={} # goto() subwindos mapping
+		self.ioact=self.emenu.addAction('None',self.edit)
+		self.emenu.addAction(_('Unset'), self.unset)
+		self.emenu.addAction(_('Go to'), self.goto)
+		self.value=QtGui.QLabel('None')
+		self.update()
+		
+		self.emit(QtCore.SIGNAL('selfchanged()'))
+		
+	def update(self):
+		""" Draw the referred widget"""
+		self.prop=self.remObj.gete(self.handle)
+		opt=self.prop['options']
+		obj=self.server.toPath(opt[0])
+		fu=False
+		# Is update needed? 
+		if self.value:
+			if hasattr(self.value,'prop'):
+				kid=opt[0]+opt[-1]
+				if kid==self.value.prop['kid']:
+					return
+				fu=self.value.force_update
+			# Remove old widget
+			self.lay.removeWidget(self.value)
+			self.value.hide()
+			self.value.close()
+		# Recreate widget
+		if obj and opt[2] not in ('None',None):
+			from misura.client.widgets import build
+			self.value=build(self.server,obj,obj.gete(opt[2]))
+			self.value.label_widget.hide()
+			self.value.force_update=fu
+			#TODO: manage units and menu, which is bounded to label_widget
+		else:
+			self.value=QtGui.QLabel('None')
+		self.lay.addWidget(self.value)
+		self.ioact.setText('{}: {} : {}'.format(*opt))
+
+	def unset(self):
+		self.remObj.setattr(self.handle,'options',['None','default','None'])
+		self.update()
+		
+	def goto(self):
+		cur=self.prop['options']
+		p=cur[0]
+		if p in ['None', None]:
+			return False
+		# retrieve an existing win
+		v=self.subwin.get(p, False)
+		if v: 
+			v.show()
+			return True
+		from ..conf import mconf
+		obj=self.remObj.root.toPath(cur[0])
+		v=mconf.TreePanel(obj, select=obj)
+		v.show()
+		self.subwin[p]=v
+		return True
+		
+	def  adapt2gui(self, val):
+		"""Convert the Role list into a string"""
+		return str(val)
+		
+	def edit(self):
+		"""Opens the Role editing dialog."""
+		d=RoleDialog(self)
+		return d.exec_()
+		
+	
 	
 class RoleDialog(QtGui.QDialog):
 	def __init__(self, parent):
@@ -140,11 +185,17 @@ class RoleEditor(QtGui.QWidget):
 					self.select)
 		self.update()
 		
+	@property
+	def current(self):
+		if self.w.isIO:
+			return self.w.prop['options']
+		return self.w.current
+		
 	def update(self, cur=False, prev=False):
 		# Set current values
-		devpath=self.w.current[0]
+		devpath=self.current[0]
 		objpath=self.w.server.searchPath(devpath)
-		print 'server.searchPath',objpath, self.w.current
+		print 'server.searchPath',objpath, self.current
 		if objpath is False: 
 			return
 		# this will emit a currentChanged(), triggering select()
@@ -153,11 +204,11 @@ class RoleEditor(QtGui.QWidget):
 	def select(self, cur=False, prev=False):
 		self.remDev=False
 		self.redraw_config(cur)
-		conf=self.w.current[1]
+		conf=self.current[1]
 		idx=self.config.findData(conf)
 		self.config.setCurrentIndex(idx)
 		if self.w.isIO:
-			io=self.w.current[2]
+			io=self.current[2]
 			idx=self.io.findData(io)
 			self.io.setCurrentIndex(idx)
 		
@@ -167,7 +218,7 @@ class RoleEditor(QtGui.QWidget):
 		self.config.addItem('default', 'default')
 		path=self.tree.current_fullpath()
 		st, self.remDev=getRemoteDev(self.w.server, path)
-		print 'redraw_config Got Remote Dev',self.w.current[0], path, self.remDev
+		print 'redraw_config Got Remote Dev',self.current[0], path, self.remDev
 		if st and (self.remDev is not None):
 			for pre in self.remDev.listPresets():
 				if pre=='default': continue
@@ -200,13 +251,12 @@ class RoleEditor(QtGui.QWidget):
 
 		if None in [r, r1,r2]:
 			raise BaseException('NoneRequest')
-		
+		r=[r, r1]
 		if self.w.isIO:
-			print 'Adapt2srv IO',[r,r1,r2]
-			r=[r, r1,r2]
+			r.append(r2)
+			self.w.remObj.setattr(self.w.handle,'options',r)
+			self.w.update()
 		else:
-			print 'Adapt2srv',[r,r1]
-			r=[r, r1]
-		self.w.set(r)
+			self.w.set(r)
 		
 		

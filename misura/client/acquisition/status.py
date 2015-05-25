@@ -18,9 +18,12 @@ class Status(QtGui.QWidget):
 			wg=widgets.build(server, server.kiln,server.kiln.gete('motorStatus'))
 			wg.force_update=True
 			self.lay.addRow(wg.label_widget, wg)			
-		for opt in 'T', 'P', 'S','Ts','Tk':
+		for opt in 'T', 'S','P','Ts','Tk':
 			wg=widgets.build(server, server.kiln,server.kiln.gete(opt))
-			wg.force_update=True
+			if wg.type.endswith('IO'):
+				wg.value.force_update=True
+			else:
+				wg.force_update=True
 			self.lay.addRow(wg.label_widget, wg)
 		n=remObj['devpath']
 		opt=False

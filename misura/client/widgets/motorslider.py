@@ -100,7 +100,7 @@ class MotorSlider(aNumber):
 			# Start forced updates
 #			self.pos_obj.force_update=True
 		msg='%i%%' % abs(s)
-		self.label_widget.label.setText(msg)
+		self.label_widget.setText(msg)
 		return r
 	
 class MotorSliderAction(QtGui.QWidgetAction):

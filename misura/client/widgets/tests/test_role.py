@@ -2,13 +2,9 @@
 # -*- coding: utf-8 -*-
 """Tests role selector widget."""
 import unittest
-import functools
-from misura import utils_testing as ut
 from misura.client import widgets
 from misura.canon import option
-from misura import kiln, microscope
-from PyQt4 import QtGui,QtCore
-from PyQt4.QtTest import QTest
+from PyQt4 import QtGui
 app=False
 print 'Importing',__name__
 main=__name__=='__main__'
@@ -19,7 +15,6 @@ def setUpModule():
 	print 'setUpModule',__name__
 	global app
 	app=QtGui.QApplication([])
-	ut.parallel(0)
 
 def tearDownModule():
 	global app
@@ -31,40 +26,45 @@ def tearDownModule():
 class Role(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
-		cls.root=ut.dummyServer(kiln.Kiln, microscope.Hsm)
-		ut.thermoregulationInit(cls.root)
+		cls.root=option.ConfigurationProxy({
+										'self':{'role':{'current':['/dev/','default'],'type':'Role'},
+												'roleio':{'options':['/dev/','default','value'],'type':'RoleIO'}
+												},
+										'dev':{'self':{
+													'name':{'type':'String'},
+													'value':{'attr':['History'],'type':'Integer'},
+													'value2':{'current':2,'attr':['History'],'unit':'celsius','type':'Integer'},
+													}
+											}
+										})
+		cls.root.validate()
+		cls.root.dev.validate()
 	
-	def test(self):
-		w=widgets.build(self.root, self.root.hsm, self.root.hsm.gete('smp0'))
-		# The current value is not initialized (gete() returns {current:None} )
-		self.assertEqual(w.current, None)
-		self.assertEqual(w.button.text(), 'None')
-		w.get()
-		self.assertEqual(w.current, ['/hsm/sample0/', 'default'])
+	def test_role(self):
+		w=widgets.build(self.root, self.root, self.root.gete('role'))
+		self.assertEqual(w.current, ['/dev/', 'default'])
 		e=widgets.RoleEditor(w)
-		self.assertEqual(e.tree.current_fullpath(), '/hsm/sample0/')
+		self.assertEqual(e.tree.current_fullpath(), '/dev/')
 		self.assertEqual(e.config.itemData(e.config.currentIndex()), 'default')
 		self.assertFalse(hasattr(e, 'io'))
-		
+		if main and False:
+			w.show()
+			QtGui.qApp.exec_()
+			print 'Selected on exit:', w.current
+					
 	def test_io(self):
-		#FIXME: update to new IO logic!
-		self.root.kiln._readLevel=5
-		self.root.kiln._writeLevel=5
-		w=widgets.build(self.root, self.root.kiln, self.root.kiln.gete('Ts'))
-		self.assertEqual(w.current, None)
-		self.assertEqual(w.button.text(), 'None')
-		w.get()
-		self.assertEqual(w.current, ['/kiln/heatload/', 'default', 'temp'])
+		w=widgets.build(self.root, self.root, self.root.gete('roleio'))
+		self.assertEqual(w.prop['options'], ['/dev/', 'default', 'value'])
 		e=widgets.RoleEditor(w)
-		self.assertEqual(e.tree.current_fullpath(), '/kiln/heatload/')
+		self.assertEqual(e.tree.current_fullpath(), '/dev/')
 		ci=e.config.currentIndex()
 		self.assertEqual(e.config.itemData(ci), 'default')
 		ei=e.io.currentIndex()
-		self.assertEqual(e.io.itemData(ei), 'temp')
+		self.assertEqual(e.io.itemData(ei), 'value')
 		e.io.setCurrentIndex(ei-1)
 		nval=e.io.itemData(e.io.currentIndex())
 		e.apply()
-		self.assertEqual(w.current[-1], nval)
+# 		self.assertEqual(w.prop['options'][-1], nval)
 		if main:
 			w.show()
 			QtGui.qApp.exec_()

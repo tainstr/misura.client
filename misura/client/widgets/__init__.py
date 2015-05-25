@@ -22,14 +22,15 @@ from aProfile import aProfile
 from aTime import aTime, aDelay
 from aFileList import aFileList
 from presets import PresetManager
-from role import Role,  RoleEditor,  RoleDialog
+from role import Role,  RoleIO, RoleEditor,  RoleDialog
 from cycle import ThermalCycleChooser
 from motorslider import MotorSlider, MotorSliderAction
 
 def build(server, remObj, prop, parent=None):
 	"""Build a property widget based on a property dict"""
 	arg=(server, remObj, prop, parent)
-	A=prop['attr']
+	print prop
+	A=prop.get('attr',[])
 	T=prop['type']
 	if 'Hidden' in A+[T]:
 #		print 'Hidden property',prop
@@ -71,8 +72,10 @@ def build(server, remObj, prop, parent=None):
 			obj=aButton(*arg)
 		elif T=='ThermalCycle':
 			obj=ThermalCycleChooser(server.kiln, parent=parent)
-		elif T.startswith('Role'):
+		elif T=='Role':
 			obj=Role(*arg)
+		elif T=='RoleIO':
+			obj=RoleIO(*arg)
 		elif T=='Table':
 			obj=aTable(*arg)
 		elif T=='Profile':

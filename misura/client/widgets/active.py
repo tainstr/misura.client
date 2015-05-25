@@ -71,7 +71,7 @@ class Active(object):
 		self.path=remObj._Method__name
 		self.prop=prop
 		
-		for p in 'current', 'type', 'handle', 'factory_default', 'attr', 'readLevel', 'writeLevel', 'name', 'kid':
+		for p in 'current', 'type', 'handle', 'factory_default', 'attr', 'readLevel', 'writeLevel', 'name':
 			setattr(self, p, prop[p])
 		self.readonly=(self.type=='ReadOnly') or ('ReadOnly' in self.attr) or (self.remObj._writeLevel<self.writeLevel)
 		
@@ -206,23 +206,140 @@ class ActiveObject(Active, QtCore.QObject):
 	def emit(self, *a, **k):
 		return QtCore.QObject.emit(self, *a, **k)
 		
-class LabelWidget(QtGui.QWidget):
-	def __init__(self, parent,context='Option'):
-		QtGui.QWidget.__init__(self,parent=parent)
-		self.active=parent
+class LabelWidget(QtGui.QLabel):
+	def __init__(self, parent):
 		prop=parent.prop
+		QtGui.QLabel.__init__(self,unicode(_(prop['name'])),parent=parent)
+		self.prop=prop
+			
+	def mousePressEvent(self, event):
+		"""Begin a drag and drop event"""
+		if event.button() == QtCore.Qt.LeftButton:
+			drag=QtGui.QDrag(self)
+			mimeData=QtCore.QMimeData()
+			mimeData.setData("text/plain", self.prop['kid'])
+			drag.setMimeData(mimeData)
+			drag.exec_()
+			
+	def enterEvent(self,event):
+		self.parent().enterEvent(event)
+		return QtGui.QLabel.enterEvent(self,event)
+	
+	def leaveEvent(self,event):
+		self.parent().leaveEvent(event)
+		return QtGui.QLabel.leaveEvent(self,event)
+
+class ActiveMenuButton(QtGui.QPushButton):
+	def __init__(self, prop,parent=None):
+		QtGui.QPushButton.__init__(self,parent=parent)
+		self.prop=prop	
+		
+	def mousePressEvent(self, event):
+		"""Begin a drag and drop event"""
+		if event.button() == QtCore.Qt.RightButton:
+			drag=QtGui.QDrag(self)
+			mimeData=QtCore.QMimeData()
+			mimeData.setData("text/plain", self.prop['kid'])
+			drag.setMimeData(mimeData)
+			drag.exec_()
+		return QtGui.QPushButton.mousePressEvent(self,event)
+		
+
+
+class ActiveWidget(Active, QtGui.QWidget):
+	"""Graphical representation of an Option object"""
+	bmenu_hide=True
+	"""Auto-hide menu button"""
+	def __init__(self, server, remObj, prop, parent=None, context='Option'):
+		Active.__init__(self, server, remObj, prop, context)
+		QtGui.QWidget.__init__(self,parent)
+		self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
+		self.setFocusPolicy(QtCore.Qt.StrongFocus)
 		self.lay=QtGui.QHBoxLayout()
 		self.lay.setContentsMargins(0,0,0,0)
 		self.lay.setSpacing(0)
 		self.setLayout(self.lay)
+		self.label=self.tr(self.name)
+		self.label_widget=LabelWidget(self) # Info label
+		self.emenu=QtGui.QMenu(self) 
+		self.build_extended_menu()
+		self.connect(self, QtCore.SIGNAL('destroyed()'), self.unregister)
+		self.connect(self, QtCore.SIGNAL('selfchanged'), self._get)
+		self.connect(self, QtCore.SIGNAL('selfchanged()'), self._get)
+		self.connect(self, QtCore.SIGNAL('selfhide()'), self.hide)
+		self.connect(self, QtCore.SIGNAL('selfshow()'), self.show)
 		
-		self.menu=QtGui.QMenu(self)
 		
+	@property
+	def unit(self):
+		"""Get measurement unit for this label"""
+		# First check the client-side unit
+		u=self.prop.get('csunit',False)
+		if u in ['', 'None',None, False]: u=False
+		if not u:
+			u=self.prop.get('unit',False)
+		if u in ['', 'None',None, False]: u=False
+		return u
+	
+	def set_label(self):
+		"""Update label contents"""
+		sym=False
+		u=self.unit
+		if u and isinstance(u, collections.Hashable):
+			sym=units.hsymbols.get(u,False)
+		msg=''
+		if sym:
+			msg=u'{}'.format(sym)
+			self.bmenu.setMaximumWidth(50)
+		else:
+			self.bmenu.setMaximumWidth(20)
+		self.bmenu.setText(msg)
+
+	def set_unit(self,unit):
+		"""Change measurement unit"""
+		for u,(act,p) in self.units.iteritems():
+			if u!=unit:
+				act.setChecked(False)
+				continue
+			act.setChecked(True)
+			print 'Setting csunit to',u
+			r=self.remObj.setattr(self.handle,'csunit',u)
+			self.prop['csunit']=u
+			print 'result', r
+		self.set_label()
+		self.update_menu()
+		self.update()
+		
+	def set_flags(self,foo=0):
+		out={}
+		for key, act in self.flags.iteritems():
+			out[key]=act.isChecked()>0
+		if self.enable_check:
+			if self.enable_check.isChecked(): out['enabled']=True
+			else: out['enabled']=False
+		print 'updating flags', out
+		r=self.remObj.setFlags(self.handle, out)
+		return r
+	
+	def update_menu(self):
+		flags=self.remObj.getFlags(self.handle)
+		print 'remote flags', flags
+		for key, act in self.flags.iteritems():
+			if not flags.has_key(key):
+				print 'Error, key disappeared', key
+			act.setChecked(flags[key]*2)
+			if key=='enabled':
+				self.enable_check.setChecked(flags[key]*2)
+		
+	def build_extended_menu(self):
+		# Extended menu
+		self.emenu.clear()
 		# Add flags to context menu
 		self.flags={}
+		prop=self.prop
 		if prop.has_key('flags'):
 			for key, val in prop['flags'].iteritems():
-				act=self.menu.addAction(key, self.set_flags)
+				act=self.emenu.addAction(key, self.set_flags)
 				act.setCheckable(True)
 				act.setChecked(val*2)
 				self.flags[key]=act
@@ -236,8 +353,9 @@ class LabelWidget(QtGui.QWidget):
 		# Units sub-menu
 		self.units={}
 		u=self.unit
+		u1=''
 		if u!='None' and type(u)==type(''):
-			un=self.menu.addMenu(_('Units'))
+			un=self.emenu.addMenu(_('Units'))
 			kgroup,f,p=units.get_unit_info(u,units.from_base)
 			same=units.from_base.get(kgroup,{u:lambda v: v}).keys()
 			print kgroup, same
@@ -249,116 +367,18 @@ class LabelWidget(QtGui.QWidget):
 					act.setChecked(True)
 				self.units[u1]=(act,p)
 			
-			
-		self.menu.addAction(_('Set default value'), parent.set_default)
-		self.menu.addAction(_('Check for modification'), parent.get)
-		self.menu.addAction(_('Option Info'), self.show_info)
-		self.menu.addAction(_('Online help for "%s"') % parent.handle, parent.emitHelp)
-
-		self.label=QtGui.QLabel()
-		self.label.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-		self.label.connect(self.label, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
+		self.emenu.addAction(_('Set default value'), self.set_default)
+		self.emenu.addAction(_('Check for modification'), self.get)
+		self.emenu.addAction(_('Option Info'), self.show_info)
+		self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
+		# Units button
+		self.bmenu=ActiveMenuButton(self.prop,self)
+		self.bmenu.setMenu(self.emenu)
+		self.bmenu.setSizePolicy(QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Minimum)
+		self.bmenu.clicked.connect(self.update_menu)
+		self.bmenu.hide()
 		self.set_label()
-		self.lay.addWidget(self.label)
-		
-	@property
-	def unit(self):
-		"""Get measurement unit for this label"""
-		# First check the client-side unit
-		u=self.active.prop.get('csunit',False)
-		if u in ['', 'None',None, False]: u=False
-		if not u:
-			u=self.active.prop.get('unit',False)
-		if u in ['', 'None',None, False]: u=False
-		return u
-		
-	def show_info(self):
-		prop=self.active.prop
-		print prop
-		t='<h1> Option: %s </h1>' % prop.get('name','Object')
-		
-		for k, v in prop.iteritems():
-			t+='<b>{}</b>: {}<br/>'.format(k, v)
-			
-		info_dialog(t, parent=self)
-			
-	def mousePressEvent(self, event):
-		if event.button() == QtCore.Qt.LeftButton:
-			drag=QtGui.QDrag(self)
-			mimeData=QtCore.QMimeData()
-			mimeData.setData("text/plain", self.active.prop['kid'])
-			drag.setMimeData(mimeData)
-			drag.exec_()
-			
-	def set_label(self):
-		"""Update label contents"""
-		sym=False
-		u=self.unit
-		if u and isinstance(u, collections.Hashable):
-			sym=units.hsymbols.get(u,False)
-		msg=unicode(_(self.active.name))
-		if sym:
-			msg+=u' ({})'.format(sym)
-		self.label.setText(msg)
-
-	def set_unit(self,unit):
-		"""Change measurement unit"""
-		for u,(act,p) in self.units.iteritems():
-			if u!=unit:
-				act.setChecked(False)
-				continue
-			act.setChecked(True)
-			print 'Setting csunit to',u
-			r=self.active.remObj.setattr(self.active.handle,'csunit',u)
-			self.active.prop['csunit']=u
-			print 'result', r
-		self.set_label()
-		self.active.update()
-		
-	def showMenu(self, pt):
-		parent=self.active
-		flags=parent.remObj.getFlags(parent.handle)
-		print 'remote flags', flags
-		for key, act in self.flags.iteritems():
-			if not flags.has_key(key):
-				print 'Error, key disappeared', key
-			act.setChecked(flags[key]*2)
-			if key=='enabled':
-				self.enable_check.setChecked(flags[key]*2)
-		self.menu.popup(self.label.mapToGlobal(pt))
-		
-	def set_flags(self,foo=0):
-		out={}
-		for key, act in self.flags.iteritems():
-			out[key]=act.isChecked()>0
-		if self.enable_check:
-			if self.enable_check.isChecked(): out['enabled']=True
-			else: out['enabled']=False
-		print 'updating flags', out
-		r=self.active.remObj.setFlags(self.active.handle, out)
-		self.showMenu(QtCore.QPoint())
-		self.menu.hide()
-		return r
-				
-
-class ActiveWidget(Active, QtGui.QWidget):
-	"""Graphical representation of an Option object"""
-	def __init__(self, server, remObj, prop, parent=None, context='Option'):
-		Active.__init__(self, server, remObj, prop, context)
-		QtGui.QWidget.__init__(self,parent)
-		self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
-		self.setFocusPolicy(QtCore.Qt.StrongFocus)
-		self.lay=QtGui.QHBoxLayout()
-		self.lay.setContentsMargins(0,0,0,0)
-		self.lay.setSpacing(0)
-		self.setLayout(self.lay)
-		self.label=self.tr(self.name)
-		self.label_widget=LabelWidget(self)
-		self.connect(self, QtCore.SIGNAL('destroyed()'), self.unregister)
-		self.connect(self, QtCore.SIGNAL('selfchanged'), self._get)
-		self.connect(self, QtCore.SIGNAL('selfchanged()'), self._get)
-		self.connect(self, QtCore.SIGNAL('selfhide()'), self.hide)
-		self.connect(self, QtCore.SIGNAL('selfshow()'), self.show)
+		self.lay.addWidget(self.bmenu)
 		
 	def isVisible(self):
 		return QtGui.QWidget.isVisible(self)
@@ -368,9 +388,26 @@ class ActiveWidget(Active, QtGui.QWidget):
 	def enterEvent(self, event):
 		"""Update the widget anytime the mouse enters its area.
 		This must be overridden in one-shot widgets, like buttons."""
-		self.get()
-		return 
-
+		self.get()	
+		if not self.emenu.isEmpty():
+			self.bmenu.show()
+		return QtGui.QWidget.enterEvent(self,event)
+	
+	def leaveEvent(self,event):
+		if self.bmenu_hide:
+			QtCore.QTimer.singleShot(500,self.do_hide_menu)
+		return QtGui.QWidget.leaveEvent(self,event)
+	
+	def do_hide_menu(self):
+		"""Delayed hiding"""
+		cur=self.mapFromGlobal(QtGui.QCursor.pos())
+		x,y=cur.x(),cur.y()
+		if x<0 or y<0 or x>self.width() or y>self.height():
+			self.bmenu.hide()
+		else:
+			# Retry later
+			QtCore.QTimer.singleShot(500,self.do_hide_menu)
+			
 	def clear(self):
 		"""Removes all widgets in this layout"""
 		for i in range(self.lay.count()):
@@ -418,6 +455,16 @@ class ActiveWidget(Active, QtGui.QWidget):
 	def hideEvent(self, e):
 		self.unregister()
 		return QtGui.QWidget.hideEvent(self, e)
+	
+	def show_info(self):
+		prop=self.prop
+		print prop
+		t='<h1> Option: %s </h1>' % prop.get('name','Object')
+		
+		for k, v in prop.iteritems():
+			t+='<b>{}</b>: {}<br/>'.format(k, v)
+			
+		info_dialog(t, parent=self)
 		
 
 class Autoupdater(QtCore.QObject):

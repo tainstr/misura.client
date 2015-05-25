@@ -93,7 +93,7 @@ class KidRegistry(QtCore.QThread):
 		if w.type=='Button':
 			print 'It is not possible to register "Button" widgets.'
 			return False
-		kid=w.kid
+		kid=w.prop['kid']
 		# Add to the dictionary
 		if not self.rid.has_key(kid):
 			self.rid[kid]=[]
@@ -107,7 +107,7 @@ class KidRegistry(QtCore.QThread):
 #	@lockme
 	def unregister(self, w):
 		"""Removes a widget from the registry."""
-		kid=w.kid
+		kid=w.prop['kid']
 		if self.rid.has_key(kid):
 			if w in self.rid[kid]:
 				self.rid[kid].remove(w)

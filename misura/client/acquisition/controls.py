@@ -234,7 +234,7 @@ class MotionControls(QtGui.QToolBar):
 		
 		if self.server.kiln['motorStatus']>=0:
 			self.kmotor=widgets.build(self.server, self.server.kiln, self.server.kiln.gete('motorStatus'))
-			self.kmotor.label_widget.label.setText('Furnace:')
+			self.kmotor.label_widget.setText('Furnace:')
 			self.kmotor.lay.insertWidget(0,self.kmotor.label_widget)
 			self.addWidget(self.kmotor)
 		
@@ -256,7 +256,7 @@ class MotionControls(QtGui.QToolBar):
 # 		slider=widgets.MotorSlider(self.server,obj,self.parent())
 		slider=widgets.build(self.server, obj, obj.gete('goingTo'))
 		slider.lay.insertWidget(0,slider.label_widget)
-		slider.label_widget.label.setText('    Focus:')
+		slider.label_widget.setText('    Focus:')
 		self.addWidget(slider)
 		
 			

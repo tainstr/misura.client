@@ -69,7 +69,7 @@ class RoleProgress(ActiveWidget):
 		
 		self.prog={}
 		self.update()
-		self.label_widget.label.setText('Remote operations')
+		self.label_widget.setText('Remote operations')
 		
 	def toggle_log(self):
 		if self.log.isVisible():
@@ -86,7 +86,7 @@ class RoleProgress(ActiveWidget):
 		for k in vis-cur:
 			p=self.prog[k]
 			txt=self.log.toPlainText()
-			txt+='Done: '+p.label_widget.label.text()+'\n'
+			txt+='Done: '+p.label_widget.text()+'\n'
 			self.log.setPlainText(txt)
 			p.hide()
 			self.mlay.removeWidget(p)
@@ -102,8 +102,8 @@ class RoleProgress(ActiveWidget):
 			if prop is None: 
 				continue
 			p=aProgress(self.server, obj, prop, parent=self.mw)
-			txt=obj['name'].capitalize()+': '+p.label_widget.label.text()
-			p.label_widget.label.setText(txt)
+			txt=obj['name'].capitalize()+': '+p.label_widget.text()
+			p.label_widget.setText(txt)
 			p.lay.insertWidget(0, p.label_widget) # show label before pbar
 			self.mlay.addWidget(p)
 			# Remember progress
