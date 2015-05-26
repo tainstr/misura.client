@@ -139,7 +139,7 @@ class MiniImage(QtGui.QWidget):
 			if k=='T':
 				p1='0:kiln/'+k
 			else:
-				p1='0:'+p+'/'+k
+				p1='0:'+p[1:]+'/'+k
 			ds=self.doc.data.get(p1,None)
 			if ds is None:
 				print 'update_info: no target dataset was found',k,p1
