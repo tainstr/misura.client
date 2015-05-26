@@ -5,6 +5,9 @@ from .. import _
 from PyQt4 import QtGui
 
 class aButton(ActiveWidget):
+	get_on_enter=False
+	"""Do not auto-update when mouse enters."""
+	
 	def __init__(self, server, path,  prop, parent=None):
 		ActiveWidget.__init__(self, server,path,  prop, parent)
 		self.button=QtGui.QPushButton(self.tr(self.name))
@@ -17,7 +20,3 @@ class aButton(ActiveWidget):
 		if r is True: r=_('Done')
 		elif r is False: r=_('Failed')
 		QtGui.QMessageBox.information(self, _('Operation Result'), str(r))
-			
-	def enterEvent(self, event):
-		"""Override auto-update when mouse enters."""
-		return None

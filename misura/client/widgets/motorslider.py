@@ -43,6 +43,7 @@ class MotorSlider(aNumber):
 	def showMenu(self, pt):
 		if self.cf:
 			self.cfact.setChecked(self.cf.isVisible())
+		self.update()
 		self.menu.popup(self.mapToGlobal(pt))
 		
 	def enterEvent(self,e):
@@ -56,9 +57,6 @@ class MotorSlider(aNumber):
 			self.lay.setContentsMargins(0, 0, 0, 0)
 			self.lay.setSpacing(0)
 			self.slider.setContentsMargins(0, 0, 0, 0)
-#			a=direction==QtCore.Qt.Horizontal
-#			self.slider.setInvertedAppearance(not a)
-#			self.slider.setInvertedControls(a)
 		return r
 		
 	def update_position(self, pos):
@@ -91,14 +89,9 @@ class MotorSlider(aNumber):
 			d=0
 		if d<=5*step:
 			self.started=s
-#			self.menu.hide()
 			s=100
-			# Stop forced updates
-#			self.pos_obj.force_update=False
 		else:
 			s=100*(1-abs(self.current-s)/d)
-			# Start forced updates
-#			self.pos_obj.force_update=True
 		msg='%i%%' % abs(s)
 		self.label_widget.setText(msg)
 		return r

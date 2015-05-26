@@ -206,50 +206,64 @@ class ActiveObject(Active, QtCore.QObject):
 	def emit(self, *a, **k):
 		return QtCore.QObject.emit(self, *a, **k)
 		
+
+class LabelUnit(QtGui.QLabel):
+	clicked=QtCore.pyqtSignal()
+	def __init__(self, prop,parent=None):
+		"""Label displaying the measurement unit, optional menu, able to start a drag event."""
+		QtGui.QLabel.__init__(self,'.',parent=parent)
+		self.prop=prop	
+		self.menu=False
+		self.setMaximumWidth(30)
+		self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+		
+	def setMenu(self, menu):
+		self.menu=menu
+		
+	def start_drag(self):
+		"""Begin a drag and drop event"""
+		drag=QtGui.QDrag(self)
+		mimeData=QtCore.QMimeData()
+		mimeData.setData("text/plain", self.prop['kid'])
+		drag.setMimeData(mimeData)
+		drag.exec_()		
+		
+	def show_menu(self, event):
+		"""Show associated menu"""
+		if self.menu:
+			self.menu.popup(event.globalPos())
+			self.clicked.emit()	
+			
+	def mousePressEvent(self, event):
+		if event.button() == QtCore.Qt.RightButton:
+			self.start_drag()
+		elif self.menu and event.button() == QtCore.Qt.LeftButton:
+			self.show_menu(event)
+		return QtGui.QLabel.mousePressEvent(self,event)
+		
 class LabelWidget(QtGui.QLabel):
-	def __init__(self, parent):
-		prop=parent.prop
-		QtGui.QLabel.__init__(self,unicode(_(prop['name'])),parent=parent)
+	def __init__(self, active):
+		self.active=active
+		prop=active.prop
+		QtGui.QLabel.__init__(self,unicode(_(prop['name'])),parent=active)
 		self.prop=prop
 			
 	def mousePressEvent(self, event):
-		"""Begin a drag and drop event"""
-		if event.button() == QtCore.Qt.LeftButton:
-			drag=QtGui.QDrag(self)
-			mimeData=QtCore.QMimeData()
-			mimeData.setData("text/plain", self.prop['kid'])
-			drag.setMimeData(mimeData)
-			drag.exec_()
+		return self.active.bmenu.mousePressEvent(event)
 			
 	def enterEvent(self,event):
-		self.parent().enterEvent(event)
-		return QtGui.QLabel.enterEvent(self,event)
+		return self.active.enterEvent(event)
 	
 	def leaveEvent(self,event):
-		self.parent().leaveEvent(event)
-		return QtGui.QLabel.leaveEvent(self,event)
-
-class ActiveMenuButton(QtGui.QPushButton):
-	def __init__(self, prop,parent=None):
-		QtGui.QPushButton.__init__(self,parent=parent)
-		self.prop=prop	
+		return self.active.leaveEvent(event)
 		
-	def mousePressEvent(self, event):
-		"""Begin a drag and drop event"""
-		if event.button() == QtCore.Qt.RightButton:
-			drag=QtGui.QDrag(self)
-			mimeData=QtCore.QMimeData()
-			mimeData.setData("text/plain", self.prop['kid'])
-			drag.setMimeData(mimeData)
-			drag.exec_()
-		return QtGui.QPushButton.mousePressEvent(self,event)
 		
-
-
 class ActiveWidget(Active, QtGui.QWidget):
 	"""Graphical representation of an Option object"""
 	bmenu_hide=True
 	"""Auto-hide menu button"""
+	get_on_enter=True
+	"""Update on mouse enter"""
 	def __init__(self, server, remObj, prop, parent=None, context='Option'):
 		Active.__init__(self, server, remObj, prop, context)
 		QtGui.QWidget.__init__(self,parent)
@@ -287,12 +301,9 @@ class ActiveWidget(Active, QtGui.QWidget):
 		u=self.unit
 		if u and isinstance(u, collections.Hashable):
 			sym=units.hsymbols.get(u,False)
-		msg=''
+		msg='..'
 		if sym:
 			msg=u'{}'.format(sym)
-			self.bmenu.setMaximumWidth(50)
-		else:
-			self.bmenu.setMaximumWidth(20)
 		self.bmenu.setText(msg)
 
 	def set_unit(self,unit):
@@ -372,11 +383,12 @@ class ActiveWidget(Active, QtGui.QWidget):
 		self.emenu.addAction(_('Option Info'), self.show_info)
 		self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
 		# Units button
-		self.bmenu=ActiveMenuButton(self.prop,self)
+		self.bmenu=LabelUnit(self.prop,self)
 		self.bmenu.setMenu(self.emenu)
 		self.bmenu.setSizePolicy(QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Minimum)
 		self.bmenu.clicked.connect(self.update_menu)
-		self.bmenu.hide()
+		if not self.unit:
+			self.bmenu.hide()
 		self.set_label()
 		self.lay.addWidget(self.bmenu)
 		
@@ -388,13 +400,15 @@ class ActiveWidget(Active, QtGui.QWidget):
 	def enterEvent(self, event):
 		"""Update the widget anytime the mouse enters its area.
 		This must be overridden in one-shot widgets, like buttons."""
-		self.get()	
-		if not self.emenu.isEmpty():
+		if self.get_on_enter:
+			self.get()	
+		# Show only if label_widget is not visible
+		if not self.label_widget.isVisible():
 			self.bmenu.show()
 		return QtGui.QWidget.enterEvent(self,event)
 	
 	def leaveEvent(self,event):
-		if self.bmenu_hide:
+		if self.bmenu_hide and not self.unit:
 			QtCore.QTimer.singleShot(500,self.do_hide_menu)
 		return QtGui.QWidget.leaveEvent(self,event)
 	

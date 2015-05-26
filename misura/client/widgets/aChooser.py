@@ -11,7 +11,7 @@ class aChooser(ActiveWidget):
 	
 	def __init__(self, server, path, prop, parent=None):
 		ActiveWidget.__init__(self, server, path,  prop, parent)
-		self.combo=QtGui.QComboBox()
+		self.combo=QtGui.QComboBox(parent=self)
 		self.redraw(reget=False)
 		self.lay.addWidget(self.combo)
 		self.connect(self.combo,  QtCore.SIGNAL('currentIndexChanged(int)'), self.set)
@@ -23,7 +23,7 @@ class aChooser(ActiveWidget):
 			self.redraw()
 		else:
 			self.get()
-		return 
+		return ActiveWidget.enterEvent(self, event)
 		
 	def redraw(self, reget=True):
 		self.combo.blockSignals(True)
