@@ -174,7 +174,7 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 		self.nosave_server=[]
 		self.close()
 		if path: self.path=path
-		self.conn=sqlite3.connect(self.path)
+		self.conn=sqlite3.connect(self.path, detect_types=sqlite3.PARSE_DECLTYPES)
 		self.conn.text_factory=unicode
 		cursor=self.conn.cursor()
 		

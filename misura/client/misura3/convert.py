@@ -38,7 +38,7 @@ ao(base_dict,'fullpath','String')
 
 measure_dict=deepcopy(base_dict)
 measure_dict['name']['current']='Measure'
-ao(measure_dict,'nSamples','Number',1)
+ao(measure_dict,'nSamples','Integer',1)
 ao(measure_dict,'id','String')
 ao(measure_dict,'date','Date','00:00:00 01/01/2000')
 ao(measure_dict,'elapsed','Float',unit='second')
@@ -165,8 +165,8 @@ ao(std_hsm,'param_melt','Float',0.333,'Ratio h/w for Melting',parent='Melting')
 
 smp_dict=deepcopy(base_dict)
 smp_dict['name']['current']='Sample'
-ao(smp_dict,'idx','Number')
-ao(smp_dict,'ii','Number')
+ao(smp_dict,'idx','Integer')
+ao(smp_dict,'ii','Integer')
 ao(smp_dict,'initialDimension','Float',3000.)
 ao(smp_dict,'initialWidth','Float',2000.)
 ao(smp_dict,'roi','Rect',[0,0,640,480])
@@ -190,8 +190,8 @@ ao(kiln_dict,'P','Float',0,'Power',unit='percent')
 ao(kiln_dict,'S','Float',0,'Setpoint',unit='celsius')
 
 instr_dict=deepcopy(base_dict)
-ao(instr_dict,'camera','RoleBeholder',['camerapath','default'])
-ao(instr_dict,'devices','List')
+ao(instr_dict,'camera','Role',['camerapath','default'])
+ao(instr_dict,'devices','Point')
 
 camera_dict=deepcopy(instr_dict)
 camera_dict['name']['current']='camera'

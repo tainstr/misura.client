@@ -117,7 +117,7 @@ class aTableModel(QtCore.QAbstractTableModel):
 		for ent in self.header:
 			ent=ent[1]
 			if ent=='String': row.append('')
-			elif ent in ['Float','Integer', 'Number']: row.append(0)
+			elif ent in ['Float','Integer']: row.append(0)
 			else: row.append('')
 		return row
 		

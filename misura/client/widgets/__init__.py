@@ -55,7 +55,7 @@ def build(server, remObj, prop, parent=None):
 			obj=aChooser(*arg)
 		elif T=='Preset':
 			obj=PresetManager(remObj)
-		elif T in ['Integer', 'Float', 'Number']:
+		elif T in ['Integer', 'Float']:
 			obj=aNumber(*arg)
 		elif T=='Time':
 			if prop['kid']=='/delay':
@@ -64,8 +64,6 @@ def build(server, remObj, prop, parent=None):
 				obj=aTime(*arg)
 		elif T=='Progress':
 			obj=aProgress(*arg)
-		elif T in ['Point2D', 'Vector', 'Dict']:
-			obj=aDict(*arg)
 		elif T=='Meta':
 			obj=aMeta(*arg)
 		elif T=='Button':
