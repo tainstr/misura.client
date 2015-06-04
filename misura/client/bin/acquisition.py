@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sys
-from misura.client import iutils, acquisition
+from misura.client import acquisition, from_argv, iutils
 
 
 if __name__=='__main__':

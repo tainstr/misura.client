@@ -1,10 +1,14 @@
 #!/usr/bin/python2.6
 # -*- coding: utf-8 -*-
 from PyQt4 import QtCore, QtGui
+pyodbc=False
 try:
 	import odbc as pyodbc
 except:
-	import pyodbc 
+	try:
+		import pyodbc 
+	except:
+		pass
 import datetime
 from time import sleep
 from scipy import array, interpolate, arange

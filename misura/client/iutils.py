@@ -213,23 +213,6 @@ def getOpts():
 		r[opt]=val
 	return r
 
-# CONNECTION SHORTCUTS
-def default(host='localhost', port=3880, user='admin', password='admin'):
-	addr='https://{}:{}/RPC'.format(host,port)
-	network.getConnection(addr,user,password,smart=True)
-	return network.manager.remote
-
-def from_argv():
-	"""Get connection from command line arguments"""
-	import sys, getopt
-	print 'from argv', sys.argv
-	opts, args=getopt.getopt(sys.argv[1:], 'h:p:u:w:')
-	r={'-h':'localhost', '-p':3880,
-		'-u':'admin','-w':'admin'}
-	for opt, val in opts:
-		r[opt]=val
-	return default(host=r['-h'],port=r['-p'],user=r['-u'],password=r['-w'])
-
 def get_plotted_tree(base,m=False):
 	"""Builds a dictionary for the base graph:
 		m => {'plot': {plotpath: dsname,...},
