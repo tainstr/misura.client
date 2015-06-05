@@ -27,6 +27,8 @@ class Designer(unittest.TestCase):
 	
 	def test(self):
 		k=kiln.Kiln()
+		k._writeLevel=5
+		k._readLevel=5
 		call=lambda f, *ar,**kw: getattr(k, f)(*ar, **kw)
 		setattr(k, 'call', call)
 		tcd=thermal_cycle.ThermalCycleDesigner(k)

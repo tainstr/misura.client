@@ -19,9 +19,13 @@ def clean_curve(dat,events=True):
 		if None in ent: 
 			print 'Skipping row', irow
 			continue
-		if not events and isinstance(T,str):
-			print 'Skipping EVENT',irow
-			continue
+		if isinstance(T,basestring):
+			if events:
+				T=str(T)
+			else:
+				print 'Skipping EVENT',irow
+				continue
+
 		crv.append([t*60, T])
 	return crv
 
@@ -204,7 +208,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 		if not index.isValid() or irow<0 or irow>self.rowCount() or icol<0 or icol>colCHK:
 			print 'setData: invalid line',irow,icol
 			return False
-		if isinstance(value,str) and (not value.startswith('>')):
+		if isinstance(value,basestring) and (not value.startswith('>')):
 			value=float(value)
 		row=self.dat[irow]
 		print 'setData:',irow,icol,value,row[icol]
@@ -267,7 +271,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 		for i, row in enumerate(crv):
 			t, T=row
 			# Detect TCEv
-			if isinstance(T,str):
+			if isinstance(T,basestring):
 				self.dat[i]=[t/60.,T,0,0]
 				continue
 			D=0; R=0
@@ -291,7 +295,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 	def updateRow(self, irow):
 #		if irow<1: 
 #			return
-		if isinstance(self.dat[irow][1],str):
+		if isinstance(self.dat[irow][1],basestring):
 			print 'skipping event ', irow, self.dat[irow]
 			return 
 		print 'updateRow',self.mode, irow
@@ -356,8 +360,9 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
 			else:
 				wg.setRange(pre, post)
 		elif index.column()==colTEMP:
-			if isinstance(val,str):
+			if isinstance(val,basestring):
 				return wg
+
 			wg=QtGui.QDoubleSpinBox(parent)
 			wg.setRange(0, 1750)
 			wg.setSuffix(u' \xb0C')
@@ -644,7 +649,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 		f.write('#time ; temp ; checkpoint\n')
 		for row in self.model.curve(events=True):
 			tpl="{:.3f} ; {:.3f} \n"
-			if isinstance(row[1],str):
+			if isinstance(row[1],basestring):
 				tpl="{:.3f} ; {} \n"
 			f.write(tpl.format(*row))
 		
