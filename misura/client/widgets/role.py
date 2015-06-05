@@ -16,7 +16,8 @@ class Role(ActiveWidget):
 		self.emenu.addAction(_('Change'), self.edit)
 		self.emenu.addAction(_('Unset'), self.unset)
 		self.emenu.addAction(_('Go to'), self.goto)
-		
+		self.value=QtGui.QLabel('None')
+		self.lay.addWidget(self.value)
 		self.emit(QtCore.SIGNAL('selfchanged()'))
 		
 	def unset(self):
@@ -58,10 +59,12 @@ class Role(ActiveWidget):
 			self.bmenu.setText('None')
 			self.bmenu.setToolTip('Error: Undefined value')
 			return
-		self.bmenu.setText(self.adapt2gui(self.current))
+		s=self.adapt2gui(self.current)
+		self.bmenu.setText(s)
 		tt='Object: {}\nPreset: {}'
 		tt=tt.format(*self.current)
 		self.bmenu.setToolTip(tt)
+		self.value.setText(s)
 		
 	def edit(self):
 		"""Opens the Role editing dialog."""
@@ -87,6 +90,7 @@ class RoleIO(ActiveWidget):
 		""" Draw the referred widget"""
 		self.prop=self.remObj.gete(self.handle)
 		opt=self.prop['options']
+		path=self.server.searchPath(opt[0])
 		obj=self.server.toPath(opt[0])
 		fu=False
 		# Is update needed? 
@@ -101,7 +105,7 @@ class RoleIO(ActiveWidget):
 			self.value.hide()
 			self.value.close()
 		# Recreate widget
-		if obj and opt[2] not in ('None',None):
+		if path and obj and opt[2] not in ('None',None):
 			from misura.client.widgets import build
 			self.value=build(self.server,obj,obj.gete(opt[2]))
 			self.value.label_widget.hide()
