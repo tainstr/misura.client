@@ -53,12 +53,14 @@ class Plot(VeuszPlot):
 		return self.document.model
 	
 	def idx_connect(self):
+		"""Reconnect index line motion events"""
 		wg=self.doc.resolveFullWidgetPath('/temperature/temp/idx')
 		wg.settings.get('xPos').setOnModified(self.move_line_temp)
 		wg=self.doc.resolveFullWidgetPath('/time/time/idx')
 		wg.settings.get('xPos').setOnModified(self.move_line_time)
 	
 	def idx_disconnect(self):
+		"""Disconnect index line motion events"""
 		wg=self.doc.resolveFullWidgetPath('/temperature/temp/idx')
 		try:
 			wg.settings.get('xPos').removeOnModified(self.move_line_temp)
@@ -212,20 +214,23 @@ class Plot(VeuszPlot):
 		self.set_idx(idx)
 		
 	def move_line(self,g):
+		"""Get relative position of index line"""
 		wg=self.doc.resolveFullWidgetPath(g+'/idx')
 		xax=self.document.resolveFullWidgetPath(g+'/x')
 		rg=xax.getPlottedRange()
 		rel=wg.settings.xPos[0]*(rg[1]-rg[0])+rg[0]
-		print 'move_line',g,wg.settings.xPos,rg,rel
 		return rel
 		
-		
 	def move_line_time(self):
+		"""Index line was moved on time-based plot"""
 		rel=self.move_line('/time/time')
 		self.emit(QtCore.SIGNAL('move_line(float)'),rel)
 	
 	def move_line_temp(self):
+		"""Index line was moved on temperature-based plot"""
 		rel=self.move_line('/temperature/temp')
+		# Convert relative position with respect to temperature to a time value 
+		# (cooling ramps will be discarted)
 		idx=csutil.find_nearest_val(self.document.data['0:kiln/T'].data, rel, seed=self.idx)
 		t=self.document.data['0:t'].data[idx]
 		self.emit(QtCore.SIGNAL('move_line(float)'),t)

@@ -14,7 +14,6 @@ import numpy as np
 from .. import parameters as params
 from misura.canon import  bitmap
 from misura.canon import reference
-from misura.canon import indexer
 import proxy
 
 MAX=10**5
@@ -165,7 +164,10 @@ class DataDecoder(QtCore.QThread):
 			f=self.proxy.get_time_profile
 		else:
 			f=self.proxy.get_time_image
-		return f(self.datapath,t+self.zerotime)
+		# Compatibility with absolute-time datasets
+		if t>self.zerotime:
+			t+=self.zerotime
+		return f(self.datapath,t)
 	
 	def get_data(self,seq,fp=False):
 		if not fp: fp=self.proxy
@@ -265,7 +267,10 @@ class DataDecoder(QtCore.QThread):
 			self.emit(QtCore.SIGNAL('readyImage(QImage)'), dat)
 		self.emit(QtCore.SIGNAL('readyFrame()'))
 		print 'found data',self.zerotime,t
-		return t-self.zerotime,dat
+		# Compatibility with absolute-time datasets
+		if t>self.zerotime:
+			t-=self.zerotime
+		return t,dat
 		
 	def run(self):
 		"""Runs the decoding in a separate process"""
