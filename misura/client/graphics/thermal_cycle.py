@@ -185,8 +185,14 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 		if not index.isValid() or not (0<= index.row()<self.rowCount()):
 			return 0
 		row=self.dat[index.row()]
+		col=index.column()
 		if role==QtCore.Qt.DisplayRole:
-			return row[index.column()]
+			r=row[index.column()]
+			if col==colTEMP:
+				if isinstance(r,basestring):
+					r=r.replace('>','Event: ')
+			return r
+		
 			
 	def flags(self, index):
 		row=index.row()
@@ -361,7 +367,8 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
 				wg.setRange(pre, post)
 		elif index.column()==colTEMP:
 			if isinstance(val,basestring):
-				return wg
+				#Read-only events
+				return None
 
 			wg=QtGui.QDoubleSpinBox(parent)
 			wg.setRange(0, 1750)

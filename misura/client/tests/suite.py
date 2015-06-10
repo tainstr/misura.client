@@ -3,7 +3,6 @@
 """Auto-discovery suite"""
 import os, sys
 import unittest
-import multiprocessing
 #FIXME: Must add this import otherwise it will FAIL
 from misura.client.tests import test_configuration
 import iutils_testing as iut

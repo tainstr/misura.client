@@ -193,7 +193,7 @@ class TransferThread(QtCore.QThread):
 		# Remove other reservations and close file
 		while not server.storage.test.free(uid) and not self.aborted:
 			self.dlWaiting.emit(url,outfile,itr)
-			sleep(1)
+# 			sleep(1)
 			if itr>=self.retry:
 				break
 			print 'Waiting for uid reservation',uid
@@ -225,7 +225,7 @@ class TransferThread(QtCore.QThread):
 			remotefile=os.path.basename(localfile)
 		url=self.prepare_opener(url)
 		self.dlStarted.emit(url,localfile)
-		CHUNK = 16 * 1024
+		CHUNK = 1024 * 1024
 		fp=open(localfile, 'rb')
 		fp.seek(0,2)
 		dim=fp.tell()
@@ -248,7 +248,7 @@ class TransferThread(QtCore.QThread):
 				fp.close()
 				fp=False
 			self.dlDone.emit(done)
-			sleep(0.1)
+# 			sleep(0.1)
 		# Remove if aborted
 		if self.aborted:
 			print 'Upload ABORTED at',done
