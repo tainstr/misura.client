@@ -9,9 +9,6 @@ from parameters import determine_path
 
 from PyQt4 import QtCore
 import network
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
 
 def _(text, disambiguation=None, context='misura'):
 	"""Veusz-based translatable messages tagging."""
@@ -34,3 +31,20 @@ def from_argv():
 	for opt, val in opts:
 		r[opt]=val
 	return default(host=r['-h'],port=r['-p'],user=r['-u'],password=r['-w'])
+
+def configure_logger():
+	import os
+	import logging
+	from misura.client.clientconf import confdb
+	from misura.client import units
+
+	logging.basicConfig(level=confdb['loglevel'])
+	logdir = os.path.dirname(confdb['logfile'])
+	if not os.path.exists(logdir):
+		os.makedirs(logdir)
+	logsize = units.Converter.convert('kilobyte','byte', confdb['logsize'])
+	rotating_file_handler = logging.handlers.RotatingFileHandler(confdb['logfile'], maxBytes=logsize, backupCount=confdb['lognumber'])
+	rotating_file_handler.setFormatter(logging.Formatter("%(levelname)s: %(asctime)s %(message)s"))
+	logging.getLogger().addHandler(rotating_file_handler)
+
+configure_logger()
