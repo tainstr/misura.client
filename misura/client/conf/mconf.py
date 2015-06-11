@@ -162,7 +162,5 @@ class MConf( QtGui.QMainWindow):
 		self.tab.setCurrentIndex(2)
 		
 	def clientConf(self):
-		cc=ClientConf()
-		cc.show()
-
-
+		self.cc=ClientConf()
+		self.cc.show()
