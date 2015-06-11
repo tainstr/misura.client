@@ -36,13 +36,13 @@ def configure_logger():
 	import os
 	import logging
 	from misura.client.clientconf import confdb
-	from misura.client import units
+	from misura.client.units import Converter
 
 	logging.basicConfig(level=confdb['loglevel'])
 	logdir = os.path.dirname(confdb['logfile'])
 	if not os.path.exists(logdir):
 		os.makedirs(logdir)
-	logsize = units.Converter.convert('kilobyte','byte', confdb['logsize'])
+	logsize = Converter.convert('kilobyte','byte', confdb['logsize'])
 	rotating_file_handler = logging.handlers.RotatingFileHandler(confdb['logfile'], maxBytes=logsize, backupCount=confdb['lognumber'])
 	rotating_file_handler.setFormatter(logging.Formatter("%(levelname)s: %(asctime)s %(message)s"))
 	logging.getLogger().addHandler(rotating_file_handler)
