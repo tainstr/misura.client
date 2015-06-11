@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Unit conversion"""
 from math import *
+import logging
 
 base_units={'micron':'length',
 		'micron^3': 'volume',
@@ -88,7 +89,7 @@ user_defaults={'length':'micron',
 
 
 def get_unit_info(unit, units):
-	print 'get_unit_info',unit
+	logging.debug('%s %s', 'get_unit_info', unit)
 	p=unit.split('^')
 	u=p[0]
 	if len(p)==2: p=int(p[1])
@@ -213,7 +214,7 @@ def convert(ds,to_unit):
 		ini1=Converter.convert(from_unit,to_unit,ini)
 		ds.m_initialDimension=ini1
 		ds1.m_initialDimension=ini1
-		print 'converting m_initialDimension',ini,ini1
+		logging.debug('%s %s %s', 'converting m_initialDimension', ini, ini1)
 	ds1.data=plugins.numpyCopyOrNone(out)
 	ds1.unit=to_unit
 	return ds1
@@ -225,7 +226,7 @@ def percentile_conversion(ds,action='Invert',auto=True):
 	if action=='Invert':
 		if cur: action='To Absolute'
 		else: action='To Percent'
-		print 'percentile_conversion doing',action,cur
+		logging.debug('%s %s %s', 'percentile_conversion doing', action, cur)
 		
 	ini=getattr(ds, 'm_initialDimension',False)
 	out=np.array(ds.data)

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 from PyQt4 import QtGui, QtCore
 from traceback import print_exc
 import functools
@@ -37,11 +38,11 @@ class MetaLabel(Overlay):
 		for k,v in self.current.iteritems():
 			t+='{}: {:.2e}\n'.format(k,v)
 		if len(t)==0: t='Empty'
-		print 'updating to',t,'MetaLabels'
+		logging.debug('%s %s %s', 'updating to', t, 'MetaLabels')
 		self.label.setText(t)
 		
 	def add(self,name):
-		print 'adding name',name
+		logging.debug('%s %s', 'adding name', name)
 		self.opt.add(name)
 		rem=functools.partial(self.remove,name)
 		a=self.menu.addAction(name,rem)
@@ -51,7 +52,7 @@ class MetaLabel(Overlay):
 		self.parentItem().parentItem().opt_changed=True
 		
 	def remove(self,name):
-		print 'removing name',name
+		logging.debug('%s %s', 'removing name', name)
 		self.opt.remove(name)
 		del self.current[name]
 		self.menu.removeAction(self.acts[name][0])
@@ -67,15 +68,15 @@ class SamplePix(QtGui.QGraphicsPixmapItem):
 		self.label.unscale(factor)
 		
 	def dragEnterEvent(self,event):
-		print 'dragEnterEvent',event.mimeData()
+		logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
 		event.acceptProposedAction()
 		if event.mimeData().hasFormat("text/plain"):
 			event.acceptProposedAction()
 			
 	def dropEvent(self,event):
-		print 'DROP EVENT'
+		logging.debug('%s', 'DROP EVENT')
 		opt=str(event.mimeData().text()).replace('summary', '').replace('//', '/').split('/')[-1]
-		print 'Adding option:',opt
+		logging.debug('%s %s', 'Adding option:', opt)
 		self.label.add(opt)
 		self.parentItem().opt_changed=True
 
@@ -143,8 +144,8 @@ class SamplePicture(QtGui.QGraphicsItem):
 				try:
 					ov.slot_update(multiget)
 				except:
-					print 'Overlay update error'
-					print_exc()
+					logging.debug('%s', 'Overlay update error')
+					logging.debug('%s', print_exc())
 		return True
 		
 	@property

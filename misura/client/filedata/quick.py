@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tree visualization of opened misura Files in a document."""
+import logging
 import veusz.dialogs
 from veusz import document
 from PyQt4.QtCore import Qt
@@ -41,7 +42,7 @@ def node(func):
 			n=docname(n)
 		# If node was expressed as/converted to string, get its corresponding tree entry
 		if isinstance(n,str) or isinstance(n, unicode):
-			print 'traversing node',n
+			logging.debug('%s %s', 'traversing node', n)
 			n=str(n)
 			n=self.model().tree.traverse(n)
 		
@@ -51,7 +52,7 @@ def node(func):
 			a=list(a)
 			a[0]=n
 			a=tuple(a)
-		print '@node with',n,type(n),isinstance(n,unicode)
+		logging.debug('%s %s %s %s %s', '@node with', n, type(n), isinstance(n, unicode))
 		return func(self,*a,**k)
 	return node_wrapper
 
@@ -80,7 +81,7 @@ def nodes(func):
 			a=list(a)
 			a[0]=n
 			a=tuple(a)
-		print '@nodes with',n,type(n),isinstance(n,unicode)
+		logging.debug('%s %s %s %s %s', '@nodes with', n, type(n), isinstance(n, unicode))
 		return func(self,*a,**k)
 	return node_wrapper	
 
@@ -94,7 +95,7 @@ class QuickOps(object):
 		return self._mainwindow
 	
 	def refresh(self):
-		print 'refreshing model', self.doc
+		logging.debug('%s %s', 'refreshing model', self.doc)
 		self.model().refresh(True)	
 		
 	@node
@@ -127,7 +128,7 @@ class QuickOps(object):
 		#FIXME: model no longer have a "tests" structure.
 		lk=node.linked
 		if not lk:
-			print 'Node does not have linked file',node.path
+			logging.debug('%s %s', 'Node does not have linked file', node.path)
 			return False
 		for ds in self.doc.data.values():
 			if ds.linked==lk:
@@ -136,30 +137,30 @@ class QuickOps(object):
 	
 	@node
 	def reloadFile(self,node=False):
-		print 'RELOADING'
+		logging.debug('%s', 'RELOADING')
 		if not node.linked:
 			return False
-		print node.linked.reloadLinks(self.doc)
+		logging.debug('%s', node.linked.reloadLinks(self.doc))
 		self.refresh()
 		
 		
 	def load_version(self,LF,version):
 		#FIXME: VERSIONING!
-		print 'LOAD VERSION'
+		logging.debug('%s', 'LOAD VERSION')
 		LF.params.version=version
 		LF.reloadLinks(self.doc)
 		self.refresh()
 		fl=self.model().files
-		print 'got linked files',self.model().files[:]
+		logging.debug('%s %s', 'got linked files', self.model().files[:])
 		
 	@node	
 	def commit(self,node=False):
 		"""Write datasets to linked file. """
 		name,st=QtGui.QInputDialog.getText(self,"Version Name","Choose a name for the data version you are saving:")
 		if not st:
-			print 'Aborted' 
+			logging.debug('%s', 'Aborted')
 			return
-		print 'Committing data to',node.filename
+		logging.debug('%s %s', 'Committing data to', node.filename)
 		node.commit(unicode(name))
 		self.refresh()
 		
@@ -169,7 +170,7 @@ class QuickOps(object):
 	@node
 	def deleteChildren(self,node=False):
 		"""Delete all children of node."""
-		print 'deleteChildren',node,node.children
+		logging.debug('%s %s %s', 'deleteChildren', node, node.children)
 		for sub in node.children.values():
 			if not sub.ds:
 				continue
@@ -219,15 +220,15 @@ class QuickOps(object):
 	
 	@node
 	def load(self,node=False):
-		print 'load',node
+		logging.debug('%s %s', 'load', node)
 		if node.linked is None:
-			print 'Cannot load: no linked file!',node
+			logging.debug('%s %s', 'Cannot load: no linked file!', node)
 			return
 		if not node.linked.filename:
-			print 'Cannot load: no filename!',node
+			logging.debug('%s %s', 'Cannot load: no filename!', node)
 			return
 		if len(node.ds)>0:
-			print 'Unloading',node.path
+			logging.debug('%s %s', 'Unloading', node.path)
 			node.ds.data=[]
 			self.previous_selection=False
 			self.refresh()
@@ -248,11 +249,11 @@ class QuickOps(object):
 	@node
 	def setInitialDimension(self,node=False):
 		"""Invoke the initial dimension plugin on the current entry"""
-		print 'Searching dataset name',node,node.path
+		logging.debug('%s %s %s', 'Searching dataset name', node, node.path)
 		n=self.doc.datasetName(node.ds)
 		ini=getattr(node.ds, 'm_initialDimension', False)
 		if not ini: ini=100.
-		print 'Invoking InitialDimensionPlugin',n,ini
+		logging.debug('%s %s %s', 'Invoking InitialDimensionPlugin', n, ini)
 		from misura.client import plugin
 		p=plugin.InitialDimensionPlugin(ds=n, ini=ini)
 		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.InitialDimensionPlugin)
@@ -271,9 +272,9 @@ class QuickOps(object):
 		
 	@node
 	def set_unit(self,node=False,convert=False):
-		print 'set_unit:',node,node.unit,convert
+		logging.debug('%s %s %s %s', 'set_unit:', node, node.unit, convert)
 		if node.unit==convert or not convert or not node.unit:
-			print 'set_unit: Nothing to do'
+			logging.debug('%s', 'set_unit: Nothing to do')
 			return
 		n=self.doc.datasetName(node.ds)
 		from misura.client import plugin
@@ -337,13 +338,13 @@ class QuickOps(object):
 
 		# Remove object and unreferenced axes
 		for obj in remplot+remax+remobj:
-			print 'Removing obj',obj.name, obj.path
+			logging.debug('%s %s %s', 'Removing obj', obj.name, obj.path)
 			obj.parent.removeChild(obj.name)
 		# Finally, delete dataset
 		if remove_dataset:
 # 			n=self.doc.datasetName(ds)
 			self.doc.deleteDataset(pt)
-			print 'deleted', pt
+			logging.debug('%s %s', 'deleted', pt)
 			self.previous_selection=False
 		
 		#Recursive call over derived datasets
@@ -364,9 +365,9 @@ class QuickOps(object):
 		"""Get X dataset name for Y node y, in `page`"""
 		if page==False:
 			page=self.model().page
-		print 'XNAMES',y,type(y),y.path
-		print 'y.linked', y.linked
-		print 'y.parent.linked', y.parent.linked
+		logging.debug('%s %s %s %s', 'XNAMES', y, type(y), y.path)
+		logging.debug('%s %s', 'y.linked', y.linked)
+		logging.debug('%s %s', 'y.parent.linked', y.parent.linked)
 		lk=y.linked if y.linked else y.parent.linked
 		p=getattr(lk,'prefix','')
 		if page.startswith('/time'):
@@ -387,7 +388,7 @@ class QuickOps(object):
 		"""Slot for plotting by temperature and time the currently selected entry"""
 		pt=self.model().is_plotted(node.path)
 		if pt:
-			print 'UNPLOTTING',node
+			logging.debug('%s %s', 'UNPLOTTING', node)
 			self.deleteData(node=node,remove_dataset=False, recursive=False)
 			return
 		# Load if no data
@@ -399,7 +400,7 @@ class QuickOps(object):
 		# If standard page, plot both T,t
 		page=self.model().page
 		if page.startswith('/temperature/') or page.startswith('/time/'):
-			print 'Quick.plot',page
+			logging.debug('%s %s', 'Quick.plot', page)
 			# Get X temperature names
 			xnames=self.xnames(node,page='/temperature')
 			assert len(xnames)>0
@@ -414,7 +415,7 @@ class QuickOps(object):
 		else:
 			if page.startswith('/report'):
 				page=page+'/temp'
-			print 'Quick.plot on currentwidget',page
+			logging.debug('%s %s', 'Quick.plot on currentwidget', page)
 			xnames=self.xnames(node,page=page)
 			assert len(xnames)>0
 			p=plugin.PlotDatasetPlugin()
@@ -426,7 +427,7 @@ class QuickOps(object):
 		"""Slot for opening the dataset edit window on the currently selected entry"""
 		ds,y=self.dsnode(node)
 		name=node.path
-		print 'name',name
+		logging.debug('%s %s', 'name', name)
 		dialog=self.mainwindow.slotDataEdit(name)
 		if ds is not y:
 			dialog.slotDatasetEdit()
@@ -491,7 +492,7 @@ class QuickOps(object):
 		- 5 nodes selected: interpret as separate (beta, r0, T) + (dil, T) datasets and try to assign based on their name and path
 		"""
 		if len(nodes)>1:
-			print 'Not implemented'
+			logging.debug('%s', 'Not implemented')
 			return False
 		smp=nodes[0].children
 		dbeta,nbeta=self.dsnode(smp['beta'])

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import logging
 from numpy import prod
 
 def colorLevels(n):
@@ -17,7 +18,7 @@ def colorLevels(n):
 		if m<0: break
 		LR,LG,LB=vL
 		if m==0: break
-	print 'levels',LR,LG,LB
+	logging.debug('%s %s %s %s', 'levels', LR, LG, LB)
 	return LR,LG,LB
 
 # Conversione da tupla R,G,B a codice HTML compreso da Veusz

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 import functools
 from PyQt4 import QtGui, QtCore
 from ...canon import csutil
@@ -36,7 +37,7 @@ class MiniImage(QtGui.QWidget):
 		self.lbl_info.hide()
 		self.meta={'T':None}
 		self.doc=doc
-		print 'datapath',datapath
+		logging.debug('%s %s', 'datapath', datapath)
 		self.decoder=doc.decoders.get(datapath,False)
 		self.img=QtGui.QImage()
 		self.curWidth=curWidth
@@ -84,21 +85,21 @@ class MiniImage(QtGui.QWidget):
 
 	def set_idx(self,idx=-1):		
 		if not self.decoder:
-			print 'set_idx no decoder'
+			logging.debug('%s', 'set_idx no decoder')
 			return False				
 		if idx<0:idx=self.idx
-		print 'set_idx',idx
+		logging.debug('%s %s', 'set_idx', idx)
 		self.idx=idx
 		ln=len(self.decoder)
 		self.slider.setMaximum(ln)
 		if self.idx>=ln:
-			print 'Index out of bounds',self.idx, ln 
+			logging.debug('%s %s %s', 'Index out of bounds', self.idx, ln)
 			return False
-		print 'getting idx from decoder',self.decoder.datapath,self.decoder.ext,idx
+		logging.debug('%s %s %s %s', 'getting idx from decoder', self.decoder.datapath, self.decoder.ext, idx)
 		img=self.decoder.get(idx)
 		
 		self.slider.valueChanged.disconnect(self.set_idx)
-		print 'GOT IMG',repr(img)
+		logging.debug('%s %s', 'GOT IMG', repr(img))
 		if not img: 
 			self.img=QtGui.QImage()
 		else:
@@ -107,7 +108,7 @@ class MiniImage(QtGui.QWidget):
 		self.zoom(self.curWidth)
 		
 		self.slider.setValue(self.idx)
-		print 'sliderValue',self.slider.value()
+		logging.debug('%s %s', 'sliderValue', self.slider.value())
 		self.emit(QtCore.SIGNAL('changedIdx()'))
 		self.emit(QtCore.SIGNAL('changedIdx(int)'),self.idx)
 		self.slider.valueChanged.connect(self.set_idx)
@@ -123,7 +124,7 @@ class MiniImage(QtGui.QWidget):
 	def update_info(self):
 		"""Update info label"""
 		if not self.doc.data.has_key('0:t'):
-			print 'No time dataset still'
+			logging.debug('%s', 'No time dataset still')
 			self.lbl_info.hide()
 			return False
 		# Base dataset path name
@@ -131,7 +132,7 @@ class MiniImage(QtGui.QWidget):
 		# Remove last name (/profile or /frame)
 		p.pop(-1)
 		p='/'.join(p)
-		print 'update_info',p
+		logging.debug('%s %s', 'update_info', p)
 		
 		# Document-based index
 		idx=csutil.find_nearest_val(self.doc.data['0:t'].data,self.t)
@@ -142,7 +143,7 @@ class MiniImage(QtGui.QWidget):
 				p1='0:'+p[1:]+'/'+k
 			ds=self.doc.data.get(p1,None)
 			if ds is None:
-				print 'update_info: no target dataset was found',k,p1
+				logging.debug('%s %s %s', 'update_info: no target dataset was found', k, p1)
 				continue
 			self.meta[k]=ds.data[idx]
 			
@@ -152,7 +153,7 @@ class MiniImage(QtGui.QWidget):
 				continue
 			msg+='{}: {:.2f}\n'.format(k,v)
 		if not len(msg):
-			print 'No metadata to update', self.meta
+			logging.debug('%s %s', 'No metadata to update', self.meta)
 			self.lbl_info.hide()
 			return False
 		self.lbl_info.setText(msg[:-1])
@@ -160,15 +161,15 @@ class MiniImage(QtGui.QWidget):
 		return True
 	
 	def dragEnterEvent(self,event):
-		print 'dragEnterEvent',event.mimeData()
+		logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
 		event.acceptProposedAction()
 		if event.mimeData().hasFormat("text/plain"):
 			event.acceptProposedAction()
 	
 	def dropEvent(self,event):
-		print 'DROP EVENT'
+		logging.debug('%s', 'DROP EVENT')
 		opt=str(event.mimeData().text()).replace('summary', '').replace('//', '/').split('/')[-1]
-		print 'Adding sample option:',opt
+		logging.debug('%s %s', 'Adding sample option:', opt)
 		self.meta[opt]=0
 		self.update_info()
 		self.metaChanged.emit(self.meta.keys())
@@ -177,7 +178,7 @@ class MiniImage(QtGui.QWidget):
 		"""To be connected with metaChanged signal from other mini images"""
 		new=set(keys)
 		old=set(self.meta.keys())
-		print 'sync',new,old
+		logging.debug('%s %s %s', 'sync', new, old)
 		for k in new-old:
 			self.meta[k]=0
 		for k in old-new:
@@ -210,7 +211,7 @@ class MiniImage(QtGui.QWidget):
 		self.update_info()
 		
 	def zoom(self, width=0):
-		print 'zooming'
+		logging.debug('%s', 'zooming')
 		if not width: width=self.defaultWidth
 		width=min(width,self.maxWidth)
 		width=max(width,self.minWidth)
@@ -239,7 +240,7 @@ class MiniImage(QtGui.QWidget):
 	
 	def mouseDoubleClickEvent(self,event):
 		"""Opens a dialog containing a new MiniImage instance"""
-		print event
+		logging.debug('%s', event)
 		self.new=self.copy()
 		dia=ImageDialog(self.new,parent=self)
 		dia.show()

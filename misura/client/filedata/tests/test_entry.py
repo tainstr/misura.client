@@ -3,6 +3,7 @@
 """Testing the datasets.py module."""
 import unittest
 import sys
+import logging
 import os,shutil
 from misura.client import filedata
 from misura.client.tests import iutils_testing as iut
@@ -11,17 +12,17 @@ import veusz.document as document
 
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 
 from3=os.path.join(iut.data_dir,'m3_hsm.h5')
@@ -58,7 +59,7 @@ class TestDatasetPluginEntry(unittest.TestCase):
 				maxst=c.status
 			# Recursively check
 			self.check(c,c.status)
-		print 'check',root,maxst
+		logging.debug('%s %s %s', 'check', root, maxst)
 		self.assertTrue(root.status,maxst)
 	
 	def _test_dpe(self):
@@ -81,8 +82,8 @@ class TestDatasetPluginEntry(unittest.TestCase):
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
 		doc=document.Document()
 		imp.do(doc)
-		print imp.outnames
-		print doc.data.keys()
+		logging.debug('%s', imp.outnames)
+		logging.debug('%s', doc.data.keys())
 		root=filedata.NodeEntry()
 		root.set_doc(doc)
 		

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Live data retrieve and processing"""
 
+import logging
 from time import sleep, time
 from cPickle import loads
 from misura.client import _
@@ -34,7 +35,7 @@ class FrameProcessor(QtCore.QThread):
 		frame_number=0
 		force = True
 		#Create new cam object with connection unique to this thread.
-		print 'FRAMEPROCESSOR', type(self.cam)
+		logging.debug('%s %s', 'FRAMEPROCESSOR', type(self.cam))
 		tcam = self.cam
 		while self.stream:
 			if not self.parent().isVisible(): 
@@ -54,7 +55,7 @@ class FrameProcessor(QtCore.QThread):
 				n+=1
 				if not ent:
 					continue
-				print ent
+				logging.debug('%s', ent)
 				x,y,w,h,fr=ent
 				# Create a QImage for signalling
 				img=QtGui.QImage()
@@ -76,7 +77,7 @@ class FrameProcessor(QtCore.QThread):
 		
 		
 	def toggle_run(self,do=None):
-		print 'FrameProcessor.toggle_run', do
+		logging.debug('%s %s', 'FrameProcessor.toggle_run', do)
 		if do==True:
 			if not self.isRunning(): 
 				self.stream=True
@@ -133,7 +134,7 @@ class SampleProcessor(QtCore.QThread):
 				if first: smp.connect()
 				r = smp.multiget(list(self.opt-set(['roi', 'crop'])))
 				if not r:
-					print 'Live update failed: multiget returned', r, self.opt
+					logging.debug('%s %s %s', 'Live update failed: multiget returned', r, self.opt)
 				if r.has_key('profile'):
 					r['profile']=loads(r['profile'].data)
 #				print 'SamplePreprocessor.emit',i,r.keys()
@@ -142,7 +143,7 @@ class SampleProcessor(QtCore.QThread):
 			sleep(self.waiting)
 		
 	def toggle_run(self,do=None):
-		print 'SampleProcessor.toggle_run', do
+		logging.debug('%s %s', 'SampleProcessor.toggle_run', do)
 		if do==True:
 			if not self.isRunning(): 
 				self.stream=True

@@ -4,6 +4,7 @@
 from PyQt4 import QtGui,QtCore
 from active import Active, ActiveObject, ActiveWidget,Autoupdater, info_dialog, RunMethod
 import os
+import logging
 
 from .. import _
 from traceback import print_exc
@@ -29,7 +30,7 @@ from motorslider import MotorSlider, MotorSliderAction
 def build(server, remObj, prop, parent=None):
 	"""Build a property widget based on a property dict"""
 	arg=(server, remObj, prop, parent)
-	print prop
+	logging.debug('%s', prop)
 	A=prop.get('attr',[])
 	T=prop['type']
 	if 'Hidden' in A+[T]:
@@ -47,7 +48,7 @@ def build(server, remObj, prop, parent=None):
 		elif T=='TextArea':
 			obj=aString(server, remObj, prop, parent, extended=True)
 		elif T=='Script':
-			print 'starting script',prop
+			logging.debug('%s %s', 'starting script', prop)
 			obj=aScript(server, remObj, prop, parent)
 		elif T=='Boolean':
 			obj=aBoolean(*arg)
@@ -81,8 +82,8 @@ def build(server, remObj, prop, parent=None):
 		elif prop['kid']=='/progress':
 				obj=RoleProgress(*arg)
 	except:
-		print 'Building ', prop, 'of', remObj, 'error:'
-		print_exc()
+		logging.debug('%s %s %s %s %s', 'Building ', prop, 'of', remObj, 'error:')
+		logging.debug('%s', print_exc())
 		if obj:
 			obj.hide()
 			obj.close()
@@ -116,7 +117,7 @@ if __name__=='__main__':
 #	wgs.append(aTable(srv, srv.simulator.flexion,srv.simulator.flexion.gete('MultiLayer_material')))
 	wgs.append(aProfile(srv, srv.hsm.sample0, srv.hsm.sample0.gete('profile')))
 	for wg in wgs:
-		print wg
+		logging.debug('%s', wg)
 		lay.addRow(wg.label, wg)
 	qb.setLayout(lay)
 	qb.show()

@@ -3,6 +3,7 @@
 """Tests DataDecoder"""
 import unittest
 
+import logging
 import os
 from misura.client.tests import iutils_testing as iut
 from misura.client import archive, filedata, conf
@@ -11,17 +12,17 @@ nativem4=os.path.join(iut.data_dir,'hsm_test.h5')
 from PyQt4 import QtGui
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 #@unittest.skip('')
 class DataDecoder(unittest.TestCase):

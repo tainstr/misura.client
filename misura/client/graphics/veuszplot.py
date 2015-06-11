@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Simple plotting for archive and live acquisition."""
 import os
+import logging
 from veusz import qtall as qt4
 from PyQt4 import QtGui, QtCore
 
@@ -206,9 +207,9 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
 		n=self.getPageNumber()
 		page=self.document.basewidget.getPage(n)
 		if page is None:
-			print 'NO PAGE FOUND',n
+			logging.debug('%s %s', 'NO PAGE FOUND', n)
 			return
-		print 'update_page',page.path
+		logging.debug('%s %s', 'update_page', page.path)
 		self.document.model.set_page(page.path)	
 		
 
@@ -297,7 +298,7 @@ class VeuszPlot(QtGui.QWidget):
 			self.fitSize()
 	
 	def showEvent(self, e):
-		print 'show event'
+		logging.debug('%s', 'show event')
 		self.fitSize()
 #		self.plot.delayed.singleShot(100, self.delayedUpdate)
 		
@@ -310,7 +311,7 @@ class VeuszPlot(QtGui.QWidget):
 		"""Fit the plot into the widget size.
 		`zoom` asks for zooming factor preservation."""
 		if not isinstance(self.plot,VeuszPlotWindow):
-			print 'Cannot fitSize on widget'
+			logging.debug('%s', 'Cannot fitSize on widget')
 			return
 		if not zoom: self.plot.slotViewZoom11()
 		w=self.plot.width()
@@ -323,7 +324,7 @@ class VeuszPlot(QtGui.QWidget):
 		self.cmd.Set('/width', str(w)+'in')
 		self.cmd.Set('/height', str(h)+'in')
 		
-		print 'fitSize', w, h
+		logging.debug('%s %s %s', 'fitSize', w, h)
 		# If the plot dimension is not sufficient, hide the axes.
 		page=self.document.basewidget.getPage(self.plot.getPageNumber())
 		g=page.name
@@ -347,7 +348,7 @@ class VeuszPlot(QtGui.QWidget):
 				self.cmd.Set(g+'/y/hide', False)
 			except: pass
 			self.emit(QtCore.SIGNAL('bigPlot()'))
-		print 'endfitsize'
+		logging.debug('%s', 'endfitsize')
 		self.emit(QtCore.SIGNAL('fitSize()'))
 		
 	def slotDataEdit(self, editdataset=None):

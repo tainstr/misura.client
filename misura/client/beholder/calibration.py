@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Graphical overlay for image analysis"""
+import logging
 from PyQt4 import QtGui, QtCore
 from math import sqrt
 from hook import HookPoint
@@ -163,7 +164,7 @@ class CalibrationTool(QtGui.QDialog):
 		self.vis_sync()
 		self.factor=self.newUm.value()/self.rpl.current
 		self.newFactor.setText(u'%.2f \u00b5m/px' % self.factor)
-		print "Factor", self.factor
+		logging.debug('%s %s', "Factor", self.factor)
 		
 		
 	def closeEvent(self, e):

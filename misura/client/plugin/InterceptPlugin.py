@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Intercept all curves in a given x or y by placing datapoints."""
+import logging
 import veusz.widgets
 import veusz.plugins as plugins
 import veusz.document as document
@@ -51,15 +52,15 @@ class InterceptPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		
 		hor = axn == 'X'
 		actions=[]
-		print 'targets',targetds
+		logging.debug('%s %s', 'targets', targetds)
 		for obj in g.children:
 			if not isinstance(obj, veusz.widgets.point.PointPlotter):
 				continue
 			if obj.settings.hide: 
-				print 'Skipping hidden object',obj.path
+				logging.debug('%s %s', 'Skipping hidden object', obj.path)
 				continue
 			if obj.settings.yData not in targetds and len(targetds)>0:
-				print 'Skipping non-targeted object',obj.path,obj.settings.yData
+				logging.debug('%s %s %s', 'Skipping non-targeted object', obj.path, obj.settings.yData)
 				continue			
 			# Search the nearest point
 			x = obj.settings.get('xData').getFloatArray(doc)
@@ -92,7 +93,7 @@ class InterceptPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 # 			cmd.To(g.path + '/' + name)
 # 			cmd.Action('up')
 		
-		print 'Intercepting',self.ops
+		logging.debug('%s %s', 'Intercepting', self.ops)
 		self.apply_ops('Intercept')
 		# Force update call
 		for p in actions:

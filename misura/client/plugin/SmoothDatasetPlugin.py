@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tools and plugins for Veusz, providing Misura Thermal Analysis functionality"""
+import logging
 import veusz.plugins as plugins
 import numpy
 from utils import smooth
@@ -38,7 +39,7 @@ class SmoothDatasetPlugin(plugins.DatasetPlugin):
 		if fields['ds_out'] == '':
 			raise plugins.DatasetPluginException('Invalid output dataset name')
 		# make a new dataset with name in fields['ds_out']
-		print 'DSOUT', fields
+		logging.debug('%s %s', 'DSOUT', fields)
 		self.ds_out = plugins.Dataset1D(fields['ds_out'])
 
 		# return list of datasets

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Place datapoints on the characteristic shapes."""
+import logging
 import veusz.plugins as plugins
 import veusz.document as document
 
@@ -45,9 +46,9 @@ class ShapesPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		g=self.doc.resolveFullWidgetPath(cur)
 		g=utils.searchFirstOccurrence(g,'graph')
 		if g is None or g.typename!='graph':
-			print 'Found graph:',g
+			logging.debug('%s %s', 'Found graph:', g)
 			raise plugins.ToolsPluginException('You should run this tool on a graph')
-		print 'ShapesPlugin searching',p
+		logging.debug('%s %s', 'ShapesPlugin searching', p)
 		conf=False
 		vds=[]
 # 		if smpe.ds:
@@ -61,22 +62,22 @@ class ShapesPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 				vds.append(ent.path)
 		if not conf or len(vds)==0:
 			raise plugins.ToolsPluginException('No metadata found for '+p)
-		print 'Found datasets',vds
+		logging.debug('%s %s', 'Found datasets', vds)
 		smpp=smpe.path
 		# Detect if a sample dataset was selected and go up one level
 		if smpp.split('/')[-2].startswith('sample'):
 			smpp=smpe.parent.path
 		smpp=smpp.replace('summary','')
-		print 'Found sample path',smpp,p
+		logging.debug('%s %s %s', 'Found sample path', smpp, p)
 		smp=conf.toPath(smpp)
-		print 'config',smp
+		logging.debug('%s %s', 'config', smp)
 		for shape,opt in smp.describe().iteritems():
 			if opt['type']!='Meta': continue
 			txt=str(fields['text']).replace('$shape$',shape)
 			pt=opt['current']
 			t=pt['time']; T=pt['temp']
 			if t in [0,None,'None'] or T in [0,None,'None']: 
-				print 'Shape not found:',shape
+				logging.debug('%s %s', 'Shape not found:', shape)
 				continue
 			t-=conf['zerotime']
 			# Temperature plotting
@@ -93,7 +94,7 @@ class ShapesPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 				}
 			self.ops.append(document.OperationToolsPlugin(InterceptPlugin(),f))
 				
-		print 'ShapesPlugin ops',self.ops
+		logging.debug('%s %s', 'ShapesPlugin ops', self.ops)
 		self.apply_ops()
 				
 				

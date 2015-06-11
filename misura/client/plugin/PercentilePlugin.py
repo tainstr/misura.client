@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tools and plugins for Veusz, providing Misura Thermal Analysis functionality"""
+import logging
 import veusz.plugins as plugins
 from PyQt4 import QtGui, QtCore
 import veusz.document as document
@@ -51,7 +52,7 @@ class PercentilePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		ds=ds1
 		self.ops.append(document.OperationDatasetSet(fields['ds'],ds1))
 		self.apply_ops()
-		print 'Converted %s %s using initial dimension %.2f.' % (fields['ds'], fields['action'], ds.m_initialDimension)
+		logging.debug('%s %s %s', 'Converted %s %s using initial dimension %.2f.' % (fields['ds'], fields['action'], ds.m_initialDimension))
 # 		QtGui.QMessageBox.information(None,'Percentile output',
 # 				'Converted %s %s using initial dimension %.2f.' % (fields['ds'], msg, ds.m_initialDimension))		
 		if not fields['propagate']: return
@@ -62,7 +63,7 @@ class PercentilePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		for axp, dslist in tree['axis'].iteritems():
 			if not fields['ds'] in dslist:
 				continue
-			print 'Propagating to',cvt
+			logging.debug('%s %s', 'Propagating to', cvt)
 			cvt+=dslist
 			upax.append(axp)
 		cvt=list(set(cvt))
@@ -74,7 +75,7 @@ class PercentilePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 			ncur=getattr(self.doc.data[nds],'m_percent',None)
 			if ncur==ds.m_percent:
 				continue
-			print 'Really propagating percentile to',nds
+			logging.debug('%s %s', 'Really propagating percentile to', nds)
 			fields={'ds': nds, 'propagate':False,'action':act,'auto':True}
 			self.ops.append(document.OperationToolsPlugin(PercentilePlugin(),fields))
 		# Update axis labels

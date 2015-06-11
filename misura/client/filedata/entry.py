@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Classes representing datasets in the DocumentModel."""
+import logging
 from veusz import document
 from compiler.ast import flatten
 import collections
@@ -34,7 +35,7 @@ def find_pos(dslist,p=0):
 			p=max(p,d.m_pos)
 		else:
 			d.m_pos=p+1
-			print 'Assign pos',d.path,p+1
+			logging.debug('%s %s %s', 'Assign pos', d.path, p+1)
 		p+=1
 	for d in dslist:
 		p=find_pos(d.children.keys(),p)
@@ -96,15 +97,15 @@ class NodeEntry(object):
 		# Root and file entries
 		if not self.parent:
 			self._path=self._name
-			print 'Root entry', self._name
+			logging.debug('%s %s', 'Root entry', self._name)
 		# File entry
 		elif not self.parent.parent:
 			self._path= self._name
-			print 'File entry', self._name
+			logging.debug('%s %s', 'File entry', self._name)
 		# First level entries (t, groups)
 		elif not self.parent.parent.parent:
 			self._path=self.parent.path+':'+self._name
-			print 'First level', self._path
+			logging.debug('%s %s', 'First level', self._path)
 		# Normal entries
 		else:
 			self._path=self.splt.join([self.parent.path,self._name])
@@ -214,9 +215,9 @@ class NodeEntry(object):
 			path=path[len(self.path)+len(splt):]
 		item=self
 		linked=False
-		print 'going to insert',path
+		logging.debug('%s %s', 'going to insert', path)
 		for sub, parent, leaf in iterpath(path):
-			print 'iterating', sub,parent,leaf,repr(item.path),repr(item._name),id(parent)
+			logging.debug('%s %s %s %s %s %s %s', 'iterating', sub, parent, leaf, repr(item.path), repr(item._name), id(parent))
 			# Remember the first part of the path (summary, 0:summary, etc)
 			if not parent:
 				linked=sub
@@ -235,9 +236,9 @@ class NodeEntry(object):
 			
 	def remove(self,child):
 		k=child._name
-		print 'removing ',k, self.path
+		logging.debug('%s %s %s', 'removing ', k, self.path)
 		if not self._children.has_key(k):
-			print 'Asking to remove non existent node',k,'from',self.path
+			logging.debug('%s %s %s %s', 'Asking to remove non existent node', k, 'from', self.path)
 			return False
 		self._children.pop(k)
 		return True
@@ -274,7 +275,7 @@ class NodeEntry(object):
 				if (not cls) or isinstance(child,cls):
 					r.append(child)
 				else:
-					print 'rec skip',child, child.status, st
+					logging.debug('%s %s %s %s', 'rec skip', child, child.status, st)
 			if depth>0 or depth<0: # depth=0 will block! 
 				r+=child.recursive_status(st,depth=depth-1)
 		r=sorted(r,key=lambda child: child._name if not child.ds else child.m_pos)
@@ -352,7 +353,7 @@ class DatasetEntry(NodeEntry):
 				continue
 			involved=flatten(ds.pluginmanager.fields.values())
 			if path in involved:
-				print 'path involved',path,involved,name
+				logging.debug('%s %s %s %s', 'path involved', path, involved, name)
 				# Recover an already defined dataset
 				entry=self._children.get(name,False)
 				if entry is False:

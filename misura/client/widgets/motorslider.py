@@ -70,7 +70,7 @@ class MotorSlider(aNumber):
 			k['minmax']=False
 		r=aNumber.update(self,*a, **k)
 		if not hasattr(self, 'menu'):
-			print 'MotorSlider not fully initialized'
+			logging.debug('%s', 'MotorSlider not fully initialized')
 			return r
 		# If 'position' argument was not passed, 
 		# force pos_obj to re-register itself

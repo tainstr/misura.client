@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Simple plotting for archive and live acquisition."""
+import logging
 from misura.client import plugin
 from misura.client.database import ProgressBar
 from misura.canon import csutil
@@ -102,14 +103,14 @@ class Plot(VeuszPlot):
 		self.plot.contextmenu.addAction('Reset', self.reset)
 		self.plot.contextmenu.addAction('Update', self.update)
 		self.plot.contextmenu.addAction('Save to...', self.save_to_file)
-		print 'Calling reload data on document',self.document,self.document.filename
+		logging.debug('%s %s %s', 'Calling reload data on document', self.document, self.document.filename)
 		self.document.reloadData()
 		self.model.refresh()
 		self.emit(QtCore.SIGNAL('reset()'))
 		
 		
 	def default_plot(self):
-		print 'APPLY DEFAULT PLOT PLUGIN',self.document.data.keys()
+		logging.debug('%s %s', 'APPLY DEFAULT PLOT PLUGIN', self.document.data.keys())
 		p=plugin.DefaultPlotPlugin()
 		r=p.apply(self.cmd,{'dsn':self.document.data.keys()})
 		self.curveNames.update(r)
@@ -118,14 +119,14 @@ class Plot(VeuszPlot):
 	
 	def byTime(self):
 		self.plot.setPageNumber(1)
-		print 'byTime', self.plot.getPageNumber()
+		logging.debug('%s %s', 'byTime', self.plot.getPageNumber())
 		self.actByTime.setChecked(True)
 		self.actByTemp.setChecked(False)
 		self.doc.model.set_page('/time')
 		
 	def byTemp(self):
 		self.plot.setPageNumber(0)
-		print 'byTemp', self.plot.getPageNumber()
+		logging.debug('%s %s', 'byTemp', self.plot.getPageNumber())
 		self.actByTime.setChecked(False)
 		self.actByTemp.setChecked(True)		
 		self.doc.model.set_page('/temperature')
@@ -140,14 +141,14 @@ class Plot(VeuszPlot):
 		return col in self.visibleCurves
 		
 	def updateCurvesMenu(self):
-		print 'updateCurvesMenu',self.document.data.keys()
+		logging.debug('%s %s', 'updateCurvesMenu', self.document.data.keys())
 		self.doc.model.set_page(self.doc.basewidget.children[self.plot.pagenumber].path)
 		hsf=lambda name: self.hide_show(name,update=True)
 		self.load_map,self.avail_map=self.model.build_datasets_menu(self.curvesMenu,hsf)
 		return
 	
 	def updateCurveActions(self):
-		print 'UPDATE CURVE ACTIONS'
+		logging.debug('%s', 'UPDATE CURVE ACTIONS')
 		self.doc.model.set_page(self.doc.basewidget.children[self.plot.pagenumber].path)
 		self.axesMenu.clear()
 		self.axesMenus=self.model.build_axes_menu(self.axesMenu)
@@ -159,7 +160,7 @@ class Plot(VeuszPlot):
 		else:
 			dsnames=self.doc.reloadData()
 		if len(dsnames)==0:
-			print 'No data to reload' 
+			logging.debug('%s', 'No data to reload')
 			return
 		self.updateCurvesMenu()
 		if not update:
@@ -178,9 +179,9 @@ class Plot(VeuszPlot):
 											filter='Veusz (*.vsz);;Images (*.png *.jpg);;Vector (*svg *pdf *eps)')
 		name=unicode(name)
 		if len(name)==0:
-			print 'cancelled',name 
+			logging.debug('%s %s', 'cancelled', name)
 			return
-		print 'Saving to',name
+		logging.debug('%s %s', 'Saving to', name)
 		f=open(name,'w')
 		self.document.saveToFile(f)
 		f.close()
@@ -190,7 +191,7 @@ class Plot(VeuszPlot):
 		self.idx_disconnect()
 		if seq<0: seq=self.idx
 		for g,dsn in (('/time/time/','0:t'), ('/temperature/temp/','0:kiln/T')):
-			print self.document.data.keys()
+			logging.debug('%s', self.document.data.keys())
 			ds=self.document.data[dsn]
 			if seq>=len(ds.data): return
 			xval=ds.data[seq]
@@ -199,7 +200,7 @@ class Plot(VeuszPlot):
 			rg=xax.getPlottedRange()
 			# Calc relative position with respect to X axis
 			rel=(xval-rg[0])/(rg[1]-rg[0])
-			print 'Red bar relative position:',rel,xval,rg,xax.autorange,xax.plottedrange
+			logging.debug('%s %s %s %s %s %s', 'Red bar relative position:', rel, xval, rg, xax.autorange, xax.plottedrange)
 			self.cmd.To(g+'idx')
 			self.cmd.Set('xPos',rel)
 			self.cmd.Set('length',1.)
@@ -210,7 +211,7 @@ class Plot(VeuszPlot):
 		"""Moves the position line according to the requested point in time"""
 		self.t=t
 		idx=csutil.find_nearest_val(self.document.data['0:t'].data, t, seed=self.idx)
-		print 'Setting time t'
+		logging.debug('%s', 'Setting time t')
 		self.set_idx(idx)
 		
 	def move_line(self,g):

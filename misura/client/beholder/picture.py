@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 from functools import partial
 from PyQt4 import QtGui, QtCore
 from misura.client import widgets, _
@@ -74,17 +75,17 @@ class ViewerPicture(QtGui.QGraphicsView):
 		self.connect(self.nsmp_obj, QtCore.SIGNAL('changed()'), self.reconnectSample)
 		
 	def close(self):
-		print 'Closing ViewerPicture'
+		logging.debug('%s', 'Closing ViewerPicture')
 		if self.processor:
-			print 'Closing FrameProcessor'
+			logging.debug('%s', 'Closing FrameProcessor')
 			self.processor.toggle_run(False)
-			print 'quitting'
+			logging.debug('%s', 'quitting')
 			self.processor.wait()
 		self.processor=False
 		if self.sampleProcessor:
-			print 'Closing SampleProcessor'
+			logging.debug('%s', 'Closing SampleProcessor')
 			self.sampleProcessor.toggle_run(False)
-			print 'quitting'
+			logging.debug('%s', 'quitting')
 			self.sampleProcessor.wait()
 		self.sampleProcessor=False
 		if self.calibrationTool:
@@ -184,7 +185,7 @@ class ViewerPicture(QtGui.QGraphicsView):
 		if isinstance(prop, str):
 			prop=obj.gete(prop)
 		if prop is None:
-			print 'Sample not found!'
+			logging.debug('%s', 'Sample not found!')
 			return False
 		handle=prop['handle']
 		fp=obj['fullpath']
@@ -214,15 +215,15 @@ class ViewerPicture(QtGui.QGraphicsView):
 		for fp,win in self.conf_win.iteritems():
 			act=self.conf_act[fp]
 			act.setChecked(2*win.isVisible())
-			print 'updateActions',fp,act.isChecked()
+			logging.debug('%s %s %s', 'updateActions', fp, act.isChecked())
 			
 	def configure_object(self,obj):
 		"""Show object configuration window"""
 		fp=obj['fullpath']
-		print 'configure object',fp
+		logging.debug('%s %s', 'configure object', fp)
 		act=self.conf_act.get(fp,False)
 		if act is False:
-			print 'configure_object: Object path not found',fp
+			logging.debug('%s %s', 'configure_object: Object path not found', fp)
 			return
 		win=self.conf_win.get(fp,False)
 		if win is False:
@@ -230,12 +231,12 @@ class ViewerPicture(QtGui.QGraphicsView):
 			win.setWindowTitle('Configuration tree from: %s' % obj['name'])
 			self.conf_win[fp]=win
 		if act.isChecked():
-			print 'SHOWING',fp
+			logging.debug('%s %s', 'SHOWING', fp)
 			win.show()
 			win.activateWindow()
 			win.raise_()
 		else:
-			print 'HIDING',fp
+			logging.debug('%s %s', 'HIDING', fp)
 			win.hide()	
 			
 	def add_conf_action(self,menu,obj,fp=False,txt=False):
@@ -329,7 +330,7 @@ class ViewerPicture(QtGui.QGraphicsView):
 			m=enc['motor']
 			if m is False:
 				return False
-			print m
+			logging.debug('%s', m)
 			path=m[0]
 			if path in ('None',None):
 				return False
@@ -374,9 +375,9 @@ class ViewerPicture(QtGui.QGraphicsView):
 			overlay=getattr(smp,name,False)
 			container=overlay
 			if not container:
-				print 'No overlay named:',name
+				logging.debug('%s %s', 'No overlay named:', name)
 			if act.isChecked():
-				print 'show',name
+				logging.debug('%s %s', 'show', name)
 				overlay.show()
 # 				if name=='roi':
 # 					self.reconnectSample()
@@ -415,30 +416,30 @@ class ViewerPicture(QtGui.QGraphicsView):
 	def toggle(self, do=None):
 		"""Toggle data streams"""
 		if not self.processor:
-			print 'No processor. Cannot start/stop.'
+			logging.debug('%s', 'No processor. Cannot start/stop.')
 			return False
 		if do == None:
 			self.processor.toggle_run()
 		elif do > 0:
-			print 'proc start'
+			logging.debug('%s', 'proc start')
 			self.reconnectSample()
 			self.processor.toggle_run(True)
 		else:
-			print 'proc stop'
+			logging.debug('%s', 'proc stop')
 			self.processor.toggle_run(False)
 			
 		self.sampleProcessor.toggle_run(do=self.processor.isRunning())
 			
 	def contextMenuEvent(self,event):
 		item=self.itemAt(event.pos())
-		print 'got item',item
+		logging.debug('%s %s', 'got item', item)
 		if hasattr(item,'menu'):
 			item.menu.popup(event.globalPos())
 		else:
 			self.menu.popup(event.globalPos())
 			
 	def updateSample(self,i,multiget):
-		print 'updateSample',i,multiget.keys()
+		logging.debug('%s %s %s', 'updateSample', i, multiget.keys())
 		smp=self.samples[i]
 		r=smp.update(multiget)
 		if smp.opt_changed:
@@ -484,19 +485,19 @@ class ViewerPicture(QtGui.QGraphicsView):
 		self.samples=[]
 		samples = []
 		for i in range(n):
-			print 'RECONNECTING SAMPLES', i, n, self.remote['fullpath']
+			logging.debug('%s %s %s %s', 'RECONNECTING SAMPLES', i, n, self.remote['fullpath'])
 			name='smp%i' % i
 			if not self.remote.has_key(name):
-				print 'Sample not found',name
+				logging.debug('%s %s', 'Sample not found', name)
 				continue
 			# Get the current analysis sample
 			path=self.remote[name][0]
 			if path in [None,'None']:
-				print 'No sample path defined',path
+				logging.debug('%s %s', 'No sample path defined', path)
 				continue
 			sample=self.server.toPath(path)
 			if sample is None:
-				print 'Sample path not found',path
+				logging.debug('%s %s', 'Sample path not found', path)
 				continue
 			fp=sample['fullpath']
 			samples.append(sample)

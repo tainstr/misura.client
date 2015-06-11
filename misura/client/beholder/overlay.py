@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Graphical overlay for image analysis"""
+import logging
 from PyQt4 import QtGui, QtCore
 colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (0, 125, 125), (125, 125, 0), (125, 0, 125)]*3
 
@@ -35,10 +36,10 @@ class Overlay(QtGui.QGraphicsItem):
 	@property
 	def zoom_factor(self):
 		t=self.scene().views()[0].transform()
-		print 'zoom_factor'
-		print	t.m11(), t.m12(), t.m13()
-		print	t.m21(), t.m22(), t.m23() 
-		print	t.m31(), t.m32(), t.m33() 
+		logging.debug('%s', 'zoom_factor')
+		logging.debug('%s %s %s', t.m11(), t.m12(), t.m13())
+		logging.debug('%s %s %s', t.m21(), t.m22(), t.m23())
+		logging.debug('%s %s %s', t.m31(), t.m32(), t.m33())
 		return abs(t.m11()+t.m21())
 	
 	def unscale(self,factor):
@@ -58,7 +59,7 @@ class Overlay(QtGui.QGraphicsItem):
 			if not multiget.has_key(opt):
 				continue
 			self.current[opt]=multiget[opt]
-		print 'slot_update',self,self.current.keys()
+		logging.debug('%s %s %s', 'slot_update', self, self.current.keys())
 		if self.validate():
 			self.up()
 			return True
@@ -71,7 +72,7 @@ class Overlay(QtGui.QGraphicsItem):
 	def validate(self):
 		for opt in self.opt:
 			if not self.current.has_key(opt):
-				print 'Validation Failed',self.ovname,self.Z 
+				logging.debug('%s %s %s', 'Validation Failed', self.ovname, self.Z)
 				return False
 		return True
 	

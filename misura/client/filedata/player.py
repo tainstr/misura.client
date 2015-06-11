@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
+import logging
 from PyQt4 import QtCore
 import exceptions
 from time import sleep
@@ -21,12 +22,12 @@ class FilePlayer(QtCore.QThread):
 		
 	def set_doc(self,doc):
 		if self.isRunning():
-			print 'stopping'
+			logging.debug('%s', 'stopping')
 			self.stream = 0
 			self.terminate()
 		if self.doc:
 			for dec in doc.decoders.itervalues():
-				print 'stopping decoder',dec.datapath
+				logging.debug('%s %s', 'stopping decoder', dec.datapath)
 				doc.terminate()
 		self.params={}
 		self.samples=[]
@@ -51,7 +52,7 @@ class FilePlayer(QtCore.QThread):
 		return 'Test replay started'
 	
 	def stop_acquisition(self,*a):
-		print 'STOP ACQUISITION'
+		logging.debug('%s', 'STOP ACQUISITION')
 		self.stream=0
 		self.terminate()
 			
@@ -59,23 +60,23 @@ class FilePlayer(QtCore.QThread):
 		pass
 	
 	def outIdx(self,idx):
-		print 'outIdx',idx
+		logging.debug('%s %s', 'outIdx', idx)
 		self.idx=idx
 		
 	def set_idx(self,idx=-1):
-		print 'FilePlay.set_idx',idx
+		logging.debug('%s %s', 'FilePlay.set_idx', idx)
 		if not self.doc:
-			print 'NO DOC' 
+			logging.debug('%s', 'NO DOC')
 			return
 		if idx<0: idx=self.idx
 		img=True
 		for dec in self.doc.decoders.itervalues():
 			dimg=dec.get(idx)
 			if not dimg:
-				print 'error getting data from',dec.datapath,idx
+				logging.debug('%s %s %s', 'error getting data from', dec.datapath, idx)
 			img=img and dec.get(idx)
 		if not img:
-			print 'Could not get some data'
+			logging.debug('%s', 'Could not get some data')
 			return 
 		self.idx=idx
 		
@@ -119,7 +120,7 @@ class FilePlayer(QtCore.QThread):
 		
 	def run(self):
 		if not self.doc:
-			print 'No document defined!'
+			logging.debug('%s', 'No document defined!')
 			self.stream=False
 			return
 		self.set_idx(self.idx)

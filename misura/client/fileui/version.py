@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Versioning management utilities"""
+import logging
 from .. import _
 import functools
 from PyQt4 import QtGui, QtCore
@@ -19,14 +20,14 @@ class VersionMenu(QtGui.QMenu):
 	def redraw(self):
 		self.clear()
 		vd=self.proxy.get_versions()
-		print 'Got info',vd
+		logging.debug('%s %s', 'Got info', vd)
 		if vd is None:
 			return
 		cur=self.proxy.get_version()
-		print 'Current version',cur
+		logging.debug('%s %s', 'Current version', cur)
 		self.loadActs=[]
 		for v,info in vd.iteritems():
-			print 'Found version',v,info
+			logging.debug('%s %s %s', 'Found version', v, info)
 			p=functools.partial(self.load_version,v)
 			act=self.addAction(' - '.join(info),p)
 			act.setCheckable(True)

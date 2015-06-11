@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Surface tension from capillarity shape and scale parameters and expansion data."""
+import logging
 import veusz.plugins as plugins
 import numpy as np
 from scipy import interpolate
@@ -8,7 +9,7 @@ from scipy import interpolate
 class DensityFunction(object):
 	"""Callable returning density at any temperature, given a reference density and temperature and linear/volumetric expansion curves"""
 	def __init__(self,rho0,T0,dil=False,T=False,ex_start=0,ex_end=0,dim='Linear'):
-		print 'DensityFunction', rho0, T0, dil, T, ex_start, ex_end, dim
+		logging.debug('%s %s %s %s %s %s %s %s', 'DensityFunction', rho0, T0, dil, T, ex_start, ex_end, dim)
 		self.rho0=rho0
 		self.T0=T0
 		self.dil=dil

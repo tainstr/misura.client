@@ -3,6 +3,7 @@
 """Configuration interface for misura.
 Global instrument parametrization and setup."""
 
+import logging
 from misura.client import network
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
@@ -41,7 +42,7 @@ class Item(object):
 		while node.name!='server':
 			path=[node.name]+path
 			node=node.parent
-		print "path",path
+		logging.debug('%s %s', "path", path)
 		return path
 	
 	def index_path(self,path):
@@ -52,14 +53,14 @@ class Item(object):
 		node=self
 		idx=[]
 		for name in path:
-			print 'index_path searching',name,node.names
+			logging.debug('%s %s %s', 'index_path searching', name, node.names)
 			if name not in node.names:
-				print 'NAME NOT FOUND',name, node.name, node.names
+				logging.debug('%s %s %s %s', 'NAME NOT FOUND', name, node.name, node.names)
 				return False,False
 			i=node.names.index(name)
 			node=node.children[i]
 			idx.append(i)
-			print 'index_path',name,i,node
+			logging.debug('%s %s %s %s', 'index_path', name, i, node)
 		return idx,node
 			
 def recursiveModel(base, parent=False, model=False):
@@ -79,7 +80,7 @@ def recursiveModel(base, parent=False, model=False):
 			continue
 		item=Item(parent, path,i)
 		obj=base.child(path)
-		print 'Recursive Model on ',path,item,name
+		logging.debug('%s %s %s %s', 'Recursive Model on ', path, item, name)
 		item=recursiveModel(obj,item, model[path])
 		parent.children.append(item)
 		# was: name
@@ -112,14 +113,14 @@ class ServerModel(QtCore.QAbstractItemModel):
 		"""Returns the sequence of model indexes starting from a path: parent0...parentN.nodename"""
 		# Get the full sequence of indexes and the parent node
 		idx,node=self.item.children[0].index_path(path)
-		print 'ServerModel.index_path: FOUND',path,idx,node
+		logging.debug('%s %s %s %s', 'ServerModel.index_path: FOUND', path, idx, node)
 		if not idx:
 			return []
 #		return self.createIndex(idx[-1], 0, node),idx
 		jdx=[]
 		jdx.append(self.createIndex(0,0,self.item.children[0]))
 		for i in idx:
-			print 'indexing',jdx[-1],i
+			logging.debug('%s %s %s', 'indexing', jdx[-1], i)
 			jdx.append(self.index(i,0,jdx[-1]))
 		return jdx
 		

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 """Set curve color markers"""
+import logging
 import veusz.plugins as plugins
 
 import utils 
@@ -43,7 +44,7 @@ class ColorizePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		
 		g=utils.searchFirstOccurrence(c,'graph',-1)
 		if g is None or g.typename!='graph':
-			print 'found',g,c
+			logging.debug('%s %s %s', 'found', g, c)
 			raise plugins.ToolsPluginException('Error: Curve is not contained in a graph.')
 		pts=fields['x']
 		ds=self.doc.data.get(pts,False)

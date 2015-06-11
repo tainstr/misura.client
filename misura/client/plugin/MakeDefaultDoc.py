@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Simple plotting for archive and live acquisition."""
+import logging
 import veusz.plugins
 import veusz.document as document
 import utils
@@ -43,7 +44,7 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
 			self.dict_toset(g, props)
 			self.toset(g.getChild('x'),'label',labels[i])
 			if not fields['title']:
-				print 'Skipping title creation'
+				logging.debug('%s', 'Skipping title creation')
 				continue
 			self.toset(g,'topMargin','1.5cm')
 			props={'xPos':0.1,'yPos':0.96,'label':'Title'}

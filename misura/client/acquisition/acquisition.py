@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 from PyQt4 import QtGui, QtCore
 import functools
 import tables
@@ -104,7 +105,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.setServer(s)
 
 	def setServer(self, server=False):
-		print 'Setting server to',server
+		logging.debug('%s %s', 'Setting server to', server)
 		self.server=server
 		if not server:
 			network.manager.remote.connect()
@@ -130,7 +131,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.instrumentSelector=InstrumentSelector(self,self.setInstrument)
 		self.instrumentDock.setWidget(self.instrumentSelector)
 		self.addDockWidget(QtCore.Qt.TopDockWidgetArea,self.instrumentDock)
-		print self.server.describe()
+		logging.debug('%s', self.server.describe())
 		ri=self.server['runningInstrument'] # currently running
 		li=ri
 		if self.server.has_key('lastInstrument'): # compatibility with old tests
@@ -207,10 +208,10 @@ class MainWindow(QtGui.QMainWindow):
 		return r.init_instrument(soft)
 	def init_instrument(self, soft=False):
 		#TODO: this scheme could be automated via a decorator: @thread 
-		print 'Calling init_instrument in QThreadPool'
+		logging.debug('%s', 'Calling init_instrument in QThreadPool')
 		r=widgets.RunMethod(self._init_instrument, soft)
 		QtCore.QThreadPool.globalInstance().start(r)
-		print 'active threads:', QtCore.QThreadPool.globalInstance().activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount()
+		logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance().activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
 		
 #	@csutil.profile
 	def setInstrument(self, remote, server=False):
@@ -220,27 +221,27 @@ class MainWindow(QtGui.QMainWindow):
 		self.remote=remote
 		name=self.remote['devpath']
 		self.name=name
-		print 'Setting remote',remote,self.remote,name
+		logging.debug('%s %s %s %s', 'Setting remote', remote, self.remote, name)
 		self.setWindowTitle('misura Acquisition: %s (%s)' % (name, self.remote['comment']))
 		pid='Instrument: '+self.name
 		self.tasks.jobs(11,pid)
 		QtGui.qApp.processEvents()
 		if not self.fixedDoc and not self.server['isRunning'] and self.name!=self.server['lastInstrument']:
-			print 'Init instrument'
+			logging.debug('%s', 'Init instrument')
 			if self.remote.init_instrument is not None:
 				self.tasks.job(0,pid,'Initializing instrument')
 				QtGui.qApp.processEvents()
 				# Async call of init_instrument
 				self.init_instrument(soft=True) # soft: only if not already initialized
 #				QtCore.QThreadPool.globalInstance().waitForDone()
-				print 'active threads:', QtCore.QThreadPool.globalInstance().activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount()
+				logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance().activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
 #				sleep(10)
 #				self.remote.init_instrument()
 		self.tasks.job(1,pid,'Preparing menus')
 		self.myMenuBar.close()
 		self.myMenuBar=MenuBar(server=self.server,parent=self)
 		self.setMenuWidget(self.myMenuBar)
-		print 'Done menubar'
+		logging.debug('%s', 'Done menubar')
 		self.centralWidget().closeAllSubWindows()
 		self.tasks.job(1,pid,'Controls')
 		for tb in self.toolbars:
@@ -248,16 +249,16 @@ class MainWindow(QtGui.QMainWindow):
 			tb.close()
 			del tb
 		self.toolbars=[]
-		print 'Cleaned toolbars'
+		logging.debug('%s', 'Cleaned toolbars')
 		self.controls=Controls(self.remote, parent=self)
-		print 'Created controls'
+		logging.debug('%s', 'Created controls')
 		self.controls.stopped_nosave.connect(self.stopped_nosave)
 		self.controls.stopped.connect(self.stopped)
 		self.controls.started.connect(self.resetFileProxy)
 		self.controls.mute=bool(self.fixedDoc)
 		self.addToolBar(self.controls)
 		self.toolbars.append(self.controls)
-		print 'Done controls'
+		logging.debug('%s', 'Done controls')
 		self.tasks.job(-1,pid,'Status panel')
 		
 		
@@ -278,14 +279,14 @@ class MainWindow(QtGui.QMainWindow):
 		
 		# Update Menu
 		self.tasks.job(-1,pid,'Filling menus')
-		print 'MENUBAR SET INSTRUMENT',remote
+		logging.debug('%s %s', 'MENUBAR SET INSTRUMENT', remote)
 		self.myMenuBar.setInstrument(remote,server=self.server)
 		self.myMenuBar.show()
 		
 		# Populate Cameras
 		self.tasks.job(-1,pid,'Show cameras')
 		paths=self.remote['devices']
-		print 'setInstrument PATHS:',paths
+		logging.debug('%s %s', 'setInstrument PATHS:', paths)
 		for p, (pic, win) in self.cameras.iteritems():
 			pic.close()
 			win.hide()
@@ -346,22 +347,22 @@ class MainWindow(QtGui.QMainWindow):
 		self.tasks.job(-1,pid,'Setting document in live registry')
 		registry.set_doc(doc)
 		
-		print 'snapshotsTable'
+		logging.debug('%s', 'snapshotsTable')
 		self.tasks.job(-1,pid,'Sync snapshots with document')
 		self.snapshotsTable.set_doc(doc)
 		
-		print 'summaryPlot'
+		logging.debug('%s', 'summaryPlot')
 		self.tasks.job(-1,pid,'Sync graph with document')
 		self.summaryPlot.set_doc(doc)
 		
-		print 'navigator'
+		logging.debug('%s', 'navigator')
 		self.tasks.job(-1,pid,'Sync document tree')
 		self.navigator.set_doc(doc)
 
-		print 'dataTable'
+		logging.debug('%s', 'dataTable')
 		self.tasks.job(-1,pid,'Sync data table')
 		self.dataTable.set_doc(doc)
-		print 'connect'
+		logging.debug('%s', 'connect')
 		self.connect(self.snapshotsTable,QtCore.SIGNAL('set_time(float)'),self.summaryPlot.set_time)
 		self.connect(self.snapshotsTable,QtCore.SIGNAL('set_time(float)'),self.navigator.set_time)
 		self.connect(self.summaryPlot,QtCore.SIGNAL('move_line(float)'),self.snapshotsTable.set_time)
@@ -382,7 +383,7 @@ class MainWindow(QtGui.QMainWindow):
 		elif self.server['initTest'] or self.server['closingTest']:
 			self.tasks.jobs(0,'Test initialization')
 			self.tasks.setFocus()
-			print 'Waiting for initialization to complete...'
+			logging.debug('%s', 'Waiting for initialization to complete...')
 			QtGui.qApp.processEvents()
 			sleep(.1)
 			return self._resetFileProxy(retry=0)
@@ -404,10 +405,10 @@ class MainWindow(QtGui.QMainWindow):
 				return False
 			fid=self.remote.measure['uid']
 			if fid=='':
-				print 'no active test',fid
+				logging.debug('%s %s', 'no active test', fid)
 				self.tasks.done('Waiting for data')
 				return False
-			print 'resetFileProxy to live ',fid
+			logging.debug('%s %s', 'resetFileProxy to live ', fid)
 			live_uid=self.server.storage.test.live.get_uid()
 			if not live_uid:
 				return False
@@ -415,13 +416,13 @@ class MainWindow(QtGui.QMainWindow):
 			if not live.has_node('/conf'):
 				live.load_conf()
 			if not live.has_node('/conf'):
-				print 'Conf node not found: acquisition has not been initialized.'
+				logging.debug('%s', 'Conf node not found: acquisition has not been initialized.')
 				self.tasks.job(0,'Waiting for data',
 							'Conf node not found: acquisition has not been initialized.')
 				self.tasks.done('Waiting for data')
 				return False
 			if fid==self.uid:
-				print 'Measure id is still the same. Aborting resetFileProxy.'
+				logging.debug('%s', 'Measure id is still the same. Aborting resetFileProxy.')
 				self.tasks.job(0,'Waiting for data',
 							'Measure id is still the same. Aborting resetFileProxy.')
 				self.tasks.done('Waiting for data')
@@ -429,13 +430,13 @@ class MainWindow(QtGui.QMainWindow):
 			try:
 #				live.reopen() # does not work when file grows...
 				fp=RemoteFileProxy(live,conf=self.server,live=True)
-				print fp.header()
+				logging.debug('%s', fp.header())
 				doc=filedata.MisuraDocument(proxy=fp)
 				# Remember as the current uid
 				self.uid=fid
 			except:
-				print 'RESETFILEPROXY error'
-				print_exc()
+				logging.debug('%s', 'RESETFILEPROXY error')
+				logging.debug('%s', print_exc())
 				doc=False
 				sleep(4)
 				return self._resetFileProxy(retry=retry+1)
@@ -443,7 +444,7 @@ class MainWindow(QtGui.QMainWindow):
 		if doc is False:
 			doc=filedata.MisuraDocument(root=self.server)	
 		doc.up=True
-		print 'RESETFILEPROXY',doc.filename,doc.data.keys(),doc.up
+		logging.debug('%s %s %s %s', 'RESETFILEPROXY', doc.filename, doc.data.keys(), doc.up)
 		self.set_doc(doc)
 
 # 	@csutil.profile
@@ -451,16 +452,16 @@ class MainWindow(QtGui.QMainWindow):
 	def resetFileProxy(self,*a,**k):
 		"""Locked version of resetFileProxy"""
 		if not self._lock.acquire(False):
-			print 'ANOTHER RESETFILEPROXY IS RUNNING!'
+			logging.debug('%s', 'ANOTHER RESETFILEPROXY IS RUNNING!')
 			return
-		print 'MainWindow.resetFileProxy: Stopping registry'
+		logging.debug('%s', 'MainWindow.resetFileProxy: Stopping registry')
 		registry.toggle_run(False)
 		r=False
 		try:
 			r=self._resetFileProxy(*a,**k)
 		except:
-			print_exc()
-		print 'MainWindow.resetFileProxy: Restarting registry'
+			logging.debug('%s', print_exc())
+		logging.debug('%s', 'MainWindow.resetFileProxy: Restarting registry')
 		registry.toggle_run(True)
 		self.tasks.done('Waiting for data')
 		self.tasks.hide()
@@ -481,7 +482,7 @@ class MainWindow(QtGui.QMainWindow):
 		
 	def stopped_nosave(self):
 		"""Reset the instrument, completely discarding acquired data and remote file proxy"""
-		print "STOPPED_NOSAVE"
+		logging.debug('%s', "STOPPED_NOSAVE")
 		#TODO: reset ops should be performed server-side
 		self.remote.measure['uid']=''
 		self.resetFileProxy()
@@ -493,7 +494,7 @@ class MainWindow(QtGui.QMainWindow):
 		dbpath=confdb['database']
 		# NO db: ask to specify custom location
 		if not os.path.exists(dbpath):
-			print 'DATABASE PATH DOES NOT EXIST',dbpath
+			logging.debug('%s %s', 'DATABASE PATH DOES NOT EXIST', dbpath)
 			dbpath=False
 			outfile=QtGui.QFileDialog.getSaveFileName(self,	_("Download finished test as"))
 			outfile=str(outfile)
@@ -560,7 +561,7 @@ class MainWindow(QtGui.QMainWindow):
 	def post_uid(self,uid):
 		uid=str(uid)
 		r=self.server.storage.searchUID(uid)
-		print 'SEARCH UID',r
+		logging.debug('%s %s', 'SEARCH UID', r)
 		if not r: 
 			return False
 		self.remote.init_uid(uid)

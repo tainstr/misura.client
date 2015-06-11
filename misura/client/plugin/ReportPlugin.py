@@ -4,6 +4,7 @@
 import os
 from textwrap import wrap, fill
 import datetime
+import logging
 
 import veusz
 import veusz.plugins as plugins
@@ -28,7 +29,7 @@ def wr(k,v,n=18,inter=' '):
 	v='\\\\'.join(v)
 	v=v.replace('_','\\_')
 	r='{}{}{}'.format(k,inter,v)
-	print 'wrapped',k,v,r
+	logging.debug('%s %s %s %s', 'wrapped', k, v, r)
 	return r
 
 invalid=(None,'None','')
@@ -55,7 +56,7 @@ def render_meta(obj,notfound=False,n=30,inter=' ', full=False, zt=0):
 				if c['time'] not in invalid:
 					t=c['time']
 					if t>zt: t-=zt
-					print 'render time',c['time'],t,zt
+					logging.debug('%s %s %s %s', 'render time', c['time'], t, zt)
 					v+=', {}'.format(datetime.timedelta(seconds=int(t)))
 		w=wr(m['name'],v, n=n,inter=inter)
 		msg+='\\\\'+w
@@ -87,11 +88,11 @@ class ReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 		smp_name=vsmp[-1] # sample name
 		smp_path='/'+'/'.join(vsmp[1:]) # cut summary/ stuff
 		report_path='/report'
-		print smp_path,smp_name,report_path
+		logging.debug('%s %s %s', smp_path, smp_name, report_path)
 		test=fields['sample'].linked
 		from .. import filedata
 		if not filedata.ism(test, filedata.LinkedMisuraFile): 
-			print type(test),test
+			logging.debug('%s %s', type(test), test)
 			raise plugins.ToolsPluginException('The target must be misura test file')
 		# Search for test name
 		uk=test.prefix+'unknown'

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tests camera ViewerControl"""
+import logging
 import unittest
 from misura import utils_testing as ut
 
@@ -17,20 +18,20 @@ app=False
 
 #TODO: test if just one coordinate! 
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 	ut.parallel(1)
 
 def tearDownModule():
 	global app
-	print 'Quitting app'
+	logging.debug('%s', 'Quitting app')
 	app.quit()
 	ut.parallel(0)
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 
 class ViewerControl(unittest.TestCase):

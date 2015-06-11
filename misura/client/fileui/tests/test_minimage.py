@@ -3,6 +3,7 @@
 """Testing fileui.minimage module."""
 import unittest
 import os
+import logging
 from misura.client import filedata
 from misura.client import fileui
 from misura.client.tests import iutils_testing as iut
@@ -11,17 +12,17 @@ from veusz import widgets # needed for document creation!
 from PyQt4 import QtGui
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 
 

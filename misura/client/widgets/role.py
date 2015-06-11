@@ -3,6 +3,7 @@
 from PyQt4 import QtCore, QtGui
 from active import ActiveWidget, getRemoteDev
 from .. import _
+import logging
 
 class Role(ActiveWidget):
 	isIO=False
@@ -199,7 +200,7 @@ class RoleEditor(QtGui.QWidget):
 		# Set current values
 		devpath=self.current[0]
 		objpath=self.w.server.searchPath(devpath)
-		print 'server.searchPath',objpath, self.current
+		logging.debug('%s %s %s', 'server.searchPath', objpath, self.current)
 		if objpath is False: 
 			return
 		# this will emit a currentChanged(), triggering select()
@@ -222,7 +223,7 @@ class RoleEditor(QtGui.QWidget):
 		self.config.addItem('default', 'default')
 		path=self.tree.current_fullpath()
 		st, self.remDev=getRemoteDev(self.w.server, path)
-		print 'redraw_config Got Remote Dev',self.current[0], path, self.remDev
+		logging.debug('%s %s %s %s', 'redraw_config Got Remote Dev', self.current[0], path, self.remDev)
 		if st and (self.remDev is not None):
 			for pre in self.remDev.listPresets():
 				if pre=='default': continue
@@ -236,7 +237,7 @@ class RoleEditor(QtGui.QWidget):
 		self.io.addItem('None', 'None')
 		if self.remDev:
 			for pre in self.remDev.iolist():
-				print 'IO Listing',pre
+				logging.debug('%s %s', 'IO Listing', pre)
 				self.io.addItem(pre, pre)
 	
 	def apply(self):

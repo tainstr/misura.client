@@ -8,6 +8,8 @@ import network
 from clientconf import confdb
 from live import registry
 
+import logging
+
 def getConnection(srv):
 	lw=LoginWindow(srv.addr, srv.user, srv.password)
 	login=lw.tryLogin(srv.user, srv.password)
@@ -128,7 +130,7 @@ class ServerSelector(QtGui.QToolBox):
 		self.redraw()
 
 	def redraw(self):
-		print 'redraw'
+		logging.debug('%s', 'redraw')
 		while True:
 			wg=self.currentWidget()
 			idx=self.currentIndex()
@@ -197,13 +199,13 @@ class LiveLog(QtGui.QTextEdit, Autoupdater):
 		self.setFont(QtGui.QFont('TypeWriter',  7, 50, False))
 
 	def slotUpdate(self):
-		print 'LiveLog.slotUpdate'
+		logging.debug('%s', 'LiveLog.slotUpdate')
 		if registry==None:
-			print 'No registry' 
+			logging.debug('%s', 'No registry')
 			return
 		buf=registry.log_buf
 		if len(buf)<=self.nlog:
-			print 'No new log' 
+			logging.debug('%s', 'No new log')
 			return
 		txt=''
 		for line in buf[self.nlog:]:
@@ -225,5 +227,5 @@ class LiveLog(QtGui.QTextEdit, Autoupdater):
 		self.nlog=len(buf)
 
 	def update(self):
-		print 'LiveLog.update'
+		logging.debug('%s', 'LiveLog.update')
 		registry.updateLog()

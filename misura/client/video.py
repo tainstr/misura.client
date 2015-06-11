@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Video export tools"""
+import logging
 import numpy as np
 try:
 	import cv2 as cv
 except:
-	print 'OpenCV is not available. Video Export is disabled.'
+	logging.debug('%s', 'OpenCV is not available. Video Export is disabled.')
 	cv=False
 
 from ..canon import csutil, reference
@@ -21,7 +22,7 @@ def export(sh,frame='/hsm/sample0/frame',
 				output='output.avi',framerate=50.0, fourcc=-1,prog=False):
 	"""Base video export function"""
 	if cv is False:
-		print 'No OpenCV library' 
+		logging.debug('%s', 'No OpenCV library')
 		return False
 	if T:
 		nT=sh.col(T,raw=True)
@@ -65,7 +66,7 @@ def export(sh,frame='/hsm/sample0/frame',
 			cv.fillPoly(im, [p], 0)
 			im=np.dstack((im,im,im))
 		else:
-			print 'Unsupported reference'
+			logging.debug('%s', 'Unsupported reference')
 			break
 		# Get T
 		ti=csutil.find_nearest_val(tT, t, seed=ti)
@@ -76,10 +77,10 @@ def export(sh,frame='/hsm/sample0/frame',
 		if prog:
 			QtGui.qApp.processEvents()
 			if i>1 and prog.value()==0:
-				print 'Export cancelled at frame',i
+				logging.debug('%s %s', 'Export cancelled at frame', i)
 				break
 			prog.setValue(i)
-	print 'releasing',output
+	logging.debug('%s %s', 'releasing', output)
 	out.release()
 	return True
 	
@@ -163,7 +164,7 @@ class VideoExporter(QtGui.QDialog):
 		
 	def cancel(self):
 		"""Interrupt export thread"""
-		print 'Cancel clicked!',self.prog
+		logging.debug('%s %s', 'Cancel clicked!', self.prog)
 		if self.prog:
 			self.prog.setValue(0)
 	

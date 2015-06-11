@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Arrange curves and axes"""
+import logging
 import veusz.plugins as plugins
 import veusz.utils
 from misura.client.iutils import get_plotted_tree
@@ -60,7 +61,7 @@ class ArrangePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		
 		graph=gobj.path
 		tree=get_plotted_tree(gobj)
-		print 'Plotted axis',graph,tree['axis'],tree
+		logging.debug('%s %s %s %s', 'Plotted axis', graph, tree['axis'], tree)
 		smps=tree['sample']
 		# Ax Positioning
 		axes=sorted(tree['axis'].keys())
@@ -87,12 +88,12 @@ class ArrangePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 			if fields['dataset']=='Line Color':
 				if hasattr(ax,'m_auto'):
 					color=ax.m_auto.get('Line/color',False)
-					print 'm_auto',color
+					logging.debug('%s %s', 'm_auto', color)
 				else:
 					color=colorize(idx+dcolor,LR,LG,LB)
-					print 'found color',color
+					logging.debug('%s %s', 'found color', color)
 					while color in used:
-						print 'color is used',color
+						logging.debug('%s %s', 'color is used', color)
 						dcolor+=1
 						levels+=1
 						LR,LG,LB=colorLevels(levels)
@@ -179,7 +180,7 @@ class ArrangePlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 #			setattr(smp,m_var,outvar)
 			# Set back the reference marker if it was not set and this is the first sample
 			if smp['idx']==0:
-				print 'Setting back reference marker',smp,refsmp,outvar
+				logging.debug('%s %s %s %s', 'Setting back reference marker', smp, refsmp, outvar)
 				setattr(refsmp, m_var, outvar)
 #			props[var]=outvar
 			self.dict_toset(obj, props)

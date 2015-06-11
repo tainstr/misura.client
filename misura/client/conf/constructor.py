@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Programmatic interface construction utilities"""
+import logging
 from PyQt4 import QtGui, QtCore
 import functools
 from misura.canon import option
@@ -13,7 +14,7 @@ from ..import parameters as params
 
 def desc2html(desc):
 	"""Crea una rappresentazione HTML del dizionario di descrizione."""
-	print 'show details'
+	logging.debug('%s', 'show details')
 	t='<h1> Properties for: %s </h1>' % desc.get('name',{'current':'Object'})['current']
 	items=desc.items()
 	items.sort(sorter)
@@ -42,7 +43,7 @@ def orgSections(prop_dict):
 		if parent is False: continue
 		parentopt=prop_dict.get(parent,False)
 		if parentopt is False:
-			print 'Non-existent parent for ',handle,prop['parent'] 
+			logging.debug('%s %s %s', 'Non-existent parent for ', handle, prop['parent'])
 			continue
 		# Create the children list on the parent option
 		if not parentopt.has_key('children'): 
@@ -123,7 +124,7 @@ class Section(QtGui.QWidget):
 	def build(self,prop):
 		wg=widgets.build(self.server, self.remObj, prop, parent=self)
 		if wg is False:
-			print 'Section: Failed wg creation',prop['handle'], self.remObj._Method__name, self.path, prop
+			logging.debug('%s %s %s %s %s', 'Section: Failed wg creation', prop['handle'], self.remObj._Method__name, self.path, prop)
 			return False
 		self.widgetsMap[prop['handle']]=wg
 		r=self.lay.rowCount()
@@ -216,14 +217,14 @@ class Interface(QtGui.QTabWidget):
 			wg.close()
 			wg.destroy()
 		for i in range(self.count()):
-			print 'remove tab'
+			logging.debug('%s', 'remove tab')
 			self.removeTab(self.currentIndex())			
 		
 	def update(self):
 		for s, sec in self.sectionsMap.iteritems():
 			for w, wg in sec.widgetsMap.iteritems():
 				if wg.type=='Button': continue
-				print 'updating:', s, w, wg.get()
+				logging.debug('%s %s %s %s', 'updating:', s, w, wg.get())
 			
 	def showMenu(self, pt):
 		self.menu.popup(self.mapToGlobal(pt))

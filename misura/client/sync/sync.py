@@ -6,6 +6,7 @@ import urllib2, urllib
 
 from time import sleep
 from traceback import print_exc
+import logging
 
 from PyQt4 import QtCore, QtGui
 
@@ -27,7 +28,7 @@ def remote_dbdir(server):
 	# Filter away the misura.sqlite filename
 	p=server.storage.get_dbpath().split('/')[:-1]
 	r= '/'.join(p)
-	print 'remote_dbdir',r
+	logging.debug('%s %s', 'remote_dbdir', r)
 	return r
 
 def dataurl(server,uid):
@@ -139,7 +140,7 @@ class TransferThread(QtCore.QThread):
 				
 	def download_url(self,url,outfile):
 		"""Download from url and save to outfile path"""
-		print 'download url',url,outfile
+		logging.debug('%s %s %s', 'download url', url, outfile)
 		self.url=url
 		self.outfile=outfile
 		url=self.prepare_opener(url)
@@ -156,11 +157,11 @@ class TransferThread(QtCore.QThread):
 				if not chunk: break
 				fp.write(chunk)
 				done+=len(chunk)
-				print 'DONE',done,dim
+				logging.debug('%s %s %s', 'DONE', done, dim)
 				self.dlDone.emit(done)
 		# Remove if aborted
 		if self.aborted:
-			print 'Download ABORTED. Removing local file:',outfile
+			logging.debug('%s %s', 'Download ABORTED. Removing local file:', outfile)
 			os.remove(outfile)
 			self.dlAborted.emit(url,outfile)
 		# Append to db if defined
@@ -196,17 +197,17 @@ class TransferThread(QtCore.QThread):
 # 			sleep(1)
 			if itr>=self.retry:
 				break
-			print 'Waiting for uid reservation',uid
+			logging.debug('%s %s', 'Waiting for uid reservation', uid)
 			itr+=1
 		if self.aborted:
-			print 'Aborted waiting for uid reservation',uid
+			logging.debug('%s %s', 'Aborted waiting for uid reservation', uid)
 			self.dlAborted.emit(url,outfile)
 			return False
 		# Reserve again
 		server.storage.test.reserve(uid)
 		# Abort if not reserved
 		if not server.storage.test.is_reserved(uid):
-			print 'Cannot reserve UID for download',uid,url
+			logging.debug('%s %s %s', 'Cannot reserve UID for download', uid, url)
 			self.dlAborted.emit(url,outfile)
 			return False
 		self.download_url(url,outfile)
@@ -240,9 +241,9 @@ class TransferThread(QtCore.QThread):
 			enc=urllib.urlencode({'opt' : opt,
 	                         'filename'  : remotefile,
 	                         'data':data})
-			print 'urlopen',url,opt,remotefile
+			logging.debug('%s %s %s %s', 'urlopen', url, opt, remotefile)
 			content = urllib2.urlopen(url=url, data=enc).read()
-			print 'Transferred chunk',content
+			logging.debug('%s %s', 'Transferred chunk', content)
 			done+=len(data)
 			if len(data)==0:
 				fp.close()
@@ -251,14 +252,14 @@ class TransferThread(QtCore.QThread):
 # 			sleep(0.1)
 		# Remove if aborted
 		if self.aborted:
-			print 'Upload ABORTED at',done
+			logging.debug('%s %s', 'Upload ABORTED at', done)
 			self.dlAborted.emit(url,localfile)
 		self.dlFinished.emit(url,localfile)		
 		
 	def run(self):
 		"""Download the configured file in a separate thread"""
 		if (not (self.outfile or self.dbpath)) or not ((self.uid and self.server) or self.url) or not (self.post and self.outfile and self.url):
-			print 'Impossible to download',self.url,self.uid,self.server,self.outfile,self.post
+			logging.debug('%s %s %s %s %s %s', 'Impossible to download', self.url, self.uid, self.server, self.outfile, self.post)
 		if self.post:
 			self.upload(self.url,self.outfile,self.post)
 		elif self.uid:
@@ -293,7 +294,7 @@ class Sync(TransferThread):
 			dbpath=confdb['database']
 		self.dbpath=dbpath
 		if not os.path.exists(self.dbpath):
-			print 'Database path does not exist!',self.dbpath
+			logging.debug('%s %s', 'Database path does not exist!', self.dbpath)
 			return False
 		self.dbdir=os.path.dirname(self.dbpath)
 		self.db=indexer.Indexer(self.dbpath)
@@ -321,10 +322,10 @@ class Sync(TransferThread):
 		# Check if previously approved (exit) or already excluded (remove!)
 		uid=record[2]
 		if self.has_uid(uid,'sync_queue'):
-			print 'Record already queued',record
+			logging.debug('%s %s', 'Record already queued', record)
 			return False
 		if self.has_uid(uid, 'sync_exclude'):
-			print 'Record was excluded. Enabling.', record
+			logging.debug('%s %s', 'Record was excluded. Enabling.', record)
 			self.rem_uid(uid,'sync_exclude')
 		self.add_record(record,'sync_queue')
 		return True
@@ -334,10 +335,10 @@ class Sync(TransferThread):
 		# Check if previously approved (remove!) or already excluded (exit)
 		uid=record[2]
 		if self.has_uid(uid,'sync_exclude'):
-			print 'Record already excluded',record
+			logging.debug('%s %s', 'Record already excluded', record)
 			return False
 		if self.has_uid(uid, 'sync_queue'):
-			print 'Record was queued. Enabling.', record
+			logging.debug('%s %s', 'Record was queued. Enabling.', record)
 			self.rem_uid(uid,'sync_queue')
 		self.add_record(record,'sync_exclude')
 		return True
@@ -371,7 +372,7 @@ class Sync(TransferThread):
 		
 	def download_record(self,record):
 		"""Start the chunked download of a record"""
-		print 'download_record',record
+		logging.debug('%s %s', 'download_record', record)
 		p=record[0].lstrip(self.remote_dbdir).split('/')
 		fn=p.pop(-1)
 		d=os.path.join(*p)
@@ -399,7 +400,7 @@ class SyncThread(Sync):
 		self.server=self.server.copy()
 		while self.enabled:
 			self.loop()
-		print 'Sync service was stopped'
+		logging.debug('%s', 'Sync service was stopped')
 		
 		
 		

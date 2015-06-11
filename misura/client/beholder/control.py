@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 from PyQt4 import QtGui, QtCore
 from misura.client import conf,_
 import picture
@@ -43,7 +44,7 @@ class ViewerControl(QtGui.QWidget):
 		return self.viewer.processor
 		
 	def close(self):
-		print 'ViewerControl.close'
+		logging.debug('%s', 'ViewerControl.close')
 		for ctrl in self.controls.itervalues():
 			if ctrl is None: continue
 			ctrl.close()
@@ -55,10 +56,10 @@ class ViewerControl(QtGui.QWidget):
 	def setControl(self, widget, position, tooltip='', inversion=0):
 		"""Set a slider widget in the given position. Available positions: upper, bottom, left, right"""
 		if not self.positions.has_key(position):
-			print 'Impossible position requested',position
+			logging.debug('%s %s', 'Impossible position requested', position)
 			return False
 		if self.controls[position] is not None:
-			print 'Position already has a control',position,self.controls[position]
+			logging.debug('%s %s %s', 'Position already has a control', position, self.controls[position])
 			return False
 		pos=self.positions[position]
 		widget.label_widget.hide()
@@ -69,13 +70,13 @@ class ViewerControl(QtGui.QWidget):
 			widget.setOrientation(QtCore.Qt.Vertical)
 		self.lay.addWidget(widget,*pos)
 		self.controls[position]=widget
-		print 'ViewerControl.setControl',widget,position,pos
+		logging.debug('%s %s %s %s', 'ViewerControl.setControl', widget, position, pos)
 		
 	def delControl(self,position):
 		"""Removes a control widget placed in position"""
 		wdg=self.controls[position]
 		if wdg is None:
-			print 'Impossible to remove the control widget',position
+			logging.debug('%s %s', 'Impossible to remove the control widget', position)
 			return False
 		self.lay.removeWidget(wdg)
 		wdg.hide()
@@ -94,7 +95,7 @@ class CameraController(conf.Interface):
 	"""An interface widget adding the "View Camera" button"""
 	viewerDialog=False
 	def __init__(self, server, remote, suffix='', parent=None):
-		print 'CameraController.__init__', server, remote
+		logging.debug('%s %s %s', 'CameraController.__init__', server, remote)
 		self.remote = remote
 		self.server=server
 		desc = self.remote.describe()
@@ -105,16 +106,16 @@ class CameraController(conf.Interface):
 		
 		self.stream = QtGui.QPushButton(_("View camera"))
 		
-		print self.sectionsMap
+		logging.debug('%s', self.sectionsMap)
 		self.sectionsMap['Main'].lay.addWidget(self.stream)
 		self.connect(self.stream, QtCore.SIGNAL('clicked()'), self.toggle_stream)
 		
 	def restoreFactory(self):
-		print self.rpc.restoreFactory(self.idx)
+		logging.debug('%s', self.rpc.restoreFactory(self.idx))
 		
 	def toggle_stream(self, do=None):
 		"""Activate/deactivate camera viewing"""
-		print 'CameraController.toggle_stream', self.remote, self.server, self.viewerDialog
+		logging.debug('%s %s %s %s', 'CameraController.toggle_stream', self.remote, self.server, self.viewerDialog)
 		if self.viewerDialog and self.viewerDialog.viewer:
 			self.viewerDialog.close()
 		self.viewerDialog=False

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """An image contained in a Misura HDF5 output file time/Image array reference."""
 import os
+import logging
 
 import veusz.utils
 import veusz.widgets
@@ -72,13 +73,13 @@ class ImageReference(utils.OperationWrapper,veusz.widgets.ImageFile):
 		dec=self.dec
 		dec.reset(fp,datapath=s.dataset)
 		seq=dec.get_time(t)
-		print 'sequence',seq
+		logging.debug('%s %s', 'sequence', seq)
 		r=dec.get_data(seq)
 		fp.close()
 		
-		print 'data',r
+		logging.debug('%s %s', 'data', r)
 		if not r:
-			print 'Could not get image data',t,seq
+			logging.debug('%s %s %s', 'Could not get image data', t, seq)
 			return
 		t,pix=r
 		ba = QtCore.QByteArray()
@@ -86,7 +87,7 @@ class ImageReference(utils.OperationWrapper,veusz.widgets.ImageFile):
 		buf.open(QtCore.QIODevice.WriteOnly)
 		pix.save(buf, 'PNG')
 		encoded = veusz.compat.cbytes(ba.toBase64()).decode('ascii')
-		print 'encoded'
+		logging.debug('%s', 'encoded')
 		self.cacheimage = pix
 		self.cacheembeddata=encoded	
 		
@@ -111,7 +112,7 @@ class ImageReference(utils.OperationWrapper,veusz.widgets.ImageFile):
 	def drawShape(self, painter, rect):
 		"""Draw image."""
 		s = self.settings
-		print 'drawShape'
+		logging.debug('%s', 'drawShape')
 		# draw border and fill
 		painter.drawRect(rect)
 		

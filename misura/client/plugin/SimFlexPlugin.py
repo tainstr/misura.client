@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tools and plugins for Veusz, providing Misura Thermal Analysis functionality"""
+import logging
 import veusz.plugins as plugins
 import numpy
 import scipy
@@ -102,14 +103,14 @@ class SimFlex(object):
 			# Minimize energy
 			xopt,fopt, iter, funcalls, warnflag = fmin(self.elastic_energy, [r0],args=(L,),
 									 disp= True,full_output=True)
-			print T,xopt,fopt
+			logging.debug('%s %s %s', T, xopt, fopt)
 			curv.append(xopt[0])
 		curv.pop(0)
 		length=np.array(length)
 		curv=np.array(curv)
 		# Calculate vertical displacement of the middle point (flexure)
 		flex=(abs(curv)-np.sqrt(curv**2-(length/2)**2))*np.sign(curv)
-		print self.vT,flex,length
+		logging.debug('%s %s %s', self.vT, flex, length)
 		return self.vT,flex,length
 
 class SimFlexPlugin(plugins.DatasetPlugin):

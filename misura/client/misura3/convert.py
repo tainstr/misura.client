@@ -5,6 +5,7 @@ import tables, numpy
 import numpy as np
 from copy import deepcopy
 import os
+import logging
 import StringIO
 from traceback import print_exc
 from datetime import datetime
@@ -234,7 +235,7 @@ tree_dict={'self':server_dict,
 def create_tree(outFile,tree,path='/'):
 	"""Recursive tree structure creation"""
 	for key,foo in tree.list():
-		print 'Creating group:',path,key
+		logging.debug('%s %s %s', 'Creating group:', path, key)
 		outFile.createGroup(path,key,key)
 		create_tree(outFile,tree.child(key),path=path+key+'/')
 
@@ -247,7 +248,7 @@ def clear_data(outFile):
 			outFile.removeNode('/'+n, recursive=True)
 
 def fsignal(*foo,**kwfoo):
-	print 'emit',foo
+	logging.debug('%s %s', 'emit', foo)
 
 def convert(dbpath, tcode=False, outdir=False,img=True,force=True, keep_img=True,format='m3',signal=fsignal):
 	"""Extract a Misura 3 test and export into a Misura 4 test file"""
@@ -260,16 +261,16 @@ def convert(dbpath, tcode=False, outdir=False,img=True,force=True, keep_img=True
 	cursor.execute("select * from PROVE where IDProve = '%s'" % tcode)
 	tests=cursor.fetchall()
 	if len(tests)!=1:
-		print 'Wrong number of tests found',tests
+		logging.debug('%s %s', 'Wrong number of tests found', tests)
 		return False
 	signal(5)
 	test=tests[0]
 	icode=m3db.getImageCode(tcode)
 	cursor.execute("select * from IMMAGINI where [IDProve] = '%s' order by Tempo" % icode)
 	rows=cursor.fetchall()
-	print 'CONVERT GOT',len(rows)
+	logging.debug('%s %s', 'CONVERT GOT', len(rows))
 	if len(rows)<1:
-		print 'No points',rows
+		logging.debug('%s %s', 'No points', rows)
 		return False
 	signal(10)
 	
@@ -304,7 +305,7 @@ def convert(dbpath, tcode=False, outdir=False,img=True,force=True, keep_img=True
 			outFile=tables.openFile(outpath,mode='w')
 		# If I am not forcing neither keeping images, return the current file
 		else:
-			print 'Already exported path:',outpath
+			logging.debug('%s %s', 'Already exported path:', outpath)
 			return outpath
 	# If it does not exist, create!
 	else:
@@ -327,7 +328,7 @@ def convert(dbpath, tcode=False, outdir=False,img=True,force=True, keep_img=True
 	cycle=m3db.getHeatingCycle(test)
 	for l in cycle:
 		if len(l)==2: l.append(False)
-		print l
+		logging.debug('%s', l)
 	signal(12)
 	
 	
@@ -363,7 +364,7 @@ def convert(dbpath, tcode=False, outdir=False,img=True,force=True, keep_img=True
 	# Measure
 	tid=dbpath+ '|' + tcode
 	tdate=test[m3db.fprv.Data].strftime("%H:%M:%S, %d/%m/%Y")
-	print test[m3db.fprv.Data].strftime("%H:%M:%S, %d/%m/%Y")
+	logging.debug('%s %s', test[m3db.fprv.Data].strftime("%H:%M:%S, %d/%m/%Y"))
 	instrobj.measure['name']=test[m3db.fprv.Desc_Prova]
 	instrobj.measure['comment']=test[m3db.fprv.Note]
 	instrobj.measure['date']=tdate
@@ -382,7 +383,7 @@ def convert(dbpath, tcode=False, outdir=False,img=True,force=True, keep_img=True
 	# GET THE ACTUAL DATA
 	header,columns=m3db.getHeaderCols(test[m3db.fprv.Tipo_Prova],tcode)
 	rows=np.array(rows)
-	print header,columns, len(rows[0]), instr
+	logging.debug('%s %s %s %s', header, columns, len(rows[0]), instr)
 	instr_path='/' + instr
 	smp_path=instr_path+'/sample0'
 	
@@ -418,7 +419,7 @@ def convert(dbpath, tcode=False, outdir=False,img=True,force=True, keep_img=True
 		elif col=='P': 
 			data=data/10.
 		elif col=='Width':
-			print data
+			logging.debug('%s', data)
 			data=data/200.
 		ref=arrayRef[col].ref
 		ref.append(np.array([timecol,data]).transpose())
@@ -498,13 +499,13 @@ def append_images(outFile,rows,imgdir,icode,format,signal):
 		nj=sjob+i*job
 		if i // 10 ==0:
 			signal(int(nj))
-		print nj,'%'
+		logging.debug('%s %s', nj, '%')
 		
 		num=r[m3db.fimg.Numero_Immagine]
 		img='%sH.%03i' % (icode, int(num))
 		img=os.path.join(imgdir,img)
 		if not os.path.exists(img): 
-			print 'Skipping non-existent image',img
+			logging.debug('%s %s', 'Skipping non-existent image', img)
 			continue
 		
 		im,size=decompress(img,format)
@@ -515,8 +516,8 @@ def append_images(outFile,rows,imgdir,icode,format,signal):
 		ref.commit([[rows[i,m3db.fimg.Tempo],im]])
 		oi+=1
 		outFile.flush()
-	print 'Included images:',oi
-	print 'Expected size:',esz/1000000.
+	logging.debug('%s %s', 'Included images:', oi)
+	logging.debug('%s %s', 'Expected size:', esz/1000000.)
 	return True
 
 def decompress(img,format):
@@ -545,8 +546,8 @@ def decompress(img,format):
 			r=sio.read()
 			return (r,im.size)
 	except:
-		print_exc()
-		print 'Error reading image',img
+		logging.debug('%s', print_exc())
+		logging.debug('%s %s', 'Error reading image', img)
 		r=('',(0,0))
 	return r	
 

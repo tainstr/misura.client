@@ -3,6 +3,7 @@
 """Testing MisuraDocument (mdoc.py module)"""
 import unittest
 import sys
+import logging
 import os,shutil
 from misura.client import filedata
 from misura.canon import indexer
@@ -13,19 +14,19 @@ import veusz.document as document
 import veusz.widgets
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 nativem4=os.path.join(iut.data_dir,'hsm_test.h5')
 
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 class MisuraDocument(unittest.TestCase):
 	def setUp(self):
@@ -42,7 +43,7 @@ class MisuraDocument(unittest.TestCase):
 	def test_update(self):
 		# Reduce elapsed time by a half
 		elp=self.original_elapsed/2.
-		print 'elapsed',self.original_elapsed,elp
+		logging.debug('%s %s %s', 'elapsed', self.original_elapsed, elp)
 		f=indexer.SharedFile(nativem4)
 		f.set_node_attr('/conf','elapsed',elp)
 		doc=filedata.MisuraDocument(proxy=f)
@@ -53,13 +54,13 @@ class MisuraDocument(unittest.TestCase):
 		nt=len(doc.data['0:t'].data)
 		nh=len(doc.data['hsm.sample0.h'].data)
 		lastt=doc.data['0:t'].data[-1]
-		print 'first import',doc.data['0:t'].data
+		logging.debug('%s %s', 'first import', doc.data['0:t'].data)
 		# Restore the original elapsed value
 		f.set_node_attr('/conf','elapsed',self.original_elapsed)
 		# Try to update
 		r=doc.update()
-		print 'updated',r
-		print 'second import',doc.data['0:t'].data
+		logging.debug('%s %s', 'updated', r)
+		logging.debug('%s %s', 'second import', doc.data['0:t'].data)
 		nt1=len(doc.data['0:t'].data)
 		nh1=len(doc.data['hsm.sample0.h'].data)
 		lastt1=doc.data['0:t'].data[-1]
@@ -74,7 +75,7 @@ class MisuraDocument(unittest.TestCase):
 		doc=filedata.MisuraDocument(filename=nativem4)
 		doc.reloadData()
 		row=doc.get_row(5)
-		print row
+		logging.debug('%s', row)
 		
 	
 if __name__ == "__main__":

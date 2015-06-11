@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Designer per il ciclo termico."""
+import logging
 import numpy as np
 from numpy import array
 from .. import _
@@ -17,13 +18,13 @@ def clean_curve(dat,events=True):
 	for irow,ent in enumerate(dat):
 		t, T, R, D=ent
 		if None in ent: 
-			print 'Skipping row', irow
+			logging.debug('%s %s', 'Skipping row', irow)
 			continue
 		if isinstance(T,basestring):
 			if events:
 				T=str(T)
 			else:
-				print 'Skipping EVENT',irow
+				logging.debug('%s %s', 'Skipping EVENT', irow)
 				continue
 
 		crv.append([t*60, T])
@@ -95,8 +96,8 @@ class ThermalCyclePlot(plot.VeuszPlot):
 			y1=np.diff(y)/np.diff(x)
 			y1=array([y1,y1]).transpose().flatten()
 			x1=array([x,x]).transpose().flatten()[1:-1]
-			print 'x1',x1
-			print 'y1',y1
+			logging.debug('%s %s', 'x1', x1)
+			logging.debug('%s %s', 'y1', y1)
 			cmd.SetData(yR, y1)
 			cmd.SetData(xR, x1)
 		else:
@@ -122,7 +123,7 @@ class TimeSpinBox(QtGui.QDoubleSpinBox):
 		self.setRange(0, 10**7)
 	
 	def textFromValue(self, s):
-		print 'textFromValue',s
+		logging.debug('%s %s', 'textFromValue', s)
 		s=s*60
 		h, s=divmod(s, 3600)
 		m, s=divmod(s, 60)
@@ -130,9 +131,9 @@ class TimeSpinBox(QtGui.QDoubleSpinBox):
 		
 	def valueFromText(self, qstr):
 		qstr=str(qstr).replace(' ','')
-		print 'valueFromText',qstr
+		logging.debug('%s %s', 'valueFromText', qstr)
 		if len(qstr)==0:
-			print 'valueFromText: empty',qstr
+			logging.debug('%s %s', 'valueFromText: empty', qstr)
 			return 0.
 		if ':' in qstr:
 			h, m, s=qstr.split(':')
@@ -142,21 +143,21 @@ class TimeSpinBox(QtGui.QDoubleSpinBox):
 		return r/60
 		
 	def setTime(self, t):
-		print 'setTime',t
+		logging.debug('%s %s', 'setTime', t)
 		self.setValue(t)
 		
 	def setText(self, txt):
-		print 'setText',txt
+		logging.debug('%s %s', 'setText', txt)
 		val=self.valueFromText(txt)
 		self.setValue(val)
 		
 	def validate(self,inp,pos):
-		print 'validate',inp,pos
+		logging.debug('%s %s %s', 'validate', inp, pos)
 		try: 
 			self.valueFromText(inp)
 			return (QtGui.QValidator.Acceptable,inp,pos)
 		except:
-			print 'invalid',inp,pos
+			logging.debug('%s %s %s', 'invalid', inp, pos)
 			return (QtGui.QValidator.Intermediate,inp,pos)
 		
 # Nota: colCHK deve sempre essere l'ultima colonna (indice + alto)
@@ -212,12 +213,12 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 		irow=index.row()
 		icol=index.column()
 		if not index.isValid() or irow<0 or irow>self.rowCount() or icol<0 or icol>colCHK:
-			print 'setData: invalid line',irow,icol
+			logging.debug('%s %s %s', 'setData: invalid line', irow, icol)
 			return False
 		if isinstance(value,basestring) and (not value.startswith('>')):
 			value=float(value)
 		row=self.dat[irow]
-		print 'setData:',irow,icol,value,row[icol]
+		logging.debug('%s %s %s %s %s', 'setData:', irow, icol, value, row[icol])
 		row[icol]=value
 		self.dat[irow]=row
 		for ir in range(irow, self.rowCount()):
@@ -229,7 +230,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 		return True
 		
 	def insertRows(self, position, rows=1, index=QtCore.QModelIndex(),ini=False):
-		print 'insertRows',position,rows,index.row()
+		logging.debug('%s %s %s %s', 'insertRows', position, rows, index.row())
 		self.beginInsertRows(QtCore.QModelIndex(), position, position+rows-1)
 		if not ini:
 			ini=[0]*self.columnCount()
@@ -302,16 +303,16 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 #		if irow<1: 
 #			return
 		if isinstance(self.dat[irow][1],basestring):
-			print 'skipping event ', irow, self.dat[irow]
+			logging.debug('%s %s %s', 'skipping event ', irow, self.dat[irow])
 			return 
-		print 'updateRow',self.mode, irow
+		logging.debug('%s %s %s', 'updateRow', self.mode, irow)
 		t, T, R, D=self.dat[irow]
 		pt0,ent0=next_point(self.dat,irow-1,-1)
 		if ent0 is False:
-			print 'skipping empty', irow, pt0, ent0
+			logging.debug('%s %s %s %s', 'skipping empty', irow, pt0, ent0)
 			return
 		t0, T0, R0, D0=ent0
-		print ent0
+		logging.debug('%s', ent0)
 		if self.mode=='points':
 			D=(t-t0)
 			if D==0: R=0
@@ -328,7 +329,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 				R=(T-T0)/D
 			t=t0+D
 		if D<0 or t<t0:
-			print 'Impossible duration!'
+			logging.debug('%s', 'Impossible duration!')
 			self.dat[irow]=[t0+1, T0, 0, 1]
 		else:
 			self.dat[irow]=[t, T, R, D]
@@ -391,7 +392,7 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
 		# First row is not editable
 		col=index.column()
 		if index.row()==0 and col in [colTIME,colCHK]:
-			print 'row0 is not editable'
+			logging.debug('%s', 'row0 is not editable')
 			return 
 		mod=index.model()
 		val=mod.data(index)
@@ -407,20 +408,20 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
 		col=index.column()
 		# first row is not editable
 		if index.row()==0 and col!=colTEMP: 
-			print 'setModelData: First row is not editable',index.row(),index.column()
+			logging.debug('%s %s %s', 'setModelData: First row is not editable', index.row(), index.column())
 			return	
 		val=None
 		if hasattr(editor,'value'):
 			val=editor.value()
-			print 'editor value',val
+			logging.debug('%s %s', 'editor value', val)
 		elif hasattr(editor,'text'):
 			val=editor.text()
-			print 'editor text',val
+			logging.debug('%s %s', 'editor text', val)
 			if hasattr(editor,'valueFromText'):
 				val=editor.valueFromText(val)
-				print 'editor valueFromText',val
+				logging.debug('%s %s', 'editor valueFromText', val)
 		if val is not None:
-			print 'setModelData',val,index.row(),index.column()
+			logging.debug('%s %s %s %s', 'setModelData', val, index.row(), index.column())
 			model.setData(index, val, QtCore.Qt.DisplayRole)
 		else:
 			QtGui.QItemDelegate.setModelData(self, editor, model, index)
@@ -569,7 +570,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 		
 	def replot(self, *args):
 		crv=self.model.curve(events=False)
-		print 'replotting',crv
+		logging.debug('%s %s', 'replotting', crv)
 		self.plot.setCurve(crv)
 		
 	def addButtons(self):
@@ -602,7 +603,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 	def addTable(self, crv=None):
 		if crv==None:
 			crv=self.remote.get('curve')
-			print 'got remote curve', crv
+			logging.debug('%s %s', 'got remote curve', crv)
 		if len(crv)==0: 
 			crv=[[0,0]] 
 # 			self.plot.hide()
@@ -622,7 +623,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 		
 		
 	def refresh(self, *args):
-		print 'ThermalCycleDesigner.refresh'
+		logging.debug('%s', 'ThermalCycleDesigner.refresh')
 		self.addTable()
 		
 	def apply(self):
@@ -636,7 +637,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 		
 	def loadCSV(self):
 		fname=QtGui.QFileDialog.getOpenFileName(self, 'Choose a *.csv file containing a time-temperature curve', '', "CSV Files (*.csv)")
-		print fname
+		logging.debug('%s', fname)
 		f=open(fname, 'r')
 		crv=[]
 		for row in f:

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Changes measurement unit to a dataset."""
+import logging
 import veusz.plugins as plugins
 import veusz.document as document
 import utils
@@ -56,7 +57,7 @@ class UnitsConverterTool(utils.OperationWrapper,plugins.ToolsPlugin):
 		for axp, dslist in tree['axis'].iteritems():
 			if not fields['ds'] in dslist:
 				continue
-			print 'Propagating to',cvt
+			logging.debug('%s %s', 'Propagating to', cvt)
 			cvt+=dslist
 			upax.append(axp)
 		# If time dataset, propagate to all time datasets
@@ -73,7 +74,7 @@ class UnitsConverterTool(utils.OperationWrapper,plugins.ToolsPlugin):
 			ncur=getattr(self.doc.data[nds],'unit',False)
 			if not ncur:
 				continue
-			print 'Really propagating unit conversion to',nds
+			logging.debug('%s %s', 'Really propagating unit conversion to', nds)
 			fields={'ds': nds, 'propagate':False,'convert':fields['convert']}
 			self.ops.append(document.OperationToolsPlugin(UnitsConverterTool(),fields))
 		# Update axis labels

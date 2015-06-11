@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Libreria per il plotting semplice durante l'acquisizione."""
 import os
+import logging
 import veusz.dataimport.base as base
 from misura.canon import option
 from proxy import getFileProxy
@@ -55,10 +56,10 @@ class LinkedMisuraFile(base.LinkedFileBase):
 		datasets=sorted(datasets, key=lambda ds: ds.m_pos)
 		for ds in datasets:
 			if not ds.m_keep: continue
-			print ds, ds.m_col
+			logging.debug('%s %s', ds, ds.m_col)
 			colnames.append(ds.m_name)
 			coldatas.append(ds.data[:])
-		print coldatas
+		logging.debug('%s', coldatas)
 		#FIXME: fp.save_summary(colnames,coldatas,name)
 	
 		

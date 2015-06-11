@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tests camera ViewerDialog"""
+import logging
 import unittest
 from misura import utils_testing as ut
 
@@ -21,10 +22,10 @@ from misura.flex import Flex
 
 #app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 #	global app
 #	app=QtGui.QApplication([])
 #	qt4reactor.install()
@@ -32,9 +33,9 @@ def setUpModule():
 
 def tearDownModule():
 	global app
-	print 'Quitting app'
+	logging.debug('%s', 'Quitting app')
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	ut.parallel(False)
 
 instr_class=Hsm

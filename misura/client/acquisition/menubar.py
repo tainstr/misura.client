@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 from .. import network, conf, _
 from ..clientconf import confdb
 from ..connection import LoginWindow, addrConnection
@@ -62,7 +63,7 @@ class MenuBar(QtGui.QMenuBar):
 		addr=str(addr)
 		obj=addrConnection(addr)
 		if not obj: 
-			print 'MenuBar.setAddr: Failed!'
+			logging.debug('%s', 'MenuBar.setAddr: Failed!')
 			return
 		network.setRemote(obj)
 		
@@ -94,14 +95,14 @@ class MenuBar(QtGui.QMenuBar):
 			opt='eq_'+name
 			if self.server.has_key(opt):
 				if not self.server[opt]:
-					print 'Disabled instrument',opt, self.server[opt]
+					logging.debug('%s %s %s', 'Disabled instrument', opt, self.server[opt])
 					continue					
 			elif not params.debug:
-				print 'Skipping unknown instrument',name
+				logging.debug('%s %s', 'Skipping unknown instrument', name)
 				continue
 			obj=getattr(self.server, name,False)
 			if not obj:
-				print 'missing handler',name
+				logging.debug('%s %s', 'missing handler', name)
 				continue
 			f=functools.partial(self.parent().setInstrument, obj)
 			act=self.instruments.addAction('%s (%s)' % (title, obj['comment']), f)
@@ -114,7 +115,7 @@ class MenuBar(QtGui.QMenuBar):
 			self.actLogout.setEnabled(True)
 			self.actShutdown.setEnabled(True)
 			self.settings.setEnabled(True)
-		print 'lstInstruments', self.lstInstruments
+		logging.debug('%s %s', 'lstInstruments', self.lstInstruments)
 		
 	def get_window(self,key):
 		d=self.windows.get(key,False)
@@ -201,11 +202,11 @@ class MenuBar(QtGui.QMenuBar):
 			role,path=path
 			lst=self.server.searchPath(path)
 			if lst is False:
-				print 'Undefined path for role', role,path
+				logging.debug('%s %s %s', 'Undefined path for role', role, path)
 				continue
 			obj=self.server.toPath(lst)
 			if obj is None: 
-				print 'Path not found'
+				logging.debug('%s', 'Path not found')
 				continue
 			self.addDevConf(obj, role)
 		self.appendGlobalConf()
@@ -235,7 +236,7 @@ class MenuBar(QtGui.QMenuBar):
 			if not conf: continue
 			if type(conf)==type(''): continue
 			if hasattr(conf, '_Method__name'): continue
-			print 'Updating',conf
+			logging.debug('%s %s', 'Updating', conf)
 			act.setChecked(conf.isVisible())
 
 	def reload_data(self):

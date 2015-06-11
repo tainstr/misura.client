@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Tabular view of data in a MisuraDocument"""
 import os
+import logging
 
 from .. import iutils,_
 from misura.client import widgets
@@ -97,10 +98,10 @@ class SummaryModel(QtCore.QAbstractTableModel):
 				ordered.remove(None)
 		else:
 			ordered=self._loaded[:]
-		print 'ordered',ordered
+		logging.debug('%s %s', 'ordered', ordered)
 		n=len(ordered)
 		if not n:
-			print 'No columns to export.'
+			logging.debug('%s', 'No columns to export.')
 			return False
 		f=open(path,'w')
 		if header:
@@ -149,7 +150,7 @@ class SummaryHeader(QtGui.QHeaderView):
 			return 'No point for hide()'
 		i=self.logicalIndexAt(self.point)
 		self.hideSection(i)
-		print 'Hide',i
+		logging.debug('%s %s', 'Hide', i)
 	
 	def show_more(self):
 		"""Load more columns from document model"""
@@ -207,10 +208,10 @@ class SummaryView(QtGui.QTableView):
 	def set_idx(self,idx=-1):
 		if idx<0: idx=0
 		cidx=self.currentIndex()
-		print 'cidx',cidx
+		logging.debug('%s %s', 'cidx', cidx)
 		col=cidx.column()
 		if col<0: col=0
-		print 'row,col',idx,col
+		logging.debug('%s %s %s %s', 'row, col', idx, col)
 		midx=self.model().index(idx,col)
 		self.setCurrentIndex(midx)
 	

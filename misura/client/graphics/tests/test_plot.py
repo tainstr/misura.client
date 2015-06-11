@@ -4,6 +4,7 @@
 import unittest
 
 import os
+import logging
 from misura.client.tests import iutils_testing as iut
 from misura.client.graphics import Plot
 from misura.client import filedata
@@ -11,17 +12,17 @@ from misura.client.navigator import Navigator
 from PyQt4 import QtGui,QtCore
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 nativem4=os.path.join(iut.data_dir,'device_22.h5')
 nativem4='/home/daniele/misura/misura/storage/data/hsm/cube2.h5'

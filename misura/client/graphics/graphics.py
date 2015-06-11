@@ -3,6 +3,7 @@
 """Applicazione di grafica basata su Veusz"""
 # Librerie generali
 import os
+import logging
 import sip
 sip.setapi('QString', 2)
 from PyQt4 import QtGui, QtCore
@@ -37,7 +38,7 @@ def loadIcons():
 	for key in ['m4.connect', 'm4.db', 'm4.open', 'm4.sintering', 'm4.softening', 'm4.sphere', 'm4.halfSphere', 'm4.melting']:
 		n=key.split('.')[1]+'.svg'
 		n=os.path.join(params.pathArt, n)
-		print n 
+		logging.debug('%s', n)
 		if not os.path.exists(n): continue
 		veusz.utils.action._iconcache[key]=QtGui.QIcon(n)
 
@@ -71,14 +72,14 @@ def misura_import(self, filename, **options):
 	# lookup filename
 	filename=unicode(filename)
 	realfilename = self.findFileOnImportPath(filename)
-	print 'open_file:',filename,realfilename
+	logging.debug('%s %s %s', 'open_file:', filename, realfilename)
 	p=filedata.ImportParamsMisura(filename=realfilename, **options)
 	op = filedata.OperationMisuraImport(p)
 	
 	self.document.applyOperation(op)
 	confdb.mem_file(realfilename,op.measurename)
 	dsnames = op.outdatasets
-	print "Imported datasets %s" % (' '.join(dsnames),)
+	logging.debug('%s %s', "Imported datasets %s" % (' '.join(dsnames), ))
 	return dsnames
 
 # Add the Importmisura command to the CommandInterface class
@@ -160,11 +161,11 @@ class misuraInterface(CustomInterface, QtCore.QObject):
 		n=self.mw.plot.getPageNumber()
 		page=self.mw.document.basewidget.getPage(n)
 		if page is None:
-			print 'NO PAGE FOUND',n
+			logging.debug('%s %s', 'NO PAGE FOUND', n)
 			return
-		print 'update_page',page.path
+		logging.debug('%s %s', 'update_page', page.path)
 		self.openedFiles.model().set_page(page.path)
-		print 'done model.set_page'
+		logging.debug('%s', 'done model.set_page')
 		for p in self.mw.document.basewidget.children:
 			if not p.typename=='page': continue
 			self.update_title(p)
@@ -312,15 +313,15 @@ class Graphics(MainWindow):
 		return
 	def __init__(self,*a):
 		loadIcons()
-		print 'Load Icons OK'
+		logging.debug('%s', 'Load Icons OK')
 		self._document=MisuraDocument()
 		# Shortcuts to command interpreter and interface
 		MainWindow.__init__(self,*a)
-		print 'MainWindow init'
+		logging.debug('%s', 'MainWindow init')
 		self.ci=self.console.interpreter
 		self.cmd=self.ci.interface
 		# misura Interface
-		print 'misura Interface'
+		logging.debug('%s', 'misura Interface')
 		self.m4=misuraInterface(self)
 		# Misura3 Interface
 		#print 'Misura3 Interface'
@@ -351,7 +352,7 @@ class GraphicsApp(veusz_main.VeuszApp):
 					emptywins[0].openFile(filename)
 		else:
 			# create blank window
-			print 'creating blank window'
+			logging.debug('%s', 'creating blank window')
 			MainWindow.CreateWindow()	
 			
 	def startup(self):

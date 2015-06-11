@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Graphical overlay for image analysis"""
+import logging
 from overlay import Overlay
 from hook import HookPoint, HookRect
 from PyQt4 import QtGui, QtCore
@@ -64,7 +65,7 @@ class BoxRegion(Overlay):
 		self._opt=list(val)[0]
 		
 	def get(self):
-		print 'BoxRegion.get',self.remObj,self._opt
+		logging.debug('%s %s %s', 'BoxRegion.get', self.remObj, self._opt)
 		re=self.remObj.get(self._opt)
 		self.current={self._opt:re}
 		return re
@@ -73,7 +74,7 @@ class BoxRegion(Overlay):
 		"""Sets server-side option according to visible rectangle."""
 		r = self.box.rect()	
 		r = [self.box.x()+r.x(),self.box.y()+r.y(),r.width(),r.height()]
-		print 'setting rect',r
+		logging.debug('%s %s', 'setting rect', r)
 		self.remObj[self._opt]=r
 		self.syncPoints()
 		self.get()
@@ -93,20 +94,20 @@ class BoxRegion(Overlay):
 	def up(self):
 		"""Read and redraw server values."""
 		if self.moving:
-			print 'BoxRegion is moving' 
+			logging.debug('%s', 'BoxRegion is moving')
 			return
 		if not self.isVisible():
-			print 'BoxRegion not visible' 
+			logging.debug('%s', 'BoxRegion not visible')
 			return False
 		if not self.validate():
-			print 'BoxRegion not validated' 
+			logging.debug('%s', 'BoxRegion not validated')
 			return False
 #		r = self.get()
 		r=self.current[self._opt]
 		if r is None:
-			print 'Region UP error: no values', r
+			logging.debug('%s %s', 'Region UP error: no values', r)
 		x, y, w, h=r
-		print 'BoxRegion.up',x,y,w,h
+		logging.debug('%s %s %s %s %s', 'BoxRegion.up', x, y, w, h)
 		self.box.setPos(0, 0)
 		self.box.setRect(QtCore.QRectF(x, y, w, h))
 		self.syncPoints()
@@ -135,6 +136,6 @@ class BoxRegion(Overlay):
 		d2=d/2
 		self.ptul.setPos(x-d2,y-d2)
 		self.ptbr.setPos(x+w-d2,y+h-d2)
-		print 'move:',x,y,w,h
+		logging.debug('%s %s %s %s %s', 'move:', x, y, w, h)
 		
 

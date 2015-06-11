@@ -32,6 +32,7 @@ u_entry="""
     </message>
 """
 
+import logging
 from time import time
 from sys import argv
 import os
@@ -67,7 +68,7 @@ def update(lang,ctx,base='misura'):
 	filename=os.path.join(pathLang, base+'_'+lang+'.ts')
 	# No previous translations: nothing to update!
 	if not os.path.exists(filename):
-		print lang.upper(),'\tOriginal translation not found:',filename
+		logging.debug('%s %s %s', lang.upper(), '\tOriginal translation not found:', filename)
 		return ctx
 	# Update from found filename
 	for line in open(filename,'r'):
@@ -96,7 +97,7 @@ def write_ts(lang,ctx):
 	out.write(header % lang)
 	for c, ent in ctx.iteritems():
 		out.write(context_h % c)
-		print '\tContext:',c
+		logging.debug('%s %s', '\tContext:', c)
 		for s, e in ent.iteritems():
 			if e[0]=='': out.write(u_entry % (s, e[0], e[1]))
 			else: out.write(entry % (s, e[0], e[1]))
@@ -114,7 +115,7 @@ def collect_conf(module,translations):
 		if not hasattr(obj,'conf_def'): continue
 		conf_def=getattr(obj,'conf_def')
 		if not conf_def: continue
-		print 'Found conf_def',obj.__name__,conf_def
+		logging.debug('%s %s %s', 'Found conf_def', obj.__name__, conf_def)
 		for el in conf_def:
 			if not isinstance(el,dict): continue
 			tr=el.get('name',False)
@@ -123,7 +124,7 @@ def collect_conf(module,translations):
 			if not h:
 				missing+=1
 				h='!!!_missing_handle_{}'.format(missing)
-			print obj,h,tr
+			logging.debug('%s %s %s', obj, h, tr)
 			translations[h]=tr
 			# Get translatable option names
 			opt=el.get('options', False)
@@ -145,11 +146,11 @@ def iterpackage(package):
 	missing=0
 	for importer, modname, ispkg in pkgutil.iter_modules(package.__path__, prefix):
 		if modname.split('.')[-1] in ('client','canon','libvideodev','utils'):
-			print 'skipping', modname
+			logging.debug('%s %s', 'skipping', modname)
 			continue
-		print "Found submodule %s (is a package: %s)" % (modname, ispkg)
+		logging.debug('%s %s', "Found submodule %s (is a package: %s)" % (modname, ispkg))
 		module = __import__(modname, fromlist="dummy")
-		print "Imported", module
+		logging.debug('%s %s', "Imported", module)
 		translations,ms=collect_conf(module,translations)
 		missing+=ms
 		if ispkg:
@@ -163,7 +164,7 @@ def collect():
 
 	import misura
 	translations,missing=iterpackage(misura)
-	print 'Stats',len(translations),len(set(translations)), missing
+	logging.debug('%s %s %s %s', 'Stats', len(translations), len(set(translations)), missing)
 	
 	out=open('static.txt','w')
 	for h,tr in translations.iteritems():
@@ -338,7 +339,7 @@ def scan_client_source(path,out=False):
 		for fn in files:
 			if not fn.endswith('.py'): continue
 			fp=os.path.join(root,fn)
-			print 'Scanning',fp
+			logging.debug('%s %s', 'Scanning', fp)
 			python_find_strings(fp,retn)
 	# Simplify output
 	if not out: out={}
@@ -368,7 +369,7 @@ def language_sync():
 	
 	statistics={}
 	for l in langs:
-		print 'LANGUAGE:',l
+		logging.debug('%s %s', 'LANGUAGE:', l)
 		ctx=update(l,contexts.copy(),base='misura')
 		ctx=update(l,ctx)
 		write_ts(l,ctx)
@@ -381,10 +382,10 @@ def language_sync():
 			for k, e in v.iteritems():
 				contexts[c][k]=('', '')		
 	
-	print 'Completeness:'
+	logging.debug('%s', 'Completeness:')
 	for l in langs:
 		s=statistics[l]
-		print '%s: %.2f %% (missing: %i)' % (l.upper(), 100.*s[1]/(s[1]+s[2]), s[2])
+		logging.debug('%s %s %s', '%s: %.2f %% (missing: %i)' % (l.upper(), 100.*s[1]/(s[1]+s[2]), s[2]))
 
 if __name__=='__main__':
 	language_sync()

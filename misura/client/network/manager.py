@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+import logging
 import select
 import socket
 from time import sleep
@@ -32,7 +32,7 @@ class NetworkManager(QtCore.QThread):
 		try:
 			self.browser=pybonjour.DNSServiceBrowse(regtype = regtype, callBack = self.browse_callback)
 		except:
-			print_exc()
+			logging.debug('%s', print_exc())
 		self.addr=''
 		"""Indirizzo cui si è connessi"""
 		self.connected=False
@@ -45,16 +45,16 @@ class NetworkManager(QtCore.QThread):
 								rrtype, rrclass, rdata, ttl):
 		"""Get the IP address of the referenced service"""
 		# Unqueue this reference
-		print 'query_record_callback',sdRef
+		logging.debug('%s %s', 'query_record_callback', sdRef)
 		self.queue.remove(sdRef)
 		if errorCode != pybonjour.kDNSServiceErr_NoError:
-			print 'IP NOT FOUND:', fullname, txtRecord[1::2][::-1]
+			logging.debug('%s %s %s', 'IP NOT FOUND:', fullname, txtRecord[1::2][::-1])
 			return 
 		ip=socket.inet_ntoa(rdata) #IP
-		print 'Searching', fullname, self.resolved
+		logging.debug('%s %s %s', 'Searching', fullname, self.resolved)
 		srv=self.resolved[fullname.replace('.', '')]
 		srv.ip=ip
-		print 'Found service:',  srv
+		logging.debug('%s %s', 'Found service:', srv)
 		self.emit(QtCore.SIGNAL('found(QString)'), srv.addr)
 		self.servers[srv.fullname]=srv
 		# Close query reference
@@ -67,15 +67,15 @@ class NetworkManager(QtCore.QThread):
 		if not pybonjour:
 			return
 		# Unqueue this reference
-		print 'resolve_callback',sdRef
+		logging.debug('%s %s', 'resolve_callback', sdRef)
 		self.queue.remove(sdRef)
 		if errorCode != pybonjour.kDNSServiceErr_NoError:
-			print 'kDNSService Error:',errorCode
+			logging.debug('%s %s', 'kDNSService Error:', errorCode)
 			return
 		if not fullname.startswith('misura'):
-			print 'Wrong service name:',fullname
+			logging.debug('%s %s', 'Wrong service name:', fullname)
 			return
-		print 'Query IP'
+		logging.debug('%s', 'Query IP')
 		# Query for IP address
 		query_sdRef = pybonjour.DNSServiceQueryRecord(interfaceIndex = interfaceIndex,
 									fullname = hosttarget,
@@ -88,7 +88,7 @@ class NetworkManager(QtCore.QThread):
 		self.queue.append(query_sdRef)
 		# Close resolve reference
 		sdRef.close()
-		print 'done resolve_callback'
+		logging.debug('%s', 'done resolve_callback')
 		
 	def browse_callback(self, sdRef, flags, interfaceIndex, errorCode, serviceName,
 						regtype, replyDomain):
@@ -96,18 +96,18 @@ class NetworkManager(QtCore.QThread):
 		if not pybonjour:
 			return
 		if errorCode != pybonjour.kDNSServiceErr_NoError:
-			print 'Found error ', errorCode 
+			logging.debug('%s %s', 'Found error ', errorCode)
 			return
 		if serviceName[:7]!='misura': 
-			print 'Wrong service name:',fullname
+			logging.debug('%s %s', 'Wrong service name:', fullname)
 			return
 		fullname=serviceName+'.'+regtype+replyDomain
 		# If flags means the service has been lost, remove it
 		if not (flags & pybonjour.kDNSServiceFlagsAdd):
 			if not self.servers.has_key(fullname): return
 			srv=self.servers.pop(fullname)
-			print self.servers
-			print 'Service lost', srv
+			logging.debug('%s', self.servers)
+			logging.debug('%s %s', 'Service lost', srv)
 			self.emit(QtCore.SIGNAL('lost(QString)'), srv.fullname)
 			return 
 		# Ask full resolution of the service
@@ -126,14 +126,14 @@ class NetworkManager(QtCore.QThread):
 		sleep(1)
 		pybonjour.DNSServiceProcessResult(self.browser)
 		while self.scan:
-			print 'scan', self.queue
+			logging.debug('%s %s', 'scan', self.queue)
 			# Search for something to process
 			ready = select.select([self.browser]+self.queue, [], [], 2)
 			for ref in ready[0]:
 				pybonjour.DNSServiceProcessResult(ref)
 			# If there is nothing left to do, wait
 			if len(self.queue)==0: sleep(5)
-		print 'Network Manager CLOSED'
+		logging.debug('%s', 'Network Manager CLOSED')
 		self.browser.close()
 		
 	def copy(self, path=False):

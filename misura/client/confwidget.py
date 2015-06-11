@@ -5,6 +5,7 @@ from misura.client import _
 from misura.client.clientconf import confdb, settings
 import functools
 import os
+import logging
 
 class Path(QtGui.QWidget):
 	def __init__(self,path,parent=None):
@@ -80,7 +81,7 @@ class RecentInterface(object):
 	
 	def getNameSigList(self):
 		tab=getattr(self.conf,'recent_'+self.category)
-		print 'getNameSigList',self.category,tab
+		logging.debug('%s %s %s', 'getNameSigList', self.category, tab)
 		nsl=[]
 		for i,row in enumerate(tab):
 			sig=row[0]
@@ -104,7 +105,7 @@ class RecentInterface(object):
 			path=QtGui.QInputDialog.getText(self, _('Specify a new server address'), _('Address'),text='https://IP:3880/RPC')[0]
 		else:
 			tab=getattr(self.conf,'recent_'+self.category)
-			print 'new: tab',self.category,tab
+			logging.debug('%s %s %s', 'new: tab', self.category, tab)
 			d=''
 			if len(tab)>0:
 				d=os.path.dirname(tab[-1][0])

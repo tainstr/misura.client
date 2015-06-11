@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Rich, hierarchical representation of opened tests and their datasets"""
+import logging
 import sip
 sip.setapi('QString', 2)
 from veusz import document
@@ -59,7 +60,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
 	def set_idx(self,t):
 		if self.paused:
 			return False
-		print 'DocumentModel.set_idx',t
+		logging.debug('%s %s', 'DocumentModel.set_idx', t)
 		#TODO: convert to time index
 		tds=self.doc.data.get('t',False)
 		if tds is False: 
@@ -73,13 +74,13 @@ class DocumentModel(QtCore.QAbstractItemModel):
 	def set_time(self,t):
 		"""Changes current values to requested time `t`"""
 		idx=find_nearest_val(self.doc.data['0:t'].data, t, seed=self.idx)
-		print 'Setting time t',t,idx
+		logging.debug('%s %s %s', 'Setting time t', t, idx)
 		self.set_idx(idx)
 		return True
 		
 	paused=False
 	def pause(self,do=True):
-		print 'Set paused',do
+		logging.debug('%s %s', 'Set paused', do)
 		self.paused=do
 		if do:
 			self.disconnect(self.doc,QtCore.SIGNAL("sigModified"),self.refresh)
@@ -109,12 +110,12 @@ class DocumentModel(QtCore.QAbstractItemModel):
 	def refresh(self,force=False):
 		if not force:
 			if self.paused:
-				print 'NOT REFRESHING MODEL',self.paused
+				logging.debug('%s %s', 'NOT REFRESHING MODEL', self.paused)
 				return
 			elif self.changeset==self.doc.changeset:
-				print 'NOTHING CHANGED',self.changeset,self.doc.changeset
+				logging.debug('%s %s %s', 'NOTHING CHANGED', self.changeset, self.doc.changeset)
 				return
-		print 'REFRESHING MODEL',self.paused
+		logging.debug('%s %s', 'REFRESHING MODEL', self.paused)
 		self.paused=True
 		self.doc.suspendUpdates()
 		self.emit(QtCore.SIGNAL('beginResetModel()'))
@@ -124,9 +125,9 @@ class DocumentModel(QtCore.QAbstractItemModel):
 		
 		self.emit(QtCore.SIGNAL('endResetModel()'))
 		self.paused=False
-		print 'End reset model sent'
+		logging.debug('%s', 'End reset model sent')
 		self.emit(QtCore.SIGNAL('modelReset()'))
-		print 'Model reset sent'
+		logging.debug('%s', 'Model reset sent')
 		self.changeset=self.doc.changeset
 		self.doc.enableUpdates()
 		
@@ -240,12 +241,12 @@ class DocumentModel(QtCore.QAbstractItemModel):
 	def index(self, row, column, parent=voididx):
 		parent=self.nodeFromIndex(parent)
 		if not (isinstance(parent, DatasetEntry) or isinstance(parent,NodeEntry)):
-			print 'child ERROR',parent
+			logging.debug('%s %s', 'child ERROR', parent)
 			return voididx
 		assert row>=0
 		lst=parent.recursive_status(self.status,depth=0)
 		if row>=len(lst):
-			print 'WRONG ROW',row,len(lst)
+			logging.debug('%s %s %s', 'WRONG ROW', row, len(lst))
 			return voididx
 		assert row<len(lst), 'index() '+str(parent)+str(row)+str(lst)+str(self.status)
 		child=lst[row]
@@ -302,7 +303,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
 			# Create index
 			jdx.append(self.index(i,0,jdx[-1]))
 			
-		print 'index_path',jdx
+		logging.debug('%s %s', 'index_path', jdx)
 		return jdx
 		
 	#####
@@ -315,7 +316,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
 		for index in indexes:
 			node=self.nodeFromIndex(index)
 			out.append(node.path)
-		print 'mimeData',out
+		logging.debug('%s %s', 'mimeData', out)
 		dat=QtCore.QMimeData()
 		dat.setData("text/plain", ';'.join(out))
 		return dat
@@ -353,7 +354,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
 		return True
 	
 	def hide_show(self,col,do=None,emit=True):
-		print 'RowView.hide_show',col,do,emit
+		logging.debug('%s %s %s %s', 'RowView.hide_show', col, do, emit)
 		col=str(col)
 		if do==None:
 			item=self.tree.traverse(col)
@@ -448,7 +449,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
 		which matches the parent first level axis."""
 		menu.clear()
 		axs=self.plots['axis'].keys()
-		print 'AXES',axs
+		logging.debug('%s %s', 'AXES', axs)
 		#TODO: generalize
 		axmap={}
 		axs1=[] # First level (no match setting)
@@ -457,7 +458,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
 		for pt in axs:
 			# discard axis not in current page
 			if not pt.startswith(self.page): 
-				print 'Ax: Other page',pt,self.page
+				logging.debug('%s %s %s', 'Ax: Other page', pt, self.page)
 				continue
 			lst=self.matching(pt)
 			if len(lst)==0:
@@ -495,7 +496,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
 		The `second` will become `second`-level and will be listed 
 		in every other first-level axis referenced in its match setting."""
 		lst=self.matching(second)
-		print 'matching ',first,second,lst
+		logging.debug('%s %s %s %s', 'matching ', first, second, lst)
 		# Add match
 		if first not in lst:
 			lst.append(first)

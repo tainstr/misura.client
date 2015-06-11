@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+import logging
 import sip
 API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
 API_VERSION = 2
@@ -8,8 +10,9 @@ from parameters import determine_path
 
 from PyQt4 import QtCore
 import network
+import logging
 
-
+logging.basicConfig(level=logging.DEBUG)
 
 def _(text, disambiguation=None, context='misura'):
 	"""Veusz-based translatable messages tagging."""
@@ -25,7 +28,7 @@ def default(host='localhost', port=3880, user='admin', password='admin'):
 def from_argv():
 	"""Get connection from command line arguments"""
 	import sys, getopt
-	print 'from argv', sys.argv
+	logging.debug('%s %s', 'from argv', sys.argv)
 	opts, args=getopt.getopt(sys.argv[1:], 'h:p:u:w:')
 	r={'-h':'localhost', '-p':3880,
 		'-u':'admin','-w':'admin'}

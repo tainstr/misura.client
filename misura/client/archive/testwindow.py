@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 from PyQt4 import QtGui, QtCore
 from .. import _
 from .. import filedata
@@ -36,7 +37,7 @@ class TestWindow(acquisition.MainWindow):
 		
 # 	@profile
 	def load_version(self,v=-1):
-		print "SETTING VERSION",v
+		logging.debug('%s %s', "SETTING VERSION", v)
 		if not self.fixedDoc.proxy.isopen():
 			self.fixedDoc.proxy.reopen()
 		self.fixedDoc.proxy.set_version(v)
@@ -44,7 +45,7 @@ class TestWindow(acquisition.MainWindow):
 			self.fixedDoc.proxy.load_conf()
 		self.setServer(self.fixedDoc.proxy.conf)
 		self.name=self.fixedDoc.proxy.get_node_attr('/conf','instrument')
-		print 'instrument name',self.name,	getattr(self.fixedDoc.proxy.conf,self.name)
+		logging.debug('%s %s %s %s', 'instrument name', self.name, getattr(self.fixedDoc.proxy.conf, self.name))
 		self.snapshotsTable.slider.choice()
 		self.snapshotsTable.strip.set_idx()
 		self.title=self.remote.measure['name']
@@ -65,7 +66,7 @@ class TestWindow(acquisition.MainWindow):
 		acquisition.MainWindow.close(self)
 		
 	def set_idx(self,idx):
-		print 'TestWindow.set_idx',self.play.isRunning(),idx
+		logging.debug('%s %s %s', 'TestWindow.set_idx', self.play.isRunning(), idx)
 		if not self.play.isRunning():
 			self.play.set_idx(idx)
 		else:
@@ -77,7 +78,7 @@ class TestWindow(acquisition.MainWindow):
 		"""Re-evaluate the meta-data generating scripts (standards)."""
 		fp=self.fixedDoc.proxy
 		if fp.__class__.__name__!='SharedFile':
-			print 'Error: restandard is only possible on local files'
+			logging.debug('%s', 'Error: restandard is only possible on local files')
 			return
 		# Overwrite
 		r=self.fixedDoc.proxy.run_scripts(self.remote)

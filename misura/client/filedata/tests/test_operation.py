@@ -3,6 +3,7 @@
 """Testing the datasets.py module."""
 import unittest
 import sys
+import logging
 import os,shutil
 from misura.client import filedata
 from misura.client.tests import iutils_testing as iut
@@ -12,17 +13,17 @@ import veusz.document as document
 import veusz.widgets
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 
 from3=os.path.join(iut.data_dir,'m3_hsm.h5')
@@ -73,8 +74,8 @@ class TestOperationMisuraImport(unittest.TestCase):
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
 		doc=document.Document()
 		imp.do(doc)
-		print imp.outnames
-		print doc.data.keys()
+		logging.debug('%s', imp.outnames)
+		logging.debug('%s', doc.data.keys())
 		# autoload
 		self.assertGreater(len(doc.data['hsm/sample0/h']),10)
 		# no load: ds present but empty
@@ -89,8 +90,8 @@ class TestOperationMisuraImport(unittest.TestCase):
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
 		doc=document.Document()
 		imp.do(doc)
-		print imp.outnames
-		print doc.data.keys()
+		logging.debug('%s', imp.outnames)
+		logging.debug('%s', doc.data.keys())
 		# autoload
 		self.assertGreater(len(doc.data['hsm/sample0/h']),10)
 		# no load: ds present but empty
@@ -98,8 +99,8 @@ class TestOperationMisuraImport(unittest.TestCase):
 		
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4b))
 		imp.do(doc)
-		print 'second',imp.outnames
-		print 'second',doc.data.keys()	
+		logging.debug('%s %s', 'second', imp.outnames)
+		logging.debug('%s %s', 'second', doc.data.keys())
 		self.assertIn('0:t',imp.outnames)
 		self.assertIn('t',doc.data.keys())
 		self.assertIn('0:t',doc.data.keys())	

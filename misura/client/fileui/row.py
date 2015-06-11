@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tree visualization of variables at a given time"""
+import logging
 from .. import _
 import functools
 
@@ -39,7 +40,7 @@ class RowView(QtGui.QTreeView):
 			return
 		qi=self.indexAt(pt)
 		node=qi.internalPointer()
-		print 'show_menu',node
+		logging.debug('%s %s', 'show_menu', node)
 		# Show the node menu
 		if node!=None:
 			if node.status>0:
@@ -57,7 +58,7 @@ class RowView(QtGui.QTreeView):
 				self.devmenu[node.col].popup(self.mapToGlobal(pt))
 				return
 		# Show the entire menu
-		print 'show_menu entire'
+		logging.debug('%s', 'show_menu entire')
 		self.menu.addAction('Update View',self.model().refresh)
 		self.menu.popup(self.mapToGlobal(pt))
 		
@@ -72,7 +73,7 @@ class RowView(QtGui.QTreeView):
 		return QtGui.QTreeView.keyPressEvent(self,ev)
 	
 	def hide_show(self,col,do=None,emit=True):
-		print 'RowView.hide_show',col,do,emit
+		logging.debug('%s %s %s %s', 'RowView.hide_show', col, do, emit)
 		m=self.model()
 		col=str(col)
 		if do==None:

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Graphical overlay for image analysis"""
+import logging
 import numpy
 from overlay import Overlay
 from PyQt4 import QtGui, QtCore
@@ -26,16 +27,16 @@ class Profile(Overlay):
 		if not self.current.has_key('profile'): return
 		prf=self.current['profile']
 		if len(prf)<3:
-			print "No profile",prf
+			logging.debug('%s %s', "No profile", prf)
 			return False
 		sz,x,y=prf	
 		# Discart malformed profiles
 		if len(sz)<2 or len(x)<1 or len(x)!=len(y):
-			print "Malformed profile",prf
+			logging.debug('%s %s', "Malformed profile", prf)
 			return False
 		# Discart malformed profiles
 		if len(x)<=1 or len(x)!=len(y):
-			print "Malformed profile",prf
+			logging.debug('%s %s', "Malformed profile", prf)
 			return False
 		# Translate points with respect to sample ROI
 		rx,ry,rw,rh=self.current['roi']

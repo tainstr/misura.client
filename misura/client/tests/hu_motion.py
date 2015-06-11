@@ -3,6 +3,7 @@
 """Display a list of `end` option for all detected motors and updates it."""
 from misura.client import widgets
 import sys
+import logging
 from misura.client import iutils, network
 from PyQt4 import QtGui, QtCore
 
@@ -23,7 +24,7 @@ def main():
 			
 	do=False
 	def up():
-		print 'up'
+		logging.debug('%s', 'up')
 		global do
 		if do: return
 		do=True

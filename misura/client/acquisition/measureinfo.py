@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 from PyQt4 import QtGui, QtCore
 from ..graphics import thermal_cycle
 from .. import conf, widgets
@@ -15,7 +16,7 @@ class MeasureInfo(QtGui.QTabWidget):
 		QtGui.QTabWidget.__init__(self, parent)
 		self.setTabPosition(QtGui.QTabWidget.East)
 		self.remote=remote
-		print 'MeasureInfo paths',remote.parent()._Method__name,remote._Method__name,remote.measure._Method__name
+		logging.debug('%s %s %s %s', 'MeasureInfo paths', remote.parent()._Method__name, remote._Method__name, remote.measure._Method__name)
 		# Configurazione della Misura
 		self.server=remote.parent()
 		self.measureView=conf.Interface(self.server,remote.measure, remote.measure.describe(), parent=self)
@@ -63,7 +64,7 @@ class MeasureInfo(QtGui.QTabWidget):
 #		nsmp=self.remote.measure['nSamples']
 		nsmp=self.nobj.current
 		if self.nsmp==nsmp:
-			print 'NO CHANGE in samples number', self.nsmp, nsmp
+			logging.debug('%s %s %s', 'NO CHANGE in samples number', self.nsmp, nsmp)
 			return False
 		self.nsmp=nsmp
 		self.clear()
@@ -74,11 +75,11 @@ class MeasureInfo(QtGui.QTabWidget):
 			self.up_isRunning()
 		self.addTab(self.measureView, 'Measure')
 		self.addTab(self.thermalCycleView, 'Thermal Cycle')
-		print 'REFRESH SAMPLES', self.remote.measure['nSamples']
+		logging.debug('%s %s', 'REFRESH SAMPLES', self.remote.measure['nSamples'])
 		for i in range(self.nsmp):
 			sample=getattr(self.remote, 'sample'+str(i), False)
 			if not sample: 
-				print 'Missing sample object nr.', i
+				logging.debug('%s %s', 'Missing sample object nr.', i)
 				continue
 			self.addTab(conf.Interface(self.remote.parent(),sample, sample.describe(), self), 'Sample'+str(i))
 		self.addTab(self.results, 'Results')

@@ -3,6 +3,7 @@
 """Tests role selector widget."""
 import unittest
 import functools
+import logging
 from misura import utils_testing as ut
 from misura.client import widgets
 from misura.device import Node 
@@ -10,22 +11,22 @@ from misura.canon import option
 from PyQt4 import QtGui,QtCore
 from PyQt4.QtTest import QTest
 app=False
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 main=__name__=='__main__'
 
 #TODO: generalize a widget testing  framework
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 	ut.parallel(0)
 
 def tearDownModule():
 	global app
-	print 'Quitting app'
+	logging.debug('%s', 'Quitting app')
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 class aProgress(unittest.TestCase):
 	def setUp(self):

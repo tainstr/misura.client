@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 import os
+import logging
 
 from misura import utils_testing as ut
 from misura import parameters as params
@@ -9,17 +10,17 @@ from misura.canon.indexer import SharedFile
 from misura.client import video
 from PyQt4 import QtGui
 
-print 'Importing '+__name__
+logging.debug('%s', 'Importing '+__name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 	
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 		
 
 m4file=params.testdir+'storage/hsm_test.h5'	

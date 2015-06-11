@@ -8,6 +8,7 @@ from time import time
 from misura.client import iutils
 from misura.client.iutils import get_plotted_tree
 import os
+import logging
 import utils
 import PercentilePlugin
 from .. import units
@@ -54,9 +55,9 @@ def dataset_curve_name(ds,dsn):
 	ax_label=dsvar.split('_')[::-1]
 	ax_label='_'.join(ax_label)
 	if ds.unit:
-		print 'getting symbol for',ds.unit,units.symbols
+		logging.debug('%s %s %s', 'getting symbol for', ds.unit, units.symbols)
 		u=units.symbols.get(ds.unit,ds.unit)
-		print 'got symbol',ds.unit,u
+		logging.debug('%s %s %s', 'got symbol', ds.unit, u)
 		ax_label+=' ({{{}}})'.format(u)
 	ax_name='ax:'+ds.m_var.replace("/", ":")
 	return curve_name, ax_name, ax_label
@@ -84,7 +85,7 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 	def initCurve(self, name='Curve', xData='xD', yData='yD',
 				yAxis='y', axisLabel='Curve', idx=0, graph='/page/graph'):
 		"""Configure a new curve (appearance, axes positions, data labels"""
-		print 'initCurve',name,xData,yData
+		logging.debug('%s %s %s %s', 'initCurve', name, xData, yData)
 		
 		doc=self.doc
 		
@@ -100,7 +101,7 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 			preop.append(document.OperationWidgetAdd(gobj,'axis',name=yAxis,direction='vertical'))		
 		
 		# Create graph and axis (if needed)
-		print 'applying operations',preop
+		logging.debug('%s %s', 'applying operations', preop)
 		doc.applyOperation(
 			document.OperationMultiple(preop, descr='PlotDataset:Create')) 
 		
@@ -125,10 +126,10 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		dslist=tree['axis'].get(g.path+'/'+ax_name,[])
 		pc=getattr(ds,'m_percent',None)
 		if pc is None:
-			print 'No m_percent attribute defined',dsn
+			logging.debug('%s %s', 'No m_percent attribute defined', dsn)
 			return False
 		if getattr(ds,'m_initialDimension',None) is None:
-			print 'No initial dimension defined',dsn
+			logging.debug('%s %s', 'No initial dimension defined', dsn)
 			return False
 		cvt=None
 		for nds in dslist:
@@ -138,7 +139,7 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		if cvt is None or cvt==pc:
 			return False
 		# A conversion should happen
-		print 'CONVERTING',cvt,pc
+		logging.debug('%s %s %s', 'CONVERTING', cvt, pc)
 		self.ops.append(document.OperationToolsPlugin(PercentilePlugin.PercentilePlugin()
 							,{'ds':dsn,'propagate':False,'action':'Invert'}))
 		return True
@@ -158,7 +159,7 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		if g is None or g.typename!='graph':
 			raise plugins.ToolsPluginException('You should run this tool on a graph')
 		
-		print 'Plotting:', fields['x'],fields['y']
+		logging.debug('%s %s %s', 'Plotting:', fields['x'], fields['y'])
 		cnames={}
 		doc=cmd.document
 		t=time()
@@ -178,18 +179,18 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		
 		for i,x in enumerate(valid_x):
 			y=valid_y[i]
-			print 'plotting value:', y, 'data:', doc.data[y]
+			logging.debug('%s %s %s %s', 'plotting value:', y, 'data:', doc.data[y])
 			ds=doc.data[y]
 			dsx=doc.data[x]
 			# If the ds is recursively derived, substitute it by its entry
 			if not hasattr(ds,'m_smp'):
-				print 'Retrieving ent',y
+				logging.debug('%s %s', 'Retrieving ent', y)
 				for eid,entry in doc.ent.items(): #warining: can change size during iter!
 					if entry.path==y:
-						print 'Found entry',entry,entry.parents,entry.path
+						logging.debug('%s %s %s %s', 'Found entry', entry, entry.parents, entry.path)
 						ds=entry
 						break
-					print 'Skipping',eid,entry.path,entry.name
+					logging.debug('%s %s %s %s', 'Skipping', eid, entry.path, entry.name)
 					
 			# Get the curve and axis name
 			cname, ax_name,ax_lbl=dataset_curve_name(ds,y)
@@ -269,7 +270,7 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
 			ds1=ds
 			if ':' in ds1: ds1=ds1.split(':')[1]
 			var=iutils.namingConvention(ds1)[0]
-			print 'Checking', ds, var
+			logging.debug('%s %s %s', 'Checking', ds, var)
 			if var=='t': 
 				timeds=ds
 			elif re.search('kiln/T$',ds1): 
@@ -277,7 +278,7 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
 			elif rp and rp.search(ds1): 
 				vars.append(ds)
 			#else: skipped curve
-		print "VARS", vars
+		logging.debug('%s %s', "VARS", vars)
 		xt=[]; xT=[]
 		yt=[]; yT=[]
 		for ds in vars:

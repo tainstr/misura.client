@@ -4,6 +4,7 @@
 import unittest
 import sys
 import os
+import logging
 import veusz.document as document
 from misura.client import filedata
 import iutils_testing as iut
@@ -12,17 +13,17 @@ import numpy as np
 from PyQt4 import QtGui
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 from3=os.path.join(iut.data_dir,'m3_hsm.h5')
 nativem4=os.path.join(iut.data_dir,'hsm_test.h5')
@@ -38,7 +39,7 @@ class TestSummaryVersioning(unittest.TestCase):
 		
 	@classmethod
 	def tearDownClass(cls):
-		print 'teardown'
+		logging.debug('%s', 'teardown')
 		os.remove(cls.path)
 		
 #	@unittest.skip('')

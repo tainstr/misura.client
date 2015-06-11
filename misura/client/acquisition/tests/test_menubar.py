@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tests Archive"""
+import logging
 import unittest
 import functools
 from misura import utils_testing as ut
@@ -13,16 +14,16 @@ from misura import server
 
 from PyQt4 import QtGui,QtCore
 app=False
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 
 #@unittest.skip('')
@@ -43,8 +44,8 @@ class MenuBar(unittest.TestCase):
 		self.assertEqual(len(self.m.instruments.actions()),n)
 		
 		lst=self.root['instruments']
-		print '>>lstInstruments',self.m.lstInstruments
-		print '>>instruments',self.m.instruments.actions()
+		logging.debug('%s %s', '>>lstInstruments', self.m.lstInstruments)
+		logging.debug('%s %s', '>>instruments', self.m.instruments.actions())
 			
 #	@unittest.skip('')
 	def test_setInstrument(self):

@@ -6,6 +6,7 @@ configuration_level=5
 import sys
 import os
 from time import time
+import logging
 from PyQt4 import QtCore
 from traceback import print_exc
 
@@ -26,13 +27,13 @@ def determine_path (root=False):
 
 # Percorso dell'eseguibile
 pathClient=determine_path()
-print 'pathClient',pathClient
+logging.debug('%s %s', 'pathClient', pathClient)
 # Percorso utilizzato per immagazzinare la configurazione del client
 pathConf=os.path.join(pathClient, 'conf.sqlite')
 pathLang=os.path.join(pathClient,'i18n')
-print 'pathLang',pathLang
+logging.debug('%s %s', 'pathLang', pathLang)
 pathArt=os.path.join(pathClient,'art' )
-print 'pathArt',pathArt
+logging.debug('%s %s', 'pathArt', pathArt)
 locale=QtCore.QLocale.system().name()
 locale=str(locale.split('_')[0]).lower()
 

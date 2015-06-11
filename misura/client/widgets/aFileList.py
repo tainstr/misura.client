@@ -5,6 +5,7 @@ from misura.client.widgets.active import *
 from aChooser import aChooser
 from .. import _
 from ..sync import TransferThread
+import logging
 
 
 class aFileList(aChooser):
@@ -24,10 +25,10 @@ class aFileList(aChooser):
 		"""Upload local file"""
 		n=QtGui.QFileDialog.getOpenFileName(parent=self,caption=_("Upload File"))
 		if len(n)==0 or not os.path.exists(n):
-			print 'File Upload Aborted'
+			logging.debug('%s', 'File Upload Aborted')
 			return
 		url=self.remObj.conn_addr+self.remObj['fullpath'][:-1] # remove trailing /
-		print 'Transfer target:',repr(url),n,self.handle
+		logging.debug('%s %s %s %s', 'Transfer target:', repr(url), n, self.handle)
 		self.transfer=TransferThread(url=url,outfile=n,post={'opt':self.handle})
 		from ..live import registry
 		self.transfer.set_tasks(registry.tasks)

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Pending tasks feedback"""
 
+import logging
 from misura.canon.csutil import lockme, profile
 from misura.client import _
 import functools
@@ -100,7 +101,7 @@ class LocalTasks(QtGui.QWidget):
 		
 		self.sig_done.connect(self._done)
 		self.sig_done0.connect(self._done)
-		print 'LocalTasks initialized'
+		logging.debug('%s', 'LocalTasks initialized')
 		
 	def __len__(self):
 		return len(self.prog)
@@ -155,7 +156,7 @@ class LocalTasks(QtGui.QWidget):
 		"""Progress job `pid` to `step`, and display `label`. A negative step causes the bar to progress by 1."""
 		wg=self.prog.get(pid,False)
 		if not wg:
-			print 'LocalTasks.jog: no job defined!',pid
+			logging.debug('%s %s', 'LocalTasks.jog: no job defined!', pid)
 			return
 		if step<0:
 			step=wg.pb.value()+1
@@ -175,14 +176,14 @@ class LocalTasks(QtGui.QWidget):
 		"""Complete job `pid`"""
 		wg=self.prog.get(pid,False)
 		if not wg: 
-			print 'LocalTasks.done: no pid',pid
+			logging.debug('%s %s', 'LocalTasks.done: no pid', pid)
 			return False
 		wg.hide()
 		del self.prog[pid]
 		self.mlay.removeWidget(wg)
 		del wg
 		self.msg('Completed task: '+str(pid))
-		print 'LocalTasks.done',self.prog
+		logging.debug('%s %s', 'LocalTasks.done', self.prog)
 		self.ch.emit()
 		return True
 	

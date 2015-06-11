@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Tree visualization of opened misura Files in a document."""
 import functools
+import logging
 
 import veusz.document as document
 from PyQt4 import QtGui, QtCore
@@ -122,11 +123,11 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 			if act.isChecked():
 				final.add(s)
 		if len(final) == 0:
-			print 'no valid status requested'
+			logging.debug('%s', 'no valid status requested')
 			return
 		self.status = final
 		self.model().status = final
-		print 'STATUS SET TO', final
+		logging.debug('%s %s', 'STATUS SET TO', final)
 		self.collapseAll()
 		self.refresh()
 		self.expandAll()
@@ -134,10 +135,10 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 	def select(self, idx):
 		node = self.model().data(idx, role=Qt.UserRole)
 		self.previous_selection = node.path
-		print 'select', node
+		logging.debug('%s %s', 'select', node)
 		self.emit(QtCore.SIGNAL('select()'))
 		plotpath = self.model().is_plotted(node.path)
-		print 'Select: plotted on', node.path, plotpath
+		logging.debug('%s %s %s', 'Select: plotted on', node.path, plotpath)
 		if len(plotpath) == 0: return
 		wg = self.doc.resolveFullWidgetPath(plotpath[0])
 		self.mainwindow.treeedit.selectWidget(wg)
@@ -149,7 +150,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 			return False
 		self.expandAll()
 		return False
-		print 'restoring previous selection', self.previous_selection
+		logging.debug('%s %s', 'restoring previous selection', self.previous_selection)
 		if self.previous_selection:
 			node = self.model().tree.traverse(self.previous_selection)
 			if not node:
@@ -259,7 +260,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 		un = menu.addMenu(_('Units'))
 		kgroup, f, p = units.get_unit_info(u, units.from_base)
 		same = units.from_base.get(kgroup, {u:lambda v: v}).keys()
-		print kgroup, same
+		logging.debug('%s %s', kgroup, same)
 		for u1 in same:
 			p = functools.partial(self.set_unit, convert=u1)
 			act = un.addAction(_(u1), p)
@@ -314,7 +315,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 		
 	def update_dataset_menu(self, node):
 		istime = node.path == 't' or node.path.endswith(':t')
-		print 'update_dataset_menu', node.path
+		logging.debug('%s %s', 'update_dataset_menu', node.path)
 		self.dataset_menu.clear()
 		if istime:
 			self.act_load = False
@@ -366,7 +367,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 		sel = self.selectedIndexes()
 		n = len(sel)
 		node = self.model().data(self.currentIndex(), role=Qt.UserRole)
-		print 'showContextMenu', node.path
+		logging.debug('%s %s', 'showContextMenu', node.path)
 		if not node.parent:
 			self.update_base_menu()
 			menu = self.base_menu

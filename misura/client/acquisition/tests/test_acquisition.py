@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tests Archive"""
+import logging
 import unittest
 from misura.client.acquisition import acquisition
 from misura import beholder
@@ -9,17 +10,17 @@ from misura import server
 from PyQt4 import QtGui
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 #@unittest.skip('')
 class MainWindow(unittest.TestCase):
@@ -53,7 +54,7 @@ class MainWindow(unittest.TestCase):
 	def test_setInstrument(self):
 		mw=self.mw
 		mw.setServer(self.server_proxy)
-		print 'init_instrument is',self.instr.init_instrument
+		logging.debug('%s %s', 'init_instrument is', self.instr.init_instrument)
 		mw.setInstrument(self.instr)
 		self.assertEqual(mw.windowTitle(),'misura Acquisition: flex (Optical Fleximeter)')
 		self.assertEqual(mw.controls.mute, mw.fixedDoc)

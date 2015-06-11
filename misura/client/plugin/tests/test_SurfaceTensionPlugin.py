@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Testing SurfaceTensionPlugin.py plugin."""
 import unittest
+import logging
 
 from misura.client.tests import iutils_testing as iut
 from misura.client.plugin import SurfaceTensionPlugin
@@ -14,17 +15,17 @@ import veusz.plugins
 from PyQt4 import QtGui
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 
 def insertData(doc,datadict):
@@ -48,16 +49,16 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
 			if ds[k]=='':
 				fields[k]=''
 				continue
-			print 'inserting data',k
+			logging.debug('%s %s', 'inserting data', k)
 			insertData(doc,{k:ds[k]})
 			fields[k]=k
 		fields.update(kw)
 		fields['ds_out']='out'
-		print 'build op'
+		logging.debug('%s', 'build op')
 		p=SurfaceTensionPlugin(**fields)
-		print 'get ds'
+		logging.debug('%s', 'get ds')
 		p.getDatasets(fields)
-		print 'update ds'
+		logging.debug('%s', 'update ds')
 		out=p.updateDatasets(fields,veusz.plugins.DatasetPluginHelper(doc))
 		return out
 	
@@ -74,7 +75,7 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
 		# Both nan and inf should be converted to zero
 		self.assertEqual(out[-1],0)
 		self.assertEqual(out[-2],0)
-		print out
+		logging.debug('%s', out)
 		
 	def test_water(self):
 		"""Filled with water test data"""
@@ -84,7 +85,7 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
 		T=np.ones(N)*25
 		out=self.do(beta,R0,T)
 		self.assertEqual(len(out),N)
-		print 'water', out
+		logging.debug('%s %s', 'water', out)
 	
 		
 		

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """A point connected to an xy plot."""
+import logging
 import veusz.widgets
 import veusz.document as document
 import veusz.setting as setting
@@ -70,7 +71,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
 		return self.document
 		
 	def actionUp(self):
-		print 'SYNC LINE UP'
+		logging.debug('%s', 'SYNC LINE UP')
 		self.ops=[]
 		doc=self.document
 		ref=None	# Reference curve is the first child
@@ -92,7 +93,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
 			obj=self.parent.getChild(uc)
 			if obj is None: 
 				if i==0:
-					print 'No reference curve defined'
+					logging.debug('%s', 'No reference curve defined')
 					return
 				break
 			xax=self.parent.getChild(obj.settings.xAxis)
@@ -193,7 +194,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
 		"""Restore dataset translated by values"""
 		for uc,d in self.trcum.iteritems():
 			obj=self.document.resolveFullWidgetPath(uc)
-			print 'restoring curve',uc,d,obj
+			logging.debug('%s %s %s %s', 'restoring curve', uc, d, obj)
 			yds_name=obj.settings.yData
 			yds=self.document.data[yds_name]
 			new=yds.data+d
@@ -204,7 +205,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
 			# Set original dataset to copied one
 			op=document.OperationDatasetSet(yds_name,ydsn)
 			self.ops.append(op)
-		print 'axmap',self.axmap
+		logging.debug('%s %s', 'axmap', self.axmap)
 		for uc,(newax,oldax,(minVal,maxVal)) in self.axmap.iteritems():
 			obj=self.document.resolveFullWidgetPath(uc)
 			self.toset(obj,'yAxis',oldax)

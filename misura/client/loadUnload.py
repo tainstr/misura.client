@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Esempio di script per i test di elasticità tramite carico/scarico su campione FLEX"""
 
+import logging
 from time import sleep
 from sys import argv,exit
 from numpy import *
@@ -15,7 +16,7 @@ def wait(pos):
 	while now!=pos:
 		sleep(.1)
 		now=obj['position']
-		print 'waiting ',pos,now
+		logging.debug('%s %s %s', 'waiting ', pos, now)
 
 def main():
 	from m4script import m4
@@ -35,12 +36,12 @@ def main():
 		d=upos-m4.flex.camera['pos']
 		msg='[%i:%.2f%%] Displacement: %i' % (i,100.*i/N,d)
 		m4.send_log(msg)
-		print msg
+		logging.debug('%s', msg)
 		sleep(1)
 	
 	wait(unload)
 	sleep(10)
-	print 'Stopping acquisition'
+	logging.debug('%s', 'Stopping acquisition')
 	m4.flex.stop_acquisition()
 
 if __name__=='__main__':

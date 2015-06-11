@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Verify conversion from Misura3 to misura files. Windows-only unittest!"""
+import logging
 import sip
 sip.setapi('QString', 2)
 import unittest
@@ -79,7 +80,7 @@ class Convert(unittest.TestCase):
 	
 	def check_import(self,op,names=False):
 		"""Simulate a data import operation"""
-		print 'check_import',op
+		logging.debug('%s %s', 'check_import', op)
 		fp=indexer.SharedFile(op)
 		rm=devtree.recursiveModel(fp.conf)
 		fp.close()

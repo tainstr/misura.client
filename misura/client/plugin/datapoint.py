@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """A point connected to an xy plot."""
+import logging
 from PyQt4 import QtGui
 import veusz.utils
 import veusz.widgets
@@ -170,7 +171,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		return aligned
 				
 	def actionUp(self,oldx=None,oldy=None):
-		print 'ACTION UP'
+		logging.debug('%s', 'ACTION UP')
 		
 		d = self.document
 		self.doc=d
@@ -179,7 +180,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		
 		xy = s.get('xy').findWidget()
 		if xy is None:
-			print 'No xy widget was defined!'
+			logging.debug('%s', 'No xy widget was defined!')
 			return False
 		self.xy=xy
 		
@@ -190,7 +191,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 
 		aligned=self.check_axis()
 		if not aligned:
-			print 'Impossible to align DataPoint settings'
+			logging.debug('%s', 'Impossible to align DataPoint settings')
 			return False
 		self.dependencies()
 		self.up_coord(oldx,oldy)
@@ -208,7 +209,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		# Tangent
 		tg = s.get('tangentLine').findWidget()
 		if tg is None:
-			print 'No tangent line specified'
+			logging.debug('%s', 'No tangent line specified')
 			if s.showTangent:
 				name='tg_'+self.name
 				self.ops.append(document.OperationWidgetAdd(self.parent,'line',name=name))
@@ -220,7 +221,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		# Perpendicular
 		tg = s.get('perpendicularLine').findWidget()
 		if tg is None:
-			print 'No pp line specified'
+			logging.debug('%s', 'No pp line specified')
 			if s.showTangent:
 				name='pp_'+self.name
 				self.ops.append(document.OperationWidgetAdd(self.parent,'line',name=name))
@@ -233,7 +234,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		tg = s.get('pt2ptLine').findWidget()
 		p2=s.get('secondPoint').findWidget()
 		if tg is None:
-			print 'No p2p line specified'
+			logging.debug('%s', 'No p2p line specified')
 			
 			if p2 is not None:
 				name='p2p_%s_%s' %(self.name,p2.name)
@@ -296,7 +297,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		if oldy is None: oldy=oy_set.get()
 		
 		if 0 in [xRange,yRange]:
-			print 'ERROR: Datapoint divide for ranges',xRange, yRange
+			logging.debug('%s %s %s', 'ERROR: Datapoint divide for ranges', xRange, yRange)
 			return
 		
 		# Store values in class attributes in order for other methods to find them
@@ -320,7 +321,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		"""Search for critical points in curve"""
 		src=self.settings.search
 		if src=='None':
-			print 'No search defined'
+			logging.debug('%s', 'No search defined')
 			return False
 		# Calculate slice
 		rg=self.settings.searchRange/2.
@@ -332,12 +333,12 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		if rg>0:
 			i1=self.i
 			xmi=xm[i1]
-			print 'searching',xmi,i1,rg
+			logging.debug('%s %s %s %s', 'searching', xmi, i1, rg)
 			iL=csutil.find_nearest_val(xm,xmi-rg,seed=i1)
 			iR=csutil.find_nearest_val(xm,xmi+rg,seed=i1)
 		
 		sl=slice(iL,iR)
-		print 'Slicing',iL,iR
+		logging.debug('%s %s %s', 'Slicing', iL, iR)
 		def result(i):
 			"""Set result"""
 			s=0
@@ -347,7 +348,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 			self.i=i
 			self.x=self.xData[self.i]
 			self.y=self.yData[self.i]
-			print 'result',src,self.i,self.x,self.y
+			logging.debug('%s %s %s %s %s', 'result', src, self.i, self.x, self.y)
 			
 		
 		if src in ('Maximum','Minimum'):
@@ -368,10 +369,10 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 			sp=interpolate.LSQUnivariateSpline(xm1,ym1,xm1[step:-step:step],k=5) 
 			r=sp.derivative(2).roots()
 		if len(r)==0:
-			print 'NO CRITICAL POINTS FOUND',src
+			logging.debug('%s %s', 'NO CRITICAL POINTS FOUND', src)
 			return False
-		print 'CRITICAL POINTS',src,r
-		print 'xm1',xm1
+		logging.debug('%s %s %s', 'CRITICAL POINTS', src, r)
+		logging.debug('%s %s', 'xm1', xm1)
 		# Find the nearest root
 		rr=abs(r-self.x)
 		ri=np.where(rr==min(rr))[0][0]
@@ -391,7 +392,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 			return self._tg_ang
 		n=6
 		if n<3: 
-			print 'Too few points in order to calculate the tangent line'
+			logging.debug('%s', 'Too few points in order to calculate the tangent line')
 			self._tg_ang=None
 			return None
 		# Select a sequence of points around datapoint. Translate to the dp is the origin.
@@ -401,8 +402,8 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		vy=np.concatenate((self.yData[left],self.yData[right]))
 		vx-=self.x
 		vy-=self.y
-		print 'vx',vx
-		print 'vy',vy
+		logging.debug('%s %s', 'vx', vx)
+		logging.debug('%s %s', 'vy', vy)
 		# Angle as a mean of arctan2 values (avoid zero-denominator problems)
 		
 		self._tg_ang=np.arctan(vy/vx).mean()
@@ -446,16 +447,16 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 			dn=(L**2)*(xR2*s02+yR2*c02)
 			nr=(xR2*s2+yR2*c2)
 			L=np.sqrt(dn/nr)
-			print 'convL',L
+			logging.debug('%s %s', 'convL', L)
 		else:
 			L=np.sqrt(self.xRange**2+self.yRange**2)/2
 		
 
-		print 'preL',L,c,s
+		logging.debug('%s %s %s %s', 'preL', L, c, s)
 		
 
-		print 'ranges',self.xRange,self.yRange
-		print 'rangesL',self.xRange/abs(c),self.yRange/abs(s)
+		logging.debug('%s %s %s', 'ranges', self.xRange, self.yRange)
+		logging.debug('%s %s %s', 'rangesL', self.xRange/abs(c), self.yRange/abs(s))
 		# Scale the length inside graph margins
 		if c!=0:
 			L=min(L,self.xRange/abs(c))
@@ -465,7 +466,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		xL=0.5*c*L
 		yL=0.5*s*L
 		
-		print line.name,'L',L,'xL',xL,'yL',yL,'angle',ang*180/np.pi
+		logging.debug('%s %s %s %s %s %s %s %s %s', line.name, 'L', L, 'xL', xL, 'yL', yL, 'angle', ang*180/np.pi)
 		self.toset(line,'xPos',float(self.x-xL))
 		self.toset(line,'yPos',float(self.y-yL))
 		self.toset(line,'xPos2',float(self.x+xL))
@@ -490,7 +491,7 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		s=self.settings
 		pp = s.get('perpendicularLine').findWidget()
 		if pp is None:
-			print 'No perpendicular line specified'
+			logging.debug('%s', 'No perpendicular line specified')
 			return
 		
 		if self.tg_ang is None:
@@ -504,18 +505,17 @@ class DataPoint(utils.OperationWrapper,veusz.widgets.BoxShape):
 		s=self.settings
 		pp = s.get('pt2ptLine').findWidget()
 		if pp is None:
-			print 'No passing line defined'
+			logging.debug('%s', 'No passing line defined')
 			return
 		pt2 = s.get('secondPoint').findWidget()
 		if pt2 is None:
-			print 
-			'No second point defined'
+			logging.debug('%s', 'No second point defined')
 			return
 		aligned=self.check_line(pp)
 		aligned=aligned and self.check_point(pt2,name='secondPoint')
 		self.cpset(self,pt2,'pt2ptLine')
 		if not aligned:
-			print 'Point2point references were not aligned'
+			logging.debug('%s', 'Point2point references were not aligned')
 			return
 		
 		self.toset(pp,'xPos',self.x)

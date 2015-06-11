@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Client-Server Synchronization"""
 
+import logging
 from time import sleep, time
 from cPickle import loads
 import threading
@@ -61,12 +62,12 @@ class KidRegistry(QtCore.QThread):
 		self.connect(self, QtCore.SIGNAL('set_server(PyQt_PyObject)'), self.taskswg.progress.set_server)
 		if man is not None:
 			if man.remote:
-				print 'KidRegistry.set_manager with remote', man.remote
+				logging.debug('%s %s', 'KidRegistry.set_manager with remote', man.remote)
 				self.emit(QtCore.SIGNAL('set_server(PyQt_PyObject)'), man.remote)
 			else:
-				print 'KidRegistry.set_manager without remote', man.remote
+				logging.debug('%s %s', 'KidRegistry.set_manager without remote', man.remote)
 		else:
-			print 'KidRegistry.set_manager set to None', man
+			logging.debug('%s %s', 'KidRegistry.set_manager set to None', man)
 	
 	@property
 	def progress(self):
@@ -82,7 +83,7 @@ class KidRegistry(QtCore.QThread):
 		if not doc and self.doc:
 			self.dicconnect(self,QtCore.SIGNAL('update()'),self.doc.update)
 			self.lastdoc=False
-			print 'KidRegistry.set_doc CLEARED'
+			logging.debug('%s', 'KidRegistry.set_doc CLEARED')
 		self.doc=doc
 		if doc:
 			self.connect(self,QtCore.SIGNAL('update()'),self.doc.update)
@@ -91,7 +92,7 @@ class KidRegistry(QtCore.QThread):
 	def register(self, w):
 		"""Register Active object `w`"""
 		if w.type=='Button':
-			print 'It is not possible to register "Button" widgets.'
+			logging.debug('%s', 'It is not possible to register "Button" widgets.')
 			return False
 		kid=w.prop['kid']
 		# Add to the dictionary
@@ -99,7 +100,7 @@ class KidRegistry(QtCore.QThread):
 			self.rid[kid]=[]
 			self.times[kid]=0
 		if w in self.rid[kid]:
-			print 'Already registered', kid, w
+			logging.debug('%s %s %s', 'Already registered', kid, w)
 			return kid
 		self.rid[kid].append(w)
 		return kid
@@ -162,7 +163,7 @@ class KidRegistry(QtCore.QThread):
 		# Call remote mapdate()
 		r=self.obj.mapdate(request)
 		if not r or r is None:
-			print 'KidRegistry.update_all SKIPPING'
+			logging.debug('%s', 'KidRegistry.update_all SKIPPING')
 			return []
 		idx, reply=r
 		# Decode the reply
@@ -212,7 +213,7 @@ class KidRegistry(QtCore.QThread):
 		self.emit(QtCore.SIGNAL('cycle()'))
 		if self.obj is False:
 			if not self.manager:
-				print 'KidRegistry.control_loop: No manager registered.'
+				logging.debug('%s', 'KidRegistry.control_loop: No manager registered.')
 				return False
 			if not self.manager.remote:
 # 				print 'KidRegistry.control_loop: no remote manager'
@@ -221,7 +222,7 @@ class KidRegistry(QtCore.QThread):
 			self.obj.connect()
 			self.emit(QtCore.SIGNAL('set_server(PyQt_PyObject)'), self.obj)
 		if not net.connected:
-			print 'KidRegistry.control_loop: Not connected' 
+			logging.debug('%s', 'KidRegistry.control_loop: Not connected')
 			return False
 		if self.doc and (self.doc is not self.lastdoc):
 			if self.doc.proxy:
@@ -241,7 +242,7 @@ class KidRegistry(QtCore.QThread):
 	def run(self):
 		"""Execution entry for the registry thread.
 		Will call control_loop() until self.stream is True."""
-		print 'Starting registry in new thread', len(self.rid)
+		logging.debug('%s %s', 'Starting registry in new thread', len(self.rid))
 		self.setPriority(QtCore.QThread.IdlePriority)
 		t0=time()
 #		self.obj=False
@@ -257,16 +258,16 @@ class KidRegistry(QtCore.QThread):
 			try:
 				self.control_loop()
 			except:
-				print_exc()
+				logging.debug('%s', print_exc())
 				sleep(1)
-		print 'KidRegistry.run END',self.stream
+		logging.debug('%s %s', 'KidRegistry.run END', self.stream)
 
 	
 	def toggle_run(self, auto=None):
 		"""Start/stop KID reading thread"""
 		if auto==None: 
 			auto=self.stream^1
-		print 'KidRegistry.toggle_run', auto
+		logging.debug('%s %s', 'KidRegistry.toggle_run', auto)
 		if auto==True:
 			self.stream=True
 			if not self.isRunning():

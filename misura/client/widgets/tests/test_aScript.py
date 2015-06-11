@@ -2,25 +2,26 @@
 #!/usr/bin/python
 """Tests aScript widget."""
 import unittest
+import logging
 from misura.client import widgets
 from misura.canon import option
 from PyQt4 import QtGui,QtCore
 app=False
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 main=__name__=='__main__'
 
 #TODO: generalize a widget testing  framework
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
-	print 'Quitting app'
+	logging.debug('%s', 'Quitting app')
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 class aScript(unittest.TestCase):
 	def setUp(self):

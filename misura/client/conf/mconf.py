@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Configuration interface for misura.
 Global instrument parametrization and setup."""
+import logging
 from PyQt4 import QtGui, QtCore
 import constructor
 from devtree import ServerView
@@ -30,7 +31,7 @@ class TreePanel( QtGui.QSplitter):
 		self.setHandleWidth(10)
 		if select is not False:
 			self.select_remote(select)
-		print 'TreePanel.__init__', self.server, self.remote
+		logging.debug('%s %s %s', 'TreePanel.__init__', self.server, self.remote)
 		
 	def objTable(self):
 		self.tab.currentWidget().show_details()
@@ -52,14 +53,14 @@ class TreePanel( QtGui.QSplitter):
 		if not title: title=''
 		current=self.tab.currentIndex()
 		if current>=0 and not keepCurrent:
-			print 'Removing current tab'
+			logging.debug('%s', 'Removing current tab')
 			self.tab.currentWidget().close()
 			self.closeTab(current)
 		elif current<0: current=0
-		print 'Inserting tab',current
+		logging.debug('%s %s', 'Inserting tab', current)
 		i=self.tab.insertTab(current, widget, title)
 		self.tab.setTabToolTip(i,widget.name)
-		print 'Setting current index',i
+		logging.debug('%s %s', 'Setting current index', i)
 		self.tab.setCurrentIndex(i)
 
 		
@@ -67,14 +68,14 @@ class TreePanel( QtGui.QSplitter):
 		model=self.view.model()
 		node=model.data(index,role=-1)
 		path=node.path
-		print 'selecting remote path', path
+		logging.debug('%s %s', 'selecting remote path', path)
 		obj=self.remote.toPath(path)
-		print 'found object', obj
+		logging.debug('%s %s', 'found object', obj)
 		self.select_remote(obj,keepCurrent)
 		
 	def select_remote(self,obj,keepCurrent=False):
-		print "select_remote obj",obj, obj.parent()
-		print 'mro',obj['mro']
+		logging.debug('%s %s %s', "select_remote obj", obj, obj.parent())
+		logging.debug('%s %s', 'mro', obj['mro'])
 		path=obj['fullpath'].replace('MAINSERVER','server').split('/')
 		if len(path)==0: 
 			path=[self.remote['devpath']]
@@ -87,9 +88,9 @@ class TreePanel( QtGui.QSplitter):
 		# Otherwise, generic Interface:
 		else:
 			page=constructor.Interface(self.server, obj, obj.describe(), parent=self)
-		print "constructor",page,path[-1]
+		logging.debug('%s %s %s', "constructor", page, path[-1])
 		self.setPage(page,'/'.join(path),keepCurrent=keepCurrent)
-		print "page ok"
+		logging.debug('%s', "page ok")
 
 				
 class MConf( QtGui.QMainWindow):
@@ -131,7 +132,7 @@ class MConf( QtGui.QMainWindow):
 		addr=str(addr)
 		obj=addrConnection(addr)
 		if not obj:
-			print 'MConf.setAddr: Connection to address failed' 
+			logging.debug('%s', 'MConf.setAddr: Connection to address failed')
 			return
 		network.setRemote(obj)
 		
@@ -156,7 +157,7 @@ class MConf( QtGui.QMainWindow):
 			self.tree.close()
 			del self.tree
 		self.tree=TreePanel(self.server, parent=self)
-		print self.tree.view.model().item.children
+		logging.debug('%s', self.tree.view.model().item.children)
 		self.tab.addTab(self.tree,_("Tree Panel"))
 		self.tab.setCurrentIndex(2)
 		

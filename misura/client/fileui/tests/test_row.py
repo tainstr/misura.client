@@ -3,6 +3,7 @@
 """Testing fileui.row module."""
 import unittest
 import os
+import logging
 from misura.client import filedata
 from misura.client import fileui
 from misura.client.tests import iutils_testing as iut
@@ -10,17 +11,17 @@ from veusz import widgets # needed for document creation!
 from PyQt4 import QtGui
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 
 fpath=os.path.join(iut.data_dir,'hsm_test.h5')
@@ -36,9 +37,9 @@ class RowView(unittest.TestCase):
 		rv.set_doc(doc)
 		rv.set_idx(1)
 		#FIXME: fix these functions!
-		print 'devmenu',rv.devmenu
-		print 'header',rv.model().header
-		print 'tree',rv.model().tree
+		logging.debug('%s %s', 'devmenu', rv.devmenu)
+		logging.debug('%s %s', 'header', rv.model().header)
+		logging.debug('%s %s', 'tree', rv.model().tree)
 		
 		
 if __name__ == "__main__":

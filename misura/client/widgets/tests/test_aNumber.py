@@ -2,25 +2,26 @@
 # -*- coding: utf-8 -*-
 """Tests role selector widget."""
 import unittest
+import logging
 from misura.client import widgets
 from misura.canon import option
 from PyQt4 import QtGui,QtCore
 app=False
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 main=__name__=='__main__'
 
 #TODO: generalize a widget testing  framework
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
-	print 'Quitting app'
+	logging.debug('%s', 'Quitting app')
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 class aNumber(unittest.TestCase):
 	def setUp(self):
@@ -38,14 +39,14 @@ class aNumber(unittest.TestCase):
 		w=self.wgGen()
 		self.assertEqual(w.current, 0)
 		self.assertFalse(w.slider)
-		print 'Current:',  w.current,   'Maximim:',  w.max,  'Mimimum',  w.min
+		logging.debug('%s %s %s %s %s %s', 'Current:', w.current, 'Maximim:', w.max, 'Mimimum', w.min)
 
 	def test_float(self):
 		self.root.sete('Test', option.ao({}, 'Test', 'Float')['Test'])
 		w=self.wgGen()
 		self.assertEqual(w.current, 0)
 		self.assertFalse(w.slider)
-		print 'Current:',  w.current,   'Maximim:',  w.max,  'Mimimum',  w.min
+		logging.debug('%s %s %s %s %s %s', 'Current:', w.current, 'Maximim:', w.max, 'Mimimum', w.min)
 
 	def test_MIN_MAX(self):
 		self.root.sete('Test', 

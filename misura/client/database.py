@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtCore,QtGui
 import os
+import logging
 import datetime
 import functools
 from misura.client import _
@@ -145,7 +146,7 @@ class DatabaseWidget(QtGui.QWidget):
 		self.up()
 		
 	def up(self):
-		print 'DATABASEWIDGET UP'
+		logging.debug('%s', 'DATABASEWIDGET UP')
 		self.table.model().up()
 		header=self.table.model().header
 		sh=self.table.model().sheader
@@ -153,7 +154,7 @@ class DatabaseWidget(QtGui.QWidget):
 		self.qfilter.clear()
 		self.qfilter.addItem(_('None'),'')
 		for i,h in enumerate(header):
-			print 'qfilter',i,h
+			logging.debug('%s %s %s', 'qfilter', i, h)
 			if hh.isSectionHidden(i): continue
 			self.qfilter.addItem(_(sh[i]),h)
 			
@@ -178,7 +179,7 @@ class DatabaseWidget(QtGui.QWidget):
 	def download(self, dest=False):
 		fname, instr, file,uid=self.table.getName()
 		if not fname:
-			print 'No valid index selected'
+			logging.debug('%s', 'No valid index selected')
 			return
 		if not dest:
 			# Reads the previous directory or the user's home
@@ -191,11 +192,11 @@ class DatabaseWidget(QtGui.QWidget):
 		# Scarico il file in modalità chunked per evitare problemi di memoria con file di grandi dimensioni.
 		self.bar.setValue(0)
 		self.bar.show()
-		print 'DOWNLOAD',instr,file
+		logging.debug('%s %s %s', 'DOWNLOAD', instr, file)
 		self.remote.test.open_file(uid)
 		ckn, binary=self.remote.test.download(uid, 0)
 		self.bar.setMaximum(ckn)
-		if ckn<0: print 'ERROR - INVALID FILE REQUESTED'
+		if ckn<0: logging.debug('ERROR - INVALID FILE REQUESTED')
 		f=open(dest, 'wb')
 		f.write(binary.data)
 		for i in range(1, ckn+1):
@@ -210,7 +211,7 @@ class DatabaseWidget(QtGui.QWidget):
 	def downloadAs(self, dest=False):
 		fname, instr, file,uid=self.table.getName()
 		if not fname:
-			print 'No valid index selected'
+			logging.debug('%s', 'No valid index selected')
 			return
 		if not dest:
 			# Reads the previous directory or the user's home
@@ -280,7 +281,7 @@ def getDatabaseWidget(path,new=False):
 def getRemoteDatabaseWidget(path):
 	obj=addrConnection(path)
 	if not obj:
-		print 'Connection FAILED'
+		logging.debug('%s', 'Connection FAILED')
 		return False
 	idb=DatabaseWidget(obj.storage)
 	idb.up()

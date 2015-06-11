@@ -2,22 +2,24 @@
 # -*- coding: utf-8 -*-
 """misura Configuration Manager"""
 import unittest
+import logging
 from misura.client import clientconf, confwidget
 import tempfile
+import logging
 from PyQt4 import QtGui
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('setUpModule %s', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 class Conf(unittest.TestCase):
 #	@unittest.skip('')
@@ -55,13 +57,13 @@ class Conf(unittest.TestCase):
 		self.assertEqual(cf.recent_file,[['name1','path1'],['name2','path2']])
 		for i in range(10):
 			cf.mem_file(str(i),str(i))
-		print 'RECENT FILE',cf.recent_file
+		logging.debug('%s %s', 'RECENT FILE', cf.recent_file)
 		self.assertEqual(cf.recent_file[7],['5','5'])
 		cf.save()
 		o=cf.recent_file[:]
 		cf=clientconf.ConfDb(p)
-		print 'RECENT FILE AFTER SAVING',o
-		print 'RECENT FILE AFTER OPENING',cf.recent_file
+		logging.debug('%s %s', 'RECENT FILE AFTER SAVING', o)
+		logging.debug('%s %s', 'RECENT FILE AFTER OPENING', cf.recent_file)
 		
 		self.assertEqual(cf.recent_file,o)
 	

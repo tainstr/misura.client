@@ -3,6 +3,7 @@
 from .. import _
 from misura.client.widgets.active import *
 from aString import aString
+import logging
 
 
 
@@ -15,7 +16,7 @@ class aMaterial(aString):
 
 	def listMaterials(self):
 		mats=self.server.storage.listMaterials()
-		print mats
+		logging.debug('%s', mats)
 		mat=QtGui.QInputDialog.getItem(self, "Select the material name",
 							"Select an already used material name or input a new one.",
 							QtCore.QStringList(mats))

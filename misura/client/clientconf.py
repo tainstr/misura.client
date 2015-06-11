@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """misura Configuration Manager"""
 import os
+import logging
 import sqlite3
 import re
 from traceback import print_exc
@@ -13,6 +14,8 @@ from ..canon.option import ao
 import units
 
 import parameters as params
+
+import logging
 
 default_desc={}
 
@@ -90,13 +93,14 @@ class RulesTable(object):
 		self.rows=[]
 		for row in tab:
 			if len(row)<=1:
-				print 'skipping malformed rule',row
+				logging.debug('skipping malformed rule',row)
+				logging.debug('%s %s', 'skipping malformed rule', row)
 			if isinstance(row[0],tuple):
 				# Skip header row
 				continue
 			r=row[0]
 			if len(r)==0:
-				print 'skipping empty rule',row
+				logging.debug('%s %s', 'skipping empty rule', row)
 				continue
 			r=re.compile(r.replace('\n','|'))
 			self.rules.append(r)
@@ -170,7 +174,7 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 	
 	def load(self,path=False):
 		"""Load an existent client configuration database, or create a new one."""
-		print 'LOAD',path
+		logging.debug('%s %s', 'LOAD', path)
 		self.nosave_server=[]
 		self.close()
 		if path: self.path=path
@@ -191,11 +195,11 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 			try:
 				desc.update(self.store.read_table(cursor,'conf'))
 			except:
-				print_exc()			
+				logging.debug('%s', print_exc())
 			self.desc=desc
-			print 'Loaded configuration',self.desc
+			logging.debug('%s %s', 'Loaded configuration', self.desc)
 		else:
-			print 'Recreating client configuration'
+			logging.debug('%s', 'Recreating client configuration')
 			for key,val in default_desc.iteritems():
 				self.store.desc[key]=option.Option(**val)
 			self.desc=self.store.desc
@@ -233,7 +237,7 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 		
 	def save(self,path=False):
 		"""Save to an existent client configuration database."""
-		print 'SAVING'
+		logging.debug('%s', 'SAVING')
 		cursor=self.conn.cursor()
 		self.store.write_table(cursor,'conf',desc=self.desc)
 		for name in recent_tables:
@@ -241,7 +245,7 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 			tab=getattr(self,tname,[])
 			nosave=getattr(self,'nosave_'+name,[])
 			if nosave is None: nosave=[]
-			print tname,tab,nosave
+			logging.debug("%s %s %s", tname,tab,nosave)
 			cursor.execute("delete from "+tname)
 			if len(tab)==0: continue
 			# Prepare the query
@@ -250,12 +254,9 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 			cmd="insert into "+tname+" values ("+q+")"
 			# insert table rows
 			for i,row in enumerate(tab):
-#				print 'saving',i,row,nosave
 				if row[0] in nosave: 
-#					print 'Not saving',tname,row[0]
 					continue
 				row=[i]+row
-#				print 'inserting',tname, row
 				cursor.execute(cmd, row)
 		cursor.close()
 		self.conn.commit()
@@ -263,7 +264,7 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 		
 	def mem(self,name,*arg):
 		"""Memoize a recent datum"""
-		print 'mem',name,arg
+		logging.debug("mem %s %s", name,arg)
 		tname=tabname(name)
 		tab=getattr(self,tname)
 		# Avoid saving duplicate values

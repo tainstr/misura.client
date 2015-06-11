@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
+import logging
 from time import sleep
 from PyQt4 import QtCore
 import threading
@@ -51,7 +52,7 @@ class MisuraDocument(document.Document):
 			return
 		
 		dec=self.proxy.header(['Binary','Profile'])
-		print 'FOUND FOLDERS',dec
+		logging.debug('%s %s', 'FOUND FOLDERS', dec)
 		for fold in dec:
 			d=DataDecoder(self)
 			d.reset(self.proxy,datapath=fold)
@@ -68,7 +69,7 @@ class MisuraDocument(document.Document):
 		# Clear all previous datasets, in order to avoid duplicates
 		self.zerotime=-1
 		if not self.up:
-			print 'No up',self.up 
+			logging.debug('%s %s', 'No up', self.up)
 			return []
 		# Save current units and delete datasets
 		self.model.paused=True
@@ -76,10 +77,10 @@ class MisuraDocument(document.Document):
 			self.deleteData(name)
 		self.model.paused=False
 		if self.filename is False:
-			print 'no filename defined'
+			logging.debug('%s', 'no filename defined')
 			self.reloading=False
 			return []
-		print 'Reloading Data',self.filename
+		logging.debug('%s %s', 'Reloading Data', self.filename)
 		
 		op = OperationMisuraImport(
 								ImportParamsMisura(filename=self.filename,
@@ -89,13 +90,13 @@ class MisuraDocument(document.Document):
 													rule_load=confdb['rule_load']+'\n'+confdb['rule_plot'],
 													rule_unit=confdb['rule_unit'])
 								)
-		print 'apply operation'
+		logging.debug('%s', 'apply operation')
 		self.applyOperation(op)
 		if not self.proxy:
 			self.proxy=op.proxy
 # 		self.proxy.reopen() # apply will close it!
 		dsnames = op.outdatasets
-		print 'reloadData dsnames',dsnames.keys()
+		logging.debug('%s %s', 'reloadData dsnames', dsnames.keys())
 		
 		self.emit(QtCore.SIGNAL('updated()'))
 		self.emit(QtCore.SIGNAL('reloaded()'))
@@ -108,7 +109,7 @@ class MisuraDocument(document.Document):
 		if not self.up: return {}
 		cols=self.data.keys()
 		if len(cols)==0:
-			print 'No data loaded in document',self.data
+			logging.debug('%s %s', 'No data loaded in document', self.data)
 			self.reloadData()
 			return False
 		if len(self.data['0:t'])<idx:
@@ -120,7 +121,7 @@ class MisuraDocument(document.Document):
 			if not ds.m_update: continue
 			a=ds.data
 			if len(a)<=idx:
-				print 'Non-uniform length found:',col,len(a)
+				logging.debug('%s %s %s', 'Non-uniform length found:', col, len(a))
 				v=a[-1]
 			else:
 				v=a[idx]
@@ -134,7 +135,7 @@ class MisuraDocument(document.Document):
 		if not proxy:
 			proxy=self.proxy
 		if not self.data.has_key('0:t'):
-			print 'Time dataset is missing. Reloading.',self.data.keys()
+			logging.debug('%s %s', 'Time dataset is missing. Reloading.', self.data.keys())
 			self._lock.release()
 			dsnames=self.reloadData()
 			self._lock.acquire(False)
@@ -156,9 +157,9 @@ class MisuraDocument(document.Document):
 		# interval rounding
 		elp=(elp//self.interval)*self.interval
 		if (elp-lastt)<self.interval:
-			print 'Update not needed',elp,lastt
+			logging.debug('%s %s %s', 'Update not needed', elp, lastt)
 			return []
-		print 'Update needed: %.2f>%.2f doc' % (elp,lastt)
+		logging.debug('%s %s', 'Update needed: %.2f>%.2f doc' % (elp, lastt))
 		# New time point in time units
 		nt=[units.Converter.convert('second',tu,elp)]
 		k=[]
@@ -173,9 +174,9 @@ class MisuraDocument(document.Document):
 		ks=set(self.data.keys())
 		dh=header-ks
 		if len(dh)>0:
-			print 'RELOADING DATA: HEADER DIFFERS. Missing:',dh
-			print 'header',header
-			print 'keys',ks
+			logging.debug('%s %s', 'RELOADING DATA: HEADER DIFFERS. Missing:', dh)
+			logging.debug('%s %s', 'header', header)
+			logging.debug('%s %s', 'keys', ks)
 			self._lock.release()
 			dsnames=self.reloadData()
 			self._lock.acquire(False)
@@ -203,7 +204,7 @@ class MisuraDocument(document.Document):
 				elif to_unit and to_unit!=from_unit:
 					val=units.Converter.convert(from_unit,to_unit,val)
 				updata=[val]
-				print 'Updating',col,opt,updata,from_unit,to_unit
+				logging.debug('%s %s %s %s %s %s', 'Updating', col, opt, updata, from_unit, to_unit)
 			N=len(ds.data)
 			ds.insertRows(N,1,{'data':updata})
 #			print 'Updated',col,N,'new val:',updata[0]

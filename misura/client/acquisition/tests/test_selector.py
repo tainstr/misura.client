@@ -1,21 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tests Archive"""
+import logging
 import unittest
 from misura.client.acquisition import selector
 from misura import server
 from PyQt4 import QtGui,QtCore
 app=False
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 class Parent(QtGui.QWidget):
 	ok=False

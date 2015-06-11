@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from .. import _
+import logging
 from PyQt4 import QtGui,QtCore
 from misura.client.widgets.active import ActiveWidget
 
@@ -32,7 +33,7 @@ class aChooser(ActiveWidget):
 			self.combo.removeItem(self.combo.currentIndex())
 		# Get new property
 		self.prop=self.remObj.gete(self.handle)
-		print 'aChooser.redraw', self.prop
+		logging.debug('%s %s', 'aChooser.redraw', self.prop)
 		opt=self.prop.get('options',[])
 		vals=self.prop.get('values', opt)
 		# Associate opt-val couples to new combo entries
@@ -47,7 +48,7 @@ class aChooser(ActiveWidget):
 			elif type(k)!=type(u''):
 				k=str(k)
 				K=self.tr(k)
-			print 'Combo addItem',k,v
+			logging.debug('%s %s %s', 'Combo addItem', k, v)
 			self.combo.addItem(k, v)
 		# Read again the current options, if requested
 		if reget: self.get()
@@ -62,7 +63,7 @@ class aChooser(ActiveWidget):
 			r=str(r)
 		elif self.tuplelike:
 			r=tuple(r)
-		print 'adapt2srv', idx,r
+		logging.debug('%s %s %s', 'adapt2srv', idx, r)
 		return r
 
 	def adapt2gui(self, val):
@@ -70,10 +71,10 @@ class aChooser(ActiveWidget):
 		if self.tuplelike:
 			val=list(val)
 		r=self.combo.findData(val)
-		print 'adapt2gui', repr(self.current), r
+		logging.debug('%s %s %s', 'adapt2gui', repr(self.current), r)
 		return r
 
 	def update(self):
 		idx=self.adapt2gui(self.current)
-		print 'update', repr(self.current), idx
+		logging.debug('%s %s %s', 'update', repr(self.current), idx)
 		self.combo.setCurrentIndex(self.adapt2gui(self.current))

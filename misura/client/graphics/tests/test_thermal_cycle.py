@@ -2,25 +2,26 @@
 # -*- coding: utf-8 -*-
 """Test for thermal cycle editor"""
 import unittest
+import logging
 from misura import utils_testing as ut
 from misura.client.graphics import thermal_cycle
 from misura import kiln
 from PyQt4 import QtGui,QtCore
 from PyQt4.QtTest import QTest
 app=False
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 	ut.parallel(0)
 
 def tearDownModule():
 	global app
-	print 'Quitting app'
+	logging.debug('%s', 'Quitting app')
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 	
 class Designer(unittest.TestCase):

@@ -4,6 +4,7 @@ from traceback import print_exc
 import functools
 from time import sleep, time
 import collections
+import logging
 
 from misura.client import network
 from misura.client import units
@@ -19,11 +20,11 @@ from misura.client.parameters import MAX,MIN
 def getRemoteDev(server, devpath):
 	if devpath=='None': return False, None
 	sp=server.searchPath(devpath)
-	print 'Getting Remote Dev',sp,devpath
+	logging.debug('%s %s %s', 'Getting Remote Dev', sp, devpath)
 	if not sp: return False, None
-	print 'Getting Remote Dev',sp
+	logging.debug('%s %s', 'Getting Remote Dev', sp)
 	dev=server.toPath(sp)
-	print 'Got Remote Dev',devpath,dev
+	logging.debug('%s %s %s', 'Got Remote Dev', devpath, dev)
 	return True, dev
 	
 def info_dialog(text, title='Info', parent=None):
@@ -48,13 +49,13 @@ class RunMethod(QtCore.QRunnable):
 		self.func=func
 		self.args=args
 		self.kwargs=kwargs
-		print 'RunMethod initialized', self.func, self.args, self.kwargs
+		logging.debug('%s %s %s %s', 'RunMethod initialized', self.func, self.args, self.kwargs)
 		self.runnables.append(self)
 		
 	def run(self):
-		print 'RunMethod.run', self.func, self.args, self.kwargs
+		logging.debug('%s %s %s %s', 'RunMethod.run', self.func, self.args, self.kwargs)
 		r=self.func(*self.args, **self.kwargs)
-		print 'RunMethod.run result', r
+		logging.debug('%s %s', 'RunMethod.run result', r)
 		self.runnables.remove(self)
 		
 
@@ -132,7 +133,7 @@ class Active(object):
 
 	def emitError(self, msg):
 		msg=self.tr(msg)
-		print msg
+		logging.debug('%s', msg)
 
 	def emitOptional(self):
 		pass
@@ -157,10 +158,10 @@ class Active(object):
 		"""Set a new value `val` to server. Convert val into server units."""
 		val=self.adapt2srv(val)
 		if val==self.current:
-			print 'nothing to set'
+			logging.debug('%s', 'nothing to set')
 			return True
 		out=self.remObj.set(self.handle,  val)
-		print 'Active.set',self.handle, repr(val),  out
+		logging.debug('%s %s %s %s', 'Active.set', self.handle, repr(val), out)
 		self.get()
 
 	def _get(self, rem=None):
@@ -313,10 +314,10 @@ class ActiveWidget(Active, QtGui.QWidget):
 				act.setChecked(False)
 				continue
 			act.setChecked(True)
-			print 'Setting csunit to',u
+			logging.debug('%s %s', 'Setting csunit to', u)
 			r=self.remObj.setattr(self.handle,'csunit',u)
 			self.prop['csunit']=u
-			print 'result', r
+			logging.debug('%s %s', 'result', r)
 		self.set_label()
 		self.update_menu()
 		self.update()
@@ -328,16 +329,16 @@ class ActiveWidget(Active, QtGui.QWidget):
 		if self.enable_check:
 			if self.enable_check.isChecked(): out['enabled']=True
 			else: out['enabled']=False
-		print 'updating flags', out
+		logging.debug('%s %s', 'updating flags', out)
 		r=self.remObj.setFlags(self.handle, out)
 		return r
 	
 	def update_menu(self):
 		flags=self.remObj.getFlags(self.handle)
-		print 'remote flags', flags
+		logging.debug('%s %s', 'remote flags', flags)
 		for key, act in self.flags.iteritems():
 			if not flags.has_key(key):
-				print 'Error, key disappeared', key
+				logging.debug('%s %s %s', 'Error, key disappeared', key)
 			act.setChecked(flags[key]*2)
 			if key=='enabled':
 				self.enable_check.setChecked(flags[key]*2)
@@ -369,7 +370,7 @@ class ActiveWidget(Active, QtGui.QWidget):
 			un=self.emenu.addMenu(_('Units'))
 			kgroup,f,p=units.get_unit_info(u,units.from_base)
 			same=units.from_base.get(kgroup,{u:lambda v: v}).keys()
-			print kgroup, same
+			logging.debug('%s %s', kgroup, same)
 			for u1 in same:
 				p=functools.partial(self.set_unit,u1)
 				act=un.addAction(_(u1),p)
@@ -455,7 +456,7 @@ class ActiveWidget(Active, QtGui.QWidget):
 		wg=getattr(self, wg, False)
 		if wg:
 			idx=self.lay.indexOf(wg)
-			print 'del',idx
+			logging.debug('%s %s', 'del', idx)
 			wg.setVisible(False)
 			self.lay.removeWidget(wg)
 			wg.destroy()
@@ -472,7 +473,7 @@ class ActiveWidget(Active, QtGui.QWidget):
 	
 	def show_info(self):
 		prop=self.prop
-		print prop
+		logging.debug('%s', prop)
 		t='<h1> Option: %s </h1>' % prop.get('name','Object')
 		
 		for k, v in prop.iteritems():

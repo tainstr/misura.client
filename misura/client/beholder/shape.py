@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Graphical overlay for image analysis"""
+import logging
 from overlay import Overlay
 from PyQt4 import QtGui
 
@@ -31,16 +32,16 @@ class SamplePoints(Overlay):
 		nx,ny=len(vx),len(vy)
 		rx, ry, rw, rh=self.current['roi']
 		cx, cy, cw, ch=self.current.get('crop', [rx, ry, rw, rh])
-		print 'updating points', self.current.keys(), rx, cx, ry, cy
+		logging.debug('%s %s %s %s %s %s', 'updating points', self.current.keys(), rx, cx, ry, cy)
 		d=10
 		d=int(self.dim(factor=75, minimum=12))+1 # pt diameter
 		d2=d/2
 		for p in ['iA','iB','iC','iD']:
 			i=self.current.get(p,0)
 			if i>=nx or i>=ny:
-				print 'Invalid point',p,i,nx,ny
+				logging.debug('%s %s %s %s %s', 'Invalid point', p, i, nx, ny)
 				return False
-			print p,i
+			logging.debug('%s %s', p, i)
 			x=vx[i]#-rx+cx
 			y=vy[i]#-ry+cy
 			g=getattr(self,p)

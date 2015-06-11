@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Testing plugin/CurveOperationPlugin.py plugin."""
 import unittest
+import logging
 
 from misura.client.tests import iutils_testing as iut
 from misura.client.plugin import CurveOperationPlugin
@@ -14,17 +15,17 @@ import veusz.plugins
 from PyQt4 import QtGui
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 
 def insertData(doc,datadict):
@@ -37,17 +38,17 @@ class TestCurveOperationPlugin(unittest.TestCase):
 	"""Tests the CurveOperationPlugin."""
 	
 	def do(self,ax,ay,bx,by,op='A-B',**kw):
-		print 'creating doc'
+		logging.debug('%s', 'creating doc')
 		doc=document.Document()
-		print 'inserting data'
+		logging.debug('%s', 'inserting data')
 		insertData(doc,{'ax':ax,'ay':ay,'bx':bx,'by':by})
 		fields={'ax':'ax','ay':'ay','bx':'bx','by':'by','ds_out':'out','operation':op,'smooth':False,'relative':True,'tolerance':1.}
 		fields.update(kw)
-		print 'build op'
+		logging.debug('%s', 'build op')
 		p=CurveOperationPlugin(**fields)
-		print 'get ds'
+		logging.debug('%s', 'get ds')
 		p.getDatasets(fields)
-		print 'update ds'
+		logging.debug('%s', 'update ds')
 		out=p.updateDatasets(fields,veusz.plugins.DatasetPluginHelper(doc))
 		return out
 
@@ -63,13 +64,13 @@ class TestCurveOperationPlugin(unittest.TestCase):
 		# SUPERSAMPLING
 		# Subtract B to A
 		sup=self.do(ax,ay,bx,by,'A-B')
-		print 'Supersampling',sup.sum()
+		logging.debug('%s %s', 'Supersampling', sup.sum())
 		# Output value should have same length of ref. array, A
 		self.assertEqual(len(sup),len(ay))
 		
 		# UNDERSAMPLING
 		und=self.do(bx,by,ax,ay,'A-B')
-		print 'Undersampling',und.sum()
+		logging.debug('%s %s', 'Undersampling', und.sum())
 		# Output value should have same length of ref. array, B
 		self.assertEqual(len(und),len(by))
 		self.assertAlmostEqual(sup.sum(),0)

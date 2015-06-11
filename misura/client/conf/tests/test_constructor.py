@@ -3,6 +3,7 @@
 """Testing the programmatic widget construction."""
 import unittest
 import os
+import logging
 from misura.client.conf import constructor
 from misura.client import filedata
 from misura.client.misura3 import convert
@@ -12,17 +13,17 @@ from PyQt4 import QtGui,QtCore
 
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 
 
@@ -44,7 +45,7 @@ class TestOrgSections(unittest.TestCase):
 		sec=constructor.orgSections(fp.conf.post.measure.describe())
 		handles=[o['handle'] for o in sec['Main']]
 		
-		print '\n'.join(['%s -> %r' % (o['handle'],[c['handle'] for c in o['children']]) for o in sec['Main']])
+		logging.debug('%s %s', '\n'.join(['%s -> %r' % (o['handle'], [c['handle'] for c in o['children']]) for o in sec['Main']]))
 		self.assertTrue('param_Sint' not in handles)
 		
 #@unittest.skip('')		
@@ -74,7 +75,7 @@ class TestInterface(unittest.TestCase):
 		rem=fp.conf.post.measure
 		obj=constructor.Interface(fp.conf,rem,rem.describe())
 		if main:
-			print 'Interactive testing'
+			logging.debug('%s', 'Interactive testing')
 			obj.show()
 			QtGui.qApp.exec_()
 
@@ -85,7 +86,7 @@ class TestInterface(unittest.TestCase):
 		sec=constructor.orgSections(m.describe())['Main']
 		obj=constructor.Section(cp, m, sec)
 		if main:
-			print 'Interactive testing'
+			logging.debug('%s', 'Interactive testing')
 			obj.show()
 			QtGui.qApp.exec_()			
 

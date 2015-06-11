@@ -3,23 +3,24 @@
 """Testing fileui.log module."""
 import unittest
 import os
+import logging
 from misura.client.tests import iutils_testing as iut
 from misura.client import fileui
 from misura.canon import indexer
 from PyQt4 import QtGui
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 
 
 fpath=os.path.join(iut.data_dir,'m3_hsm.h5')

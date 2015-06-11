@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+import logging
 
 class ServerInfo(object):
 	def __init__(self, fullname='._', hosttarget='', port=0, txt='SERIAL=0; =; ='):
@@ -16,7 +16,7 @@ class ServerInfo(object):
 			txt=txt[::-1]
 		self.txt=txt
 		v=self.txt.split('; ')
-		print txt, self.txt, v
+		logging.debug('%s %s %s', txt, self.txt, v)
 		self.serial=v[0].split('=')[1]
 		self.cap=[]
 		if len(v)>1:

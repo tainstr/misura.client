@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-print 'Importing '+__name__
+logging.debug('%s', 'Importing '+__name__)
 
 import unittest
+import logging
 from time import sleep
 from misura import utils_testing as ut
 from misura.client.tests import iutils_testing as iut

@@ -1,5 +1,6 @@
 #!/usr/bin/python2.6
 # -*- coding: utf-8 -*-
+import logging
 from PyQt4 import QtCore, QtGui
 pyodbc=False
 try:
@@ -113,7 +114,7 @@ fprv=fieldPRV()
 def getHeaderCols(tt, tcode='', all=False):
 	"""Selects and returns the appropriate columns and their headers"""
 	global etp, fimg
-	print 'getHeaderCols',tt,tcode
+	logging.debug('%s %s %s', 'getHeaderCols', tt, tcode)
 	# DILATOMETRY
 	h=['t', 'T']; c=[fimg.Tempo, fimg.Temp]
 	if tt in [etp.DilatometroVerticale,  etp.DilatometroOrizzontale, etp.Calibrazione]:
@@ -213,7 +214,7 @@ def getCharacteristicShapes(test,cols):
 		return sh
 	vt=numpy.array(cols[fimg.Tempo])
 	vT=numpy.array(cols[fimg.Temp])
-	print vT
+	logging.debug('%s', vT)
 	for i,name in enumerate('Temp_Sint,Temp_Rammoll,Temp_Sfera,Temp_Mezza_Sfera,Temp_Fusione'.split(',')): 
 		r=test[getattr(fprv, name)]
 		if r==None: continue
@@ -227,7 +228,7 @@ def getCharacteristicShapes(test,cols):
 		d=numpy.abs(v-r)
 		idx=numpy.where(d==d.min())[0][0]
 		idx=int(idx)
-		print 'Where:', r, idx
+		logging.debug('%s %s %s', 'Where:', r, idx)
 		if idx==0:
 			t='None'; T='None'; point='None'; idx='None'
 		else:
@@ -236,7 +237,7 @@ def getCharacteristicShapes(test,cols):
 		hnd=shm4[name]
 		d=shm4d[hnd]
 		ao(sh,hnd,'Meta',{'time':t,'temp':T,'point':idx,'value':'None'},d,priority=100+i)
-	print sh
+	logging.debug('%s', sh)
 	return sh
 		
 
@@ -298,7 +299,7 @@ def getConnectionCursor(path):
 	else:
 		driver="{Microsoft Access Driver (*.mdb)}"
 		cs="DRIVER=%s;DBQ=%s" % (driver, path)
-	print cs
+	logging.debug('%s', cs)
 	conn= pyodbc.connect(cs)
 	cursor=conn.cursor()
 	return conn, cursor
@@ -417,7 +418,7 @@ class TestDialog(QtGui.QWidget):
 	def getPath(self):
 		path=settings.value('/Misura3Archive', None)
 		if path==None or not os.path.exists(path):
-			print 'path does not exist', path
+			logging.debug('%s %s', 'path does not exist', path)
 			return False
 		return path
 			
@@ -447,7 +448,7 @@ class TestDialog(QtGui.QWidget):
 		
 	def setFilterType(self, idx):
 		tt=self.filterType.itemData(idx)
-		print 'Selecting', tt
+		logging.debug('%s %s', 'Selecting', tt)
 		self.cursor.execute("select * from PROVE where [Tipo Prova] = %i" % tt)
 		tests=self.cursor.fetchall()
 		self.table.curveModel.setTests(tests)
@@ -499,7 +500,7 @@ class TestDialog(QtGui.QWidget):
 							keep_img=self.keep_img,
 							format=self.format,
 							signal=fsignal)
-		print 'exported to ', outdir
+		logging.debug('%s %s', 'exported to ', outdir)
 		progress.hide()
 		progress.close()
 		del progress
@@ -516,7 +517,7 @@ class TestDialog(QtGui.QWidget):
 			if i in done: continue
 			done.append(i)
 			prova=self.table.curveModel.tests[i]
-			print 'importing test: ',prova
+			logging.debug('%s %s', 'importing test: ', prova)
 			self.tname=validate_tabname(prova[2])
 			imported=self.path+'|'+str(prova[0])
 			outpath=self.convert(imported)
@@ -550,7 +551,7 @@ class ImagePreviewModel(QtCore.QAbstractTableModel):
 		self.dat=[]
 		self.path=''
 		if not os.path.exists(os.path.dirname(path)):
-			print 'Path does not exists', path
+			logging.debug('%s %s', 'Path does not exists', path)
 			QtCore.QAbstractTableModel.reset(self)
 			return
 		self.dat=data

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Camera ViewerPicture, Human Interactive Test"""
+import logging
 import unittest
 import functools
 from misura import utils_testing as ut
@@ -11,18 +12,18 @@ from misura.beholder import sim_camera
 from misura.microscope import Hsm
 from PyQt4 import QtGui
 app=False
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 	ut.parallel(True)
 
 def tearDownModule():
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	global app
-	print 'Quitting app'
+	logging.debug('%s', 'Quitting app')
 	app.quit()
 	ut.parallel(False)
 

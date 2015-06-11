@@ -4,6 +4,7 @@
 from PyQt4 import QtGui, QtCore
 import os
 import sys
+import logging
 from time import sleep
 import signal
 
@@ -58,17 +59,17 @@ def initClient():
 def initTranslations(app):
 	appTranslator=QtCore.QTranslator()
 	pathLang=os.path.join(params.determine_path(),'i18n')
-	print 'initClient: pathLang',pathLang
+	logging.debug('%s %s', 'initClient: pathLang', pathLang)
 	lang=confdb['lang']
 	if lang=='sys': lang=params.locale
-	print "misura_"+lang
+	logging.debug('%s', "misura_"+lang)
 	if appTranslator.load("misura_"+lang, pathLang):
-		print 'installing translator'
+		logging.debug('%s', 'installing translator')
 		app.installTranslator(appTranslator)
 		# devo creare un riferimento permanente onde evitare che il QTranslator vada distrutto
 		translators.append(appTranslator)
 	else:
-		print 'translations not available'
+		logging.debug('%s', 'translations not available')
 	
 def initNetwork():
 	"""Start zeroconf network scanner - deprecated"""
@@ -197,7 +198,7 @@ def getOpts():
 	"""
 	import sys, getopt
 	opts, args=getopt.getopt(sys.argv[1:], 'h:o:')
-	print opts, args
+	logging.debug('%s %s', opts, args)
 	h='https://admin:admin@localhost:3880/RPC'
 	o='/'
 	r={'-h':False, '-o':False}

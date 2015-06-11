@@ -3,6 +3,7 @@
 """Database synchronization service and widget"""
 import unittest
 import os
+import logging
 
 from misura.canon import indexer
 from misura.canon import option
@@ -34,7 +35,7 @@ cdb['database']=test_confdb
 sync.sync.confdb=cdb
 
 
-print remote_dbpath, local_dbpath
+logging.debug('%s %s', remote_dbpath, local_dbpath)
 class Sync(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):

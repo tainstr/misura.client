@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #from transport import MisuraTransport
+import logging
 import xmlrpclib
 from xmlrpclib import ServerProxy, ProtocolError
 from time import time
@@ -65,12 +66,12 @@ def reconnect(func):
 		try:
 			r=func(self,*a,**k)
 		except (xmlrpclib.ProtocolError, httplib.CannotSendRequest, httplib.BadStatusLine, httplib.ResponseNotReady):
-			print 'RECONNNECTING', func
+			logging.debug('%s %s', 'RECONNNECTING', func)
 			self.connect()
 			return func(self,*a,**k)
 		except:
-			print 'UNHANDLED EXCEPTION', func
-			print_exc()
+			logging.debug('%s %s', 'UNHANDLED EXCEPTION', func)
+			logging.debug('%s', print_exc())
 			raise
 		return r
 	return reconnect_wrapper
@@ -265,10 +266,10 @@ class MisuraProxy(object):
 	@lockme
 	def info(self,key):
 		"""Pretty print information about `key`"""
-		print 'Option:',key
+		logging.debug('%s %s', 'Option:', key)
 		e=self.remObj.gete(key)
 		for k,v in e.iteritems():
-			print '\t',k,':',v
+			logging.debug('%s %s %s %s', '\t', k, ':', v)
 			
 	@lockme
 	def lastlog(self):
@@ -315,7 +316,7 @@ class MisuraProxy(object):
 		if self.remObj is not False:
 			return self.__setitem__(key, val)
 		elif key in self._remoteNames:
-			print 'Overwrite of a remote object name is forbidden!', key
+			logging.debug('%s %s', 'Overwrite of a remote object name is forbidden!', key)
 			return False
 		else:
 			return  object.__setattr__(self,key, val)
@@ -367,7 +368,7 @@ class MisuraProxy(object):
 		v=col.split(sp)
 		if v[0]=='': v.pop(0)
 		name=v.pop(-1)
-		print 'from_column', col0, v, name
+		logging.debug('%s %s %s %s', 'from_column', col0, v, name)
 		obj=self.toPath(v)
 		return obj,name
 	

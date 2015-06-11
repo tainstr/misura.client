@@ -6,6 +6,7 @@ from traceback import print_exc
 from misura.client.parameters import MAX,MIN
 from misura.client.widgets.active import ActiveWidget
 import math
+import logging
 
 class FocusableSlider(QtGui.QSlider):
 	zoom=QtCore.pyqtSignal(bool)
@@ -16,13 +17,13 @@ class FocusableSlider(QtGui.QSlider):
 		self.zoomed=False
 		
 	def mousePressEvent(self,ev):
-		print 'mousePressEvent'
+		logging.debug('%s', 'mousePressEvent')
 		self.paused=True
 		self.pause.emit(True)
 		return QtGui.QSlider.mousePressEvent(self,ev)
 
 	def mouseReleaseEvent(self,ev):
-		print 'mouseReleaseEvent'
+		logging.debug('%s', 'mouseReleaseEvent')
 		self.paused=False
 		self.pause.emit(False)
 		return QtGui.QSlider.mouseReleaseEvent(self,ev)
@@ -30,7 +31,7 @@ class FocusableSlider(QtGui.QSlider):
 	def mouseDoubleClickEvent(self,ev):
 		self.zoomed=1^self.zoomed
 		self.zoom.emit(self.zoomed)
-		print 'mouseDoubleClickEvent',self.zoomed
+		logging.debug('%s %s', 'mouseDoubleClickEvent', self.zoomed)
 		return QtGui.QSlider.mouseDoubleClickEvent(self,ev)
 		
 		
@@ -134,7 +135,7 @@ class aNumber(ActiveWidget):
 			return False
 		# Block remote updates while editing
 		if self.spinbox.hasFocus():
-			print 'aNumber.update has focus - skipping'
+			logging.debug('%s', 'aNumber.update has focus - skipping')
 			return False
 		self.spinbox.blockSignals(True)
 		# Update minimum and maximum
@@ -166,7 +167,7 @@ class aNumber(ActiveWidget):
 			if self.slider: 
 				self.slider.setValue(int(cur*self.divider))
 		except:
-			print_exc()
+			logging.debug('%s', print_exc())
 		finally:
 			self.spinbox.blockSignals(False)
 			if self.slider: 

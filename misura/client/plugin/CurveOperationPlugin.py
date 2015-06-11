@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Operations between x,y, curves"""
+import logging
 import veusz.plugins as plugins
 import numpy as np
 from scipy import interpolate
@@ -84,7 +85,7 @@ def do(fields, helper):
 	if fields['relative']:
 		d=by[0]-ay[0]
 		by-=d
-		print 'relative correction',d
+		logging.debug('%s %s', 'relative correction', d)
 		
 	# If the two curves share the same dataset, directly operate
 	if fields['bx']==fields['ax']:
@@ -100,13 +101,13 @@ def do(fields, helper):
 	if xtol>0:
 		rax,dax,erra=utils.rectify(ax)
 		rbx,dbx,errb=utils.rectify(bx)
-		print 'rectification errors',erra,errb
+		logging.debug('%s %s %s', 'rectification errors', erra, errb)
 		if erra>xtol or errb>xtol:
 			raise plugins.DatasetPluginException('X Datasets are not comparable in the required tolerance.')
 	#TODO: manage extrapolation!
 	# Get rectified B(x) spline for B(y)
-	print  'rbx',rbx[-1]-bx[-1],rbx
-	print 'by',by
+	logging.debug('%s %s %s', 'rbx', rbx[-1]-bx[-1], rbx)
+	logging.debug('%s %s', 'by', by)
 	N=len(rbx)
 	margin=1+int(N/10)
 	step=2+int((N-2*margin)/100)
@@ -114,16 +115,16 @@ def do(fields, helper):
 	error=bsp.get_residual()
 	# Evaluate B(y) spline with rectified A(x) array
 	b=bsp(rax)
-	print 'rax',rax[-1]-ax[-1],rax
-	print 'a',ay
-	print 'b',b,b[1000:1010]
+	logging.debug('%s %s %s', 'rax', rax[-1]-ax[-1], rax)
+	logging.debug('%s %s', 'a', ay)
+	logging.debug('%s %s %s', 'b', b, b[1000:1010])
 # 	np.save('/tmp/misura/rbx',rbx)
 # 	np.save('/tmp/misura/by',by)
 # 	np.save('/tmp/misura/rax',rax)
 # 	np.save('/tmp/misura/ay',ay)
 	# Perform the operation using numexpr
 	out=numexpr.evaluate(op,local_dict={'a':ay,'b':b})
-	print 'out',out
+	logging.debug('%s %s', 'out', out)
 	return out,error
 		
 		

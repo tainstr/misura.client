@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Testing plugin/CurveOperationPlugin.py plugin."""
 import unittest
-
+import logging
 
 import numpy as np
 
@@ -16,7 +16,7 @@ from misura.client.plugin import datapoint
 from PyQt4 import QtGui
 app=False
 
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 
 
 class DataPoint(unittest.TestCase):
@@ -39,9 +39,9 @@ class DataPoint(unittest.TestCase):
 			self.dp.i=start
 			self.dp.x=self.dp.xData[self.dp.i]
 			self.dp.y=self.dp.yData[self.dp.i]
-		print 'starting from',self.dp.i,self.dp.x,self.dp.y
+		logging.debug('%s %s %s %s', 'starting from', self.dp.i, self.dp.x, self.dp.y)
 		self.assertTrue(self.dp.critical_search())
-		print 'ending in',self.dp.i,self.dp.x,self.dp.y
+		logging.debug('%s %s %s %s', 'ending in', self.dp.i, self.dp.x, self.dp.y)
 		self.assertAlmostEqual(self.dp.i,expect,delta=delta)
 	
 	def critical_search(self,delta=None):

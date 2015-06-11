@@ -2,6 +2,7 @@
 from PyQt4 import QtGui
 from pygments import formatters, lexer, lexers, styles
 from .. import _
+import logging
   
   
 def get_tokens_unprocessed(self, text, stack=('root',)):
@@ -112,7 +113,7 @@ class PygmentsHighlighter(QtGui.QSyntaxHighlighter):
   
         # Lex the text using Pygments
         index = 0
-        print self._lexer, type(self._lexer)
+        logging.debug('%s %s', self._lexer, type(self._lexer))
         for token, text in self._lexer.get_tokens(qstring):
             length = len(text)
             self.setFormat(index, length, self._get_format(token))

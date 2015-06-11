@@ -5,6 +5,7 @@ from .. import _
 from misura.client.widgets.active import *
 import numpy as np
 import cPickle as pickle
+import logging
 
 class Profile(QtGui.QGraphicsView):
 	def __init__(self,parent=None):
@@ -24,7 +25,7 @@ class Profile(QtGui.QGraphicsView):
 			self.path=False
 		# Discart malformed profiles
 		if len(x)<=1 or len(x)!=len(y):
-			print "Malformed profile",prf
+			logging.debug('%s %s', "Malformed profile", prf)
 			return
 		# Convert x,y, vectors into a QPointF list
 		lst=list(QtCore.QPointF(ix,y[i]) for i,ix in enumerate(x))
@@ -45,7 +46,7 @@ class aProfile(ActiveWidget):
 
 	def set(self,*foo,**kfoo):
 		"""Override set() method in order to avoid forbidden write operations"""
-		print "Set operation is not possible on Profile properties"
+		logging.debug('%s', "Set operation is not possible on Profile properties")
 		
 	def adapt2gui(self, val):
 		"""Unpickle profile data"""
@@ -57,16 +58,16 @@ class aProfile(ActiveWidget):
 		"""Update graphics scene"""
 		prf=self.adapt2gui(self.current)
 		if prf is None:
-			print 'No profile'
+			logging.debug('%s', 'No profile')
 			return 
 		# Discart malformed profiles
 		if len(prf)<3:
-			print "No profile",prf
+			logging.debug('%s %s', "No profile", prf)
 			return
 		sz,x,y=prf
 		# Discart malformed profiles
 		if len(sz)<2 or len(x)<1 or len(x)!=len(y):
-			print "Malformed profile",prf
+			logging.debug('%s %s', "Malformed profile", prf)
 			return
 		# Minimum dimension
 		self.profile.updateSize(sz)

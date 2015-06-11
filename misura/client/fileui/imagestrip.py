@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 from row import RowView
 from PyQt4 import QtGui, QtCore
 from minimage import MiniImage
@@ -28,7 +29,7 @@ class ImageStrip(QtGui.QWidget):
 		self.actTime.setCheckable(True)
 		
 	def set_doc(self,doc,datapath):
-		print 'ImageStrip.set_doc',doc,datapath
+		logging.debug('%s %s %s', 'ImageStrip.set_doc', doc, datapath)
 		self.doc=doc
 		self.decoder=doc.decoders[datapath]
 		self.idx=0
@@ -67,7 +68,7 @@ class ImageStrip(QtGui.QWidget):
 		
 	
 	def route_meta_changed(self,keys):
-		print 'routing meta keys',keys
+		logging.debug('%s %s', 'routing meta keys', keys)
 		for lbl in self.labels:
 			lbl.sync_meta_keys(keys)
 		
@@ -98,21 +99,21 @@ class ImageStrip(QtGui.QWidget):
 	def emitSetTime(self,t):
 		"""Route setTime signals received by the last MiniImage"""
 		self.t=t
-		print 'ImageStrip.emitSetTime',t
+		logging.debug('%s %s', 'ImageStrip.emitSetTime', t)
 		self.emit(QtCore.SIGNAL('set_time(float)'),t)
 		
 	def set_time(self,t):
 		"""Find the nearest index to time `t` and set myself on that idx"""
-		print 'ImageStrip.setTime',t
+		logging.debug('%s %s', 'ImageStrip.setTime', t)
 		idx=self.decoder.get_time(self.decoder.datapath)
-		print 'ImageStrip.setTime: idx',idx
+		logging.debug('%s %s', 'ImageStrip.setTime: idx', idx)
 		return self.set_idx(idx)
 			
 	def set_idx(self,idx=-1):
 		"""Sets the current end index."""
 		if len(self.labels)<self.n: return
 		if self.n==0: return
-		print 'strip idx',idx
+		logging.debug('%s %s', 'strip idx', idx)
 		if idx<0: idx=self.idx
 		# Sets the idx to decreasing values starting from idx, from the last to the first label
 		for i in range(self.n):
@@ -159,9 +160,9 @@ class Slider(QtGui.QWidget):
 		if self.decoder:
 			L=len(self.decoder)
 		self.slider.setMaximum(L)
-		print 'Slider.setLen', L
+		logging.debug('%s %s', 'Slider.setLen', L)
 		if follow:
-			print 'Slider.setLen autofollow'
+			logging.debug('%s', 'Slider.setLen autofollow')
 			self.set_idx(L)
 		
 	def choice(self,foo=0):
@@ -175,7 +176,7 @@ class Slider(QtGui.QWidget):
 		# Get dat group
 		i=self.cbPath.currentIndex()
 		cgr=str(self.cbPath.itemData(i))
-		print 'current group',i,cgr
+		logging.debug('%s %s %s', 'current group', i, cgr)
 		
 		# Update group combo
 		self.cbPath.clear()
@@ -190,10 +191,10 @@ class Slider(QtGui.QWidget):
 
 		# Reset decoder
 		if choice:
-			print 'resetting to',cgr
+			logging.debug('%s %s', 'resetting to', cgr)
 			self.decoder=self.doc.decoders.get(cgr,False)
 			n=getattr(self.decoder,'datapath',False)
-			print 'resetted to',n
+			logging.debug('%s %s', 'resetted to', n)
 			if n:
 				self.emit(QtCore.SIGNAL('datapathChanged(QString)'),n)
 		m=0
@@ -202,7 +203,7 @@ class Slider(QtGui.QWidget):
 		self.slider.setMaximum(m)
 		self.slider.setMinimum(0)
 		self.slider.setValue(0)
-		print 'done'
+		logging.debug('%s', 'done')
 		
 	def set_idx(self,idx):
 		if self.slider.maximum()==0: return
@@ -242,7 +243,7 @@ class ImageSlider(QtGui.QWidget):
 		
 	def emitSetTime(self,t):
 		"""Route setTime signals received by the ImageStrip"""
-		print 'ImageSlider.setTime',t
+		logging.debug('%s %s', 'ImageSlider.setTime', t)
 		self.emit(QtCore.SIGNAL('set_time(float)'),t)
 		
 	@property

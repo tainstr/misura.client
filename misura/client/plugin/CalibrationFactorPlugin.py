@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Get calibration factor from standard expansion curve"""
+import logging
 from copy import copy
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
@@ -93,10 +94,10 @@ class CalibrationFactorPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		# Cut datasets
 		si=find_nearest_val(T,start,get=T.__getitem__)
 		ei=find_nearest_val(T,end,get=T.__getitem__)
-		print 'Cutting',si,ei
+		logging.debug('%s %s %s', 'Cutting', si, ei)
 		T=T[si:ei]
 		d=d[si:ei]
-		print 'T start,end',start,end
+		logging.debug('%s %s %s %s', 'T start, end', start, end)
 		f=InterpolatedUnivariateSpline(sT, sd, k=2)
 		s0=f(T[0])
 		s_slope=(f(T[-1])-s0)/(T[-1]-T[0])
@@ -114,7 +115,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		factor=s_slope/z_slope
 		micron=u'\u03bcm'
 		msg=_('Calibration factor: {} \nStandard deviation: \n    {} %\n    {} {}').format(factor,res,um,micron)
-		print msg
+		logging.debug('%s', msg)
 		self.msg=msg
 		self.slope,self.const=slope,const
 		self.fld,self.ds,self.T,self.d,self.sT,self.sd=fields,ds,T,d,sT,sd

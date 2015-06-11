@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 from PyQt4 import QtGui, QtCore
 from .. import _
 from .. import confwidget
@@ -53,7 +54,7 @@ class MainWindow(QtGui.QMainWindow):
 					
 	def open_file(self,path):
 		path=unicode(path)
-		print 'Archive MainWindow.open_file',path
+		logging.debug('%s %s', 'Archive MainWindow.open_file', path)
 		doc=filedata.MisuraDocument(path)
 		tw=testwindow.TestWindow(doc)
 		cw=self.centralWidget()
@@ -100,7 +101,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.m3db.show()
 				
 	def close_tab(self,idx):
-		print 'Tab close requested',idx
+		logging.debug('%s %s', 'Tab close requested', idx)
 		if idx==0: return
 		w=self.tab.widget(idx)
 		self.tab.removeTab(idx) 

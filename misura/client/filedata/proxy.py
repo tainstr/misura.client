@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
+import logging
 from misura.client.connection import addrConnection
 from misura.canon.indexer import SharedFile
 from cPickle import loads
@@ -35,7 +36,7 @@ class RemoteFileProxy(object):
 			return True
 		# Otherwise unpickle the configuration tree dict and get a ConfigurationProxy for it
 		d=self._decode(self.obj.conf_tree)
-		print 'loading conf',len(d),d.keys()
+		logging.debug('%s %s %s', 'loading conf', len(d), d.keys())
 		self.conf=option.ConfigurationProxy(desc=d)
 		return True
 	

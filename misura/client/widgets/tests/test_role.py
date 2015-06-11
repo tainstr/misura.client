@@ -2,25 +2,27 @@
 # -*- coding: utf-8 -*-
 """Tests role selector widget."""
 import unittest
+import logging
 from misura.client import widgets
 from misura.canon import option
 from PyQt4 import QtGui
+
 app=False
-print 'Importing',__name__
+logging.debug('%s %s', 'Importing', __name__)
 main=__name__=='__main__'
 
 #TODO: generalize a widget testing  framework
 
 def setUpModule():
-	print 'setUpModule',__name__
+	logging.debug('%s %s', 'setUpModule', __name__)
 	global app
 	app=QtGui.QApplication([])
 
 def tearDownModule():
 	global app
-	print 'Quitting app'
+	logging.debug('%s', 'Quitting app')
 	app.quit()
-	print 'tearDownModule',__name__
+	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 	
 class Role(unittest.TestCase):
@@ -50,7 +52,7 @@ class Role(unittest.TestCase):
 		if main and False:
 			w.show()
 			QtGui.qApp.exec_()
-			print 'Selected on exit:', w.current
+			logging.debug('%s %s', 'Selected on exit:', w.current)
 					
 	def test_io(self):
 		w=widgets.build(self.root, self.root, self.root.gete('roleio'))
@@ -68,7 +70,7 @@ class Role(unittest.TestCase):
 		if main:
 			w.show()
 			QtGui.qApp.exec_()
-			print 'Selected on exit:', w.current
+			logging.debug('%s %s', 'Selected on exit:', w.current)
 		
 		
 		

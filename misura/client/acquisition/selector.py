@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 from PyQt4 import QtGui, QtCore
 import functools
 from .. import parameters as params
@@ -26,16 +27,16 @@ class InstrumentSelector(QtGui.QWidget):
 			opt='eq_'+name
 			if server.has_key(opt):
 				if not server[opt]: 
-					print opt, server[opt]
+					logging.debug('%s %s', opt, server[opt])
 					continue
 			elif params.debug: 
-				print 'Enabling unknown instrument...',title,name
+				logging.debug('%s %s %s', 'Enabling unknown instrument...', title, name)
 			else:
-				print 'Ignoring unknown instrument',title,name
+				logging.debug('%s %s %s', 'Ignoring unknown instrument', title, name)
 				continue
 			obj=getattr(server, name, False)
 			if obj is False: 
-				print 'Instrument not found',name
+				logging.debug('%s %s', 'Instrument not found', name)
 				continue
 			f=functools.partial(self.setInstrument, obj)
 			self.func.append(f)
