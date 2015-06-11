@@ -10,7 +10,8 @@ base_units={'micron':'length',
 		'celsius':'temperature',
 		'second':'time',
 		'percent':'part',
-		'frequency':'hertz'}
+		'hertz':'frequency',
+		'kilobyte':'memory'}
 
 from_base={'length': {'micron': lambda v: v, 'nanometer': lambda v: v*1E3, 'millimeter': lambda v: v*1E-3}, # length
 	'area':{'micron^2': lambda v:v,'nanometer^2': lambda v: v*1E6, 'millimeter^2': lambda v: v*1E-6}, # area
@@ -21,6 +22,12 @@ from_base={'length': {'micron': lambda v: v, 'nanometer': lambda v: v*1E3, 'mill
 	'part':{'percent': lambda v:v, 'permille': lambda v: v*10., 'permyriad': lambda v: v*100., 
 		'ppm': lambda v:v*10000., 'ppb': lambda v: v*(1.E7), 'ppt': lambda v: v*(1.E10)},
 	'frequency':{'hertz': lambda v:v,'kilohertz': lambda v:v/1000.},
+	'memory':{
+		'byte': lambda v: v*1000, 
+		'kilobyte': lambda v: v,
+		'megabyte': lambda v: v*1E-3,
+		'gigabyte': lambda v: v*1E-6,
+		},
 	}
 
 derivatives={'length': {'micron': 1, 'nanometer': 1E3, 'millimeter': 1E-3}, # length
@@ -32,6 +39,12 @@ derivatives={'length': {'micron': 1, 'nanometer': 1E3, 'millimeter': 1E-3}, # le
 	'part':{'percent': 1, 'permille': 10., 'permyriad': 100., # parts
 		'ppm': 10000., 'ppb': 1.E7, 'ppt': 1.E10},
 	'frequency':{'hertz': 1,'kilohertz': 1/1000.},	# freq
+	'memory': {
+		'byte': 1000, 
+		'kilobyte': 1,
+		'megabyte': 1E-3,
+		'gigabyte': 1E-6,
+		},
 	}
 
 to_base={'length': {'micron': lambda v: v, "nanometer": lambda v: v*1E-3, 'millimeter': lambda v: v*1E3}, # length
@@ -43,6 +56,12 @@ to_base={'length': {'micron': lambda v: v, "nanometer": lambda v: v*1E-3, 'milli
 	'part':{'percent': lambda v:v, 'permille': lambda v: v/10., 'permyriad': lambda v: v/100., # parts
 		'ppm': lambda v:v/10000., 'ppb': lambda v: 1.*v/(10**7), 'ppt': lambda v: 1.*v/10**10},	# freq
 	'frequency':{'hertz': lambda v:v,'kilohertz': lambda v:v*1000.},
+	'memory':{
+		'byte': lambda v: v*1E-3, 
+		'kilobyte': lambda v: v,
+		'megabyte': lambda v: v*1E3,
+		'gigabyte': lambda v: v*1E6,
+		},
 	}
 
 # Veusz symbols
@@ -55,6 +74,10 @@ symbols={'micron':'{\mu}m',	'nanometer':'nm',	'millimeter':'mm',
 		'second':'s','minute':'min','hour':'hr','day':'d',
 		'percent':'%','permille':'{\\textperthousand}',
 		'hertz':'Hz','kilohertz':'kHz',
+		'byte': 'B', 
+		'kilobyte': 'KB',
+		'megabyte': 'MB',
+		'gigabyte': 'GB',
 		}
 
 # HTML symbols

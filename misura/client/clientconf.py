@@ -26,13 +26,18 @@ ao(default_desc,'lang',**{'name':"Client Language",
 	})
 ao(default_desc,'refresh',**{'name':'Remote Server Refresh Rate (ms)', 'current':2000,	'max':20000,	'min':100, 'type':'Integer'})
 
-ao(default_desc,'database',**{'name':'Default Database', 'current':'',	'max':20000,	'min':100, 'type':'FilePath'})
+ao(default_desc,'database',**{'name':'Default Database', 'current':'', 'type':'FilePath'})
 ao(default_desc,'autodownload',**{'name':'Auto-download finished tests', 'current':True, 'type':'Boolean'})
-ao(default_desc,'hserver',**{'name':'Recent Servers', 'current':5,	'max':20,	'min':0, 'type':'Integer'})
+ao(default_desc,'hserver',**{'name':'Recent Servers', 'current':5,	'max':20, 'min':0, 'type':'Integer'})
 ao(default_desc,'saveLogin',**{'name':'Save User/Password by Default', 'current':True, 'type':'Boolean'})
-ao(default_desc,'hdatabase',**{'name':'Recent Database Files', 'current':10,	'max':100,	'min':1, 'type':'Integer'})
-ao(default_desc,'hfile',**{'name':'Recent Test Files', 'current':15,	'max':100,	'min':1, 'type':'Integer'})
-ao(default_desc,'hm3database',**{'name':'Recent Misura3 Databases', 'current':10,	'max':100,	'min':1, 'type':'Integer'})
+ao(default_desc,'hdatabase',**{'name':'Recent Database Files', 'current':10, 'max':100,	'min':1, 'type':'Integer'})
+ao(default_desc,'hfile',**{'name':'Recent Test Files', 'current':15, 'max':100, 'min':1, 'type':'Integer'})
+ao(default_desc,'hm3database',**{'name':'Recent Misura3 Databases', 'current':10, 'max':100, 'min':1, 'type':'Integer'})
+
+ao(default_desc,'logdir',**{'name':'Log files directory', 'current':os.path.expanduser("~/.misura_log"), 'type':'FilePath'})
+ao(default_desc,'loglevel',**{'name':'Logging Level', 'current':50,	'max':50, 'min':0, 'step': 10, 'type':'Integer', 'parent':'logdir'})
+ao(default_desc,'logsize',**{'name':'Size of each log file', 'current':2048, 'min':0, 'unit': 'kilobyte', 'type':'Integer', 'parent':'logdir'})
+ao(default_desc,'lognumber',**{'name':'Max number of logfiles to be kept', 'current':50, 'min':0, 'type':'Integer', 'parent':'logdir'})
 
 
 u=[[k,v] for k,v in units.user_defaults.iteritems()]
