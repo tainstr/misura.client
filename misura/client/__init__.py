@@ -35,6 +35,7 @@ def from_argv():
 def configure_logger():
 	import os
 	import logging
+	import logging.handlers
 	from misura.client.clientconf import confdb
 	from misura.client.units import Converter
 
