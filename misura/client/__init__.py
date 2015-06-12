@@ -23,7 +23,7 @@ def default(host='localhost', port=3880, user='admin', password='admin'):
 
 def from_argv():
 	"""Get connection from command line arguments"""
-	import sys, getopt
+	import sys, getopt, logging
 	logging.debug('%s %s', 'from argv', sys.argv)
 	opts, args=getopt.getopt(sys.argv[1:], 'h:p:u:w:')
 	r={'-h':'localhost', '-p':3880,
