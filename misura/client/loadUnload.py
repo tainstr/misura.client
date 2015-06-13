@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Esempio di script per i test di elasticità tramite carico/scarico su campione FLEX"""
 
-import logging
+from misura.canon.logger import Log as logging
 from time import sleep
 from sys import argv,exit
 from numpy import *

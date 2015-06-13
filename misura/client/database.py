@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtCore,QtGui
 import os
-import logging
+from misura.canon.logger import Log as logging
 import datetime
 import functools
 from misura.client import _

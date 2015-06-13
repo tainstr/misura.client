@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Designer per il ciclo termico."""
-import logging
+from misura.canon.logger import Log as logging
 import numpy as np
 from numpy import array
 from .. import _

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tools and plugins for Veusz, providing Misura Thermal Analysis functionality"""
-import logging
+from misura.canon.logger import Log as logging
 import veusz.plugins as plugins
 import numpy
 from utils import smooth

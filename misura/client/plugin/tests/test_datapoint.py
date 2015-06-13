@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Testing plugin/CurveOperationPlugin.py plugin."""
 import unittest
-import logging
+from misura.canon.logger import Log as logging
 
 import numpy as np
 

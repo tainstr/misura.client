@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import logging
+from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 import functools
 import tables
@@ -288,6 +288,7 @@ class MainWindow(QtGui.QMainWindow):
 		paths=self.remote['devices']
 		logging.debug('%s %s', 'setInstrument PATHS:', paths)
 		for p, (pic, win) in self.cameras.iteritems():
+			logging.debug('deleting cameras', p, pic, win)
 			pic.close()
 			win.hide()
 			win.deleteLater()
@@ -338,6 +339,7 @@ class MainWindow(QtGui.QMainWindow):
 			win.hide()
 #		self.connect(pic, QtCore.SIGNAL('updatedROI()'), win.repaint)
 		self.cameras[role]=(pic, win)
+		
 		
 # 	@csutil.lockme
 	def set_doc(self,doc):

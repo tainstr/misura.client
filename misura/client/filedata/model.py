@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Rich, hierarchical representation of opened tests and their datasets"""
-import logging
+from misura.canon.logger import Log as logging
 import sip
 sip.setapi('QString', 2)
 from veusz import document

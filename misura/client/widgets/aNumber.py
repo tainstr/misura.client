@@ -6,7 +6,7 @@ from traceback import print_exc
 from misura.client.parameters import MAX,MIN
 from misura.client.widgets.active import ActiveWidget
 import math
-import logging
+from misura.canon.logger import Log as logging
 
 class FocusableSlider(QtGui.QSlider):
 	zoom=QtCore.pyqtSignal(bool)

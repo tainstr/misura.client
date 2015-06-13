@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """misura Configuration Manager"""
 import unittest
-import logging
+from misura.canon.logger import Log as logging
 from misura.client import clientconf, confwidget
 import tempfile
-import logging
+from misura.canon.logger import Log as logging
 from PyQt4 import QtGui
 app=False
 

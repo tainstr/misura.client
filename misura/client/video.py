@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Video export tools"""
-import logging
+from misura.canon.logger import Log as logging
 import numpy as np
 try:
 	import cv2 as cv

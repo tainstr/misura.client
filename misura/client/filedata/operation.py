@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Libreria per il plotting semplice durante l'acquisizione."""
-import logging
+from misura.canon.logger import Log as logging
 from traceback import print_exc
 from exceptions import BaseException
 import numpy as np

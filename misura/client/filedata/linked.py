@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Libreria per il plotting semplice durante l'acquisizione."""
 import os
-import logging
+from misura.canon.logger import Log as logging
 import veusz.dataimport.base as base
 from misura.canon import option
 from proxy import getFileProxy

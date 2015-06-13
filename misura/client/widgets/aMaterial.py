@@ -3,7 +3,7 @@
 from .. import _
 from misura.client.widgets.active import *
 from aString import aString
-import logging
+from misura.canon.logger import Log as logging
 
 
 

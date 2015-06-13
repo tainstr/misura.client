@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Testing SurfaceTensionPlugin.py plugin."""
 import unittest
-import logging
+from misura.canon.logger import Log as logging
 
 from misura.client.tests import iutils_testing as iut
 from misura.client.plugin import SurfaceTensionPlugin

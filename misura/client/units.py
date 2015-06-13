@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Unit conversion"""
 from math import *
-import logging
+from misura.canon.logger import Log as logging
 
 base_units={'micron':'length',
 		'micron^3': 'volume',

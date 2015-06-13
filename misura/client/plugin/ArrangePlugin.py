@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Arrange curves and axes"""
-import logging
+from misura.canon.logger import Log as logging
 import veusz.plugins as plugins
 import veusz.utils
 from misura.client.iutils import get_plotted_tree

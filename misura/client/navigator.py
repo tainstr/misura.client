@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Tree visualization of opened misura Files in a document."""
 import functools
-import logging
+from misura.canon.logger import Log as logging
 
 import veusz.document as document
 from PyQt4 import QtGui, QtCore

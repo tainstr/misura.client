@@ -3,7 +3,7 @@
 """Interfaces for local and remote file access"""
 
 import os
-import logging
+from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 from time import sleep, time
 import tempfile

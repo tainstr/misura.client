@@ -3,7 +3,7 @@
 """Testing the programmatic widget construction."""
 import unittest
 import os
-import logging
+from misura.canon.logger import Log as logging
 from misura.client.conf import constructor
 from misura.client import filedata
 from misura.client.misura3 import convert

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Place datapoints on the characteristic shapes."""
-import logging
+from misura.canon.logger import Log as logging
 import veusz.plugins as plugins
 import veusz.document as document
 

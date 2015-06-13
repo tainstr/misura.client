@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """Set curve color markers"""
-import logging
+from misura.canon.logger import Log as logging
 import veusz.plugins as plugins
 
 import utils 

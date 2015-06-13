@@ -6,7 +6,7 @@ configuration_level=5
 import sys
 import os
 from time import time
-import logging
+from misura.canon.logger import Log as logging
 from PyQt4 import QtCore
 from traceback import print_exc
 

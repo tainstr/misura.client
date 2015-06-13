@@ -4,7 +4,7 @@
 from PyQt4 import QtGui, QtCore
 import os
 import sys
-import logging
+from misura.canon.logger import Log as logging
 from time import sleep
 import signal
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import logging
+from misura.canon.logger import Log as logging
 import select
 import socket
 from time import sleep

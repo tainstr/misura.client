@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from .. import _
-import logging
+from misura.canon.logger import Log as logging
 from PyQt4 import QtGui,QtCore
 from misura.client.widgets.active import ActiveWidget
 

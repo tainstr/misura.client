@@ -3,7 +3,7 @@
 """Configuration interface for misura.
 Global instrument parametrization and setup."""
 
-import logging
+from misura.canon.logger import Log as logging
 from misura.client import network
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt

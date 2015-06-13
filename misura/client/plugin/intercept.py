@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """A point connected to an xy plot."""
-import logging
+from misura.canon.logger import Log as logging
 import veusz.widgets
 import veusz.document as document
 import veusz.setting as setting

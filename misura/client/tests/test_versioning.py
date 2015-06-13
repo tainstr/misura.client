@@ -4,7 +4,7 @@
 import unittest
 import sys
 import os
-import logging
+from misura.canon.logger import Log as logging
 import veusz.document as document
 from misura.client import filedata
 import iutils_testing as iut

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Tests aTable widget."""
 import unittest
-import logging
+from misura.canon.logger import Log as logging
 from misura import utils_testing as ut
 from misura.client import widgets
 from misura.device import Node 

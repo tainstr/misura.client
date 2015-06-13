@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Tabular view of data in a MisuraDocument"""
 import os
-import logging
+from misura.canon.logger import Log as logging
 
 from .. import iutils,_
 from misura.client import widgets

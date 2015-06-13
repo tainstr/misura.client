@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """An image contained in a Misura HDF5 output file time/Image array reference."""
 import os
-import logging
+from misura.canon.logger import Log as logging
 
 import veusz.utils
 import veusz.widgets

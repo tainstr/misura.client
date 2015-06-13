@@ -4,7 +4,7 @@
 import os
 from textwrap import wrap, fill
 import datetime
-import logging
+from misura.canon.logger import Log as logging
 
 import veusz
 import veusz.plugins as plugins

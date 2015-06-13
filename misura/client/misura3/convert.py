@@ -5,7 +5,7 @@ import tables, numpy
 import numpy as np
 from copy import deepcopy
 import os
-import logging
+from misura.canon.logger import Log as logging
 import StringIO
 from traceback import print_exc
 from datetime import datetime

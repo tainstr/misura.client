@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Changes measurement unit to a dataset."""
-import logging
+from misura.canon.logger import Log as logging
 import veusz.plugins as plugins
 import veusz.document as document
 import utils

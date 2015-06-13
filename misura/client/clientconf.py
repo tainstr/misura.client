@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """misura Configuration Manager"""
 import os
-import logging
+from misura.canon.logger import Log as logging
 import sqlite3
 import re
 from traceback import print_exc
@@ -15,7 +15,7 @@ import units
 
 import parameters as params
 
-import logging
+from misura.canon.logger import Log as logging
 
 default_desc={}
 

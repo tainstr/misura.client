@@ -4,7 +4,7 @@ from traceback import print_exc
 import functools
 from time import sleep, time
 import collections
-import logging
+from misura.canon.logger import Log as logging
 
 from misura.client import network
 from misura.client import units

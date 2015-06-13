@@ -3,7 +3,7 @@
 """Applicazione di grafica basata su Veusz"""
 # Librerie generali
 import os
-import logging
+from misura.canon.logger import Log as logging
 import sip
 sip.setapi('QString', 2)
 from PyQt4 import QtGui, QtCore

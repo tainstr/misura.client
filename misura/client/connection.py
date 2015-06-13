@@ -8,7 +8,7 @@ import network
 from clientconf import confdb
 from live import registry
 
-import logging
+from misura.canon.logger import Log as logging
 
 def getConnection(srv):
 	lw=LoginWindow(srv.addr, srv.user, srv.password)

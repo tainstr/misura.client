@@ -3,7 +3,7 @@
 """Testing the ShapesPlugin."""
 import unittest
 import os
-import logging
+from misura.canon.logger import Log as logging
 import veusz.document as document
 import veusz.plugins
 from misura.client import filedata

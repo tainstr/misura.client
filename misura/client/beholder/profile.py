@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Graphical overlay for image analysis"""
-import logging
+from misura.canon.logger import Log as logging
 import numpy
 from overlay import Overlay
 from PyQt4 import QtGui, QtCore

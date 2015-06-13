@@ -1,6 +1,6 @@
  #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import logging
+from misura.canon.logger import Log as logging
 import sip
 API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
 API_VERSION = 2

@@ -4,7 +4,7 @@
 import unittest
 import sys
 import os
-import logging
+from misura.canon.logger import Log as logging
 from misura.client import units
 from PyQt4 import QtGui
 app=False

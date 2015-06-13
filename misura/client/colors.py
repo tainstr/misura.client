@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import logging
+from misura.canon.logger import Log as logging
 from numpy import prod
 
 def colorLevels(n):

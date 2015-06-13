@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Classes representing datasets in the DocumentModel."""
-import logging
+from misura.canon.logger import Log as logging
 from veusz import document
 from compiler.ast import flatten
 import collections

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Operations between x,y, curves"""
-import logging
+from misura.canon.logger import Log as logging
 import veusz.plugins as plugins
 import numpy as np
 from scipy import interpolate

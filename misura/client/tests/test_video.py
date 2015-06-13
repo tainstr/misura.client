@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 import os
-import logging
+from misura.canon.logger import Log as logging
 
 from misura import utils_testing as ut
 from misura import parameters as params

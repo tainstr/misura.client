@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import logging
+from misura.canon.logger import Log as logging
 from row import RowView
 from PyQt4 import QtGui, QtCore
 from minimage import MiniImage

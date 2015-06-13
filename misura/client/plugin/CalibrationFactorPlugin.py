@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Get calibration factor from standard expansion curve"""
-import logging
+from misura.canon.logger import Log as logging
 from copy import copy
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline

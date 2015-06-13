@@ -3,7 +3,7 @@
 """Tests DataDecoder"""
 import unittest
 
-import logging
+from misura.canon.logger import Log as logging
 import os
 from misura.client.tests import iutils_testing as iut
 from misura.client import archive, filedata, conf

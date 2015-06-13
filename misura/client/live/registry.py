@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Client-Server Synchronization"""
 
-import logging
+from misura.canon.logger import Log as logging
 from time import sleep, time
 from cPickle import loads
 import threading

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
-import logging
+from misura.canon.logger import Log as logging
 from PyQt4 import QtCore
 import exceptions
 from time import sleep

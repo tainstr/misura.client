@@ -3,7 +3,7 @@
 """Testing fileui.minimage module."""
 import unittest
 import os
-import logging
+from misura.canon.logger import Log as logging
 from misura.client import filedata
 from misura.client import fileui
 from misura.client.tests import iutils_testing as iut

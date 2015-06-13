@@ -5,7 +5,7 @@ from misura.client import _
 from misura.client.clientconf import confdb, settings
 import functools
 import os
-import logging
+from misura.canon.logger import Log as logging
 
 class Path(QtGui.QWidget):
 	def __init__(self,path,parent=None):

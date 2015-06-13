@@ -3,7 +3,7 @@
 """Display a list of `end` option for all detected motors and updates it."""
 from misura.client import widgets
 import sys
-import logging
+from misura.canon.logger import Log as logging
 from misura.client import iutils, network
 from PyQt4 import QtGui, QtCore
 

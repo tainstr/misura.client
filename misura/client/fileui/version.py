@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Versioning management utilities"""
-import logging
+from misura.canon.logger import Log as logging
 from .. import _
 import functools
 from PyQt4 import QtGui, QtCore

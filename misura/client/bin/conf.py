@@ -1,7 +1,7 @@
 #!/usr/bin/python 
 # -*- coding: utf-8 -*-
 import sys
-import logging
+from misura.canon.logger import Log as logging
 from misura.client import iutils, conf
 from misura.client.clientconf import confdb
 

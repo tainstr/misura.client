@@ -3,7 +3,7 @@
 """Tests Archive"""
 import unittest
 import os
-import logging
+from misura.canon.logger import Log as logging
 from misura import utils_testing as ut
 
 from misura import server

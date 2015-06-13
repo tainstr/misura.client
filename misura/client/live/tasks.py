@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Pending tasks feedback"""
 
-import logging
+from misura.canon.logger import Log as logging
 from misura.canon.csutil import lockme, profile
 from misura.client import _
 import functools

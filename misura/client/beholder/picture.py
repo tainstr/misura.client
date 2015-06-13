@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import logging
+from misura.canon.logger import Log as logging
 from functools import partial
 from PyQt4 import QtGui, QtCore
 from misura.client import widgets, _

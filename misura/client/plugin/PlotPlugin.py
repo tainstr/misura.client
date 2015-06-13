@@ -8,7 +8,7 @@ from time import time
 from misura.client import iutils
 from misura.client.iutils import get_plotted_tree
 import os
-import logging
+from misura.canon.logger import Log as logging
 import utils
 import PercentilePlugin
 from .. import units

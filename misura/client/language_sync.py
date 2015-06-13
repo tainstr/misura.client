@@ -32,7 +32,7 @@ u_entry="""
     </message>
 """
 
-import logging
+from misura.canon.logger import Log as logging
 from time import time
 from sys import argv
 import os

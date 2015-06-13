@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Programmatic interface construction utilities"""
-import logging
+from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 import functools
 from misura.canon import option

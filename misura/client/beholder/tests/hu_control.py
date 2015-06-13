@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tests camera ViewerControl"""
-import logging
+from misura.canon.logger import Log as logging
 import unittest
 from misura import utils_testing as ut
 

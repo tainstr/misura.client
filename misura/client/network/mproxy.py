@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #from transport import MisuraTransport
-import logging
+from misura.canon.logger import Log as logging
 import xmlrpclib
 from xmlrpclib import ServerProxy, ProtocolError
 from time import time

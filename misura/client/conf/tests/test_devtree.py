@@ -3,7 +3,7 @@
 """Tests Archive"""
 import unittest
 import os
-import logging
+from misura.canon.logger import Log as logging
 import functools
 from misura import utils_testing as ut
 from misura.client.tests import iutils_testing as iut

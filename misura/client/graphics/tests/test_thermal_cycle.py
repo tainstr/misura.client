@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Test for thermal cycle editor"""
 import unittest
-import logging
+from misura.canon.logger import Log as logging
 from misura import utils_testing as ut
 from misura.client.graphics import thermal_cycle
 from misura import kiln

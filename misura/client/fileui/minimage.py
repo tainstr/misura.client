@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import logging
+from misura.canon.logger import Log as logging
 import functools
 from PyQt4 import QtGui, QtCore
 from ...canon import csutil

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import logging
+from misura.canon.logger import Log as logging
 from .. import network, conf, _
 from ..clientconf import confdb
 from ..connection import LoginWindow, addrConnection

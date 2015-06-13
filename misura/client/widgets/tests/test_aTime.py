@@ -3,7 +3,7 @@
 """Tests role selector widget."""
 import unittest
 import functools
-import logging
+from misura.canon.logger import Log as logging
 from time import time
 from misura import utils_testing as ut
 from misura.client import widgets

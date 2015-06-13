@@ -2,7 +2,7 @@
 #!/usr/bin/python
 """Tests aScript widget."""
 import unittest
-import logging
+from misura.canon.logger import Log as logging
 from misura.client import widgets
 from misura.canon import option
 from PyQt4 import QtGui,QtCore

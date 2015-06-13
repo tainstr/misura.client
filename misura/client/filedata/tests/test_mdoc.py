@@ -3,7 +3,7 @@
 """Testing MisuraDocument (mdoc.py module)"""
 import unittest
 import sys
-import logging
+from misura.canon.logger import Log as logging
 import os,shutil
 from misura.client import filedata
 from misura.canon import indexer

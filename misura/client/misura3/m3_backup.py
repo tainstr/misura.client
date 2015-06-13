@@ -4,7 +4,7 @@ from PyQt4 import QtCore, QtGui
 import pyodbc
 import os, tarfile
 import sys
-import logging
+from misura.canon.logger import Log as logging
 app=QtGui.QApplication(sys.argv)
 
 path=QtGui.QFileDialog.getOpenFileName(None,"Select Misura3 Database","C:\ESS\Misura3\db")

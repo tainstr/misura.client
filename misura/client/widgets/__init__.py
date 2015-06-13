@@ -4,7 +4,7 @@
 from PyQt4 import QtGui,QtCore
 from active import Active, ActiveObject, ActiveWidget,Autoupdater, info_dialog, RunMethod
 import os
-import logging
+from misura.canon.logger import Log as logging
 
 from .. import _
 from traceback import print_exc

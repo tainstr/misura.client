@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tree visualization of variables at a given time"""
-import logging
+from misura.canon.logger import Log as logging
 from .. import _
 import functools
 

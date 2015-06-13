@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Simple plotting for archive and live acquisition."""
 import os
-import logging
+from misura.canon.logger import Log as logging
 from veusz import qtall as qt4
 from PyQt4 import QtGui, QtCore
 

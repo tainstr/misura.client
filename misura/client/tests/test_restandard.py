@@ -3,7 +3,7 @@
 """Testing the client-side standard execution."""
 import unittest
 import os
-import logging
+from misura.canon.logger import Log as logging
 from misura.client import filedata
 import iutils_testing as iut
 from PyQt4 import QtGui

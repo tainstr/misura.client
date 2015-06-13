@@ -4,7 +4,7 @@
 import unittest
 
 import os
-import logging
+from misura.canon.logger import Log as logging
 from misura.client.tests import iutils_testing as iut
 from misura.client.graphics import Plot
 from misura.client import filedata

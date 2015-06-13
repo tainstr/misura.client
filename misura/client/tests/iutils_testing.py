@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import logging
+from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 def determine_path ():
 	"""Borrowed from wxglade.py"""

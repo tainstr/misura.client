@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Verify conversion from Misura3 to misura files. Windows-only unittest!"""
-import logging
+from misura.canon.logger import Log as logging
 import sip
 sip.setapi('QString', 2)
 import unittest

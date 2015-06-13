@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Graphical overlay for image analysis"""
-import logging
+from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (0, 125, 125), (125, 125, 0), (125, 0, 125)]*3
 

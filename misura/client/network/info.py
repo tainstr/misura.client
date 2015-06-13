@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import logging
+from misura.canon.logger import Log as logging
 
 class ServerInfo(object):
 	def __init__(self, fullname='._', hosttarget='', port=0, txt='SERIAL=0; =; ='):

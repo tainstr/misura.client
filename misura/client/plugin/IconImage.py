@@ -7,7 +7,7 @@ import veusz.widgets
 import veusz.document as document
 import veusz.utils
 import os
-import logging
+from misura.canon.logger import Log as logging
 
 
 class IconImage(veusz.widgets.ImageFile):
