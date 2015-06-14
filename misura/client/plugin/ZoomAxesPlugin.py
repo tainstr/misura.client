@@ -5,7 +5,7 @@ import veusz.plugins as plugins
 import veusz.document as document
 import utils
 class ZoomAxesPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
-	"""Show Misura Microscope shapes in graphics"""
+	"""Re-scale all axes in order to zoom in/out from the graph"""
 	# a tuple of strings building up menu to place plugin on
 	menu = ('General','Zoom axes')
 	# unique name for plugin

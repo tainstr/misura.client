@@ -73,11 +73,11 @@ class ViewerControl(unittest.TestCase):
 		
 		enc.x['motor']=[self.motH['fullpath'],'default',False]
 		enc.x['align']=1
-		enc.x.motor['streamerPos']=[self.rem['fullpath'],'default','xPos']
+		enc.x.motor.setattr('streamerPos','options',[self.rem['fullpath'],'default','xPos'])
 		
 		enc.y['motor']=[self.motV['fullpath'],'default',False]
 		enc.y['align']=1
-		enc.y.motor['streamerPos']=[self.rem['fullpath'],'default','yPos']
+		enc.y.motor('streamerPos','options',[self.rem['fullpath'],'default','yPos'])
 		
 		enc.focus['motor']=[self.motF['fullpath'],'default',False]
 		enc.angle['motor']=[self.motA['fullpath'],'default',False]
