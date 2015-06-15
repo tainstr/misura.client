@@ -71,8 +71,8 @@ class aNumber(ActiveWidget):
 		else:
 			if self.slider: 
 				self.connect(self.slider, QtCore.SIGNAL('valueChanged(int)'), self.sliderPush)
+				self.connect(self.slider, QtCore.SIGNAL('pause(bool)'), self.update)
 			self.connect(self.spinbox, QtCore.SIGNAL(self.sValueChanged), self.boxPush)
-#		self.emit(QtCore.SIGNAL('selfchanged()'))
 		self.update(minmax=False)
 
 		
