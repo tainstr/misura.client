@@ -14,7 +14,7 @@ from aChooser import aChooser
 from aDict import aDict
 from aMeta import aMeta
 from aMaterial import aMaterial
-from aNumber import aNumber,  aNumberAction
+from aNumber import aNumber,  aNumberAction,  FocusableSlider
 from aProgress import aProgress, RoleProgress
 from aString import aString
 from aScript import aScript

@@ -22,6 +22,49 @@ def tearDownModule():
 	logging.debug('%s', 'Quitting app')
 	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
+
+
+ev=QtGui.QMouseEvent(QtCore.QEvent.MouseButtonPress, QtCore.QPoint(0, 0), QtCore.QPoint(0, 0), 
+                     QtCore.Qt.NoButton, QtCore.Qt.NoButton, QtCore.Qt.NoModifier)
+
+class FocusableSlider(unittest.TestCase):
+	def setUp(self):
+		self.wg=widgets.FocusableSlider()
+		
+	def tearDown(self):
+		print 'teardown'
+		self.wg.close()
+		
+	def test_set_paused(self):
+		self.assertFalse(self.wg.paused)
+		self.assertTrue(self.wg.set_paused(True))
+		self.assertTrue(self.wg.paused)
+		self.assertTrue(self.wg.set_paused(False))
+		self.assertFalse(self.wg.paused)
+		self.assertFalse(self.wg.set_paused(False))
+		
+	def test_mousePressEvent(self):
+		print 'a'
+		self.assertFalse(self.wg.paused)
+		print '0'
+		self.wg.mousePressEvent(ev)
+		print '1'
+		self.assertTrue(self.wg.paused)
+		self.wg.mouseReleaseEvent(ev)
+		print '2'
+		self.assertFalse(self.wg.paused)
+		print '3'
+		
+	def test_mouseDoubleClickEvent(self):
+		print 'mdce 1'
+		self.assertFalse(self.wg.zoomed)
+		self.wg.mouseDoubleClickEvent(ev)
+		print 'mdce 2'
+		self.assertTrue(self.wg.zoomed)
+		self.wg.mouseDoubleClickEvent(ev)
+		print 'mdce 3'
+		self.assertFalse(self.wg.zoomed)
+		print 'done'
 	
 class aNumber(unittest.TestCase):
 	def setUp(self):
@@ -70,6 +113,8 @@ class aNumber(unittest.TestCase):
 		self.assertEqual(w.current, 0)
 		self.assertFalse(w.slider)
 		#TODO!
+		
+	
 		
 if __name__ == "__main__":
 	unittest.main(verbosity=2)  

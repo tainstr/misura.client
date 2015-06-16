@@ -16,22 +16,28 @@ class FocusableSlider(QtGui.QSlider):
 		self.paused=False
 		self.zoomed=False
 		
+	def set_paused(self, v):
+		"""Change paused state for the slider."""
+		if self.paused==v:
+			return False
+		self.paused=v
+		self.pause.emit(v)
+		return True
+		
 	def mousePressEvent(self,ev):
-		logging.debug('%s', 'mousePressEvent')
-		self.paused=True
-		self.pause.emit(True)
+		logging.debug('mousePressEvent')
+		self.set_paused(True)
 		return QtGui.QSlider.mousePressEvent(self,ev)
 
 	def mouseReleaseEvent(self,ev):
-		logging.debug('%s', 'mouseReleaseEvent')
-		self.paused=False
-		self.pause.emit(False)
+		logging.debug('mouseReleaseEvent')
+		self.set_paused(False)
 		return QtGui.QSlider.mouseReleaseEvent(self,ev)
 	
 	def mouseDoubleClickEvent(self,ev):
 		self.zoomed=1^self.zoomed
 		self.zoom.emit(self.zoomed)
-		logging.debug('%s %s', 'mouseDoubleClickEvent', self.zoomed)
+		logging.debug('mouseDoubleClickEvent %s', self.zoomed)
 		return QtGui.QSlider.mouseDoubleClickEvent(self,ev)
 		
 		
@@ -71,7 +77,7 @@ class aNumber(ActiveWidget):
 		else:
 			if self.slider: 
 				self.connect(self.slider, QtCore.SIGNAL('valueChanged(int)'), self.sliderPush)
-				self.connect(self.slider, QtCore.SIGNAL('pause(bool)'), self.update)
+#				self.connect(self.slider, QtCore.SIGNAL('pause(bool)'), self.update)
 			self.connect(self.spinbox, QtCore.SIGNAL(self.sValueChanged), self.boxPush)
 		self.update(minmax=False)
 
@@ -119,6 +125,8 @@ class aNumber(ActiveWidget):
 		target=target/self.divider
 		if self.double: target=float(target)
 		else: target=int(target)
+		if self.slider:
+			self.slider.set_paused(False)
 		self.set(target)
 		
 	def setZoom(self,val):
