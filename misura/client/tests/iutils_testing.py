@@ -22,6 +22,16 @@ db3_path=os.path.join(db3_dir,'test.mdb')
 data_dir=os.path.join(client_test_dir,'data')
 rem=None
 
+import logging
+logging.disable(logging.CRITICAL)
+
+def disable_print():
+	import sys
+	import os
+	sys.stdout = open(os.devnull, 'w')
+
+disable_print()
+
 win=sys.platform.startswith('win')
 
 class Dummy(object):

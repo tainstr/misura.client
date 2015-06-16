@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
 logging.debug('%s', 'Importing '+__name__)
 
 import unittest
