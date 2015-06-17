@@ -8,19 +8,15 @@ from misura.client.graphics import thermal_cycle
 from misura import kiln
 from PyQt4 import QtGui,QtCore
 from PyQt4.QtTest import QTest
-app=False
+
 logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 	ut.parallel(0)
 
 def tearDownModule():
-	global app
 	logging.debug('%s', 'Quitting app')
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 	
@@ -35,7 +31,7 @@ class Designer(unittest.TestCase):
 		tcd=thermal_cycle.ThermalCycleDesigner(k)
 		if __name__=='__main__':
 			tcd.show()
-			app.exec_()
+			QtGui.qApp.exec_()
 		
 		
 if __name__ == "__main__":

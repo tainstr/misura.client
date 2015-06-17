@@ -8,33 +8,22 @@ from misura import utils_testing as ut
 from misura import client
 from PyQt4 import QtGui
 from qtreactor import  qt4reactor
-app=QtGui.QApplication([])
 qt4reactor.install()
 from misura.client.beholder import dialog
-
-
 
 from misura.beholder import sim_camera
 from misura.morla import sim_motor
 from misura.microscope import Hsm
 from misura.flex import Flex
 
-
-#app=False
-
 logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-#	global app
-#	app=QtGui.QApplication([])
-#	qt4reactor.install()
 	ut.parallel(True)
 
 def tearDownModule():
-	global app
 	logging.debug('%s', 'Quitting app')
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 	ut.parallel(False)
 
@@ -110,7 +99,7 @@ class ViewerDialog(unittest.TestCase):
 	
 	def test_show(self):
 		self.obj.show()
-		app.exec_()
+		QtGui.qApp.exec_()
 
 		
 

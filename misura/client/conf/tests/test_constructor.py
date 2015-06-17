@@ -11,21 +11,13 @@ from misura.client.tests import iutils_testing as iut
 from misura.canon import option
 from PyQt4 import QtGui,QtCore
 
-app=False
-
 logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 
 def tearDownModule():
-	global app
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
-	
-
 
 main=__name__=="__main__"
 

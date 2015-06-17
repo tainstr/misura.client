@@ -8,18 +8,13 @@ from misura.client.tests import iutils_testing as iut
 from misura.client import fileui
 from misura.canon import indexer
 from PyQt4 import QtGui
-app=False
 
 logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 
 def tearDownModule():
-	global app
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 
 

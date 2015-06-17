@@ -12,20 +12,15 @@ from misura.canon import option
 from PyQt4 import QtGui,QtCore
 from PyQt4.QtTest import QTest
 
-app=False
 logging.debug('%s %s', 'Importing', __name__)
 main=__name__=='__main__'
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 	ut.parallel(0)
 
 def tearDownModule():
-	global app
 	logging.debug('%s', 'Quitting app')
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 
 	

@@ -10,19 +10,13 @@ from misura.client.acquisition import controls
 from misura import instrument
 from PyQt4 import QtGui
 
-app=False
-
 logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 
 def tearDownModule():
-	global app
 	logging.debug('%s', 'Quitting app')
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 class Parent(QtGui.QWidget):
@@ -84,7 +78,7 @@ class HuControl(unittest.TestCase):
 		mw=QtGui.QMainWindow()
 		mw.addToolBar(self.ctrl)
 		mw.show()
-		app.exec_()
+		QtGui.qApp.exec_()
 		ut.parallel(0)
 		
 		

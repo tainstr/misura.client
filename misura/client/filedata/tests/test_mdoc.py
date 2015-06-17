@@ -12,7 +12,6 @@ from PyQt4 import QtGui
 from time import sleep
 import veusz.document as document
 import veusz.widgets
-app=False
 
 logging.debug('%s %s', 'Importing', __name__)
 nativem4=os.path.join(iut.data_dir,'hsm_test.h5')
@@ -20,12 +19,8 @@ nativem4=os.path.join(iut.data_dir,'hsm_test.h5')
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 
 def tearDownModule():
-	global app
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 class MisuraDocument(unittest.TestCase):

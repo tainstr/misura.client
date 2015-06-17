@@ -19,12 +19,8 @@ logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 
 def tearDownModule():
-	global app
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 nativem4=os.path.join(iut.data_dir,'hsm_test.h5')

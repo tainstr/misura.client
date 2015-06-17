@@ -4,9 +4,6 @@
 import os, sys
 import unittest
 from misura.canon.logger import Log as logging
-#FIXME: Must add this import otherwise it will FAIL
-from misura.client.tests import test_configuration
-import iutils_testing as iut
 
 patterns=['test_*.py', # unit tests
 		'sim_*.py', 	# large, complete simulations
@@ -45,6 +42,8 @@ def load_tests(loader, tests, pattern):
 		# Normalize dirpath ending
 		if not dirpath.endswith('/'): 
 			dirpath=dirpath+'/'
+		# if not 'conf/tests' in dirpath:
+		# 	continue
 		# Remember for future use
 		lst.append(dirpath)
 	d2=os.path.split(d1)[0]
@@ -65,8 +64,3 @@ def load_tests(loader, tests, pattern):
 if __name__=='__main__':
 	unittest.main(verbosity=1)
 	logging.debug('%s', 'DONE')
-	
-	
-	
-	
-	

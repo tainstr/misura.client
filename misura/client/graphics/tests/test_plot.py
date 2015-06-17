@@ -10,18 +10,13 @@ from misura.client.graphics import Plot
 from misura.client import filedata
 from misura.client.navigator import Navigator
 from PyQt4 import QtGui,QtCore
-app=False
 
 logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 
 def tearDownModule():
-	global app
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 
 nativem4=os.path.join(iut.data_dir,'device_22.h5')
@@ -42,7 +37,7 @@ class TestPlot(unittest.TestCase):
 		self.p.hide_show('0:hsm/sample0/Vol')
 		if __name__=='__main__':
 			self.p.show()
-			app.exec_()
+			QtGui.qApp.exec_()
 		
 		
 		

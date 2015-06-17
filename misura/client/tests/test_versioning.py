@@ -11,18 +11,13 @@ import iutils_testing as iut
 import shutil
 import numpy as np
 from PyQt4 import QtGui
-app=False
 
 logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 
 def tearDownModule():
-	global app
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 
 from3=os.path.join(iut.data_dir,'m3_hsm.h5')

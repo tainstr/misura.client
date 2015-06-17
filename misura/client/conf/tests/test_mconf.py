@@ -19,11 +19,8 @@ main=__name__=='__main__'
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 	
 def tearDownModule():
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 # nativem4=os.path.join(iut.data_dir,'post_m3.h5')
@@ -38,7 +35,7 @@ class TestTreePanel(unittest.TestCase):
 		m=conf.TreePanel(s.users,select=s.users)
 		if main:
 			m.show()
-			app.exec_()
+			QtGui.qApp.exec_()
 		
 		
 

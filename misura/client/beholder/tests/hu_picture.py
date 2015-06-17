@@ -11,20 +11,16 @@ from misura.beholder import sim_camera
 
 from misura.microscope import Hsm
 from PyQt4 import QtGui
-app=False
+
 logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 	ut.parallel(True)
 
 def tearDownModule():
 	logging.debug('%s %s', 'tearDownModule', __name__)
-	global app
 	logging.debug('%s', 'Quitting app')
-	app.quit()
 	ut.parallel(False)
 
 class HuViewerPicture(unittest.TestCase):
@@ -46,7 +42,7 @@ class HuViewerPicture(unittest.TestCase):
 		
 	def test_exec(self):
 		self.obj.show()
-		app.exec_()
+		QtGui.qApp.exec_()
 		
 		
 		

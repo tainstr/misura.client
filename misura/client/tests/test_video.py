@@ -14,12 +14,8 @@ logging.debug('%s', 'Importing '+__name__)
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 	
 def tearDownModule():
-	global app
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 		
 
@@ -34,7 +30,7 @@ class Video(unittest.TestCase):
 		sh=SharedFile(m4file)
 		v=video.VideoExporter(sh)
 		v.show()
-		app.exec_()
+		QtGui.qApp.exec_()
 		sh.close()
 		
 # 	@unittest.skip('')

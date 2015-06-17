@@ -23,18 +23,10 @@ from PyQt4 import QtGui
 
 from misura.client.tests import iutils_testing as iut
 
-app=False
 def setUpModule():
-	global app
 	if sys.platform not in ['win32','win64']:
 		raise unittest.SkipTest( 'Misura3->misura conversion is available only in windows platforms.')
-	app=QtGui.QApplication([])
 
-def tearDownModule():
-	global app
-	if app: app.quit()
-	del app
-	
 	
 hsm_names=set(['t','/hsm/sample0/Ang','/hsm/sample0/Area','/hsm/sample0/Sint','/hsm/sample0/Ratio',
 		'/kiln/P','/kiln/T','/kiln/S']) #,'/hsm/sample0/Width','/hsm/sample0/Softening'

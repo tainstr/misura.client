@@ -22,6 +22,8 @@ db3_path=os.path.join(db3_dir,'test.mdb')
 data_dir=os.path.join(client_test_dir,'data')
 rem=None
 
+app = QtGui.QApplication([])
+
 import logging
 logging.disable(logging.CRITICAL)
 

@@ -7,7 +7,6 @@ from misura.client import widgets
 from misura.canon import option
 from PyQt4 import QtGui
 
-app=False
 logging.debug('%s %s', 'Importing', __name__)
 main=__name__=='__main__'
 
@@ -15,13 +14,9 @@ main=__name__=='__main__'
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 
 def tearDownModule():
-	global app
 	logging.debug('%s', 'Quitting app')
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 	

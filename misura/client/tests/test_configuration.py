@@ -13,12 +13,8 @@ logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
 	logging.debug('setUpModule %s', __name__)
-	global app
-	app=QtGui.QApplication([])
 
 def tearDownModule():
-	global app
-	app.quit()
 	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 class Conf(unittest.TestCase):
@@ -78,7 +74,7 @@ class Conf(unittest.TestCase):
 	def test_widget(self):
 		cc=confwidget.ClientConf()
 		cc.show()
-		app.exec_()
+		QtGui.qApp.exec_()
 	
 
 

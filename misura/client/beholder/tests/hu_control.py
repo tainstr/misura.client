@@ -14,22 +14,16 @@ from misura.microscope import Hsm
 from misura.flex import Flex
 from PyQt4 import QtGui
 
-app=False
-
 #TODO: test if just one coordinate! 
 
 logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
 	logging.debug('%s %s', 'setUpModule', __name__)
-	global app
-	app=QtGui.QApplication([])
 	ut.parallel(1)
 
 def tearDownModule():
-	global app
 	logging.debug('%s', 'Quitting app')
-	app.quit()
 	ut.parallel(0)
 	logging.debug('%s %s', 'tearDownModule', __name__)
 
@@ -115,7 +109,7 @@ class ViewerControl(unittest.TestCase):
 		self.check_control('left',wg1)
 		
 		obj.show()
-		app.exec_()
+		appQtGui.qApp.exec_()
 		
 		obj.delControl('left')
 		self.assertEqual(obj.controls['left'],None)
