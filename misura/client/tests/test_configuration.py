@@ -2,68 +2,56 @@
 # -*- coding: utf-8 -*-
 """misura Configuration Manager"""
 import unittest
-from misura.canon.logger import Log as logging
+from misura.client.tests import iutils_testing
 from misura.client import clientconf, confwidget
 import tempfile
-from misura.canon.logger import Log as logging
 from PyQt4 import QtGui
-app=False
 
-logging.debug('%s %s', 'Importing', __name__)
+def temporary_filename():
+	temporary_file = tempfile.NamedTemporaryFile(delete = False)
+	file_name = temporary_file.name
+	temporary_file.close()
+	return file_name
 
-def setUpModule():
-	logging.debug('setUpModule %s', __name__)
-
-def tearDownModule():
-	logging.debug('%s %s', 'tearDownModule', __name__)
 	
 class Conf(unittest.TestCase):
-#	@unittest.skip('')
 	def test_create(self):
-#		f,p=tempfile.mkstemp()
-		f=tempfile.NamedTemporaryFile(delete=False)
-		p=f.name
-		f.close() # Compatibilità Windows: i file temporanei devono essere aperti e chiusi...!!!
-		cf=clientconf.ConfDb(p,new=True)
-		k0=set(clientconf.default_desc.keys())
-		k1=set(cf.desc.keys())
+		file_name = temporary_filename()
+		client_configuration = clientconf.ConfDb(file_name,new=True)
+
+		k0 = set(clientconf.default_desc.keys())
+		k1 = set(client_configuration.desc.keys())
 		self.assertEqual(k0,k1)
 	
-#	@unittest.skip('')
 	def test_save(self):
-#		f,p=tempfile.mkstemp()
-		f=tempfile.NamedTemporaryFile(delete=False)
-		p=f.name
-		f.close()
-		cf=clientconf.ConfDb(p,new=True)
-		cf['lang']='en'
-		cf.save()
-		cf=clientconf.ConfDb(p)
-		self.assertEqual(cf['lang'],'en')
+		file_name = temporary_filename()
+
+		client_configuration = clientconf.ConfDb(path = file_name, new = True)
+		client_configuration['lang'] = 'en'
+		client_configuration.save()
+
+		reloaded_clientconf = clientconf.ConfDb(file_name)
+
+		self.assertEqual(reloaded_clientconf.path, file_name)
+		self.assertEqual(reloaded_clientconf['lang'], 'en')
+
 		
-#	@unittest.skip('')	
 	def test_mem(self):
-#		f,p=tempfile.mkstemp()
-		f=tempfile.NamedTemporaryFile(delete=False)
-		p=f.name
-		f.close()
+		p = temporary_filename()
+		
 		cf=clientconf.ConfDb(p,new=True)
 		cf.mem('file','name1','path1')
 		cf.mem_file('name2','path2')
 		self.assertEqual(cf.recent_file,[['name1','path1'],['name2','path2']])
 		for i in range(10):
 			cf.mem_file(str(i),str(i))
-		logging.debug('%s %s', 'RECENT FILE', cf.recent_file)
 		self.assertEqual(cf.recent_file[7],['5','5'])
 		cf.save()
 		o=cf.recent_file[:]
 		cf=clientconf.ConfDb(p)
-		logging.debug('%s %s', 'RECENT FILE AFTER SAVING', o)
-		logging.debug('%s %s', 'RECENT FILE AFTER OPENING', cf.recent_file)
 		
 		self.assertEqual(cf.recent_file,o)
 	
-#	@unittest.skip('')	
 	def test_unicode(self):
 		f=tempfile.NamedTemporaryFile(delete=False)
 		cf=clientconf.ConfDb(f.name,new=True)

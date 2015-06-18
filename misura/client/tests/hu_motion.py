@@ -19,8 +19,6 @@ def main():
 			wg=widgets.build(srv, m, m.gete('end'))
 			wgs.append(wg)
 			lay.addRow(m['fullpath']+m['name'], wg)
-	#		break
-	#	break
 			
 	do=False
 	def up():
@@ -36,13 +34,6 @@ def main():
 	clock.connect(clock, QtCore.SIGNAL('timeout()'), up)
 	clock.start(250)
 
-	#class Thread(QtCore.QThread):
-	#	def run(self):
-	#		while True:
-	#			up()
-			
-	#t=Thread()
-	#t.start()
 	qb.setLayout(lay)
 	qb.show()
 	sys.exit(QtGui.qApp.exec_())

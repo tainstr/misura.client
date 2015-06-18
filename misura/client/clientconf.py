@@ -127,7 +127,8 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 	_Method__name='CONF'
 	conn=False
 	path=''
-	def __init__(self,path=False,new=False):
+
+	def __init__(self, path = False, new = False):
 		QtCore.QObject.__init__(self)
 		option.ConfigurationProxy.__init__(self)
 		self.store=option.SqlStore()
@@ -137,13 +138,12 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 		# Ensure missing if new
 		if os.path.exists(path) and new:
 			os.remove(path)
-		# Missing but not new: create default path
-		elif not new:
-			path=os.path.expanduser('~/misuraconf.sqlite')
 		# Load/create
+
 		self.load(path)
-		
+
 	_rule_style=RulesTable()
+	
 	@property
 	def rule_style(self):
 		"""A RulesTable for styles"""
@@ -152,6 +152,7 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 		return self._rule_style
 	
 	_rule_dataset=RulesTable()
+	
 	@property
 	def rule_dataset(self):
 		"""A special RulesTable collecting dataset loading behaviors."""
@@ -166,6 +167,7 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 		return self._rule_dataset	
 	
 	_rule_unit=RulesTable()
+
 	@property
 	def rule_unit(self):
 		if not self._rule_unit:
@@ -179,7 +181,7 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 	
 	def load(self,path=False):
 		"""Load an existent client configuration database, or create a new one."""
-		logging.debug('%s %s', 'LOAD', path)
+		logging.debug('LOAD %s', path)
 		self.nosave_server=[]
 		self.close()
 		if path: self.path=path
@@ -220,7 +222,6 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 			r=sorted(r, key=lambda e: e[0])
 			# Pop key
 			r=[list(e[1:]) for e in r]
-#			print 'read',name,r
 			setattr(self,name,r)
 		cursor.close()
 		self.conn.commit()
