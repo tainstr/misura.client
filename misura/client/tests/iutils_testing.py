@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import disable_print_and_logging
 import os
 import sys
 from misura.canon.logger import Log
@@ -23,16 +24,6 @@ data_dir=os.path.join(client_test_dir,'data')
 rem=None
 
 app = QtGui.QApplication([])
-
-import logging
-logging.disable(logging.CRITICAL)
-
-def disable_print():
-	import sys
-	import os
-	sys.stdout = open(os.devnull, 'w')
-
-disable_print()
 
 win=sys.platform.startswith('win')
 

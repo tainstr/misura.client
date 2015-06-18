@@ -28,6 +28,7 @@ class KidRegistry(QtCore.QThread):
 	"""Remote progress dialog"""
 	tasks=False
 	"""Local tasks dialog"""
+	taskswg = False
 	system_kids=set(['/isRunning'])
 	"""Set of forced update system kids. These are always updated."""
 	#TODO: add queued_kids, a way to asynchronous one-time-update 
@@ -75,6 +76,8 @@ class KidRegistry(QtCore.QThread):
 
 	@property
 	def tasks(self):
+		if not self.taskswg:
+			return False
 		return self.taskswg.tasks
 
 	@lockme
