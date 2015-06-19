@@ -34,7 +34,7 @@ class MainWindow(unittest.TestCase):
 		main_window = self.main_window
 		main_window.setServer(self.server)
 		cam = beholder.SimCamera(self.server)
-		main_window.addCamera(cam,'camera')
+		main_window.addCamera(cam, 'camera')
 
 		self.assertEqual(main_window.cameras['camera'][0].remote, cam)
 				

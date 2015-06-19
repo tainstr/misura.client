@@ -13,8 +13,6 @@ from misura.client.network import manager as net
 from misura.client import _
 from PyQt4 import QtGui, QtCore
 from tasks import Tasks
-
-
 		
 		
 #TODO: we should NEVER reference widgets here, just KIDs (except pending tasks)
@@ -24,8 +22,6 @@ class KidRegistry(QtCore.QThread):
 	stream=False
 	interval=1
 	"""Update interval (s)"""
-	progress=False
-	"""Remote progress dialog"""
 	tasks=False
 	"""Local tasks dialog"""
 	taskswg = False
@@ -91,6 +87,7 @@ class KidRegistry(QtCore.QThread):
 		if doc:
 			self.connect(self,QtCore.SIGNAL('update()'),self.doc.update)
 
+#FIXME: should be locked. It was unlocked for performance, but SHOULD BE LOCKED
 #	@lockme
 	def register(self, w):
 		"""Register Active object `w`"""
@@ -111,32 +108,32 @@ class KidRegistry(QtCore.QThread):
 		self.rid[kid].append(w)
 		return kid
 	
+#FIXME: should be locked. It was unlocked for performance, but SHOULD BE LOCKED
 #	@lockme
-	def unregister(self, w):
+	def unregister(self, widget):
 		"""Removes a widget from the registry."""
-		kid=w.prop['kid']
-		if self.rid.has_key(kid):
-			if w in self.rid[kid]:
-				self.rid[kid].remove(w)
-			del w
-			if len(self.rid[kid])==0:
-				del self.rid[kid]
-		if self.times.has_key(kid):
-			del self.times[kid]
+		key_id = widget.prop['kid']
+		if self.rid.has_key(key_id):
+			if widget in self.rid[key_id]:
+				self.rid[key_id].remove(widget)
+			del widget
+			if len(self.rid[key_id]) == 0:
+				del self.rid[key_id]
+				if self.times.has_key(key_id):
+					del self.times[key_id]
 			
 	@lockme
 	def clear(self):
 		"""Removes all registered objects."""
-		return 
-# 		self.rid={}
-# 		self.times={}
+		self.rid={}
+		self.times={}
 	
 	
 	def _build_request(self):
 		"""Build a request for mapdate() based on valid and visible registered widgets."""
 		request=[]
 		# Force progress update
-		cur=self.obj.get('progress')
+		cur = self.obj.get('progress')
 		if self.progress.progress:
 			self.progress.progress.emit(QtCore.SIGNAL('selfchanged'), cur)
 		for kid,ws in self.rid.items():
@@ -165,21 +162,21 @@ class KidRegistry(QtCore.QThread):
 		"""Update registered objects."""
 		updated=[]
 		# Prepare request list 
-		request=self._build_request()
+		request = self._build_request()
 		# Call remote mapdate()
-		r=self.obj.mapdate(request)
+		r = self.obj.mapdate(request)
 		if not r or r is None:
 			logging.debug('%s', 'KidRegistry.update_all SKIPPING')
 			return []
-		idx, reply=r
+		idx, reply = r
 		# Decode the reply
-		nt=self.obj.time()
+		nt = self.obj.time()
 		for i, j in enumerate(idx):
 			nval=reply[i]
 			kid, ot=request[j]
 			self.times[kid]=nt
 			# Apply the new value
-			ws=self.rid.get(kid, [])
+			ws = self.rid.get(kid, [])
 			# forget all widgets for this kid
 			self.rid[kid]=[] 
 			self.values[kid]=nval
@@ -194,7 +191,6 @@ class KidRegistry(QtCore.QThread):
 			# Notify system kid changes
 			if kid in self.system_kids:
 				self.system_kid_changed.emit(kid)
-# 		print 'Registry.update_all', len(updated)
 		return updated
 		
 	def force_redraw(self):
