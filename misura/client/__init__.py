@@ -13,7 +13,7 @@ import network
 def _(text, disambiguation=None, context='misura'):
 	"""Veusz-based translatable messages tagging."""
 	return QtCore.QCoreApplication.translate(context, text,
-                                     disambiguation=disambiguation)
+									disambiguation=disambiguation)
 
 # CONNECTION SHORTCUTS
 def default(host='localhost', port=3880, user='admin', password='admin'):
@@ -46,7 +46,9 @@ def configure_logger():
 	logsize = Converter.convert('kilobyte','byte', confdb['logsize'])
 	rotating_file_handler = logging.handlers.RotatingFileHandler(confdb['logfile'], maxBytes=logsize, backupCount=confdb['lognumber'])
 	rotating_file_handler.setFormatter(logging.Formatter("%(levelname)s: %(asctime)s %(message)s"))
-	logging.getLogger().addHandler(rotating_file_handler)
-	logging.getLogger().setLevel(confdb['loglevel'])
+#	logging.getLogger().addHandler(rotating_file_handler)
+	level=confdb['loglevel']
+#	level=50
+	logging.getLogger().setLevel(level)
 
 configure_logger()

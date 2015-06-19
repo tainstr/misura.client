@@ -45,7 +45,6 @@ class TestWindow(acquisition.MainWindow):
 			self.fixedDoc.proxy.load_conf()
 		self.setServer(self.fixedDoc.proxy.conf)
 		self.name=self.fixedDoc.proxy.get_node_attr('/conf','instrument')
-		logging.debug('%s %s %s %s', 'instrument name', self.name, getattr(self.fixedDoc.proxy.conf, self.name))
 		self.snapshotsTable.slider.choice()
 		self.snapshotsTable.strip.set_idx()
 		self.title=self.remote.measure['name']

@@ -97,6 +97,9 @@ class KidRegistry(QtCore.QThread):
 		if w.type=='Button':
 			logging.debug('%s', 'It is not possible to register "Button" widgets.')
 			return False
+		if not w.prop:
+			logging.debug('No property for active widget. Impossible to register')
+			return False
 		kid=w.prop['kid']
 		# Add to the dictionary
 		if not self.rid.has_key(kid):
