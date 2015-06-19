@@ -41,7 +41,11 @@ class FrameProcessor(QtCore.QThread):
 			if not self.parent().isVisible(): 
 				sleep(self.waiting)
 				continue
-			crop, frs, frame_number = tcam.frame(frame_number, force)
+			fr=tcam.frame(frame_number, force)
+			if not fr:
+				self.stream=False
+				continue
+			crop, frs, frame_number = fr
 			if force: force = False
 			if frs is False:
 				sleep(self.waiting)
