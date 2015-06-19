@@ -158,7 +158,6 @@ class Active(object):
 		"""Set a new value `val` to server. Convert val into server units."""
 		val=self.adapt2srv(val)
 		if val==self.current:
-			logging.debug('%s', 'nothing to set')
 			return True
 		out=self.remObj.set(self.handle,  val)
 		logging.debug('%s %s %s %s', 'Active.set', self.handle, repr(val), out)
@@ -283,7 +282,10 @@ class ActiveWidget(Active, QtGui.QWidget):
 		self.connect(self, QtCore.SIGNAL('selfchanged()'), self._get)
 		self.connect(self, QtCore.SIGNAL('selfhide()'), self.hide)
 		self.connect(self, QtCore.SIGNAL('selfshow()'), self.show)
-		
+		self.menu_timer=QtCore.QTimer(parent=self)
+		self.menu_timer.setSingleShot(True)
+		self.menu_timer.setInterval(500)
+		self.connect(self.menu_timer, QtCore.SIGNAL('timeout()'), self.do_hide_menu)
 		
 	@property
 	def unit(self):
@@ -421,7 +423,7 @@ class ActiveWidget(Active, QtGui.QWidget):
 			self.bmenu.hide()
 		else:
 			# Retry later
-			QtCore.QTimer.singleShot(500,self.do_hide_menu)
+			self.menu_timer.start()
 			
 	def clear(self):
 		"""Removes all widgets in this layout"""

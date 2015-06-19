@@ -1,13 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from misura.canon.logger import Log as logging
-from PyQt4 import QtGui, QtCore
 import functools
-import tables
 from time import sleep
 import threading
-from traceback import print_exc
+from traceback import  format_exc
 import os
+import sys
+import tables
+
+from misura.canon.logger import Log as logging
+from misura.canon import csutil
 
 from .. import _
 from ..live import registry
@@ -32,7 +34,9 @@ from .. import graphics
 from ..database import UploadThread
 from ..filedata import RemoteFileProxy 
 
-from misura.canon import csutil
+
+
+from PyQt4 import QtGui, QtCore
 
 subWinFlags=QtCore.Qt.CustomizeWindowHint|QtCore.Qt.WindowTitleHint|QtCore.Qt.WindowMinMaxButtonsHint
 
@@ -74,6 +78,10 @@ class MainWindow(QtGui.QMainWindow):
 		self.setMenuWidget(self.myMenuBar)
 		self.connect(network.manager, QtCore.SIGNAL('connected()'), self.setServer)	
 		self.add_server_selector()
+		self.reset_proxy_timer=QtCore.QTimer(parent=self)
+		self.reset_proxy_timer.setSingleShot(True)
+		self.reset_proxy_timer.setInterval(500)
+		self.connect(self.reset_proxy_timer, QtCore.SIGNAL('timeout()'), self._resetFileProxy)
 
 	def add_server_selector(self):
 		"""Server selector dock widget"""
@@ -103,8 +111,9 @@ class MainWindow(QtGui.QMainWindow):
 		registry.set_manager(network.manager)
 		registry.toggle_run(True)
 		self.setServer(s)
-
+	_blockResetFileProxy=False
 	def setServer(self, server=False):
+		self._blockResetFileProxy=True
 		logging.debug('%s %s', 'Setting server to', server)
 		self.server=server
 		if not server:
@@ -217,6 +226,7 @@ class MainWindow(QtGui.QMainWindow):
 	def setInstrument(self, remote, server=False):
 		if server is not False:
 			self.setServer(server)
+		self._blockResetFileProxy=True
 		self.instrumentDock.hide()
 		self.remote=remote
 		name=self.remote['devpath']
@@ -315,7 +325,7 @@ class MainWindow(QtGui.QMainWindow):
 		
 		# Connect to "id" property
 		self.tasks.job(-1,pid,'Document')
-		self.idobj=widgets.ActiveObject(self.server, self.remote.measure, self.remote.measure.gete('id'))
+		self.idobj=widgets.ActiveObject(self.server, self.remote.measure, self.remote.measure.gete('id'), parent=self)
 		self.connect(self.idobj, QtCore.SIGNAL('changed()'), self.resetFileProxy)
 		# Reset decoder and plot
 		self.resetFileProxy()
@@ -370,15 +380,19 @@ class MainWindow(QtGui.QMainWindow):
 		self.connect(self.summaryPlot,QtCore.SIGNAL('move_line(float)'),self.snapshotsTable.set_time)
 		self.tasks.done(pid)
 		
-	retry=10
-	def _resetFileProxy(self,retry=0):
+	max_retry=10
+	def _resetFileProxy(self,retry=0, recursion=0):
 		"""Resets acquired data widgets"""
+		if self._blockResetFileProxy:
+			return False
 		QtGui.qApp.processEvents()
 		if self.doc:
 			self.doc.close()
 			self.doc=False
 		doc=False
 		fid=False
+		if recursion>sys.getrecursionlimit()-10:
+			return False
 		if self.fixedDoc is not False:
 			fid='fixedDoc'
 			doc=self.fixedDoc
@@ -387,19 +401,19 @@ class MainWindow(QtGui.QMainWindow):
 			self.tasks.setFocus()
 			logging.debug('%s', 'Waiting for initialization to complete...')
 			QtGui.qApp.processEvents()
-			sleep(.1)
-			return self._resetFileProxy(retry=0)
+			sleep(0.2)
+			return self._resetFileProxy(retry=0, recursion=recursion+1)
 		else:
 			if not self.server['isRunning']: 
 				retry=5
-			self.tasks.jobs(self.retry,'Waiting for data')
+			self.tasks.jobs(self.max_retry,'Waiting for data')
 			self.tasks.done('Test initialization')
 			self.tasks.job(retry,'Waiting for data')
 			QtGui.qApp.processEvents()
 			if retry<5:
 				sleep(retry/2.)
-				return self._resetFileProxy(retry=retry+1)
-			if retry>self.retry:
+				return self._resetFileProxy(retry=retry+1, recursion=recursion+1)
+			if retry>self.max_retry:
 				self.tasks.done('Waiting for data')
 				QtGui.QMessageBox.critical(self,_('Impossible to retrieve the ongoing test data'),
 						_("""A communication error with the instrument does not allow to retrieve the ongoing test data.
@@ -437,37 +451,41 @@ class MainWindow(QtGui.QMainWindow):
 				# Remember as the current uid
 				self.uid=fid
 			except:
-				logging.debug('%s', 'RESETFILEPROXY error')
-				logging.debug('%s', print_exc())
+				logging.debug('RESETFILEPROXY error')
+				logging.debug(format_exc())
 				doc=False
 				sleep(4)
-				return self._resetFileProxy(retry=retry+1)
+				return self._resetFileProxy(retry=retry+1, recursion=recursion+1)
 		self.tasks.done('Waiting for data')
 		if doc is False:
 			doc=filedata.MisuraDocument(root=self.server)	
 		doc.up=True
 		logging.debug('%s %s %s %s', 'RESETFILEPROXY', doc.filename, doc.data.keys(), doc.up)
 		self.set_doc(doc)
-
-# 	@csutil.profile
+	
 	@csutil.unlockme
 	def resetFileProxy(self,*a,**k):
 		"""Locked version of resetFileProxy"""
 		if not self._lock.acquire(False):
-			logging.debug('%s', 'ANOTHER RESETFILEPROXY IS RUNNING!')
+			logging.debug('ANOTHER RESETFILEPROXY IS RUNNING!')
 			return
-		logging.debug('%s', 'MainWindow.resetFileProxy: Stopping registry')
+		self._blockResetFileProxy=False
+		logging.debug('MainWindow.resetFileProxy: Stopping registry')
 		registry.toggle_run(False)
 		r=False
 		try:
 			r=self._resetFileProxy(*a,**k)
 		except:
-			logging.debug('%s', print_exc())
+			logging.debug('%s', format_exc())
+		self._finishFileProxy()
+		return r
+		
+	def _finishFileProxy(self):
 		logging.debug('%s', 'MainWindow.resetFileProxy: Restarting registry')
 		registry.toggle_run(True)
 		self.tasks.done('Waiting for data')
 		self.tasks.hide()
-		return r
+	
 
 	###########
 	### Start/Stop utilities

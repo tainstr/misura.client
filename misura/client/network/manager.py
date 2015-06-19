@@ -4,7 +4,7 @@ from misura.canon.logger import Log as logging
 import select
 import socket
 from time import sleep
-from traceback import print_exc
+from traceback import format_exc
 from PyQt4 import QtCore
 
 from info import ServerInfo
@@ -32,7 +32,7 @@ class NetworkManager(QtCore.QThread):
 		try:
 			self.browser=pybonjour.DNSServiceBrowse(regtype = regtype, callBack = self.browse_callback)
 		except:
-			logging.debug('%s', print_exc())
+			logging.debug(format_exc())
 		self.addr=''
 		"""Indirizzo cui si è connessi"""
 		self.connected=False

@@ -218,6 +218,8 @@ class VeuszPlot(QtGui.QWidget):
 	__pyqtSignals__ =('smallPlot()', 'bigPlot()')
 	vzactions={}
 	documentOpened = qt4.pyqtSignal()
+	cmd=False
+	ci=False
 	def __init__(self, parent=None):
 		QtGui.QWidget.__init__(self, parent)
 		self.menus={'edit.select':QtGui.QMenu()} # fake
@@ -303,6 +305,9 @@ class VeuszPlot(QtGui.QWidget):
 #		self.plot.delayed.singleShot(100, self.delayedUpdate)
 		
 	def resizeEvent(self, e):
+		if not self.cmd:
+			# No plot/document defined
+			return
 		self.fitSize(zoom=True)
 		self.plot.actionForceUpdate()
 		

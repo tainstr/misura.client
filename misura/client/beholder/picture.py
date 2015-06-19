@@ -70,7 +70,7 @@ class ViewerPicture(QtGui.QGraphicsView):
 		self.setSampleProcessor(sampleProcessor)
 		self.reconnectSample()
 		# Monitor number of samples
-		self.nsmp_obj=widgets.ActiveObject(self.server, self.remote, self.remote.gete('nSamples'), self)
+		self.nsmp_obj=widgets.ActiveObject(self.server, self.remote, self.remote.gete('nSamples'), parent=self)
 		self.nsmp_obj.register()
 		self.connect(self.nsmp_obj, QtCore.SIGNAL('changed()'), self.reconnectSample)
 		
@@ -104,7 +104,6 @@ class ViewerPicture(QtGui.QGraphicsView):
 		self.connect(self.processor,QtCore.SIGNAL('crop(int,int,int,int)'), self.set_crop)
 		self.termProcessor = lambda * foo: self.processor.toggle_run(False)
 		self.connect(self, QtCore.SIGNAL('destroyed(QObject)'), self.termProcessor) 
-	
 	
 	def set_crop(self, x, y, w, h):
 		"""Broadcast new image crop value to all overlays. It is used as the region of interest."""

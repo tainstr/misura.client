@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from .. import _
 from PyQt4 import QtCore,QtGui
-from traceback import print_exc
+from traceback import format_exc
 from misura.client.parameters import MAX,MIN
 from misura.client.widgets.active import ActiveWidget
 import math
@@ -175,7 +175,7 @@ class aNumber(ActiveWidget):
 			if self.slider: 
 				self.slider.setValue(int(cur*self.divider))
 		except:
-			logging.debug('%s', print_exc())
+			logging.debug(format_exc())
 		finally:
 			self.spinbox.blockSignals(False)
 			if self.slider: 

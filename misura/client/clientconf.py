@@ -5,7 +5,7 @@ import os
 from misura.canon.logger import Log as logging
 import sqlite3
 import re
-from traceback import print_exc
+from traceback import format_exc
 
 from PyQt4 import QtCore
 
@@ -202,7 +202,7 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 			try:
 				desc.update(self.store.read_table(cursor,'conf'))
 			except:
-				logging.debug('%s', print_exc())
+				logging.debug(format_exc())
 			self.desc=desc
 			logging.debug('%s %s', 'Loaded configuration', self.desc)
 		else:

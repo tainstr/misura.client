@@ -5,6 +5,7 @@ from aNumber import aNumber
 from active import ActiveObject
 from misura.canon.logger import Log as logging
 from .. import _
+
 class MotorSlider(aNumber):
 	def __init__(self, server, remObj, parent=None):
 		prop=remObj.gete('goingTo')
@@ -12,7 +13,7 @@ class MotorSlider(aNumber):
 		self.target=0
 		self.position=0
 		aNumber.__init__(self,server, remObj, prop, parent)
-		self.pos_obj=ActiveObject(server, remObj, remObj.gete('position'))
+		self.pos_obj=ActiveObject(server, remObj, remObj.gete('position'), parent=self)
 		self.connect(self.pos_obj, QtCore.SIGNAL('selfchanged'), self.update_position)
 		if self.slider:
 			self.slider.setTracking(False)
@@ -71,7 +72,7 @@ class MotorSlider(aNumber):
 			k['minmax']=False
 		r=aNumber.update(self,*a, **k)
 		if not hasattr(self, 'menu'):
-			logging.debug('%s', 'MotorSlider not fully initialized')
+			# MotorSlider not fully initialized
 			return r
 		# If 'position' argument was not passed, 
 		# force pos_obj to re-register itself

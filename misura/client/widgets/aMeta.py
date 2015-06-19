@@ -25,7 +25,9 @@ class aMeta(ActiveWidget):
 				msg='Empty\n'
 				break
 			if key=='time' and 'Duration' not in self.handle:
-				val-=self.server['zerotime']
+				# Make relative, if absolute
+				if val>self.server['zerotime']:
+					val-=self.server['zerotime']
 			msg+='{}: {:.1f}\n'.format(key.capitalize(),val)
 		
 		if len(msg):

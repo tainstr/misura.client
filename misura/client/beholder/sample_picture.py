@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
-from traceback import print_exc
+from traceback import format_exc
 import functools
 
 import region, profile, shape
@@ -145,7 +145,7 @@ class SamplePicture(QtGui.QGraphicsItem):
 					ov.slot_update(multiget)
 				except:
 					logging.debug('%s', 'Overlay update error')
-					logging.debug('%s', print_exc())
+					logging.debug('%s', format_exc())
 		return True
 		
 	@property

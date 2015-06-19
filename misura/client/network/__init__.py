@@ -11,7 +11,7 @@ import hashlib, platform
 import select
 import socket
 from time import sleep, time
-from traceback import print_exc
+from traceback import format_exc
 from xmlrpclib import ServerProxy, ProtocolError, SafeTransport
 import Cookie
 from PyQt4 import QtCore
@@ -55,23 +55,23 @@ def simpleConnection(addr,user='',password='',save=True):
 	try:
 		obj=MisuraProxy(addr,user=user,password=password)
 	except:
-		logging.debug('%s', 'FAILED simpleConnection at instantiation')
-		logging.debug('%s', print_exc())
+		logging.debug('FAILED simpleConnection at instantiation')
+		logging.debug(format_exc())
 		return False, None
 	try:
 		obj.remObj.echo('echo')
 	except ProtocolError as err:
 		logging.debug('%s', 'FAILED simpleConnection at echo')
-		logging.debug('%s', print_exc())
+		logging.debug(format_exc())
 		if err.errcode==401:
 			obj._error='Authorization Failed!'
 		elif err.errcode==409:
 			obj._error='Another user is currently logged in.'
 		return False, obj
 	except:
-		logging.debug('%s', 'FAILED simpleConnection at echo - unknown')
+		logging.debug('FAILED simpleConnection at echo - unknown')
 		obj._error='Unknown Error'
-		logging.debug('%s', print_exc())
+		logging.debug(format_exc())
 		return False, obj
 	#TODO: prendere serial e name ed emetterli!
 	manager.emit(QtCore.SIGNAL('connected(QString,QString,QString,bool)'),addr,user,password,save)

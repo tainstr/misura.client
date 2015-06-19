@@ -66,12 +66,12 @@ def reconnect(func):
 		try:
 			r=func(self,*a,**k)
 		except (xmlrpclib.ProtocolError, httplib.CannotSendRequest, httplib.BadStatusLine, httplib.ResponseNotReady):
-			logging.debug('%s %s', 'RECONNNECTING', func)
+			logging.debug('RECONNNECTING', func)
 			self.connect()
 			return func(self,*a,**k)
 		except:
-			logging.debug('%s %s', 'UNHANDLED EXCEPTION', func)
-			logging.debug('%s', print_exc())
+			logging.debug('UNHANDLED EXCEPTION', func)
+			logging.debug( format_exc())
 			raise
 		return r
 	return reconnect_wrapper

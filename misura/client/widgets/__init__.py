@@ -1,13 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Elementi grafici avanzati per la modifica delle proprietà di configurazione sul server misura"""
-from PyQt4 import QtGui,QtCore
-from active import Active, ActiveObject, ActiveWidget,Autoupdater, info_dialog, RunMethod
 import os
+from traceback import format_exc
 from misura.canon.logger import Log as logging
 
 from .. import _
-from traceback import print_exc
+from active import Active, ActiveObject, ActiveWidget,Autoupdater, info_dialog, RunMethod
 from aBoolean import aBoolean,  aBooleanAction
 from aButton import aButton
 from aChooser import aChooser
@@ -26,6 +25,8 @@ from presets import PresetManager
 from role import Role,  RoleIO, RoleEditor,  RoleDialog
 from cycle import ThermalCycleChooser
 from motorslider import MotorSlider, MotorSliderAction
+
+from PyQt4 import QtGui,QtCore
 
 def build(server, remObj, prop, parent=None):
 	"""Build a property widget based on a property dict"""
@@ -83,7 +84,7 @@ def build(server, remObj, prop, parent=None):
 				obj=RoleProgress(*arg)
 	except:
 		logging.debug('%s %s %s %s %s', 'Building ', prop, 'of', remObj, 'error:')
-		logging.debug('%s', print_exc())
+		logging.debug(format_exc())
 		if obj:
 			obj.hide()
 			obj.close()

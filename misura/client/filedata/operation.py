@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Libreria per il plotting semplice durante l'acquisizione."""
 from misura.canon.logger import Log as logging
-from traceback import print_exc
+from traceback import format_exc
 from exceptions import BaseException
 import numpy as np
 from copy import deepcopy
@@ -287,7 +287,7 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 				if zerotime/10.<z<zerotime or zerotime<=0: 
 					zerotime=z 
 			except:
-				logging.debug('%s', print_exc())
+				logging.debug(format_exc())
 				logging.debug('%s %s', 'removing column', col)
 				header.remove(col)
 				continue

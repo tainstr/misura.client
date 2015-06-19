@@ -6,6 +6,7 @@ from PyQt4 import QtCore,QtGui
 from traceback import print_exc
 from misura.client.parameters import MAX,MIN
 from misura.client.widgets.active import ActiveWidget
+
 import math
 from .. import _
 
@@ -89,6 +90,7 @@ class RoleProgress(ActiveWidget):
 			txt+='Done: '+p.label_widget.text()+'\n'
 			self.log.setPlainText(txt)
 			p.hide()
+			p.unregister()
 			self.mlay.removeWidget(p)
 			p.close()
 			del self.prog[k]
@@ -111,10 +113,6 @@ class RoleProgress(ActiveWidget):
 			# Log line
 			txt=self.log.toPlainText()+'Started: '+txt+'\n'
 			self.log.setPlainText(txt)
-			
-#		# Update old bars
-#		for k in set(self.prog.keys())-add:
-#			self.prog[k].update()
 			
 
 	

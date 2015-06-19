@@ -7,7 +7,7 @@ from copy import deepcopy
 import os
 from misura.canon.logger import Log as logging
 import StringIO
-from traceback import print_exc
+from traceback import format_exc
 from datetime import datetime
 from time import time
 import string
@@ -546,7 +546,7 @@ def decompress(img,format):
 			r=sio.read()
 			return (r,im.size)
 	except:
-		logging.debug('%s', print_exc())
+		logging.debug(format_exc())
 		logging.debug('%s %s', 'Error reading image', img)
 		r=('',(0,0))
 	return r	
