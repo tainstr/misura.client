@@ -4,7 +4,6 @@
 import unittest
 import sys
 import os
-from misura.canon.logger import Log as logging
 import veusz.document as document
 from misura.client import filedata
 import iutils_testing as iut
@@ -12,90 +11,59 @@ import shutil
 import numpy as np
 from PyQt4 import QtGui
 
-logging.debug('%s %s', 'Importing', __name__)
-
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
-
-def tearDownModule():
-	logging.debug('%s %s', 'tearDownModule', __name__)
-
-from3=os.path.join(iut.data_dir,'m3_hsm.h5')
-nativem4=os.path.join(iut.data_dir,'hsm_test.h5')
+from3 = os.path.join(iut.data_dir,'m3_hsm.h5')
+nativem4 = os.path.join(iut.data_dir,'measure.h5')
 
 
 class TestSummaryVersioning(unittest.TestCase):
-	"""Tests the creation, navigation and loading of versions of summary table."""	
+	"""Tests the creation, navigation and loading of versions."""	
 
 	@classmethod
 	def setUpClass(cls):
-		cls.path=os.path.join(iut.data_dir,'versions.h5')
-		shutil.copy(nativem4,cls.path)
+		cls.path = os.path.join(iut.data_dir,'versions.h5')
+		shutil.copy(nativem4, cls.path)
 		
 	@classmethod
 	def tearDownClass(cls):
-		logging.debug('%s', 'teardown')
 		os.remove(cls.path)
+
+	def setUp(self):
+		self.file_proxy = filedata.getFileProxy(self.path)
+
+	def tearDown(self):
+		self.file_proxy.close()
+
+
+	def test_0_virgin(self):		
+		versions = self.file_proxy.get_versions()
+
+		no_version_yet = ''
+		actual_version_name = versions[no_version_yet][0]
+
+		self.assertEqual(1, len(versions))
+		self.assertEqual("Original", actual_version_name)
 		
-#	@unittest.skip('')
-	def test_0_virgin(self):
-		"""Check if an unversioned file returns the expected versions."""
-		fp=filedata.getFileProxy(self.path)
-		cur,avail,info=fp.get_versions('/summary')
-		self.assertEqual(cur,-1)
-		self.assertEqual(avail,[0])
-		self.assertEqual(info,[('Original','')])
-		fp.close()
 		
 	def test_1_save(self):
-		"""Check if saving works"""
-		fp=filedata.getFileProxy(self.path)
-		colnames=fp.header()
-		coldatas=[]
-		for n in colnames:
-			coldatas.append(fp.col(n))
-		old=coldatas[0][0]
-		new=old+1
-		coldatas[0][0]=new
-		# Save as version labelled 'Test'
-		fp.save_summary(colnames,coldatas,'Test')
-		
-		# Read back available verisons
-		cur,avail,info=fp.get_versions('/summary')
-		self.assertEqual(cur,-1)
-		self.assertEqual(avail,[0,1])
-		self.assertEqual(info[0],('Original',''))
-		self.assertEqual(info[1][0],'Test')
-		
-		# Read new value
-		self.assertEqual(fp.col(colnames[0])[0],new)
-		
-		# Load original version
-		fp.set_version('/summary',0)
-		self.assertEqual(fp.col(colnames[0])[0],old)
-		
-		fp.close()	
-		
-	def test_2_reloading(self):
-		# Simulate an import
-		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=self.path))
-		doc=document.Document()
-		otm=filedata.DocumentModel(doc)
-		otm.pause()
-		imp.do(doc)
-		otm.pause(False)
-		otm.refresh()
-#		otm.index(1,0,otm.root)
-		# Reload links
-		otm.pause()
-		LF=doc.data['0:t'].linked
-		LF.reloadLinks(doc)
-		otm.pause(False)
-		otm.refresh()
-#		otm.index(1,0,otm.root)
-		return doc
-			
-		
+		self.file_proxy.load_conf()
+		original_name = self.file_proxy.conf['name']
+
+		self.file_proxy.conf['name'] = 'pippo'
+
+		self.file_proxy.create_version('any version name')
+		self.file_proxy.save_conf(tree=self.file_proxy.conf.tree())
+
+		versions = self.file_proxy.get_versions()
+
+		self.assertEqual(2, len(versions))
+		self.assertEqual(versions['/ver_1'][0], 'any version name')
+
+		self.file_proxy.set_version(0)
+		self.assertEqual(self.file_proxy.conf['name'], original_name)
+
+		self.file_proxy.set_version(1)
+		self.assertEqual(self.file_proxy.conf['name'], 'pippo')
+
 		
 if __name__ == "__main__":
     unittest.main()  
