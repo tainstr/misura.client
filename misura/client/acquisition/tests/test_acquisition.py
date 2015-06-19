@@ -44,12 +44,12 @@ class MainWindow(unittest.TestCase):
 		main_window.setServer(self.server_proxy)
 		main_window.setInstrument(self.instr)
 
-		self.assertEqual(main_window.windowTitle(),'misura Acquisition: flex (Optical Fleximeter)')
+		self.assertEqual(main_window.windowTitle(), 'misura Acquisition: flex (Optical Fleximeter)')
 		self.assertEqual(main_window.controls.mute, main_window.fixedDoc)
 		self.assertEqual(main_window.controls.startAct.isEnabled(), not self.server['isRunning'])
-		self.assertEqual(main_window.controls.stopAct.isEnabled(),self.server['isRunning'])
-		self.assertEqual(main_window.measureTab.count(),4)
-		self.assertEqual(main_window.name,'flex')
+		self.assertEqual(main_window.controls.stopAct.isEnabled(), self.server['isRunning'])
+		self.assertEqual(main_window.measureTab.count(), 4)
+		self.assertEqual(main_window.name, 'flex')
 	
 
 		
