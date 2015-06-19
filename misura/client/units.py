@@ -196,14 +196,6 @@ class Converter(object):
 				sfb=from_base[group][unit]
 				self.from_client=lambda val: sfb(ctb(val))
 
-	@property
-	def csd(self):
-		"""Derivative for client->server conversion"""
-		return 1./self.d
-	@property
-	def scd(self):
-		"""Derivative for server->client conversion"""
-		return self.d
 
 import veusz.plugins as plugins
 from copy import copy

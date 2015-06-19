@@ -16,10 +16,8 @@ def setUpModule():
 def tearDownModule():
 	logging.debug('%s %s', 'tearDownModule', __name__)
 	
-#@unittest.skip('')
 class TestUnits(unittest.TestCase):
 	"""Tests the MainWindow"""	
-#	@unittest.skip('')
 	def test_base(self):
 		"""Test conversions between base units"""
 		c=units.Converter('celsius','kelvin')
@@ -40,13 +38,7 @@ class TestUnits(unittest.TestCase):
 		c=units.Converter('kelvin','fahrenheit')
 		self.assertEqual(c.from_server(298.15),77.0)
 		self.assertEqual(c.from_client(77.0),298.15)
-		
-	def test_der(self):
-		"""Check derivative factors for client->server and server->client conversions"""
-		c=units.Converter('millimeter','nanometer')
-		self.assertEqual(c.csd,1E-6)
-		self.assertEqual(c.scd,1E6)
-		
+				
 		
 if __name__ == "__main__":
 	unittest.main()  
