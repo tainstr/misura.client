@@ -396,9 +396,15 @@ class ActiveWidget(Active, QtGui.QWidget):
 		self.lay.addWidget(self.bmenu)
 		
 	def isVisible(self):
-		return QtGui.QWidget.isVisible(self)
+		try:
+			return QtGui.QWidget.isVisible(self)
+		except:
+			return False
 	def emit(self, *a, **k):
-		return QtGui.QWidget.emit(self, *a, **k)
+		try:
+			return QtGui.QWidget.emit(self, *a, **k)
+		except:
+			return False
 		
 	def enterEvent(self, event):
 		"""Update the widget anytime the mouse enters its area.

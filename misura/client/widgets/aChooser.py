@@ -48,7 +48,6 @@ class aChooser(ActiveWidget):
 			elif type(k)!=type(u''):
 				k=str(k)
 				K=self.tr(k)
-			logging.debug('%s %s %s', 'Combo addItem', k, v)
 			self.combo.addItem(k, v)
 		# Read again the current options, if requested
 		if reget: self.get()
@@ -71,10 +70,8 @@ class aChooser(ActiveWidget):
 		if self.tuplelike:
 			val=list(val)
 		r=self.combo.findData(val)
-		logging.debug('%s %s %s', 'adapt2gui', repr(self.current), r)
 		return r
 
 	def update(self):
 		idx=self.adapt2gui(self.current)
-		logging.debug('%s %s %s', 'update', repr(self.current), idx)
 		self.combo.setCurrentIndex(self.adapt2gui(self.current))

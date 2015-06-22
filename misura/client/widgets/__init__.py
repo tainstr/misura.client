@@ -31,7 +31,6 @@ from PyQt4 import QtGui,QtCore
 def build(server, remObj, prop, parent=None):
 	"""Build a property widget based on a property dict"""
 	arg=(server, remObj, prop, parent)
-	logging.debug('%s', prop)
 	A=prop.get('attr',[])
 	T=prop['type']
 	if 'Hidden' in A+[T]:

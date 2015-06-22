@@ -35,7 +35,6 @@ class FrameProcessor(QtCore.QThread):
 		frame_number=0
 		force = True
 		#Create new cam object with connection unique to this thread.
-#		logging.debug('%s %s', 'FRAMEPROCESSOR', type(self.cam))
 		tcam = self.cam
 		while self.stream:
 			if not self.parent().isVisible(): 

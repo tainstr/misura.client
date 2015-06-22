@@ -231,13 +231,13 @@ class MainWindow(QtGui.QMainWindow):
 		self.remote=remote
 		name=self.remote['devpath']
 		self.name=name
-		logging.debug('%s %s %s %s', 'Setting remote', remote, self.remote, name)
+		logging.debug('Setting remote %s %s %s', remote, self.remote, name)
 		self.setWindowTitle('misura Acquisition: %s (%s)' % (name, self.remote['comment']))
 		pid='Instrument: '+self.name
 		self.tasks.jobs(11,pid)
 		QtGui.qApp.processEvents()
 		if not self.fixedDoc and not self.server['isRunning'] and self.name!=self.server['lastInstrument']:
-			logging.debug('%s', 'Init instrument')
+			logging.debug('Init instrument')
 			if self.remote.init_instrument is not None:
 				self.tasks.job(0,pid,'Initializing instrument')
 				QtGui.qApp.processEvents()
@@ -252,7 +252,20 @@ class MainWindow(QtGui.QMainWindow):
 		self.myMenuBar=MenuBar(server=self.server,parent=self)
 		self.setMenuWidget(self.myMenuBar)
 		logging.debug('%s', 'Done menubar')
+		
+		# Close cameras
+		logging.debug('Defined cameras', self.cameras)
+		for p, (pic, win) in self.cameras.iteritems():
+			logging.debug('deleting cameras', p, pic, win)
+			pic.close()
+			win.hide()
+			win.close()
+			win.deleteLater()
+		self.cameras={}
+		# Remove any remaining subwindow
 		self.centralWidget().closeAllSubWindows()
+	
+	
 		self.tasks.job(1,pid,'Controls')
 		for tb in self.toolbars:
 			self.removeToolBar(tb)
@@ -297,13 +310,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.tasks.job(-1,pid,'Show cameras')
 		paths=self.remote['devices']
 		logging.debug('%s %s', 'setInstrument PATHS:', paths)
-		for p, (pic, win) in self.cameras.iteritems():
-			logging.debug('deleting cameras', p, pic, win)
-			pic.close()
-			win.hide()
-			win.deleteLater()
-			
-		self.cameras={}
+		
 		for path in paths:
 			lst=self.server.searchPath(path[1])
 			if not lst: continue
@@ -348,7 +355,7 @@ class MainWindow(QtGui.QMainWindow):
 		else: 
 			win.hide()
 #		self.connect(pic, QtCore.SIGNAL('updatedROI()'), win.repaint)
-		self.cameras[role]=(pic, win)
+		self.cameras[obj['fullpath']]=(pic, win)
 		
 		
 # 	@csutil.lockme

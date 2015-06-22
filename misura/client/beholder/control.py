@@ -49,9 +49,14 @@ class ViewerControl(QtGui.QWidget):
 			if ctrl is None: continue
 			ctrl.close()
 			self.lay.removeWidget(ctrl)
-			ctrl.destroy()
-		self.viewer.close()
-		self.viewer=False
+			ctrl.deleteLater()
+		if self.viewer:
+			self.viewer.close()
+			self.viewer=False
+		
+	def closeEvent(self, ev):
+		self.close()
+		QtGui.QWidget.closeEvent(self, ev)
 		
 	def setControl(self, widget, position, tooltip='', inversion=0):
 		"""Set a slider widget in the given position. Available positions: upper, bottom, left, right"""

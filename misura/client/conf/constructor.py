@@ -124,7 +124,6 @@ class Section(QtGui.QWidget):
 	def build(self,prop):
 		wg=widgets.build(self.server, self.remObj, prop, parent=self)
 		if wg is False:
-			logging.debug('%s %s %s %s %s', 'Section: Failed wg creation', prop['handle'], self.remObj._Method__name, self.path, prop)
 			return False
 		self.widgetsMap[prop['handle']]=wg
 		r=self.lay.rowCount()

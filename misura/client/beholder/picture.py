@@ -81,13 +81,17 @@ class ViewerPicture(QtGui.QGraphicsView):
 			self.processor.toggle_run(False)
 			logging.debug('%s', 'quitting')
 			self.processor.wait()
-		self.processor=False
+			self.processor.terminate()
+			self.processor.deleteLater()
+#		self.processor=False
 		if self.sampleProcessor:
 			logging.debug('%s', 'Closing SampleProcessor')
 			self.sampleProcessor.toggle_run(False)
 			logging.debug('%s', 'quitting')
 			self.sampleProcessor.wait()
-		self.sampleProcessor=False
+			self.sampleProcessor.terminate()
+			self.sampleProcessor.deleteLater()
+#		self.sampleProcessor=False
 		if self.calibrationTool:
 			self.calibrationTool.close()
 		
@@ -97,7 +101,9 @@ class ViewerPicture(QtGui.QGraphicsView):
 			fp=FrameProcessor(self.remote, self)
 		if self.processor is not False:
 			self.processor.toggle_run(False)
-			del self.processor
+			self.processor.deleteLater()
+			self._oldproc=self.processor
+#			del self.processor
 		self.processor=fp
 # 		self.connect(self.processor, QtCore.SIGNAL('readyFrame(int,int,int,int,int,QByteArray)'), self.updateFrame, QtCore.Qt.QueuedConnection)
 		self.connect(self.processor, QtCore.SIGNAL('readyImage(int,int,int,int,int,QImage)'), self.updateImage, QtCore.Qt.QueuedConnection)
