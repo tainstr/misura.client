@@ -256,6 +256,18 @@ class LabelWidget(QtGui.QLabel):
 	
 	def leaveEvent(self,event):
 		return self.active.leaveEvent(event)
+	
+	def dropEvent(self,event):
+		"""Route drop event to parent ActiveWidget"""
+		self.active.receive_drop(event)
+		return QtGui.QLabel.dropEvent(event)
+
+	def dragEnterEvent(self,event):
+		logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
+		event.acceptProposedAction()
+		if event.mimeData().hasFormat("text/plain"):
+			event.acceptProposedAction()
+		
 		
 		
 class ActiveWidget(Active, QtGui.QWidget):
@@ -478,6 +490,20 @@ class ActiveWidget(Active, QtGui.QWidget):
 	def hideEvent(self, e):
 		self.unregister()
 		return QtGui.QWidget.hideEvent(self, e)
+	
+	def receive_drop(self,event):
+		"""Receive a drop event from any sub widget"""
+		return
+	
+	def dropEvent(self,event):
+		self.receive_drop(event)
+		return QtGui.QWidget.dropEvent(self,event)
+	
+	def dragEnterEvent(self,event):
+		logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
+		event.acceptProposedAction()
+		if event.mimeData().hasFormat("text/plain"):
+			event.acceptProposedAction()
 	
 	def show_info(self):
 		prop=self.prop

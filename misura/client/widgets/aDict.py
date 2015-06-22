@@ -25,7 +25,8 @@ class aDict(ActiveWidget):
 			val=units.Converter.convert(self.prop['unit'][key],None, val)
 			# Time correction
 			if key=='time' and 'Duration' not in self.handle:
-				val+=self.server['zerotime']
+				if val>self.server['zerotime']:
+					val+=self.server['zerotime']
 			rmap[key]=val
 		return rmap
 	
@@ -34,7 +35,8 @@ class aDict(ActiveWidget):
 		for key, val in vdict.copy().iteritems():
 			# Time correction
 			if key=='time' and val!='None' and 'Duration' not in self.handle:
-				val-=self.server['zerotime']
+				if val>self.server['zerotime']:
+					val-=self.server['zerotime']
 			val=units.Converter.convert(self.prop['unit'][key],None, val)
 			vdict[key]=val
 		return vdict

@@ -16,6 +16,9 @@ class aMeta(ActiveWidget):
 		# Cause update immediately after initialization
 		self.emit(QtCore.SIGNAL('selfchanged()'))
 		self.connect(self.lbl,QtCore.SIGNAL('clicked()'),self.edit)
+		self.setAcceptDrops(True)
+		self.label_widget.setAcceptDrops(True)
+		self.lbl.setAcceptDrops(True)
 
 	def update(self):
 		msg=''
@@ -43,4 +46,20 @@ class aMeta(ActiveWidget):
 		dia.setLayout(lay)
 		dia.setWindowTitle('Edit metadata: {}'.format(self.prop['name']))
 		dia.exec_()
+		
+		
+	def receive_drop(self,event):
+		"""Receive drops from MiniImage"""
+		txt=str(event.mimeData().text())
+		logging.debug('Received drop event %s',txt)
+		if not txt.startswith('point:'):
+			return 
+		foo,path,t,T=txt.split(':')
+		if not self.prop['kid'].startswith(path):
+			logging.debug("Wrong destination %s %s",path)
+		self.current['time']=float(t)
+		self.current['temp']=float(T)
+		self.current['value']='None'
+		self.set(self.current)
+		self.update()
 

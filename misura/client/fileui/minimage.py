@@ -4,6 +4,7 @@ from misura.canon.logger import Log as logging
 import functools
 from PyQt4 import QtGui, QtCore
 from ...canon import csutil
+from misura.client import _
 
 class MiniImage(QtGui.QWidget):
 	"""Image from test chronology"""
@@ -11,6 +12,8 @@ class MiniImage(QtGui.QWidget):
 	decoder=False
 	idx=0
 	"""Current data index"""
+	doc_idx=0
+	"""Current document data index"""
 	t=0
 	"""Current data time"""
 	meta={'T':None}
@@ -47,10 +50,10 @@ class MiniImage(QtGui.QWidget):
 		self.menu=QtGui.QMenu(self)
 		self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.connect(self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
-		self.menu.addAction('Next', self.next)
-		self.menu.addAction('Previous', self.prev)
-		self.menu.addAction('Save', self.save_frame)
-		self.meta_menu=self.menu.addMenu('Labels')
+		self.menu.addAction(_('Next'), self.next)
+		self.menu.addAction(_('Previous'), self.prev)
+		self.menu.addAction(_('Save'), self.save_frame)
+		self.meta_menu=self.menu.addMenu(_('Labels'))
 		# Slider for image navigation
 		self.slider=QtGui.QScrollBar(parent=self)
 		if self.decoder:
@@ -120,6 +123,15 @@ class MiniImage(QtGui.QWidget):
 		#TODO: implement this in order to be introduce time stepping in slider.
 		# This will in turn enable value stepping.
 		self.update_info()
+		
+	@property
+	def base_dataset_path(self):
+		# Base dataset path name
+		p=self.decoder.datapath.split('/') 
+		# Remove last name (/profile or /frame)
+		p.pop(-1)
+		p='/'.join(p)
+		return p
 	
 	def update_info(self):
 		"""Update info label"""
@@ -127,15 +139,12 @@ class MiniImage(QtGui.QWidget):
 			logging.debug('%s', 'No time dataset still')
 			self.lbl_info.hide()
 			return False
-		# Base dataset path name
-		p=self.decoder.datapath.split('/') 
-		# Remove last name (/profile or /frame)
-		p.pop(-1)
-		p='/'.join(p)
+		p=self.base_dataset_path
 		logging.debug('%s %s', 'update_info', p)
 		
 		# Document-based index
 		idx=csutil.find_nearest_val(self.doc.data['0:t'].data,self.t)
+		self.doc_idx=idx
 		for k in self.meta.keys():
 			if k=='T':
 				p1='0:kiln/'+k
@@ -159,20 +168,6 @@ class MiniImage(QtGui.QWidget):
 		self.lbl_info.setText(msg[:-1])
 		self.lbl_info.show()
 		return True
-	
-	def dragEnterEvent(self,event):
-		logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
-		event.acceptProposedAction()
-		if event.mimeData().hasFormat("text/plain"):
-			event.acceptProposedAction()
-	
-	def dropEvent(self,event):
-		logging.debug('%s', 'DROP EVENT')
-		opt=str(event.mimeData().text()).replace('summary', '').replace('//', '/').split('/')[-1]
-		logging.debug('%s %s', 'Adding sample option:', opt)
-		self.meta[opt]=0
-		self.update_info()
-		self.metaChanged.emit(self.meta.keys())
 		
 	def sync_meta_keys(self,keys):
 		"""To be connected with metaChanged signal from other mini images"""
@@ -237,6 +232,29 @@ class MiniImage(QtGui.QWidget):
 		new.set_idx(self.idx)
 # 		new.zoom()
 		return new
+		
+	def dropEvent(self,event):
+		logging.debug('DROP EVENT')
+		#TODO: intercept aMeta drops
+		opt=str(event.mimeData().text()).replace('summary', '').replace('//', '/').split('/')[-1]
+		logging.debug('%s %s', 'Adding sample option:', opt)
+		self.meta[opt]=0
+		self.update_info()
+		self.metaChanged.emit(self.meta.keys())
+		
+	def start_drag(self):
+		drag=QtGui.QDrag(self)
+		mimeData=QtCore.QMimeData()
+		ds=self.doc.data.get('0:kiln/T')
+		T=ds.data[self.doc_idx]
+		mimeData.setData("text/plain", 'point:{}:{}:{}'.format(self.base_dataset_path,self.t,T))
+		drag.setMimeData(mimeData)
+		drag.exec_()	
+		
+	def mousePressEvent(self, event):
+		if event.button() == QtCore.Qt.LeftButton:
+			self.start_drag()
+		return QtGui.QWidget.mousePressEvent(self,event)
 	
 	def mouseDoubleClickEvent(self,event):
 		"""Opens a dialog containing a new MiniImage instance"""
