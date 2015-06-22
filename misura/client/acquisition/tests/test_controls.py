@@ -5,70 +5,81 @@ from misura.canon.logger import Log as logging
 import unittest
 import functools
 
-from misura import utils_testing as ut
+from misura.client.tests import iutils_testing
+from misura import utils_testing
 from misura.client.acquisition import controls
 from misura import instrument
 from PyQt4 import QtGui
 
-logging.debug('%s %s', 'Importing', __name__)
+class DummyMeasureTab():
+	def checkCurve(self):
+		return True
 
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
+class DummyDock():
+	def widget(self):
+		return DummyMeasureTab()
 
-def tearDownModule():
-	logging.debug('%s', 'Quitting app')
-	logging.debug('%s %s', 'tearDownModule', __name__)
-	
+class DummyOutFile():
+	def close(self):
+		return True
+
 class Parent(QtGui.QWidget):
-	ok=False
-	ins=False
-	measureDock=False
-	snapshotsDock=False
-	graphWin=False
-	tableWin=False
-	logDock=False
-	def newTest(self): self.ok=True
-	def setInstrument(self,ins): self.ins=ins
+	measureDock = DummyDock()
+	fixedDoc = False
 
-#@unittest.skip('')
+
+
+
 class Controls(unittest.TestCase):
+
 	def setUp(self):
-		self.server=ut.dummyServer()
-		self.rem=instrument.Instrument(self.server)
-		self.rem.start_acquisition=functools.partial(self.server.set,'isRunning',True)
-		self.rem.parent=lambda: self.server
-		self.parent=Parent()
-		self.ctrl=controls.Controls(self.rem,self.parent)
+		self.server = utils_testing.dummyServer()
+		self.remote_instrument = instrument.Instrument(self.server)
+		self.remote_instrument.start_acquisition = lambda : self.server.set('isRunning', True)
+		self.remote_instrument.parent = lambda: self.server
+		self.remote_instrument.outFile = DummyOutFile()
+		self.parent = Parent()
+		self.ctrl = controls.Controls(self.remote_instrument, self.parent)
 		self.ctrl.mute=True
 		
 	def tearDown(self):
-		self.rem.stop_acquisition(False)
+		self.remote_instrument.stop_acquisition(False)
 		
 	def check_act(self):
 		self.assertEqual(self.ctrl.startAct.isEnabled(),not self.server['isRunning'])
 		self.assertEqual(self.ctrl.stopAct.isEnabled(),self.server['isRunning'])
 	
-#	@unittest.skip('')
 	def test_init(self):
 		self.check_act()
 		
 	def test_start(self):
-		self.ctrl.start()
-		self.assertTrue(self.server['isRunning'])
-		self.check_act()
+		class DummtTasks():
+			@classmethod
+			def jobs(self, n, msg):
+				return True
+			@classmethod
+			def setFocus(self):
+				return True
+			@classmethod
+			def done(self, arg):
+				return True
+		setattr(controls.Controls, "tasks", DummtTasks)
+
+		self.ctrl._start()
+
+		self.assertTrue(self.server['isRunning'], "Server should be running, but it's not.")
 		
 	def test_stop(self):
 		self.test_start()
-		self.ctrl.stop()
+		self.ctrl._stop(False)
 		self.assertFalse(self.server['isRunning'])
-		self.check_act()
 		
 
 @unittest.skipIf(__name__!='__main__','Non interactive.')
 class HuControl(unittest.TestCase):	
 	def test_hu(self):
-		ut.parallel(1)
-		self.server=ut.dummyServer()
+		utils_testing.parallel(1)
+		self.server=utils_testing.dummyServer()
 		self.rem=instrument.Instrument(self.server)
 # 		self.rem.start_acquisition=functools.partial(self.server.set,'isRunning',True)
 		self.rem.parent=lambda: self.server
@@ -79,7 +90,7 @@ class HuControl(unittest.TestCase):
 		mw.addToolBar(self.ctrl)
 		mw.show()
 		QtGui.qApp.exec_()
-		ut.parallel(0)
+		utils_testing.parallel(0)
 		
 		
 		
