@@ -13,10 +13,28 @@ class aButton(ActiveWidget):
 		self.button=QtGui.QPushButton(self.tr(self.name))
 		self.connect(self.button,  QtCore.SIGNAL('pressed()'), self.get)
 		self.lay.addWidget(self.button)
-		self.connect(self, QtCore.SIGNAL('changed()'), self.msg)
+		self.connect(self, QtCore.SIGNAL('changed()'), self.show_msg)
 		
-	def msg(self):
+	def _msgBox(self):
+		"""Generate message box for display"""
 		r=self.current
 		if r is True: r=_('Done')
 		elif r is False: r=_('Failed')
-		QtGui.QMessageBox.information(self, _('Operation Result'), str(r))
+		r1=r
+		more=False
+		if len(str(r))>200:
+			more=True
+			r=r[:190]+ '...'
+		msg=QtGui.QMessageBox( parent=self)
+		msg.setWindowTitle(_('Operation Result'))
+		msg.setText(_('Result for option "{}"').format(self.prop['name']))
+		msg.setInformativeText(r)
+		if more:
+			msg.setDetailedText(r1)
+		return msg
+		
+	def show_msg(self):
+		"""Display informative messagebox"""
+		msgBox=self._msgBox()
+		return msgBox.exec_()
+		
