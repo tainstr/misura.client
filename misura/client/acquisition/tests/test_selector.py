@@ -1,34 +1,27 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tests Archive"""
-from misura.canon.logger import Log as logging
 import unittest
 from misura.client.acquisition import selector
 from misura import server
 from PyQt4 import QtGui,QtCore
-logging.debug('%s %s', 'Importing', __name__)
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
-
-def tearDownModule():
-	logging.debug('%s %s', 'tearDownModule', __name__)
+from misura.client.tests import iutils_testing
 
 class Parent(QtGui.QWidget):
-	ok=False
-	ins=False
-	def newTest(self): self.ok=True
+	ok = False
+	ins = False
+	def newTest(self): self.ok = True
 	def setInstrument(self,ins): self.ins=ins
 
-#@unittest.skip('')
 class InstrumentSelector(unittest.TestCase):
 	def setUp(self):
 		# Fire instantiate the full server with all defined instruments 
 		self.server=server.MainServer()
-		self.rem=self.server.instruments[0]
-		self.rem.parent=lambda: self.server
-		self.parent=Parent()
-		self.parent.server=self.server
-		self.sel=selector.InstrumentSelector(self.parent, self.parent.setInstrument)
+		self.rem = self.server.instruments[0]
+		self.rem.parent = lambda : self.server
+		self.parent = Parent()
+		self.parent.server = self.server
+		self.sel = selector.InstrumentSelector(self.parent, self.parent.setInstrument)
 		
 	def test_init(self):
 		lst=self.server['instruments']
