@@ -1,11 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from misura.canon.logger import Log as logging
-from PyQt4 import QtGui, QtCore
+from threading import Lock
 from traceback import format_exc
+
 from .. import widgets, _
 from ..live import registry
 from ..database import ProgressBar 
+
+from PyQt4 import QtGui, QtCore
 
 class Controls(QtGui.QToolBar):
 	"""Start/stop toolbar"""
@@ -15,12 +18,15 @@ class Controls(QtGui.QToolBar):
 	"""Local running status"""
 	paused=False
 	"""Do not update actions"""
+	_lock=False
+	"""Multithreading lock"""
 	started=QtCore.pyqtSignal()
 	stopped=QtCore.pyqtSignal()
 	stopped_nosave=QtCore.pyqtSignal()
 	#cycleNotSaved=False
 	def __init__(self, remote, parent=None):
 		QtGui.QToolBar.__init__(self, parent)
+		self._lock=Lock()
 		self.remote=remote
 		logging.debug('%s', 'Controls: init')
 		self.server=remote.parent()
@@ -34,7 +40,6 @@ class Controls(QtGui.QToolBar):
 			self.addAction('Machine Database', parent.showIDB)
 			self.addAction('Test File', parent.openFile)
 			self.addAction('Misura3 Database', parent.showDB3)
-		logging.debug('%s', 'Controls.updateActions()')
 		self.updateActions()
 		logging.debug('%s', 'Controls end init')
 		self.stopped.connect(self.hide_prog)
@@ -49,13 +54,18 @@ class Controls(QtGui.QToolBar):
 		Calls updateActions if /isRunning is received."""
 		logging.debug('%s %s', 'system_kid_slot: received', kid)
 		if kid=='/isRunning':
+			if not self._lock.acquire(False):
+				logging.debug("Controls.system_kid_slot: Impossible to acquire lock")
+				return 
 			self.updateActions()
+			self._lock.release()
+		
 		
 	@property
 	def tasks(self):
 		"""Shortcut to pending tasks dialog"""
 		return registry.tasks
-
+	
 	def updateActions(self):
 		"""Update status visualization and notify third-party changes"""
 		if self.paused:
@@ -82,12 +92,6 @@ class Controls(QtGui.QToolBar):
 			sig.emit()
 		# Locally remember remote status
 		self.isRunning=r
-# 		c=(1,0,0,1) if r else (0,1,0,1) 
-# 		g=QtGui.QRadialGradient(0.5,0.5,0.99,0.5,0.5)
-# 		g.setCoordinateMode(QtGui.QGradient.ObjectBoundingMode)
-# 		g.setColorAt(0,QtGui.QColor.fromRgbF(0,0,0,0))
-# 		g.setColorAt(1,QtGui.QColor.fromRgbF(*c))
-# 		self.parent().area.setBackground(QtGui.QBrush(g))
 		return r
 		
 	def enterEvent(self, ev):
