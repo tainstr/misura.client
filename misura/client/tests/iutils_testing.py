@@ -164,4 +164,7 @@ class FakeProxy(network.MisuraProxy):
 	def to_root(self):
 		return FakeProxy(self.remObj.root)
 	
+def silent_remove(filename):
+	if os.path.exists(filename): 
+		os.remove(filename)
 

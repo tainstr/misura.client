@@ -14,12 +14,15 @@ from ..canon import csutil, reference
 import platform
 
 from PyQt4 import QtGui,QtCore
+from misura.client import _
+
+default_fourcc = cv.VideoWriter_fourcc('M', '4', 'S', '2')
 
 #TODO: profile reconstruction. Use cvpolyfill
 def export(sh,frame='/hsm/sample0/frame', 
 				roi='/hsm/sample0/roi',
 				T='/kiln/T',
-				output='output.avi',framerate=50.0, fourcc=-1,prog=False):
+				output='output.avi',framerate=50.0, fourcc=default_fourcc, prog=False):
 	"""Base video export function"""
 	if cv is False:
 		logging.debug('%s', 'No OpenCV library')
@@ -80,6 +83,7 @@ def export(sh,frame='/hsm/sample0/frame',
 				logging.debug('%s %s', 'Export cancelled at frame', i)
 				break
 			prog.setValue(i)
+
 	logging.debug('%s %s', 'releasing', output)
 	out.release()
 	return True
@@ -133,7 +137,7 @@ class VideoExporter(QtGui.QDialog):
 		self.lay.addRow(_("Framerate"),self.fps)
 		
 		self.out=QtGui.QLineEdit()
-		self.out.setText(sh.get_path()+'.avi')
+		self.out.setText(sh.get_path() + '.avi')
 		self.lbl_out=QtGui.QPushButton(_("Output file"))
 		self.lbl_out.pressed.connect(self.change_output)
 		self.lay.addRow(self.lbl_out,self.out)
@@ -153,9 +157,9 @@ class VideoExporter(QtGui.QDialog):
 		ext=str(self.ext.currentText())
 		if self.frm:
 			frm=str(self.frm.currentText())
-			fourcc=cv.VideoWriter_fourcc(*frm)
+			fourcc = cv.VideoWriter_fourcc(*frm)
 		else:
-			fourcc=-1
+			fourcc = default_fourcc
 		out=str(self.out.text())
 		fps=self.fps.value()
 		self.prog=prog

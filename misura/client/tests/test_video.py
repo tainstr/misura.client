@@ -4,45 +4,58 @@ import unittest
 import os
 from misura.canon.logger import Log as logging
 
-from misura import utils_testing as ut
+from misura.client.tests import iutils_testing
 from misura import parameters as params
 from misura.canon.indexer import SharedFile
 from misura.client import video
+import shutil
 from PyQt4 import QtGui
 
-logging.debug('%s', 'Importing '+__name__)
-
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
-	
-def tearDownModule():
-	logging.debug('%s %s', 'tearDownModule', __name__)
-		
-
-m4file=params.testdir+'storage/hsm_test.h5'	
-m4file='/home/daniele/f3x3.h5'
-output='/home/daniele/output.avi'
-		
 class Video(unittest.TestCase):
-	
+	def setUp(self):
+		self.test_file = os.path.join(iutils_testing.data_dir,'video_file.h5')
+		self.source_file = os.path.join(iutils_testing.data_dir,'test_video.h5')
+		self.output_file_name = os.path.join(iutils_testing.data_dir,'output.avi')
+
+		self.clean()
+		shutil.copy(self.source_file, self.test_file)
+
+	def tearDown(self):
+		self.clean()
+
 	@unittest.skipIf(__name__!='__main__','Not interactive')
 	def test_gui(self):
-		sh=SharedFile(m4file)
-		v=video.VideoExporter(sh)
-		v.show()
+		shared_file = SharedFile(self.test_file)
+		video_exporter = video.VideoExporter(shared_file)
+		video_exporter.show()
 		QtGui.qApp.exec_()
-		sh.close()
+		shared_file.close()
 		
-# 	@unittest.skip('')
+	@unittest.skip('frame is not preset in tests files at the moment')
 	def test_export_image(self):
-		sh=SharedFile(m4file)
-		video.export(sh,output=output)
-		sh.close()
+		shared_file = SharedFile(self.test_file, '/hsm/sample0/frame')
+		self.output_file_name = os.path.join(iutils_testing.data_dir,'output.avi')
+		video.export(shared_file, output = self.output_file_name)
+		
+		shared_file.close()
+
+		self.assertTrue(os.path.exists(self.output_file_name))
 	
 	def test_export_profile(self):
-		sh=SharedFile(m4file)
-		video.export(sh,'/hsm/sample0/profile',output=output)
-		sh.close()
+		shared_file = SharedFile(self.test_file)
+		
+		self.assertFalse(os.path.exists(self.output_file_name))
+		
+		video.export(shared_file, '/hsm/sample0/profile', output = self.output_file_name)
+		shared_file.close()
+
+		self.assertTrue(os.path.exists(self.output_file_name))
+
+
+	def clean(self):
+		iutils_testing.silent_remove(self.test_file)
+		iutils_testing.silent_remove(self.output_file_name)
+
 		
 		
 		
