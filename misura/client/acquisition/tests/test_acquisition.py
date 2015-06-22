@@ -36,7 +36,7 @@ class MainWindow(unittest.TestCase):
 		cam = beholder.SimCamera(self.server)
 		main_window.addCamera(cam, 'camera')
 
-		self.assertEqual(main_window.cameras['camera'][0].remote, cam)
+		self.assertEqual(main_window.cameras[cam['fullpath']][0].remote, cam)
 				
 	@unittest.skip("at the moment it's too difficult to mock the MainServer")
 	def test_setInstrument(self):
