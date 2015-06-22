@@ -89,6 +89,7 @@ class FrameProcessor(QtCore.QThread):
 		elif do==False:
 			if self.isRunning(): 
 				self.stream=False
+				self.wait(1000)
 				self.quit()
 		else:
 			self.toggle_run(not self.isRunning())			
@@ -155,6 +156,7 @@ class SampleProcessor(QtCore.QThread):
 		elif do==False:
 			if self.isRunning(): 
 				self.stream=False
+				self.wait(1000)
 				self.quit()
 		else:
 			self.toggle_run(not self.isRunning())

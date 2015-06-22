@@ -6,7 +6,7 @@ from misura.canon.logger import Log as logging
 from time import sleep, time
 from cPickle import loads
 import threading
-from traceback import print_exc
+from traceback import format_exc
 from misura.canon import option
 from misura.canon.csutil import lockme, profile
 from misura.client.network import manager as net
@@ -92,7 +92,7 @@ class KidRegistry(QtCore.QThread):
 	def register(self, w):
 		"""Register Active object `w`"""
 		if w.type=='Button':
-			logging.debug('%s', 'It is not possible to register "Button" widgets.')
+			logging.debug('It is not possible to register "Button" widgets.')
 			return False
 		if not w.prop:
 			logging.debug('No property for active widget. Impossible to register')
@@ -103,7 +103,6 @@ class KidRegistry(QtCore.QThread):
 			self.rid[kid]=[]
 			self.times[kid]=0
 		if w in self.rid[kid]:
-			logging.debug('%s %s %s', 'Already registered', kid, w)
 			return kid
 		self.rid[kid].append(w)
 		return kid
@@ -260,7 +259,7 @@ class KidRegistry(QtCore.QThread):
 			try:
 				self.control_loop()
 			except:
-				logging.debug('%s', print_exc())
+				logging.debug(format_exc())
 				sleep(1)
 		logging.debug('%s %s', 'KidRegistry.run END', self.stream)
 

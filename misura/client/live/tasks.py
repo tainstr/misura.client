@@ -1,22 +1,24 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Pending tasks feedback"""
+from traceback import format_exc
+import functools
 
 from misura.canon.logger import Log as logging
 from misura.canon.csutil import lockme, profile
 from misura.client import _
-import functools
+
 from PyQt4 import QtGui, QtCore
 
 class PendingTasks(QtGui.QWidget):
 	server=False
 	progress=False
 	ch=QtCore.pyqtSignal()
-	def __init__(self):
-		QtGui.QWidget.__init__(self)
+	def __init__(self, parent=None):
+		QtGui.QWidget.__init__(self, parent=parent)
 		self.lay=QtGui.QVBoxLayout(self)
 		self.setLayout(self.lay)
-		self.setWindowTitle('Remote Pending Tasks')
+		self.setWindowTitle(_('Remote Pending Tasks'))
 		
 	def __len__(self):
 		if self.progress is False:
@@ -34,6 +36,9 @@ class PendingTasks(QtGui.QWidget):
 		if self.progress:
 			try:
 				self.progress.hide()
+				self.progress.unregister()
+			except:
+				logging.debug('While removing old progress... \n%s',format_exc() )
 			finally:
 				self.progress=False
 		from ..widgets import RoleProgress
@@ -61,8 +66,8 @@ class LocalTasks(QtGui.QWidget):
 	ch=QtCore.pyqtSignal()
 	sig_done=QtCore.pyqtSignal(str)
 	sig_done0=QtCore.pyqtSignal()
-	def __init__(self):
-		QtGui.QWidget.__init__(self)
+	def __init__(self, parent=None):
+		QtGui.QWidget.__init__(self, parent=parent)
 		self.lay=QtGui.QHBoxLayout()
 		self.setLayout(self.lay)
 		self.setWindowTitle(_('Local Operations in Progress'))
@@ -127,7 +132,7 @@ class LocalTasks(QtGui.QWidget):
 				self.ch.emit()
 				self.show()
 			return
-		wg=QtGui.QWidget()
+		wg=QtGui.QWidget(self)
 		pb=QtGui.QProgressBar(self)
 		pb.setRange(0,tot)
 		lbl=QtGui.QLabel(pid)
@@ -197,9 +202,9 @@ class Tasks(QtGui.QWidget):
 		self.lay=QtGui.QVBoxLayout()
 		self.setLayout(self.lay)
 		self.setWindowTitle(_('Pending Operations'))
-		self.tasks=LocalTasks()
+		self.tasks=LocalTasks(self)
 		self.lay.addWidget(self.tasks)
-		self.progress=PendingTasks()
+		self.progress=PendingTasks(self)
 		self.lay.addWidget(self.progress)
 		
 		self.tasks.ch.connect(self.hide_show)
