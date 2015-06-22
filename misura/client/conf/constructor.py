@@ -233,4 +233,19 @@ class Interface(QtGui.QTabWidget):
 		self.desc=self.remObj.describe()
 		widgets.info_dialog(desc2html(self.desc), 'Details for Object: %s' % self.desc.get('name',{'current':'Object'})['current'], parent=self)
 		
+
+class InterfaceDialog(QtGui.QDialog):
+	def __init__(self,server, remObj, prop_dict=False, parent=None):
+		QtGui.QDialog.__init__(self,parent=parent)
+		self.interface=Interface(server,remObj,prop_dict,self)
+		lay=QtGui.QVBoxLayout()
+		self.setLayout(lay)
+		lay.addWidget(self.interface)
+		self.ok=QtGui.QPushButton('Ok')
+		self.ok.setDefault(True)
+		lay.addWidget(self.ok)
+		
+		self.connect(self.ok,QtCore.SIGNAL('clicked()'),self.accept)
+		
+		
 		

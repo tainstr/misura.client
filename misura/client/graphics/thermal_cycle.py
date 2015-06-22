@@ -8,9 +8,10 @@ from .. import _
 from .. import widgets
 from .. import parameters as params
 import plot
-
+from misura.canon import option
 from misura.canon.csutil import next_point
-
+from .. import conf
+from .. import units
 from PyQt4 import QtGui, QtCore
 
 def clean_curve(dat,events=True):
@@ -444,8 +445,8 @@ class ThermalCurveTable(QtGui.QTableView):
 		m.addAction(_('Insert point'), self.newRow)
 		m.addAction(_('Insert checkpoint'), self.newCheckpoint)
 		m.addAction(_('Insert movement'), self.newMove)
-		a=m.addAction(_('Insert parametric heating'), self.newParam)
-		a.setEnabled(False)
+# 		a=m.addAction(_('Insert parametric heating'), self.newParam)
+# 		a.setEnabled(False)
 		m.addAction(_('Remove current row'), self.delRow)
 		m.addSeparator()
 		self.rti=m.addAction(_('Rate/Temperature mode'), self.curveModel.mode_ramp)
@@ -506,12 +507,15 @@ class ThermalCurveTable(QtGui.QTableView):
 		self.insert_event(val)
 		
 	def newCheckpoint(self):
-		delta,ok=QtGui.QInputDialog.getDouble(self,_('Define a setpoint tolerance'),
-											_('Temperature-Setpoint tolerance:'),
-											3,0.1)
-		if not ok:
-			return
-		event='>checkpoint,{:.1f}'.format(delta)
+		desc={}
+		option.ao(desc, 'deltaST', 'Float', name="Temperature-Setpoint tolerance",unit='celsius', current=3,min=0,max=100,step=0.1)
+		option.ao(desc, 'timeout', 'Float', name="Timeout", unit='minute', current=120,min=0,max=1e3,step=0.1)
+		cp=option.ConfigurationProxy({'self':desc})
+		chk=conf.InterfaceDialog(cp,cp,desc,parent=self)
+		chk.setWindowTitle(_("Checkpoint configuration"))
+		chk.exec_()
+		timeout=units.Converter.convert('minute','second', cp['timeout'])
+		event='>checkpoint,{:.1f},{:.1f}'.format(cp['deltaST'],timeout)
 		self.insert_event(event)
 	
 	def newParam(self):
