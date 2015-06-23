@@ -1,47 +1,43 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tests Archive"""
-from misura.canon.logger import Log as logging
 import unittest
 
 import os
-from misura.client.tests import iutils_testing as iut
+from misura.client.tests import iutils_testing
 from misura.client import archive, filedata, conf
 from misura.client.clientconf import confdb
+import shutil
+
 from PyQt4 import QtGui
 
-logging.debug('%s %s', 'Importing', __name__)
 
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
 
-def tearDownModule():
-	logging.debug('%s %s', 'tearDownModule', __name__)
+test_file_name = os.path.join(iutils_testing.data_dir,'archive_test.h5')
 
-nativem4=os.path.join(iut.data_dir,'hsm_test.h5')
-#@unittest.skip('')
 class MainWindow(unittest.TestCase):
-	"""Tests the MainWindow"""	
-#	@unittest.skip('')
+	def tearDown(self):
+		iutils_testing.silent_remove(test_file_name)
+
 	def test_openfile(self):
-		w=archive.MainWindow()
-		w.open_file(nativem4)
-# 		self.assertEqual(confdb.recent_file[-1][0],nativem4)
+		shutil.copy(os.path.join(iutils_testing.data_dir,'measure.h5'), test_file_name)
+
+		main_window = archive.MainWindow()
+		main_window.open_file(test_file_name)
+		
 		if __name__=='__main__':
-			w.show()
-			iut.QtGui.qApp.exec_()
-		w.close()
+			main_window.show()
+			iutils_testing.QtGui.qApp.exec_()
+		
+		main_window.close()
 		
 		
 @unittest.skip('')
 class TestWindow(unittest.TestCase):
-	"""Tests the TestWindow"""	
-#	@unittest.skip('')
 	def test_openfile(self):
-		doc=filedata.MisuraDocument(nativem4)
+		doc=filedata.MisuraDocument(test_file_name)
 		w=archive.TestWindow(doc)
 		w.close()
-		#TODO: check double import of data
 		
 		
 		

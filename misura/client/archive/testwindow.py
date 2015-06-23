@@ -31,10 +31,6 @@ class TestWindow(acquisition.MainWindow):
 		self.connect(self.play, QtCore.SIGNAL('set_idx(int)'),self.set_idx)
 		self.connect(self.snapshotsTable,QtCore.SIGNAL('set_idx(int)'),self.play.set_idx)
 		
-	@property
-	def tasks(self):
-		return registry.tasks
-		
 # 	@profile
 	def load_version(self,v=-1):
 		logging.debug('%s %s', "SETTING VERSION", v)
