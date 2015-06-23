@@ -4,23 +4,15 @@
 import unittest
 
 import os
-from misura.canon.logger import Log as logging
-from misura.client.tests import iutils_testing as iut
+from misura.client.tests import iutils_testing
 from misura.client.graphics import Plot
 from misura.client import filedata
 from misura.client.navigator import Navigator
 from PyQt4 import QtGui,QtCore
 
-logging.debug('%s %s', 'Importing', __name__)
 
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
+nativem4=os.path.join(iutils_testing.data_dir,'test_video.h5')
 
-def tearDownModule():
-	logging.debug('%s %s', 'tearDownModule', __name__)
-
-nativem4=os.path.join(iut.data_dir,'device_22.h5')
-nativem4='/home/daniele/misura/misura/storage/data/hsm/cube2.h5'
 class TestPlot(unittest.TestCase):
 	def setUp(self):
 		self.p=Plot()
@@ -35,9 +27,8 @@ class TestPlot(unittest.TestCase):
 		self.p.updateCurvesMenu()
 		self.p.updateCurveActions()
 		self.p.hide_show('0:hsm/sample0/Vol')
-		if __name__=='__main__':
-			self.p.show()
-			QtGui.qApp.exec_()
+
+		iutils_testing.show(self.p, __name__)
 		
 		
 		
