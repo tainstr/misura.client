@@ -168,7 +168,7 @@ def silent_remove(filename):
 	if os.path.exists(filename): 
 		os.remove(filename)
 
-def show(widget, name):
+def show(showable, name):
 	if name =='__main__':
-		widget.show()
+		showable.show()
 		QtGui.qApp.exec_()		
