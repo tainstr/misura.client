@@ -3,25 +3,14 @@
 """Testing the datasets.py module."""
 import unittest
 import sys
-from misura.canon.logger import Log as logging
 import os,shutil
 from misura.client import filedata
-from misura.client.tests import iutils_testing as iut
+from misura.client.tests import iutils_testing
 from PyQt4 import QtGui
 import veusz.document as document
 
-logging.debug('%s %s', 'Importing', __name__)
 
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
-
-def tearDownModule():
-	logging.debug('%s %s', 'tearDownModule', __name__)
-
-
-from3=os.path.join(iut.data_dir,'m3_hsm.h5')
-nativem4=os.path.join(iut.data_dir,'post_m3.h5')
-nativem4='/opt/local_data/vertical/VerticalDilatometer_3.h5'
+nativem4=os.path.join(iutils_testing.data_dir,'test_video.h5')
 
 m3names=['t', 'kiln_T', 'smp0_Sint', 'smp0_Ang', 'smp0_Ratio', 'smp0_Area','kiln_S', 'kiln_P', 'smp0_Width']
 
@@ -53,7 +42,6 @@ class TestDatasetPluginEntry(unittest.TestCase):
 				maxst=c.status
 			# Recursively check
 			self.check(c,c.status)
-		logging.debug('%s %s %s', 'check', root, maxst)
 		self.assertTrue(root.status,maxst)
 	
 	def _test_dpe(self):
@@ -76,10 +64,12 @@ class TestDatasetPluginEntry(unittest.TestCase):
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
 		doc=document.Document()
 		imp.do(doc)
-		logging.debug('%s', imp.outnames)
-		logging.debug('%s', doc.data.keys())
 		root=filedata.NodeEntry()
 		root.set_doc(doc)
+		for path, ds in doc.data.iteritems():
+			dataset_entry = root.traverse(path)
+			self.assertEqual(ds, dataset_entry.ds)
+
 		
 		
 		
