@@ -10,8 +10,6 @@ from misura.client import _
 
 from PyQt4 import QtGui, QtCore
 
-testing = False
-	
 class PendingTasks(QtGui.QWidget):
 	server=False
 	progress=False
@@ -213,11 +211,10 @@ class Tasks(QtGui.QWidget):
 		self.progress.ch.connect(self.hide_show)
 		
 	def hide_show(self):
-		if not testing:
-			if len(self.tasks)+len(self.progress):
-				self.show()
-			else:
-				self.hide()
+		if len(self.tasks)+len(self.progress):
+			self.show()
+		else:
+			self.hide()
 		
 		
 		

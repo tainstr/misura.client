@@ -172,6 +172,3 @@ def show(widget, name):
 	if name =='__main__':
 		widget.show()
 		QtGui.qApp.exec_()		
-
-from misura.client.live import tasks
-tasks.testing = True
