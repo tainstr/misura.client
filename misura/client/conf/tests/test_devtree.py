@@ -3,10 +3,7 @@
 """Tests Archive"""
 import unittest
 import os
-from misura.canon.logger import Log as logging
-import functools
-from misura import utils_testing as ut
-from misura.client.tests import iutils_testing as iut
+from misura.client.tests import iutils_testing
 
 from misura import server
 from misura.client.conf import devtree
@@ -15,24 +12,13 @@ from misura.client import filedata
 from PyQt4 import QtGui,QtCore
 app=False
 
-logging.debug('%s %s', 'Importing', __name__)
-
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
-
-def tearDownModule():
-	logging.debug('%s %s', 'tearDownModule', __name__)
-	
-nativem4=os.path.join(iut.data_dir,'hsm_test.h5')
+nativem4=os.path.join(iutils_testing.data_dir,'measure.h5')
 
 
-#@unittest.skip('')
 class RecursiveModel(unittest.TestCase):
-#	@unittest.skip('')
 	def test_recursiveModel(self):
 		s=server.BaseServer()
 		m=devtree.recursiveModel(s)
-		logging.debug('%s', m)
 		
 	def test_fileRecursiveModel(self):
 		fp=filedata.getFileProxy(nativem4)
@@ -42,7 +28,6 @@ class RecursiveModel(unittest.TestCase):
 		
 #TODO: test su fileproxy!
 
-#@unittest.skip('')		
 class ServerModel(unittest.TestCase):
 	def setUp(self):
 		self.s=server.BaseServer()
