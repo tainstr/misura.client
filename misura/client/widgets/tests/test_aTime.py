@@ -3,25 +3,12 @@
 """Tests role selector widget."""
 import unittest
 import functools
-from misura.canon.logger import Log as logging
 from time import time
-from misura import utils_testing as ut
+from misura.client.tests import iutils_testing
 from misura.client import widgets
-from misura.device import Node 
 from misura.canon import option
 from PyQt4 import QtGui,QtCore
 from PyQt4.QtTest import QTest
-
-logging.debug('%s %s', 'Importing', __name__)
-main=__name__=='__main__'
-
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
-	ut.parallel(0)
-
-def tearDownModule():
-	logging.debug('%s', 'Quitting app')
-	logging.debug('%s %s', 'tearDownModule', __name__)
 
 	
 class aTime(unittest.TestCase):
@@ -30,12 +17,11 @@ class aTime(unittest.TestCase):
 	tol=0.001
 	"""Test comparison tolerance (seconds)"""
 	def setUp(self):
-		self.root=Node()
+		self.root = option.ConfigurationProxy()
 		self.root.time=lambda: time()-self.shift
 		
 	def wgGen(self,k='val'):
 		self.assertTrue(self.root.has_key(k))
-		logging.debug('%s', self.root.gete(k))
 		w=widgets.build(self.root, self.root, self.root.gete(k))
 		# The current value is not initialized (gete() returns {current:None} )
 		self.assertTrue(w is not False)
@@ -70,9 +56,7 @@ class aDelay(aTime):
 		w=self.wgGen('delay')
 		w1=widgets.build(self.root, self.root, self.root.gete('delayStart'))
 		w.lay.addWidget(w1)
-		if main:
-			w.show()
-			QtGui.qApp.exec_()
+		iutils_testing.show(w, __name__)
 	
 			
 if __name__ == "__main__":
