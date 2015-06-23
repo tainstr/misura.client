@@ -4,7 +4,8 @@
 import unittest
 import functools
 
-from misura import utils_testing as ut
+from misura import utils_testing
+from misura.client.tests import iutils_testing
 
 from misura.client.acquisition import measureinfo
 from misura import instrument
@@ -15,12 +16,10 @@ from misura import kiln, flex
 
 from PyQt4 import QtGui,QtCore
 
-	
-	
 
 class MeasureInfo(unittest.TestCase):
 	def setUp(self):
-		self.server=ut.dummyServer(flex.Flex, kiln.Kiln)
+		self.server=utils_testing.dummyServer(flex.Flex, kiln.Kiln)
 		self.remote_instrument = self.server.flex
 
 		proxy=option.ConfigurationProxy(self.server.tree()[0])
