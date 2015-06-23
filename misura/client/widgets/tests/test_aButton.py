@@ -40,7 +40,7 @@ class aButton(unittest.TestCase):
         self.assertEqual(msgBox.informativeText(),'test text')
         # Try with long reply
         self.root['test']='test text\n'*100
-        w.get()
+        w.current = self.root['test']
         msgBox=w._msgBox()
         self.assertTrue(str(msgBox.informativeText()).startswith('test text'))
         self.assertEqual(msgBox.detailedText(),self.root['test'])

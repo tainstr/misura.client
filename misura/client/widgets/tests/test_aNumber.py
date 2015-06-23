@@ -79,9 +79,8 @@ class aNumber(unittest.TestCase):
 		self.assertFalse(w.slider)
 
 	def test_MIN_MAX(self):
-		self.root.sete('Test', 
-		               option.ao({}, 'Test', 'Integer', 5, minimum=-10,  maximum=10)['Test'])
-		w=self.wgGen()
+		self.root.sete('Test', option.ao({}, 'Test', 'Integer', 5, minimum=-10,  maximum=10)['Test'])
+		w = self.wgGen()
 		self.assertEqual(w.current, 5)
 		self.assertTrue(w.slider)
 	
