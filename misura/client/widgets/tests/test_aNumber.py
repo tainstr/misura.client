@@ -33,27 +33,18 @@ class FocusableSlider(unittest.TestCase):
 		self.assertFalse(self.wg.set_paused(False))
 		
 	def test_mousePressEvent(self):
-		print 'a'
 		self.assertFalse(self.wg.paused)
-		print '0'
 		self.wg.mousePressEvent(ev)
-		print '1'
 		self.assertTrue(self.wg.paused)
 		self.wg.mouseReleaseEvent(ev)
-		print '2'
 		self.assertFalse(self.wg.paused)
-		print '3'
 		
 	def test_mouseDoubleClickEvent(self):
-		print 'mdce 1'
 		self.assertFalse(self.wg.zoomed)
 		self.wg.mouseDoubleClickEvent(ev)
-		print 'mdce 2'
 		self.assertTrue(self.wg.zoomed)
 		self.wg.mouseDoubleClickEvent(ev)
-		print 'mdce 3'
 		self.assertFalse(self.wg.zoomed)
-		print 'done'
 	
 class aNumber(unittest.TestCase):
 	def setUp(self):
