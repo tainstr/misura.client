@@ -82,17 +82,17 @@ def misura_import(self, filename, **options):
 	logging.debug('%s %s', "Imported datasets %s" % (' '.join(dsnames), ))
 	return dsnames
 
-# Add the Importmisura command to the CommandInterface class
-imp='Importmisura'
+# Add the ImportMisura command to the CommandInterface class
+imp='ImportMisura'
 safe=list(document.CommandInterface.safe_commands)
 safe.append(imp)
 document.CommandInterface.safe_commands=safe
-document.CommandInterface.Importmisura=misura_import
+document.CommandInterface.ImportMisura=misura_import
 	
-class misuraInterface(CustomInterface, QtCore.QObject):
+class MisuraInterface(CustomInterface, QtCore.QObject):
 	"""MainWindow methods useful for misura specific widgets and actions"""
 	def __init__(self, mainwindow):
-		CustomInterface.__init__(self, mainwindow, 'misura')
+		CustomInterface.__init__(self, mainwindow, 'Misura')
 		QtCore.QObject.__init__(self, parent=mainwindow)
 		
 		# Navigator
@@ -241,7 +241,7 @@ class misuraInterface(CustomInterface, QtCore.QObject):
 		p.apply(self.mw.cmd,{'dsn': dsn})		
 		
 	def liveImport(self, filename, options={}):
-		"""Import misura Data and do the default plotting"""
+		"""Import misura data and do the default plotting"""
 		self.mw.document.suspendUpdates()
 		dsn=self.open_file(filename, **options)
 		self.defaultPlot(dsn)
@@ -257,7 +257,7 @@ class misuraInterface(CustomInterface, QtCore.QObject):
 		options['rule_unit']=confdb['rule_unit']
 		# lookup filename
 		filename=unicode(filename)
-		dsnames=self.mw.cmd.Importmisura(filename, **options)
+		dsnames=self.mw.cmd.ImportMisura(filename, **options)
 		self.openedFiles.refresh()
 		return dsnames
 
@@ -295,7 +295,7 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
 		"""Import misura data from HDF file"""
 		# lookup filename
 		filename=unicode(filename)
-		dsnames=self.mw.cmd.Importmisura(filename, **options)
+		dsnames=self.mw.cmd.ImportMisura(filename, **options)
 		return dsnames
 
 
@@ -322,7 +322,7 @@ class Graphics(MainWindow):
 		self.cmd=self.ci.interface
 		# misura Interface
 		logging.debug('%s', 'misura Interface')
-		self.m4=misuraInterface(self)
+		self.m4=MisuraInterface(self)
 		# Misura3 Interface
 		#print 'Misura3 Interface'
 		#self.m3=Misura3Interface(self)

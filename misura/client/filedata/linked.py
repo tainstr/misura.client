@@ -39,7 +39,7 @@ class LinkedMisuraFile(base.LinkedFileBase):
 		params = [repr(self._getSaveFilename(relpath))]
 		if self.prefix:
 			params.append('prefix=' + repr(self.prefix))
-		fileobj.write('Importmisura(%s)\n' % (', '.join(params)))
+		fileobj.write('ImportMisura(%s)\n' % (', '.join(params)))
 		
 	def createOperation(self):
 		"""Returns the operation needed for data reloading"""

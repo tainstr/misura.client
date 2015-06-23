@@ -53,6 +53,8 @@ class TestWindow(acquisition.MainWindow):
 		
 		self.menuVersions=fileui.VersionMenu(self.fixedDoc.proxy)
 		self.myMenuBar.measure.addMenu(self.menuVersions)
+		self.menuPlot=fileui.SavePlotMenu(self.fixedDoc)
+		self.myMenuBar.measure.addMenu(self.menuPlot)
 		self.menuVersions.versionChanged.connect(self.load_version)
 		
 	def close(self):

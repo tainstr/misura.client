@@ -71,6 +71,7 @@ class Active(object):
 	_lock=False
 	current=None
 	"""Current server-side value"""
+	unit=None
 	def __init__(self, server, remObj, prop, context='Option', connect=True):
 		self._lock=threading.Lock()
 		self.server=server

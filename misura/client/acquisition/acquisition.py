@@ -215,10 +215,12 @@ class MainWindow(QtGui.QMainWindow):
 		r=self.remote.copy()
 		r.connect()
 		return r.init_instrument(soft)
+
 	def init_instrument(self, soft=False):
 		#TODO: this scheme could be automated via a decorator: @thread 
 		logging.debug('%s', 'Calling init_instrument in QThreadPool')
 		r=widgets.RunMethod(self._init_instrument, soft)
+		r.pid='Instrument initialization '
 		QtCore.QThreadPool.globalInstance().start(r)
 		logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance().activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
 		
