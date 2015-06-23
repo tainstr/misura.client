@@ -24,21 +24,23 @@ class aProgress(unittest.TestCase):
 		widget = widgets.build(self.root, self.root, self.root.gete(name))
 		self.assertTrue(widget is not False)
 		return widget
+
+	def show(self, widget):
+		if __name__=='__main__':
+			widget.show()
+			QtGui.qApp.exec_()
+			
 		
 	def test_zero(self):
 		self.root.sete('Test', option.ao({}, 'Test', 'Progress')['Test'])
 		widget = self.wgGen('Test')
 		self.assertEqual(widget.current, 0)
-		if __name__=='__main__':
-			widget.show()
-			QtGui.qApp.exec_()
+		self.show(widget)
 	
 	def test_more(self):
 		self.root.sete('Test', option.ao({}, 'Test', 'Progress', current = 3, max = 10)['Test'])
 		widget = self.wgGen('Test')
-		if __name__=='__main__':
-			widget.show()
-			QtGui.qApp.exec_()
+		self.show(widget)
 			
 	def test_RoleProgress(self):
 		self.root.sete('Test', option.ao({}, 'Test', 'Progress', current=3, max = 10)['Test'])
@@ -48,9 +50,7 @@ class aProgress(unittest.TestCase):
 		self.root.setattr('progress', 'kid', '/progress')
 
 		widget = self.wgGen('progress')
-		if __name__=='__main__':
-			widget.show()
-			QtGui.qApp.exec_()
+		self.show(widget)
 			
 if __name__ == "__main__":
 	unittest.main(verbosity=2)  
