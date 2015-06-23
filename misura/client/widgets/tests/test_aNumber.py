@@ -79,17 +79,13 @@ class aNumber(unittest.TestCase):
 		self.root.sete('Test', option.ao({}, 'Test', 'Float', current=120,unit='second')['Test'])
 		w=self.wgGen()
 		w.lay.addWidget(w.label_widget)
-# 		w.spinbox.setReadOnly(True)
-		if __name__=='__main__':
-			w.show()
-			QtGui.qApp.exec_()
+		iutils_testing.show(w, __name__)
 			
 	def test_units(self):
 		self.root.sete('Test', option.ao({}, 'Test', 'Float', units='second')['Test'])
 		w=self.wgGen()
 		self.assertEqual(w.current, 0)
 		self.assertFalse(w.slider)
-		#TODO!
 		
 	
 		

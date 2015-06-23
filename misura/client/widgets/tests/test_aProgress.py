@@ -9,10 +9,6 @@ from misura.canon import option
 from PyQt4 import QtGui,QtCore
 from PyQt4.QtTest import QTest
 
-main = __name__=='__main__'
-
-#TODO: generalize a widget testing  framework
-
 class aProgress(unittest.TestCase):
 	def setUp(self):
 		self.root = option.ConfigurationProxy()
@@ -25,22 +21,17 @@ class aProgress(unittest.TestCase):
 		self.assertTrue(widget is not False)
 		return widget
 
-	def show(self, widget):
-		if __name__=='__main__':
-			widget.show()
-			QtGui.qApp.exec_()
-			
 		
 	def test_zero(self):
 		self.root.sete('Test', option.ao({}, 'Test', 'Progress')['Test'])
 		widget = self.wgGen('Test')
 		self.assertEqual(widget.current, 0)
-		self.show(widget)
+		iutils_testing.show(widget, __name__)
 	
 	def test_more(self):
 		self.root.sete('Test', option.ao({}, 'Test', 'Progress', current = 3, max = 10)['Test'])
 		widget = self.wgGen('Test')
-		self.show(widget)
+		iutils_testing.show(widget, __name__)
 			
 	def test_RoleProgress(self):
 		self.root.sete('Test', option.ao({}, 'Test', 'Progress', current=3, max = 10)['Test'])
@@ -50,7 +41,7 @@ class aProgress(unittest.TestCase):
 		self.root.setattr('progress', 'kid', '/progress')
 
 		widget = self.wgGen('progress')
-		self.show(widget)
+		iutils_testing.show(widget, __name__)
 			
 if __name__ == "__main__":
 	unittest.main(verbosity=2)  

@@ -26,9 +26,7 @@ class aScript(unittest.TestCase):
 		self.root.sete('test', option.ao({}, 'test', 'Script')['test'])
 		widget = self.wgGen()
 		
-		if __name__=='__main__':
-			widget.show()
-			QtGui.qApp.exec_()
+		iutils_testing.show(widget, __name__)
 			
 	
 			
