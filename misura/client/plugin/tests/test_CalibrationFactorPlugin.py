@@ -3,26 +3,18 @@
 """Testing CalibrationFactorPlugin."""
 import unittest
 import os
-from misura.canon.logger import Log as logging
 import veusz.document as document
 from misura.client import filedata
 from misura.client.tests import iutils_testing as iut
 from misura.client import plugin
 from PyQt4 import QtGui
 
-logging.debug('%s %s', 'Importing', __name__)
-
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
-
-def tearDownModule():
-	logging.debug('%s %s', 'tearDownModule', __name__)
-
-nativem4=os.path.join(iut.data_dir,'calibration.h5')
+nativem4 = os.path.join(iut.data_dir, 'calibration.h5')
 
 class CalibrationFactorPlugin(unittest.TestCase):
 	"""Tests the CalibrationFactorPlugin"""	
-			
+
+	@unittest.skip('WAITING FOR A CALIBRATION TEST FILE!!!')
 	def test(self):
 		# Simulate an import
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
