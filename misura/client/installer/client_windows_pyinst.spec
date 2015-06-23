@@ -5,7 +5,7 @@ import os.path
 from misura.client.parameters import pathClient
 from veusz import utils as vutils
 
-console=False
+console=True
 debug=False
 cli=pathClient+'\\' 
 bin=cli+'bin\\'

@@ -3,6 +3,7 @@
 """Auto-discovery suite"""
 import os, sys
 import unittest
+from traceback import format_exc
 from misura.canon.logger import Log as logging
 
 patterns=['test_*.py', # unit tests
@@ -34,14 +35,14 @@ def load_tests(loader, tests, pattern):
 		if dirpath.count('/.')>0: 
 			continue
 		# Allow only "tests" dirs
-		if '/tests' not in dirpath: 
+		if os.path.sep+'tests' not in dirpath: 
 			continue
 		# Require an __init__.py file to be present
 		if '__init__.py' not in filenames: 
 			continue
 		# Normalize dirpath ending
-		if not dirpath.endswith('/'): 
-			dirpath=dirpath+'/'
+		if not dirpath.endswith(os.path.sep): 
+			dirpath=dirpath+os.path.sep
 		# if not 'conf/tests' in dirpath:
 		# 	continue
 		# Remember for future use
@@ -58,7 +59,10 @@ def load_tests(loader, tests, pattern):
 			for all_test_suite in unittest.defaultTestLoader.discover(dirpath, pattern=pattern,top_level_dir=d2):
 				for test_suite in all_test_suite:
 					logging.debug('%s %s %s', 'adding', dirpath, test_suite)
-					suite.addTests(test_suite)
+					try:
+						suite.addTests(test_suite)
+					except:
+						logging.debug(format_exc())
 	return suite
 
 if __name__=='__main__':

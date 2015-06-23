@@ -23,10 +23,11 @@ C:
 cd %installerDir%
 %pyinst% -y %specFile%
 
+REM Consolidate local build
 xcopy %out%\configuration\* %out%\misura4
 xcopy %out%\archive\* %out%\misura4
 xcopy %out%\acquisition\* %out%\misura4
 
 REM Deploy step
-del /q /s "%deployDir%\misura4" 
-xcopy /E /Y /I "%out%\misura4" "%deployDir%\misura4"
+REM del /q /s "%deployDir%\misura4" 
+REM xcopy /E /Y /I "%out%\misura4" "%deployDir%\misura4"
