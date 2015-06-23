@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from traceback import print_exc
 import functools
-from time import sleep, time
+from time import time
 import collections
-from misura.canon.logger import Log as logging
+import threading
 
+from misura.canon.logger import Log as logging
+from misura.canon.csutil import lockme
 from misura.client import network
 from misura.client import units
 from misura.client.clientconf import confdb
@@ -49,24 +50,29 @@ class RunMethod(QtCore.QRunnable):
 		self.func=func
 		self.args=args
 		self.kwargs=kwargs
-		logging.debug('%s %s %s %s', 'RunMethod initialized', self.func, self.args, self.kwargs)
+		self.pid='Waiting: {}'.format(func)
+		logging.debug('RunMethod initialized %s %s %s', self.func, self.args, self.kwargs)
 		self.runnables.append(self)
 		
 	def run(self):
-		logging.debug('%s %s %s %s', 'RunMethod.run', self.func, self.args, self.kwargs)
+		registry.tasks.jobs(2,self.pid)
+		logging.debug('RunMethod.run %s %s %s', self.func, self.args, self.kwargs)
+		registry.tasks.job(1,self.pid, self.pid)
 		r=self.func(*self.args, **self.kwargs)
-		logging.debug('%s %s', 'RunMethod.run result', r)
+		logging.debug('RunMethod.run result %s', r)
 		self.runnables.remove(self)
-		
+		registry.tasks.done(self.pid)
 
 
 class Active(object):
 	interval=200
 	last_async_get=0
 	force_update=False
+	_lock=False
 	current=None
 	"""Current server-side value"""
 	def __init__(self, server, remObj, prop, context='Option', connect=True):
+		self._lock=threading.Lock()
 		self.server=server
 		self.remObj=remObj
 		self.path=remObj._Method__name
@@ -102,6 +108,7 @@ class Active(object):
 		if t-self.last_async_get<self.interval/1000.:
 			return False
 		r=RunMethod(self.get)
+		r.pid=_('Waiting: ')+self.label
 		QtCore.QThreadPool.globalInstance().start(r)
 		self.last_async_get=t
 		return True
@@ -170,7 +177,8 @@ class Active(object):
 		elif self.current!=rem:
 			self.current=rem
 			self.emitChanged()
-
+	
+	@lockme
 	def get(self, *args):
 		rem=self.remObj.get(self.handle, *args)
 		self._get(rem)

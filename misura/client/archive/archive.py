@@ -14,7 +14,7 @@ import testwindow
 		
 
 class MainWindow(QtGui.QMainWindow):
-	"""Apertura file singoli, database locali, database remoti."""
+	"""Open single files, local databases, remote databases."""
 
 	def __init__(self, parent=None):
 		super(QtGui.QMainWindow, self).__init__(parent)
@@ -60,7 +60,7 @@ class MainWindow(QtGui.QMainWindow):
 		cw=self.centralWidget()
 		win=cw.addTab(tw,tw.title)
 		confdb.mem_file(path,tw.remote.measure['name'])
-		cw.setCurrentIndex(cw.count())
+		cw.setCurrentIndex(cw.count()-1)
 		
 	def open_database(self,path,new=False):
 		idb=getDatabaseWidget(path,new=new)

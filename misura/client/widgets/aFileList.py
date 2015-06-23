@@ -27,6 +27,10 @@ class aFileList(aChooser):
 		if len(n)==0 or not os.path.exists(n):
 			logging.debug('%s', 'File Upload Aborted')
 			return
+		if os.path.basename(n) in self.prop['options']:
+			#TODO: allow to overwrite....
+			QtGui.QMessageBox.warning(self,_('Overwriting file'),_('A file with the same name already exists.\nPlease choose a different one.'))
+			return 
 		url=self.remObj.conn_addr+self.remObj['fullpath'][:-1] # remove trailing /
 		logging.debug('%s %s %s %s', 'Transfer target:', repr(url), n, self.handle)
 		self.transfer=TransferThread(url=url,outfile=n,post={'opt':self.handle})

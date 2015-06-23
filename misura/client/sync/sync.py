@@ -3,9 +3,6 @@
 """Database synchronization service and widget"""
 import os
 import urllib2, urllib
-
-from time import sleep
-from traceback import print_exc
 import logging
 
 from PyQt4 import QtCore, QtGui

@@ -29,6 +29,7 @@ class aChooser(ActiveWidget):
 	def redraw(self, reget=True):
 		self.combo.blockSignals(True)
 		# Cleans combo entries
+		self.combo.clear()
 		for i in range(self.combo.count()):
 			self.combo.removeItem(self.combo.currentIndex())
 		# Get new property
