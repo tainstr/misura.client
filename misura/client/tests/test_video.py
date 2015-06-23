@@ -11,7 +11,6 @@ from misura.client import video
 import shutil
 from PyQt4 import QtGui
 
-@unittest.skip('temporary skipped to debug automatic')
 class Video(unittest.TestCase):
 	def setUp(self):
 		self.test_file = os.path.join(iutils_testing.data_dir,'video_file.h5')
