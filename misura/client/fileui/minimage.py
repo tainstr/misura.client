@@ -5,6 +5,7 @@ import functools
 from PyQt4 import QtGui, QtCore
 from ...canon import csutil
 from misura.client import _
+import os
 
 class MiniImage(QtGui.QWidget):
 	"""Image from test chronology"""
@@ -69,7 +70,9 @@ class MiniImage(QtGui.QWidget):
 		"""Save current frame"""
 		if not self.saveDir:
 			self.saveDir = QtGui.QFileDialog.getExistingDirectory(self, "Images destination folder", "/tmp")
-		self.img.save('%s/%i.jpg' % (self.saveDir, self.idx), 'JPG',25)
+		saved_file = os.path.join(self.saveDir, str(self.idx)) + '.jpg'
+		self.img.save(saved_file, 'JPG',25)
+		return saved_file
 		
 	def empty(self):
 		"""Set the image as empty"""

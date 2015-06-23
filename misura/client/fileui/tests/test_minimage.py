@@ -3,44 +3,48 @@
 """Testing fileui.minimage module."""
 import unittest
 import os
-from misura.canon.logger import Log as logging
 from misura.client import filedata
 from misura.client import fileui
-from misura.client.tests import iutils_testing as iut
+from misura.client.tests import iutils_testing
 from misura.canon import indexer
 from veusz import widgets # needed for document creation!
 from PyQt4 import QtGui
 
-logging.debug('%s %s', 'Importing', __name__)
-
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
-
-def tearDownModule():
-	logging.debug('%s %s', 'tearDownModule', __name__)
-	
 
 
-fpath=os.path.join(iut.data_dir,'hsm_test.h5')
 
 class MiniImage(unittest.TestCase):	
+	def tearDown(self):
+		iutils_testing.silent_remove(self.saved_file)
+
+
 	def test_init(self):
+		fpath = os.path.join(iutils_testing.data_dir,'test_video.h5')
+
 		# Simulate an import
-		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=fpath))
-		doc=filedata.MisuraDocument()
+		imp = filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=fpath))
+		doc = filedata.MisuraDocument()
 		imp.do(doc)
-		fp=indexer.SharedFile(fpath)
-		decoder=filedata.DataDecoder()
-		p='/cam/last_frame'
-		decoder.reset(fp,p)
-		decoder.start()
-		doc.decoders[p]=decoder
-		# Create the minimage
-		mini=fileui.MiniImage(doc,'/cam/last_frame')
-		mini.saveDir='/tmp/'
-		mini.set_idx(0)
-		mini.save_frame()
+		fp = indexer.SharedFile(fpath)
+		decoder = filedata.DataDecoder()
+		profile = '/hsm/sample0/profile'
+		decoder.reset(fp, profile)
 		
+		self.sync(decoder)
+
+		doc.decoders[profile] = decoder
+		
+		mini = fileui.MiniImage(doc, '/hsm/sample0/profile')
+		mini.saveDir = iutils_testing.data_dir
+		mini.set_idx(0)
+
+		self.saved_file = mini.save_frame()
+		self.assertTrue(os.path.exists(self.saved_file))
+
+
+	def sync(self, decoder):
+		self.assertGreater(decoder.get_len(), 0)
+		decoder.cache(0)
 		
 if __name__ == "__main__":
 	unittest.main()  
