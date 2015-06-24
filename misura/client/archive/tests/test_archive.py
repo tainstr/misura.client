@@ -24,10 +24,8 @@ class MainWindow(unittest.TestCase):
 
 		main_window = archive.MainWindow()
 		main_window.open_file(test_file_name)
-		
-		if __name__=='__main__':
-			main_window.show()
-			iutils_testing.QtGui.qApp.exec_()
+
+		iutils_testing.show(main_window, __name__)
 		
 		main_window.close()
 		
