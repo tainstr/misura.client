@@ -4,10 +4,10 @@
 import unittest
 import os
 import veusz.document as document
-from misura.client import filedata, iutils
+
 from misura.client.tests import iutils_testing
+from misura.client import filedata
 from misura.client import plugin
-from PyQt4 import QtGui
 
 
 
@@ -20,7 +20,7 @@ class ReportPlugin(unittest.TestCase):
 		p.apply(self.cmd,fields)
 			
 	def test_hsm(self):
-		"""Double import a file and subtract the same datasets."""
+		"""Create HSM report"""
 		# Simulate an import
 		nativem4 = os.path.join(iutils_testing.data_dir,'test_video.h5')
 		imp = filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))

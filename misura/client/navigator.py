@@ -205,7 +205,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 	def update_sample_menu(self, node):
 		self.sample_menu.clear()
 		self.sample_menu.addAction(_('Intercept all curves'), self.intercept)
-		if '/hsm/' in node.path:
+		if 'hsm/' in node.path:
 			self.sample_menu.addAction(_('Show Characteristic Points'), self.showPoints)
 			# Check minimum conditions for surface tension plugin
 			j=0; k=['beta','r0','Vol']

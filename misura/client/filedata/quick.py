@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tree visualization of opened misura Files in a document."""
 from misura.canon.logger import Log as logging
-import veusz.dialogs
+from veusz.dialogs.plugin import PluginDialog
+
 from veusz import document
 from PyQt4.QtCore import Qt
 from PyQt4 import QtGui, QtCore
@@ -109,7 +110,7 @@ class QuickOps(object):
 		else: dslist=[]
 		from misura.client import plugin
 		p=plugin.InterceptPlugin(target=dslist,axis='X')
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.InterceptPlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.InterceptPlugin)
 		self.mainwindow.showDialog(d)
 
 	###
@@ -182,7 +183,7 @@ class QuickOps(object):
 		"""Show characteristic points"""
 		from misura.client import plugin
 		p=plugin.ShapesPlugin(sample=node)
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.ShapesPlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.ShapesPlugin)
 		self.mainwindow.showDialog(d)
 		
 	@node
@@ -190,7 +191,7 @@ class QuickOps(object):
 		"""Execute ReportPlugin on `node`"""
 		from misura.client import plugin
 		p=plugin.ReportPlugin(sample=node)
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
 		self.mainwindow.showDialog(d)
 		
 	@node
@@ -242,7 +243,7 @@ class QuickOps(object):
 		"""Write thermal cycle onto a text label"""
 		from misura.client import plugin
 		p=plugin.ThermalCyclePlugin(test=node)
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.ThermalCyclePlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.ThermalCyclePlugin)
 		self.mainwindow.showDialog(d)
 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 	
@@ -256,7 +257,7 @@ class QuickOps(object):
 		logging.debug('%s %s %s', 'Invoking InitialDimensionPlugin', n, ini)
 		from misura.client import plugin
 		p=plugin.InitialDimensionPlugin(ds=n, ini=ini)
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.InitialDimensionPlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.InitialDimensionPlugin)
 		self.mainwindow.showDialog(d)
 # 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 		
@@ -266,7 +267,7 @@ class QuickOps(object):
 		n=self.doc.datasetName(node.ds)
 		from misura.client import plugin
 		p=plugin.PercentilePlugin(ds=n,propagate=True)
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.PercentilePlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.PercentilePlugin)
 		self.mainwindow.showDialog(d)
 # 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 		
@@ -279,7 +280,7 @@ class QuickOps(object):
 		n=self.doc.datasetName(node.ds)
 		from misura.client import plugin
 		p=plugin.UnitsConverterTool(ds=n,convert=convert,propagate=True)
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.UnitsConverterTool)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.UnitsConverterTool)
 		self.mainwindow.showDialog(d)
 # 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 		
@@ -440,7 +441,7 @@ class QuickOps(object):
 		w=max(5,len(ds.data)/50)
 		from misura.client import plugin
 		p=plugin.SmoothDatasetPlugin(ds_in=node.path, ds_out=node.m_name+'_sm', window=int(w))
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.SmoothDatasetPlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.SmoothDatasetPlugin)
 		self.mainwindow.showDialog(d)
 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 		
@@ -453,7 +454,7 @@ class QuickOps(object):
 		ini=getattr(ds, 'm_initialDimension', 0)
 		from misura.client import plugin
 		p=plugin.CoefficientPlugin( ds_y=node.path, ds_x=ds_x, ds_out=node.m_name+'_cf',smooth=w, percent=ini)
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.CoefficientPlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.CoefficientPlugin)
 		self.mainwindow.showDialog(d)
 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 		
@@ -465,7 +466,7 @@ class QuickOps(object):
 		ds_x=self.xnames(node)[0] # in current page
 		from misura.client import plugin
 		p=plugin.DeriveDatasetPlugin( ds_y=node.path, ds_x=ds_x, ds_out=node.m_name+'_d',smooth=w)
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.DeriveDatasetPlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.DeriveDatasetPlugin)
 		self.mainwindow.showDialog(d)
 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 	
@@ -479,7 +480,7 @@ class QuickOps(object):
 		from misura.client import plugin
 		p=plugin.CurveOperationPlugin(ax=T0,ay=node0.path,bx=T1,by=node0.path)
 		#TODO: TC comparison?
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
 		self.mainwindow.showDialog(d)
 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)	
 	
@@ -516,7 +517,7 @@ class QuickOps(object):
 		cls=plugin.SurfaceTensionPlugin
 		p=cls(beta=beta,R0=R0,T=T,
 								dil=dil,dilT=T, ds_out=out)
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, cls)
+		d = PluginDialog(self.mainwindow, self.doc, p, cls)
 		self.mainwindow.showDialog(d)
 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)			
 	@node
@@ -536,7 +537,7 @@ class QuickOps(object):
 		x=self.xnames(node)[0]
 		from misura.client import plugin
 		p=plugin.ColorizePlugin(curve=plotpath[0],x=x)	
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.ColorizePlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.ColorizePlugin)
 		self.mainwindow.showDialog(d)		
 	
 	@node
@@ -566,7 +567,7 @@ class QuickOps(object):
 		ds,node=self.dsnode()
 		from misura.client import plugin
 		p=plugin.OverwritePlugin(a=node.parent.path,b=node.path,delete=True)
-		d = veusz.dialogs.plugin.PluginDialog(self.mainwindow, self.doc, p, plugin.OverwritePlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.OverwritePlugin)
 		self.mainwindow.showDialog(d)
 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)	
 		

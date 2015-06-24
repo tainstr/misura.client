@@ -83,10 +83,11 @@ class ReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 		doc=cmd.document
 		self.doc=doc
 		exe=CommandInterpreter(doc)
-		smp_path=fields['sample'].path
+		smp_path0=fields['sample'].path
+		smp_path=smp_path0.split(':')[1]
 		vsmp=smp_path.split('/')
 		smp_name=vsmp[-1] # sample name
-		smp_path='/'+'/'.join(vsmp[1:]) # cut summary/ stuff
+		smp_path='/'+'/'.join(vsmp) # cut summary/ stuff
 		report_path='/report'
 		logging.debug('%s %s %s', smp_path, smp_name, report_path)
 		test=fields['sample'].linked
@@ -109,6 +110,7 @@ class ReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 #		d=list(os.path.split(parameters.pathClient))[:-1]+['client','art','report_hsm.vsz']
 #		d=os.path.join(*tuple(d))
 		d=os.path.join(params.pathArt,'report_hsm.vsz')
+		#TODO: replace report path
 		tpl=open(d,'rb').read()
 		exe.run(tpl)
 				
@@ -177,12 +179,13 @@ class ReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 			'TickLabels/size':'6pt'}
 		self.dict_toset(doc.resolveFullWidgetPath(graph+'/y'),cf)
 		self.dict_toset(doc.resolveFullWidgetPath(graph+'/y1'),cf)
-		
+
+
 		# Volume plotting
 		self.ops.append(document.OperationToolsPlugin(PlotPlugin.PlotDatasetPlugin(),
 					{'x':[test.prefix+'kiln/T'],
-					'y':[test.prefix+smp_path+'/Vol'],
-					'currentwidget':'/report/temp'}
+					'y':[smp_path0+'/Vol'],
+					'currentwidget':report_path+'/temp'}
 					))
 		self.apply_ops()
 		
