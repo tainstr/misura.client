@@ -31,11 +31,12 @@ class MeasureInfo(unittest.TestCase):
 		self.assertEqual(self.measure_info.count(), 4 + number_of_samples)
 
 				
-	def test_tabs(self):
+	def test_tabs_for_two_samples(self):
 		self.measure_info.remote.measure['nSamples'] = 2
 		self.measure_info.refreshSamples()
 		self.check_tabs()
 
+	def test_tabs_for_one_samples(self):
 		self.measure_info.remote.measure['nSamples'] = 1
 		self.measure_info.refreshSamples()
 		self.check_tabs()
