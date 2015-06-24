@@ -3,12 +3,14 @@
 """Tests Archive"""
 import unittest
 import functools
+import os
 
 from misura import utils_testing
 from misura.client.tests import iutils_testing
 
 from misura.client.acquisition import measureinfo
 from misura import instrument
+from misura.client import filedata
 
 from test_controls import Parent
 from misura.canon import option
@@ -19,27 +21,27 @@ from PyQt4 import QtGui,QtCore
 
 class MeasureInfo(unittest.TestCase):
 	def setUp(self):
-		self.server=utils_testing.dummyServer(flex.Flex, kiln.Kiln)
-		self.remote_instrument = self.server.flex
-
-		proxy=option.ConfigurationProxy(self.server.tree()[0])
-		proxy._parent=option.ConfigurationProxy(self.server.tree()[0])
-		self.measure_info = measureinfo.MeasureInfo(proxy.flex)
+		file_proxy = filedata.getFileProxy(os.path.join(iutils_testing.data_dir,'test_video.h5'))
+		file_proxy.load_conf()
 		
-	def check_tabs(self):
-		number_of_samples = self.remote_instrument.measure['nSamples']
+		proxy = file_proxy.conf
+
+		self.measure_info = measureinfo.MeasureInfo(proxy.hsm)
+		
+	def check_tabs(self, number_of_samples):
 		self.assertEqual(self.measure_info.count(), 4 + number_of_samples)
 
 				
 	def test_tabs_for_two_samples(self):
-		self.measure_info.remote.measure['nSamples'] = 2
+		self.measure_info.nobj.current = 2
 		self.measure_info.refreshSamples()
-		self.check_tabs()
+		self.check_tabs(2)
 
-	def test_tabs_for_one_samples(self):
-		self.measure_info.remote.measure['nSamples'] = 1
+		self.measure_info.nobj.current = 1
 		self.measure_info.refreshSamples()
-		self.check_tabs()
+		self.check_tabs(1)
+
+		
 			
 		
 if __name__ == "__main__":
