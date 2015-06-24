@@ -3,23 +3,13 @@
 """Testing the ShapesPlugin."""
 import unittest
 import os
-from misura.canon.logger import Log as logging
 import veusz.document as document
 from misura.client import filedata, iutils
-from misura.client.tests import iutils_testing as iut
+from misura.client.tests import iutils_testing
 from misura.client import plugin
 from PyQt4 import QtGui
 
-logging.debug('%s %s', 'Importing', __name__)
 
-def setUpModule():
-	logging.debug('%s %s', 'setUpModule', __name__)
-
-def tearDownModule():
-	logging.debug('%s %s', 'tearDownModule', __name__)
-
-nativem4=os.path.join(iut.data_dir,'hsm_test.h5')
-nativem4='/home/daniele/f3x3.h5'
 
 class ReportPlugin(unittest.TestCase):
 	"""Tests the CalibrationPlugin"""	
@@ -29,22 +19,21 @@ class ReportPlugin(unittest.TestCase):
 		p=plugin.ReportPlugin()
 		p.apply(self.cmd,fields)
 			
-	def test(self):
+	def test_hsm(self):
 		"""Double import a file and subtract the same datasets."""
 		# Simulate an import
-		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
-		doc=filedata.MisuraDocument()
+		nativem4 = os.path.join(iutils_testing.data_dir,'test_video.h5')
+		imp = filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
+		doc = filedata.MisuraDocument()
 		self.cmd=document.CommandInterface(doc)
+		plugin.makeDefaultDoc(self.cmd)
 		imp.do(doc)
 		# Import again
 		imp.do(doc)
-		logging.debug('%s', doc.data.keys())
 		doc.model.refresh()
 		tree=doc.model.tree
-		logging.debug('%s %s', 'tree child', tree.get('').children)
-		entry=tree.traverse('hsm/sample0')
+		entry=tree.traverse('0:hsm/sample0')
 		self.assertTrue(entry!=False)
-		logging.debug('%s %s', 'found entry', entry)
 		self.do(doc,entry)
 		
 if __name__ == "__main__":
