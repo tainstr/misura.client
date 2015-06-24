@@ -4,7 +4,7 @@ from misura.canon.logger import Log as logging
 from .. import network, conf, _
 from ..clientconf import confdb
 from ..connection import LoginWindow, addrConnection
-from ..confwidget import RecentMenu
+from ..confwidget import ClientConf, RecentMenu
 from .. import parameters as params
 
 from PyQt4 import QtGui, QtCore
@@ -32,6 +32,7 @@ class MenuBar(QtGui.QMenuBar):
 			self.measure.setEnabled(False)
 			self.settings.setEnabled(False)
 		self.help=self.addMenu('Help')
+		self.help.addAction(_('Client configuration'),self.showClientConf)
 		if server is not False: 
 			self.setServer(server)
 
@@ -188,7 +189,7 @@ class MenuBar(QtGui.QMenuBar):
 		### SETTINGS Menu
 		self.settings.clear()
 		self.showInstrumentConf=functools.partial(self.hideShow, 'iconf')
-		act=self.settings.addAction('Instrument', self.showInstrumentConf)
+		act=self.settings.addAction(_('Instrument'), self.showInstrumentConf)
 #		self.objects['iconf']=functools.partial(conf.Interface, self.server,  self.remote)
 		self.objects['iconf']=functools.partial(conf.TreePanel, self.remote, None, self.remote)
 		self.lstActions.append((act, self.remote))
@@ -242,3 +243,8 @@ class MenuBar(QtGui.QMenuBar):
 	def reload_data(self):
 		self.parent().uid=False
 		self.parent().resetFileProxy()
+		
+	def showClientConf(self):
+		"""Show client configuration panel"""
+		self.cc=ClientConf()
+		self.cc.show()

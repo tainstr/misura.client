@@ -4,7 +4,7 @@ import os
 from misura.client.widgets.active import *
 from aChooser import aChooser
 from .. import _
-from ..sync import TransferThread
+from ..network import TransferThread
 from misura.canon.logger import Log as logging
 
 

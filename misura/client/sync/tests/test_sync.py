@@ -36,12 +36,12 @@ sync.sync.confdb=cdb
 
 
 logging.debug('%s %s', remote_dbpath, local_dbpath)
-class Sync(unittest.TestCase):
+class StorageSync(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		s=option.ConfigurationProxy()
 		s.sete('isRunning', option.ao({}, 'isRunning', 'Integer',0)['isRunning'])
-		s.sete('serial', option.ao({}, 'serial', 'String','test_sync')['serial'])
+		s.sete('eq_sn', option.ao({}, 'eq_sn', 'String','test_sync')['eq_sn'])
 		cls.srv=s	# base configuration proxy
 		
 		p=iut.FakeProxy(s) # server proxy
@@ -52,20 +52,20 @@ class Sync(unittest.TestCase):
 		iut.enableSignalDebugging()
 		
 	def setUp(self):
-		self.sync=sync.Sync(self.server)
+		self.sync=sync.StorageSync()
+		self.assertTrue(self.sync.prepare(test_confdb, self.server))
 		
 	def test_prepare(self):
 		"""Test object setup before thread start"""
-		self.assertEqual(self.sync.serial,self.srv['serial'])
+		self.assertEqual(self.sync.serial,self.srv['eq_sn'])
 		self.assertEqual(self.sync.remote_dbdir,remote_dbdir)
-		self.assertTrue(self.sync.prepare())
 		self.assertEqual(self.sync.dbpath,test_confdb)
 		
 	
 	def rec(self,i):
 		row=indexer.indexer.testColumnDefault[:]
 		i=str(i)
-		row[:3]=['file'+i,self.srv['serial'],'uid'+i]
+		row[:3]=['file'+i,self.srv['eq_sn'],'uid'+i]
 		return row
 		
 	def check_queue(self,uid,queued=True):
@@ -91,7 +91,10 @@ class Sync(unittest.TestCase):
 		self.check_queue(uid,True)
 	
 	def test_collect(self):
-		pass
+		r=self.sync.collect()
+		print 'collect',r
+		r=self.sync.download()
+		print 'download',r
 	
 	#TODO: these would need an https service
 	def test_download(self):

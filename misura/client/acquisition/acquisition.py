@@ -14,7 +14,7 @@ from misura.canon import csutil
 from .. import _
 from ..live import registry
 from .. import network
-
+from ..network import TransferThread
 from .. import widgets, beholder
 from .. import fileui, filedata, navigator
 from ..misura3 import m3db
@@ -541,7 +541,7 @@ class MainWindow(QtGui.QMainWindow):
 				return False	
 		#TODO: Must wait that current file is closed!!!
 		# Must download
-		sy=sync.TransferThread(outfile=outfile,uid=uid,server=self.server,dbpath=dbpath)
+		sy=TransferThread(outfile=outfile,uid=uid,server=self.server,dbpath=dbpath)
 		sy.set_tasks(self.tasks)
 		sy.start()
 		# Keep a reference

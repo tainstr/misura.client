@@ -54,9 +54,12 @@ class KidRegistry(QtCore.QThread):
 			
 	@lockme
 	def set_manager(self,man=None):
+		old_stream=self.stream
+		self.stream=False
+		self.wait()
 		self.manager=man
 		self.taskswg=Tasks()
-		self.connect(self, QtCore.SIGNAL('set_server(PyQt_PyObject)'), self.taskswg.progress.set_server)
+		self.connect(self, QtCore.SIGNAL('set_server(PyQt_PyObject)'), self.taskswg.set_server)
 		if man is not None:
 			if man.remote:
 				logging.debug('%s %s', 'KidRegistry.set_manager with remote', man.remote)
@@ -65,6 +68,8 @@ class KidRegistry(QtCore.QThread):
 				logging.debug('%s %s', 'KidRegistry.set_manager without remote', man.remote)
 		else:
 			logging.debug('%s %s', 'KidRegistry.set_manager set to None', man)
+		if old_stream:
+			self.start()
 	
 	@property
 	def progress(self):
@@ -232,9 +237,11 @@ class KidRegistry(QtCore.QThread):
 #		if self.proxy: 
 #			self.proxy.connect()
 		# If a doc is registered and remote is running acquisition, update the document
-		if self.doc and self.obj['isRunning']:
-# 			self.emit(QtCore.SIGNAL('update()'))
-			self.doc.update(proxy=self.proxy)
+		if self.obj['isRunning']:
+			if self.doc:
+				self.doc.update(proxy=self.proxy)
+		else:
+			self.taskswg.sync.loop()
 		self.updateLog()
 		self.update_all()
 		return True
@@ -248,6 +255,8 @@ class KidRegistry(QtCore.QThread):
 #		self.obj=False
 		self.stream=True
 		self.lastdoc=False
+		if self.taskswg:
+			self.taskswg.sync.moveToThread(self)
 		while self.stream:
 			# Sleep only if loops are shorter than interval
 # 			print 'KidRegistry.run', len(self.rid)

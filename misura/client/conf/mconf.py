@@ -8,6 +8,7 @@ import constructor
 from devtree import ServerView
 from .. import _ 
 from .. import network
+from ..live import registry
 from ..clientconf import confdb
 from ..connection import ServerSelector, ConnectionStatus, addrConnection
 from ..confwidget import ClientConf, RecentMenu
@@ -112,6 +113,7 @@ class MConf( QtGui.QMainWindow):
 		self.connect(self.menu, QtCore.SIGNAL('select(QString)'), self.setAddr)
 		self.cmenu=QtGui.QMenu('Client')
 		self.cmenu.addAction(_('Configuration'),self.clientConf)
+		self.cmenu.addAction(_('Pending Tasks'),self.show_tasks)
 		self.menuBar().addMenu(self.menu)
 		self.menuBar().addMenu(self.cmenu)
 		self.connect(network.manager, QtCore.SIGNAL('connected()'), self.resetServer)
@@ -164,3 +166,7 @@ class MConf( QtGui.QMainWindow):
 	def clientConf(self):
 		self.cc=ClientConf()
 		self.cc.show()
+		
+	def show_tasks(self):
+		registry.taskswg.user_show=True
+		registry.taskswg.show()

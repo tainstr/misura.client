@@ -80,7 +80,6 @@ def recursiveModel(base, parent=False, model=False):
 			continue
 		item=Item(parent, path,i)
 		obj=base.child(path)
-		logging.debug('%s %s %s %s', 'Recursive Model on ', path, item, name)
 		item=recursiveModel(obj,item, model[path])
 		parent.children.append(item)
 		# was: name

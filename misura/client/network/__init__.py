@@ -20,6 +20,7 @@ from exceptions import BaseException
 from info import ServerInfo
 from manager import NetworkManager
 from mproxy import MisuraProxy, reconnect
+from transfer_thread import TransferThread, urlauth, dataurl, remote_dbdir
 
 global ess
 ess=ServerInfo()
