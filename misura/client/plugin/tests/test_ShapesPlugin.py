@@ -4,11 +4,11 @@
 import unittest
 import os
 import veusz.document as document
-import veusz.plugins
-from misura.client import filedata
+
 from misura.client.tests import iutils_testing as iut
+from misura.client import filedata
+
 from misura.client import plugin
-from PyQt4 import QtGui
 
 class ShapesPlugin(unittest.TestCase):
 	"""Tests the CalibrationPlugin"""	
@@ -25,12 +25,13 @@ class ShapesPlugin(unittest.TestCase):
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
 		misuraDocument = filedata.MisuraDocument()
 		self.cmd = document.CommandInterface(misuraDocument)
+		plugin.makeDefaultDoc(self.cmd)
 		imp.do(misuraDocument)
 		# Import again
 		imp.do(misuraDocument)
 		misuraDocument.model.refresh()
 		tree=misuraDocument.model.tree
-		entry=tree.traverse('0:hsm/sample0/h')
+		entry=tree.traverse('0:hsm/sample0')
 		
 		self.assertTrue(entry!=False)
 

@@ -63,7 +63,7 @@ class ShapesPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		if not conf or len(vds)==0:
 			raise plugins.ToolsPluginException('No metadata found for '+p)
 		logging.debug('%s %s', 'Found datasets', vds)
-		smpp=smpe.path
+		smpp=smpe.path.split(':')[-1]
 		# Detect if a sample dataset was selected and go up one level
 		if smpp.split('/')[-2].startswith('sample'):
 			smpp=smpe.parent.path
