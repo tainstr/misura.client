@@ -35,6 +35,8 @@ class VersionMenu(QtGui.QMenu):
 				act.setChecked(True)
 			# Keep in memory
 			self.loadActs.append((p,act))		
+		if len(vd)>0:
+			self.addSeparator()
 		act=self.addAction(_('New version'),self.new_version)
 		self.loadActs.append((self.new_version,act))
 		act=self.addAction(_('Save configuration'),self.save_version)
