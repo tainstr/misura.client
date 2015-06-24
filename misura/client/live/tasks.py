@@ -7,6 +7,7 @@ import functools
 from misura.canon.logger import Log as logging
 from misura.canon.csutil import lockme, profile
 from misura.client import _
+from misura.client.sync import SyncWidget
 
 from PyQt4 import QtGui, QtCore
 
@@ -48,8 +49,9 @@ class PendingTasks(QtGui.QWidget):
 		self.progress.label_widget.hide()
 		self.lay.addWidget(self.progress)
 		self.connect(self.progress, QtCore.SIGNAL('changed()'), self.update)
-		self.connect(self.progress, QtCore.SIGNAL('selfchanged'), self.update)
+		self.connect(self.progress, QtCore.SIGNAL('selfchanged'), self.update)		
 		self.update()
+
 		
 	def update(self, *a, **k):
 		if len(self)==0:
@@ -197,6 +199,8 @@ class LocalTasks(QtGui.QWidget):
 		self.sig_done.emit(pid)
 		
 class Tasks(QtGui.QWidget):
+	user_show=False
+	"""Detect if the user asked to view this widget"""
 	def __init__(self):
 		QtGui.QWidget.__init__(self)
 		self.lay=QtGui.QVBoxLayout()
@@ -207,14 +211,35 @@ class Tasks(QtGui.QWidget):
 		self.progress=PendingTasks(self)
 		self.lay.addWidget(self.progress)
 		
+		self.sync=SyncWidget(parent=self)
+		self.lay.addWidget(self.sync)
+		
 		self.tasks.ch.connect(self.hide_show)
 		self.progress.ch.connect(self.hide_show)
+		self.sync.ch.connect(self.hide_show)
+		
+	def set_server(self,server):
+		server=server.copy()
+		server.connect()
+		self.progress.set_server(server)
+		self.sync.set_server(server)
 		
 	def hide_show(self):
-		if len(self.tasks)+len(self.progress):
+		if self.user_show:
+			return
+		if len(self.tasks)+len(self.progress)+len(self.sync):
 			self.show()
 		else:
 			self.hide()
+			
+	def hideEvent(self, e):
+		self.user_show=False
+		return QtGui.QWidget.hideEvent(self, e)
+	
+	def closeEvent(self,e):
+		self.user_show=False
+		self.hide()
+		return None
 		
 		
 		
