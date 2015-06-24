@@ -29,5 +29,5 @@ xcopy %out%\archive\* %out%\misura4
 xcopy %out%\acquisition\* %out%\misura4
 
 REM Deploy step
-REM del /q /s "%deployDir%\misura4" 
-REM xcopy /E /Y /I "%out%\misura4" "%deployDir%\misura4"
+del /q /s "%deployDir%\misura4" 
+xcopy /E /Y /I "%out%\misura4" "%deployDir%\misura4"

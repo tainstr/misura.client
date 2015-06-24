@@ -97,7 +97,10 @@ class SavePlotMenu(QtGui.QMenu):
 		ci=document.CommandInterface(self.doc)
 		tmp='tmp_veusz_render.jpg'
 		ci.Export(tmp,page=page)
-		render=open(tmp).read()
+		render=open(tmp,'rb').read()
+		if not len(render):
+                        logging.debug('Failed rendering')
+                        render=False
 		r=self.proxy.save_plot(text, plot_id=plot_id, title=name,render=render,render_format='jpg')
 		os.remove(tmp)
 		return r
