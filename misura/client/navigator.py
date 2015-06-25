@@ -212,8 +212,12 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 			for kj in k: j+=node.children.has_key(kj)
 			if j==len(k):
 				self.sample_menu.addAction(_('Surface tension'), self.surface_tension)
-			self.sample_menu.addAction(_('Report'), self.report)
+			self.sample_menu.addAction(_('Report'), self.hsm_report)
 			self.sample_menu.addAction(_('Render video'), self.render)
+
+		if 'horizontal/' in node.path:
+			self.sample_menu.addAction(_('Report'), self.horizontal_report)
+			
 		self.sample_menu.addAction(_('Delete'), self.deleteChildren)
 		return self.sample_menu
 	

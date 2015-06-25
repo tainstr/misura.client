@@ -187,11 +187,19 @@ class QuickOps(object):
 		self.mainwindow.showDialog(d)
 		
 	@node
-	def report(self,node=False):
+	def hsm_report(self,node=False):
 		"""Execute HsmReportPlugin on `node`"""
 		from misura.client import plugin
 		p=plugin.HsmReportPlugin(sample=node)
 		d = PluginDialog(self.mainwindow, self.doc, p, plugin.HsmReportPlugin)
+		self.mainwindow.showDialog(d)
+
+	@node
+	def horizontal_report(self,node=False):
+		"""Execute HorzizontalReportPlugin on `node`"""
+		from misura.client import plugin
+		p=plugin.HorizontalReportPlugin(sample=node)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.HorizontalReportPlugin)
 		self.mainwindow.showDialog(d)
 		
 	@node
