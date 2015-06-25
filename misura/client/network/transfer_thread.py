@@ -74,8 +74,11 @@ class TransferThread(QtCore.QThread):
 	def pid(self):
 		"""Task identification name"""
 		r=self.prefix
-		url=self.url.split('@')[-1]
-		r+='{}{} \nto {}'.format(self.prefix,url,self.outfile)
+		if self.url:
+			url=self.url.split('@')[-1]
+			r+=url
+		if self.outfile:
+			r+='\nto '+self.outfile
 		return r
 	
 	@property

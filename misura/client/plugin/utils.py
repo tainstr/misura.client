@@ -23,7 +23,9 @@ def searchFirstOccurrence(base, typename, direction=0):
 			found=searchFirstOccurrence(obj,typename,direction=1)
 			if found is not None:
 				return found
-			
+		# Continue upwards
+		if direction==0:
+			direction=-1
 	# Search up in the object tree
 	# Note: exclude siblings - just look for parents
 	if direction<0:
