@@ -29,6 +29,10 @@ class HsmReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 	def add_shapes(self, sample, toset, page, dict_toset, smp_path, test, doc):
 		msg=''
 		for sh in ('Sintering', 'Softening','Sphere','HalfSphere','Melting'):
+			if not sample.has_key(sh):
+				return
+
+		for sh in ('Sintering', 'Softening','Sphere','HalfSphere','Melting'):
 			pt=sample[sh]
 			if pt['time'] in ['None',None,'']:
 				msg+='None\\\\'
