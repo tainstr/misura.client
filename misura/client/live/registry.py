@@ -245,7 +245,7 @@ class KidRegistry(QtCore.QThread):
 			if self.doc:
 				self.doc.update(proxy=self.proxy)
 		else:
-			self.taskswg.sync.loop()
+			self.taskswg.sync.loop(self.obj)
 		self.updateLog()
 		self.update_all()
 		return True

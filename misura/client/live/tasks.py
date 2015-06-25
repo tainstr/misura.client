@@ -5,7 +5,6 @@ from traceback import format_exc
 import functools
 
 from misura.canon.logger import Log as logging
-from misura.canon.csutil import lockme, profile
 from misura.client import _
 from misura.client.sync import SyncWidget
 
@@ -54,10 +53,6 @@ class PendingTasks(QtGui.QWidget):
 
 		
 	def update(self, *a, **k):
-# 		if len(self)==0:
-# 			self.hide()
-# 		else:
-# 			self.show()
 		len(self)
 		self.ch.emit()
 			
@@ -205,7 +200,7 @@ class Tasks(QtGui.QTabWidget):
 	def __init__(self):
 		QtGui.QTabWidget.__init__(self)
 		
-		self.setWindowTitle(_('Pending Operations'))
+		self.setWindowTitle(_('Pending Tasks'))
 		
 		self.progress=PendingTasks(self)
 		self.addTab(self.progress,_('Remote'))

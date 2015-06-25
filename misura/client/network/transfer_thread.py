@@ -59,6 +59,7 @@ class TransferThread(QtCore.QThread):
 	"""Waiting to reserve the file uid for download. (url, local path,progress)"""
 	aborted=False
 	retry=30
+	chunk = 1024**2
 	def __init__(self,url=False,outfile=False,uid=False,server=False,dbpath=False,post=False,parent=None):
 		QtCore.QThread.__init__(self,parent)
 		self.url=url
@@ -72,12 +73,16 @@ class TransferThread(QtCore.QThread):
 	@property
 	def pid(self):
 		"""Task identification name"""
-		return self.prefix+('{} \nto {}'.format(self.url,self.outfile))
+		r=self.prefix
+		url=self.url.split('@')[-1]
+		r+='{}{} \nto {}'.format(self.prefix,url,self.outfile)
+		return r
 	
 	@property
 	def wpid(self):
 		"""Waiting task id"""
-		return 'Waiting: {} \nto {}'.format(self.url,self.outfile)
+		url=self.url.split('@')[-1]
+		return 'Waiting: {} \nto {}'.format(url,self.outfile)
 		
 	def task_new(self,size):
 		"""Start new download task"""
@@ -127,6 +132,7 @@ class TransferThread(QtCore.QThread):
 		return True
 	
 	def prepare_opener(self,url):
+		"""Install the basic authentication url opener"""
 		user,passwd,url=urlauth(url)
 		# Connection to data
 		auth_handler= urllib2.HTTPBasicAuthHandler()
@@ -147,12 +153,12 @@ class TransferThread(QtCore.QThread):
 		req = urllib2.urlopen(url)
 		dim=int(req.info().getheaders('Content-Length')[0])
 		self.dlSize.emit(dim)
-		CHUNK = 16 * 1024
+		#FIXME: maximum recursion depth on big files or chunks too little
 		done=0
 		with open(outfile, 'wb') as fp:
 			while not self.aborted:
 # 				sleep(0.1) # Throttle
-				chunk = req.read(CHUNK)
+				chunk = req.read(self.chunk)
 				if not chunk: break
 				fp.write(chunk)
 				done+=len(chunk)
@@ -226,7 +232,6 @@ class TransferThread(QtCore.QThread):
 			remotefile=os.path.basename(localfile)
 		url=self.prepare_opener(url)
 		self.dlStarted.emit(url,localfile)
-		CHUNK = 1024 * 1024
 		fp=open(localfile, 'rb')
 		fp.seek(0,2)
 		dim=fp.tell()
@@ -237,7 +242,7 @@ class TransferThread(QtCore.QThread):
 			if self.aborted:
 				data=''
 			else:
-				data=fp.read(CHUNK)
+				data=fp.read(self.chunk)
 			enc=urllib.urlencode({'opt' : opt,
 	                         'filename'  : remotefile,
 	                         'data':data})
