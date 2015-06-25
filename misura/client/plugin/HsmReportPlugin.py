@@ -17,7 +17,7 @@ class HsmReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 	description_full = 'Create Report on new page'
 
 	def __init__(self, sample = None):
-		self.report_plugin = ReportPlugin(self.add_shapes, sample)
+		self.report_plugin = ReportPlugin(sample)
 
 	def apply(self, cmd, fields):
 		self.report_plugin.apply(cmd, fields, 'report_hsm.vsz', 'Vol')
@@ -26,32 +26,7 @@ class HsmReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 	def fields(self):
 		return self.report_plugin.fields
 
-	def add_shapes(self, sample, toset, page, dict_toset, smp_path, test, doc):
-		msg=''
-		for sh in ('Sintering', 'Softening','Sphere','HalfSphere','Melting'):
-			if not sample.has_key(sh):
-				return
-
-		for sh in ('Sintering', 'Softening','Sphere','HalfSphere','Melting'):
-			pt=sample[sh]
-			if pt['time'] in ['None',None,'']:
-				msg+='None\\\\'
-				continue
-			cf={'dataset':smp_path+'/profile',
-				'filename':test.params.filename,
- 				'target':pt['time']-zt}
-			dict_toset(page.getChild(sh),cf)
-			T='{}{{\\deg}}C'.format(int(pt['temp']))
-			toset(page.getChild('lbl_'+sh),'label',sh+', '+T)
-			msg+=T+'\\\\'
-		toset(page.getChild('shapes'),'label',msg)
-		
-		dict_toset(page.getChild('initial'),{'dataset':smp_path+'/profile',
- 				'filename':test.params.filename,'target':0})
-		T=doc.data[test.prefix+'kiln/T'].data[0]
-		toset(page.getChild('lbl_initial'),'label','Initial, {}{{\\deg}}C'.format(int(T)))
-
-		toset(page.getChild('standard'),'label',wr('Standard',sample['preset'],50))
+	
 
 
 plugins.toolspluginregistry.append(HsmReportPlugin)

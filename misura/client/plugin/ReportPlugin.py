@@ -19,9 +19,8 @@ from report_plugin_utils import wr, render_meta
 
 
 class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
-	def __init__(self, add_shapes, sample=None):
+	def __init__(self, sample=None):
 		"""Make list of fields."""
-		self.add_shapes = add_shapes
 		self.fields = [ 
 			FieldMisuraNavigator("sample", descr="Target sample:", depth='sample',default=sample),
 		]
@@ -89,7 +88,37 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 		self.toset(page.getChild('serial'),'label',wr('Serial',test.conf['eq_sn']))
 		self.toset(page.getChild('furnace'),'label',wr('Furnace',kiln['ksn']))
 		
-		self.add_shapes(sample, self.toset, page, self.dict_toset, smp_path, test, doc)
+		
+		msg=''
+		
+		should_draw_shapes = True
+
+		for sh in ('Sintering', 'Softening','Sphere','HalfSphere','Melting'):
+			if not sample.has_key(sh):
+				should_draw_shapes = False
+
+		if should_draw_shapes:
+			for sh in ('Sintering', 'Softening','Sphere','HalfSphere','Melting'):
+				pt=sample[sh]
+				if pt['time'] in ['None',None,'']:
+					msg+='None\\\\'
+					continue
+				cf={'dataset':smp_path+'/profile',
+					'filename':test.params.filename,
+	 				'target':pt['time']-zt}
+				dict_toset(page.getChild(sh),cf)
+				T='{}{{\\deg}}C'.format(int(pt['temp']))
+				self.toset(page.getChild('lbl_'+sh),'label',sh+', '+T)
+				msg+=T+'\\\\'
+			self.toset(page.getChild('shapes'),'label',msg)
+			
+			self.dict_toset(page.getChild('initial'),{'dataset':smp_path+'/profile',
+	 				'filename':test.params.filename,'target':0})
+			T=doc.data[test.prefix+'kiln/T'].data[0]
+			self.toset(page.getChild('lbl_initial'),'label','Initial, {}{{\\deg}}C'.format(int(T)))
+
+			self.toset(page.getChild('standard'),'label',wr('Standard',sample['preset'],50))
+
 		
 
 		# Thermal cycle plotting
