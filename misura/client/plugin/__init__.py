@@ -37,6 +37,7 @@ from SimFlexPlugin import SimFlexPlugin
 from ArrangePlugin import ArrangePlugin
 from HsmReportPlugin import HsmReportPlugin
 from HorizontalReportPlugin import HorizontalReportPlugin
+from VerticalReportPlugin import VerticalReportPlugin
 
 
 from SurfaceTensionPlugin import SurfaceTensionPlugin

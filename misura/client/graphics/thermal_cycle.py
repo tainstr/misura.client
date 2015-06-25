@@ -17,7 +17,7 @@ from PyQt4 import QtGui, QtCore
 def clean_curve(dat,events=True):
 	crv=[]
 	for irow,ent in enumerate(dat):
-		t, T, R, D=ent
+		t, T = ent[:2]
 		if None in ent: 
 			logging.debug('%s %s', 'Skipping row', irow)
 			continue

@@ -65,9 +65,20 @@ def smooth(x,window=10,method='hanning'):
 
 class OperationWrapper(object):
 	"""Helper class for operation-based objects like ToolPlugins or custom widgets"""
-	name='OperationWrapper'
-	ops=[]
-	preserve=None
+	name = 'OperationWrapper'
+	_ops = False
+	preserve = None
+
+
+	@property
+	def ops(self):
+		if not self._ops:
+			self._ops = []
+		return self._ops
+
+	@ops.setter
+	def ops(self, val):
+		self._ops = val
 	
 	def apply_ops(self,descr=False):
 		if not descr:

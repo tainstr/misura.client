@@ -144,11 +144,12 @@ class HorizontalReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 		
 		
 		# Thermal cycle plotting
-		from ..graphics.thermal_cycle import ThermalCyclePlot
+		from ..graphics.thermal_cycle import ThermalCyclePlot, clean_curve
 		graph=report_path+'/tc'
 		cf={'graph':graph,'xT':'reportxT','yT':'reportyT','xR':'reportxR','yR':'reportyR'}
 		#TODO: convert into a plugin, creating a subplot!
 		ThermalCyclePlot.setup(cmd,**cf)
+		tc = clean_curve(tc, events=False)
 		ThermalCyclePlot.importCurve(cmd,tc,**cf)
 		cf={'Label/font':'Bitstream Vera Sans','Label/size':'6pt',
 			'TickLabels/font':'Bitstream Vera Sans',
