@@ -67,6 +67,22 @@ class ReportPlugins(unittest.TestCase):
 
 		self.assertTrue(entry!=False)
 		self.do(doc, entry, plugin.VerticalReportPlugin)
+
+	def test_flex(self):
+		"""Create Flex report"""
+		# Simulate an import
+		nativem4 = os.path.join(iutils_testing.data_dir,'test_flex.h5')
+		imp = filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
+		doc = filedata.MisuraDocument()
+		self.cmd=document.CommandInterface(doc)
+		plugin.makeDefaultDoc(self.cmd)
+		imp.do(doc)
+		doc.model.refresh()
+		tree=doc.model.tree
+		entry=tree.traverse('0:flex/sample0')
+
+		self.assertTrue(entry!=False)
+		self.do(doc, entry, plugin.FlexReportPlugin)
 		
 if __name__ == "__main__":
 	unittest.main(verbosity=2)  

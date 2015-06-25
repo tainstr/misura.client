@@ -215,8 +215,12 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 			self.sample_menu.addAction(_('Report'), self.hsm_report)
 			self.sample_menu.addAction(_('Render video'), self.render)
 
-		if 'horizontal/' in node.path or 'vertical/' in node.path:
+		if 'horizontal/' in node.path:
 			self.sample_menu.addAction(_('Report'), self.horizontal_report)
+		if 'vertical/' in node.path:
+			self.sample_menu.addAction(_('Report'), self.vertical_report)
+		if 'flex/' in node.path:
+			self.sample_menu.addAction(_('Report'), self.flex_report)
 			
 		self.sample_menu.addAction(_('Delete'), self.deleteChildren)
 		return self.sample_menu

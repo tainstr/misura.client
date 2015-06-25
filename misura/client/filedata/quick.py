@@ -207,7 +207,15 @@ class QuickOps(object):
 		"""Execute HorzizontalReportPlugin on `node`"""
 		from misura.client import plugin
 		p=plugin.VerticalReportPlugin(sample=node)
-		d = PluginDialog(self.mainwindow, self.doc, p, plugin.HorizontalReportPlugin)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.VerticalReportPlugin)
+		self.mainwindow.showDialog(d)
+
+	@node
+	def flex_report(self,node=False):
+		"""Execute FlexReportPlugin on `node`"""
+		from misura.client import plugin
+		p=plugin.FlexReportPlugin(sample=node)
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.FlexReportPlugin)
 		self.mainwindow.showDialog(d)
 		
 	@node
