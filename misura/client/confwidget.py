@@ -96,6 +96,7 @@ class RecentInterface(object):
 		return nsl
 	
 	def clear_recent(self):
+		logging.debug('ConfWidget: Clearing recent entries')
 		setattr(self.conf,'recent_'+self.category,[])
 		self.conf.save()
 		self.conf.emit(QtCore.SIGNAL('rem()'))

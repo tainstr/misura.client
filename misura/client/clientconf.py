@@ -251,7 +251,7 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 			tab=getattr(self,tname,[])
 			nosave=getattr(self,'nosave_'+name,[])
 			if nosave is None: nosave=[]
-			logging.debug("%s %s %s", tname,tab,nosave)
+			logging.debug("save: %s %s %s", tname,tab,nosave)
 			cursor.execute("delete from "+tname)
 			if len(tab)==0: continue
 			# Prepare the query

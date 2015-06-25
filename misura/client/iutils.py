@@ -81,6 +81,7 @@ def initRegistry():
 	registry.toggle_run(True)
 	
 def closeRegistry():
+	logging.debug('iutils.closeRegistry')
 	registry.toggle_run(False)
 	sleep(1)
 	registry.terminate()
@@ -105,6 +106,7 @@ def initApp(name='misura', org="Expert System Solutions", domain="expertsystemso
 def closeApp():
 	"""Operazioni di pulizia prima della chiusura"""
 	# Save configuration
+	logging.debug('Closing App')
 	confdb.save()
 	closeRegistry()
 	network.manager.scan=False

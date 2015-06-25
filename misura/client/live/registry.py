@@ -56,8 +56,10 @@ class KidRegistry(QtCore.QThread):
 	def set_manager(self,man=None):
 		old_stream=self.stream
 		self.stream=False
-		self.wait()
+		if self.isRunning():
+			self.wait(1)
 		self.manager=man
+		logging.debug('KidRegistry.set_manager %s',man)
 		self.taskswg=Tasks()
 		self.connect(self, QtCore.SIGNAL('set_server(PyQt_PyObject)'), self.taskswg.set_server)
 		if man is not None:
@@ -115,6 +117,8 @@ class KidRegistry(QtCore.QThread):
 #	@lockme
 	def unregister(self, widget):
 		"""Removes a widget from the registry."""
+		if not widget.prop:
+			return 
 		key_id = widget.prop['kid']
 		if self.rid.has_key(key_id):
 			if widget in self.rid[key_id]:
@@ -255,8 +259,8 @@ class KidRegistry(QtCore.QThread):
 #		self.obj=False
 		self.stream=True
 		self.lastdoc=False
-		if self.taskswg:
-			self.taskswg.sync.moveToThread(self)
+# 		if self.taskswg:
+# 			self.taskswg.sync.moveToThread(self)
 		while self.stream:
 			# Sleep only if loops are shorter than interval
 # 			print 'KidRegistry.run', len(self.rid)
@@ -283,7 +287,6 @@ class KidRegistry(QtCore.QThread):
 				self.start()
 		elif auto==False:
 			self.stream=False
-#			if self.isRunning():
-#				self.quit()
+			if self.isRunning():
+				self.wait(1)
 
-#registry=KidRegistry()

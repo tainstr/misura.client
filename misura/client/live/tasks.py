@@ -54,10 +54,11 @@ class PendingTasks(QtGui.QWidget):
 
 		
 	def update(self, *a, **k):
-		if len(self)==0:
-			self.hide()
-		else:
-			self.show()
+# 		if len(self)==0:
+# 			self.hide()
+# 		else:
+# 			self.show()
+		len(self)
 		self.ch.emit()
 			
 		
@@ -198,21 +199,22 @@ class LocalTasks(QtGui.QWidget):
 		"""Thread-safe call for _done()"""
 		self.sig_done.emit(pid)
 		
-class Tasks(QtGui.QWidget):
+class Tasks(QtGui.QTabWidget):
 	user_show=False
 	"""Detect if the user asked to view this widget"""
 	def __init__(self):
-		QtGui.QWidget.__init__(self)
-		self.lay=QtGui.QVBoxLayout()
-		self.setLayout(self.lay)
-		self.setWindowTitle(_('Pending Operations'))
-		self.tasks=LocalTasks(self)
-		self.lay.addWidget(self.tasks)
-		self.progress=PendingTasks(self)
-		self.lay.addWidget(self.progress)
+		QtGui.QTabWidget.__init__(self)
 		
+		self.setWindowTitle(_('Pending Operations'))
+		
+		self.progress=PendingTasks(self)
+		self.addTab(self.progress,_('Remote'))
+		
+		self.tasks=LocalTasks(self)
+		self.addTab(self.tasks,_('Local'))
+
 		self.sync=SyncWidget(parent=self)
-		self.lay.addWidget(self.sync)
+		self.addTab(self.sync,_('Storage'))
 		
 		self.tasks.ch.connect(self.hide_show)
 		self.progress.ch.connect(self.hide_show)
@@ -224,12 +226,24 @@ class Tasks(QtGui.QWidget):
 		self.progress.set_server(server)
 		self.sync.set_server(server)
 		
-	def hide_show(self):
-		if self.user_show:
-			return
-		if len(self.tasks)+len(self.progress)+len(self.sync):
-			self.show()
+	def update_active(self):
+		"""Switch the active tab"""
+		if len(self.progress):
+			self.setCurrentIndex(0)
+		elif len(self.tasks):
+			self.setCurrentIndex(1)
+		elif len(self.sync):
+			self.setCurrentIndex(2)
 		else:
+			return False
+		return True
+		
+	def hide_show(self):
+		"""Decide if to automatically hide or show this window"""
+		if self.update_active():
+			if not self.isVisible():
+				self.show()
+		elif not self.user_show:
 			self.hide()
 			
 	def hideEvent(self, e):

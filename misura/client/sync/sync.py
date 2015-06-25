@@ -4,6 +4,8 @@
 import os
 import logging
 from time import sleep
+from traceback import format_exc
+
 from .. import _
 from ..clientconf import confdb
 from ...canon import indexer
@@ -11,6 +13,7 @@ from ..network import TransferThread, remote_dbdir
 
 from PyQt4 import QtCore, QtGui, QtSql
 
+record_length=len(indexer.indexer.testColumn)
 
 class StorageSync(object):
 	"""Synchronization utilities"""
@@ -55,16 +58,18 @@ class StorageSync(object):
 
 	def has_uid(self,uid, tname):
 		"""Check if `uid` is in table `tname`"""
-		r=self.db.execute_fetchall("SELECT 1 from {} where uid='{}'".format(tname,uid))
+		r=self.db.execute_fetchall("SELECT 1 from {} where uid='{}'".format(tname,unicode(uid)))
 		return len(r)
 		
 	def rem_uid(self,uid,tname):
 		"""Remove `uid` from table `tname`"""
 		self.db.execute("DELETE from {} where uid='{}'".format(tname,uid))
+		logging.debug('removed uid %s %s',tname,uid)
 	
 	def add_record(self,record, tname):
 		v=('?,'*len(record))[:-1]
 		self.db.execute("INSERT INTO {} VALUES ({})".format(tname,v),record)
+		logging.debug('added record %s %s',tname,record)
 	
 	def queue_record(self,record):
 		"""Approve `record` for download."""
@@ -77,10 +82,16 @@ class StorageSync(object):
 			logging.debug('%s %s', 'Record was excluded. Enabling.', record)
 			self.rem_uid(uid,'sync_exclude')
 			
+		if self.has_uid(uid, 'sync_error'):
+			logging.debug('%s %s', 'Retrying: ', record)
+			self.rem_uid(uid,'sync_error')
+			
 		if self.has_uid(uid,'sync_queue'):
 			logging.debug('%s %s', 'Record already queued', record)
 			return False
-
+		
+		if len(record)>record_length:
+			record=record[:record_length]
 		self.add_record(record,'sync_queue')
 		return True
 	
@@ -95,10 +106,14 @@ class StorageSync(object):
 		if self.has_uid(uid,'sync_approve'):
 			self.rem_uid(uid,'sync_approve')
 			
+		if self.has_uid(uid,'sync_error'):
+			self.rem_uid(uid,'sync_error')
+			
 		if self.has_uid(uid,'sync_exclude'):
 			logging.debug('%s %s', 'Record already excluded', record)
 			return False
-
+		if len(record)>record_length:
+			record=record[:record_length]
 		self.add_record(record,'sync_exclude')
 		return True
 		
@@ -108,36 +123,30 @@ class StorageSync(object):
 		if end>=self.tot: end=self.tot
 		lst=self.server.storage.list_tests(self.start,self.start+25)[::-1]
 		i=0
-		for t in lst:
-			uid=t[2]
+		for record in lst:
+			uid=record[2]
 			if self.has_uid(uid,'sync_queue'):
 				continue
 			if self.has_uid(uid,'sync_exclude'):
 				continue
+			if self.has_uid(uid,'sync_error'):
+				continue
 			if self.has_uid(uid,'sync_approve'):
 				continue
-			r=self.db.searchUID(t[2],full=True)
+			r=self.db.searchUID(uid,full=True)
 			if r and os.path.exists(r[0]):
+				logging.debug('Path already exists %s %s',r[0],record)
 				continue
-			self.add_record(t,'sync_approve')
+			self.add_record(record,'sync_approve')
 			i+=1
 		self.start=end
 		return i
-		
-	def tab_len(self,table_name):
-		"""Returns length of a table"""
-		if not self.db:
-			return 0
-		r= self.db.execute_fetchone('SELECT COUNT(*) from {}'.format(table_name))
-		if not r:
-			return 0
-		return r[0]
 	
 	def __len__(self):
 		"""Returns the length of the approval queue"""
 		if not self.server:
 			return 0
-		return self.tab_len('sync_approve')
+		return self.db.tab_len('sync_approve')
 		
 	def download(self):
 		"""Search for the next file to download"""
@@ -146,23 +155,29 @@ class StorageSync(object):
 			# Nothing to download
 			return False
 # 		record=record[0]
-		r=self.download_record(record)
+		r=False
+		error='Unknown error'
+		try:
+			r=self.download_record(record)
+		except:
+			error=format_exc()
 		if not r: 
-			logging.error('Failed download %s',record)
-			return False
-		self.db.execute("DELETE from sync_queue WHERE file='{}'".format(record[0]))
-		return True
+			logging.info('Failed test file download %s: \n%s',record,error)
+			error=list(record)+[error]
+			self.add_record(error,'sync_error')
+		self.db.execute("DELETE from sync_queue WHERE uid='{}'".format(record[2]))
+		return r
 		
 	def download_record(self,record):
 		"""Start the chunked download of a record"""
 		logging.debug('%s %s %s', 'download_record', record,self.remote_dbdir)
-		p=record[0].replace(self.remote_dbdir,'').split('/')
+		remote_path=record[0]
+		p=remote_path.replace(self.remote_dbdir,'').split('/')
 		print 'record path',p
 		fn=p.pop(-1)
 		print 'record filename',fn
-		d='/'+os.path.join(*p)
-		#TODO: give unique name
 		outfile=os.path.join(self.dbdir,fn)
+		d='/'+os.path.join(*p)
 		url=self.server.data_addr+d+'/'+fn
 		r=self.transfer.download_url(url,outfile)
 		self.db.appendFile(outfile)
@@ -171,7 +186,7 @@ class StorageSync(object):
 	def loop(self):
 		"""Inner synchronization loop"""
 		if self.server['isRunning']:
-			sleep(1)
+			return 0
 		n=self.collect()
 		# Download next file
 		if not self.server['isRunning']:
@@ -181,31 +196,47 @@ class StorageSync(object):
 	
 class SyncTable(QtGui.QTableView):
 	"""Table showing queued sync files, allowing the user to interact with them"""
+	length=0
 	def __init__(self,dbpath,table_name,parent=None):
 		super(SyncTable,self).__init__(parent)
 		db=QtSql.QSqlDatabase.addDatabase('QSQLITE')
 		self.dbpath=dbpath
+		self.storage_sync=StorageSync()
+		self.storage_sync.set_dbpath(self.dbpath)
 		db.setDatabaseName(dbpath)
 		model=QtSql.QSqlTableModel()
 		model.setTable(table_name)
 		model.select()
 		self.setModel(model)
+		for i in (0,6,9,11):
+			self.hideColumn(i)
 		self.selection=QtGui.QItemSelectionModel(self.model())
 		self.setSelectionModel(self.selection)
 		self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 		self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.menu=QtGui.QMenu(self)
 		if table_name.endswith('_approve'):
-			self.menu.addAction(_('Enqueue'),self.enqueue)
-			self.menu.addAction(_('Exclude'),self.exclude)
+			self.menu.addAction(_('Download'),self.enqueue)
+			self.menu.addAction(_('Ignore'),self.exclude)
 		elif table_name.endswith('_queue'):
-			self.menu.addAction(_('Exclude'),self.exclude)
+			self.menu.addAction(_('Ignore'),self.exclude)
 		elif table_name.endswith('_exclude'):
-			self.menu.addAction(_('Enqueue'),self.enqueue)
+			self.menu.addAction(_('Download'),self.enqueue)
+		elif table_name.endswith('_error'):
+			self.menu.addAction(_('Retry'),self.enqueue)
+			self.menu.addAction(_('Ignore'),self.exclude)
 		self.connect(self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
 		
 	def showMenu(self, pt):
 		self.menu.popup(self.mapToGlobal(pt))
+		
+	def __len__(self):
+		n= self.storage_sync.db.tab_len(self.model().tableName())
+		if n!=self.length:
+			self.model().select()
+			self.length=n
+		logging.debug('SyncTable length %s',n)
+		return n
 		
 	def iter_selected(self):
 		column_count=self.model().columnCount()
@@ -219,22 +250,18 @@ class SyncTable(QtGui.QTableView):
 					
 	def enqueue(self):
 		"""Promote selection to sync_queue table"""
-		ss=StorageSync()
-		ss.set_dbpath(self.dbpath)
 		for record in self.iter_selected():
-			ss.queue_record(record)
+			self.storage_sync.queue_record(record)
 		self.model().select()
 	
 	def exclude(self):
 		"""Move selection to sync_exclude table"""
-		ss=StorageSync()
-		ss.set_dbpath(self.dbpath)
 		for record in self.iter_selected():
-			ss.exclude_record(record)
+			self.storage_sync.exclude_record(record)
 		self.model().select()
 		
 
-class SyncWidget(QtGui.QWidget):
+class SyncWidget(QtGui.QTabWidget):
 	"""Allows the user to control sync behavior."""
 	ch=QtCore.pyqtSignal()
 	dbpath=False
@@ -246,22 +273,26 @@ class SyncWidget(QtGui.QWidget):
 		#Create if missing
 		try:
 			db=indexer.Indexer(dbpath)
+			db.close()
 		except:
+			logging.info('Cannot set local db for storage sync \n%',format_exc())
 			return
 		self.dbpath=dbpath
 		self.storage_sync.set_dbpath(dbpath)
-		self.lay=QtGui.QVBoxLayout()
 		
 		self.tab_approve=SyncTable(self.dbpath,'sync_approve',parent=self)
-		self.lay.addWidget(self.tab_approve)
+		self.addTab(self.tab_approve,_('Waiting approval'))
 		
 		self.tab_queue=SyncTable(self.dbpath,'sync_queue',parent=self)
-		self.lay.addWidget(self.tab_queue)
+		self.addTab(self.tab_queue,_('Download queue'))
 		
-# 		self.tab_exclude=SyncTable(self.dbpath,'sync_exclude',parent=self)
-# 		self.lay.addWidget(self.tab_exclude)
+		self.tab_error=SyncTable(self.dbpath,'sync_error',parent=self)
+		self.addTab(self.tab_error,_('Errors'))
+				
+		self.tab_exclude=SyncTable(self.dbpath,'sync_exclude',parent=self)
+		self.addTab(self.tab_exclude,_('Ignored'))
 		
-		self.setLayout(self.lay)
+		logging.debug('Created SyncWidget')
 		
 	def set_server(self,server):
 		self.storage_sync.prepare(self.dbpath,server)
@@ -269,20 +300,28 @@ class SyncWidget(QtGui.QWidget):
 	def loop(self):
 		"""Do one collect/download loop"""
 		if not self.dbpath:
+			logging.debug('No database path set %s',self.dbpath)
 			return False
 		if not self.storage_sync.server:
+			logging.debug('No server set')
 			return False
 		n= self.storage_sync.loop()
 		if n:
 			self.ch.emit()
-		if not len(self):
-			self.hide()
-		if self.storage_sync.tab_len('sync_queue'):
-			self.tab_queue.show()
-		else:
-			self.tab_queue.hide()
 	
 	def __len__(self):
-		return len(self.storage_sync)
+		n = len(self.tab_approve)
+		return n
+	
+	def showEvent(self,ev):
+		"""Automatically switch to appropriate queue when showed"""
+		if len(self.tab_approve):
+			if self.currentIndex()!=0:
+				self.setCurrentIndex(0)
+		elif len(self.tab_error):
+			if self.currentIndex()!=2:
+				self.setCurrentIndex(2)
+		self.currentWidget().model().select()
+		return super(SyncWidget,self).showEvent(ev)
 		
 

@@ -6,12 +6,13 @@ from ..clientconf import confdb
 from ..connection import LoginWindow, addrConnection
 from ..confwidget import ClientConf, RecentMenu
 from .. import parameters as params
+from ..live import registry
 
 from PyQt4 import QtGui, QtCore
 import functools
 
 class MenuBar(QtGui.QMenuBar):
-	"""Menu principali"""
+	"""Main acquisition menus"""
 	def __init__(self, server=False, parent=None):
 		QtGui.QMenuBar.__init__(self, parent)
 		self.remote=False
@@ -33,6 +34,8 @@ class MenuBar(QtGui.QMenuBar):
 			self.settings.setEnabled(False)
 		self.help=self.addMenu('Help')
 		self.help.addAction(_('Client configuration'),self.showClientConf)
+		self.help.addAction(_('Documentation'),self.showDocSite)
+		self.help.addAction(_('Pending operations'),self.showTasks)
 		if server is not False: 
 			self.setServer(server)
 
@@ -248,3 +251,11 @@ class MenuBar(QtGui.QMenuBar):
 		"""Show client configuration panel"""
 		self.cc=ClientConf()
 		self.cc.show()
+		
+	def showDocSite(self):
+		url='http://misura.readthedocs.org'
+		QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
+		
+	def showTasks(self):
+		registry.taskswg.user_show=True
+		registry.taskswg.show()

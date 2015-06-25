@@ -105,12 +105,13 @@ class MainWindow(QtGui.QMainWindow):
 				
 	def set_addr(self,addr):
 		"""Open server by address"""
+		logging.debug('MainWindow.set_addr %s',addr)
 		s=connection.addrConnection(addr)
 		network.manager.set_remote(s)
-		registry.toggle_run(False)
 		registry.set_manager(network.manager)
 		registry.toggle_run(True)
 		self.setServer(s)
+	
 	_blockResetFileProxy=False
 	def setServer(self, server=False):
 		self._blockResetFileProxy=True
