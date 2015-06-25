@@ -25,4 +25,3 @@ class VerticalReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 	def fields(self):
 		return self.report_plugin.fields
 		
-plugins.toolspluginregistry.append(VerticalReportPlugin)

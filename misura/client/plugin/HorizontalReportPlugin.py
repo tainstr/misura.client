@@ -24,7 +24,3 @@ class HorizontalReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 	@property
 	def fields(self):
 		return self.report_plugin.fields
-
-			
-		
-plugins.toolspluginregistry.append(HorizontalReportPlugin)

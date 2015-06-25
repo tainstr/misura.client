@@ -4,7 +4,6 @@
 from ReportPlugin import ReportPlugin
 from utils import OperationWrapper
 import veusz.plugins as plugins
-from report_plugin_utils import wr, render_meta
 
 class HsmReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 	# a tuple of strings building up menu to place plugin on
@@ -25,8 +24,3 @@ class HsmReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 	@property
 	def fields(self):
 		return self.report_plugin.fields
-
-	
-
-
-plugins.toolspluginregistry.append(HsmReportPlugin)

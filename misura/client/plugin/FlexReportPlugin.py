@@ -24,5 +24,3 @@ class FlexReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 	@property
 	def fields(self):
 		return self.report_plugin.fields
-
-plugins.toolspluginregistry.append(FlexReportPlugin)
