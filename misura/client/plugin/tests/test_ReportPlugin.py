@@ -11,12 +11,12 @@ from misura.client import plugin
 
 
 
-class ReportPlugin(unittest.TestCase):
+class HsmReportPlugin(unittest.TestCase):
 	"""Tests the CalibrationPlugin"""	
 
 	def do(self,doc,target):
 		fields={'sample':target}
-		p=plugin.ReportPlugin()
+		p=plugin.HsmReportPlugin()
 		p.apply(self.cmd,fields)
 			
 	def test_hsm(self):

@@ -35,7 +35,7 @@ from ShapesPlugin import ShapesPlugin
 from MotorCorrectionPlugin import MotorCorrectionPlugin
 from SimFlexPlugin import SimFlexPlugin
 from ArrangePlugin import ArrangePlugin
-from ReportPlugin import ReportPlugin
+from HsmReportPlugin import HsmReportPlugin
 
 
 from SurfaceTensionPlugin import SurfaceTensionPlugin

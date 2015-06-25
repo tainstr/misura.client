@@ -62,7 +62,7 @@ def render_meta(obj,notfound=False,n=30,inter=' ', full=False, zt=0):
 		msg+='\\\\'+w
 	return msg
 
-class ReportPlugin(OperationWrapper,plugins.ToolsPlugin):
+class HsmReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 	"""Show Misura Microscope shapes in graphics"""
 	# a tuple of strings building up menu to place plugin on
 	menu = ('Misura','Report')
@@ -201,5 +201,5 @@ class ReportPlugin(OperationWrapper,plugins.ToolsPlugin):
 		
 
 		
-plugins.toolspluginregistry.append(ReportPlugin)
+plugins.toolspluginregistry.append(HsmReportPlugin)
 
