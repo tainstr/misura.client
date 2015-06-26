@@ -43,7 +43,7 @@ for pdir in ('accessible', 'codecs', 'graphicssystems'):
 # add necessary documentation, licence
 binaries = a.binaries
 for fn in ('VERSION', 'ChangeLog', 'AUTHORS', 'README', 'INSTALL', 'COPYING'):
-    binaries += [ (fn, res+fn, 'DATA') ]
+    binaries += [ (fn, cli+fn, 'DATA') ]
 
 # add various required files to distribution
 for name in ['icons/*.png','icons/*.ico','icons/*.svg','examples/*.vsz',
