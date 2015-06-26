@@ -108,7 +108,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 				cf={'dataset':smp_path+'/profile',
 					'filename':test.params.filename,
 	 				'target':pt['time']-zt}
-				dict_toset(page.getChild(sh),cf)
+				self.dict_toset(page.getChild(sh),cf)
 				T='{}{{\\deg}}C'.format(int(pt['temp']))
 				self.toset(page.getChild('lbl_'+sh),'label',sh+', '+T)
 				msg+=T+'\\\\'
