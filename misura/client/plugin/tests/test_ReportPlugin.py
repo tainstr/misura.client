@@ -12,8 +12,6 @@ from misura.client import plugin
 
 
 class ReportPlugins(unittest.TestCase):
-	"""Tests the CalibrationPlugin"""	
-			
 	def test_hsm(self):
 		"""Create HSM report"""
 		self.verify_plugin('test_video.h5', '0:hsm/sample0', 'report_hsm.vsz', 'Vol')
