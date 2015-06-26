@@ -233,10 +233,13 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 		"""Add load/unload action"""
 		self.act_load = self.dataset_menu.addAction(_('Load'), self.load)
 		self.act_load.setCheckable(True)
+		is_loaded=True
 		if node.linked is None:
 			self.act_load.setVisible(False)
 		else:
-			self.act_load.setChecked(len(node.ds) > 0)	
+			is_loaded=len(node.ds) > 0
+			self.act_load.setChecked(is_loaded)
+		return is_loaded	
 		
 		
 	def add_plotted(self, node, menu):
@@ -244,7 +247,9 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 		self.act_plot = menu.addAction(_('Plot'), self.plot)
 		self.act_plot.setCheckable(True)
 		plotpath = self.model().is_plotted(node.path)
-		self.act_plot.setChecked(len(plotpath) > 0)
+		is_plotted=len(plotpath) > 0
+		self.act_plot.setChecked(is_plotted)
+		return is_plotted
 		
 	def add_percentile(self, node, menu):
 		"""Add percentile conversion action"""
@@ -328,13 +333,15 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 		if istime:
 			self.act_load = False
 		else:
-			self.add_load(node, self.dataset_menu)
-			
-		self.add_plotted(node, self.dataset_menu)
+			is_loaded=self.add_load(node, self.dataset_menu)
+		if not is_loaded:
+			return self.dataset_menu
+		
+		is_plotted = self.add_plotted(node, self.dataset_menu)
 		
 		self.dataset_menu.addAction(_('Edit'), self.edit_dataset)
-		
-		self.dataset_menu.addAction(_('Intercept this curve'), self.intercept)
+		if is_plotted:
+			self.dataset_menu.addAction(_('Intercept this curve'), self.intercept)
 		if istime:
 			self.act_percent = False
 		else:

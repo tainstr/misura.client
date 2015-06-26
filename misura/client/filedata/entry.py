@@ -41,6 +41,52 @@ def find_pos(dslist,p=0):
 		p=find_pos(d.children.keys(),p)
 	return p
 
+class AllDocDataAccessor(object):
+	"""Simulates a document with access to all data"""
+	def __init__(self,doc):
+		self.doc=doc 
+		
+	@property 
+	def data(self):
+		return self.doc.data
+	
+	@property
+	def available_data(self):
+		return self.doc.available_data
+		
+	def has_key(self,k,ret=False):
+		if self.data.has_key(k):
+			if ret:
+				return self.data[k]
+			return True
+		if self.available_data.has_key(k):
+			if ret:
+				return self.available_data[k]
+			return True
+		return False
+	
+	def get(self,k,*a):
+		val=self.has_key(k)
+		if not val:
+			if len(a)==1:
+				return a[0]
+			raise KeyError("Key not found: {}".format(k))
+		val=self.has_key(k,ret=True)
+		return val		
+		
+	def __getitem__(self,k):
+		return self.get(k)
+	
+	def items(self):
+		return self.data.items()+self.available_data.items()
+	
+	def iteritems(self):
+		for item in self.data.iteritems():
+			yield item
+		for item in self.available_data.iteritems():
+			yield item
+
+
 class NodeEntry(object):
 	"""Generic node representation for the document model"""
 	_status=1
@@ -63,6 +109,7 @@ class NodeEntry(object):
 	def __init__(self,doc=False,name='',parent=False,path=False,splt=sep):
 		self.splt=splt
 		self.doc=doc
+		self.alldoc=AllDocDataAccessor(doc)
 		self._name=name
 		self._children=collections.OrderedDict()
 		self._path=path
@@ -73,6 +120,7 @@ class NodeEntry(object):
 				doc.ent={}
 			doc.ent[id(self)]=self
 		
+
 			
 	def name(self):
 		return self._name
@@ -208,7 +256,7 @@ class NodeEntry(object):
 	def insert(self,path,status=1):
 		"""Insert a pure node"""
 		splt=self.splt
-		ds=self.doc.data.get(path,False)
+		ds=self.alldoc.get(path,False)
 		if self.parent:
 			assert self.path.startswith(path)
 			# Cut away the common part
@@ -290,10 +338,9 @@ class NodeEntry(object):
 		self.parent=False
 		doc.ent={}
 		self.doc=doc
+		self.alldoc=AllDocDataAccessor(doc)
 		self.names={}
-		h=doc.data.keys()
-		for dn in h:
-			d=doc.data[dn]
+		for dn,d in self.alldoc.iteritems():
 			dn1=dn
 			if hasattr(d, 'm_var'):
 				dn1=d.m_var
@@ -326,11 +373,11 @@ class DatasetEntry(NodeEntry):
 	def ds(self):
 		"""Retrieve the original dataset from the document,
 		not keeping any reference to it"""
-		return self.doc.data.get(self.path,False)
+		return self.alldoc.get(self.path,False)
 	
 	@property
 	def status(self):
-		ds=self.doc.data.get(self.path,False)
+		ds=self.alldoc.get(self.path,False)
 		if ds is False:
 			self.parent.remove(self)
 			return 0
@@ -344,10 +391,10 @@ class DatasetEntry(NodeEntry):
 		for path, entry in self._children.items():
 			if not isinstance(entry,DatasetEntry):
 				continue
-			if self.doc.data.has_key(entry.path):
+			if self.alldoc.has_key(entry.path):
 				continue
 			del self._children[path]
-		for name, ds in self.doc.data.iteritems():
+		for name, ds in self.alldoc.iteritems():
 			if name==path: continue
 			if not isinstance(ds,document.datasets.Dataset1DPlugin):
 				continue
@@ -371,7 +418,7 @@ class DatasetEntry(NodeEntry):
 		self._parents=[]
 		for name in involved:
 			if name==self._name: continue
-			if not self.doc.data.has_key(name): continue
+			if not self.alldoc.has_key(name): continue
 			self._parents.append(name)
 		return self._parents
 	
@@ -383,7 +430,7 @@ class DatasetEntry(NodeEntry):
 	def vars(self):
 		vars=[]
 		for p in self.parents:
-			ds=self.doc.data[p]
+			ds=self.alldoc[p]
 			if hasattr(ds,'m_var'):
 				vars.append(ds.m_var)
 			else: vars.append(p)

@@ -62,7 +62,7 @@ class TestDatasetPluginEntry(unittest.TestCase):
 		
 	def test_import(self):
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
-		doc=document.Document()
+		doc=filedata.MisuraDocument()
 		imp.do(doc)
 		root=filedata.NodeEntry()
 		root.set_doc(doc)

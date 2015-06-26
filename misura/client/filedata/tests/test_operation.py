@@ -45,25 +45,26 @@ class TestOperationMisuraImport(unittest.TestCase):
 	def test_1_importFromM4(self):
 		# Simulate an import
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
-		doc=document.Document()
+		doc=filedata.MisuraDocument()
 		imp.do(doc)
 		# autoload
 		self.assertGreater(len(doc.data['0:hsm/sample0/h']),10)
 		# no load: ds present but empty
-		self.assertEqual(len(doc.data['0:hsm/sample0/e']),0)
-		self.assertSetEqual(set(m4names)-set(imp.outnames),set([]))
+		self.assertIn('0:hsm/sample0/e',doc.available_data)
+		self.assertNotIn('0:hsm/sample0/e',doc.data)
+		self.assertSetEqual(set(m4names)-set(imp.outnames)-set(doc.available_data.keys()),set([]))
 		self.check_doc(doc,nativem4)
 		
 	def test_2_multiImport(self):
 		# Simulate an import
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
-		doc=document.Document()
+		doc=filedata.MisuraDocument()
 		imp.do(doc)
 		# autoload
 		self.assertGreater(len(doc.data['0:hsm/sample0/h']),10)
 		# no load: ds present but empty
-		self.assertEqual(len(doc.data['0:hsm/sample0/e']),0)
-		
+		self.assertIn('0:hsm/sample0/e',doc.available_data)
+		self.assertNotIn('0:hsm/sample0/e',doc.data)
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4b))
 		imp.do(doc)
 		self.assertIn('0:t',imp.outnames)
@@ -77,7 +78,7 @@ class TestOperationMisuraImport(unittest.TestCase):
 		"""Test the operation from a Misura3 file"""
 		# Simulate an import
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=from3))
-		doc=document.Document()
+		doc=filedata.MisuraDocument()
 		imp.do(doc)
 		m3names=['t', 'kiln_T', 'smp0_Sint', 'smp0_Ang', 'smp0_Ratio', 'smp0_Area','kiln_S', 'kiln_P', 'smp0_Width']
 		self.assertEqual(imp.outnames,m3names)
@@ -87,7 +88,7 @@ class TestOperationMisuraImport(unittest.TestCase):
 		path='tmp.h5'
 		shutil.copy(from3,'tmp.h5')
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=path))
-		doc=document.Document()
+		doc=filedata.MisuraDocument()
 		imp.do(doc)
 		doc.data['smp0_Sint'].linked.commit('test')
 		

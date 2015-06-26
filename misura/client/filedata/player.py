@@ -35,7 +35,7 @@ class FilePlayer(QtCore.QThread):
 		self.doc=doc
 		
 	def close(self):
-		for k,d in self.doc.decoders:
+		for k,d in self.doc.decoders.iteritems():
 			d.close()
 		
 	def __getitem__(self,var):

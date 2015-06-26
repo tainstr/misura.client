@@ -324,6 +324,7 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		startt=ztime_sequence[0]
 		endt=ztime_sequence[-1]
 		outds={}
+		availds={}
 		for p, col0 in enumerate(['t']+header):
 			logging.debug('%s %s %s %s', 'Importing column', p, col0, elapsed)
 			col=col0.replace('/summary/', '/')
@@ -386,7 +387,7 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 			ds.m_update=m_update
 			ds.m_conf=self.proxy.conf
 			ds.unit=str(u) if u else u
-			names.append(pcol)
+			
 			
 			# Try to read column metadata
 			if len(data)>0 and col!='t':
@@ -402,6 +403,7 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 				if u and nu:
 					logging.debug('%s %s %s %s', 'Converting to unit', col, ds.unit, nu)
 					ds=units.convert(ds,nu[0])
+				
 			
 			# Find out the sample index to which this dataset refers
 			var, idx=iutils.namingConvention(col)
@@ -418,16 +420,6 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 				# Retrieve initial dimension from sample
 				if var=='d' and smp.conf.has_key('initialDimension'):
 					ds.m_initialDimension=smp.conf['initialDimension']
-# 				smp._name=smp['name']
-# 				for smp in LF.samples:
-# 					if smp.ref: # is the reference sample
-# 						continue
-# 					if smp['idx']==idx: 
-# 						ds.m_smp=smp
-# 						ds.m_var=var
-# 						smp._name=smp['name']
-# 					else:
-# 						print 'sample mismatch',idx,smp['idx']
 			if ds.m_smp is False:
 				ds.m_smp=refsmp
 			# Add the hierarchy tags
@@ -436,15 +428,19 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 					ds.tags.add(parent)
 			# Actually set the data
 # 			LF.children.append(pcol)
-			outds[pcol]=ds
+			if len(data)>0:
+				names.append(pcol)
+				outds[pcol]=ds
+			else:
+				availds[pcol]=ds
 			logging.debug('%s %s %s', 'created', col, len(ds.data))
 			self.job(p+1)
 		logging.debug('%s', 'emitting done')
 		self.done()
 		self.done('Reading file')
 		logging.debug('%s %s', 'imported names:', names)
+		self._doc.available_data.update(availds)
 		self.outdatasets=outds
-			
 		return names
 
 

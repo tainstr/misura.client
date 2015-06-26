@@ -78,7 +78,7 @@ class Convert(unittest.TestCase):
 		fp.close()
 		# Simulate an import
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=op))
-		doc=document.Document()
+		doc=filedata.MisuraDocument()
 		imp.do(doc)
 		# Build dataset tree
 		tree=filedata.get_datasets_tree(doc)

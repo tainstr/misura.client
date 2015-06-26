@@ -38,6 +38,8 @@ class MisuraDocument(document.Document):
 		self.filename=False
 		self.header=[]
 		self.root=root
+		# Available datasets in the output file
+		self.available_data={}
 		self.model=DocumentModel(self)
 		#Create one decoder for each 'dat' group
 		self.decoders={}
