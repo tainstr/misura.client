@@ -14,9 +14,9 @@ from misura.client import plugin
 class ReportPlugins(unittest.TestCase):
 	"""Tests the CalibrationPlugin"""	
 
-	def do(self, doc, target, plugin_to_apply):
-		fields={'sample':target}
-		plugin_to_apply().apply(self.cmd,fields)
+	def do(self, doc, sample, template_filename, measure_to_plot):
+		fields = {'sample': sample, 'measure_to_plot': measure_to_plot, 'template_file_name': template_filename}
+		plugin.ReportPlugin(None, template_filename, measure_to_plot).apply(self.cmd, fields)
 			
 	def test_hsm(self):
 		"""Create HSM report"""
@@ -33,7 +33,7 @@ class ReportPlugins(unittest.TestCase):
 		entry=tree.traverse('0:hsm/sample0')
 
 		self.assertTrue(entry!=False)
-		self.do(doc, entry, plugin.HsmReportPlugin)
+		self.do(doc, entry, 'report_hsm.vsz', 'Vol')
 
 
 	def test_horizontal(self):
@@ -50,7 +50,7 @@ class ReportPlugins(unittest.TestCase):
 		entry=tree.traverse('0:horizontal/sample0')
 
 		self.assertTrue(entry!=False)
-		self.do(doc, entry, plugin.HorizontalReportPlugin)
+		self.do(doc, entry, 'report_horizontal.vsz', 'd')
 
 	def test_vertical(self):
 		"""Create Vertical Dilatometer report"""
@@ -66,7 +66,7 @@ class ReportPlugins(unittest.TestCase):
 		entry=tree.traverse('0:vertical/sample0')
 
 		self.assertTrue(entry!=False)
-		self.do(doc, entry, plugin.VerticalReportPlugin)
+		self.do(doc, entry, 'report_vertical.vsz', 'd')
 
 	def test_flex(self):
 		"""Create Flex report"""
@@ -82,7 +82,7 @@ class ReportPlugins(unittest.TestCase):
 		entry=tree.traverse('0:flex/sample0')
 
 		self.assertTrue(entry!=False)
-		self.do(doc, entry, plugin.FlexReportPlugin)
+		self.do(doc, entry, 'report_flex.vsz', 'd')
 		
 if __name__ == "__main__":
 	unittest.main(verbosity=2)  

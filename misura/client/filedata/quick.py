@@ -190,32 +190,32 @@ class QuickOps(object):
 	def hsm_report(self,node=False):
 		"""Execute HsmReportPlugin on `node`"""
 		from misura.client import plugin
-		p=plugin.HsmReportPlugin(sample=node)
-		d = PluginDialog(self.mainwindow, self.doc, p, plugin.HsmReportPlugin)
+		p=plugin.ReportPlugin(node, 'report_hsm.vsz', 'Vol')
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
 		self.mainwindow.showDialog(d)
 
 	@node
 	def horizontal_report(self,node=False):
 		"""Execute HorzizontalReportPlugin on `node`"""
 		from misura.client import plugin
-		p=plugin.HorizontalReportPlugin(sample=node)
-		d = PluginDialog(self.mainwindow, self.doc, p, plugin.HorizontalReportPlugin)
+		p=plugin.ReportPlugin(node, 'report_horizontal.vsz', 'd')
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
 		self.mainwindow.showDialog(d)
 
 	@node
 	def vertical_report(self,node=False):
-		"""Execute HorzizontalReportPlugin on `node`"""
+		"""Execute VerticalReportPlugin on `node`"""
 		from misura.client import plugin
-		p=plugin.VerticalReportPlugin(sample=node)
-		d = PluginDialog(self.mainwindow, self.doc, p, plugin.VerticalReportPlugin)
+		p=plugin.ReportPlugin(node, 'report_vertical.vsz', 'd')
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
 		self.mainwindow.showDialog(d)
 
 	@node
 	def flex_report(self,node=False):
 		"""Execute FlexReportPlugin on `node`"""
 		from misura.client import plugin
-		p=plugin.FlexReportPlugin(sample=node)
-		d = PluginDialog(self.mainwindow, self.doc, p, plugin.FlexReportPlugin)
+		p=plugin.ReportPlugin(node, 'report_flex.vsz', 'd')
+		d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
 		self.mainwindow.showDialog(d)
 		
 	@node

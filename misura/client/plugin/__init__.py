@@ -39,6 +39,7 @@ from HsmReportPlugin import HsmReportPlugin
 from HorizontalReportPlugin import HorizontalReportPlugin
 from VerticalReportPlugin import VerticalReportPlugin
 from FlexReportPlugin import FlexReportPlugin
+from ReportPlugin import ReportPlugin
 
 
 from SurfaceTensionPlugin import SurfaceTensionPlugin

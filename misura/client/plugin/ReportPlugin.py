@@ -19,13 +19,15 @@ from report_plugin_utils import wr, render_meta
 
 
 class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
-	def __init__(self, sample=None):
+	def __init__(self, sample=None, template_file_name='default.vsz', measure_to_plot='d'):
 		"""Make list of fields."""
 		self.fields = [ 
 			FieldMisuraNavigator("sample", descr="Target sample:", depth='sample',default=sample),
+			plugins.FieldText('measure_to_plot', 'Measure to plot', default=measure_to_plot),
+			plugins.FieldText('template_file_name', 'Template filename', default=template_file_name),
 		]
 
-	def apply(self, cmd, fields, template_file, measure_to_plot):
+	def apply(self, cmd, fields):
 		doc=cmd.document
 		self.doc=doc
 		exe=CommandInterpreter(doc)
@@ -53,7 +55,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 		
 		sample=getattr(instr,smp_name)
 
-		d=os.path.join(params.pathArt, template_file)
+		d=os.path.join(params.pathArt, fields['template_file_name'])
 		#TODO: replace report path
 		tpl=open(d,'rb').read()
 		exe.run(tpl)
@@ -138,12 +140,13 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 
 		self.ops.append(document.OperationToolsPlugin(PlotPlugin.PlotDatasetPlugin(),
 					{'x':[test.prefix+'kiln/T'],
-					'y':[smp_path0+'/'+measure_to_plot],
+					'y':[smp_path0+'/'+fields['measure_to_plot']],
 					'currentwidget':report_path+'/temp'}
 					))
 		self.apply_ops()
 		
-		self.dict_toset(doc.resolveFullWidgetPath(report_path+'/temp/ax:' + measure_to_plot),cf)
+		self.dict_toset(doc.resolveFullWidgetPath(report_path+'/temp/ax:' + fields['measure_to_plot']),cf)
 		self.apply_ops()
 		
 		
+plugins.toolspluginregistry.append(ReportPlugin)
