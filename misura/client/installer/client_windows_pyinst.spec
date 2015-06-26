@@ -36,7 +36,7 @@ a.binaries = [b for b in a.binaries if not (os.path.basename(b[0]) in
               ('kernel32.dll', 'Qt3Support4.dll',
                'QtNetwork4.dll', 'QtOpenGL4.dll', 'QtSql4.dll'))]
 
-# remove unnedded plugins
+# remove unneeded plugins
 for pdir in ('accessible', 'codecs', 'graphicssystems'):
     a.binaries = [b for b in a.binaries if b[1].find(os.path.join(vzd,'plugins', pdir)) == -1]
 

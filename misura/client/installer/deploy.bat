@@ -5,7 +5,6 @@ set deployDir=\\Ess-server\company\Installations\Misura4
 set pyinst=pyinstaller
 set python=C:\Python27\python.exe
 
-
 set sourceDir=%codeBase%\misura
 set clientDir=%sourceDir%\client
 set canonDir=%sourceDir%\canon
@@ -15,15 +14,6 @@ set installerDir=%codeBase%\misura\client\installer
 set specFile=%installerDir%\client_windows_pyinst.spec
 set out=%installerDir%\dist
 
-REM Recreate dist output directory
-del /q /s "%out%"
-mkdir "%out%"
+del /q /s "%deployDir%\misura4" 
+xcopy /E /Y /I "%out%\misura4" "%deployDir%\misura4"
 
-C:
-cd %installerDir%
-%pyinst% -y %specFile%
-
-REM Consolidate local build
-xcopy %out%\configuration\* %out%\misura4
-xcopy %out%\archive\* %out%\misura4
-xcopy %out%\acquisition\* %out%\misura4
