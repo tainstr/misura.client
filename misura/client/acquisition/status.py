@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
 from .. import conf, widgets
-
+from time import sleep
 class Status(QtGui.QWidget):
 	def __init__(self, server, remObj, parent=None):
 		QtGui.QWidget.__init__(self, parent)
+		#TOD: accept drops
 		self.lay=QtGui.QFormLayout()
 		self.lay.setLabelAlignment(QtCore.Qt.AlignRight)
 		self.lay.setRowWrapPolicy(QtGui.QFormLayout.WrapLongRows)
@@ -32,9 +33,10 @@ class Status(QtGui.QWidget):
 				opt='h'
 			elif n in ('vertical', 'horizontal', 'flex'):
 				opt ='d'
-			if opt:
-				for i in range(remObj['nSamples']):
-					smp=getattr(remObj, 'sample'+str(i))
-					wg=widgets.build(server, smp,smp.gete(opt))
-					self.lay.addRow(wg.label_widget, wg)
+		if opt:
+			for i in range(remObj.measure['nSamples']):
+				smp=getattr(remObj, 'sample'+str(i))
+				print 'Building widget', smp['fullpath'], opt
+				wg=widgets.build(server, smp,smp.gete(opt))
+				self.lay.addRow(wg.label_widget, wg)
 		self.setLayout(self.lay)

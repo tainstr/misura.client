@@ -36,10 +36,6 @@ class Overlay(QtGui.QGraphicsItem):
 	@property
 	def zoom_factor(self):
 		t=self.scene().views()[0].transform()
-		logging.debug('%s', 'zoom_factor')
-		logging.debug('%s %s %s', t.m11(), t.m12(), t.m13())
-		logging.debug('%s %s %s', t.m21(), t.m22(), t.m23())
-		logging.debug('%s %s %s', t.m31(), t.m32(), t.m33())
 		return abs(t.m11()+t.m21())
 	
 	def unscale(self,factor):
@@ -59,7 +55,6 @@ class Overlay(QtGui.QGraphicsItem):
 			if not multiget.has_key(opt):
 				continue
 			self.current[opt]=multiget[opt]
-		logging.debug('%s %s %s', 'slot_update', self, self.current.keys())
 		if self.validate():
 			self.up()
 			return True
@@ -78,7 +73,6 @@ class Overlay(QtGui.QGraphicsItem):
 	
 	def boundingRect(self):
 		return QtCore.QRectF(0,0,0,0)
-#		return self.parentItem().boundingRect()
 		
 	def paint(self,*a,**kw):
 		return None

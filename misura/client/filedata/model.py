@@ -223,6 +223,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
 				LF=node.linked
 				if (node.parent and LF) and not node.parent.parent:
 					r=getattr(LF.conf,LF.instrument)
+					r.connect()
 					r=r.measure['name']
 					if len(LF.prefix):
 						r+=', ({})'.format(LF.prefix)

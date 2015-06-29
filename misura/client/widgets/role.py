@@ -90,6 +90,9 @@ class RoleIO(ActiveWidget):
 	def update(self):
 		""" Draw the referred widget"""
 		self.prop=self.remObj.gete(self.handle)
+		if not self.prop:
+			logging.warning('Cannot get option  %s', self.handle )
+			return 
 		opt=self.prop['options']
 		path=self.server.searchPath(opt[0])
 		obj=self.server.toPath(opt[0])

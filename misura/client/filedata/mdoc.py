@@ -24,7 +24,7 @@ MIN=-10**5
 class MisuraDocument(document.Document):
 	"""Extended Veusz document with connectivity to a single Misura test file, local or remote"""
 	up=True
-	zerotime=-1
+	zerotime=None
 	interval=1 # Update interval
 	instrument_name=False
 	root=False
@@ -69,7 +69,7 @@ class MisuraDocument(document.Document):
 	@lockme
 	def reloadData(self,update=True):
 		# Clear all previous datasets, in order to avoid duplicates
-		self.zerotime=-1
+		self.zerotime=None
 		if not self.up:
 			logging.debug('%s %s', 'No up', self.up)
 			return []
@@ -147,13 +147,14 @@ class MisuraDocument(document.Document):
 		if not self.root:
 			self.root=self.proxy.root
 		root=self.root
+		root.connect()
 		if not self.instrument_name:
 			self.instrument_name=self.proxy.conf['runningInstrument']
 		instr=getattr(self.proxy.conf,self.instrument_name)
 		lastt=self.data['0:t'].data[-1]
 		tu=getattr(self.data['0:t'],'unit','second')
 		lastt=units.Converter.convert(tu,'second',lastt)
-		if self.zerotime<0:
+		if self.zerotime is None:
 			self.zerotime=instr['zerotime']
 		elp=root.time()-self.zerotime
 		# interval rounding
@@ -173,7 +174,7 @@ class MisuraDocument(document.Document):
 				header.remove(h)
 		header=[h.replace('/summary/', '0:') for h in header] # remove initial /
 		header=set(header)
-		ks=set(self.data.keys())
+		ks=set(self.data.keys()) | set(self.available_data.keys())
 		dh=header-ks
 		if len(dh)>0:
 			logging.debug('%s %s', 'RELOADING DATA: HEADER DIFFERS. Missing:', dh)

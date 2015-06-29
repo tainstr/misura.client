@@ -107,7 +107,6 @@ class BoxRegion(Overlay):
 		if r is None:
 			logging.debug('%s %s', 'Region UP error: no values', r)
 		x, y, w, h=r
-		logging.debug('%s %s %s %s %s', 'BoxRegion.up', x, y, w, h)
 		self.box.setPos(0, 0)
 		self.box.setRect(QtCore.QRectF(x, y, w, h))
 		self.syncPoints()

@@ -102,29 +102,25 @@ def not_interpolated(proxy,col,startt,endt):
 		apt=np.linspace(0,d-1,d)
 		vals=np.ones(d)*data[0][1]
 		ap=np.array([apt,vals]).transpose()
-		logging.debug('%s %s', 'extend towards start', ap.shape)
 		data=np.concatenate((ap,data))
 	# Extend towards end
 	s=data[-1][0]
 	d=int(endt-s)
 	if d>2:
-		logging.debug('%s %s %s %s', 'Extending towards end', s, endt, d)
 		apt=np.linspace(s+1,endt+1,d)
 		vals=np.ones(d)*data[-1][1]
 		ap=np.array([apt,vals]).transpose()
-		logging.debug('%s %s %s %s %s %s', 'extend towards end', data.shape, ap.shape, ap, apt, vals)
 		data=np.concatenate((data,ap))
 	return data.transpose()
 
 def interpolated(proxy,col,ztime_sequence):
 	"""Retrieve `col` from `proxy` and interpolate it around `ztime_sequence`"""
-	logging.debug('%s %s', 'interpolating col', col)
 	tdata=not_interpolated(proxy,col,ztime_sequence[0],ztime_sequence[-1])
 	if tdata is False:
 		return False
 	t,val=tdata[0],tdata[1]
+	# Empty column
 	if val is False or len(val)==0:
-		logging.debug('%s %s', 'INTERPOLATING EMPTY COLUMN', col)
 		return val
 	f=InterpolatedUnivariateSpline(t,val,k=1)
 	r=f(ztime_sequence)
@@ -219,11 +215,8 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		fp=getattr(doc,'proxy',False)
 		logging.debug('%s %s %s %s', 'FILENAME', self.filename, type(fp), fp)
 		if fp is False or not fp.isopen():
-			logging.debug('%s', 'CREATING NEW FILE PROXY')
 			self.proxy=getFileProxy(self.filename)
 		else:
-			logging.debug('%s', 'COPY FILE PROXY')
-			#self.proxy=fp.copy()
 			self.proxy=fp
 		self.job(1,'Reading file','Configuration')
 		if not self.proxy.isopen():
@@ -235,7 +228,6 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		conf=self.proxy.conf	#ConfigurationProxy
 		LF.conf=conf
 		instr=conf['runningInstrument']
-		logging.debug('%s %s', 'got runningInstrument', instr)
 		LF.instrument=instr
 		instrobj=getattr(conf,instr)
 		LF.instr=instrobj
@@ -245,7 +237,6 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		
 		###
 		# Set available curves on the LF
-		logging.debug('%s', 'getting header')
 		self.job(2,'Reading file','Header')
 		header=self.proxy.header(['Array'],'/summary') # Will list only Array-type descending from /summary
 		autoload=[]
@@ -300,7 +291,6 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 					zerotime=z 
 			except:
 				logging.debug(format_exc())
-				logging.debug('%s %s', 'removing column', col)
 				header.remove(col)
 				continue
 			
@@ -338,7 +328,6 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		outds={}
 		availds={}
 		for p, col0 in enumerate(['t']+header):
-			logging.debug('%s %s %s %s', 'Importing column', p, col0, elapsed)
 			col=col0.replace('/summary/', '/')
 			mcol=col
 			if mcol.startswith(sep): mcol=mcol[1:]
@@ -347,30 +336,24 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 			m_var=col.split('/')[-1]
 			# Set m_update 
 			if m_var=='t' or col0 in autoload:
-				logging.debug('%s %s', 'Set for update', col)
 				m_update=True
 			else:
-				logging.debug('%s %s', 'Set for no-update', col)
 				m_update=False	
 			# Configure dataset
 			if not m_update:
 				# completely skip processing if dataset is already in document
 				if doc.data.has_key(pcol):
-					logging.debug('%s %s', 'Skipping column: Document already has this non-autoload dataset', pcol)
 					continue
 				# data is not loaded anyway
 				data=[]
 			elif col=='t':
 				data=time_sequence
 			elif not interpolating:
-				logging.debug('%s %s', 'not interpolating', pcol)
 				data=not_interpolated(self.proxy,col,startt,endt)[1] # Take values column
 			else:
-				logging.debug('%s %s', 'interpolating', pcol)
 				data=interpolated(self.proxy,col,ztime_sequence)
 				
 			if data is False:
-				logging.debug('%s %s %s', 'Skipping column: no data', p, col)
 				data=[]
 # 				continue
 			# Get meas. unit
@@ -378,14 +361,12 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 			if col=='t':
 				u='second'
 			else:
-				logging.debug('%s %s', 'getting unit', col)
 				u=self.proxy.get_node_attr(col,'unit')
 				if u in ['','None',None,False,0]: 
 					u=False
 				# Correct missing celsius indication
 				if not u and m_var=='T':
 					u='celsius'
-				logging.debug('%s %s %s', 'got unit', col, u)
 				
 			
 			logging.debug('%s', 'building the dataset')
@@ -413,13 +394,11 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 				# Units conversion
 				nu=self.rule_unit(col)
 				if u and nu:
-					logging.debug('%s %s %s %s', 'Converting to unit', col, ds.unit, nu)
 					ds=units.convert(ds,nu[0])
 				
 			
 			# Find out the sample index to which this dataset refers
 			var, idx=iutils.namingConvention(col)
-			logging.debug('%s %s %s %s %s', 'Naming convention', col, var, idx, LF.samples)
 			if '/sample' in col:
 				parts=col.split(sep)
 				for q in parts: 
@@ -445,7 +424,6 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 				outds[pcol]=ds
 			else:
 				availds[pcol]=ds
-			logging.debug('%s %s %s', 'created', col, len(ds.data))
 			self.job(p+1)
 		# Detect ds which should be removed from availds because already contained in imported names
 		avail_set=set(self._doc.available_data.keys())
@@ -460,83 +438,3 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 		self.outdatasets=outds
 		return names
 
-
-class MisuraCaptureStream(capture.CaptureStream):
-	"""CaptureStream object receiving data from a remote Misura file."""
-	descr = 'import misura hdf file'
-	
-	def __init__(self, obj, doc):
-		"""Create an import operation on the filename. Update defines if keep old data or completely wipe it."""
-		capture.CaptureStream.__init__(self)
-		self.doc=doc
-		self.obj=obj
-		
-	def getMoreData(self):
-		pass
-	
-	def close(self):
-		pass
-		
-	def doImport(self):
-		"""Import data.  Returns a list of datasets which were imported."""
-		logging.debug('%s', 'OperationmisuraImport')
-		doc=self._doc
-		if not self.filename:
-			logging.debug('%s', 'EMPTY FILENAME')
-			return []
-		# Get a the corresponding linked file or create a new one with a new prefix
-		LF = get_linked(doc,self.params)
-		self.params.prefix=LF.prefix
-		self.prefix=LF.prefix
-		
-		# open the file
-		fp=getattr(doc,'proxy',False)
-		logging.debug('%s %s', 'FILENAME', self.filename)
-		if fp is False:
-			logging.debug('%s', 'CREATING NEW FILE PROXY')
-			self.proxy=getFileProxy(self.filename)
-		else:
-			logging.debug('%s', 'COPY FILE PROXY')
-			self.proxy=fp.copy()
-		self.proxy.set_version('/conf',self.params.meta_version)
-		conf=self.proxy.conf	#ConfigurationProxy
-		LF.conf=conf
-		instr=self.proxy.get_node_attr('/conf','instrument')
-		logging.debug('%s %s', 'got attribute', instr)
-		LF.instrument=instr
-		instrobj=getattr(conf,instr)
-		LF.instr=instrobj
-		# get the prefix from the test title
-		LF.title=instrobj.measure['name']
-		self.measurename=LF.title
-		
-		
-		lastt=self.data['0:t'].data[-1]
-		elp=self.proxy.get_node_attr('/conf','elapsed')
-		# interval rounding
-		elp=(elp//self.interval)*self.interval
-		if (elp-lastt)<self.interval:
-			logging.debug('%s %s %s', 'Update not needed', elp, lastt)
-			return []
-		logging.debug('%s %s', 'Update needed: %.2f>%.2f doc' % (elp, lastt))
-		nt=list(np.arange(lastt+self.interval,elp,self.interval))
-		k=[]
-		for col in self.data.iterkeys():
-			ds=self.data[col]
-			# Skip non-marked
-			if not ds.m_update:
-				continue
-			if col=='t': 
-				updata=nt
-			else:
-				# Ask for interpolated data, from lastt to the end
-				updata=self.proxy.interpolated_col(ds.m_col,time_sequence=nt)
-			Nu=len(updata)
-			if Nu==0:
-				continue
-			N=len(ds.data)
-			ds.insertRows(N,Nu,{'data':updata})
-#			print 'Updated',col,N,Nu
-			k.append(col)
-		self.emit(QtCore.SIGNAL('updated()'))
-		return k			
