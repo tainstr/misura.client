@@ -40,8 +40,6 @@ class TestOperationMisuraImport(unittest.TestCase):
 			self.assertEqual(ds.linked.filename,path)
 				
 		
- 	
-		
 	def test_1_importFromM4(self):
 		# Simulate an import
 		imp=filedata.OperationMisuraImport(filedata.ImportParamsMisura(filename=nativem4))
@@ -54,6 +52,11 @@ class TestOperationMisuraImport(unittest.TestCase):
 		self.assertNotIn('0:hsm/sample0/e',doc.data)
 		self.assertSetEqual(set(m4names)-set(imp.outnames)-set(doc.available_data.keys()),set([]))
 		self.check_doc(doc,nativem4)
+		# Test single dataset name import
+		imp=filedata.OperationMisuraImport.from_dataset_in_file('0:hsm/sample0/e', nativem4)
+		imp.do(doc)
+		self.assertIn('0:hsm/sample0/e',doc.data)
+		self.assertNotIn('0:hsm/sample0/e',doc.available_data)
 		
 	def test_2_multiImport(self):
 		# Simulate an import

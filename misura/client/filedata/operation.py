@@ -168,6 +168,18 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 			logging.debug('%s %s', 'Load rule', r)
 			self.rule_load=re.compile(r)
 		self.rule_unit=clientconf.RulesTable(params.rule_unit)
+		
+	@classmethod
+	def from_dataset_in_file(cls,dataset_name, linked_filename):
+		"""Create an import operation from a `dataset_name` contained in `linked_filename`""" 
+		if ':' in dataset_name:
+			dataset_name=dataset_name.split(':')[1]
+		p=ImportParamsMisura(filename = linked_filename,
+							rule_exc = ' *',
+							rule_load = '^(/summary/)?'+dataset_name+'$',
+							rule_unit = clientconf.confdb['rule_unit'])
+		op=OperationMisuraImport(p)
+		return op
 					
 	def do(self,document):
 		"""Override do() in order to get a reference to the document!"""
@@ -435,6 +447,11 @@ class OperationMisuraImport(QtCore.QObject,base.OperationDataImportBase):
 				availds[pcol]=ds
 			logging.debug('%s %s %s', 'created', col, len(ds.data))
 			self.job(p+1)
+		# Detect ds which should be removed from availds because already contained in imported names
+		avail_set=set(self._doc.available_data.keys())
+		names_set=set(names).union(set(self._doc.data.keys()))
+		for dup in names_set.intersection(avail_set):
+			self._doc.available_data.pop(dup)
 		logging.debug('%s', 'emitting done')
 		self.done()
 		self.done('Reading file')

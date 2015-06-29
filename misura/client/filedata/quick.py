@@ -233,14 +233,7 @@ class QuickOps(object):
 	###
 	def _load(self, node):
 		"""Load or reload a dataset"""
-		p=node.path
-		if ':' in p:
-			p=p.split(':')[1]
-		p=ImportParamsMisura(filename=node.linked.filename,
-							rule_exc=' *',
-							rule_load='^(/summary/)?'+p+'$',
-							rule_unit=clientconf.confdb['rule_unit'])
-		op=OperationMisuraImport(p)
+		op=OperationMisuraImport.from_dataset_in_file(node.path, node.linked.filename)
 		self.doc.applyOperation(op)
 	
 	@node
@@ -313,15 +306,18 @@ class QuickOps(object):
 		"""Delete a dataset and all depending graphical widgets."""
 		ds=node.ds
 		pt=node.path
-# 		pt=self.doc.datasetName(ds)
-		# Exit if no plot is associated
+		# Remove and exit if dataset was only in available_data
+		if self.doc.available_data.has_key(pt):
+			self.doc.available_data.pop(pt)
+			if not self.doc.data.has_key(pt):
+				return True
+		# Remove and exit if no plot is associated
 		if not self.model().plots['dataset'].has_key(pt):
-# 			n=self.doc.datasetName(ds)
 			self.doc.deleteDataset(pt)
 			self.doc.setModified()
 			self.previous_selection=False
-			return
-#		self.model().pause(True)
+			return True
+		
 		plots=self.model().plots['dataset'][pt]
 		# Collect involved graphs
 		graphs=[]
@@ -378,6 +374,7 @@ class QuickOps(object):
 				self.deleteData(sub,remove_dataset, recursive)
 		self.previous_selection=False
 		self.doc.setModified()
+		return True
 	
 	@nodes	
 	def deleteDatas(self,nodes=[]):

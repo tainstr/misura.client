@@ -335,6 +335,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 		else:
 			is_loaded=self.add_load(node, self.dataset_menu)
 		if not is_loaded:
+			self.dataset_menu.addAction(_('Delete'), self.deleteData)
 			return self.dataset_menu
 		
 		is_plotted = self.add_plotted(node, self.dataset_menu)
