@@ -30,8 +30,6 @@ class aChooser(ActiveWidget):
 		self.combo.blockSignals(True)
 		# Cleans combo entries
 		self.combo.clear()
-		for i in range(self.combo.count()):
-			self.combo.removeItem(self.combo.currentIndex())
 		# Get new property
 		self.prop=self.remObj.gete(self.handle)
 		logging.debug('%s %s', 'aChooser.redraw', self.prop)
@@ -74,5 +72,7 @@ class aChooser(ActiveWidget):
 		return r
 
 	def update(self):
+		self.combo.blockSignals(True)
 		idx=self.adapt2gui(self.current)
 		self.combo.setCurrentIndex(self.adapt2gui(self.current))
+		self.combo.blockSignals(False)

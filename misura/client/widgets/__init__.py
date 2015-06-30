@@ -55,7 +55,7 @@ def build(server, remObj, prop, parent=None):
 		elif T in ['Chooser', 'Menu', 'FileList']:
 			obj=aChooser(*arg)
 		elif T=='Preset':
-			obj=PresetManager(remObj)
+			obj=PresetManager(remObj, parent=parent)
 		elif T in ['Integer', 'Float']:
 			obj=aNumber(*arg)
 		elif T=='Time':

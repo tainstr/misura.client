@@ -223,7 +223,7 @@ class Interface(QtGui.QTabWidget):
 		for s, sec in self.sectionsMap.iteritems():
 			for w, wg in sec.widgetsMap.iteritems():
 				if wg.type=='Button': continue
-				logging.debug('%s %s %s %s', 'updating:', s, w, wg.get())
+				logging.debug('%s %s %s %s', 'updating:', s, w, wg.async_get())
 			
 	def showMenu(self, pt):
 		self.menu.popup(self.mapToGlobal(pt))
