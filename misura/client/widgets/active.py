@@ -213,7 +213,10 @@ class ActiveObject(Active, QtCore.QObject):
 		self.connect(self, QtCore.SIGNAL('selfchanged()'), self._get)
 		
 	def emit(self, *a, **k):
-		return QtCore.QObject.emit(self, *a, **k)
+		try:
+			return QtCore.QObject.emit(self, *a, **k)
+		except:
+			return False
 		
 
 class LabelUnit(QtGui.QLabel):

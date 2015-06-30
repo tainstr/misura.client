@@ -64,7 +64,8 @@ class MiniImage(QtGui.QWidget):
 		self.slider.setOrientation(QtCore.Qt.Horizontal)
 		self.slider.valueChanged.connect(self.set_idx)
 		if not slider: self.slider.hide()
-		self.connect(self.decoder,QtCore.SIGNAL('cached(int)'),self.cached)
+		if self.decoder:
+			self.connect(self.decoder,QtCore.SIGNAL('cached(int)'),self.cached)
 		
 	def save_frame(self):
 		"""Save current frame"""

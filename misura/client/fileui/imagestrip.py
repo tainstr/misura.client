@@ -12,6 +12,7 @@ class ImageStrip(QtGui.QWidget):
 	step=10
 	bytime=False
 	autofollow=False
+	decoder=False
 	def __init__(self,n=5,parent=None):
 		QtGui.QWidget.__init__(self,parent)
 		self.lay=QtGui.QGridLayout()
@@ -28,16 +29,18 @@ class ImageStrip(QtGui.QWidget):
 		self.actTime=self.menu.addAction('Step by time', self.by_time)
 		self.actTime.setCheckable(True)
 		
-	def set_doc(self,doc,datapath):
+	def set_doc(self,doc,datapath=False):
 		logging.debug('%s %s %s', 'ImageStrip.set_doc', doc, datapath)
 		self.doc=doc
-		self.decoder=doc.decoders[datapath]
 		self.idx=0
 		self.t=0
 		self.rows=1
+		self.decoder=doc.decoders.get(datapath, False)
 		self.set_idx(0)
 		self.setLen(self.n)
-		self.connect(self.decoder,QtCore.SIGNAL('reset()'),self.setLen)
+		
+		if self.decoder:
+			self.connect(self.decoder,QtCore.SIGNAL('reset()'),self.setLen)
 		
 	def showMenu(self, pt):
 		self.menu.popup(self.mapToGlobal(pt))
@@ -74,19 +77,20 @@ class ImageStrip(QtGui.QWidget):
 		
 	def setLen(self,n=-1):
 		"""Changes the number of visible images"""
-		if not self.decoder:
-			return False
 		if n<0: n=self.n
 		self.n=n
 		for lbl in self.labels:
 			lbl.close()
 			del lbl
 		self.labels=[]
-		
+		if self.decoder:
+			datapath=self.decoder.datapath
+		else:
+			datapath=False
 		for i in range(n):
 			row=i % self.rows
 			col=i / self.rows
-			lbl=MiniImage(self.doc,self.decoder.datapath,parent=self)
+			lbl=MiniImage(self.doc,datapath,parent=self)
 			self.lay.addWidget(lbl,row,col)
 			self.labels.append(lbl)
 			lbl.metaChanged.connect(self.route_meta_changed)
@@ -149,7 +153,7 @@ class Slider(QtGui.QWidget):
 				
 	def set_doc(self,doc):
 		self.doc=doc	
-		self.reset(1)
+		self.reset(True)
 		self.connect(self.doc,QtCore.SIGNAL('updated()'),self.setLen)
 		
 	def setLen(self):

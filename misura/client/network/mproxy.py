@@ -5,7 +5,7 @@ import xmlrpclib
 from xmlrpclib import ServerProxy, ProtocolError
 from time import time
 import httplib
-from traceback import print_exc
+from traceback import format_exc
 import threading
 from misura.canon.csutil import lockme
 

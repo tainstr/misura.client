@@ -159,7 +159,6 @@ class DataDecoder(QtCore.QThread):
 			traceback.print_exc()
 		return r
 
-	
 	def get_time(self,t):
 		if self.ext=='Profile':
 			f=self.proxy.get_time_profile
@@ -188,7 +187,7 @@ class DataDecoder(QtCore.QThread):
 			entry=fp.col_at(self.datapath,seq,True)
 			t1=time()
 			logging.debug('%s %s', 'DataDecoder entry search', t1-t0)
-			if len(entry)<=5:
+			if entry is None or len(entry)<=5:
 				logging.debug('%s %s %s %s %s', 'NO DATA', self.datapath, seq, self.ext, entry)
 				return False
 			np.save(tmpdat,entry)

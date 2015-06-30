@@ -30,6 +30,10 @@ class MisuraDocument(document.Document):
 	root=False
 	def close(self):
 		self.up=False
+		for k, d in self.decoders.iteritems():
+			print 'Closing decoder', k
+			d.close()
+		self.decoders={}
 		
 	def __init__(self,filename=False,proxy=False,root=False):
 		document.Document.__init__(self)

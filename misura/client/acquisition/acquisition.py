@@ -226,12 +226,15 @@ class MainWindow(QtGui.QMainWindow):
 		logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance().activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
 		
 #	@csutil.profile
-	def setInstrument(self, remote, server=False):
+	def setInstrument(self, remote=False, server=False):
 		if server is not False:
 			self.setServer(server)
+		if remote is False:
+			remote=self.remote
+		else:
+			self.remote=remote
 		self._blockResetFileProxy=True
 		self.instrumentDock.hide()
-		self.remote=remote
 		name=self.remote['devpath']
 		self.name=name
 		logging.debug('Setting remote %s %s %s', remote, self.remote, name)
@@ -362,7 +365,10 @@ class MainWindow(QtGui.QMainWindow):
 		
 		
 # 	@csutil.lockme
-	def set_doc(self,doc):
+	def set_doc(self,doc=False):
+		if doc is False:
+			doc=filedata.MisuraDocument(root=self.server)	
+		doc.up=True
 		pid='Data display'
 		self.tasks.jobs(10,pid)
 		self.doc=doc
@@ -435,8 +441,10 @@ class MainWindow(QtGui.QMainWindow):
 				self.tasks.done('Waiting for data')
 				return False
 			logging.debug('%s %s', 'resetFileProxy to live ', fid)
+			self.server.connect()
 			live_uid=self.server.storage.test.live.get_uid()
 			if not live_uid:
+				logging.debug('No live_uid returnned')
 				return False
 			live=getattr(self.server.storage.test,live_uid)
 			if not live.has_node('/conf'):
@@ -467,9 +475,6 @@ class MainWindow(QtGui.QMainWindow):
 				sleep(4)
 				return self._resetFileProxy(retry=retry+1, recursion=recursion+1)
 		self.tasks.done('Waiting for data')
-		if doc is False:
-			doc=filedata.MisuraDocument(root=self.server)	
-		doc.up=True
 		logging.debug('%s %s %s %s', 'RESETFILEPROXY', doc.filename, doc.data.keys(), doc.up)
 		self.set_doc(doc)
 	
@@ -478,7 +483,7 @@ class MainWindow(QtGui.QMainWindow):
 		"""Locked version of resetFileProxy"""
 		if not self._lock.acquire(False):
 			logging.debug('ANOTHER RESETFILEPROXY IS RUNNING!')
-			return
+			return False
 		self._blockResetFileProxy=False
 		logging.debug('MainWindow.resetFileProxy: Stopping registry')
 		registry.toggle_run(False)
@@ -515,13 +520,20 @@ class MainWindow(QtGui.QMainWindow):
 		logging.debug('%s', "STOPPED_NOSAVE")
 		#TODO: reset ops should be performed server-side
 		self.remote.measure['uid']=''
-		self.resetFileProxy()
+		if self.doc:
+			self.doc.close()
+		self.set_doc(False)
+		self.resetFileProxy(retry=10)
 		
 	def stopped(self):
 		"""Offer option to download the remote file"""
 		#HTTPS data url
 		uid=self.remote.measure['uid']
 		dbpath=confdb['database']
+		if self.doc:
+			self.doc.close()
+		self.set_doc(False)
+		self.resetFileProxy(retry=10)
 		# NO db: ask to specify custom location
 		if not os.path.exists(dbpath):
 			logging.debug('%s %s', 'DATABASE PATH DOES NOT EXIST', dbpath)
@@ -547,6 +559,7 @@ class MainWindow(QtGui.QMainWindow):
 		sy.start()
 		# Keep a reference
 		self._download_thread=sy
+		return True
 
 	###########
 	### Post-analysis
