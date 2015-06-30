@@ -13,6 +13,7 @@ from misura.canon.csutil import next_point
 from .. import conf
 from .. import units
 from PyQt4 import QtGui, QtCore
+from thermal_cycle_row import ThermalCycleRow
 
 def clean_curve(dat,events=True):
 	crv=[]
@@ -301,39 +302,8 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 		                                     self.index(self.rowCount(), self.columnCount()))
 	
 	def updateRow(self, irow):
-#		if irow<1: 
-#			return
-		if isinstance(self.dat[irow][1],basestring):
-			logging.debug('%s %s %s', 'skipping event ', irow, self.dat[irow])
-			return 
-		logging.debug('%s %s %s', 'updateRow', self.mode, irow)
-		t, T, R, D=self.dat[irow]
-		pt0,ent0=next_point(self.dat,irow-1,-1)
-		if ent0 is False:
-			logging.debug('%s %s %s %s', 'skipping empty', irow, pt0, ent0)
-			return
-		t0, T0, R0, D0=ent0
-		logging.debug('%s', ent0)
-		if self.mode=='points':
-			D=(t-t0)
-			if D==0: R=0
-			else:
-				R=(T-T0)/D
-		elif self.mode=='ramp':
-			if R==0: D=0
-			else:
-				D=(T-T0)/R
-			t=t0+D
-		elif self.mode=='dwell':
-			if D==0: R=0
-			else:
-				R=(T-T0)/D
-			t=t0+D
-		if D<0 or t<t0:
-			logging.debug('%s', 'Impossible duration!')
-			self.dat[irow]=[t0+1, T0, 0, 1]
-		else:
-			self.dat[irow]=[t, T, R, D]
+		self.dat[irow] = ThermalCycleRow().update_row(self.dat, irow, self.mode)
+		
 		
 	def curve(self,events=True):
 		"""Format table for plotting or transmission"""
