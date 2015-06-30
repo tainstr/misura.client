@@ -1,7 +1,7 @@
 #!/bin/bash
 
 T=`readlink -m "${BASH_SOURCE[0]}"`
-CLIENTROOT="$( cd "$( dirname "${T}" )"/.. && pwd )"
+CLIENTROOT="$( cd "$( dirname "${T}" )"/../.. && pwd )"
 CLIENTDIR=$CLIENTROOT/misura/client
 export PYTHONPATH=$CLIENTROOT:$PYTHONPATH
 
