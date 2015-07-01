@@ -415,31 +415,11 @@ class ThermalCurveTable(QtGui.QTableView):
 # 		a.setEnabled(False)
 		m.addAction(_('Remove current row'), self.delRow)
 		m.addSeparator()
-		self.rti=m.addAction(_('Rate/Temperature mode'), self.curveModel.mode_ramp)
-		self.tti=m.addAction(_('Time/Temperature mode'),self.curveModel.mode_points)
-		self.dti=m.addAction(_('Duration/Temperature mode'), self.curveModel.mode_dwell)
-		self.curveModel.sigModeChanged.connect(self.updateMenu)
-		self.connect(self.menu, QtCore.SIGNAL('aboutToShow()'), self.updateMenu)
-		for act in self.rti, self.tti, self.dti:
-			act.setCheckable(True)
 		self.curveModel.mode_ramp()
 		
 	def showMenu(self, pt):
 		self.menu.popup(self.mapToGlobal(pt))
-	def updateMenu(self):
-		mode=self.model().mode
-		if mode=='ramp':
-			self.rti.setChecked(True)
-			self.tti.setChecked(False)
-			self.dti.setChecked(False)
-		elif mode=='points':
-			self.rti.setChecked(False)
-			self.tti.setChecked(True)
-			self.dti.setChecked(False)
-		elif mode=='dwell':
-			self.rti.setChecked(False)
-			self.tti.setChecked(False)
-			self.dti.setChecked(True)		
+	
 	def setCurve(self, crv, progressBar=False):
 		self.model().setCurve(crv, progressBar)
 	def curve(self):
@@ -510,7 +490,6 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 		
 		self.table=ThermalCurveTable()
 		self.model=self.table.model()
-		self.table.updateMenu()
 		
 		self.fileMenu=menuBar.addMenu('File')
 		self.fileMenu.addAction('Import from CSV', self.loadCSV)
@@ -523,10 +502,6 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 		a=self.editMenu.addAction('Insert parametric heating', self.table.newParam)
 		a.setEnabled(False)
 		self.editMenu.addAction('Remove current row', self.table.delRow)
-		self.modeMenu=menuBar.addMenu('Mode')
-		self.modeMenu.addAction(self.table.rti)
-		self.modeMenu.addAction(self.table.tti)
-		self.modeMenu.addAction(self.table.dti)
 		self.addButtons()
 		
 
