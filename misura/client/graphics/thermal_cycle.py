@@ -176,7 +176,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 			header.append(_(s))
 		self.header=header
 		self.mode='ramp'
-		self.editable=(colTEMP, colCHK)
+
 		
 	def rowCount(self, index=QtCore.QModelIndex()):
 		return len(self.dat)
@@ -198,17 +198,15 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 		
 			
 	def flags(self, index):
-		row=index.row()
-		col=index.column()
+		row_index = index.row()
+		column_index = index.column()
+
 		if not index.isValid():
 			return QtCore.Qt.ItemIsEditable
-		# TCEv are editable only on T column
-		if self.dat[row][0]<0 and col!=1:
+
+		if (self.dat[row_index][0] < 0 and column_index != 1) or (row_index == 0 and column_index != colTEMP):
 			return QtCore.Qt.ItemIsEditable
-		if row==0 and col!=colTEMP:
-			return QtCore.Qt.ItemIsEditable
-		if col not in self.editable:
-			return QtCore.Qt.ItemIsEditable
+
 		return QtCore.Qt.ItemFlags(QtCore.QAbstractTableModel.flags(self, index)|QtCore.Qt.ItemIsEditable)
 
 	def setData(self, index, value, role=QtCore.Qt.EditRole):
@@ -253,23 +251,17 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 		if role==QtCore.Qt.DisplayRole:
 			return self.header[section]
 		elif role==QtCore.Qt.BackgroundRole: #and section!=colCHK:
-			if section in self.editable:
-				return QtGui.QBrush(QtGui.QColor(10, 200, 10))
-			else:
-				return QtGui.QBrush(QtGui.QColor(180, 180, 180))
+			return QtGui.QBrush(QtGui.QColor(10, 200, 10))
 				
-	def mode_points(self):
-		self.editable=(colTIME, colTEMP)
+	def mode_points(self):###################################3
 		self.mode='points'
 		self.emit(QtCore.SIGNAL("headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, colCHK-1)
 		self.sigModeChanged.emit()
 	def mode_ramp(self):
-		self.editable=(colRATE, colTEMP)
 		self.mode='ramp'
 		self.emit(QtCore.SIGNAL("headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, colCHK-1)
 		self.sigModeChanged.emit()
 	def mode_dwell(self):
-		self.editable=(colDUR, colTEMP)
 		self.mode='dwell'
 		self.emit(QtCore.SIGNAL("headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, colCHK-1)
 		self.sigModeChanged.emit()
@@ -329,6 +321,7 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
 		val=mod.data(index)
 		wg=QtGui.QItemDelegate.createEditor(self, parent, option, index)
 		if index.column()==colTIME:
+			mod.mode_points()
 			if index.row()==0:
 				return QtGui.QLabel('Initial Time', parent)
 			wg=TimeSpinBox(parent)
@@ -345,13 +338,16 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
 			wg=QtGui.QDoubleSpinBox(parent)
 			wg.setRange(0, 1750)
 			wg.setSuffix(u' \xb0C')
+
 		elif index.column()==colRATE:
+			mod.mode_ramp()
 			if index.row()==0:
 				return QtGui.QLabel('undefined', parent)
 			wg=QtGui.QDoubleSpinBox(parent)
 			wg.setRange(-500, 80)
 			wg.setSuffix(u' \xb0C/min')
 		elif index.column()==colDUR:
+			mod.mode_dwell()
 			if index.row()==0:
 				return QtGui.QLabel('undefined', parent)
 			wg=TimeSpinBox(parent)
