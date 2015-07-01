@@ -2,33 +2,36 @@ from misura.canon.csutil import next_point
 
 class ThermalCycleRow():
 	def update_row(self, rows, row_index, mode):
-		if isinstance(rows[row_index][1], basestring):
-			return rows[row_index]
+		current_row = rows[row_index]
+		if isinstance(current_row[1], basestring):
+			return current_row
 
-		t, T, R, D = rows[row_index]
-		pt0, ent0 = next_point(rows, row_index - 1, -1)
+		
+		next_row_index, next_row = next_point(rows, row_index - 1, -1)
 
-		if ent0 is False:
-			return rows[row_index]
-		t0, T0, R0, D0 = ent0
+		if next_row is False:
+			return current_row
 
-		if mode=='points':
-			D=(t-t0)
-			if D == 0: R = 0
+		time, temperature, heating_rate, duration = current_row
+		next_time, next_temperature, next_heating_rate, next_duration = next_row
+
+		if mode=='points':#time/temperature (Time)
+			duration = (time-next_time)
+			if duration == 0: heating_rate = 0
 			else:
-				R = (T - T0)/D
-		elif mode == 'ramp':
-			if R == 0: D = 0
+				heating_rate = (temperature - next_temperature)/duration
+		elif mode == 'ramp':#rate/temperature (Rate)
+			if heating_rate == 0: duration = 0
 			else:
-				D = (T - T0)/R
-			t = t0 + D
-		elif mode == 'dwell':
-			if D == 0: R = 0
+				duration = (temperature - next_temperature)/heating_rate
+			time = next_time + duration
+		elif mode == 'dwell':#duration/temperature (Duration)
+			if duration == 0: heating_rate = 0
 			else:
-				R = (T - T0)/D
-			t = t0 + D
+				heating_rate = (temperature - next_temperature)/duration
+			time = next_time + duration
 
-		if D < 0 or t < t0:
-			return [t0 + 1, T0, 0, 1]
+		if duration < 0 or time < next_time:
+			return [next_time + 1, next_temperature, 0, 1]
 		else:
-			return [t, T, R, D]
+			return [time, temperature, heating_rate, duration]
