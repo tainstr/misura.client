@@ -253,7 +253,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 		elif role==QtCore.Qt.BackgroundRole: #and section!=colCHK:
 			return QtGui.QBrush(QtGui.QColor(10, 200, 10))
 				
-	def mode_points(self):###################################3
+	def mode_points(self):
 		self.mode='points'
 		self.emit(QtCore.SIGNAL("headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, colCHK-1)
 		self.sigModeChanged.emit()
