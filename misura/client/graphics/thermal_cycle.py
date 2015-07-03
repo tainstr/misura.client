@@ -252,19 +252,18 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 			return self.header[section]
 		elif role==QtCore.Qt.BackgroundRole: #and section!=colCHK:
 			return QtGui.QBrush(QtGui.QColor(10, 200, 10))
-				
+
+	def mode_to(self, modename):
+		self.mode = modename
+		self.emit(QtCore.SIGNAL("headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, colCHK-1)
+		self.sigModeChanged.emit()
+
 	def mode_points(self):
-		self.mode='points'
-		self.emit(QtCore.SIGNAL("headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, colCHK-1)
-		self.sigModeChanged.emit()
+		self.mode_to('points')
 	def mode_ramp(self):
-		self.mode='ramp'
-		self.emit(QtCore.SIGNAL("headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, colCHK-1)
-		self.sigModeChanged.emit()
+		self.mode_to('ramp')
 	def mode_dwell(self):
-		self.mode='dwell'
-		self.emit(QtCore.SIGNAL("headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, colCHK-1)
-		self.sigModeChanged.emit()
+		self.mode_to('dwell')
 		
 	def setCurve(self, crv, progressBar=False):
 		self.removeRows(0, self.rowCount())
