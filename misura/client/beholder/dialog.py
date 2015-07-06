@@ -55,8 +55,9 @@ class ViewerDialog(QtGui.QDialog):
 	def close(self):
 		logging.debug('%s', 'ViewerDialog.close')
 		self.toggle_stream(do=False)
-		self.viewer.close()
-		self.control.close()
+		if self.viewer:
+			self.viewer.close()
+			self.control.close()
 		self.done(0)
 		
 	def updateFPS(self, fps):
