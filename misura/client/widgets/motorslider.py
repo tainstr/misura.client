@@ -14,7 +14,7 @@ class MotorSlider(aNumber):
 		self.position=0
 		aNumber.__init__(self,server, remObj, prop, parent)
 		self.pos_obj=ActiveObject(server, remObj, remObj.gete('position'), parent=self)
-		self.connect(self.pos_obj, QtCore.SIGNAL('selfchanged'), self.update_position)
+		self.connect(self.pos_obj, QtCore.SIGNAL('selfchanged'), self.update_position, QtCore.Qt.QueuedConnection)
 		if self.slider:
 			self.slider.setTracking(False)
 			self.slider.setFocusPolicy(QtCore.Qt.ClickFocus)

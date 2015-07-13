@@ -25,7 +25,7 @@ class SmoothDatasetPlugin(plugins.DatasetPlugin):
 		"""Define input fields for plugin."""
 		self.fields = [
 			plugins.FieldDataset('ds_in', 'Dataset to be smoothed',default=ds_in),
-			plugins.FieldCombo('method', 'Smoothing method', default=method, items=('flat', 'hanning', 'hamming', 'bartlett', 'blackman'), editable=False),
+			plugins.FieldCombo('method', 'Smoothing method', default=method, items=('flat', 'hanning', 'hamming', 'bartlett', 'blackman','kaiser'), editable=False),
 			plugins.FieldInt('window', 'Window length', default=window), 
 			plugins.FieldDataset('ds_out', 'Output dataset name',default=ds_out)
 		]

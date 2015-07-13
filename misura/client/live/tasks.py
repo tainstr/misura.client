@@ -47,8 +47,8 @@ class PendingTasks(QtGui.QWidget):
 		self.progress.force_update=True
 		self.progress.label_widget.hide()
 		self.lay.addWidget(self.progress)
-		self.connect(self.progress, QtCore.SIGNAL('changed()'), self.update)
-		self.connect(self.progress, QtCore.SIGNAL('selfchanged'), self.update)		
+		self.connect(self.progress, QtCore.SIGNAL('changed()'), self.update, QtCore.Qt.QueuedConnection)
+		self.connect(self.progress, QtCore.SIGNAL('selfchanged'), self.update, QtCore.Qt.QueuedConnection)		
 		self.update()
 
 		

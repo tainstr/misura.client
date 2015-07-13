@@ -72,7 +72,7 @@ class ViewerPicture(QtGui.QGraphicsView):
 		# Monitor number of samples
 		self.nsmp_obj=widgets.ActiveObject(self.server, self.remote, self.remote.gete('nSamples'), parent=self)
 		self.nsmp_obj.register()
-		self.connect(self.nsmp_obj, QtCore.SIGNAL('changed()'), self.reconnectSample)
+		self.connect(self.nsmp_obj, QtCore.SIGNAL('changed()'), self.reconnectSample, QtCore.Qt.QueuedConnection)
 		
 	def close(self):
 		logging.debug('%s', 'Closing ViewerPicture')

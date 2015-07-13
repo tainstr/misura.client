@@ -54,6 +54,7 @@ def rectify(xData):
 	return x,xd,err
 
 def smooth(x,window=10,method='hanning'):
+	"""method='flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'kaiser'"""
 	s=np.r_[2*x[0]-x[window-1::-1],x,2*x[-1]-x[-1:-window:-1]]
 	#print(len(s))
 	if method == 'flat': #moving average

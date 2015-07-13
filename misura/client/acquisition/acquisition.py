@@ -58,6 +58,7 @@ class MainWindow(QtGui.QMainWindow):
 	def tasks(self):
 		# DEBUG needed for UT
 		if not registry.tasks:
+			logging.debug('Preparing registry.tasks object')
 			registry.set_manager(network.manager)
 			if self.server and not self.fixedDoc:
 				registry.progress.set_server(self.server)
@@ -339,7 +340,7 @@ class MainWindow(QtGui.QMainWindow):
 		# Connect to "id" property
 		self.tasks.job(-1,pid,'Document')
 		self.idobj=widgets.ActiveObject(self.server, self.remote.measure, self.remote.measure.gete('id'), parent=self)
-		self.connect(self.idobj, QtCore.SIGNAL('changed()'), self.resetFileProxy)
+		self.connect(self.idobj, QtCore.SIGNAL('changed()'), self.resetFileProxy, QtCore.Qt.QueuedConnection)
 		# Reset decoder and plot
 		self.resetFileProxy()
 		for obj1 in [self.dataTable,self.navigator,self.summaryPlot]:
@@ -444,7 +445,7 @@ class MainWindow(QtGui.QMainWindow):
 			self.server.connect()
 			live_uid=self.server.storage.test.live.get_uid()
 			if not live_uid:
-				logging.debug('No live_uid returnned')
+				logging.debug('No live_uid returned')
 				return False
 			live=getattr(self.server.storage.test,live_uid)
 			if not live.has_node('/conf'):

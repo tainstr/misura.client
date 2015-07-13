@@ -81,7 +81,8 @@ class Active(object):
 		
 		for p in 'current', 'type', 'handle', 'factory_default', 'attr', 'readLevel', 'writeLevel', 'name':
 			setattr(self, p, prop[p])
-		self.readonly=(self.type=='ReadOnly') or ('ReadOnly' in self.attr) or (self.remObj._writeLevel<self.writeLevel)
+		write_level=getattr(self.remObj,'_writeLevel',5)
+		self.readonly=(self.type=='ReadOnly') or ('ReadOnly' in self.attr) or (write_level<self.writeLevel)
 		
 		self.hard='Hard' in self.attr
 		self.hot='Hot' in self.attr
@@ -208,9 +209,9 @@ class ActiveObject(Active, QtCore.QObject):
 	def __init__(self, server, remObj, prop, parent=None, context='Option'):
 		Active.__init__(self, server, remObj, prop, context)
 		QtCore.QObject.__init__(self, parent=parent)
-		self.connect(self, QtCore.SIGNAL('destroyed()'), self.unregister)
-		self.connect(self, QtCore.SIGNAL('selfchanged'), self._get)
-		self.connect(self, QtCore.SIGNAL('selfchanged()'), self._get)
+		self.connect(self, QtCore.SIGNAL('destroyed()'), self.unregister, QtCore.Qt.QueuedConnection)
+		self.connect(self, QtCore.SIGNAL('selfchanged'), self._get, QtCore.Qt.QueuedConnection)
+		self.connect(self, QtCore.SIGNAL('selfchanged()'), self._get, QtCore.Qt.QueuedConnection)
 		
 	def emit(self, *a, **k):
 		try:
@@ -301,9 +302,9 @@ class ActiveWidget(Active, QtGui.QWidget):
 		self.label_widget=LabelWidget(self) # Info label
 		self.emenu=QtGui.QMenu(self) 
 		self.build_extended_menu()
-		self.connect(self, QtCore.SIGNAL('destroyed()'), self.unregister)
-		self.connect(self, QtCore.SIGNAL('selfchanged'), self._get)
-		self.connect(self, QtCore.SIGNAL('selfchanged()'), self._get)
+		self.connect(self, QtCore.SIGNAL('destroyed()'), self.unregister, QtCore.Qt.QueuedConnection)
+		self.connect(self, QtCore.SIGNAL('selfchanged'), self._get, QtCore.Qt.QueuedConnection)
+		self.connect(self, QtCore.SIGNAL('selfchanged()'), self._get, QtCore.Qt.QueuedConnection)
 		self.connect(self, QtCore.SIGNAL('selfhide()'), self.hide)
 		self.connect(self, QtCore.SIGNAL('selfshow()'), self.show)
 		self.menu_timer=QtCore.QTimer(parent=self)

@@ -71,6 +71,7 @@ class KidRegistry(QtCore.QThread):
 		else:
 			logging.debug('%s %s', 'KidRegistry.set_manager set to None', man)
 		if old_stream:
+			self.stream=True
 			self.start()
 	
 	@property

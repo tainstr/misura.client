@@ -30,7 +30,7 @@ class MeasureInfo(QtGui.QTabWidget):
 		self.addTab(self.results, 'Results') #Add a tab to correct inizialization og qTabWidget
 		self.nobj=widgets.ActiveObject(self.server, self.remote.measure, self.remote.measure.gete('nSamples'), parent=self)
 		self.nobj.register()
-		self.connect(self.nobj, QtCore.SIGNAL('changed()'), self.refreshSamples)
+		self.connect(self.nobj, QtCore.SIGNAL('changed()'), self.refreshSamples, QtCore.Qt.QueuedConnection)
 		self.connect(self, QtCore.SIGNAL("currentChanged(int)"), self.tabChanged)
 		self.connect(self, QtCore.SIGNAL("currentChanged(int)"), self.refreshSamples)
 		
