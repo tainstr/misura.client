@@ -25,14 +25,14 @@ class HookItem(object):
 	def mouseMoveEvent(self, event):
 		"""Each time the point is moved, calls the hook function."""
 		self.hook()
-		return QtGui.QGraphicsEllipseItem.mouseMoveEvent(self, event)
+		return super(HookItem,self).mouseMoveEvent(event)
 	def mouseReleaseEvent(self, event):
 		self.hookRelease()
-		return QtGui.QGraphicsEllipseItem.mouseReleaseEvent(self, event)
+		return super(HookItem,self).mouseReleaseEvent(event)
 	def mousePressEvent(self, event):
 		self.hook()
 		self.hookPress()
-		return QtGui.QGraphicsEllipseItem.mousePressEvent(self, event)
+		return super(HookItem,self).mousePressEvent(event)
 		
 	def width(self):
 		return self.rect().width()
