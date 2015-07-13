@@ -28,7 +28,7 @@ class aButton(ActiveWidget):
 		msg=QtGui.QMessageBox( parent=self)
 		msg.setWindowTitle(_('Operation Result'))
 		msg.setText(_('Result for option "{}"').format(self.prop['name']))
-		msg.setInformativeText(r)
+		msg.setInformativeText(str(r))
 		if more:
 			msg.setDetailedText(r1)
 		return msg
