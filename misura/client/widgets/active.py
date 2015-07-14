@@ -72,6 +72,7 @@ class Active(object):
 	current=None
 	"""Current server-side value"""
 	unit=None
+	prop=None
 	def __init__(self, server, remObj, prop, context='Option', connect=True):
 		self._lock=threading.Lock()
 		self.server=server
@@ -316,6 +317,8 @@ class ActiveWidget(Active, QtGui.QWidget):
 	def unit(self):
 		"""Get measurement unit for this label"""
 		# First check the client-side unit
+		if not self.prop:
+			return False
 		u=self.prop.get('csunit',False)
 		if u in ['', 'None',None, False]: u=False
 		if not u:

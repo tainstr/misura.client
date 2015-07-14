@@ -15,7 +15,7 @@ from PyQt4 import QtGui, QtCore
 
 
 class SavePlotMenu(QtGui.QMenu):
-	"""Available object versions menu"""
+	"""Available embedded plots menu"""
 	plotChanged=QtCore.pyqtSignal(('QString'))
 	current_plot_id=False
 	doc=False
@@ -94,13 +94,14 @@ class SavePlotMenu(QtGui.QMenu):
 		text=cStringIO.StringIO()
 		self.doc.saveToFile(text)
 		text=text.getvalue()
+		
 		ci=document.CommandInterface(self.doc)
 		tmp='tmp_veusz_render.jpg'
 		ci.Export(tmp,page=page)
 		render=open(tmp,'rb').read()
 		if not len(render):
-                        logging.debug('Failed rendering')
-                        render=False
+			logging.debug('Failed rendering')
+			render=False
 		r=self.proxy.save_plot(text, plot_id=plot_id, title=name,render=render,render_format='jpg')
 		os.remove(tmp)
 		return r
