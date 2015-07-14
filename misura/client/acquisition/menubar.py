@@ -57,6 +57,8 @@ class MenuBar(QtGui.QMenuBar):
 		self.actLogout.setEnabled(False)
 		self.actShutdown=self.connectTo.addAction(_('Shutdown'), self.shutdown)
 		self.actShutdown.setEnabled(False)
+		self.actRestart=self.connectTo.addAction(_('Restart'), self.restart)
+		self.actRestart.setEnabled(False)
 	
 	def set_archive_mode(self):
 		self.connectTo=QtGui.QMenu()
@@ -80,7 +82,11 @@ class MenuBar(QtGui.QMenuBar):
 		
 	def shutdown(self):
 		QtGui.QMessageBox.information(self, 'Shutting Down',
-			'Server is shutting down:\n %r' % network.manager.remote.shutdown())		
+			'Server is shutting down:\n %r' % network.manager.remote.shutdown())	
+		
+	def restart(self):
+		QtGui.QMessageBox.information(self, 'Shutting Down',
+			'Server is restarting:\n %r' % network.manager.remote.restart())	
 
 	def getConnection(self, srv):
 		LoginWindow(srv.addr, srv.user, srv.password, parent=self).exec_()
@@ -118,6 +124,7 @@ class MenuBar(QtGui.QMenuBar):
 			self.instruments.setEnabled(True)
 			self.actLogout.setEnabled(True)
 			self.actShutdown.setEnabled(True)
+			self.actRestart.setEnabled(True)
 			self.settings.setEnabled(True)
 		logging.debug('%s %s', 'lstInstruments', self.lstInstruments)
 		
