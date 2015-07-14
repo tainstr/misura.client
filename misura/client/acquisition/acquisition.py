@@ -27,9 +27,6 @@ from .measureinfo import MeasureInfo
 from .controls import Controls, MotionControls
 from .delay import DelayedStart 
 
-# Synchronization stuff
-from .. import sync
-
 from .. import graphics
 from ..database import UploadThread
 from ..filedata import RemoteFileProxy 

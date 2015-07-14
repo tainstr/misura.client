@@ -40,8 +40,10 @@ class ZoomAxesPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		x=fields['x']
 		# Apply zoom on all axes:
 		for ax in g.children:
-			if ax.typename!='axis': continue
-			if not x and ax.settings.direction=='horizontal': continue
+			if ax.typename not in ('axis','axis-function'): 
+				continue
+			if not x and ax.settings.direction=='horizontal': 
+				continue
 			if z==0:
 				self.toset(ax,'min','Auto')
 				self.toset(ax,'max','Auto')

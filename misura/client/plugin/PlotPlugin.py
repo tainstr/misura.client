@@ -98,7 +98,7 @@ class PlotDatasetPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 				create=False
 				break
 		if create:
-			preop.append(document.OperationWidgetAdd(gobj,'axis',name=yAxis,direction='vertical'))		
+			preop.append(document.OperationWidgetAdd(gobj,'axis-function',name=yAxis,direction='vertical'))		
 		
 		# Create graph and axis (if needed)
 		logging.debug('%s %s', 'applying operations', preop)

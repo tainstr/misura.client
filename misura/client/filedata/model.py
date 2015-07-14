@@ -434,14 +434,12 @@ class DocumentModel(QtCore.QAbstractItemModel):
 		return act
 	
 	def matching(self,pt):
-		"""Get the matching axes list"""
-		s=self.doc.resolveFullSettingPath(pt+'/match')
-		m=s.get()
-		if m=='':			m=[]
-		elif ',' in m:		m=m.split(',')
-		elif ';' in m:		m=m.split(';')
-		else: 				m=[m]	
-		return m
+		"""Get the matching ax"""
+		s=self.doc.resolveFullSettingPath(pt+'/linked')
+		if not s.get():
+			return ''
+		s=self.doc.resolveFullSettingPath(pt+'/linkedaxis')
+		return s.get()
 	
 	def build_axes_menu(self, menu):
 		"""Builds a two-level hierarchy from all visible axes in a plot. 
@@ -451,7 +449,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
 		menu.clear()
 		axs=self.plots['axis'].keys()
 		logging.debug('%s %s', 'AXES', axs)
-		#TODO: generalize
 		axmap={}
 		axs1=[] # First level (no match setting)
 		axs2={}	# Second level (matching)
@@ -461,31 +458,38 @@ class DocumentModel(QtCore.QAbstractItemModel):
 			if not pt.startswith(self.page): 
 				logging.debug('%s %s %s', 'Ax: Other page', pt, self.page)
 				continue
-			lst=self.matching(pt)
-			if len(lst)==0:
-				axmap[pt]=menu.addMenu(pt.replace(self.page+'/',''))
+			sp=pt.split('/')
+			axname=sp.pop(-1)
+			basename=('/'.join(sp))
+#  			axmap[pt]=menu.addMenu(axname)
+			m=self.matching(pt)
+			if m=='':
 				axs1.append(pt)
-				continue
-			axs2[pt]=lst
-			
+			else:
+				pt0=basename+'/'+m
+				axs2[pt]=pt0
+				if pt0 in axs1: axs1.remove(pt0)
+				
+		for pt in axs1:
+			axname=pt.split('/')[-1]
+			axmap[pt]=menu.addMenu(axname)
+		
 		# Populate second-level menu with assigned
-		for pt2,lst in axs2.iteritems():
-			# Add the matched ax to each other first-level matching ax
-			for pt in lst:
-				# Skip if not first-level
-				if not axmap.has_key(pt): 
-					continue
-				func=functools.partial(self.match_axes,pt,pt2)
-				act=axmap[pt].addAction(pt2.replace(self.page+'/',''),func)
-				act.setCheckable(True)
-				act.setChecked(True)
+		for pt2,pt in axs2.iteritems():
+			# Add the matched ax to the first-level matching ax
+			func=functools.partial(self.match_axes,pt2,pt)
+			act=axmap[pt].addAction(pt2.split('/')[-1],func)
+			act.setCheckable(True)
+			act.setChecked(True)
 			
 		# Add unassigned to second level menus
-		for pt,menu in axmap.iteritems():
+		for pt,submenu in axmap.iteritems():
+			if pt not in axs1:
+				continue
 			for pt1 in axs1:
 				if pt==pt1: continue
 				func=functools.partial(self.match_axes,pt,pt1)
-				act=menu.addAction(pt1.replace(self.page+'/',''),func)
+				act=submenu.addAction(pt1.split('/')[-1],func)
 				act.setCheckable(True)
 				act.setChecked(False)
 		#NOTICE: must keep these referenced by the caller
@@ -496,14 +500,22 @@ class DocumentModel(QtCore.QAbstractItemModel):
 		The first-level axis will remain first-level. 
 		The `second` will become `second`-level and will be listed 
 		in every other first-level axis referenced in its match setting."""
-		lst=self.matching(second)
-		logging.debug('%s %s %s %s', 'matching ', first, second, lst)
-		# Add match
-		if first not in lst:
-			lst.append(first)
-		# Remove match
+		
+		logging.debug('%s %s %s %s', 'matching ', first, second)
+		s=self.doc.resolveFullSettingPath(first+'/linked')
+		s1=self.doc.resolveFullSettingPath(first+'/linkedaxis')
+		ops=[]
+		if self.matching(first):
+			print 'Unsetting',first,second
+			ops.append(document.OperationSettingSet(s,False))
+			ops.append(document.OperationSettingSet(s1,''))
+			s.set(False)
+			s1.set('')
 		else:
-			lst.remove(first)
-		s=self.doc.resolveFullSettingPath(second+'/match')
-		s.set(', '.join(lst))
-
+			print 'Setting',first,second,self.matching(first)
+			ops.append(document.OperationSettingSet(s,True))
+			ops.append(document.OperationSettingSet(s1,second.split('/')[-1]))
+		self.doc.applyOperation(
+				document.OperationMultiple(ops, descr=_('Axis match')))
+		
+		
