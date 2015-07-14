@@ -10,6 +10,7 @@ import status
 
 class MeasureInfo(QtGui.QTabWidget):
 	"""Measurement and samples configuration"""
+	statusView=False
 	def __init__(self, remote, fixedDoc=False,  parent=None):
 		self.fromthermalCycleView=False
 		self.fixedDoc=fixedDoc
@@ -73,6 +74,8 @@ class MeasureInfo(QtGui.QTabWidget):
 			self.addTab(self.statusView, 'Status')
 			registry.system_kid_changed.connect(self.system_kid_slot)
 			self.up_isRunning()
+		else:
+			self.statusView=False
 		self.addTab(self.measureView, 'Measure')
 		self.addTab(self.thermalCycleView, 'Thermal Cycle')
 		logging.debug('%s %s', 'REFRESH SAMPLES', self.remote.measure['nSamples'])
@@ -90,7 +93,10 @@ class MeasureInfo(QtGui.QTabWidget):
 			self.up_isRunning()
 		
 	def up_isRunning(self):
-		if registry.values.get('/isRunning',False):
+		val=registry.values.get('/isRunning',False)
+		if val:
 			self.tabBar().setStyleSheet("background-color:red;")
 		else:
 			self.tabBar().setStyleSheet("background-color:green;")
+		# Update isRunning widget
+		self.statusView.widgets['/isRunning']._get(val)
