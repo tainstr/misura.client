@@ -27,7 +27,7 @@ class TestTermalCycleRow(unittest.TestCase):
         rows = [[0, 0, 0, 0], [0, 100, 0, 0]]
 
         self.assertEqual(
-            [0, 100, 0, 0], self.thermal_cycle_row.update_row(rows, 1, time_mode))
+            [0, 0, 0, 0], self.thermal_cycle_row.update_row(rows, 1, time_mode))
 
     def test_rate_mode_with_eating_rate_set(self):
         time_mode = 'ramp'
@@ -35,7 +35,7 @@ class TestTermalCycleRow(unittest.TestCase):
         self.assertEqual(
             [5, 100, 20, 5], self.thermal_cycle_row.update_row(rows, 1, time_mode))
 
-        rows = [[0, 0, 0, 0], [5, 100, 20, 5], [0, 200, 0, 0]]
+        rows = [[0, 0, 0, 0], [5, 200, 20, 5], [0, 200, 0, 0]]
         self.assertEqual(
             [5, 200, 0, 0], self.thermal_cycle_row.update_row(rows, 2, time_mode))
 
@@ -63,7 +63,19 @@ class TestTermalCycleRow(unittest.TestCase):
         rows = [[0, 30, 0, 0], [0, 30, 0, 10]]
         self.assertEqual(
             [10, 30, 0, 10], self.thermal_cycle_row.update_row(rows, 1, time_mode))
+    def test_duration_should_not_change_when_rate_is_set_to_zero_and_temperature_does_not_change(self):
+        time_mode = 'ramp'
 
+        rows = [[0, 30, 0, 0], [10, 30, 0, 10]]
 
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+        self.assertEqual(
+            [10,30,0,10], self.thermal_cycle_row.update_row(rows, 1, time_mode))
+
+    def test_when_rate_is_set_to_zero_temperature_should_become_equal_to_previous_row(self):
+        time_mode = 'ramp'
+
+        rows = [[0,40,0,0], [10, 30, 0, 10]]
+        self.assertEqual(
+            [10, 40, 0, 10], self.thermal_cycle_row.update_row(rows, 1, time_mode))
+
+if __name__ == "__main__": unittest.main(verbosity=2)
