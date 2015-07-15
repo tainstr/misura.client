@@ -13,7 +13,7 @@ from misura.canon.csutil import next_point
 from .. import conf
 from .. import units
 from PyQt4 import QtGui, QtCore
-from thermal_cycle_row import ThermalCycleRow
+import thermal_cycle_row
 
 
 def clean_curve(dat, events=True):
@@ -167,13 +167,6 @@ class TimeSpinBox(QtGui.QDoubleSpinBox):
             logging.debug('%s %s %s', 'invalid', inp, pos)
             return (QtGui.QValidator.Intermediate, inp, pos)
 
-# Nota: colCHK deve sempre essere l'ultima colonna (indice + alto)
-colTIME = 0
-colTEMP = 1
-colRATE = 2
-colDUR = 3
-colCHK = 4
-
 
 class ThermalCurveModel(QtCore.QAbstractTableModel):
 
@@ -193,7 +186,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         return len(self.dat)
 
     def columnCount(self, index=QtCore.QModelIndex()):
-        return colCHK  # +1 for chk
+        return thermal_cycle_row.colCHK  # +1 for chk
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
         if not index.isValid() or not (0 <= index.row() < self.rowCount()):
@@ -202,7 +195,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         col = index.column()
         if role == QtCore.Qt.DisplayRole:
             r = row[index.column()]
-            if col == colTEMP:
+            if col == thermal_cycle_row.colTEMP:
                 if isinstance(r, basestring):
                     r = r.replace('>', 'Event: ')
             return r
@@ -214,7 +207,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         if not index.isValid():
             return QtCore.Qt.ItemIsEditable
 
-        if (self.dat[row_index][0] < 0 and column_index != 1) or (row_index == 0 and column_index != colTEMP):
+        if (self.dat[row_index][0] < 0 and column_index != 1) or (row_index == 0 and column_index != thermal_cycle_row.colTEMP):
             return QtCore.Qt.ItemIsEditable
 
         return QtCore.Qt.ItemFlags(QtCore.QAbstractTableModel.flags(self, index) | QtCore.Qt.ItemIsEditable)
@@ -222,7 +215,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
     def setData(self, index, value, role=QtCore.Qt.EditRole):
         irow = index.row()
         icol = index.column()
-        if not index.isValid() or irow < 0 or irow > self.rowCount() or icol < 0 or icol > colCHK:
+        if not index.isValid() or irow < 0 or irow > self.rowCount() or icol < 0 or icol > thermal_cycle_row.colCHK:
             logging.debug('%s %s %s', 'setData: invalid line', irow, icol)
             return False
         if isinstance(value, basestring) and (not value.startswith('>')):
@@ -237,7 +230,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.index(irow, 0),
                   self.index(self.rowCount(), self.columnCount()))
         # Emetto la durata totale del ciclo termico
-        self.emit(QtCore.SIGNAL("duration(float)"), self.dat[-1][colTIME])
+        self.emit(QtCore.SIGNAL("duration(float)"), self.dat[-1][thermal_cycle_row.colTIME])
         return True
 
     def insertRows(self, position, rows=1, index=QtCore.QModelIndex(), ini=False):
@@ -263,13 +256,13 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             return
         if role == QtCore.Qt.DisplayRole:
             return self.header[section]
-        elif role == QtCore.Qt.BackgroundRole:  # and section!=colCHK:
+        elif role == QtCore.Qt.BackgroundRole:  # and section!=thermal_cycle_row.colCHK:
             return QtGui.QBrush(QtGui.QColor(10, 200, 10))
 
     def mode_to(self, modename):
         self.mode = modename
         self.emit(QtCore.SIGNAL(
-            "headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, colCHK - 1)
+            "headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, thermal_cycle_row.colCHK - 1)
         self.sigModeChanged.emit()
 
     def mode_points(self):
@@ -311,7 +304,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
                   self.index(self.rowCount(), self.columnCount()))
 
     def updateRow(self, irow):
-        self.dat[irow] = ThermalCycleRow().update_row(
+        self.dat[irow] = thermal_cycle_row.ThermalCycleRow().update_row(
             self.dat, irow, self.mode)
 
     def curve(self, events=True):
@@ -327,9 +320,9 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
         QtGui.QItemDelegate.__init__(self, parent)
 
     def timeLimits(self, index):
-        pre = index.model().index(index.row() - 1, colTIME)
+        pre = index.model().index(index.row() - 1, thermal_cycle_row.colTIME)
         pre = index.model().data(pre)
-        post = index.model().index(index.row() + 1, colTIME)
+        post = index.model().index(index.row() + 1, thermal_cycle_row.colTIME)
         post = index.model().data(post)
         if post == 0:
             post = params.MAX
@@ -339,7 +332,7 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
         mod = index.model()
         val = mod.data(index)
         wg = QtGui.QItemDelegate.createEditor(self, parent, option, index)
-        if index.column() == colTIME:
+        if index.column() == thermal_cycle_row.colTIME:
             mod.mode_points()
             if index.row() == 0:
                 return QtGui.QLabel('Initial Time', parent)
@@ -349,7 +342,7 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
                 wg.setReadOnly()
             else:
                 wg.setRange(pre, post)
-        elif index.column() == colTEMP:
+        elif index.column() == thermal_cycle_row.colTEMP:
             if isinstance(val, basestring):
                 # Read-only events
                 return None
@@ -358,14 +351,14 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
             wg.setRange(0, 1750)
             wg.setSuffix(u' \xb0C')
 
-        elif index.column() == colRATE:
+        elif index.column() == thermal_cycle_row.colRATE:
             mod.mode_ramp()
             if index.row() == 0:
                 return QtGui.QLabel('undefined', parent)
             wg = QtGui.QDoubleSpinBox(parent)
             wg.setRange(-500, 80)
             wg.setSuffix(u' \xb0C/min')
-        elif index.column() == colDUR:
+        elif index.column() == thermal_cycle_row.colDUR:
             mod.mode_dwell()
             if index.row() == 0:
                 return QtGui.QLabel('undefined', parent)
@@ -377,12 +370,12 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
     def setEditorData(self, editor, index):
         # First row is not editable
         col = index.column()
-        if index.row() == 0 and col in [colTIME, colCHK]:
+        if index.row() == 0 and col in [thermal_cycle_row.colTIME, thermal_cycle_row.colCHK]:
             logging.debug('%s', 'row0 is not editable')
             return
         mod = index.model()
         val = mod.data(index)
-        if colTIME <= col <= colDUR:
+        if thermal_cycle_row.colTIME <= col <= thermal_cycle_row.colDUR:
             if hasattr(editor, 'setValue'):
                 editor.setValue(val)
             else:
@@ -393,7 +386,7 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
     def setModelData(self, editor, model, index):
         col = index.column()
         # first row is not editable
-        if index.row() == 0 and col != colTEMP:
+        if index.row() == 0 and col != thermal_cycle_row.colTEMP:
             logging.debug(
                 '%s %s %s', 'setModelData: First row is not editable', index.row(), index.column())
             return

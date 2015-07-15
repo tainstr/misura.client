@@ -1,11 +1,17 @@
 from misura.canon.csutil import next_point
 
+# Nota: colCHK deve sempre essere l'ultima colonna (indice + alto)
+colTIME = 0
+colTEMP = 1
+colRATE = 2
+colDUR = 3
+colCHK = 4
 
 class ThermalCycleRow():
 
     def update_row(self, rows, row_index, mode):
         current_row = rows[row_index]
-        if isinstance(current_row[1], basestring):
+        if isinstance(current_row[colTEMP], basestring):
             return current_row
 
         next_row_index, next_row = next_point(rows, row_index - 1, -1)
@@ -26,7 +32,7 @@ class ThermalCycleRow():
             if heating_rate != 0:
                 duration = (temperature - next_temperature) / heating_rate
             else:
-                temperature = rows[row_index - 1][1]
+                temperature = rows[row_index - 1][colTEMP]
             time = next_time + duration
         elif mode == 'dwell':  # duration/temperature (Duration)
             if duration == 0:
