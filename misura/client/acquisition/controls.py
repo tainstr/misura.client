@@ -9,6 +9,7 @@ from ..live import registry
 from ..database import ProgressBar 
 
 from PyQt4 import QtGui, QtCore
+qm=QtGui.QMessageBox
 
 class Controls(QtGui.QToolBar):
 	"""Start/stop toolbar"""
@@ -33,8 +34,12 @@ class Controls(QtGui.QToolBar):
 		self.iniAct=self.addAction('New', self.new)
 		self.startAct=self.addAction('Start', self.start)
 		self.stopAct=self.addAction('Stop', self.stop)
-		
 		self.name=self.remote['devpath'].lower()
+		
+		if self.name!='kiln':
+			self.stopAct=self.addAction('Cool', self.stop_kiln)
+		
+		
 		logging.debug('%s %s', 'Controls: ', self.name)
 		if self.name=='post':
 			self.addAction('Machine Database', parent.showIDB)
@@ -113,7 +118,7 @@ class Controls(QtGui.QToolBar):
 	def warning(self,title,msg=False):
 		"""Display a warning message box and update actions"""
 		if not msg: msg=title
-		QtGui.QMessageBox.warning(self, title, msg)
+		qm.warning(self, title, msg)
 		self.updateActions()
 		
 	_prog=False
@@ -147,8 +152,8 @@ class Controls(QtGui.QToolBar):
 		self.started.emit()
 		if not self.mute:
 			self.emit(QtCore.SIGNAL('warning(QString,QString)'),
-					'Start Acquisition', 
-					'Result: '+msg)		
+					_('Start Acquisition'), 
+					_('Result: ')+msg)		
 
 	def start(self):
 		self.mainWin=self.parent()
@@ -158,11 +163,11 @@ class Controls(QtGui.QToolBar):
 		if not self.validate():
 			return False
 		if self.updateActions():
-			self.warning('Already running', 'Acquisition is already running. Nothing to do.')
+			self.warning(_('Already running'), _('Acquisition is already running. Nothing to do.'))
 			return False
 		self.isRunning=True
 		self._async(self._start)
-		self.show_prog("Starting new test")
+		self.show_prog(_("Starting new test"))
 		return True
 		
 	def _stop(self,mode):
@@ -183,27 +188,25 @@ class Controls(QtGui.QToolBar):
 		
 		if not mode:
 			self.emit(QtCore.SIGNAL('warning(QString,QString)'),
-					'Measurement data discarded!', \
-					'Current measurement was stopped and its data has been deleted. \n'+msg)
+				_('Measurement data discarded!'), \
+					_('Current measurement was stopped and its data has been deleted. \n')+msg)
 		else:
 			self.emit(QtCore.SIGNAL('warning(QString,QString)'),
-					'Measurement stopped and saved', \
-					'Current measurement was stopped and its data has been saved. \n'+msg)
+					_('Measurement stopped and saved'), \
+					_('Current measurement was stopped and its data has been saved. \n')+msg)
 		
 	def stop(self):
 		if not self.updateActions():
-			self.warning('Already stopped', 'No acquisition is running. Nothing to do.')
+			self.warning(_('Already stopped'), _('No acquisition is running. Nothing to do.'))
 			return
-		qm=QtGui.QMessageBox
 		if not self.mute:
-			btn=qm.question(self, 'Save the test',  'Do you want to save this measurement?', \
+			btn=qm.question(self, _('Save the test'),  _('Do you want to save this measurement?'), \
 			                               qm.Save|qm.Discard|qm.Abort, qm.Save)
 			if btn==qm.Abort:
-				qm.information(self, 'Nothing done.',  'Action aborted. The measurement maybe still running.')
+				qm.information(self, _('Nothing done.'),  _('Action aborted. The measurement maybe still running.'))
 				return False
 		else:
 			btn=qm.Discard
-			
 		self.isRunning=False
 		if btn==qm.Discard:
 			self.stopped_nosave.emit()
@@ -211,6 +214,23 @@ class Controls(QtGui.QToolBar):
 		else:
 			self._async(self._stop,True)
 		self.show_prog("Stopping current test")
+		
+	def stop_kiln(self):
+		"""Stop thermal cycle without interrupting the acquisition"""
+		# Disable auto-stop on thermal cycle end
+		self.remote.measure.setFlags('onKilnStopped',{'enabled':False})
+		self.server.kiln['analysis']=False
+		dur=self.remote.measure['duration']
+		elp=self.remote.measure['elapsed']
+		msg=_('Thermal cycle interrupted')
+		if dur>0:
+			rem=(dur*60-elp)/60.
+			qm.information(self,msg,
+						_('Thermal cycle interrupted.\nThe test will finish in {:.1f} minutes.').format(rem))
+		else:
+			self.warning(msg,
+					_('Thermal cycle interrupted, but no test termination is set: acquisition  may continue indefinitely. \nManually interrupt or set a maximum test duration.'))
+		
 		
 	def new(self):
 		self.parent().init_instrument()
