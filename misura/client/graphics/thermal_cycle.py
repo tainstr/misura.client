@@ -280,7 +280,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 				if ent is False: ent=row
 				t0,T0=ent
 				D=(t-t0)/60.
-				if T==T0: 
+				if T==T0 or D==0: 
 					R=0
 				else: 
 					R=(T-T0)/D

@@ -15,6 +15,7 @@ class Controls(QtGui.QToolBar):
 	"""Start/stop toolbar"""
 	mute=False
 	motor=False
+	coolAct=False
 	isRunning=None
 	"""Local running status"""
 	paused=False
@@ -37,7 +38,7 @@ class Controls(QtGui.QToolBar):
 		self.name=self.remote['devpath'].lower()
 		
 		if self.name!='kiln':
-			self.stopAct=self.addAction('Cool', self.stop_kiln)
+			self.coolAct=self.addAction('Cool', self.stop_kiln)
 		
 		
 		logging.debug('%s %s', 'Controls: ', self.name)
@@ -83,6 +84,8 @@ class Controls(QtGui.QToolBar):
 		r=rem['isRunning']
 		r=bool(r)
 		self.stopAct.setEnabled(r)
+		if self.coolAct:
+			self.coolAct.setEnabled(r)
 		self.startAct.setEnabled(r^1)
 		self.iniAct.setEnabled(r^1)
 		if self.isRunning is not None and self.isRunning!=r:

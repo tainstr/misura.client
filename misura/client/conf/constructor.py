@@ -157,7 +157,11 @@ class Interface(QtGui.QTabWidget):
 		self.server=server
 		self.remObj=remObj
 		if not prop_dict: 
+			self.remObj.connect()
 			prop_dict=self.remObj.describe()
+		if not prop_dict:
+			logging.critical('Impossible to get object description %s', self.remObj._Method__name)
+			return
 		self.sections=orgSections(prop_dict)
 		self.prop_dict=prop_dict
 		self.name=''
