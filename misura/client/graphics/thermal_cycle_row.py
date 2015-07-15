@@ -1,11 +1,9 @@
 from misura.canon.csutil import next_point
 
-# Nota: colCHK deve sempre essere l'ultima colonna (indice + alto)
 colTIME = 0
 colTEMP = 1
 colRATE = 2
 colDUR = 3
-colCHK = 4
 
 class ThermalCycleRow():
 
