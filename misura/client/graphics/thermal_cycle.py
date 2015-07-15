@@ -233,14 +233,14 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         self.emit(QtCore.SIGNAL("duration(float)"), self.dat[-1][thermal_cycle_row.colTIME])
         return True
 
-    def insertRows(self, position, rows=1, index=QtCore.QModelIndex(), ini=False):
+    def insertRows(self, position, rows=1, index=QtCore.QModelIndex(), values=False):
         logging.debug('%s %s %s %s', 'insertRows', position, rows, index.row())
         self.beginInsertRows(
             QtCore.QModelIndex(), position, position + rows - 1)
-        if not ini:
-            ini = [0] * self.columnCount()
+        if not values:
+            values = [0] * self.columnCount()
         for row in range(rows):
-            self.dat.insert(position + row, ini)
+            self.dat.insert(position + row, values)
         self.endInsertRows()
         return True
 
