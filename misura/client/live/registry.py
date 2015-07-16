@@ -30,6 +30,10 @@ class KidRegistry(QtCore.QThread):
 	#TODO: add queued_kids, a way to asynchronous one-time-update 
 	system_kid_changed=QtCore.pyqtSignal(str)
 	"""Signal emitted when a system kid changes."""
+	conn_error=QtCore.pyqtSignal(int)
+	"""Signal emitted when connection errors counter changes."""
+	connection_error_count=0
+	max_connection_errors=0
 	def __init__(self):
 		QtCore.QThread.__init__(self)
 		self.rid={}
@@ -80,6 +84,7 @@ class KidRegistry(QtCore.QThread):
 
 	@property
 	def tasks(self):
+		"""Return local tasks widget"""
 		if not self.taskswg:
 			return False
 		return self.taskswg.tasks
@@ -175,7 +180,7 @@ class KidRegistry(QtCore.QThread):
 		r = self.obj.mapdate(request)
 		if not r or r is None:
 			logging.debug('%s', 'KidRegistry.update_all SKIPPING')
-			return []
+			return False
 		idx, reply = r
 		# Decode the reply
 		nt = self.obj.time()
@@ -208,11 +213,15 @@ class KidRegistry(QtCore.QThread):
 	
 	@lockme
 	def updateLog(self):
-		ltime, buf=self.obj.get_log(self.log_time)
-		if ltime<=self.log_time: return
+		r=self.obj.get_log(self.log_time)
+		if r is None:
+			return False
+		ltime, buf=r
+		if ltime<=self.log_time: return True
 		self.log_time=ltime
 		self.log_buf+=buf
 		self.emit(QtCore.SIGNAL('log()'))
+		return True
 
 	def setInterval(self, ms):
 		"""Change update interval"""
@@ -224,16 +233,17 @@ class KidRegistry(QtCore.QThread):
 		if self.obj is False:
 			if not self.manager:
 				logging.debug('%s', 'KidRegistry.control_loop: No manager registered.')
-				return False
+				return True
 			if not self.manager.remote:
 # 				print 'KidRegistry.control_loop: no remote manager'
-				return False
+				return True
 			self.obj=self.manager.remote.copy()
 			self.obj.connect()
 			self.emit(QtCore.SIGNAL('set_server(PyQt_PyObject)'), self.obj)
 		if not net.connected:
 			logging.debug('%s', 'KidRegistry.control_loop: Not connected')
-			return False
+			return True
+		self.obj._reg=self
 		if self.doc and (self.doc is not self.lastdoc):
 			if self.doc.proxy:
 				self.proxy=self.doc.proxy.copy()
@@ -247,9 +257,12 @@ class KidRegistry(QtCore.QThread):
 				self.doc.update(proxy=self.proxy)
 		else:
 			self.taskswg.sync.loop(self.obj)
-		self.updateLog()
-		self.update_all()
-		return True
+		r=True
+		if not self.updateLog():
+			r=False
+		if self.update_all() is False:
+			r=False
+		return r
 
 	def run(self):
 		"""Execution entry for the registry thread.
@@ -270,10 +283,15 @@ class KidRegistry(QtCore.QThread):
 			if d>0:	sleep(d)
 			t0=t
 			try:
-				self.control_loop()
+				# Everything good
+				if self.control_loop():
+					self.connection_error(count=-1)
+				else:
+					self.connection_error()
 			except:
 				logging.debug(format_exc())
 				sleep(1)
+				self.connection_error()
 		logging.debug('%s %s', 'KidRegistry.run END', self.stream)
 
 	
@@ -290,4 +308,30 @@ class KidRegistry(QtCore.QThread):
 			self.stream=False
 			if self.isRunning():
 				self.wait(1)
+	
+	def connection_error(self,count=1):
+		"""Increase or decrease connection error counter"""
+		old=self.connection_error_count
+		if count>0:
+			self.connection_error_count+=count
+		else:
+			self.connection_error_count/=2
+			self.connection_error_count-=1
+		print 'CONN ERRORS',old,self.connection_error_count, self.max_connection_errors
+		# Reset
+		if self.connection_error_count<=0:
+			self.connection_error_count=0
+			self.max_connection_errors=0
+			self.tasks.done('Connection errors')
+			return
+		# Detect new error sequence
+		if self.connection_error_count > self.max_connection_errors:
+			self.max_connection_errors=self.connection_error_count
+			self.tasks.jobs(self.connection_error_count,'Connection errors')
+		# Notify changes
+		if old!=self.connection_error_count:
+			self.tasks.job(1+self.max_connection_errors-self.connection_error_count,'Connection errors')
+			self.conn_error.emit(self.connection_error_count)
 
+			
+		

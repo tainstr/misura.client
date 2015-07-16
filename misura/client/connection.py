@@ -7,6 +7,7 @@ from misura.client import _
 import network
 from clientconf import confdb
 from live import registry
+import socket
 
 from misura.canon.logger import Log as logging
 
@@ -21,6 +22,9 @@ def addrConnection(addr,user=False,password=False):
 	lw=LoginWindow(addr, user, password, globalconn=False)
 	try:
 		login=lw.tryLogin(user, password)
+	except socket.errno.ECONNREFUSED:
+		print 'Connection refused'
+		raise
 	except: 
 		login=False
 	if not login: 
@@ -34,6 +38,9 @@ class Inc(object):
 		return self.n
 
 class LoginWindow(QtGui.QDialog):
+	obj=False
+	login_failed=QtCore.pyqtSignal()
+	login_succeeded=QtCore.pyqtSignal()
 	def __init__(self, addr, user='username', password='password', globalconn=True, parent=None, context='Local'):
 		QtGui.QDialog.__init__(self, parent)
 		self.setWindowTitle('Login Required')
@@ -73,9 +80,13 @@ class LoginWindow(QtGui.QDialog):
 		save=bool(self.ckSave.checkState())
 		st,self.obj=self.fConnect(self.addr, user, password, save)
 		if st:
+			self.login_succeeded.emit()
 			self.done(0)
 			return self.obj
-		elif not ignore:
+		else:
+			self.login_failed.emit()
+		if not ignore:
+			self.obj=False
 			msg='Error'
 			if self.obj is not None:
 				msg=self.obj._error

@@ -5,8 +5,12 @@ import select
 import socket
 from time import sleep
 from traceback import format_exc
-from PyQt4 import QtCore
 
+try:
+	from PyQt4 import QtCore
+except:
+	QtCore=None
+	
 from info import ServerInfo
 
 try:
@@ -17,6 +21,7 @@ except:
 regtype='_https._tcp'
 timeout  = 2
 
+#FIXME: should be qt-independent and run from live.KidRegistry!
 class NetworkManager(QtCore.QThread):
 	def __init__(self):
 		self.scan=True
@@ -48,7 +53,6 @@ class NetworkManager(QtCore.QThread):
 		logging.debug('%s %s', 'query_record_callback', sdRef)
 		self.queue.remove(sdRef)
 		if errorCode != pybonjour.kDNSServiceErr_NoError:
-			logging.debug('%s %s %s', 'IP NOT FOUND:', fullname, txtRecord[1::2][::-1])
 			return 
 		ip=socket.inet_ntoa(rdata) #IP
 		logging.debug('%s %s %s', 'Searching', fullname, self.resolved)

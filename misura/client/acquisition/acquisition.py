@@ -101,15 +101,33 @@ class MainWindow(QtGui.QMainWindow):
 		w=getattr(self, w,False)
 		if w: w.deleteLater()
 				
-	def set_addr(self,addr):
-		"""Open server by address"""
-		logging.debug('MainWindow.set_addr %s',addr)
-		s=connection.addrConnection(addr)
-		network.manager.set_remote(s)
-		registry.set_manager(network.manager)
-		registry.toggle_run(True)
-		self.setServer(s)
 	
+	def set_addr(self,addr):
+		logging.debug('MainWindow.set_addr %s',addr)
+		user,password=confdb.getUserPassword(addr)
+		self.login_window=connection.LoginWindow(addr, user, password, globalconn=False)
+		self.login_window.login_failed.connect(self.retry_login,QtCore.Qt.QueuedConnection)
+		self.login_window.login_succeeded.connect(self.succeed_login,QtCore.Qt.QueuedConnection)
+		r=widgets.RunMethod(self.login_window.tryLogin, user, password, addr)
+		r.pid='Connecting to '+addr
+		QtCore.QThreadPool.globalInstance().start(r)
+		
+	def retry_login(self):
+		"""Called when set_addr fails"""
+		self.login_window.exec_()
+		if not self.login.obj:
+			self.login_window.close()
+		
+	
+	def succeed_login(self):
+		"""Called on new address successfully connected"""
+		rem=self.login_window.obj
+		network.manager.set_remote(rem)
+		registry.set_manager(network.manager)
+		self.setServer(rem)
+		
+		
+		
 	_blockResetFileProxy=False
 	def setServer(self, server=False):
 		self._blockResetFileProxy=True
@@ -118,6 +136,7 @@ class MainWindow(QtGui.QMainWindow):
 		if not server:
 			network.manager.remote.connect()
 			self.server=network.manager.remote
+		registry.toggle_run(True)
 		self.serverDock.hide()
 		self.myMenuBar.close()
 		del self.myMenuBar
