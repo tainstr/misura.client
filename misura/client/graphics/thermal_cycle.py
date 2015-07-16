@@ -242,16 +242,15 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         self.emit(QtCore.SIGNAL("duration(float)"), self.dat[-1][thermal_cycle_row.colTIME])
         return True
 
-    def insertRows(self, position, rows=1, index=QtCore.QModelIndex(), values=False):
-        logging.debug('%s %s %s %s', 'insertRows', position, rows, index.row())
+    def insertRows(self, position, rows_number=1, index=QtCore.QModelIndex(), values=False):
+        logging.debug('%s %s %s %s', 'insertRows', position, rows_number, index.row())
         self.beginInsertRows(
-            QtCore.QModelIndex(), position, position + rows - 1)
+            QtCore.QModelIndex(), position, position + rows_number - 1)
         if not values:
             values = [0] * self.columnCount()
-        for row in range(rows):
-            self.dat.insert(position + row, values)
-            self.rows_models.insert(position + row, 'points')
-
+        for current_row_index in range(rows_number):
+            self.dat.insert(position + current_row_index, values)
+            self.rows_models.insert(position + current_row_index, 'ramp')
 
         self.endInsertRows()
         
@@ -459,9 +458,9 @@ class ThermalCurveTable(QtGui.QTableView):
     ### ADD/DEL ####
     def newRow(self):
         crow = self.selection.currentIndex().row()
-        if crow <= 1:
-            crow = 1
-        self.model().insertRows(crow + 1)
+        values = self.model().dat[crow][:]
+
+        self.model().insertRows(crow + 1, values=values)
 
     def insert_event(self, event):
         """Insert new `event` at current row"""
