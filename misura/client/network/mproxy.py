@@ -16,6 +16,41 @@ if hasattr(ssl, '_create_unverified_context'):
 	
 sep='/'
 
+def urlauth(url):
+	"""Decode and strip away the auth part of an url.
+	Returns user, password and clean url"""
+	i=url.find('://')+3
+	e=url.find('@',i)+1
+	auth=url[i:e][:-1]
+	user,passwd=auth.split(':')
+	url=url[:i]+url[e:]
+	return user,passwd,url
+
+
+def remote_dbdir(server):
+	"""Calc remote database directory path"""
+	# Filter away the misura.sqlite filename
+	p=server.storage.get_dbpath().split('/')[:-1]
+	r= '/'.join(p)
+	logging.debug('%s %s', 'remote_dbdir', r)
+	return r
+
+def dataurl(server,uid):
+	"""Calc HTTPS/data url for test file `uid` on `server`"""
+	t=getattr(server.storage.test,uid)
+	if not t: 
+		return False
+	p=t.get_path()
+	# Remove remote db path from file path
+	dbdir=remote_dbdir(server)
+	if p.startswith(dbdir):
+		p=p[len(dbdir):]
+	if not p.startswith('/'):
+		p='/'+p
+	# Prepend remote HTTPS/data path
+	url=server.data_addr+p
+	return url,p
+
 class _Method:
 	"""Override xmlrpclib._Method in order to introduce our own separator"""
 	def __init__(self, send, name):
@@ -72,6 +107,8 @@ def reconnect(func):
 		except:
 			logging.debug('UNHANDLED EXCEPTION', func)
 			logging.debug( format_exc())
+			if self._reg:
+				self._reg.connection_error()
 			raise
 		return r
 	return reconnect_wrapper
@@ -111,18 +148,20 @@ class MisuraProxy(object):
 	_ctime=time()
 	"""Time of last remote call - use for logging"""
 	_smartnaming=False
+	_reg=False
 	"""Triggers remote get/set requests when accessing to un-protected local attributes"""
 	_protect=set(['remObj','conn_addr','data_addr','to_root','toPath','root','connect','paste','copy','describe',
 				'info','lastlog','get','from_column','parent','child','call','devices','roledev'])
 	"""Local names which must not be accessed remotely"""
 	sep='/'
-	def __init__(self, addr='', user='',password='', proxy=False):
+	def __init__(self, addr='', user='',password='', proxy=False, reg=False):
 		self._lock=threading.Lock()
 		# Copy existing object
 		if proxy:
 			self.paste(proxy)
 		# Create new connection
 		else:
+			self._reg=reg
 			self.addr=addr
 			self.user=user
 			self.password=password
@@ -220,6 +259,7 @@ class MisuraProxy(object):
 		self.user=obj.user
 		self.password=obj.password
 		self.addr=obj.addr
+		self._reg=obj._reg
 		self._Method__name=obj.remObj._Method__name
 		self._parent=obj.parent()
 		self._remoteDict=obj._remoteDict
@@ -383,7 +423,7 @@ class MisuraProxy(object):
 		obj._parent=self
 		return obj
 	
-	@reconnect	
+	@reconnect
 	@lockme
 	def __call__(self, *args, **kwargs):
 		self._ctime=time()

@@ -1,26 +1,33 @@
  #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import hashlib, platform
+import select
+import socket
+from time import sleep, time
+from exceptions import BaseException
+from traceback import format_exc
+
+import httplib
+import xmlrpclib
+from xmlrpclib import ServerProxy, ProtocolError, SafeTransport
+import Cookie
+
 from misura.canon.logger import Log as logging
+from mproxy import MisuraProxy, reconnect, urlauth, dataurl, remote_dbdir
+
 import sip
 API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
 API_VERSION = 2
 for name in API_NAMES:
 	sip.setapi(name, API_VERSION)
-
-import hashlib, platform
-import select
-import socket
-from time import sleep, time
-from traceback import format_exc
-from xmlrpclib import ServerProxy, ProtocolError, SafeTransport
-import Cookie
 from PyQt4 import QtCore
-from exceptions import BaseException
+
+
 
 from info import ServerInfo
 from manager import NetworkManager
-from mproxy import MisuraProxy, reconnect
-from transfer_thread import TransferThread, urlauth, dataurl, remote_dbdir
+
+from transfer_thread import TransferThread
 
 global ess
 ess=ServerInfo()
@@ -33,8 +40,7 @@ ess.serial='ESimulServ'
 
 manager=NetworkManager()
 
-import httplib
-import xmlrpclib
+
 
 
 
@@ -68,6 +74,11 @@ def simpleConnection(addr,user='',password='',save=True):
 			obj._error='Authorization Failed!'
 		elif err.errcode==409:
 			obj._error='Another user is currently logged in.'
+		return False, obj
+	except socket.error as err:
+		logging.debug('FAILED simpleConnection at echo - socket error')
+		obj._error='Socket error [{}]: {}'.format(err.errno,err.strerror)
+		logging.debug(format_exc())
 		return False, obj
 	except:
 		logging.debug('FAILED simpleConnection at echo - unknown')

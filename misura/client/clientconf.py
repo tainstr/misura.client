@@ -359,14 +359,10 @@ class ConfDb(option.ConfigurationProxy,QtCore.QObject):
 		
 	def getUserPassword(self,addr):
 		"""Returns username and passwords used to login"""
-		if not self.conn: return '',''
-		addr=str(addr)
-		cursor=self.conn.cursor()
-		cursor.execute('select user,password from recent_server where address=?',(addr,))
-		r=cursor.fetchall()
-		if len(r)==0: 
-			return '',''
-		return r[0]
+		for entry in self.recent_server:
+			if entry[0]==addr:
+				return entry[1],entry[2]
+		return '', ''
 	
 settings=QtCore.QSettings(QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope, 'Expert System Solutions', 'Misura 4')
 #Set the configuration db

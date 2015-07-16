@@ -7,42 +7,8 @@ import logging
 
 from PyQt4 import QtCore
 from ...canon import indexer
+from mproxy import urlauth, dataurl
 
-
-def urlauth(url):
-	"""Decode and strip away the auth part of an url.
-	Returns user, password and clean url"""
-	i=url.find('://')+3
-	e=url.find('@',i)+1
-	auth=url[i:e][:-1]
-	user,passwd=auth.split(':')
-	url=url[:i]+url[e:]
-	return user,passwd,url
-
-
-def remote_dbdir(server):
-	"""Calc remote database directory path"""
-	# Filter away the misura.sqlite filename
-	p=server.storage.get_dbpath().split('/')[:-1]
-	r= '/'.join(p)
-	logging.debug('%s %s', 'remote_dbdir', r)
-	return r
-
-def dataurl(server,uid):
-	"""Calc HTTPS/data url for test file `uid` on `server`"""
-	t=getattr(server.storage.test,uid)
-	if not t: 
-		return False
-	p=t.get_path()
-	# Remove remote db path from file path
-	dbdir=remote_dbdir(server)
-	if p.startswith(dbdir):
-		p=p[len(dbdir):]
-	if not p.startswith('/'):
-		p='/'+p
-	# Prepend remote HTTPS/data path
-	url=server.data_addr+p
-	return url,p
 
 class TransferThread(QtCore.QThread):
 	dlStarted=QtCore.pyqtSignal(str,str)
