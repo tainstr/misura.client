@@ -14,6 +14,7 @@ from .. import conf
 from .. import units
 from PyQt4 import QtGui, QtCore
 import thermal_cycle_row
+import collections
 
 
 def clean_curve(dat, events=True):
@@ -176,11 +177,11 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
     def __init__(self, crv=None):
         QtCore.QAbstractTableModel.__init__(self)
         self.dat = []
+        self.rows_models = []
         header = []
         for s in ['Time', 'Temperature', 'Heating Rate', 'Duration']:
             header.append(_(s))
         self.header = header
-        self.mode = 'ramp'
 
     def rowCount(self, index=QtCore.QModelIndex()):
         return len(self.dat)
@@ -193,12 +194,28 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             return 0
         row = self.dat[index.row()]
         col = index.column()
+        
         if role == QtCore.Qt.DisplayRole:
             r = row[index.column()]
             if col == thermal_cycle_row.colTEMP:
                 if isinstance(r, basestring):
                     r = r.replace('>', 'Event: ')
             return r
+        
+        if role == QtCore.Qt.ForegroundRole:
+            modes_dict = collections.defaultdict(bool)
+            modes_dict[thermal_cycle_row.colTIME] = 'points'
+            modes_dict[thermal_cycle_row.colRATE] = 'ramp'
+            modes_dict[thermal_cycle_row.colDUR] = 'dwell'
+
+            current_row_mode = self.rows_models[index.row()]
+            current_column_mode = modes_dict[col]
+            has_to_be_highligthed = index.row() > 0 and current_row_mode == current_column_mode
+
+            if has_to_be_highligthed:
+                return QtGui.QBrush(QtCore.Qt.darkRed)
+
+            return None
 
     def flags(self, index):
         row_index = index.row()
@@ -214,16 +231,16 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 
     def setData(self, index, value, role=QtCore.Qt.EditRole):
         index_row = index.row()
-        icol = index.column()
-        if not index.isValid() or index_row < 0 or index_row > self.rowCount() or icol < 0 or icol > self.columnCount():
-            logging.debug('%s %s %s', 'setData: invalid line', index_row, icol)
+        index_column = index.column()
+        if not index.isValid() or index_row < 0 or index_row > self.rowCount() or index_column < 0 or index_column > self.columnCount():
+            logging.debug('%s %s %s', 'setData: invalid line', index_row, index_column)
             return False
         if isinstance(value, basestring) and (not value.startswith('>')):
             value = float(value)
         row = self.dat[index_row]
         logging.debug(
-            '%s %s %s %s %s', 'setData:', index_row, icol, value, row[icol])
-        row[icol] = value
+            '%s %s %s %s %s', 'setData:', index_row, index_column, value, row[index_column])
+        row[index_column] = value
         self.dat[index_row] = row
         for ir in range(index_row, self.rowCount()):
             self.updateRow(ir)
@@ -241,7 +258,11 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             values = [0] * self.columnCount()
         for row in range(rows):
             self.dat.insert(position + row, values)
+            self.rows_models.insert(position + row, 'points')
+
+
         self.endInsertRows()
+        
         return True
 
     def removeRows(self, position, rows=1, index=QtCore.QModelIndex()):
@@ -259,20 +280,20 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         elif role == QtCore.Qt.BackgroundRole:
             return QtGui.QBrush(QtGui.QColor(10, 200, 10))
 
-    def mode_to(self, modename):
-        self.mode = modename
+    def mode_to(self, modename, row):
+        self.rows_models[row] = modename
         self.emit(QtCore.SIGNAL(
             "headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, self.columnCount() - 1)
         self.sigModeChanged.emit()
 
-    def mode_points(self):
-        self.mode_to('points')
+    def mode_points(self, row):
+        self.mode_to('points', row)
 
-    def mode_ramp(self):
-        self.mode_to('ramp')
+    def mode_ramp(self, row):
+        self.mode_to('ramp', row)
 
-    def mode_dwell(self):
-        self.mode_to('dwell')
+    def mode_dwell(self, row):
+        self.mode_to('dwell', row)
 
     def setCurve(self, crv, progressBar=False):
         self.removeRows(0, self.rowCount())
@@ -305,7 +326,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 
     def updateRow(self, index_row):
         self.dat[index_row] = thermal_cycle_row.ThermalCycleRow().update_row(
-            self.dat, index_row, self.mode)
+            self.dat, index_row, self.rows_models[index_row])
 
     def curve(self, events=True):
         """Format table for plotting or transmission"""
@@ -333,7 +354,7 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
         val = mod.data(index)
         wg = QtGui.QItemDelegate.createEditor(self, parent, option, index)
         if index.column() == thermal_cycle_row.colTIME:
-            mod.mode_points()
+            mod.mode_points(index.row())
             if index.row() == 0:
                 return QtGui.QLabel('Initial Time', parent)
             wg = TimeSpinBox(parent)
@@ -352,14 +373,14 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
             wg.setSuffix(u' \xb0C')
 
         elif index.column() == thermal_cycle_row.colRATE:
-            mod.mode_ramp()
+            mod.mode_ramp(index.row())
             if index.row() == 0:
                 return QtGui.QLabel('undefined', parent)
             wg = QtGui.QDoubleSpinBox(parent)
             wg.setRange(-500, 80)
             wg.setSuffix(u' \xb0C/min')
         elif index.column() == thermal_cycle_row.colDUR:
-            mod.mode_dwell()
+            mod.mode_dwell(index.row())
             if index.row() == 0:
                 return QtGui.QLabel('undefined', parent)
             wg = TimeSpinBox(parent)
@@ -432,7 +453,7 @@ class ThermalCurveTable(QtGui.QTableView):
 # 		a.setEnabled(False)
         m.addAction(_('Remove current row'), self.delRow)
         m.addSeparator()
-        self.curveModel.mode_ramp()
+        # self.curveModel.mode_ramp(0)
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))

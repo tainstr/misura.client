@@ -4,6 +4,7 @@ colTIME = 0
 colTEMP = 1
 colRATE = 2
 colDUR = 3
+colMODE = 4
 
 class ThermalCycleRow():
 
