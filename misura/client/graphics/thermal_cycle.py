@@ -14,6 +14,7 @@ from .. import conf
 from .. import units
 from PyQt4 import QtGui, QtCore
 import thermal_cycle_row
+import thermal_cycle_flags
 import collections
 
 
@@ -218,16 +219,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             return None
 
     def flags(self, index):
-        row_index = index.row()
-        column_index = index.column()
-
-        if not index.isValid():
-            return QtCore.Qt.ItemIsEditable
-
-        if (self.dat[row_index][0] < 0 and column_index != 1) or (row_index == 0 and column_index != thermal_cycle_row.colTEMP):
-            return QtCore.Qt.ItemIsEditable
-
-        return QtCore.Qt.ItemFlags(QtCore.QAbstractTableModel.flags(self, index) | QtCore.Qt.ItemIsEditable)
+        return thermal_cycle_flags.execute(self, index)
 
     def setData(self, index, value, role=QtCore.Qt.EditRole):
         index_row = index.row()
