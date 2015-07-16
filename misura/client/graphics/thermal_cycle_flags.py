@@ -1,14 +1,20 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 from PyQt4 import QtCore
 import thermal_cycle_row
 
-def execute(self, index):
+def execute(thermal_curve_model, index):
 	row_index = index.row()
 	column_index = index.column()
 
 	if not index.isValid():
-	    return QtCore.Qt.ItemIsEditable
+	    return QtCore.Qt.ItemFlags(QtCore.Qt.NoItemFlags)
 
-	if (self.dat[row_index][0] < 0 and column_index != 1) or (row_index == 0 and column_index != thermal_cycle_row.colTEMP):
-	    return QtCore.Qt.ItemIsEditable
+	if (thermal_curve_model.dat[row_index][0] < 0 and column_index != 1) or (row_index == 0 and column_index != thermal_cycle_row.colTEMP):
+	    return QtCore.Qt.ItemFlags(QtCore.Qt.NoItemFlags)
 
-	return QtCore.Qt.ItemFlags(QtCore.QAbstractTableModel.flags(self, index) | QtCore.Qt.ItemIsEditable)
+	if (row_index > 0 and column_index == thermal_cycle_row.colTEMP and thermal_curve_model.dat[row_index][thermal_cycle_row.colRATE] == 0):
+		return QtCore.Qt.ItemFlags(QtCore.Qt.NoItemFlags)
+
+	return QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
