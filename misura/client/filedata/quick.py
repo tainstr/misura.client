@@ -223,7 +223,7 @@ class QuickOps(object):
 		"""Render video from `node`"""
 		from misura.client import video
 		sh=getFileProxy(node.linked.filename)
-		pt=node.path.replace(node.linked.prefix,'').replace('summary','')
+		pt = '/' + node.path.replace(node.linked.prefix,'').replace('summary','')
 		v=video.VideoExporter(sh,pt)
 		v.exec_()
 		sh.close()
