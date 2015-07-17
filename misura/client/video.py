@@ -16,7 +16,10 @@ import platform
 from PyQt4 import QtGui,QtCore
 from misura.client import _
 
-default_fourcc = cv.VideoWriter_fourcc('M', '4', 'S', '2')
+if 'Linux' in platform.platform():
+        default_fourcc = cv.VideoWriter_fourcc('M', '4', 'S', '2')
+else:
+        default_fourcc = -1
 
 #TODO: profile reconstruction. Use cvpolyfill
 def export(sh,frame='/hsm/sample0/frame', 
