@@ -27,13 +27,6 @@ class FakeTermalCurveModel():
 	def dat(self):
 		return self.fake_dat
 
-class FakeItemFlags(object):
-	def __init__(self, arg):
-		pass
-
-	def called(self):
-		return True
-		
 
 
 class TestTermalCycleFlags(unittest.TestCase):
