@@ -3,8 +3,10 @@
 """Pending tasks feedback"""
 from traceback import format_exc
 import functools
+import threading
 
 from misura.canon.logger import Log as logging
+from misura.canon.csutil import lockme
 from misura.client import _
 from misura.client.sync import SyncWidget
 
@@ -66,6 +68,7 @@ class LocalTasks(QtGui.QWidget):
 	sig_done0=QtCore.pyqtSignal()
 	def __init__(self, parent=None):
 		QtGui.QWidget.__init__(self, parent=parent)
+		self._lock=threading.Lock()
 		self.lay=QtGui.QHBoxLayout()
 		self.setLayout(self.lay)
 		self.setWindowTitle(_('Local Operations in Progress'))
@@ -95,15 +98,15 @@ class LocalTasks(QtGui.QWidget):
 		
 		self.prog={}
 		
-		self.connect(self,QtCore.SIGNAL('jobs(int)'),self._jobs)
-		self.connect(self,QtCore.SIGNAL('jobs(int,QString)'),self._jobs)
+		self.connect(self,QtCore.SIGNAL('jobs(int)'),self._jobs,  QtCore.Qt.QueuedConnection)
+		self.connect(self,QtCore.SIGNAL('jobs(int,QString)'),self._jobs,  QtCore.Qt.QueuedConnection)
 		
-		self.connect(self,QtCore.SIGNAL('job(int,QString,QString)'),self._job)
-		self.connect(self,QtCore.SIGNAL('job(int,QString)'),self._job)
-		self.connect(self,QtCore.SIGNAL('job(int)'),self._job)
+		self.connect(self,QtCore.SIGNAL('job(int,QString,QString)'),self._job, QtCore.Qt.QueuedConnection)
+		self.connect(self,QtCore.SIGNAL('job(int,QString)'),self._job, QtCore.Qt.QueuedConnection)
+		self.connect(self,QtCore.SIGNAL('job(int)'),self._job,  QtCore.Qt.QueuedConnection)
 		
-		self.sig_done.connect(self._done)
-		self.sig_done0.connect(self._done)
+		self.sig_done.connect(self._done, QtCore.Qt.QueuedConnection)
+		self.sig_done0.connect(self._done,  QtCore.Qt.QueuedConnection)
 		logging.debug('%s', 'LocalTasks initialized')
 		
 	def __len__(self):
@@ -154,7 +157,6 @@ class LocalTasks(QtGui.QWidget):
 		"""Thread-safe call for _jobs()"""
 		self.emit(QtCore.SIGNAL('jobs(int,QString)'),tot,pid)
 		
-	
 	def _job(self,step,pid='Operation',label=''):
 		"""Progress job `pid` to `step`, and display `label`. A negative step causes the bar to progress by 1."""
 		wg=self.prog.get(pid,False)
@@ -175,11 +177,11 @@ class LocalTasks(QtGui.QWidget):
 		self.emit(QtCore.SIGNAL('job(int,QString,QString)'),
 				step,pid,label)		
 	
+	@lockme
 	def _done(self,pid='Operation'):
 		"""Complete job `pid`"""
 		wg=self.prog.get(pid,False)
 		if not wg: 
-			logging.debug('%s %s', 'LocalTasks.done: no pid', pid)
 			return False
 		wg.hide()
 		del self.prog[pid]

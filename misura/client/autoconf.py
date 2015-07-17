@@ -17,24 +17,6 @@ right_cam_serial= 's61443503'
 flex_cam_serial='s61450503'
 micro_cam_serial='s191447500'
 
-# Camera names
-assert len(m.beholder.list())==4, 'Wrong camera identification'
-left_cam=getattr(m.beholder, left_cam_serial)
-left_cam['name']='Left'
-left_cam['autocrop']='Never'
-left_cam.save('default')
-right_cam=getattr(m.beholder, right_cam_serial)
-right_cam['name']='Right'
-right_cam['autocrop']='Never'
-right_cam.save('default')
-flex_cam=getattr(m.beholder, flex_cam_serial)
-flex_cam['name']='Flex'
-flex_cam['autocrop']='Never'
-flex_cam.save('default')
-micro_cam=getattr(m.beholder, micro_cam_serial)
-micro_cam['name']='Microscope'
-micro_cam.save('default')
-
 # Motor names
 b0=m.morla.idx0
 m_focus=b0.X
@@ -47,6 +29,28 @@ right_x=b0.board3.X
 right_y=b0.board3.Y
 right_ang=b0.board4.X
 
+
+# Camera names
+assert len(m.beholder.list())==4, 'Wrong camera identification'
+left_cam=getattr(m.beholder, left_cam_serial)
+left_cam['name']='Left'
+left_cam['autocrop']='Never'
+left_cam['clock']=26
+left_cam.save('default')
+right_cam=getattr(m.beholder, right_cam_serial)
+right_cam['name']='Right'
+right_cam['autocrop']='Never'
+right_cam['clock']=26
+right_cam.save('default')
+flex_cam=getattr(m.beholder, flex_cam_serial)
+flex_cam['name']='Flex'
+flex_cam['autocrop']='Never'
+flex_cam['clock']=26
+flex_cam.save('default')
+micro_cam=getattr(m.beholder, micro_cam_serial)
+micro_cam['name']='Microscope'
+micro_cam['clock']=92
+micro_cam.save('default')
 
 ######
 ## Motors configuration
@@ -69,6 +73,11 @@ def board_send_to_zero(board):
 		board_send_to_zero(dev)
 
 def find_limits(motor, name):
+#	if motor['sloPe']==8000:
+#		motor['sloPe']==3000
+	motor['sloPe']==100000
+	if motor['Rate']==800:
+		motor['Rate']=2000
 	motor['name']=name
 	print 'finding limits:', motor['fullpath']
 	motor['micro']='both ends'
@@ -109,17 +118,21 @@ def configure_motors():
 
 	b0.maxDaisy=5
 	# High speed motors
-	b0.Y.Rate=3000
-	b0.Y.sloPe=8000
-	b0.board1.Y.Rate=3000
-	b0.board1.Y.sloPe=8000
+	m_micro.Rate=3000
+	m_micro.sloPe=8000
+	m_flash.Rate=3000
+	m_flash.sloPe=100000
+	 
+	# Angulars  in full power
+	left_ang.mOde = 2
+	right_ang.mOde = 2
 	
 	# Safety zero positioning
 	board_send_to_zero(b0)
 	board_find_limits(b0, 'Focus', 'Microscope')
 	
 	board_find_limits(b0.board1, 'Left X', 'Left Y')
-
+	
 	board_find_limits(b0.board2, 'Left Angle', 'Kiln')
 
 	board_find_limits(b0.board3, 'Right X', 'Right Y')
@@ -134,7 +147,7 @@ def configure_motors():
 	print 'Horizontal motors'
 	starting_position(left_x, left_x['steps']/2, 'horizontal')
 	starting_position(right_x, right_x['steps']/2, 'horizontal')
-	starting_position(left_y, left_y['steps']/20, 'horizontal')
+	starting_position(left_y, left_y['steps']/10, 'horizontal')
 	starting_position(right_y, right_y['steps']/4, 'horizontal')
 
 	print 'Vertical motors'

@@ -317,7 +317,6 @@ class KidRegistry(QtCore.QThread):
 		else:
 			self.connection_error_count/=2
 			self.connection_error_count-=1
-		print 'CONN ERRORS',old,self.connection_error_count, self.max_connection_errors
 		# Reset
 		if self.connection_error_count<=0:
 			self.connection_error_count=0

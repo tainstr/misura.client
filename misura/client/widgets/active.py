@@ -311,7 +311,12 @@ class ActiveWidget(Active, QtGui.QWidget):
 		self.menu_timer=QtCore.QTimer(parent=self)
 		self.menu_timer.setSingleShot(True)
 		self.menu_timer.setInterval(500)
-		self.connect(self.menu_timer, QtCore.SIGNAL('timeout()'), self.do_hide_menu)
+		self.connect(self.menu_timer, QtCore.SIGNAL('timeout()'), self.do_hide_menu, QtCore.Qt.QueuedConnection)
+		
+	@lockme
+	def closeEvent(self, event):
+		self.menu_timer.stop()
+		return super(ActiveWidget, self).closeEvent(event)
 		
 	@property
 	def unit(self):
@@ -470,7 +475,6 @@ class ActiveWidget(Active, QtGui.QWidget):
 			w.hide()
 			w.close()
 			del w
-			
 
 	def emitHelp(self):
 		self.emit(QtCore.SIGNAL('help'), 0)
@@ -485,19 +489,6 @@ class ActiveWidget(Active, QtGui.QWidget):
 	def emitError(self, msg):
 		Active.emitError(self,msg)
 		self.emit(QtCore.SIGNAL('error(QString)'), msg)
-
-	def delWg(self, wg):
-		"""Demolisce il widget"""
-		idx=-1
-		wg=getattr(self, wg, False)
-		if wg:
-			idx=self.lay.indexOf(wg)
-			logging.debug('%s %s', 'del', idx)
-			wg.setVisible(False)
-			self.lay.removeWidget(wg)
-			wg.destroy()
-			del wg
-		return idx
 		
 	def showEvent(self, e):
 		self.register()
