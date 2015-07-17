@@ -97,7 +97,7 @@ class TransferThread(QtCore.QThread):
 		self.dlFinished.connect(self.task_end)
 		self.dlAborted.connect(self.task_end)
 		self.dlWaiting.connect(self.task_wait)
-		self.tasks.sig_done.connect(self.abort)
+		self.connect(self.tasks,QtCore.SIGNAL('sig_done(QString)'),self.abort,QtCore.Qt.QueuedConnection)
 		return True
 	
 	def prepare_opener(self,url):
@@ -114,6 +114,7 @@ class TransferThread(QtCore.QThread):
 	def download_url(self,url,outfile):
 		"""Download from url and save to outfile path"""
 		logging.debug('%s %s %s', 'download url', url, outfile)
+		self.aborted=False
 		self.prefix='Download: '
 		self.url=url
 		self.outfile=outfile
