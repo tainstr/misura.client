@@ -49,5 +49,6 @@ class Status(QtGui.QWidget):
 	def showEvent(self,event):
 		for kid,wg in self.widgets.iteritems():
 			if not wg.force_update:
-				wg.async_get()
+				wg.get()
+# 				wg.async_get()
 		return super(Status,self).showEvent(event)
