@@ -32,7 +32,6 @@ from ..database import UploadThread
 from ..filedata import RemoteFileProxy 
 
 
-
 from PyQt4 import QtGui, QtCore
 
 subWinFlags=QtCore.Qt.CustomizeWindowHint|QtCore.Qt.WindowTitleHint|QtCore.Qt.WindowMinMaxButtonsHint
