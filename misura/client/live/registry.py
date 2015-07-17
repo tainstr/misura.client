@@ -335,3 +335,4 @@ class KidRegistry(QtCore.QThread):
 
 			
 		
+
