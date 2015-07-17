@@ -298,7 +298,7 @@ class SyncWidget(QtGui.QTabWidget):
 	dbpath=False
 	def __init__(self,parent=None):
 		super(SyncWidget,self).__init__(parent)
-		self.transfer=TransferThread(self)
+		self.transfer=TransferThread(parent=self)
 		# Set local tasks manager
 		if parent:
 			self.transfer.set_tasks(parent.tasks)

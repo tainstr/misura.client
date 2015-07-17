@@ -33,7 +33,7 @@ class aFileList(aChooser):
 			return 
 		url=self.remObj.conn_addr+self.remObj['fullpath'][:-1] # remove trailing /
 		logging.debug('%s %s %s %s', 'Transfer target:', repr(url), n, self.handle)
-		self.transfer=TransferThread(url=url,outfile=n,post={'opt':self.handle})
+		self.transfer=TransferThread(url=url,outfile=n,post={'opt':self.handle},parent=self)
 		from ..live import registry
 		self.transfer.set_tasks(registry.tasks)
 		self.transfer.start()
