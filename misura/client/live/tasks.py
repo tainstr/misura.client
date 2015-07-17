@@ -64,8 +64,8 @@ class PendingTasks(QtGui.QWidget):
 class LocalTasks(QtGui.QWidget):
 	"""Global server 'progress' option widget. This is a RoleIO pointing to the real 'Progress'-type option being performed"""
 	ch=QtCore.pyqtSignal()
-	sig_done=QtCore.pyqtSignal(str)
-	sig_done0=QtCore.pyqtSignal()
+# 	sig_done=QtCore.pyqtSignal(str)
+# 	sig_done0=QtCore.pyqtSignal()
 	def __init__(self, parent=None):
 		QtGui.QWidget.__init__(self, parent=parent)
 		self._lock=threading.Lock()
@@ -83,7 +83,6 @@ class LocalTasks(QtGui.QWidget):
 		self.log.hide()
 		self.more=QtGui.QPushButton(_('Log'), parent=self)
 		self.connect(self.more, QtCore.SIGNAL('clicked()'), self.toggle_log)
-		
 
 		# Progress bars widget
 		self.mw=QtGui.QWidget(parent=self)
@@ -105,8 +104,8 @@ class LocalTasks(QtGui.QWidget):
 		self.connect(self,QtCore.SIGNAL('job(int,QString)'),self._job, QtCore.Qt.QueuedConnection)
 		self.connect(self,QtCore.SIGNAL('job(int)'),self._job,  QtCore.Qt.QueuedConnection)
 		
-		self.sig_done.connect(self._done, QtCore.Qt.QueuedConnection)
-		self.sig_done0.connect(self._done,  QtCore.Qt.QueuedConnection)
+		self.connect(self,QtCore.SIGNAL('sig_done(QString)'),self._done, QtCore.Qt.QueuedConnection)
+		self.connect(self,QtCore.SIGNAL('sig_done0()'),self._done,  QtCore.Qt.QueuedConnection)
 		logging.debug('%s', 'LocalTasks initialized')
 		
 	def __len__(self):
@@ -124,6 +123,7 @@ class LocalTasks(QtGui.QWidget):
 		txt+=msg+'\n'
 		self.log.setPlainText(txt)
 				
+	@lockme
 	def _jobs(self,tot,pid='Operation'):
 		"""Initialize a new progress bar for job `pid` having total steps `tot`."""
 		wg=self.prog.get(pid)
@@ -156,7 +156,7 @@ class LocalTasks(QtGui.QWidget):
 	def jobs(self,tot,pid='Operation'):
 		"""Thread-safe call for _jobs()"""
 		self.emit(QtCore.SIGNAL('jobs(int,QString)'),tot,pid)
-		
+	
 	def _job(self,step,pid='Operation',label=''):
 		"""Progress job `pid` to `step`, and display `label`. A negative step causes the bar to progress by 1."""
 		wg=self.prog.get(pid,False)
@@ -184,6 +184,7 @@ class LocalTasks(QtGui.QWidget):
 		if not wg: 
 			return False
 		wg.hide()
+		wg.close()
 		del self.prog[pid]
 		self.mlay.removeWidget(wg)
 		del wg
@@ -194,7 +195,8 @@ class LocalTasks(QtGui.QWidget):
 	
 	def done(self,pid='Operation'):
 		"""Thread-safe call for _done()"""
-		self.sig_done.emit(pid)
+		self.emit(QtCore.SIGNAL('sig_done(QString)'),pid)
+		self.emit(QtCore.SIGNAL('sig_done()'))
 		
 class Tasks(QtGui.QTabWidget):
 	user_show=False
@@ -228,6 +230,7 @@ class Tasks(QtGui.QTabWidget):
 		if len(self.progress):
 			self.setCurrentIndex(0)
 		elif len(self.tasks):
+			print 'switch tab to local tasks',self.tasks.prog
 			self.setCurrentIndex(1)
 		elif len(self.sync):
 			self.setCurrentIndex(2)
