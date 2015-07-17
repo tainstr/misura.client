@@ -580,3 +580,4 @@ class Autoupdater(QtCore.QObject):
 	def updateMenu(self):
 		self.autoupdateAct.setChecked(confdb.updatingCurves)
 
+
