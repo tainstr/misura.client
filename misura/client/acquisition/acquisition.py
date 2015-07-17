@@ -115,7 +115,7 @@ class MainWindow(QtGui.QMainWindow):
 	def retry_login(self):
 		"""Called when set_addr fails"""
 		self.login_window.exec_()
-		if not self.login.obj:
+		if not self.login_window.obj:
 			self.login_window.close()
 		
 	
