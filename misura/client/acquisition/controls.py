@@ -94,7 +94,7 @@ class Controls(QtGui.QToolBar):
 				msg='A new test was started'
 				sig=self.started
 			else:
-				msg='Finished test'
+				msg='Finished test \n{}'.format(self.remote['endStatus'])
 				sig=self.stopped
 			QtGui.QMessageBox.warning(self,msg,msg)
 			sig.emit()

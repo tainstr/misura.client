@@ -118,15 +118,16 @@ def configure_motors():
 
 	b0.maxDaisy=5
 	# High speed motors
-	m_micro.Rate=3000
-	m_micro.sloPe=8000
-	m_flash.Rate=3000
-	m_flash.sloPe=100000
+	m_micro['Rate']=3000
+	m_micro['sloPe']=8000
+	m_flash['Rate']=3000
+	m_flash['sloPe']=100000
 	 
 	# Angulars  in full power
-	left_ang.mOde = 2
-	right_ang.mOde = 2
-	
+	left_ang['mOde'] = 2
+	left_x['mOde']  = 2
+	right_ang['mOde']  = 2
+	right_x['mOde']  = 2
 	# Safety zero positioning
 	board_send_to_zero(b0)
 	board_find_limits(b0, 'Focus', 'Microscope')
@@ -167,6 +168,8 @@ def configure_motors():
 ######
 def configure_cameras():
 	print 'Configure cameras'
+	m.beholder['servedClasses']=['']
+	m.beholder.save('default')
 	# Instruments association
 	m.hsm['camera']=micro_cam
 	m.hsm.save('default')
@@ -211,28 +214,28 @@ def configure_encoders():
 		cam.encoder.focus.motor=m_focus
 		cam.encoder.focus.save('default')
 	
-	micro_cam.encoder.Y.motor=m_micro
-	micro_cam.encoder.Y.save('default')
+	micro_cam.encoder.y.motor=m_micro
+	micro_cam.encoder.y.save('default')
 	
-	flex_cam.encoder.Y.motor=m_micro
-	flex_cam.encoder.Y.save('default')
+	flex_cam.encoder.y.motor=m_micro
+	flex_cam.encoder.y.save('default')
 	
-	left_cam.encoder.X.motor=left_x
-	left_cam.encoder.X.align=-2
-	left_cam.encoder.X.save('default')
+	left_cam.encoder.x.motor=left_x
+	left_cam.encoder.x.align=-2
+	left_cam.encoder.x.save('default')
 	
-	left_cam.encoder.Y.motor=left_y
-	left_cam.encoder.Y.save('default')
+	left_cam.encoder.y.motor=left_y
+	left_cam.encoder.y.save('default')
 	
 	left_cam.encoder.angle.motor=left_ang
 	left_cam.encoder.angle.save('default')
 
-	right_cam.encoder.X.motor=right_x
-	right_cam.encoder.X.align=2
-	right_cam.encoder.X.save('default')
+	right_cam.encoder.x.motor=right_x
+	right_cam.encoder.x.align=2
+	right_cam.encoder.x.save('default')
 
-	right_cam.encoder.Y.motor=right_y
-	right_cam.encoder.Y.save('default')
+	right_cam.encoder.y.motor=right_y
+	right_cam.encoder.y.save('default')
 	
 	right_cam.encoder.angle.motor=right_ang
 	right_cam.encoder.angle.save('default')
@@ -243,9 +246,14 @@ power_out=None
 
 def configure_kiln():
 	global power_out
+	print 'Configure kiln'
 	assert len(m.smaug.list())==3, 'Wrong number of thermal control devices'
+#	m.smaug['servedClasses']=['Eurotherm_ePack', 'DatExel']
+	m.smaug['epack']='10.0.8.88:502'
+	m.smaug['rescan']
+	m.smaug.save('default')
 	m.kiln.motor=m_flash
-	
+	m.kiln['motorStatus']=2
 	def process_datexel(dev):
 		global tc_hitemp, tc_termostat
 		if dev['model']=='3016':
