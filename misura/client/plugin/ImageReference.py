@@ -130,8 +130,7 @@ class ImageReference(utils.OperationWrapper,veusz.widgets.ImageFile):
 		# if no image, then use default image
 		if ( not image or image.isNull() or
 			 image.width() == 0 or image.height() == 0 ):
-			# load replacement image
- 			fname = os.path.join(veusz.utils.imagedir, 'button_imagefile.svg')
+			# empty image
 			r = QtSvg.QSvgRenderer()
 			
 			r.render(painter, rect)
