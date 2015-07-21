@@ -102,8 +102,10 @@ class SavePlotMenu(QtGui.QMenu):
 		if not len(render):
 			logging.debug('Failed rendering')
 			render=False
+		uid=self.proxy.get_uid()
+		
 		r=self.proxy.save_plot(text, plot_id=plot_id, title=name,render=render,render_format='jpg')
-		os.remove(tmp)
+# 		os.remove(tmp)
 		return r
 		
 	def new_plot(self):

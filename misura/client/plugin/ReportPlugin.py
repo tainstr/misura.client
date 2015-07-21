@@ -104,10 +104,11 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 				pt=sample[sh]
 				if pt['time'] in ['None',None,'']:
 					msg+='None\\\\'
+					self.toset(page.getChild('lbl_'+sh),'label',sh+', ?')
 					continue
 				cf={'dataset':smp_path+'/profile',
 					'filename':test.params.filename,
-	 				'target':pt['time']-zt}
+	 				'target':pt['time']}
 				self.dict_toset(page.getChild(sh),cf)
 				T='{}{{\\deg}}C'.format(int(pt['temp']))
 				self.toset(page.getChild('lbl_'+sh),'label',sh+', '+T)

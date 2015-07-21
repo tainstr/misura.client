@@ -67,9 +67,7 @@ class ImageReference(utils.OperationWrapper,veusz.widgets.ImageFile):
 			return
 		from .. import filedata
 		fp=filedata.getFileProxy(s.filename)
-		t=fp.get_node_attr('/conf','zerotime')
-		if s.target<t:
-			t+=s.target
+		t=s.target
 		dec=self.dec
 		dec.reset(fp,datapath=s.dataset)
 		seq=dec.get_time(t)
@@ -133,8 +131,8 @@ class ImageReference(utils.OperationWrapper,veusz.widgets.ImageFile):
 		if ( not image or image.isNull() or
 			 image.width() == 0 or image.height() == 0 ):
 			# load replacement image
-			fname = os.path.join(veusz.utils.imagedir, 'button_imagefile.svg')
-			r = QtSvg.QSvgRenderer(fname)
+ 			fname = os.path.join(veusz.utils.imagedir, 'button_imagefile.svg')
+			r = QtSvg.QSvgRenderer()
 			
 			r.render(painter, rect)
 		
