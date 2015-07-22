@@ -161,7 +161,7 @@ class LocalTasks(QtGui.QWidget):
 		"""Progress job `pid` to `step`, and display `label`. A negative step causes the bar to progress by 1."""
 		wg=self.prog.get(pid,False)
 		if not wg:
-			logging.debug('%s %s', 'LocalTasks.jog: no job defined!', pid)
+			logging.debug('%s %s', 'LocalTasks.job: no job defined!', pid)
 			return
 		if step<0:
 			step=wg.pb.value()+1

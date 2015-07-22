@@ -7,7 +7,7 @@ from traceback import format_exc
 from .. import widgets, _
 from ..live import registry
 from ..database import ProgressBar
-from misura.canon.csutil import lockme
+from misura.canon.csutil import unlockme
 
 from PyQt4 import QtGui, QtCore
 qm = QtGui.QMessageBox
@@ -67,17 +67,19 @@ class Controls(QtGui.QToolBar):
         registry.system_kids.add(self.closingTest_kid)
         registry.system_kid_changed.connect(self.system_kid_slot)
 
-    @lockme
+    @unlockme
     def system_kid_slot(self, kid):
         """Slot processing system_kid_changed signals from KidRegistry.
         Calls updateActions if /isRunning is received."""
         logging.debug('%s %s', 'system_kid_slot: received', kid)
+        if not self._lock.acquire(False):
+            print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa"
+            logging.debug(
+                "Controls.system_kid_slot: Impossible to acquire lock")
+            return
+
         if kid == '/isRunning':
-            #			if not self._lock.acquire(False):
-            #				logging.debug("Controls.system_kid_slot: Impossible to acquire lock")
-            #				return
             self.updateActions()
-#			self._lock.release()
         elif kid == self.closingTest_kid:
             if self.remote['closingTest'] != 0:
                 self.closingTest = self.remote['closingTest']
@@ -115,32 +117,35 @@ class Controls(QtGui.QToolBar):
         if self.parent().fixedDoc:
             return False
         # Always reconnect in case it is called in a different thread
-        rem = self.server.copy()
-        rem.connect()
-        r = rem['isRunning']
-        r = bool(r)
-        self.stopAct.setEnabled(r)
+        remote_server = self.server.copy()
+        remote_server.connect()
+        remote_is_running = bool(remote_server['isRunning'])
+
+        self.stopAct.setEnabled(remote_is_running)
+
         if self.coolAct:
-            self.coolAct.setEnabled(r)
-        self.startAct.setEnabled(r ^ 1)
-        self.iniAct.setEnabled(r ^ 1)
-        if self.isRunning is not None and self.isRunning != r:
+            self.coolAct.setEnabled(remote_is_running)
+
+        self.startAct.setEnabled(remote_is_running ^ 1)
+        self.iniAct.setEnabled(remote_is_running ^ 1)
+
+        if self.isRunning is not None and self.isRunning != remote_is_running:
             sig = False
             logging.debug(
-                '%s %s %s', 'Controls.updateActions', self.isRunning, r)
-            if r:
+                '%s %s %s', 'Controls.updateActions', self.isRunning, remote_is_running)
+            if remote_is_running:
                 msg = 'A new test was started'
                 sig = self.started
             else:
                 msg = 'Finished test'
-#				sig=self.stopped
             QtGui.QMessageBox.warning(self, msg, msg)
             # Emit after message
             if sig:
                 sig.emit()
-#		# Locally remember remote status
-#		self.isRunning=r
-        return r
+#		# Locally remember remote_is_running status
+        
+        self.isRunning = remote_is_running
+        return remote_is_running
 
     def enterEvent(self, ev):
         self.updateActions()
