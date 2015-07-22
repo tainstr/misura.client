@@ -226,9 +226,10 @@ class SyncTable(QtGui.QTableView):
 	excludeRecord=QtCore.pyqtSignal(object)
 	def __init__(self,dbpath,table_name,parent=None):
 		super(SyncTable,self).__init__(parent)
-		db=QtSql.QSqlDatabase.addDatabase('QSQLITE')
+		db=QtSql.QSqlDatabase.addDatabase('QSQLITE', 'SQLITE')
 		self.dbpath=dbpath
 		db.setDatabaseName(dbpath)
+		db.open()
 		model=QtSql.QSqlTableModel()
 		model.setTable(table_name)
 		model.select()

@@ -276,7 +276,6 @@ class MainWindow(QtGui.QMainWindow):
 		logging.debug('%s', 'Done menubar')
 		
 		# Close cameras
-		logging.debug('Defined cameras', self.cameras)
 		for p, (pic, win) in self.cameras.iteritems():
 			logging.debug('deleting cameras', p, pic, win)
 			pic.close()
@@ -429,7 +428,8 @@ class MainWindow(QtGui.QMainWindow):
 			doc = self.fixedDoc
 		elif self.server['initTest'] or self.server['closingTest']:
 			self.tasks.jobs(0, 'Test initialization')
-			self.tasks.setFocus()
+			if recursion==0:
+				self.tasks.setFocus()
 			logging.debug('%s', 'Waiting for initialization to complete...')
 			QtGui.qApp.processEvents()
 			sleep(0.2)

@@ -7,6 +7,7 @@ from traceback import format_exc
 from .. import widgets, _
 from ..live import registry
 from ..database import ProgressBar 
+from misura.canon.csutil import lockme
 
 from PyQt4 import QtGui, QtCore
 qm=QtGui.QMessageBox
@@ -18,6 +19,8 @@ class Controls(QtGui.QToolBar):
 	coolAct=False
 	isRunning=None
 	"""Local running status"""
+	closingTest = 0
+	"""Local closingTest status"""
 	paused=False
 	"""Do not update actions"""
 	_lock=False
@@ -25,7 +28,10 @@ class Controls(QtGui.QToolBar):
 	started=QtCore.pyqtSignal()
 	stopped=QtCore.pyqtSignal()
 	stopped_nosave=QtCore.pyqtSignal()
-	#cycleNotSaved=False
+	closingTest_kid=False
+	stop_mode=True
+	stop_message=''
+	
 	def __init__(self, remote, parent=None):
 		QtGui.QToolBar.__init__(self, parent)
 		self._lock=Lock()
@@ -46,6 +52,8 @@ class Controls(QtGui.QToolBar):
 			self.addAction('Machine Database', parent.showIDB)
 			self.addAction('Test File', parent.openFile)
 			self.addAction('Misura3 Database', parent.showDB3)
+		self.isRunning = self.server['isRunning']
+		self.closingTest = self.remote['closingTest']
 		self.updateActions()
 		logging.debug('%s', 'Controls end init')
 		self.stopped.connect(self.hide_prog)
@@ -53,18 +61,44 @@ class Controls(QtGui.QToolBar):
 		self.started.connect(self.hide_prog)
 		self.connect(self, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
 		self.connect(self, QtCore.SIGNAL('warning(QString,QString)'), self.warning)
+		self.closingTest_kid=self.remote.gete('closingTest')['kid']
+		registry.system_kids.add(self.closingTest_kid)
 		registry.system_kid_changed.connect(self.system_kid_slot)
 		
+	@lockme
 	def system_kid_slot(self,kid):
 		"""Slot processing system_kid_changed signals from KidRegistry.
 		Calls updateActions if /isRunning is received."""
 		logging.debug('%s %s', 'system_kid_slot: received', kid)
 		if kid=='/isRunning':
-			if not self._lock.acquire(False):
-				logging.debug("Controls.system_kid_slot: Impossible to acquire lock")
-				return 
+#			if not self._lock.acquire(False):
+#				logging.debug("Controls.system_kid_slot: Impossible to acquire lock")
+#				return 
 			self.updateActions()
-			self._lock.release()
+#			self._lock.release()
+		elif kid==self.closingTest_kid:
+			if self.remote['closingTest']!=0:
+				self.closingTest=self.remote['closingTest']
+				logging.debug('Waiting closingTest... %s', self.remote['closingTest'])
+				return
+			if self.closingTest==0:
+				print 'Local already closed!'
+				return
+			if self.server['isRunning']:
+				print 'Remote isRunning!'
+				return
+			endStatus=self.remote.measure['endStatus']
+			if self.stop_mode:
+				self.stopped.emit()
+				self.emit(QtCore.SIGNAL('warning(QString,QString)'),
+					_('Measurement stopped and saved'), \
+					_('Current measurement was stopped and its data has been saved. \n')+endStatus)
+			else:
+				self.stopped_nosave.emit()
+				self.emit(QtCore.SIGNAL('warning(QString,QString)'),
+					_('Measurement data discarded!'), \
+					_('Current measurement was stopped and its data has been deleted. \n')+endStatus)
+			self.isRunning=False
 		
 		
 	@property
@@ -88,18 +122,21 @@ class Controls(QtGui.QToolBar):
 			self.coolAct.setEnabled(r)
 		self.startAct.setEnabled(r^1)
 		self.iniAct.setEnabled(r^1)
-		if self.isRunning is not None and self.isRunning!=r:
+		if self.isRunning is not None and self.isRunning != r:
+			sig=False
 			logging.debug('%s %s %s', 'Controls.updateActions', self.isRunning, r)
 			if r:
 				msg='A new test was started'
 				sig=self.started
 			else:
-				msg='Finished test \n{}'.format(self.remote['endStatus'])
-				sig=self.stopped
+				msg='Finished test'
+#				sig=self.stopped
 			QtGui.QMessageBox.warning(self,msg,msg)
-			sig.emit()
-		# Locally remember remote status
-		self.isRunning=r
+			# Emit after message
+			if sig:
+				sig.emit()
+#		# Locally remember remote status
+#		self.isRunning=r
 		return r
 		
 	def enterEvent(self, ev):
@@ -120,8 +157,9 @@ class Controls(QtGui.QToolBar):
 		
 	def warning(self,title,msg=False):
 		"""Display a warning message box and update actions"""
-		if not msg: msg=title
-		qm.warning(self, title, msg)
+		if not self.mute:
+			if not msg: msg=title
+			qm.warning(self, title, msg)
 		self.updateActions()
 		
 	_prog=False
@@ -178,25 +216,11 @@ class Controls(QtGui.QToolBar):
 		rem=self.remote.copy()
 		rem.connect()
 		try:	
-			msg=rem.stop_acquisition(mode)
+			self.stop_message=rem.stop_acquisition(mode)
 		except:	
-			msg=format_exc()
-		if mode:
-			self.stopped.emit()
-		else:
-			self.stopped_nosave.emit()
+			self.stop_message=format_exc()
+		self.stop_mode=mode
 		self.paused=False
-		if self.mute:
-			return
-		
-		if not mode:
-			self.emit(QtCore.SIGNAL('warning(QString,QString)'),
-				_('Measurement data discarded!'), \
-					_('Current measurement was stopped and its data has been deleted. \n')+msg)
-		else:
-			self.emit(QtCore.SIGNAL('warning(QString,QString)'),
-					_('Measurement stopped and saved'), \
-					_('Current measurement was stopped and its data has been saved. \n')+msg)
 		
 	def stop(self):
 		if not self.updateActions():
