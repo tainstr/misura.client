@@ -31,8 +31,6 @@ class MiniImage(QtGui.QWidget):
 		self.setAcceptDrops(True)
 		# Proper image label
 		self.lbl_img=QtGui.QLabel(parent=self)
-		self.lbl_img.setAcceptDrops(True)
-# 		self.lbl_img.dropEvent=self.dropEvent
 		self.lbl_img.setPixmap(QtGui.QPixmap())
 		self.lay.addWidget(self.lbl_img)
 		# Optional Metadata label
@@ -236,6 +234,12 @@ class MiniImage(QtGui.QWidget):
 		new.set_idx(self.idx)
 # 		new.zoom()
 		return new
+
+	def dragEnterEvent(self,event):
+		logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
+		event.acceptProposedAction()
+		if event.mimeData().hasFormat("text/plain"):
+			event.acceptProposedAction()
 		
 	def dropEvent(self,event):
 		logging.debug('DROP EVENT')

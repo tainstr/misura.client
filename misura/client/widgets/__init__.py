@@ -48,7 +48,6 @@ def build(server, remObj, prop, parent=None):
 		elif T=='TextArea':
 			obj=aString(server, remObj, prop, parent, extended=True)
 		elif T=='Script':
-			logging.debug('%s %s', 'starting script', prop)
 			obj=aScript(server, remObj, prop, parent)
 		elif T=='Boolean':
 			obj=aBoolean(*arg)

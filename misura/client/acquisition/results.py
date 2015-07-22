@@ -3,10 +3,26 @@
 """Results tab with access to data tools"""
 from PyQt4 import QtGui, QtCore
 from .. import widgets
+from .. import navigator
+from veusz.windows import treeeditwindow
 
 class Results(QtGui.QTabWidget):
-	def __init__(self,parent):
+	def __init__(self,parent,plot):
 		super(Results,self).__init__(parent)
-		self.setTabPosition(QtGui.QTabWidget.East)
+		self.setTabPosition(QtGui.QTabWidget.North)
+		self.plot=plot
+		self.navigator = navigator.Navigator(parent=parent, mainwindow=plot, cols=2)
+		self.plot.connect(self.plot, QtCore.SIGNAL('hide_show(QString)'), self.navigator.plot)
 		
+		
+	def set_doc(self,doc):
+		self.clear()
+		te=self.plot.treeedit
+		self.props = treeeditwindow.PropertiesDock(doc, te, self)
+		self.formats= treeeditwindow.FormatDock(doc, te, self)
+		
+		self.addTab(self.navigator,'Data')
+		self.addTab(self.props, 'Properties')
+		self.addTab(self.formats, 'Formatting')
+		self.addTab(self.plot.treeedit,'Objects')
 		

@@ -26,6 +26,7 @@ from .selector import InstrumentSelector
 from .measureinfo import MeasureInfo
 from .controls import Controls, MotionControls
 from .delay import DelayedStart
+from .results import Results
 
 from .. import graphics
 from ..database import UploadThread
@@ -205,12 +206,10 @@ class MainWindow(QtGui.QMainWindow):
 
     def add_sumtab(self):
         # SUMMARY TREE - In lateral measureTab
-        self.navigator = navigator.Navigator(
-            parent=self, mainwindow=self.summaryPlot, cols=2)
-        self.summaryPlot.connect(
-            self.summaryPlot, QtCore.SIGNAL('hide_show(QString)'), self.navigator.plot)
-        self.measureTab.results = self.navigator
+        self.measureTab.results = Results(self,self.summaryPlot)
+        self.navigator=self.measureTab.results.navigator
         self.measureTab.refreshSamples()
+        
 
     def add_graph(self):
         # PLOT window
@@ -423,6 +422,8 @@ class MainWindow(QtGui.QMainWindow):
         logging.debug('%s', 'navigator')
         self.tasks.job(-1, pid, 'Sync document tree')
         self.navigator.set_doc(doc)
+        
+        self.measureTab.set_doc(doc)
 
         logging.debug('%s', 'dataTable')
         self.tasks.job(-1, pid, 'Sync data table')

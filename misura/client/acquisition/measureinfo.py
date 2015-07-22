@@ -35,6 +35,9 @@ class MeasureInfo(QtGui.QTabWidget):
 		self.connect(self, QtCore.SIGNAL("currentChanged(int)"), self.tabChanged)
 		self.connect(self, QtCore.SIGNAL("currentChanged(int)"), self.refreshSamples)
 		
+	def set_doc(self,doc):
+		self.results.set_doc(doc)
+		
 	
 	def tabChanged(self):
 		currentTab=self.currentWidget()

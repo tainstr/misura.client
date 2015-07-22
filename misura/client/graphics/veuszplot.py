@@ -100,6 +100,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
 		self.w.updateProperties(s)
 		self.w.show()
 		
+		
 	dirname_export=False
 	filename=False
 	def slotFileExport(self):
@@ -284,7 +285,7 @@ class VeuszPlot(QtGui.QWidget):
 		self.zoompageAct=zp
 		self.plot.sigWidgetClicked.connect(self.treeedit.selectWidget)
 		self.treeedit.widgetsSelected.connect(self.plot.selectedWidgets)
-		
+		self.treeedit.sigPageChanged.connect(self.plot.setPageNumber)
 	
 	def pauseUpdate(self):
 		self.updatePolicy=setting.settingdb['plot_updatepolicy']
