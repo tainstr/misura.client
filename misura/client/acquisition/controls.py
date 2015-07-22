@@ -73,7 +73,6 @@ class Controls(QtGui.QToolBar):
         Calls updateActions if /isRunning is received."""
         logging.debug('%s %s', 'system_kid_slot: received', kid)
         if not self._lock.acquire(False):
-            print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa"
             logging.debug(
                 "Controls.system_kid_slot: Impossible to acquire lock")
             return
