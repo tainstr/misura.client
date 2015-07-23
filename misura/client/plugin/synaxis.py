@@ -122,7 +122,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
 			# Getting curve data
 			xtr=doc.data[obj.settings.xData].data
 			yds_name=obj.settings.yData
-			yds=doc.datay[yds_name]
+			yds=doc.data[yds_name]
 			ytr=yds.data
 			#Search the nearest X value on trans X-array
 			dst=np.abs(xtr-pos)
