@@ -108,7 +108,7 @@ class TransferThread(QtCore.QThread):
 		auth_handler.add_password(realm='MISURA', uri=url, user=user, passwd=passwd)
 		opener = urllib2.build_opener(auth_handler)
 		# ...and install it globally so it can be used with urlopen.
-		urllib2.install_opener(opener)		
+		urllib2.install_opener(opener)	
 		return url
 				
 	def download_url(self,url,outfile):
@@ -120,8 +120,7 @@ class TransferThread(QtCore.QThread):
 		self.outfile=outfile
 		url=self.prepare_opener(url)
 		self.dlStarted.emit(url,outfile)
-		urlq=urllib.quote(url.encode('utf8'))
-		req = urllib2.urlopen(urlq)
+		req = urllib2.urlopen(url)
 		dim=int(req.info().getheaders('Content-Length')[0])
 		self.dlSize.emit(dim)
 		#FIXME: maximum recursion depth on big files or chunks too little

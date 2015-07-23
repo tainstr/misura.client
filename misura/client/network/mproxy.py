@@ -52,7 +52,7 @@ def dataurl(server, uid):
     if not p.startswith('/'):
         p = '/' + p
     # Prepend remote HTTPS/data path
-    url = server.data_addr + p
+    url = server.data_addr + urllib.quote(p.encode('utf8'))
     return url, p
 
 
