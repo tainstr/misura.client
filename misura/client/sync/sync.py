@@ -235,7 +235,7 @@ class SyncTable(QtGui.QTableView):
 
     def __init__(self, dbpath, table_name, parent=None):
         super(SyncTable, self).__init__(parent)
-        db = QtSql.QSqlDatabase.addDatabase('QSQLITE', 'SQLITE')
+        db = QtSql.QSqlDatabase.addDatabase('QSQLITE')
         self.dbpath = dbpath
         db.setDatabaseName(dbpath)
         db.open()
