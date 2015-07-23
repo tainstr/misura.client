@@ -49,12 +49,9 @@ class ShapesPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 			logging.debug('%s %s', 'Found graph:', g)
 			raise plugins.ToolsPluginException('You should run this tool on a graph')
 		logging.debug('%s %s', 'ShapesPlugin searching', p)
+		cur=g.path
 		conf=False
 		vds=[]
-# 		if smpe.ds:
-# 			conf=getattr(smpe.ds,'m_conf',False)
-# 			vds.append(smpe.ds.name())
-# 		else:
 		for k,ent in smpe.children.iteritems():
 			conf=getattr(ent.ds,'m_conf',False)
 			if not conf: continue
@@ -79,10 +76,13 @@ class ShapesPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 			if t in [0,None,'None'] or T in [0,None,'None']: 
 				logging.debug('%s %s', 'Shape not found:', shape)
 				continue
-			t-=conf['zerotime']
+			# Absolute time translations
+			if t>conf['zerotime']/2:
+				t-=conf['zerotime']
 			# Temperature plotting
 			basename=smpe.path.replace('/',':')+'_'
-			val=T if cur.endswith('temp') else t
+			val=T if 'temp' in cur.split('/') else t
+			print 'Selected value based on ',cur,val
 			f={'currentwidget':cur,
 				'axis':'X',
 				'val':val,

@@ -116,6 +116,7 @@ class TransferThread(QtCore.QThread):
 		logging.debug('%s %s %s', 'download url', url, outfile)
 		self.aborted=False
 		self.prefix='Download: '
+		url=urllib.quote(url.encode('utf8'))
 		self.url=url
 		self.outfile=outfile
 		url=self.prepare_opener(url)

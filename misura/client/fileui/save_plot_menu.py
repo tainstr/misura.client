@@ -74,7 +74,6 @@ class SavePlotMenu(QtGui.QMenu):
 		self.lbl.setPixmap(pix)
 		self.lbl.show()
 		
-		
 	def load_plot(self,plot_id):
 		"""Load selected plot"""
 		text=self.proxy.get_plot(plot_id)
