@@ -97,12 +97,12 @@ class LocalTasks(QtGui.QWidget):
 		
 		self.prog={}
 		
-		self.connect(self,QtCore.SIGNAL('jobs(int)'),self._jobs,  QtCore.Qt.QueuedConnection)
-		self.connect(self,QtCore.SIGNAL('jobs(int,QString)'),self._jobs,  QtCore.Qt.QueuedConnection)
+		self.connect(self,QtCore.SIGNAL('jobs(int)'),self._jobs)
+		self.connect(self,QtCore.SIGNAL('jobs(int,QString)'),self._jobs)
 		
-		self.connect(self,QtCore.SIGNAL('job(int,QString,QString)'),self._job, QtCore.Qt.QueuedConnection)
-		self.connect(self,QtCore.SIGNAL('job(int,QString)'),self._job, QtCore.Qt.QueuedConnection)
-		self.connect(self,QtCore.SIGNAL('job(int)'),self._job,  QtCore.Qt.QueuedConnection)
+		self.connect(self,QtCore.SIGNAL('job(int,QString,QString)'),self._job)
+		self.connect(self,QtCore.SIGNAL('job(int,QString)'),self._job)
+		self.connect(self,QtCore.SIGNAL('job(int)'),self._job)
 		
 		self.connect(self,QtCore.SIGNAL('sig_done(QString)'),self._done, QtCore.Qt.QueuedConnection)
 		self.connect(self,QtCore.SIGNAL('sig_done0()'),self._done,  QtCore.Qt.QueuedConnection)
