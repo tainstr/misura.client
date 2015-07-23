@@ -334,7 +334,6 @@ class SyncWidget(QtGui.QTabWidget):
 		
 	def set_server(self,server):
 		if not self.dbpath:
-			logging.debug('SyncWidget.set_server: No database path set %s',self.dbpath)
 			return
 		self.storage_sync.prepare(self.dbpath,server)
 		serial="serial='{}'".format(server['eq_sn'])
@@ -348,7 +347,6 @@ class SyncWidget(QtGui.QTabWidget):
 		"""Do one collect/download loop.
 		Optionally pass `server` if calling from a different thread."""
 		if not self.dbpath:
-			logging.debug('SyncWidget.loop: No database path set %s',self.dbpath)
 			return False
 		self.storage_sync.set_dbpath(self.dbpath)
 		if not self.storage_sync.server:
