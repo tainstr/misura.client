@@ -4,6 +4,7 @@ from misura.canon.logger import Log as logging
 import xmlrpclib
 from xmlrpclib import ServerProxy, ProtocolError
 from time import time
+import urllib
 import httplib
 from traceback import format_exc
 import threading

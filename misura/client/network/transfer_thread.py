@@ -116,12 +116,12 @@ class TransferThread(QtCore.QThread):
 		logging.debug('%s %s %s', 'download url', url, outfile)
 		self.aborted=False
 		self.prefix='Download: '
-		url=urllib.quote(url.encode('utf8'))
 		self.url=url
 		self.outfile=outfile
 		url=self.prepare_opener(url)
 		self.dlStarted.emit(url,outfile)
-		req = urllib2.urlopen(url)
+		urlq=urllib.quote(url.encode('utf8'))
+		req = urllib2.urlopen(urlq)
 		dim=int(req.info().getheaders('Content-Length')[0])
 		self.dlSize.emit(dim)
 		#FIXME: maximum recursion depth on big files or chunks too little
