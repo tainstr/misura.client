@@ -20,6 +20,7 @@ sep = '/'
 def urlauth(url):
     """Decode and strip away the auth part of an url.
     Returns user, password and clean url"""
+    url = urllib.unquote(url)
     i = url.find('://') + 3
     e = url.find('@', i) + 1
     auth = url[i:e][:-1]
