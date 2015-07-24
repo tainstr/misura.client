@@ -13,6 +13,6 @@ if __name__=='__main__':
 	mw=acquisition.MainWindow()
 	if o['-h']:
 		m=from_argv()
-		mw.setServer(m)
+ 		mw.succeed_login(m)
 	mw.show()
 	sys.exit(app.exec_())

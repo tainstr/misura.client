@@ -76,8 +76,6 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle(_('Misura Live'))
         self.myMenuBar = MenuBar(parent=self)
         self.setMenuWidget(self.myMenuBar)
-        self.connect(
-            network.manager, QtCore.SIGNAL('connected()'), self.setServer)
         self.add_server_selector()
         self.reset_proxy_timer = QtCore.QTimer(parent=self)
         self.reset_proxy_timer.setSingleShot(True)
@@ -128,13 +126,19 @@ class MainWindow(QtGui.QMainWindow):
         if not self.login_window.obj:
             self.login_window.close()
 
-    def succeed_login(self):
+    def succeed_login(self,rem=False):
         """Called on new address successfully connected"""
-        rem = self.login_window.obj
+        if not rem:
+            rem = self.login_window.obj
         network.manager.set_remote(rem)
         registry.set_manager(network.manager)
         self.setServer(rem)
-
+    
+    def closeEvent(self,ev):
+        if not self.fixedDoc:
+            registry.toggle_run(False)
+            self.tasks.close()
+        super(MainWindow, self).closeEvent(ev)
     _blockResetFileProxy = False
 
     def setServer(self, server=False):

@@ -36,6 +36,7 @@ from MotorCorrectionPlugin import MotorCorrectionPlugin
 from SimFlexPlugin import SimFlexPlugin
 from ArrangePlugin import ArrangePlugin
 from ReportPlugin import ReportPlugin
+from ViscosityPlugin import ViscosityPlugin
 
 
 from SurfaceTensionPlugin import SurfaceTensionPlugin
