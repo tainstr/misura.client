@@ -12,7 +12,7 @@ if __name__=='__main__':
 	app=iutils.app
 	mw=acquisition.MainWindow()
 	if o['-h']:
-		m=iutils.from_argv()
+		m=from_argv()
 		mw.setServer(m)
 	mw.show()
 	sys.exit(app.exec_())
