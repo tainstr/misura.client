@@ -46,7 +46,7 @@ def configure_logger():
 	logsize = Converter.convert('kilobyte','byte', confdb['logsize'])
 	rotating_file_handler = logging.handlers.RotatingFileHandler(confdb['logfile'], maxBytes=logsize, backupCount=confdb['lognumber'])
 	rotating_file_handler.setFormatter(logging.Formatter("%(levelname)s: %(asctime)s %(message)s"))
-#	logging.getLogger().addHandler(rotating_file_handler)
+	logging.getLogger().addHandler(rotating_file_handler)
 	level=confdb['loglevel']
 #	level=50
 	logging.getLogger().setLevel(level)
