@@ -20,6 +20,7 @@ from CoefficientPlugin import CoefficientPlugin
 from SynchroPlugin import SynchroPlugin
 from OverwritePlugin import OverwritePlugin
 from ColorizePlugin import ColorizePlugin
+from RemoveGapsPlugin import RemoveGapsPlugin
 
 
 
