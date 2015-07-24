@@ -254,7 +254,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 	def add_percentile(self, node, menu):
 		"""Add percentile conversion action"""
 		self.act_percent = menu.addAction(_('Set Initial Dimension'), self.setInitialDimension)
-		self.act_percent = self.dataset_menu.addAction(_('Percentile'), self.convertPercentile)
+		self.act_percent = menu.addAction(_('Percentile'), self.convertPercentile)
 		self.act_percent.setCheckable(True)		
 		self.act_percent.setChecked(node.m_percent)
 			
@@ -373,6 +373,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 		self.der_menu.addAction(_('Intercept this curve'), self.intercept)
 		self.der_menu.addAction(_('Smoothing'), self.smooth)
 		self.der_menu.addAction(_('Derivatives'), self.derive)
+		self.add_percentile(node, self.der_menu)
 		self.der_menu.addAction(_('Linear Coefficient'), self.coefficient)
 		self.der_menu.addAction(_('Overwrite parent'), self.overwrite)
 		self.add_keep(node, self.der_menu)

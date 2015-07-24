@@ -115,7 +115,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper,plugins.ToolsPlugin):
 		factor=s_slope/z_slope
 		micron=u'\u03bcm'
 		msg=_('Calibration factor: {} \nStandard deviation: \n    {} %\n    {} {}').format(factor,res,um,micron)
-		logging.debug('%s', msg)
+#		logging.debug('%s', msg)
 		self.msg=msg
 		self.slope,self.const=slope,const
 		self.fld,self.ds,self.T,self.d,self.sT,self.sd=fields,ds,T,d,sT,sd

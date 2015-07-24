@@ -265,7 +265,7 @@ def percentile_conversion(ds,action='Invert',auto=True):
 	elif action=='To Percent':
 		out=100.*out/ds.m_initialDimension
 		ds.m_percent=True
-		ds.old_unit=ds.unit
+		ds.old_unit=getattr(ds, 'unit', False)
 		ds.unit='percent'
 	ds.data=plugins.numpyCopyOrNone(out)
 	return ds
