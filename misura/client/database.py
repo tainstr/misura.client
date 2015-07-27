@@ -185,7 +185,7 @@ class DatabaseWidget(QtGui.QWidget):
 			# Reads the previous directory or the user's home
 			d=settings.value('/FileSaveToDir', os.path.expanduser('~'))
 			path=os.path.join(str(d), fname+'.h5')
-			dest=str(QtGui.QFileDialog.getSaveFileName(self,"Save Test To...",path))
+			dest=str(QtGui.QFileDialog.getSaveFileName(self,"Save Test To...", path ,filter='Misura (*.h5)'))
 			if dest=='': return
 			# Save the current directory
 			settings.setValue('/FileSaveToDir',os.path.dirname(dest))

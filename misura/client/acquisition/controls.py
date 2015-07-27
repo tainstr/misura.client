@@ -21,8 +21,6 @@ class Controls(QtGui.QToolBar):
     coolAct = False
     isRunning = None
     """Local running status"""
-    closingTest = 0
-    """Local closingTest status"""
     paused = False
     """Do not update actions"""
     _lock = False
@@ -33,12 +31,13 @@ class Controls(QtGui.QToolBar):
     closingTest_kid = False
     stop_mode = True
     stop_message = ''
-
+    uid=None
     def __init__(self, remote, parent=None):
         QtGui.QToolBar.__init__(self, parent)
         self._lock = Lock()
         self.remote = remote
         logging.debug('%s', 'Controls: init')
+        self.ended_set=set()
         self.server = remote.parent()
         self.iniAct = self.addAction('New', self.new)
         self.startAct = self.addAction('Start', self.start)
@@ -54,7 +53,6 @@ class Controls(QtGui.QToolBar):
             self.addAction('Test File', parent.openFile)
             self.addAction('Misura3 Database', parent.showDB3)
         self.isRunning = self.server['isRunning']
-        self.closingTest = self.remote['closingTest']
         self.updateActions()
         logging.debug('%s', 'Controls end init')
         self.stopped.connect(self.hide_prog)
@@ -76,20 +74,25 @@ class Controls(QtGui.QToolBar):
             logging.debug(
                 "Controls.system_kid_slot: Impossible to acquire lock")
             return
-
         if kid == '/isRunning':
             self.updateActions()
         elif kid == self.closingTest_kid:
+            uid=self.remote.measure['uid']
+            if not self.uid:
+                self.uid=uid
+                return 
+            self.uid=uid
+            if uid in self.ended_set:
+                logging.info('End of test already notified')
+                return 
             if self.remote['closingTest'] != 0:
                 self.closingTest = self.remote['closingTest']
                 logging.debug(
                     'Waiting closingTest... %s', self.remote['closingTest'])
                 return
-            if self.closingTest == 0:
-                print 'Local already closed!'
-                return
+            
             if self.server['isRunning']:
-                print 'Remote isRunning!'
+                logging.error('Remote isRunning still!')
                 return
             endStatus = self.remote.measure['endStatus']
             if self.stop_mode:
@@ -102,6 +105,7 @@ class Controls(QtGui.QToolBar):
                 self.emit(QtCore.SIGNAL('warning(QString,QString)'),
                           _('Measurement data discarded!'),
                           _('Current measurement was stopped and its data has been deleted. \n') + endStatus)
+            self.ended_set.add(uid)
             self.isRunning = False
 
     @property

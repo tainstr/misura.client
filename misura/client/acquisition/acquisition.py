@@ -16,10 +16,10 @@ from ..live import registry
 from .. import network
 from ..network import TransferThread
 from .. import widgets, beholder
-from .. import fileui, filedata, navigator
+from .. import fileui, filedata
 from ..misura3 import m3db
 from .. import connection
-from ..clientconf import confdb
+from ..clientconf import confdb, settings
 from ..confwidget import RecentWidget
 from .menubar import MenuBar
 from .selector import InstrumentSelector
@@ -31,7 +31,6 @@ from .results import Results
 from .. import graphics
 from ..database import UploadThread
 from ..filedata import RemoteFileProxy
-
 
 from PyQt4 import QtGui, QtCore
 
@@ -66,6 +65,7 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self, doc=False, parent=None):
         super(MainWindow, self).__init__(parent)
         self._lock = threading.Lock()
+        self.saved_set=set()
         self.cameras = {}
         self.toolbars = []
         self.fixedDoc = doc
@@ -579,19 +579,30 @@ class MainWindow(QtGui.QMainWindow):
         """Offer option to download the remote file"""
         # HTTPS data url
         uid = self.remote.measure['uid']
+        if uid in self.saved_set:
+            logging.debug('UID already saved!')
+            return
+        self.saved_set.add(uid)
         dbpath = confdb['database']
         if self.doc:
             self.doc.close()
         self.set_doc(False)
         self.resetFileProxy(retry=10)
+        registry.toggle_run(False)
         # NO db: ask to specify custom location
         if not os.path.exists(dbpath):
             logging.debug('%s %s', 'DATABASE PATH DOES NOT EXIST', dbpath)
             dbpath = False
+            d=settings.value('/FileSaveToDir', os.path.expanduser('~'))
+            path=os.path.join(str(d), self.remote.measure['name']+'.h5')
             outfile = QtGui.QFileDialog.getSaveFileName(
-                self, 	_("Download finished test as"))
+                self, 	_("Download finished test as"), 
+                path,
+                filter="Misura (*.h5)")
             outfile = str(outfile)
+            settings.setValue('/FileSaveToDir',os.path.dirname(outfile))
             if not len(outfile):
+                registry.toggle_run(True)
                 return False
             auto = True
         else:
@@ -602,6 +613,7 @@ class MainWindow(QtGui.QMainWindow):
             auto = QtGui.QMessageBox.question(self, _("Download finished test?"),
                                               _("Would you like to save the finished test?"))
             if auto != QtGui.QMessageBox.Ok:
+                registry.toggle_run(True)
                 return False
         # TODO: Must wait that current file is closed!!!
         # Must download
@@ -611,6 +623,7 @@ class MainWindow(QtGui.QMainWindow):
         sy.start()
         # Keep a reference
         self._download_thread = sy
+        registry.toggle_run(True)
         return True
 
     ###########

@@ -26,7 +26,16 @@ def urlauth(url):
     e = url.find('@', i) + 1
     auth = url[i:e][:-1]
     user, passwd = auth.split(':')
-    url = url[:i] + url[e:]
+    url_start = url[:i]
+    url_end = url[e:].split('/')
+    # Take the address
+    url_start += url_end.pop(0)
+    if not url_start.endswith('/'):
+        url_start += '/'
+    # Quote the item location part of the url
+    url_end = '/'.join(url_end)
+    url = url_start + urllib.quote(url_end) 
+    
     return user, passwd, url
 
 
@@ -53,6 +62,7 @@ def dataurl(server, uid):
         p = '/' + p
     # Prepend remote HTTPS/data path
     url = server.data_addr + urllib.quote(p.encode('utf8'))
+    logging.debug('dataurl %s %s --> %s',server.data_addr,p,url)
     return url, p
 
 
