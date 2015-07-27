@@ -42,7 +42,7 @@ class SummaryModel(QtCore.QAbstractTableModel):
     def update(self):
         # New rows length
         start = self._rowCount
-        end = len(self.doc.data.get('t', []))
+        end = len(self.doc.data.get('0:t', []))
         # New header (lists all loaded columns/non-zero)
         ldd = []
         for k, ds in self.doc.data.iteritems():
@@ -74,7 +74,7 @@ class SummaryModel(QtCore.QAbstractTableModel):
     def rowCount(self, parent):
         if not self.doc:
             return 0
-        if not self.doc.data.has_key('t'):
+        if not self.doc.data.has_key('0:t'):
             return 0
         self._rowCount = len(self.doc.data['0:t'].data)
         return self._rowCount
