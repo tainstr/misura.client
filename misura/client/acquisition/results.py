@@ -11,7 +11,7 @@ class Results(QtGui.QTabWidget):
 		super(Results,self).__init__(parent)
 		self.setTabPosition(QtGui.QTabWidget.North)
 		self.plot=plot
-		self.navigator = navigator.Navigator(parent=parent, mainwindow=plot, cols=2)
+		self.navigator = navigator.Navigator(parent=self, mainwindow=plot, cols=2)
 		self.plot.connect(self.plot, QtCore.SIGNAL('hide_show(QString)'), self.navigator.plot)
 		
 		
