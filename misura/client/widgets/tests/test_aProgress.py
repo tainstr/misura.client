@@ -6,45 +6,48 @@ import functools
 from misura.client.tests import iutils_testing
 from misura.client import widgets
 from misura.canon import option
-from PyQt4 import QtGui,QtCore
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtTest import QTest
 
+
 class aProgress(unittest.TestCase):
-	def setUp(self):
-		self.root = option.ConfigurationProxy()
-		self.root.sete('name', option.ao({}, 'name', 'String', 'object name')['name'])
-		
-	def wgGen(self, name):
-		self.assertTrue(self.root.has_key(name))
 
-		widget = widgets.build(self.root, self.root, self.root.gete(name))
-		self.assertTrue(widget is not False)
-		return widget
+    def setUp(self):
+        self.root = option.ConfigurationProxy()
+        self.root.sete(
+            'name', option.ao({}, 'name', 'String', 'object name')['name'])
 
-		
-	def test_zero(self):
-		self.root.sete('Test', option.ao({}, 'Test', 'Progress')['Test'])
-		widget = self.wgGen('Test')
-		self.assertEqual(widget.current, 0)
-		iutils_testing.show(widget, __name__)
-	
-	def test_more(self):
-		self.root.sete('Test', option.ao({}, 'Test', 'Progress', current = 3, max = 10)['Test'])
-		widget = self.wgGen('Test')
-		iutils_testing.show(widget, __name__)
-			
-	def test_RoleProgress(self):
-		self.root.sete('Test', option.ao({}, 'Test', 'Progress', current=3, max = 10)['Test'])
-		self.root.sete('Test2', option.ao({}, 'Test2', 'Progress', current=5, max = 8)['Test2'])
+    def wgGen(self, name):
+        self.assertTrue(self.root.has_key(name))
 
-		self.root.sete('progress', option.ao({}, 'progress', 'List', current=['/Test', '/Test2'])['progress'])
-		self.root.setattr('progress', 'kid', '/progress')
+        widget = widgets.build(self.root, self.root, self.root.gete(name))
+        self.assertTrue(widget is not False)
+        return widget
 
-		widget = self.wgGen('progress')
-		iutils_testing.show(widget, __name__)
-			
+    def test_zero(self):
+        self.root.sete('Test', option.ao({}, 'Test', 'Progress')['Test'])
+        widget = self.wgGen('Test')
+        self.assertEqual(widget.current, 0)
+        iutils_testing.show(widget, __name__)
+
+    def test_more(self):
+        self.root.sete(
+            'Test', option.ao({}, 'Test', 'Progress', current=3, max=10)['Test'])
+        widget = self.wgGen('Test')
+        iutils_testing.show(widget, __name__)
+
+    def test_RoleProgress(self):
+        self.root.sete(
+            'Test', option.ao({}, 'Test', 'Progress', current=3, max=10)['Test'])
+        self.root.sete(
+            'Test2', option.ao({}, 'Test2', 'Progress', current=5, max=8)['Test2'])
+
+        self.root.sete('progress', option.ao(
+            {}, 'progress', 'List', current=['/Test', '/Test2'])['progress'])
+        self.root.setattr('progress', 'kid', '/progress')
+
+        widget = self.wgGen('progress')
+        iutils_testing.show(widget, __name__)
+
 if __name__ == "__main__":
-	unittest.main(verbosity=2)  
-	
-	
-
+    unittest.main(verbosity=2)

@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """Download/upload thread"""
 import os
-import urllib2, urllib
+import urllib2
+import urllib
 
 from misura.canon.logger import Log as logging
 from PyQt4 import QtCore
@@ -11,80 +12,81 @@ from mproxy import urlauth, dataurl
 
 
 class TransferThread(QtCore.QThread):
-    dlStarted=QtCore.pyqtSignal(str,str)
+    dlStarted = QtCore.pyqtSignal(str, str)
     """Emitted when a new download is started. (url, local path)"""
-    dlFinished=QtCore.pyqtSignal(str,str)
+    dlFinished = QtCore.pyqtSignal(str, str)
     """Finished download - url, local path. (url, local path)"""
-    dlAborted=QtCore.pyqtSignal(str,str)
+    dlAborted = QtCore.pyqtSignal(str, str)
     """Aborted download - url, local path. (url, local path)"""
-    dlSize=QtCore.pyqtSignal(int)
+    dlSize = QtCore.pyqtSignal(int)
     """New total download dimension for current file (bytes)"""
-    dlDone=QtCore.pyqtSignal(int)
+    dlDone = QtCore.pyqtSignal(int)
     """Already downloaded bytes"""
-    dlWaiting=QtCore.pyqtSignal(str,str,int)
+    dlWaiting = QtCore.pyqtSignal(str, str, int)
     """Waiting to reserve the file uid for download. (url, local path,progress)"""
-    aborted=False
-    retry=30
+    aborted = False
+    retry = 30
     chunk = 1024**2
-    def __init__(self,url=False,outfile=False,uid=False,server=False,dbpath=False,post=False,parent=None):
-        QtCore.QThread.__init__(self,parent)
-        self.url=url
-        self.outfile=outfile
-        self.dbpath=dbpath
-        self.uid=uid
-        self.server=server
-        self.post=post
-        self.prefix='Download: '
-        
+
+    def __init__(self, url=False, outfile=False, uid=False, server=False, dbpath=False, post=False, parent=None):
+        QtCore.QThread.__init__(self, parent)
+        self.url = url
+        self.outfile = outfile
+        self.dbpath = dbpath
+        self.uid = uid
+        self.server = server
+        self.post = post
+        self.prefix = 'Download: '
+
     @property
     def pid(self):
         """Task identification name"""
-        r=self.prefix
+        r = self.prefix
         if self.url:
-            url=self.url.split('@')[-1]
-            r+=url
+            url = self.url.split('@')[-1]
+            r += url
         if self.outfile:
-            r+='\nto '+self.outfile
+            r += '\nto ' + self.outfile
         return r
-    
+
     @property
     def wpid(self):
         """Waiting task id"""
-        url=self.url.split('@')[-1]
-        return 'Waiting: {} \nto {}'.format(url,self.outfile)
-        
-    def task_new(self,size):
+        url = self.url.split('@')[-1]
+        return 'Waiting: {} \nto {}'.format(url, self.outfile)
+
+    def task_new(self, size):
         """Start new download task"""
-        self.tasks.jobs(size,self.pid)
+        self.tasks.jobs(size, self.pid)
         # End waiting task, if started
         self.tasks.done(self.wpid)
-        
-    def task_up(self,done):
+
+    def task_up(self, done):
         """Update current download task"""
-        self.tasks.job(done,self.pid)
-        
-    def task_end(self,*foo):
+        self.tasks.job(done, self.pid)
+
+    def task_end(self, *foo):
         """End current download task"""
         self.tasks.done(self.pid)
         self.tasks.done(self.wpid)
-        
-    def task_wait(self,url,outfile,progress):
+
+    def task_wait(self, url, outfile, progress):
         """Manage an UID reservation task"""
-        if progress==0:
+        if progress == 0:
             # Start a new waiting task
-            self.tasks.jobs(self.retry,self.wpid)
+            self.tasks.jobs(self.retry, self.wpid)
         else:
-            self.tasks.job(progress,self.wpid)
-            
-    def abort(self,pid=False):
+            self.tasks.job(progress, self.wpid)
+
+    def abort(self, pid=False):
         """Set the current download as aborted"""
-        if (not pid) or (pid==self.pid):
-            self.aborted=True
+        if (not pid) or (pid == self.pid):
+            self.aborted = True
         return self.aborted
-        
-    def set_tasks(self,tasks=None):
+
+    def set_tasks(self, tasks=None):
         """Install a graphical pending task manager for this thread"""
-        self.tasks=tasks
+        self.tasks = tasks
         if tasks is None:
             self.dlSize.disconnect(self.task_new)
             self.dlDone.disconnect(self.task_up)
@@ -97,151 +99,156 @@ class TransferThread(QtCore.QThread):
         self.dlFinished.connect(self.task_end)
         self.dlAborted.connect(self.task_end)
         self.dlWaiting.connect(self.task_wait)
-        self.connect(self.tasks,QtCore.SIGNAL('sig_done(QString)'),self.abort,QtCore.Qt.QueuedConnection)
+        self.connect(self.tasks, QtCore.SIGNAL(
+            'sig_done(QString)'), self.abort, QtCore.Qt.QueuedConnection)
         return True
-    
-    def prepare_opener(self,url):
+
+    def prepare_opener(self, url):
         """Install the basic authentication url opener"""
-        user,passwd,url=urlauth(url)
+        user, passwd, url = urlauth(url)
         # Connection to data
-        auth_handler= urllib2.HTTPBasicAuthHandler()
-        auth_handler.add_password(realm='MISURA', uri=url, user=user, passwd=passwd)
+        auth_handler = urllib2.HTTPBasicAuthHandler()
+        auth_handler.add_password(
+            realm='MISURA', uri=url, user=user, passwd=passwd)
         opener = urllib2.build_opener(auth_handler)
         # ...and install it globally so it can be used with urlopen.
-        urllib2.install_opener(opener)    
+        urllib2.install_opener(opener)
         return url
-                
-    def download_url(self,url,outfile):
+
+    def download_url(self, url, outfile):
         """Download from url and save to outfile path"""
         logging.debug('%s %s %s', 'download url', url, outfile)
-        self.aborted=False
-        self.prefix='Download: '
-        self.url=url
-        self.outfile=outfile
-        url=self.prepare_opener(url)
-        self.dlStarted.emit(url,outfile)
-        logging.debug('TransferThread.download_url %s',url)
+        self.aborted = False
+        self.prefix = 'Download: '
+        self.url = url
+        self.outfile = outfile
+        url = self.prepare_opener(url)
+        self.dlStarted.emit(url, outfile)
+        logging.debug('TransferThread.download_url %s', url)
         req = urllib2.urlopen(url)
-        dim=int(req.info().getheaders('Content-Length')[0])
+        dim = int(req.info().getheaders('Content-Length')[0])
         self.dlSize.emit(dim)
-        #FIXME: maximum recursion depth on big files or chunks too little
-        done=0
+        # FIXME: maximum recursion depth on big files or chunks too little
+        done = 0
         with open(outfile, 'wb') as fp:
             while not self.aborted:
-#                 sleep(0.1) # Throttle
+                #                 sleep(0.1) # Throttle
                 chunk = req.read(self.chunk)
-                if not chunk: break
+                if not chunk:
+                    break
                 fp.write(chunk)
-                done+=len(chunk)
+                done += len(chunk)
 #                 logging.debug('%s %s %s', 'DONE', done, dim)
                 self.dlDone.emit(done)
         # Remove if aborted
         if self.aborted:
-            logging.debug('%s %s', 'Download ABORTED. Removing local file:', outfile)
+            logging.debug(
+                '%s %s', 'Download ABORTED. Removing local file:', outfile)
             os.remove(outfile)
-            self.dlAborted.emit(url,outfile)
+            self.dlAborted.emit(url, outfile)
         # Append to db if defined
         elif self.dbpath and os.path.exists(self.dbpath):
-            db=indexer.Indexer(self.dbpath)
+            db = indexer.Indexer(self.dbpath)
             db.appendFile(outfile)
             db.close()
-        self.dlFinished.emit(url,outfile)
+        self.dlFinished.emit(url, outfile)
         return True
-    
-    def download_uid(self,server,uid,outfile,retry=20):
+
+    def download_uid(self, server, uid, outfile, retry=20):
         """Download test `uid` from `server` storage."""
-        url,loc=dataurl(server,uid)
-        self.url=url
+        url, loc = dataurl(server, uid)
+        self.url = url
         # Autocalc outfile from dbpath
         if not outfile and self.dbpath:
-            loc=loc.split('/')
-            outfile=os.path.dirname(self.dbpath)
-            outfile=os.path.join(outfile,*loc)
+            loc = loc.split('/')
+            outfile = os.path.dirname(self.dbpath)
+            outfile = os.path.join(outfile, *loc)
             # Create nested directory structure
-            d=os.path.dirname(outfile)
+            d = os.path.dirname(outfile)
             if not os.path.exists(d):
                 os.makedirs(d)
         if not outfile:
             raise BaseException('Output file was not specified')
-        self.outfile=outfile
+        self.outfile = outfile
         # Try to reserve the file for download
-        itr=0
-        self.retry=retry
+        itr = 0
+        self.retry = retry
         # Remove other reservations and close file
         while not server.storage.test.free(uid) and not self.aborted:
-            self.dlWaiting.emit(url,outfile,itr)
+            self.dlWaiting.emit(url, outfile, itr)
 #             sleep(1)
-            if itr>=self.retry:
+            if itr >= self.retry:
                 break
             logging.debug('%s %s', 'Waiting for uid reservation', uid)
-            itr+=1
+            itr += 1
         if self.aborted:
             logging.debug('%s %s', 'Aborted waiting for uid reservation', uid)
-            self.dlAborted.emit(url,outfile)
+            self.dlAborted.emit(url, outfile)
             return False
         # Reserve again
         server.storage.test.reserve(uid)
         # Abort if not reserved
         if not server.storage.test.is_reserved(uid):
-            logging.debug('%s %s %s', 'Cannot reserve UID for download', uid, url)
-            self.dlAborted.emit(url,outfile)
+            logging.debug(
+                '%s %s %s', 'Cannot reserve UID for download', uid, url)
+            self.dlAborted.emit(url, outfile)
             return False
-        self.download_url(url,outfile)
+        self.download_url(url, outfile)
         # Free uid for remote opening and next download
         server.storage.test.free(uid)
         return True
-    
-    def upload(self,url,localfile,post):
+
+    def upload(self, url, localfile, post):
         """
         `url` like .../RPC/full/obj/path
         `post` {'opt':,'filename':False}
         """
-        self.prefix='Upload: '
-        opt=post['opt']
-        remotefile=post.get('filename',False)
+        self.prefix = 'Upload: '
+        opt = post['opt']
+        remotefile = post.get('filename', False)
         if not remotefile:
-            remotefile=os.path.basename(localfile)
-        url=self.prepare_opener(url)
-        self.dlStarted.emit(url,localfile)
-        fp=open(localfile, 'rb')
-        fp.seek(0,2)
-        dim=fp.tell()
+            remotefile = os.path.basename(localfile)
+        url = self.prepare_opener(url)
+        self.dlStarted.emit(url, localfile)
+        fp = open(localfile, 'rb')
+        fp.seek(0, 2)
+        dim = fp.tell()
         fp.seek(0)
-        done=0
+        done = 0
         self.dlSize.emit(dim)
         while fp:
             if self.aborted:
-                data=''
+                data = ''
             else:
-                data=fp.read(self.chunk)
-            enc=urllib.urlencode({'opt' : opt,
-                             'filename'  : remotefile,
-                             'data':data})
+                data = fp.read(self.chunk)
+            enc = urllib.urlencode({'opt': opt,
+                                    'filename': remotefile,
+                                    'data': data})
             logging.debug('%s %s %s %s', 'urlopen', url, opt, remotefile)
             content = urllib2.urlopen(url=url, data=enc).read()
             logging.debug('%s %s', 'Transferred chunk', content)
-            done+=len(data)
-            if len(data)==0:
+            done += len(data)
+            if len(data) == 0:
                 fp.close()
-                fp=False
+                fp = False
             self.dlDone.emit(done)
 #             sleep(0.1)
         # Remove if aborted
         if self.aborted:
             logging.debug('%s %s', 'Upload ABORTED at', done)
-            self.dlAborted.emit(url,localfile)
-        self.dlFinished.emit(url,localfile)        
-        
+            self.dlAborted.emit(url, localfile)
+        self.dlFinished.emit(url, localfile)
+
     def run(self):
         """Download the configured file in a separate thread"""
         if (not (self.outfile or self.dbpath)) or not ((self.uid and self.server) or self.url) or not (self.post and self.outfile and self.url):
-            logging.debug('%s %s %s %s %s %s', 'Impossible to download', self.url, self.uid, self.server, self.outfile, self.post)
+            logging.debug('%s %s %s %s %s %s', 'Impossible to download',
+                          self.url, self.uid, self.server, self.outfile, self.post)
         if self.post:
-            self.upload(self.url,self.outfile,self.post)
+            self.upload(self.url, self.outfile, self.post)
         elif self.uid:
             # Reconnect because we are in a different thread
             self.server.connect()
-            self.download_uid(self.server,self.uid,self.outfile)
+            self.download_uid(self.server, self.uid, self.outfile)
         elif self.url:
-            self.download_url(self.url,self.outfile)
-            
+            self.download_url(self.url, self.outfile)

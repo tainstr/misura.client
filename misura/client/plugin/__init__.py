@@ -23,15 +23,13 @@ from ColorizePlugin import ColorizePlugin
 from RemoveGapsPlugin import RemoveGapsPlugin
 
 
-
-
 # Misura specific plugins
 from MakeDefaultDoc import MakeDefaultDoc, makeDefaultDoc
 from InitialDimensionPlugin import InitialDimensionPlugin
 from PercentilePlugin import PercentilePlugin
 from UnitsConverterTool import UnitsConverterTool
 from CalibrationFactorPlugin import CalibrationFactorPlugin
-from ThermalCyclePlugin  import ThermalCyclePlugin, drawCycleOnGraph
+from ThermalCyclePlugin import ThermalCyclePlugin, drawCycleOnGraph
 from ShapesPlugin import ShapesPlugin
 from MotorCorrectionPlugin import MotorCorrectionPlugin
 from SimFlexPlugin import SimFlexPlugin
@@ -41,4 +39,3 @@ from ViscosityPlugin import ViscosityPlugin
 
 
 from SurfaceTensionPlugin import SurfaceTensionPlugin
-

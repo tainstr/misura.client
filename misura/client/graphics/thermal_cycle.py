@@ -195,14 +195,14 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             return 0
         row = self.dat[index.row()]
         col = index.column()
-        
+
         if role == QtCore.Qt.DisplayRole:
             r = row[index.column()]
             if col == thermal_cycle_row.colTEMP:
                 if isinstance(r, basestring):
                     r = r.replace('>', 'Event: ')
             return r
-        
+
         if role == QtCore.Qt.ForegroundRole:
             modes_dict = collections.defaultdict(bool)
             modes_dict[thermal_cycle_row.colTIME] = 'points'
@@ -211,7 +211,8 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 
             current_row_mode = self.rows_models[index.row()]
             current_column_mode = modes_dict[col]
-            has_to_be_highligthed = index.row() > 0 and current_row_mode == current_column_mode
+            has_to_be_highligthed = index.row(
+            ) > 0 and current_row_mode == current_column_mode
 
             if has_to_be_highligthed:
                 return QtGui.QBrush(QtCore.Qt.darkRed)
@@ -225,7 +226,8 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         index_row = index.row()
         index_column = index.column()
         if not index.isValid() or index_row < 0 or index_row > self.rowCount() or index_column < 0 or index_column > self.columnCount():
-            logging.debug('%s %s %s', 'setData: invalid line', index_row, index_column)
+            logging.debug(
+                '%s %s %s', 'setData: invalid line', index_row, index_column)
             return False
         if isinstance(value, basestring) and (not value.startswith('>')):
             value = float(value)
@@ -239,11 +241,13 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.index(index_row, 0),
                   self.index(self.rowCount(), self.columnCount()))
         # Emetto la durata totale del ciclo termico
-        self.emit(QtCore.SIGNAL("duration(float)"), self.dat[-1][thermal_cycle_row.colTIME])
+        self.emit(QtCore.SIGNAL("duration(float)"),
+                  self.dat[-1][thermal_cycle_row.colTIME])
         return True
 
     def insertRows(self, position, rows_number=1, index=QtCore.QModelIndex(), values=False):
-        logging.debug('%s %s %s %s', 'insertRows', position, rows_number, index.row())
+        logging.debug(
+            '%s %s %s %s', 'insertRows', position, rows_number, index.row())
         self.beginInsertRows(
             QtCore.QModelIndex(), position, position + rows_number - 1)
         if not values:
@@ -253,7 +257,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             self.rows_models.insert(position + current_row_index, 'ramp')
 
         self.endInsertRows()
-        
+
         return True
 
     def removeRows(self, position, rows=1, index=QtCore.QModelIndex()):
@@ -303,7 +307,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
                     ent = row
                 t0, T0 = ent
                 D = (t - t0) / 60.
-                if T == T0 or D == 0: 
+                if T == T0 or D == 0:
                     R = 0
                 else:
                     R = (T - T0) / D

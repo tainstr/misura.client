@@ -493,10 +493,13 @@ class QuickOps(object):
     def remove_gaps(self, node=False):
         dataset = self.dsnode(node)
         from misura.client import plugin
-        remove_gaps_plugin = plugin.RemoveGapsPlugin(input_dataset = node.path, output_dataset = node.m_name + '_without_gaps')
-        plugin_dialog = PluginDialog(self.mainwindow, self.doc, remove_gaps_plugin, plugin.RemoveGapsPlugin)
+        remove_gaps_plugin = plugin.RemoveGapsPlugin(
+            input_dataset=node.path, output_dataset=node.m_name + '_without_gaps')
+        plugin_dialog = PluginDialog(
+            self.mainwindow, self.doc, remove_gaps_plugin, plugin.RemoveGapsPlugin)
         self.mainwindow.showDialog(plugin_dialog)
-        self.connect(plugin_dialog, QtCore.SIGNAL('dialogFinished'), self.refresh)
+        self.connect(
+            plugin_dialog, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @node
     def coefficient(self, node=False):

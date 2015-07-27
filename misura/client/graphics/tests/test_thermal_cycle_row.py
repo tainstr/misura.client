@@ -63,26 +63,28 @@ class TestTermalCycleRow(unittest.TestCase):
         rows = [[0, 30, 0, 0], [0, 30, 0, 10]]
         self.assertEqual(
             [10, 30, 0, 10], self.thermal_cycle_row.update_row(rows, 1, time_mode))
+
     def test_duration_should_not_change_when_rate_is_set_to_zero_and_temperature_does_not_change(self):
         time_mode = 'ramp'
 
         rows = [[0, 30, 0, 0], [10, 30, 0, 10]]
 
         self.assertEqual(
-            [10,30,0,10], self.thermal_cycle_row.update_row(rows, 1, time_mode))
+            [10, 30, 0, 10], self.thermal_cycle_row.update_row(rows, 1, time_mode))
 
     def test_when_rate_is_set_to_zero_temperature_should_become_equal_to_previous_row(self):
         time_mode = 'ramp'
 
-        rows = [[0,40,0,0], [10, 30, 0, 10]]
+        rows = [[0, 40, 0, 0], [10, 30, 0, 10]]
         self.assertEqual(
             [10, 40, 0, 10], self.thermal_cycle_row.update_row(rows, 1, time_mode))
 
     def test_when_rate_is_set_to_zero_not_in_ramp_mode_temperature_should_not_be_changed(self):
         time_mode = 'points'
 
-        rows = [[0,40,0,0], [0, 30, 0, 10]]
+        rows = [[0, 40, 0, 0], [0, 30, 0, 10]]
         self.assertEqual(
             [0, 30, 0, 0], self.thermal_cycle_row.update_row(rows, 1, time_mode))
 
-if __name__ == "__main__": unittest.main(verbosity=2)
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

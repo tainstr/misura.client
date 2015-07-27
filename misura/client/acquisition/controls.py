@@ -31,13 +31,14 @@ class Controls(QtGui.QToolBar):
     closingTest_kid = False
     stop_mode = True
     stop_message = ''
-    uid=None
+    uid = None
+
     def __init__(self, remote, parent=None):
         QtGui.QToolBar.__init__(self, parent)
         self._lock = Lock()
         self.remote = remote
         logging.debug('%s', 'Controls: init')
-        self.ended_set=set()
+        self.ended_set = set()
         self.server = remote.parent()
         self.iniAct = self.addAction('New', self.new)
         self.startAct = self.addAction('Start', self.start)
@@ -77,20 +78,20 @@ class Controls(QtGui.QToolBar):
         if kid == '/isRunning':
             self.updateActions()
         elif kid == self.closingTest_kid:
-            uid=self.remote.measure['uid']
+            uid = self.remote.measure['uid']
             if not self.uid:
-                self.uid=uid
-                return 
-            self.uid=uid
+                self.uid = uid
+                return
+            self.uid = uid
             if uid in self.ended_set:
                 logging.info('End of test already notified')
-                return 
+                return
             if self.remote['closingTest'] != 0:
                 self.closingTest = self.remote['closingTest']
                 logging.debug(
                     'Waiting closingTest... %s', self.remote['closingTest'])
                 return
-            
+
             if self.server['isRunning']:
                 logging.error('Remote isRunning still!')
                 return
@@ -146,7 +147,7 @@ class Controls(QtGui.QToolBar):
             if sig:
                 sig.emit()
 #		# Locally remember remote_is_running status
-        
+
         self.isRunning = remote_is_running
         return remote_is_running
 

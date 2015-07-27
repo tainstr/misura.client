@@ -8,18 +8,16 @@ import veusz.utils.vzsamp as vzsamp
 
 
 def run():
-	app = graphics.GraphicsApp(sys.argv)
+    app = graphics.GraphicsApp(sys.argv)
 # 	iutils.initApp(qapp=app)
 # 	vzdbus.setup()
 # 	vzsamp.setup()
 # 	iutils.initNetwork()
-	iutils.initTranslations(app)
-	app.startup()
-	iutils.initRegistry()
-	app.exec_()
+    iutils.initTranslations(app)
+    app.startup()
+    iutils.initRegistry()
+    app.exec_()
 # 	csutil.stop_profiler(mw)
-	
-if __name__=='__main__':
-	run()
 
-
+if __name__ == '__main__':
+    run()

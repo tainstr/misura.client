@@ -65,7 +65,7 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self, doc=False, parent=None):
         super(MainWindow, self).__init__(parent)
         self._lock = threading.Lock()
-        self.saved_set=set()
+        self.saved_set = set()
         self.cameras = {}
         self.toolbars = []
         self.fixedDoc = doc
@@ -126,15 +126,15 @@ class MainWindow(QtGui.QMainWindow):
         if not self.login_window.obj:
             self.login_window.close()
 
-    def succeed_login(self,rem=False):
+    def succeed_login(self, rem=False):
         """Called on new address successfully connected"""
         if not rem:
             rem = self.login_window.obj
         network.manager.set_remote(rem)
         registry.set_manager(network.manager)
         self.setServer(rem)
-    
-    def closeEvent(self,ev):
+
+    def closeEvent(self, ev):
         if not self.fixedDoc:
             registry.toggle_run(False)
             self.tasks.close()
@@ -210,10 +210,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def add_sumtab(self):
         # SUMMARY TREE - In lateral measureTab
-        self.measureTab.results = Results(self,self.summaryPlot)
-        self.navigator=self.measureTab.results.navigator
+        self.measureTab.results = Results(self, self.summaryPlot)
+        self.navigator = self.measureTab.results.navigator
         self.measureTab.refreshSamples()
-        
 
     def add_graph(self):
         # PLOT window
@@ -426,7 +425,7 @@ class MainWindow(QtGui.QMainWindow):
         logging.debug('%s', 'navigator')
         self.tasks.job(-1, pid, 'Sync document tree')
         self.navigator.set_doc(doc)
-        
+
         self.measureTab.set_doc(doc)
 
         logging.debug('%s', 'dataTable')
@@ -593,14 +592,14 @@ class MainWindow(QtGui.QMainWindow):
         if not os.path.exists(dbpath):
             logging.debug('%s %s', 'DATABASE PATH DOES NOT EXIST', dbpath)
             dbpath = False
-            d=settings.value('/FileSaveToDir', os.path.expanduser('~'))
-            path=os.path.join(str(d), self.remote.measure['name']+'.h5')
+            d = settings.value('/FileSaveToDir', os.path.expanduser('~'))
+            path = os.path.join(str(d), self.remote.measure['name'] + '.h5')
             outfile = QtGui.QFileDialog.getSaveFileName(
-                self, 	_("Download finished test as"), 
+                self, 	_("Download finished test as"),
                 path,
                 filter="Misura (*.h5)")
             outfile = str(outfile)
-            settings.setValue('/FileSaveToDir',os.path.dirname(outfile))
+            settings.setValue('/FileSaveToDir', os.path.dirname(outfile))
             if not len(outfile):
                 registry.toggle_run(True)
                 return False

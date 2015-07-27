@@ -12,13 +12,10 @@ def remove_gaps_from(data, threshold):
     gaps_indexes = numpy.where(numpy.abs(diffs) > threshold)[0]
 
     for gap_index in gaps_indexes:
-        for i in range(gap_index+1, len(clean_data)):
+        for i in range(gap_index + 1, len(clean_data)):
             clean_data[i] = clean_data[i] - diffs[gap_index]
 
     return clean_data
-
-
-
 
 
 class RemoveGapsPlugin(plugins.DatasetPlugin):
@@ -33,9 +30,12 @@ class RemoveGapsPlugin(plugins.DatasetPlugin):
 
     def __init__(self, input_dataset='', output_dataset=''):
         self.fields = [
-            plugins.FieldDataset('input_dataset', 'Input Dataset Name', default = input_dataset),
-            plugins.FieldDataset('output_dataset', 'Output dataset name', default = output_dataset),
-            plugins.FieldInt('gap_amplitutde', 'Minimum gap amplitude', default=5),
+            plugins.FieldDataset(
+                'input_dataset', 'Input Dataset Name', default=input_dataset),
+            plugins.FieldDataset(
+                'output_dataset', 'Output dataset name', default=output_dataset),
+            plugins.FieldInt(
+                'gap_amplitutde', 'Minimum gap amplitude', default=5),
         ]
 
     def getDatasets(self, fields):
@@ -46,9 +46,9 @@ class RemoveGapsPlugin(plugins.DatasetPlugin):
         input_dataset = helper.getDataset(fields['input_dataset'])
         gap_amplitutde = fields['gap_amplitutde']
         cleaned_data = remove_gaps_from(input_dataset.data, gap_amplitutde)
-        self.output_dataset.update(data=cleaned_data, serr=input_dataset.serr, perr=input_dataset.perr, nerr=input_dataset.nerr)
+        self.output_dataset.update(
+            data=cleaned_data, serr=input_dataset.serr, perr=input_dataset.perr, nerr=input_dataset.nerr)
         return [self.output_dataset]
 
 # add plugin classes to this list to get used
 plugins.datasetpluginregistry.append(RemoveGapsPlugin)
-
