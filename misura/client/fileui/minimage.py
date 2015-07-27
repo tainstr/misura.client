@@ -260,8 +260,15 @@ class MiniImage(QtGui.QWidget):
         ds = self.doc.data.get('0:kiln/T')
         T = ds.data[self.doc_idx]
         mimeData.setData("text/plain", 'point:{}:{}:{}'.format(self.base_dataset_path, self.t, T))
-        mimeData.setImageData(self.lbl_img.pixmap())
+        pix=self.lbl_img.pixmap()
+        ba=QtCore.QByteArray()
+        buf=QtCore.QBuffer(ba)
+        buf.open(QtCore.QIODevice.WriteOnly)
+        pix.save(buf,'PNG')
+        mimeData.setData("image/png",ba)
+        mimeData.setImageData(pix)
         drag.setMimeData(mimeData)
+        drag.setPixmap(pix)
         logging.debug('start drag %s', mimeData.text())
         drag.exec_()    
         
