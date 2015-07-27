@@ -470,7 +470,7 @@ class ThermalCurveTable(QtGui.QTableView):
         idx, ent = next_point(self.model().dat, crow, -1)
         if ent is not False:
             t = ent[0]
-        self.model().insertRows(crow + 1, ini=[t, event, 0, 0])
+        self.model().insertRows(crow + 1, values=[t, event, 0, 0])
 
     def newMove(self):
         items = ['>move,close', '>move,open']
