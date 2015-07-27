@@ -90,6 +90,11 @@ class MeasureInfo(QtGui.QTabWidget):
 			self.addTab(conf.Interface(self.remote.parent(),sample, sample.describe(), self), 'Sample'+str(i))
 		self.addTab(self.results, 'Results')
 		return True
+		
+	def closeEvent(self, ev):
+		"""Disconnect dangerous signals before closing"""
+		registry.system_kid_changed.disconnect(self.system_kid_slot)
+		return super(MeasureInfo, self).closeEvent(ev)
 	
 	def system_kid_slot(self,kid):
 		if kid=='/isRunning':

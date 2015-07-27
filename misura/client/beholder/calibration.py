@@ -173,6 +173,7 @@ class CalibrationTool(QtGui.QDialog):
 		
 	def cleanUp(self, *foo):
 		self.sample.analyzer['calibration']=False
+		logging.debug('Camera exiting calibration %s', self.sample.analyzer['calibration'])
 		s = self.pixItem.scene()
 		lst = self.pt1, self.pt2, self.line, self.stop1, self.stop2
 		for item in lst:

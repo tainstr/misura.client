@@ -178,8 +178,8 @@ def configure_cameras():
 	m.horizontal['cameraRight']=right_cam
 	m.horizontal.save('default')
 
-	m.vertical['cameraBase']=left_cam
-	m.vertical['cameraHeight']=right_cam
+	m.vertical['cameraBase']=right_cam
+	m.vertical['cameraHeight']=left_cam
 	m.vertical.save('default')
 
 	m.flex['camera']=flex_cam
@@ -203,10 +203,14 @@ def configure_cameras():
 
 	# Vertical 
 	m.vertical['nSamples']=1
+	left_cam['name']='Height'
 	left_cam['smp0']=m.vertical.sample0.Base
 	left_cam.save('vertical')
+	right_cam['name']='Base'
 	right_cam['smp0']=m.vertical.sample0.Height
 	right_cam.save('vertical')
+	
+	#TODO: remove autocrop
 
 def configure_encoders():
 	print 'Configure encoders'

@@ -417,7 +417,7 @@ class ActiveWidget(Active, QtGui.QWidget):
 		self.emenu.addAction(_('Set default value'), self.set_default)
 		self.emenu.addAction(_('Check for modification'), self.get)
 		self.emenu.addAction(_('Option Info'), self.show_info)
-		self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
+		#self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
 		# Units button
 		self.bmenu=LabelUnit(self.prop,self)
 		self.bmenu.setMenu(self.emenu)
