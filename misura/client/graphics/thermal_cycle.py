@@ -444,8 +444,8 @@ class ThermalCurveTable(QtGui.QTableView):
         m.addAction(_('Insert point'), self.newRow)
         m.addAction(_('Insert checkpoint'), self.newCheckpoint)
         m.addAction(_('Insert movement'), self.newMove)
-# 		a=m.addAction(_('Insert parametric heating'), self.newParam)
-# 		a.setEnabled(False)
+#       a=m.addAction(_('Insert parametric heating'), self.newParam)
+#       a.setEnabled(False)
         m.addAction(_('Remove current row'), self.delRow)
         m.addSeparator()
         # self.curveModel.mode_ramp(0)
@@ -463,12 +463,11 @@ class ThermalCurveTable(QtGui.QTableView):
     def newRow(self):
         crow = self.selection.currentIndex().row()
 
-        row_to_copy = thermal_cycle_row.previous_not_event_row_index(crow, self.model().dat)
+        row_to_copy = thermal_cycle_row.previous_not_event_row_index(
+            crow, self.model().dat)
         values = self.model().dat[row_to_copy][:]
 
         self.model().insertRows(crow + 1, values=values)
-
-    
 
     def insert_event(self, event):
         """Insert new `event` at current row"""
@@ -522,13 +521,13 @@ class ThermalCycleDesigner(QtGui.QSplitter):
     """The configuration interface widget. It builds interactive controls to deal with a misura configuration object (options, settings, peripherals configurations, etc)."""
 
     def __init__(self, remote, parent=None):
-        #		QtGui.QWidget.__init__(self, parent)
+        #       QtGui.QWidget.__init__(self, parent)
         QtGui.QSplitter.__init__(self, parent)
         self.setOrientation(QtCore.Qt.Vertical)
         self.remote = remote
         self.main_layout = self
-#		self.main_layout=QtGui.QVBoxLayout()
-#		self.setLayout(self.main_layout)
+#       self.main_layout=QtGui.QVBoxLayout()
+#       self.setLayout(self.main_layout)
         menuBar = QtGui.QMenuBar(self)
         menuBar.setNativeMenuBar(False)
         self.main_layout.addWidget(menuBar)
@@ -556,7 +555,14 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.addTable()
 
         self.main_layout.addWidget(self.table)
+        running_instrument = getattr(remote.root, remote.root['lastInstrument'])
+        self.on_kiln_stopped_widget = widgets.build(
+            running_instrument, running_instrument.measure, running_instrument.measure.gete('onKilnStopped'))
+        self.on_kiln_stopped_widget.button.hide()
+        self.on_kiln_stopped_widget.lay.insertWidget(0, self.on_kiln_stopped_widget.label_widget)
+        self.main_layout.addWidget(self.on_kiln_stopped_widget)
         self.main_layout.addWidget(self.plot)
+
 
     def replot(self, *args):
         crv = self.model.curve(events=False)
@@ -599,7 +605,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             logging.debug('%s %s', 'got remote curve', crv)
         if len(crv) == 0:
             crv = [[0, 0]]
-# 			self.plot.hide()
+#           self.plot.hide()
         if not self.plot.isVisible():
             self.plot.show()
         pb = QtGui.QProgressBar(self)
