@@ -6,9 +6,18 @@ colRATE = 2
 colDUR = 3
 colMODE = 4
 
+def is_row_an_event(row):
+        temp_value = row[colTEMP]
+        return isinstance(temp_value, basestring) and temp_value.startswith('>')
+
+def previous_not_event_row_index(current_index, rows):
+    index_to_take = current_index - 1
+    while(is_row_an_event(rows[index_to_take])):
+        index_to_take -= 1
+    return index_to_take
+
 
 class ThermalCycleRow():
-
     def update_row(self, rows, row_index, mode):
         current_row = rows[row_index]
         if isinstance(current_row[colTEMP], basestring):
@@ -32,7 +41,8 @@ class ThermalCycleRow():
             if heating_rate != 0:
                 duration = (temperature - next_temperature) / heating_rate
             else:
-                temperature = rows[row_index - 1][colTEMP]
+                index_to_take = previous_not_event_row_index(row_index, rows)
+                temperature = rows[index_to_take][colTEMP]
             time = next_time + duration
         elif mode == 'dwell':  # duration/temperature (Duration)
             if duration == 0:
@@ -45,3 +55,4 @@ class ThermalCycleRow():
             return [next_time + 1, next_temperature, 0, 1]
         else:
             return [time, temperature, heating_rate, duration]
+

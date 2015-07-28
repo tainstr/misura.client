@@ -79,6 +79,13 @@ class TestTermalCycleRow(unittest.TestCase):
         self.assertEqual(
             [10, 40, 0, 10], self.thermal_cycle_row.update_row(rows, 1, time_mode))
 
+    def test_when_rate_is_set_to_zero_temperature_should_become_equal_to_previous_non_event_row(self):
+        time_mode = 'ramp'
+
+        rows = [[0, 40, 0, 0], [0, '>any event', 0, 0], [10, 30, 0, 10]]
+        self.assertEqual(
+            [10, 40, 0, 10], self.thermal_cycle_row.update_row(rows, 2, time_mode))
+
     def test_when_rate_is_set_to_zero_not_in_ramp_mode_temperature_should_not_be_changed(self):
         time_mode = 'points'
 
