@@ -462,9 +462,17 @@ class ThermalCurveTable(QtGui.QTableView):
     ### ADD/DEL ####
     def newRow(self):
         crow = self.selection.currentIndex().row()
-        values = self.model().dat[crow][:]
+        row_to_copy = crow
+        while(self.isRowAnEvent(self.model().dat[row_to_copy])):
+            row_to_copy -= 1
+
+        values = self.model().dat[row_to_copy][:]
 
         self.model().insertRows(crow + 1, values=values)
+
+    def isRowAnEvent(self, row):
+        temp_value = row[thermal_cycle_row.colTEMP]
+        return isinstance(temp_value, basestring) and temp_value.startswith('>')
 
     def insert_event(self, event):
         """Insert new `event` at current row"""
