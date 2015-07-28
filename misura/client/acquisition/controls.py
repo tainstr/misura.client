@@ -39,6 +39,8 @@ class Controls(QtGui.QToolBar):
         self.remote = remote
         logging.debug('%s', 'Controls: init')
         self.ended_set = set()
+        self.stopped_set = set()
+        self.started_set = set()
         self.server = remote.parent()
         self.iniAct = self.addAction('New', self.new)
         self.startAct = self.addAction('Start', self.start)
@@ -132,22 +134,29 @@ class Controls(QtGui.QToolBar):
 
         self.startAct.setEnabled(remote_is_running ^ 1)
         self.iniAct.setEnabled(remote_is_running ^ 1)
-
+        uid = self.remote.measure['uid']
+        if uid in self.ended_set:
+            self.isRunning=remote_is_running
+            return remote_is_running
         if self.isRunning is not None and self.isRunning != remote_is_running:
             sig = False
+            msg = False
             logging.debug(
                 '%s %s %s', 'Controls.updateActions', self.isRunning, remote_is_running)
-            if remote_is_running:
+            if remote_is_running and uid not in self.started_set:
                 msg = 'A new test was started'
                 sig = self.started
-            else:
+                self.started_set.add(uid)
+            elif uid not in self.ended_set:
                 msg = 'Finished test'
-            QtGui.QMessageBox.warning(self, msg, msg)
+                self.ended_set.add(uid)
+            # Show message box
+            if msg:
+                QtGui.QMessageBox.warning(self, msg, msg)
             # Emit after message
             if sig:
                 sig.emit()
-#		# Locally remember remote_is_running status
-
+        # Locally remember remote_is_running status
         self.isRunning = remote_is_running
         return remote_is_running
 
