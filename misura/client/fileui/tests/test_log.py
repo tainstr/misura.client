@@ -16,7 +16,7 @@ class OfflineLog(unittest.TestCase):
     def test_log(self):
         fpath = os.path.join(iutils_testing.data_dir, 'test_video.h5')
 
-        fp = indexer.Sh	edFile(fpath)
+        fp = indexer.SharedFile(fpath)
         log = fileui.OfflineLog(fp)
         txt = log.toPlainText()
 

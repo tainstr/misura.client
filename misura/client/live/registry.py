@@ -108,7 +108,7 @@ class KidRegistry(QtCore.QThread):
             self.connect(self, QtCore.SIGNAL('update()'), self.doc.update)
 
 # FIXME: should be locked. It was unlocked for performance, but SHOULD BE LOCKED
-#	@lockme
+#   @lockme
     def register(self, w):
         """Register Active object `w`"""
         if w.type == 'Button':
@@ -128,7 +128,7 @@ class KidRegistry(QtCore.QThread):
         return kid
 
 # FIXME: should be locked. It was unlocked for performance, but SHOULD BE LOCKED
-#	@lockme
+#   @lockme
     def unregister(self, widget):
         """Removes a widget from the registry."""
         if not widget.prop:
@@ -244,7 +244,7 @@ class KidRegistry(QtCore.QThread):
                     '%s', 'KidRegistry.control_loop: No manager registered.')
                 return True
             if not self.manager.remote:
-                # 				print 'KidRegistry.control_loop: no remote manager'
+                #               print 'KidRegistry.control_loop: no remote manager'
                 return True
             self.obj = self.manager.remote.copy()
             self.obj.connect()
@@ -258,8 +258,8 @@ class KidRegistry(QtCore.QThread):
                 self.proxy = self.doc.proxy.copy()
                 self.proxy.connect()
                 self.lastdoc = self.doc
-#		if self.proxy:
-#			self.proxy.connect()
+#       if self.proxy:
+#           self.proxy.connect()
         # If a doc is registered and remote is running acquisition, update the
         # document
         if self.obj['isRunning']:
@@ -281,14 +281,14 @@ class KidRegistry(QtCore.QThread):
             '%s %s', 'Starting registry in new thread', len(self.rid))
         self.setPriority(QtCore.QThread.IdlePriority)
         t0 = time()
-#		self.obj=False
+#       self.obj=False
         self.stream = True
         self.lastdoc = False
-# 		if self.taskswg:
-# 			self.taskswg.sync.moveToThread(self)
+#       if self.taskswg:
+#           self.taskswg.sync.moveToThread(self)
         while self.stream:
             # Sleep only if loops are shorter than interval
-            # 			print 'KidRegistry.run', len(self.rid)
+            #           print 'KidRegistry.run', len(self.rid)
             t = time()
             d = self.interval - (t - t0)
             if d > 0:

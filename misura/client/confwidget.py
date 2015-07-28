@@ -101,7 +101,7 @@ class RecentInterface(object):
             if self.category == 'server':
                 name0 = row[0].replace('//', '/').split('/')[1]
                 name = row[1] + '@' + name
-#				sig='https://%s:%s@%s/RPC' % (row[1],row[2],name0)
+#               sig='https://%s:%s@%s/RPC' % (row[1],row[2],name0)
             nsl.append([name, sig])
         return nsl
 
@@ -222,7 +222,7 @@ class Greeter(QtGui.QWidget):
         self.lay.addWidget(self.file)
         self.database = RecentWidget(confdb, 'database', self)
         self.lay.addWidget(self.database)
-        self.server = RecentWidget(confdb, 'server', self)
-        self.lay.addWidget(self.server)
+#        self.server = RecentWidget(confdb, 'server', self)
+#        self.lay.addWidget(self.server)
 
         self.setLayout(self.lay)

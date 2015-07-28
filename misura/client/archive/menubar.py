@@ -7,8 +7,7 @@ from ..confwidget import RecentMenu
 
 
 class ArchiveMenuBar(QtGui.QMenuBar):
-
-    """Menu principali"""
+    """Archive menus"""
 
     def __init__(self, server=False, parent=None):
         QtGui.QMenuBar.__init__(self, parent)
@@ -29,12 +28,12 @@ class ArchiveMenuBar(QtGui.QMenuBar):
         self.actNewDb = self.file.addAction(
             _('New Database'), self.new_database)
 
-        self.recentServer = RecentMenu(confdb, 'server', self)
-#		self.connect(self.recentServer,QtCore.SIGNAL('new(QString)'),self.open_server)
-        self.addMenu(self.recentServer)
+#        self.recentServer = RecentMenu(confdb, 'server', self)
+#       self.connect(self.recentServer,QtCore.SIGNAL('new(QString)'),self.open_server)
+#        self.addMenu(self.recentServer)
 
         self.recentM3db = RecentMenu(confdb, 'm3database', self)
-#		self.connect(self.recentM3db,QtCore.SIGNAL('new(QString)'),self.open_database)
+#       self.connect(self.recentM3db,QtCore.SIGNAL('new(QString)'),self.open_database)
         self.file.addMenu(self.recentM3db)
 
         self.currents = self.addMenu(_('View Tests'))

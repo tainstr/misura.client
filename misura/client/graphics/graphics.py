@@ -52,9 +52,9 @@ class CustomInterface(object):
         self.mw = mainwindow
         self.menu = self.mw.menuBar().addMenu(name)
         self.name = name
-#		imp='Import'+name
-#		self.mw.ci.addCommand(imp, self.open_file)
-#		self.mw.document.eval_context[imp]=self.open_file
+#       imp='Import'+name
+#       self.mw.ci.addCommand(imp, self.open_file)
+#       self.mw.document.eval_context[imp]=self.open_file
 
     def buildMenus(self, actions):
         # Build menus
@@ -114,7 +114,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
             QtCore.Qt.RightDockWidgetArea, self.openedFilesDock)
 
         self.mw.plot.sigUpdatePage.connect(self.update_page)
-# 		self.connect(self.mw.plot,QtCore.SIGNAL("sigUpdatePage"),self.update_page)
+#       self.connect(self.mw.plot,QtCore.SIGNAL("sigUpdatePage"),self.update_page)
         self.connect(
             self.openedFiles, QtCore.SIGNAL("select(QString)"), self.nav_select)
 
@@ -126,17 +126,18 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         self.recentDatabase = RecentMenu(confdb, 'database', self.mw)
         self.connect(self.recentDatabase, QtCore.SIGNAL(
             'select(QString)'), self.open_database)
-        self.menu.addMenu(self.recentDatabase)
-        self.recentServer = RecentMenu(confdb, 'server', self.mw)
+#        self.menu.addMenu(self.recentDatabase)
+#        self.recentServer = RecentMenu(confdb, 'server', self.mw)
         self.connect(self.recentServer, QtCore.SIGNAL(
             'select(QString)'), self.open_server)
         self.menu.addMenu(self.recentServer)
 
-#		 ACTIONS
+#        ACTIONS
         a = veusz.utils.makeAction
-        self.actions = {'m4.connect':
-                        a(self, 'Connect to a misura server', 'Connect',
-                          self.recentServer.new, icon='m4.connect'),
+        self.actions = {
+#                        'm4.connect':  
+#                            a(self, 'Connect to a misura server', 'Connect',
+#                          self.recentServer.new, icon='m4.connect'),
                         'm4.open':
                         a(self, 'Open Local Test File', 'Open File',
                           self.recentFile.new, icon='m4.open'),
@@ -190,7 +191,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
 
     def update_title(self, pg):
         """Update title label if present in page `pg`"""
-#		print 'Update title',pg.path
+#       print 'Update title',pg.path
         if pg.getChild('title') is None:
             return
         avplot = self.openedFiles.model().plots['plot']
@@ -241,7 +242,9 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
             return False
         idb.show()
         self.connect(
-            idb, QtCore.SIGNAL('selectedFile(QString)'), self.open_file)
+            idb, QtCore.SIGNAL('selectedFile(QString)'), self.liveImport)
+        # Keep a reference
+        self.idb = idb
 
     def open_server(self, path):
         idb = getRemoteDatabaseWidget(path)
