@@ -479,6 +479,7 @@ class ThermalCurveTable(QtGui.QTableView):
         if ent is not False:
             t = ent[0]
         self.model().insertRows(crow + 1, values=[t, event, 0, 0])
+        self.setSpan(crow + 1, thermal_cycle_row.colTEMP, 1, 3)
 
     def newMove(self):
         items = ['>move,close', '>move,open']
