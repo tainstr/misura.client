@@ -561,6 +561,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.on_kiln_stopped_widget.button.hide()
         self.on_kiln_stopped_widget.lay.insertWidget(0, self.on_kiln_stopped_widget.label_widget)
         self.main_layout.addWidget(self.on_kiln_stopped_widget)
+        
         self.main_layout.addWidget(self.plot)
 
 
