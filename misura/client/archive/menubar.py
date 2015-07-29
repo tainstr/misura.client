@@ -28,7 +28,7 @@ class ArchiveMenuBar(QtGui.QMenuBar):
         self.actNewDb = self.file.addAction(
             _('New Database'), self.new_database)
 
-#        self.recentServer = RecentMenu(confdb, 'server', self)
+        self.recentServer = RecentMenu(confdb, 'server', self)
 #       self.connect(self.recentServer,QtCore.SIGNAL('new(QString)'),self.open_server)
 #        self.addMenu(self.recentServer)
 

@@ -222,7 +222,7 @@ class Greeter(QtGui.QWidget):
         self.lay.addWidget(self.file)
         self.database = RecentWidget(confdb, 'database', self)
         self.lay.addWidget(self.database)
-#        self.server = RecentWidget(confdb, 'server', self)
+        self.server = RecentWidget(confdb, 'server', self)
 #        self.lay.addWidget(self.server)
 
         self.setLayout(self.lay)
