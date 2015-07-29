@@ -1,15 +1,9 @@
 #!/usr/bin/python2.6
 # -*- coding: utf-8 -*-
 from misura.canon.logger import Log as logging
-from PyQt4 import QtCore, QtGui
+
 pyodbc = False
-try:
-    import odbc as pyodbc
-except:
-    try:
-        import pyodbc
-    except:
-        pass
+import pyodbc
 import datetime
 from time import sleep
 from scipy import array, interpolate, arange
@@ -22,6 +16,7 @@ from misura.client.database import ProgressBar
 from misura.canon.option import ao
 import convert
 import functools
+from PyQt4 import QtCore, QtGui
 settings = QtCore.QSettings(
     QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope, 'Expert System Solutions', 'Misura 4')
 
