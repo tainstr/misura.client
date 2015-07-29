@@ -555,12 +555,14 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.addTable()
 
         self.main_layout.addWidget(self.table)
-        self.on_kiln_stopped_widget = widgets.build(
-            active_instrument, active_instrument.measure, active_instrument.measure.gete('onKilnStopped'))
-        self.on_kiln_stopped_widget.button.hide()
-        self.on_kiln_stopped_widget.lay.insertWidget(0, self.on_kiln_stopped_widget.label_widget)
-        self.main_layout.addWidget(self.on_kiln_stopped_widget)
-        
+
+        if active_instrument.measure.has_key('onKilnStopped'):
+            self.on_kiln_stopped_widget = widgets.build(
+                active_instrument, active_instrument.measure, active_instrument.measure.gete('onKilnStopped'))
+            self.on_kiln_stopped_widget.button.hide()
+            self.on_kiln_stopped_widget.lay.insertWidget(0, self.on_kiln_stopped_widget.label_widget)
+            self.main_layout.addWidget(self.on_kiln_stopped_widget)
+            
         self.main_layout.addWidget(self.plot)
 
 
