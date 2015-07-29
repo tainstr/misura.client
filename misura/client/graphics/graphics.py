@@ -126,11 +126,11 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         self.recentDatabase = RecentMenu(confdb, 'database', self.mw)
         self.connect(self.recentDatabase, QtCore.SIGNAL(
             'select(QString)'), self.open_database)
-#        self.menu.addMenu(self.recentDatabase)
+        self.menu.addMenu(self.recentDatabase)
 #        self.recentServer = RecentMenu(confdb, 'server', self.mw)
-        self.connect(self.recentServer, QtCore.SIGNAL(
-            'select(QString)'), self.open_server)
-        self.menu.addMenu(self.recentServer)
+#        self.connect(self.recentServer, QtCore.SIGNAL(
+#            'select(QString)'), self.open_server)
+#        self.menu.addMenu(self.recentServer)
 
 #        ACTIONS
         a = veusz.utils.makeAction
