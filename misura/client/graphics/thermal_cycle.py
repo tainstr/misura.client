@@ -520,7 +520,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 
     """The configuration interface widget. It builds interactive controls to deal with a misura configuration object (options, settings, peripherals configurations, etc)."""
 
-    def __init__(self, remote, parent=None):
+    def __init__(self, remote, active_instrument, parent=None):
         #       QtGui.QWidget.__init__(self, parent)
         QtGui.QSplitter.__init__(self, parent)
         self.setOrientation(QtCore.Qt.Vertical)
@@ -555,9 +555,8 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.addTable()
 
         self.main_layout.addWidget(self.table)
-        running_instrument = getattr(remote.root, remote.root['lastInstrument'])
         self.on_kiln_stopped_widget = widgets.build(
-            running_instrument, running_instrument.measure, running_instrument.measure.gete('onKilnStopped'))
+            active_instrument, active_instrument.measure, active_instrument.measure.gete('onKilnStopped'))
         self.on_kiln_stopped_widget.button.hide()
         self.on_kiln_stopped_widget.lay.insertWidget(0, self.on_kiln_stopped_widget.label_widget)
         self.main_layout.addWidget(self.on_kiln_stopped_widget)
@@ -595,9 +594,6 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         # Connect to apply_and_save
         self.connect(self.tcc.bSave, QtCore.SIGNAL(
             'clicked(bool)'), self.apply_and_save)
-        # Remove edit button
-        self.tcc.lay.removeWidget(self.tcc.bEdit)
-        self.tcc.bEdit.hide()
         self.main_layout.addWidget(self.buttonBar)
 
     def addTable(self, crv=None):

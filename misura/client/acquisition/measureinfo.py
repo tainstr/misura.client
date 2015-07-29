@@ -29,7 +29,7 @@ class MeasureInfo(QtGui.QTabWidget):
         p = self.server
         if p.has_child('kiln'):
             self.thermalCycleView = thermal_cycle.ThermalCycleDesigner(
-                p.kiln, parent=self)
+                p.kiln, remote, parent=self)
         else:
             self.thermalCycleView = QtGui.QWidget(self)
         self.results = QtGui.QWidget(self)
