@@ -42,9 +42,6 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.myMenuBar, QtCore.SIGNAL(
             'new_database(QString)'), self.new_database)
 
-        self.connect(self.myMenuBar.recentServer, QtCore.SIGNAL(
-            'select(QString)'), self.open_server)
-
         self.connect(self.myMenuBar.recentM3db, QtCore.SIGNAL(
             'select(QString)'), self.open_m3db)
 
@@ -53,8 +50,6 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(greeter.file, greeter.file.sig_select, self.open_file)
         self.connect(
             greeter.database, greeter.database.sig_select, self.open_database)
-        self.connect(
-            greeter.server, greeter.server.sig_select, self.open_server)
         win = self.area.addSubWindow(greeter)
         win.show()
 
