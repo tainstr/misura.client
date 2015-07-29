@@ -5,7 +5,7 @@ import unittest
 
 import os
 from misura.client.tests import iutils_testing
-from misura.client import archive, filedata, conf
+from misura.client import browser, filedata, conf
 
 from PyQt4 import QtGui
 

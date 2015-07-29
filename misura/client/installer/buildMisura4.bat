@@ -25,5 +25,5 @@ cd %installerDir%
 
 REM Consolidate local build
 xcopy %out%\configuration\* %out%\misura4
-xcopy %out%\archive\* %out%\misura4
+xcopy %out%\browser\* %out%\misura4
 xcopy %out%\acquisition\* %out%\misura4

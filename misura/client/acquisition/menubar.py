@@ -27,7 +27,7 @@ class MenuBar(QtGui.QMenuBar):
         if self.fixedDoc is False:
             self.set_acquisition_mode()
         else:
-            self.set_archive_mode()
+            self.set_browser_mode()
         self.measure = self.addMenu(_('Measure'))
         self.connect(
             self.measure, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
@@ -67,7 +67,7 @@ class MenuBar(QtGui.QMenuBar):
         self.actRestart = self.connectTo.addAction(_('Restart'), self.restart)
         self.actRestart.setEnabled(False)
 
-    def set_archive_mode(self):
+    def set_browser_mode(self):
         self.connectTo = QtGui.QMenu()
         self.instruments = QtGui.QMenu()
         #		self.chooser.setView(self.tree)

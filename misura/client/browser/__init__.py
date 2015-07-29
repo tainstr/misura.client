@@ -1,5 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from archive import MainWindow
+from browser import MainWindow
 from testwindow import TestWindow

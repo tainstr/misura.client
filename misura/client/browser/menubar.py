@@ -6,8 +6,8 @@ from ..clientconf import confdb
 from ..confwidget import RecentMenu
 
 
-class ArchiveMenuBar(QtGui.QMenuBar):
-    """Archive menus"""
+class BrowserMenuBar(QtGui.QMenuBar):
+    """Browser menus"""
 
     def __init__(self, server=False, parent=None):
         QtGui.QMenuBar.__init__(self, parent)

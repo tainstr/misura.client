@@ -28,7 +28,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.tab)
         self.setMinimumSize(800, 600)
         self.setWindowTitle(_('Misura Browser'))
-        self.myMenuBar = menubar.ArchiveMenuBar(parent=self)
+        self.myMenuBar = menubar.BrowserMenuBar(parent=self)
         self.setMenuWidget(self.myMenuBar)
 
         self.connect(
@@ -59,7 +59,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def open_file(self, path):
         path = unicode(path)
-        logging.debug('%s %s', 'Archive MainWindow.open_file', path)
+        logging.debug('%s %s', 'Browser MainWindow.open_file', path)
         doc = filedata.MisuraDocument(path)
         tw = testwindow.TestWindow(doc)
         cw = self.centralWidget()

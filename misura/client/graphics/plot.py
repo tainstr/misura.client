@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Simple plotting for archive and live acquisition."""
+"""Simple plotting for browser and live acquisition."""
 from misura.canon.logger import Log as logging
 from misura.client import plugin
 from misura.client.database import ProgressBar

@@ -5,7 +5,7 @@ import unittest
 
 import os
 from misura.client.tests import iutils_testing
-from misura.client import archive, filedata, conf
+from misura.client import browser, filedata, conf
 from misura.client.clientconf import confdb
 import shutil
 
@@ -25,7 +25,7 @@ class MainWindow(unittest.TestCase):
         shutil.copy(
             os.path.join(iutils_testing.data_dir, 'measure.h5'), test_file_name)
 
-        main_window = archive.MainWindow()
+        main_window = browser.MainWindow()
         main_window.open_file(test_file_name)
 
         iutils_testing.show(main_window, __name__)
@@ -38,7 +38,7 @@ class TestWindow(unittest.TestCase):
 
     def test_openfile(self):
         doc = filedata.MisuraDocument(test_file_name)
-        w = archive.TestWindow(doc)
+        w = browser.TestWindow(doc)
         w.close()
 
 

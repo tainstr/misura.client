@@ -24,8 +24,12 @@ function mgr {
 	mgui graphics.py "$@"
 }
 
+function mbr {
+	mgui browser.py "$@"
+}
+
 function mar {
-	mgui archive.py "$@"
+	mbr
 }
 
 ####

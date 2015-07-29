@@ -131,8 +131,8 @@ class QuickOps(object):
         if not node.linked:
             return False
         doc = MisuraDocument(node.linked.filename)
-        from misura.client import archive
-        archive.TestWindow(doc).show()
+        from misura.client import browser
+        browser.TestWindow(doc).show()
 
     @node
     def closeFile(self, node=False):

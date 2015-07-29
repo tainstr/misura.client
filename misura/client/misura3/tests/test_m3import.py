@@ -12,7 +12,7 @@ import tables
 from tables.nodes import filenode
 import veusz.document as document
 
-from misura.client import archive
+from misura.client import browser
 from misura.client.misura3 import convert
 from misura.client.conf import devtree
 from misura.canon import reference
@@ -202,7 +202,7 @@ class Convert(unittest.TestCase):
     def test_9_toArchive(self):
         op = convert.convert(iut.db3_path, '00001S', force=True, keep_img=True)
         # problema widgetregistry
-        mw = archive.MainWindow()
+        mw = browser.MainWindow()
         mw.open_file(op)
 
     @unittest.skip('')

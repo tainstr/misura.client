@@ -65,9 +65,9 @@ for ddir in ['art','i18n']:
 Analyses.append( (a,'misura4', os.path.join('build','graphics.exe')) )
 
 # MISURA 4 ANALYSIS
-AppNames=['acquisition.py','archive.py' ,'conf.py']
-BaseNames=['acquisition','archive','configuration']
-ExeNames=['acquisition.exe','archive.exe','conf.exe']
+AppNames=['acquisition.py','browser.py' ,'conf.py']
+BaseNames=['acquisition','browser','configuration']
+ExeNames=['acquisition.exe','browser.exe','conf.exe']
 
 for i,name in enumerate(AppNames):
 	print 'Analyzing ',bin+name

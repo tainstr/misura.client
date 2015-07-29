@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Simple plotting for archive and live acquisition."""
+"""Simple plotting for browser and live acquisition."""
 from misura.canon.logger import Log as logging
 import veusz.plugins
 import veusz.document as document
