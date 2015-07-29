@@ -144,8 +144,6 @@ class DatabaseWidget(QtGui.QWidget):
         lay.addWidget(self.doQuery)
         self.connect(self.doQuery, QtCore.SIGNAL('clicked()'), self.query)
 
-        self.menu.addAction(_('Download'), self.download)
-        self.menu.addAction(_('Download As...'), self.downloadAs)
         self.menu.addAction(_('Remove'), self.remove)
         self.menu.addAction(_('Refresh'), self.up)
         self.menu.addAction(_('Rebuild'), self.rebuild)
@@ -187,62 +185,7 @@ class DatabaseWidget(QtGui.QWidget):
             self.emit(
                 QtCore.SIGNAL('selectedRemoteUid(QString,QString)'), self.remote.addr, uid)
 
-    def download(self, dest=False):
-        fname, instr, file, uid = self.table.getName()
-        if not fname:
-            logging.debug('%s', 'No valid index selected')
-            return
-        if not dest:
-            # Reads the previous directory or the user's home
-            d = settings.value('/FileSaveToDir', os.path.expanduser('~'))
-            path = os.path.join(str(d), fname + '.h5')
-            dest = str(QtGui.QFileDialog.getSaveFileName(
-                self, "Save Test To...", path, filter='Misura (*.h5)'))
-            if dest == '':
-                return
-            # Save the current directory
-            settings.setValue('/FileSaveToDir', os.path.dirname(dest))
-        # Scarico il file in modalità chunked per evitare problemi di memoria
-        # con file di grandi dimensioni.
-        self.bar.setValue(0)
-        self.bar.show()
-        logging.debug('%s %s %s', 'DOWNLOAD', instr, file)
-        self.remote.test.open_file(uid)
-        ckn, binary = self.remote.test.download(uid, 0)
-        self.bar.setMaximum(ckn)
-        if ckn < 0:
-            logging.debug('ERROR - INVALID FILE REQUESTED')
-        f = open(dest, 'wb')
-        f.write(binary.data)
-        for i in range(1, ckn + 1):
-            QtGui.qApp.processEvents()
-            ckn, binary = self.remote.test.download(instr, file, i)
-            f.write(binary.data)
-            self.bar.setValue(i)
-        f.close()
-        self.emit(QtCore.SIGNAL('selected'), dest)
-        self.bar.hide()
-
-    def downloadAs(self, dest=False):
-        fname, instr, file, uid = self.table.getName()
-        if not fname:
-            logging.debug('%s', 'No valid index selected')
-            return
-        if not dest:
-            # Reads the previous directory or the user's home
-            d = settings.value('/FileSaveToDir', os.path.expanduser('~'))
-            path = os.path.join(str(d), fname + '.csv')
-            dest = str(QtGui.QFileDialog.getSaveFileName(
-                self, "Save Exported Test To...", path))
-            if dest == '':
-                return
-            # Save the current directory
-            settings.setValue('/FileSaveToDir', os.path.dirname(dest))
-        self.remote.test.open_uid(uid)
-        csv = self.remote.test.downloadAs(uid)
-        f = open(dest, 'w')
-        f.write(csv)
-        f.close()
+    
 
     def remove(self):
         fname, instr, file, uid = self.table.getName()
