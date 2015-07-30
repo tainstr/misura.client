@@ -21,10 +21,10 @@ class MainWindow(QtGui.QMainWindow):
         self.tab = QtGui.QTabWidget()
         self.area = QtGui.QMdiArea()
         self.tab.addTab(self.area, _('Databases'))
-#       self.overview=QtGui.QWidget()
-#       self.tab.addTab(self.overview,_('Overview'))
         self.tab.setTabsClosable(True)
         self.tab.setDocumentMode(True)
+        database_tab_index = 0
+        self.remove_close_button_from_tab(database_tab_index)
         self.setCentralWidget(self.tab)
         self.setMinimumSize(800, 600)
         self.setWindowTitle(_('Misura Browser'))
@@ -119,3 +119,6 @@ class MainWindow(QtGui.QMainWindow):
         # explicitly destroy the widget
         w.close()
         del w
+
+    def remove_close_button_from_tab(self, tab_index):
+        self.tab.tabBar().tabButton(tab_index, QtGui.QTabBar.RightSide).resize(0,0)
