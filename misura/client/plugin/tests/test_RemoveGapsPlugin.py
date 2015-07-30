@@ -11,12 +11,13 @@ from misura.client.plugin.RemoveGapsPlugin import remove_gaps_from
 class RemoveGapsPlugin(unittest.TestCase):
 
     def test_remove_single_gap(self):
-        input_data = numpy.array([1, 2, 3, 4, 5, 6, 100, 101, 102, 10, 11, 12])
+        full_input_data = numpy.array([1, 2, 3, 4, 5, 6, 100, 101, 102, 10, 11, 12])
+
         expected_output = numpy.array([1, 2, 3, 4, 5, 6, 6, 7, 8, 8, 9, 10])
 
-        actual_output = remove_gaps_from(input_data, 10)
+        actual_output = remove_gaps_from(full_input_data, 10, 5, 10)
 
-        self.assertIsNot(actual_output, input_data)
+        self.assertIsNot(actual_output, full_input_data)
 
         for index, output_element in enumerate(actual_output):
             self.assertEqual(output_element, expected_output[index])
