@@ -25,7 +25,7 @@ class FrameProcessor(QtCore.QThread):
         self.cam = cam
         self.waiting = 0.1
 
-#	@profile
+#   @profile
     def run(self):
         self.cam = self.cam.copy()
         self.cam.connect()
@@ -33,7 +33,7 @@ class FrameProcessor(QtCore.QThread):
         self.time = time()
         self.compression = self.cam['compression']
         self.count = 0.
-#		frame_number = self.cam.get('frame_number')
+#       frame_number = self.cam.get('frame_number')
         frame_number = 0
         force = True
         # Create new cam object with connection unique to this thread.
@@ -42,7 +42,7 @@ class FrameProcessor(QtCore.QThread):
             if not self.parent().isVisible():
                 sleep(self.waiting)
                 continue
-            fr = tcam.frame(frame_number, force)
+            fr = tcam.new_frame(frame_number, force)
             if not fr:
                 self.stream = False
                 continue
@@ -61,12 +61,12 @@ class FrameProcessor(QtCore.QThread):
                 n += 1
                 if not ent:
                     continue
-#				logging.debug('%s', ent)
+#               logging.debug('%s', ent)
                 x, y, w, h, fr = ent
                 # Create a QImage for signalling
                 img = QtGui.QImage()
                 img.loadFromData(QtCore.QByteArray(fr.data), self.compression)
-#				print 'FrameProcessor.readyImage',n,x,y,w,h,len(fr.data)
+#               print 'FrameProcessor.readyImage',n,x,y,w,h,len(fr.data)
                 self.emit(
                     QtCore.SIGNAL('readyImage(int,int,int,int,int,QImage)'), n, x, y, w, h, img)
                 r += 1
@@ -79,11 +79,11 @@ class FrameProcessor(QtCore.QThread):
                     self.time = time()
                     self.count = 0.
             sleep(0.001)
-#			r=raw_input('Press enter for next frame')
+#           r=raw_input('Press enter for next frame')
         self.exit(0)
 
     def toggle_run(self, do=None):
-        #		logging.debug('%s %s', 'FrameProcessor.toggle_run', do)
+        #       logging.debug('%s %s', 'FrameProcessor.toggle_run', do)
         if do == True:
             if not self.isRunning():
                 self.stream = True
@@ -120,7 +120,7 @@ class SampleProcessor(QtCore.QThread):
             r = smp.multiget(list(self.opt))
             self.res.append(r)
 
-#	@profile
+#   @profile
     def run(self):
         if len(self.samples) == 0:
             return
@@ -144,17 +144,18 @@ class SampleProcessor(QtCore.QThread):
                 if first:
                     smp.connect()
                 r = smp.multiget(list(self.opt - set(['roi', 'crop'])))
-#				if not r:
-#					logging.debug('%s %s %s', 'Live update failed: multiget returned', r, self.opt)
+                if not r:
+                    continue
+#                   logging.debug('%s %s %s', 'Live update failed: multiget returned', r, self.opt)
                 if r.has_key('profile'):
                     r['profile'] = loads(r['profile'].data)
-#				print 'SamplePreprocessor.emit',i,r.keys()
+#               print 'SamplePreprocessor.emit',i,r.keys()
                 self.emit(QtCore.SIGNAL('updated(int,PyQt_PyObject)'), i, r)
             first = False
             sleep(self.waiting)
 
     def toggle_run(self, do=None):
-        #		logging.debug('%s %s', 'SampleProcessor.toggle_run', do)
+        #       logging.debug('%s %s', 'SampleProcessor.toggle_run', do)
         if do == True:
             if not self.isRunning():
                 self.stream = True

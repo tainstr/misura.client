@@ -88,7 +88,7 @@ class ViewerPicture(QtGui.QGraphicsView):
             self.processor.wait()
             self.processor.terminate()
             self.processor.deleteLater()
-#		self.processor=False
+#       self.processor=False
         if self.sampleProcessor:
             logging.debug('%s', 'Closing SampleProcessor')
             self.sampleProcessor.toggle_run(False)
@@ -96,7 +96,7 @@ class ViewerPicture(QtGui.QGraphicsView):
             self.sampleProcessor.wait()
             self.sampleProcessor.terminate()
             self.sampleProcessor.deleteLater()
-#		self.sampleProcessor=False
+#       self.sampleProcessor=False
         if self.calibrationTool:
             self.calibrationTool.close()
 
@@ -108,9 +108,9 @@ class ViewerPicture(QtGui.QGraphicsView):
             self.processor.toggle_run(False)
             self.processor.deleteLater()
             self._oldproc = self.processor
-#			del self.processor
+#           del self.processor
         self.processor = fp
-# 		self.connect(self.processor, QtCore.SIGNAL('readyFrame(int,int,int,int,int,QByteArray)'), self.updateFrame, QtCore.Qt.QueuedConnection)
+#       self.connect(self.processor, QtCore.SIGNAL('readyFrame(int,int,int,int,int,QByteArray)'), self.updateFrame, QtCore.Qt.QueuedConnection)
         self.connect(self.processor, QtCore.SIGNAL(
             'readyImage(int,int,int,int,int,QImage)'), self.updateImage, QtCore.Qt.QueuedConnection)
         self.connect(self.processor, QtCore.SIGNAL(
@@ -338,8 +338,8 @@ class ViewerPicture(QtGui.QGraphicsView):
     def add_motion_actions(self, menu):
         """Create menu actions for motion control"""
         cpos = {'x': 'bottom', 'y': 'left'}
-#		if self.inv!=0:
-#			cpos={'x':'left','y':'bottom'}
+#       if self.inv!=0:
+#           cpos={'x':'left','y':'bottom'}
         self.motor_ctrl = {}
 
         def add_coord(name):
@@ -402,8 +402,8 @@ class ViewerPicture(QtGui.QGraphicsView):
             if act.isChecked():
                 logging.debug('%s %s', 'show', name)
                 overlay.show()
-# 				if name=='roi':
-# 					self.reconnectSample()
+#               if name=='roi':
+#                   self.reconnectSample()
                 self.connect(self.sampleProcessor,
                              QtCore.SIGNAL('updated(int, PyQt_PyObject)'),
                              self.updateSample)
