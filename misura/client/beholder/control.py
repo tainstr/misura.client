@@ -76,6 +76,9 @@ class ViewerControl(QtGui.QWidget):
         # Rotate if in left/right position
         if position in ['left', 'right']:
             widget.setOrientation(QtCore.Qt.Vertical)
+        if inversion:
+            widget.setInvertedControls(True)
+            widget.setInvertedAppearance(True)
         self.lay.addWidget(widget, *pos)
         self.controls[position] = widget
         logging.debug(

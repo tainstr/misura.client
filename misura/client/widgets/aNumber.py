@@ -80,7 +80,7 @@ class aNumber(ActiveWidget):
             if self.slider:
                 self.connect(
                     self.slider, QtCore.SIGNAL('valueChanged(int)'), self.sliderPush)
-#				self.connect(self.slider, QtCore.SIGNAL('pause(bool)'), self.update)
+#               self.connect(self.slider, QtCore.SIGNAL('pause(bool)'), self.update)
             self.connect(
                 self.spinbox, QtCore.SIGNAL(self.sValueChanged), self.boxPush)
         self.update(minmax=False)
@@ -180,7 +180,7 @@ class aNumber(ActiveWidget):
 # print 'aNumber.update',
 # self.handle,cur,self.current,self.spinbox.maximum(),self.spinbox.minimum()
             self.spinbox.setValue(cur)
-# 			self.setRange(self.min, self.max, self.step)
+#           self.setRange(self.min, self.max, self.step)
             if self.slider:
                 self.slider.setValue(int(cur * self.divider))
         except:
@@ -230,7 +230,7 @@ class aNumber(ActiveWidget):
             m = max((cur - d, m))
             M = min((cur + d, M))
             step = step / d
-# 		print 'Setting range',m,M,step
+#       print 'Setting range',m,M,step
         if self.double:
             self.divider = 10.**self.spinbox.decimals()
         else:
@@ -243,7 +243,7 @@ class aNumber(ActiveWidget):
         self.step = step
         self.divider = 1
         self.spinbox.setSingleStep(step * self.divider)
-#		print 'aNumber.setRange',self.handle,min,max,step,cur
+#       print 'aNumber.setRange',self.handle,min,max,step,cur
         if self.slider:
             self.slider.setMaximum(M * self.divider)
             self.slider.setMinimum(m * self.divider)

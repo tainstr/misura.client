@@ -99,7 +99,7 @@ def do(fields, helper):
         by -= d
         logging.debug('%s %s', 'relative correction', d)
 
-    # If the two curves share the same dataset, directly operate
+    # If the two curves share the same X dataset, directly operate
     if fields['bx'] == fields['ax']:
         out = numexpr.evaluate(op, local_dict={'a': ay, 'b': by})
         return out, 0
@@ -124,17 +124,18 @@ def do(fields, helper):
     N = len(rbx)
     margin = 1 + int(N / 10)
     step = 2 + int((N - 2 * margin) / 100)
-    bsp = interpolate.LSQUnivariateSpline(rbx, by, rbx[margin:-margin:step])
+    print 'interpolating', len(rbx), len(by), margin, step
+    bsp = interpolate.LSQUnivariateSpline(rbx, by, rbx[margin:-margin:step]) #ext='const' scipy>=0.15
     error = bsp.get_residual()
     # Evaluate B(y) spline with rectified A(x) array
     b = bsp(rax)
     logging.debug('%s %s %s', 'rax', rax[-1] - ax[-1], rax)
     logging.debug('%s %s', 'a', ay)
     logging.debug('%s %s %s', 'b', b, b[1000:1010])
-# 	np.save('/tmp/misura/rbx',rbx)
-# 	np.save('/tmp/misura/by',by)
-# 	np.save('/tmp/misura/rax',rax)
-# 	np.save('/tmp/misura/ay',ay)
+#   np.save('/tmp/misura/rbx',rbx)
+#   np.save('/tmp/misura/by',by)
+#   np.save('/tmp/misura/rax',rax)
+#   np.save('/tmp/misura/ay',ay)
     # Perform the operation using numexpr
     out = numexpr.evaluate(op, local_dict={'a': ay, 'b': b})
     logging.debug('%s %s', 'out', out)

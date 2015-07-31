@@ -36,12 +36,12 @@ class EmptyDataset(BaseException):
 
 def getUsedPrefixes(doc):
     p = {}
-    for ds in doc.data.values():
+    for name, ds in doc.data.iteritems():
         lf = ds.linked
         if lf is None:
-            logging.debug('%s %s', 'no linked file for ', ds.name)
+            logging.debug('%s %s', 'no linked file for ', name)
             continue
-#		print 'found linked file',lf.filename,lf.prefix
+#       print 'found linked file',lf.filename,lf.prefix
         p[lf.filename] = lf
     logging.debug('%s %s %s', 'getUsedPrefixes', p, doc.data.keys())
     return p
@@ -377,7 +377,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
             if data is False:
                 data = []
-# 				continue
+#               continue
             # Get meas. unit
             u = 'None'
             if col == 't':
@@ -439,7 +439,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 if leaf:
                     ds.tags.add(parent)
             # Actually set the data
-# 			LF.children.append(pcol)
+#           LF.children.append(pcol)
             if len(data) > 0:
                 names.append(pcol)
                 outds[pcol] = ds

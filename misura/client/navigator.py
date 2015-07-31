@@ -395,7 +395,6 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.der_menu.addAction(_('Edit'), self.edit_dataset)
         self.der_menu.addAction(_('Intercept this curve'), self.intercept)
         self.der_menu.addAction(_('Smoothing'), self.smooth)
-        self.der_menu.addAction(_('Remove Gaps'), self.remove_gaps)
         self.der_menu.addAction(_('Derivatives'), self.derive)
         self.add_percentile(node, self.der_menu)
         self.der_menu.addAction(_('Linear Coefficient'), self.coefficient)

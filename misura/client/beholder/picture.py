@@ -144,7 +144,9 @@ class ViewerPicture(QtGui.QGraphicsView):
             s = int(0.2 * ps)  # single step
             s = max(s, 10)  # at least 10 steps
             # Invert controls and appearance?
-            invc = align > 0 and m.slider.orientation() == QtCore.Qt.Horizontal
+            orient = m.slider.orientation()
+            invc = (align > 0 and orient == QtCore.Qt.Horizontal) or (align < 0 and orient == QtCore.Qt.Vertical )
+            logging.debug('############ INVERSION?',m.prop['kid'],invc)
             # Skip if no change
             if ps != m.slider.pageStep() or s != m.slider.singleStep() or invc != m.slider.invertedControls():
                 m.slider.setPageStep(ps)
@@ -368,6 +370,7 @@ class ViewerPicture(QtGui.QGraphicsView):
             submenu = menu.addMenu(_(name.capitalize()))
             act = widgets.MotorSliderAction(self.server, obj, submenu)
             submenu.addAction(act)
+            align=enc['align']
             if name in ('x', 'y'):
                 slider = widgets.MotorSlider(
                     self.server, obj, parent=self.parent)
