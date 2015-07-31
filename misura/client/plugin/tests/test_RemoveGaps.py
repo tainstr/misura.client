@@ -5,10 +5,10 @@ import os
 import numpy
 from misura.client import filedata
 from misura.client import plugin
-from misura.client.plugin.RemoveGapsPlugin import remove_gaps_from
+from misura.client.plugin.RemoveGaps import remove_gaps_from
 
 
-class RemoveGapsPlugin(unittest.TestCase):
+class RemoveGaps(unittest.TestCase):
 
     def test_remove_single_gap(self):
         full_input_data = numpy.array([1, 2, 3, 4, 5, 6, 100, 101, 102, 10, 11, 12])

@@ -370,7 +370,6 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             self.add_percentile(node, self.dataset_menu)
             self.dataset_menu.addAction(_('Smoothing'), self.smooth)
             self.dataset_menu.addAction(_('Derivatives'), self.derive)
-            self.dataset_menu.addAction(_('Remove Gaps'), self.remove_gaps)
             self.dataset_menu.addAction(
                 _('Linear Coefficient'), self.coefficient)
             self.add_styles(node, self.dataset_menu)

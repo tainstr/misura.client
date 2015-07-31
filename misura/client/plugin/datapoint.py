@@ -11,6 +11,8 @@ import numpy as np
 from scipy import interpolate
 import utils
 from ...canon import csutil
+from misura.client.plugin.RemoveGaps import remove_gaps_from
+from copy import copy
 
 
 def searchWidgetName(widget, name):
@@ -37,19 +39,62 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         self.addAction(veusz.widgets.widget.Action('up', self.actionUp,
                                                    descr='Update Data Point',
                                                    usertext='Update Data Point'))
+        
+        self.addAction(veusz.widgets.widget.Action('removeGaps', self.removeGaps,
+                                                   descr='Remove Gaps',
+                                                   usertext='Remove Gaps'))
+
         self.labelwidget = None
+
+    def removeGaps(self):
+        gap_range = self.settings.setdict['remove_gaps_range'].val
+        gaps_thershold = self.settings.setdict['remove_gaps_thershold'].val
+        start_index = int(round(self.i - gap_range / 2.0))
+        end_index = start_index + gap_range
+        data = self.xy.settings.get('yData').getFloatArray(self.document)
+        dataset_name = self.xy.settings.get('yData').val
+        dataset = copy(self.document.data[dataset_name])
+        data_without_gap = remove_gaps_from(data, gaps_thershold, start_index, end_index)
+        
+        dataset.data = data_without_gap
+        operation = document.OperationDatasetSet(dataset_name, dataset)
+
+        self.ops.append(operation)
+        self.up_coord(yData = data_without_gap)
+
+        self.apply_ops('Remove Gap')
+        
+        
+
+
+
+        
+
 
     @classmethod
     def addSettings(klass, s):
         """Construct list of settings."""
         veusz.widgets.BoxShape.addSettings(s)
 
+        s.add(setting.Int(
+            'remove_gaps_range', 100,
+            descr = "Remove gaps range", 
+            usertext = "Remove gaps range"),
+            1)
+
+        s.add(setting.Int(
+            'remove_gaps_thershold', 10,
+            descr = "Remove gaps thershold", 
+            usertext = "Remove gaps thershold"),
+            2
+            )
+
         s.add(setting.WidgetChoice(
             'xy', '',
             descr='Curve this point is attached to.',
             widgettypes=('xy',),
             usertext='XY Reference'),
-            1)
+            3)
 
         s.add(setting.ChoiceSwitch(
             'search', ['None', 'Maximum', 'Minimum',
@@ -57,12 +102,12 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             settingstrue=['searchRange'], settingsfalse=[], showfn=lambda val: val != 'None',
             descr='Search nearest critical point',
             usertext='Search nearest'),
-            2)
+            4)
         s.add(setting.Float(
             'searchRange', 10,
             descr='Critical search range',
             usertext='Search range'),
-            2)
+            5)
 
         s.add(setting.WidgetChoice(
             'secondPoint', '',
@@ -276,14 +321,17 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         i = np.where(dst == dst.min())[0][0]
         return i, xData[i], yData[i]
 
-    def up_coord(self, oldx=None, oldy=None):
+    def up_coord(self, oldx=None, oldy=None, xData=None, yData=None):
         """Place in the nearest point to the current x,y coord"""
         d = self.document
         s = self.settings
         xSet = self.xy.settings.get('xData')
         ySet = self.xy.settings.get('yData')
-        xData = xSet.getFloatArray(d)
-        yData = ySet.getFloatArray(d)
+
+        if (xData is None):
+            xData = xSet.getFloatArray(d)
+        if (yData is None):
+            yData = ySet.getFloatArray(d)
         N = len(xData)
 
         # Compute visible ranges
