@@ -70,7 +70,7 @@ class MenuBar(QtGui.QMenuBar):
     def set_browser_mode(self):
         self.connectTo = QtGui.QMenu()
         self.instruments = QtGui.QMenu()
-        #		self.chooser.setView(self.tree)
+        #       self.chooser.setView(self.tree)
 
     def setAddr(self, addr):
         addr = str(addr)
@@ -216,7 +216,7 @@ class MenuBar(QtGui.QMenuBar):
         self.settings.clear()
         self.showInstrumentConf = functools.partial(self.hideShow, 'iconf')
         act = self.settings.addAction(_('Instrument'), self.showInstrumentConf)
-#		self.objects['iconf']=functools.partial(conf.Interface, self.server,  self.remote)
+#       self.objects['iconf']=functools.partial(conf.Interface, self.server,  self.remote)
         self.objects['iconf'] = functools.partial(
             conf.TreePanel, self.remote, None, self.remote)
         self.lstActions.append((act, self.remote))
@@ -252,7 +252,7 @@ class MenuBar(QtGui.QMenuBar):
         self.lstActions.append((act, 'mconf'))
 
     def addDevConf(self, obj, role):
-        #		self.objects[obj]=functools.partial(conf.Interface, self.server, obj)
+        #       self.objects[obj]=functools.partial(conf.Interface, self.server, obj)
         self.objects[obj] = functools.partial(conf.TreePanel, obj, None, obj)
         f = functools.partial(self.hideShow, obj)
         act = self.devices.addAction('%s (%s)' % (role, obj['name']), f)

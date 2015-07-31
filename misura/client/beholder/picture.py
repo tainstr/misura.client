@@ -294,7 +294,10 @@ class ViewerPicture(QtGui.QGraphicsView):
         self.roiAct = self.amenu.addAction('View Regions',
                                            functools.partial(self.over_by_name, 'roi'))
         self.roiAct.setCheckable(True)
-
+        
+        roiResetAct = self.amenu.addAction('Reset Regions', self.reset_regions)
+        roiResetAct.setCheckable(False)
+        
         self.profileAct = self.amenu.addAction(_('Profile'),
                                                functools.partial(self.over_by_name, 'profile'))
         self.profileAct.setCheckable(True)
@@ -334,6 +337,11 @@ class ViewerPicture(QtGui.QGraphicsView):
         self.add_motion_actions(self.mmenu)
         # Other stuff
         self.menu.addAction('Save frame', self.save_frame)
+        
+    def reset_regions(self):
+        """Re-init samples, resetting regions of interest."""
+        r=self.remote.init_samples()
+        QtGui.QMessageBox.information(self, 'Region reset', r)
 
     def add_motion_actions(self, menu):
         """Create menu actions for motion control"""
