@@ -47,7 +47,7 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
         if not ds:
             raise plugins.DatasetPluginException(
                 'Dataset not found' + fields['ds'])
-
+        
         ds1 = units.convert(ds, fields['convert'])
         self.ops.append(document.OperationDatasetSet(fields['ds'], ds1))
         self.apply_ops()

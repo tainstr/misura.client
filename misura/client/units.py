@@ -11,7 +11,8 @@ base_units = {'micron': 'length',
               'second': 'time',
               'percent': 'part',
               'hertz': 'frequency',
-              'kilobyte': 'memory'}
+              'kilobyte': 'memory',
+              'poise': 'viscosity'}
 
 from_base = {'length': {'micron': lambda v: v, 'nanometer': lambda v: v * 1E3, 'millimeter': lambda v: v * 1E-3},  # length
              # area
@@ -28,11 +29,14 @@ from_base = {'length': {'micron': lambda v: v, 'nanometer': lambda v: v * 1E3, '
                       'ppm': lambda v: v * 10000., 'ppb': lambda v: v * (1.E7), 'ppt': lambda v: v * (1.E10)},
              'frequency': {'hertz': lambda v: v, 'kilohertz': lambda v: v / 1000.},
              'memory': {
-    'byte': lambda v: v * 1000,
-    'kilobyte': lambda v: v,
-    'megabyte': lambda v: v * 1E-3,
-    'gigabyte': lambda v: v * 1E-6,
-},
+                'byte': lambda v: v * 1000,
+                'kilobyte': lambda v: v,
+                'megabyte': lambda v: v * 1E-3,
+                'gigabyte': lambda v: v * 1E-6,
+                },
+            'viscosity': {'poise': lambda v: v * 10,
+                          'pascal/s': lambda v: v,
+                          }
 }
 
 derivatives = {'length': {'micron': 1, 'nanometer': 1E3, 'millimeter': 1E-3},  # length
@@ -49,11 +53,15 @@ derivatives = {'length': {'micron': 1, 'nanometer': 1E3, 'millimeter': 1E-3},  #
                         'ppm': 10000., 'ppb': 1.E7, 'ppt': 1.E10},
                'frequency': {'hertz': 1, 'kilohertz': 1 / 1000.},  # freq
                'memory': {
-    'byte': 1000,
-    'kilobyte': 1,
-    'megabyte': 1E-3,
-    'gigabyte': 1E-6,
-},
+                    'byte': 1000,
+                    'kilobyte': 1,
+                    'megabyte': 1E-3,
+                    'gigabyte': 1E-6,
+                },
+               'viscosity': {
+                            'poise': 10,
+                            'pascal/s': 1,
+                }
 }
 
 to_base = {'length': {'micron': lambda v: v, "nanometer": lambda v: v * 1E-3, 'millimeter': lambda v: v * 1E3},  # length
@@ -71,11 +79,15 @@ to_base = {'length': {'micron': lambda v: v, "nanometer": lambda v: v * 1E-3, 'm
                     'ppm': lambda v: v / 10000., 'ppb': lambda v: 1. * v / (10**7), 'ppt': lambda v: 1. * v / 10**10},  # freq
            'frequency': {'hertz': lambda v: v, 'kilohertz': lambda v: v * 1000.},
            'memory': {
-    'byte': lambda v: v * 1E-3,
-    'kilobyte': lambda v: v,
-    'megabyte': lambda v: v * 1E3,
-    'gigabyte': lambda v: v * 1E6,
-},
+                    'byte': lambda v: v * 1E-3,
+                    'kilobyte': lambda v: v,
+                    'megabyte': lambda v: v * 1E3,
+                    'gigabyte': lambda v: v * 1E6,
+                    },
+           'viscosity': {
+                    'poise': lambda v: v * 0.1, 
+                    'pascal/s': lambda v: v,
+                    }
 }
 
 # Veusz symbols
@@ -92,6 +104,8 @@ symbols = {'micron': '{\mu}m',	'nanometer': 'nm',	'millimeter': 'mm',
            'kilobyte': 'KB',
            'megabyte': 'MB',
            'gigabyte': 'GB',
+           'poise': 'P',
+           'pascal/s': 'Pa/s',
            }
 
 # HTML symbols
@@ -121,7 +135,8 @@ user_defaults = {'length': 'micron',
                  'angle': 'degree',
                  'temperature': 'celsius',
                  'time': 'second',
-                 'part': 'percent'
+                 'part': 'percent',
+                 'viscosity': 'posie',
                  }
 
 
@@ -217,10 +232,13 @@ from copy import copy
 import numpy as np
 
 
-def convert(ds, to_unit):
+def convert(ds0, to_unit):
     """Convert dataset `ds` to `to_unit`"""
+    # In case ds derived from a plugin, return the original plugin dataset
+    ds=getattr(ds0, 'pluginds', ds0)
     from_unit = getattr(ds, 'unit', False)
     if not from_unit or to_unit in ['None', '', None, False]:
+        print 'conversion error',from_unit, to_unit
         raise plugins.DatasetPluginException(
             'Selected dataset does not have a measurement unit.')
     # Implicit To-From percentile conversion

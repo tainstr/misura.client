@@ -3,17 +3,17 @@
 """Viscosity according to the VFT equation"""
 from misura.canon.logger import Log as logging
 import veusz.plugins as plugins
-import numpy
-import collections
+import numpy as np
 
-methods = ('Glass transition DIL (10^3 Poises)',
+# Known points
+methods = ('Glass transition DIL (10^13 Poises)',
            'Softening point DIL MEC (10^10.25 Poises)',
            'Sintering beginning HSM powders (10^10 Poises)',
            'Softening HSM & Softening DIL OPT (10^8.2 Poises)',
            'Sphere HSM (10^6.1 Poises)',
            'Half Sphere HSM (10^4.55 Poises)',
            )
-values = (10 ** 3,
+values = (10 ** 13,
           10 ** 10.25,
           10 ** 10,
           10 ** 8.2,
@@ -28,6 +28,31 @@ def getViscosity(entry):
     else:
         r = float(entry)
     return r
+
+
+def viscosity_calc(temperatures, known_temperatures, known_viscosities):
+    T1, T2, T3 = known_temperatures
+    V1, V2, V3 = known_viscosities
+    # Solve VFT
+    g1 = V1 * T1
+    g2 = V2 * T2
+    g3 = V3 * T3
+
+    ratio = (T3 - T1) / (T2 - T1)
+    T0 = g1 - g3 + ((g2 - g1) * ratio)
+    T0 = T0 / ((V1 - V3) - ((V1 - V2) * ratio))
+
+    A = (g2 - g1 + ((V1 - V2) * T0)) / (T2 - T1)
+    B = (T1 - T0) * (V1 - A)
+
+    print 'VFT', A, B, T0
+    # Apply VFT
+    output = A + B / (temperatures - T0)
+    canc=np.where(temperatures < T0+1)[0]
+    print 'Cancelling',T0, min(temperatures), max(temperatures), canc, temperatures
+    if len(canc):
+        output[canc] = 0
+    return output
 
 
 class ViscosityPlugin(plugins.DatasetPlugin):
@@ -76,6 +101,7 @@ class ViscosityPlugin(plugins.DatasetPlugin):
         # make a new dataset with name in fields['ds_out']
         logging.debug('%s %s', 'DSOUT', fields)
         self.ds_out = plugins.Dataset1D(fields['ds_out'])
+        self.ds_out.unit = 'poise'
 
         # return list of datasets
         return [self.ds_out]
@@ -86,34 +112,18 @@ class ViscosityPlugin(plugins.DatasetPlugin):
         """
         # get the input dataset - helper provides methods for getting other
         # datasets from Veusz
-        ds_in = helper.getDataset(fields['ds_in']).data
-        T = numpy.array(ds_in.data)
-        T1 = fields['T1']
-        T2 = fields['T2']
-        T3 = fields['T3']
+        ds_in = helper.getDataset(fields['ds_in'])
+        T = np.array(ds_in.data)
         V1 = getViscosity(fields['V1'])
         V2 = getViscosity(fields['V2'])
         V3 = getViscosity(fields['V3'])
 
-        # Solve VFT
-        g1 = V1 * T1
-        g2 = V2 * T2
-        g3 = V3 * T3
-
-        ratio = (T3 - T1) / (T2 - T1)
-        T0 = g1 - g3 + ((g2 - g1) * ratio)
-        T0 = T0 / ((V1 - V3) - ((V1 - V2) * ratio))
-
-        A = (g2 - g1 + ((V1 - V2) * T0)) / (T2 - T1)
-        B = (T1 - T0) * (V1 - A)
-
-        print 'VFT', A, B, T0
-        print T
-        # Apply VFT
-        y = A + B / (T - T0)
-
-        # update output dataset with input dataset (plus value) and errorbars
-        self.ds_out.update(data=y)
+        output = viscosity_calc(T, 
+                    [fields['T1'],fields['T2'],fields['T3']], 
+                    [V1,V2,V3])
+        
+        self.ds_out.update(data=output)
+        self.ds_out.unit = 'poise'
         return [self.ds_out]
 
 # add plugin classes to this list to get used

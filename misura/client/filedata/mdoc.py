@@ -13,10 +13,8 @@ from proxy import getFileProxy
 from decoder import DataDecoder
 from model import DocumentModel
 from misura.canon.csutil import lockme
-from ..database import ProgressBar  # FIXME: move to better place...
 from .. import units
 from ..clientconf import confdb
-from .. import plugin
 MAX = 10**5
 MIN = -10**5
 

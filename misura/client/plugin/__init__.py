@@ -22,7 +22,6 @@ from OverwritePlugin import OverwritePlugin
 from ColorizePlugin import ColorizePlugin
 from RemoveGapsPlugin import RemoveGapsPlugin
 
-
 # Misura specific plugins
 from MakeDefaultDoc import MakeDefaultDoc, makeDefaultDoc
 from InitialDimensionPlugin import InitialDimensionPlugin
@@ -35,7 +34,7 @@ from MotorCorrectionPlugin import MotorCorrectionPlugin
 from SimFlexPlugin import SimFlexPlugin
 from ArrangePlugin import ArrangePlugin
 from ReportPlugin import ReportPlugin
-from ViscosityPlugin import ViscosityPlugin
+from ViscosityPlugin import ViscosityPlugin, viscosity_calc
 
 
 from SurfaceTensionPlugin import SurfaceTensionPlugin
