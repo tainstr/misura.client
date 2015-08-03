@@ -17,7 +17,7 @@ class Designer(unittest.TestCase):
         k._readLevel = 5
         call = lambda f, *ar, **kw: getattr(k, f)(*ar, **kw)
         setattr(k, 'call', call)
-        tcd = thermal_cycle.ThermalCycleDesigner(k)
+        tcd = thermal_cycle.ThermalCycleDesigner(k, k)
         tcd.show()
         QtGui.qApp.exec_()
 
