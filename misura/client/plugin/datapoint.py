@@ -76,13 +76,13 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         """Construct list of settings."""
         veusz.widgets.BoxShape.addSettings(s)
 
-        s.add(setting.Int(
+        s.add(setting.Float(
             'remove_gaps_range', 100,
             descr = "Remove gaps range", 
             usertext = "Remove gaps range"),
             1)
 
-        s.add(setting.Int(
+        s.add(setting.Float(
             'remove_gaps_thershold', 10,
             descr = "Remove gaps thershold", 
             usertext = "Remove gaps thershold"),
