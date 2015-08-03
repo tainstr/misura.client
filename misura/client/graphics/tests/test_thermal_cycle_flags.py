@@ -39,7 +39,7 @@ class TestTermalCycleFlags(unittest.TestCase):
     def test_should_not_be_editable_when_item_is_not_valid(self):
         not_valid_index = FakeIndex(None, None, False)
 
-        not_editable = QtCore.Qt.ItemFlags(QtCore.Qt.NoItemFlags)
+        not_editable = QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsEnabled)
         self.assertEqual(
             not_editable, thermal_cycle_flags.execute(None, not_valid_index))
 
@@ -49,7 +49,7 @@ class TestTermalCycleFlags(unittest.TestCase):
         valid_index = FakeIndex(row_index, column_index, True)
         dat = [[-1]]
 
-        not_editable = QtCore.Qt.ItemFlags(QtCore.Qt.NoItemFlags)
+        not_editable = QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsEnabled)
         self.assertEqual(not_editable, thermal_cycle_flags.execute(
             FakeTermalCurveModel(dat), valid_index))
 
@@ -59,7 +59,7 @@ class TestTermalCycleFlags(unittest.TestCase):
         valid_index = FakeIndex(row_index, column_index, True)
         dat = [[123, 1]]
 
-        not_editable = QtCore.Qt.ItemFlags(QtCore.Qt.NoItemFlags)
+        not_editable = QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsEnabled)
         self.assertEqual(not_editable, thermal_cycle_flags.execute(
             FakeTermalCurveModel(dat), valid_index))
 
@@ -69,7 +69,7 @@ class TestTermalCycleFlags(unittest.TestCase):
         valid_index = FakeIndex(row_index, column_index, True)
         dat = [[], [123, 321, 0, 132]]
 
-        not_editable = QtCore.Qt.ItemFlags(QtCore.Qt.NoItemFlags)
+        not_editable = QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsEnabled)
         self.assertEqual(not_editable, thermal_cycle_flags.execute(
             FakeTermalCurveModel(dat), valid_index))
 
