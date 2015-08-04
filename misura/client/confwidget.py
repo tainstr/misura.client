@@ -92,7 +92,7 @@ class RecentInterface(object):
         tab = getattr(self.conf, 'recent_' + self.category)
         logging.debug('%s %s %s', 'getNameSigList', self.category, tab)
         nsl = []
-        for i, row in enumerate(tab):
+        for i, row in enumerate(reversed(tab)):
             sig = row[0]
             name = row[0]
             if self.category == 'file':
