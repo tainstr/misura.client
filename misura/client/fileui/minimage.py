@@ -113,9 +113,7 @@ class MiniImage(QtGui.QWidget):
 
         self.slider.valueChanged.disconnect(self.set_idx)
         logging.debug('%s %s', 'GOT IMG', repr(img))
-        if not img:
-            self.img = QtGui.QImage()
-        else:
+        if img:
             self.t, self.img = img
             self.emit(QtCore.SIGNAL('set_time(float)'), self.t)
         self.zoom(self.curWidth)
