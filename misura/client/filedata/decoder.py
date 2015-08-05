@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
 
-import os
 from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 from time import sleep, time
@@ -10,7 +9,6 @@ import tempfile
 import traceback
 import shutil
 
-import numpy as np
 
 from .. import parameters as params
 from misura.canon import bitmap
@@ -118,6 +116,7 @@ class DataDecoder(QtCore.QThread):
     def reset(self, proxy=False, datapath=False):
         self._len = 0
         self.zerotime = -1
+        self.cached_profiles = {}
         self.ok = False
         if self.isRunning():
             self.exit()
@@ -185,13 +184,10 @@ class DataDecoder(QtCore.QThread):
             logging.debug('%s', 'get_data: no file proxy')
             return False
 
-        tmpdat = '%s/%i' % (self.tmpdir, seq)
-        logging.debug('%s %s %s', 'get_data', seq, id(fp))
+        sequence_id = '%i' % (seq)
 
-        # Read cached data or save it on filesystem cache
-        if os.path.exists(tmpdat):
-            logging.debug('%s %s', 'fs cache', tmpdat)
-            np.load(tmpdat)
+        if self.cached_profiles.has_key(sequence_id):
+            entry = self.cached_profiles[sequence_id]
         else:
             t0 = time()
             entry = fp.col_at(self.datapath, seq, True)
@@ -201,7 +197,7 @@ class DataDecoder(QtCore.QThread):
                 logging.debug(
                     '%s %s %s %s %s', 'NO DATA', self.datapath, seq, self.ext, entry)
                 return False
-            np.save(tmpdat, entry)
+            self.cached_profiles[sequence_id] = entry
 
         # Data decoding
         try:
