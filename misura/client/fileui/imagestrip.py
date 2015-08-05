@@ -157,7 +157,7 @@ class Slider(QtGui.QWidget):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.slider = QtGui.QScrollBar(parent=self)
         self.slider.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.slider.setTracking(False)
+        self.slider.setTracking(True)
         self.slider.setOrientation(QtCore.Qt.Horizontal)
 
         self.cbPath = QtGui.QComboBox(self)

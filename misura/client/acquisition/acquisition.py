@@ -433,7 +433,10 @@ class MainWindow(QtGui.QMainWindow):
         self.dataTable.set_doc(doc)
         logging.debug('%s', 'connect')
         self.connect(self.snapshotsTable, QtCore.SIGNAL(
-            'set_time(float)'), self.summaryPlot.set_time)
+            'set_time(float)'), self.set_slider_position)
+        self.connect(self.snapshotsTable.slider.slider, QtCore.SIGNAL(
+            'sliderReleased()'), self.slider_released)
+
         self.connect(self.snapshotsTable, QtCore.SIGNAL(
             'set_time(float)'), self.navigator.set_time)
         self.connect(self.summaryPlot, QtCore.SIGNAL(
@@ -441,6 +444,13 @@ class MainWindow(QtGui.QMainWindow):
         self.tasks.done(pid)
 
     max_retry = 10
+
+    def set_slider_position(self, position):
+        self.current_slider_position = position
+
+    def slider_released(self):
+        self.summaryPlot.set_time(self.current_slider_position)
+
 
     def _resetFileProxy(self, retry=0, recursion=0):
         """Resets acquired data widgets"""
