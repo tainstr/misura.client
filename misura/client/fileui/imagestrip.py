@@ -170,6 +170,10 @@ class Slider(QtGui.QWidget):
         self.setLayout(self.lay)
         self.connect(
             self.cbPath, QtCore.SIGNAL('currentIndexChanged(int)'), self.choice)
+        self.connect(self.slider, QtCore.SIGNAL('sliderReleased()'), self.slider_released)
+
+    def slider_released(self):
+        self.emit(QtCore.SIGNAL('sliderReleased()'))
 
     def set_doc(self, doc):
         self.doc = doc
@@ -276,6 +280,10 @@ class ImageSlider(QtGui.QWidget):
 
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.strip.showMenu)
+        self.connect(self.slider, QtCore.SIGNAL('sliderReleased()'), self.slider_released)
+
+    def slider_released(self):
+        self.emit(QtCore.SIGNAL('sliderReleased()'))
 
     def emitSetTime(self, t):
         """Route setTime signals received by the ImageStrip"""

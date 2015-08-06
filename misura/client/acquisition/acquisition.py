@@ -434,7 +434,7 @@ class MainWindow(QtGui.QMainWindow):
         logging.debug('%s', 'connect')
         self.connect(self.imageSlider, QtCore.SIGNAL(
             'set_time(float)'), self.set_slider_position)
-        self.connect(self.imageSlider.slider.slider, QtCore.SIGNAL(
+        self.connect(self.imageSlider, QtCore.SIGNAL(
             'sliderReleased()'), self.slider_released)
 
         self.connect(self.imageSlider, QtCore.SIGNAL(
