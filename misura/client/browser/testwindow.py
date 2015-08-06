@@ -73,7 +73,7 @@ class TestWindow(acquisition.MainWindow):
         if not self.play.isRunning():
             self.play.set_idx(idx)
         else:
-            if idx == self.imageSlider.slider.slider.value():
+            if idx == self.imageSlider.value():
                 return
             self.imageSlider.set_idx(idx)
 

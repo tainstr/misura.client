@@ -172,6 +172,9 @@ class Slider(QtGui.QWidget):
             self.cbPath, QtCore.SIGNAL('currentIndexChanged(int)'), self.choice)
         self.connect(self.slider, QtCore.SIGNAL('sliderReleased()'), self.slider_released)
 
+    def value(self):
+        return slider.value()
+
     def slider_released(self):
         self.emit(QtCore.SIGNAL('sliderReleased()'))
 
@@ -290,9 +293,12 @@ class ImageSlider(QtGui.QWidget):
         logging.debug('%s %s', 'ImageSlider.setTime', t)
         self.emit(QtCore.SIGNAL('set_time(float)'), t)
 
+    def value(self):
+        return slider.value()
+
     @property
     def idx(self):
-        return self.slider.slider.value()
+        return self.value()
 
     @property
     def t(self):
