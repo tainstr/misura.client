@@ -32,7 +32,7 @@ class TestWindow(acquisition.MainWindow):
 #		self.summaryPlot.default_plot()
         self.removeToolBar(self.controls)
         self.connect(self.play, QtCore.SIGNAL('set_idx(int)'), self.set_idx)
-        self.connect(self.snapshotsTable, QtCore.SIGNAL(
+        self.connect(self.imageSlider, QtCore.SIGNAL(
             'set_idx(int)'), self.play.set_idx)
 
 # 	@profile
@@ -45,8 +45,8 @@ class TestWindow(acquisition.MainWindow):
             self.fixedDoc.proxy.load_conf()
         self.setServer(self.fixedDoc.proxy.conf)
         self.name = self.fixedDoc.proxy.get_node_attr('/conf', 'instrument')
-        self.snapshotsTable.slider.choice()
-        self.snapshotsTable.strip.set_idx()
+        self.imageSlider.slider.choice()
+        self.imageSlider.strip.set_idx()
         self.title = self.remote.measure['name']
         self.setWindowTitle('Test: ' + self.remote.measure['name'])
 
@@ -73,9 +73,9 @@ class TestWindow(acquisition.MainWindow):
         if not self.play.isRunning():
             self.play.set_idx(idx)
         else:
-            if idx == self.snapshotsTable.slider.slider.value():
+            if idx == self.imageSlider.slider.slider.value():
                 return
-            self.snapshotsTable.set_idx(idx)
+            self.imageSlider.set_idx(idx)
 
     def re_standard(self):
         """Re-evaluate the meta-data generating scripts (standards)."""

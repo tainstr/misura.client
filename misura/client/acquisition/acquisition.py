@@ -202,8 +202,8 @@ class MainWindow(QtGui.QMainWindow):
         self.rem('snapshotsDock', 'snapshotsStrip')
         self.snapshotsDock = QtGui.QDockWidget(self.centralWidget())
         self.snapshotsDock.setWindowTitle('Snapshots')
-        self.snapshotsTable = fileui.ImageSlider()
-        self.snapshotsDock.setWidget(self.snapshotsTable)
+        self.imageSlider = fileui.ImageSlider()
+        self.snapshotsDock.setWidget(self.imageSlider)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.snapshotsDock)
         if self.name not in ['hsm', 'post', 'drop']:
             self.snapshotsDock.hide()
@@ -414,9 +414,9 @@ class MainWindow(QtGui.QMainWindow):
         self.tasks.job(-1, pid, 'Setting document in live registry')
         registry.set_doc(doc)
 
-        logging.debug('%s', 'snapshotsTable')
+        logging.debug('%s', 'imageSlider')
         self.tasks.job(-1, pid, 'Sync snapshots with document')
-        self.snapshotsTable.set_doc(doc)
+        self.imageSlider.set_doc(doc)
 
         logging.debug('%s', 'summaryPlot')
         self.tasks.job(-1, pid, 'Sync graph with document')
@@ -432,15 +432,15 @@ class MainWindow(QtGui.QMainWindow):
         self.tasks.job(-1, pid, 'Sync data table')
         self.dataTable.set_doc(doc)
         logging.debug('%s', 'connect')
-        self.connect(self.snapshotsTable, QtCore.SIGNAL(
+        self.connect(self.imageSlider, QtCore.SIGNAL(
             'set_time(float)'), self.set_slider_position)
-        self.connect(self.snapshotsTable.slider.slider, QtCore.SIGNAL(
+        self.connect(self.imageSlider.slider.slider, QtCore.SIGNAL(
             'sliderReleased()'), self.slider_released)
 
-        self.connect(self.snapshotsTable, QtCore.SIGNAL(
+        self.connect(self.imageSlider, QtCore.SIGNAL(
             'set_time(float)'), self.navigator.set_time)
         self.connect(self.summaryPlot, QtCore.SIGNAL(
-            'move_line(float)'), self.snapshotsTable.set_time)
+            'move_line(float)'), self.imageSlider.set_time)
         self.tasks.done(pid)
 
     max_retry = 10
