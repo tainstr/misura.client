@@ -157,7 +157,7 @@ class Slider(QtGui.QWidget):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.slider = QtGui.QScrollBar(parent=self)
         self.slider.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.slider.setTracking(True)
+        self.slider.setTracking(False)
         self.slider.setOrientation(QtCore.Qt.Horizontal)
 
         self.cbPath = QtGui.QComboBox(self)
@@ -271,7 +271,7 @@ class ImageSlider(QtGui.QWidget):
         self.connect(self.slider.slider, QtCore.SIGNAL(
             'customContextMenuRequested(QPoint)'), self.strip.showMenu)
 #		self.connect(self.slider,QtCore.SIGNAL('set_idx(int)'),self.set_idx)
-        self.slider.slider.valueChanged.connect(self.strip.set_idx)
+        self.slider.slider.sliderMoved.connect(self.strip.set_idx)
         self.connect(self.slider, QtCore.SIGNAL(
             'datapathChanged(QString)'), self.setPath)
         self.lay = QtGui.QVBoxLayout()
