@@ -173,7 +173,7 @@ class Slider(QtGui.QWidget):
         self.connect(self.slider, QtCore.SIGNAL('sliderReleased()'), self.slider_released)
 
     def value(self):
-        return slider.value()
+        return self.slider.value()
 
     def slider_released(self):
         self.emit(QtCore.SIGNAL('sliderReleased()'))
@@ -294,7 +294,7 @@ class ImageSlider(QtGui.QWidget):
         self.emit(QtCore.SIGNAL('set_time(float)'), t)
 
     def value(self):
-        return slider.value()
+        return self.slider.value()
 
     @property
     def idx(self):
@@ -325,8 +325,9 @@ class ImageSlider(QtGui.QWidget):
         self.connect(self.strip, QtCore.SIGNAL('set_idx(int)'), self.set_idx)
 
     def set_time(self, t):
-        if self.slider.decoder:
-            idx = self.slider.decoder.get_time(t)
-        else:
-            idx = int(t)
+        number_of_temperatures = len(self.doc.data['0:t'].data)
+        percent_t = t / number_of_temperatures
+        
+        idx = int(percent_t * self.slider.slider.maximum())
+
         self.set_idx(idx)
