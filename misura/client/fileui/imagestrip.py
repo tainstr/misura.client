@@ -325,9 +325,10 @@ class ImageSlider(QtGui.QWidget):
         self.connect(self.strip, QtCore.SIGNAL('set_idx(int)'), self.set_idx)
 
     def set_time(self, t):
-        number_of_temperatures = len(self.doc.data['0:t'].data)
-        percent_t = t / number_of_temperatures
+        number_of_samples = len(self.doc.data['0:t'].data)
+        percent_t = t / number_of_samples
         
         idx = int(percent_t * self.slider.slider.maximum())
+
 
         self.set_idx(idx)
