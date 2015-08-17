@@ -303,7 +303,11 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         # Avoid saving duplicate values
         arg = list(unicode(a) for a in arg)
         if arg in tab:
+            tab.remove(arg)
+            tab.append(arg)
+
             return False
+        
         tab.append(arg)
 
         lim = self.desc['h' + name]['current']
