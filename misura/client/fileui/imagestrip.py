@@ -329,6 +329,5 @@ class ImageSlider(QtGui.QWidget):
             idx = self.slider.decoder.get_time(t)
         else:
             idx = int(t)
-        print idx
 
         self.set_idx(idx)
