@@ -325,10 +325,10 @@ class ImageSlider(QtGui.QWidget):
         self.connect(self.strip, QtCore.SIGNAL('set_idx(int)'), self.set_idx)
 
     def set_time(self, t):
-        number_of_samples = len(self.doc.data['0:t'].data)
-        percent_t = t / number_of_samples
-        
-        idx = int(percent_t * self.slider.slider.maximum())
-
+        if self.slider.decoder:
+            idx = self.slider.decoder.get_time(t)
+        else:
+            idx = int(t)
+        print idx
 
         self.set_idx(idx)
