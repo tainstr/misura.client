@@ -86,7 +86,7 @@ class MainWindow(QtGui.QMainWindow):
     def add_server_selector(self):
         """Server selector dock widget"""
         self.serverDock = QtGui.QDockWidget(self.centralWidget())
-# 		self.serverSelector=connection.ServerSelector(self.serverDock)
+#       self.serverSelector=connection.ServerSelector(self.serverDock)
         self.serverSelector = RecentWidget(confdb, 'server', self.serverDock)
         self.connect(
             self.serverSelector, self.serverSelector.sig_select, self.set_addr)
@@ -246,7 +246,8 @@ class MainWindow(QtGui.QMainWindow):
         """Called in a different thread. Need to recreate connection."""
         r = self.remote.copy()
         r.connect()
-        return r.init_instrument(soft)
+        result = r.init_instrument(soft)
+        
 
     def init_instrument(self, soft=False):
         # TODO: this scheme could be automated via a decorator: @thread
@@ -257,7 +258,7 @@ class MainWindow(QtGui.QMainWindow):
         logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance(
         ).activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
 
-# 	@csutil.profile
+#   @csutil.profile
     def setInstrument(self, remote=False, server=False):
         if server is not False:
             self.setServer(server)
@@ -283,11 +284,11 @@ class MainWindow(QtGui.QMainWindow):
                 # Async call of init_instrument
                 # soft: only if not already initialized
                 self.init_instrument(soft=True)
-# 				QtCore.QThreadPool.globalInstance().waitForDone()
+#               QtCore.QThreadPool.globalInstance().waitForDone()
                 logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance(
                 ).activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
-# 				sleep(10)
-# 				self.remote.init_instrument()
+#               sleep(10)
+#               self.remote.init_instrument()
         self.tasks.job(1, pid, 'Preparing menus')
         self.myMenuBar.close()
         self.myMenuBar = MenuBar(server=self.server, parent=self)
@@ -356,7 +357,7 @@ class MainWindow(QtGui.QMainWindow):
             obj = self.server.toPath(lst)
             if obj is None:
                 continue
-# 			role=obj['role'][self.name]
+#           role=obj['role'][self.name]
             role = 'NoRole'
             if 'Camera' in obj['mro']:
                 an = name.lower()
@@ -399,11 +400,11 @@ class MainWindow(QtGui.QMainWindow):
             win.show()
         else:
             win.hide()
-# 		self.connect(pic, QtCore.SIGNAL('updatedROI()'), win.repaint)
+#       self.connect(pic, QtCore.SIGNAL('updatedROI()'), win.repaint)
         self.cameras[obj['fullpath']] = (pic, win)
 
 
-# 	@csutil.lockme
+#   @csutil.lockme
     def set_doc(self, doc=False):
         if doc is False:
             doc = filedata.MisuraDocument(root=self.server)
@@ -489,7 +490,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.tasks.done('Waiting for data')
                 QtGui.QMessageBox.critical(self, _('Impossible to retrieve the ongoing test data'),
                                            _("""A communication error with the instrument does not allow to retrieve the ongoing test data.
-						Please restart the client and/or stop the test."""))
+                        Please restart the client and/or stop the test."""))
                 return False
             fid = self.remote.measure['uid']
             if fid == '':
@@ -520,7 +521,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.tasks.done('Waiting for data')
                 return False
             try:
-                # 				live.reopen() # does not work when file grows...
+                #               live.reopen() # does not work when file grows...
                 fp = RemoteFileProxy(live, conf=self.server, live=True)
                 logging.debug('%s', fp.header())
                 doc = filedata.MisuraDocument(proxy=fp)
@@ -605,7 +606,7 @@ class MainWindow(QtGui.QMainWindow):
             d = settings.value('/FileSaveToDir', os.path.expanduser('~'))
             path = os.path.join(str(d), self.remote.measure['name'] + '.h5')
             outfile = QtGui.QFileDialog.getSaveFileName(
-                self, 	_("Download finished test as"),
+                self,   _("Download finished test as"),
                 path,
                 filter="Misura (*.h5)")
             outfile = str(outfile)

@@ -13,12 +13,12 @@ class aString(ActiveWidget):
         ActiveWidget.__init__(self, server, path,  prop, parent)
         if extended:
             self.browser = QtGui.QTextBrowser()
-            sign = 'textChanged()'
+            self.signal = 'textChanged()'
         else:
             self.browser = QtGui.QLineEdit("")
-            sign = 'editingFinished()'
+            self.signal = 'editingFinished()'
         self.extended = extended
-        self.connect(self.browser,   QtCore.SIGNAL(sign), self.set)
+        self.connect(self.browser,   QtCore.SIGNAL(self.signal), self.set)
         self.lay.addWidget(self.browser)
         self.emit(QtCore.SIGNAL('selfchanged()'))
 
@@ -35,6 +35,7 @@ class aString(ActiveWidget):
         return unicode(val)
 
     def update(self):
+        self.disconnect(self.browser, QtCore.SIGNAL(self.signal), self.set)
         if self.extended:
             self.browser.setPlainText(self.adapt(self.current))
         else:
@@ -43,6 +44,7 @@ class aString(ActiveWidget):
             self.browser.setReadOnly(True)
         else:
             self.browser.setReadOnly(False)
+        self.connect(self.browser,   QtCore.SIGNAL(self.signal), self.set)
 
     def set(self, *foo):
         if self.extended:
@@ -56,5 +58,5 @@ class aString(ActiveWidget):
             self.browser.setTextCursor(cur)
 
     def emitOptional(self):
-        # 		print 'textEdited(QString)', self.current
+        #       print 'textEdited(QString)', self.current
         self.emit(QtCore.SIGNAL('textEdited(QString)'), self.current)

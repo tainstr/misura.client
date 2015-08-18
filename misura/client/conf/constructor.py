@@ -123,7 +123,7 @@ class Section(QtGui.QWidget):
         self.connect(more, QtCore.SIGNAL('clicked()'), p)
         out = QtGui.QWidget()
         lay = QtGui.QHBoxLayout()
-#		lay.addWidget(QtGui.QLabel(_(wg.label)+': '))
+#       lay.addWidget(QtGui.QLabel(_(wg.label)+': '))
         lay.addWidget(wg)
         lay.addWidget(more)
         out.setLayout(lay)
@@ -208,12 +208,15 @@ class Interface(QtGui.QTabWidget):
         if self.prop_dict.has_key(sname):
             if self.prop_dict[sname]['type'] == 'Section':
                 sname = self.prop_dict[sname]['name']
-        self.addTab(area, _(sname))
+        self.addTab(area, _('Main'))
 
         for section, prop_list in self.sections.iteritems():
             if section == 'Main':
                 continue
             wg = Section(self.server, self.remObj, prop_list, parent=self)
+            # Ignore empty sections
+            if not len(wg.widgetsMap):
+                continue
             self.sectionsMap[section] = wg
             area = QtGui.QScrollArea(self)
             area.setWidget(wg)
@@ -242,11 +245,13 @@ class Interface(QtGui.QTabWidget):
             self.removeTab(self.currentIndex())
 
     def update(self):
+        """Cause all widgets to re-register for an update"""
         for s, sec in self.sectionsMap.iteritems():
             for w, wg in sec.widgetsMap.iteritems():
                 if wg.type == 'Button':
                     continue
-                logging.debug('%s %s %s %s', 'updating:', s, w, wg.async_get())
+                wg.register()
+#                logging.debug('%s %s %s %s', 'updating:', s, w, wg.async_get())
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))

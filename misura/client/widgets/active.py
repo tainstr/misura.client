@@ -142,7 +142,7 @@ class Active(object):
         self.emit(QtCore.SIGNAL('changed'), self.current)
         self.emit(QtCore.SIGNAL('changed()'))
         self.emitOptional()
-#		print 'emitChanged', self.label
+#       print 'emitChanged', self.label
 
     def emitSelfChanged(self, nval):
         """Called from diff threads"""
