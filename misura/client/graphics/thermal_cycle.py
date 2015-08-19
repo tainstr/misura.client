@@ -364,7 +364,7 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
                 return None
 
             wg = QtGui.QDoubleSpinBox(parent)
-            wg.setRange(0, 1750)
+            wg.setRange(0, 1800)
             wg.setSuffix(u' \xb0C')
 
         elif index.column() == thermal_cycle_row.colRATE:
