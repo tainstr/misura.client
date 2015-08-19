@@ -21,7 +21,7 @@ class aTablePointDelegate(QtGui.QItemDelegate):
             wg = QtGui.QDoubleSpinBox(parent)
             # TODO: implementare Range e altri argomenti opzionali per colonna.
             wg.setRange(-1e32, 1e32)
-#			wg.setSuffix(u' \xb0C')
+#           wg.setSuffix(u' \xb0C')
         elif colType == 'Integer':
             wg = QtGui.QSpinBox(parent)
             wg.setRange(-2147483647, 2147483647)
@@ -115,7 +115,7 @@ class aTableModel(QtCore.QAbstractTableModel):
             return self.header[section][0]
 
     def up(self):
-        hp = self.tableObj.get()
+        hp = self.tableObj.current
         # Table header is the first row in the property
         self.header = hp[0]
         # Rows are the rest of the property
@@ -156,7 +156,6 @@ class aTableModel(QtCore.QAbstractTableModel):
         elif colType == 'String':
             row[icol] = str(value)
         # Sostituisco la riga:
-
         self.rows[irow] = row
         self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.index(irow, 0),
                   self.index(self.rowCount(), self.columnCount()))
@@ -164,14 +163,15 @@ class aTableModel(QtCore.QAbstractTableModel):
         return True
 
     def apply(self):
-        self.tableObj.set([self.header] + self.rows)
-        self.up()
+        #FIXME: should work by
+        self.tableObj.remObj.set(self.tableObj.handle,  [self.header] + self.rows)
 
 
 class aTableView(QtGui.QTableView):
 
     def __init__(self, parent=None):
         QtGui.QTableView.__init__(self, parent)
+        self.tableObj = parent
         self.curveModel = aTableModel(parent)
         self.setModel(self.curveModel)
         self.setItemDelegate(aTablePointDelegate(self))
@@ -186,7 +186,7 @@ class aTableView(QtGui.QTableView):
         self.menu.addAction(_('Add row before'), self.rowBefore)
         self.menu.addAction(_('Delete row'), self.remRow)
         self.menu.addSeparator()
-        self.menu.addAction(_('Update'), self.curveModel.up)
+        self.menu.addAction(_('Update'), self.tableObj.get)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
 
@@ -194,9 +194,13 @@ class aTableView(QtGui.QTableView):
         self.menu.popup(self.mapToGlobal(pt))
 
     def addRow(self, pos=0):
-        model = self.model()
+        model = self.curveModel
         new = model.emptyRow()
-        i = self.currentIndex().row()
+        i = self.currentIndex()
+        if i:
+            i=i.row()
+        else:
+            i=0
         if pos == 0:  # At the end
             model.rows.append(new)
         elif pos == 1:  # After current
@@ -206,8 +210,9 @@ class aTableView(QtGui.QTableView):
         model.apply()
 
     def remRow(self):
-        model = self.model()
+        model = self.curveModel
         i = self.currentIndex().row()
+        model.rows.pop(i)
         model.apply()
 
 
