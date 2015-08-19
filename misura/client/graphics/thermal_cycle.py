@@ -376,7 +376,10 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
             if index.row() == 0:
                 return QtGui.QLabel('undefined', parent)
             wg = QtGui.QDoubleSpinBox(parent)
-            wg.setRange(-500, 80)
+            
+            maxHeatingRate = self.remote['maxHeatingRate']
+            wg.setRange(-500, maxHeatingRate)
+            
             wg.setSuffix(u' \xb0C/min')
         elif index.column() == thermal_cycle_row.colDUR:
             mod.mode_dwell(index.row())
