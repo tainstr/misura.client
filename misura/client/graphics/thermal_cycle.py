@@ -332,7 +332,8 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
 
     """Delegate for thermal cycle table cells"""
 
-    def __init__(self, parent=None):
+    def __init__(self, remote, parent=None):
+        self.remote = remote
         QtGui.QItemDelegate.__init__(self, parent)
 
     def timeLimits(self, index):
@@ -364,7 +365,10 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
                 return None
 
             wg = QtGui.QDoubleSpinBox(parent)
-            wg.setRange(0, 1800)
+
+            maxControlTemp = self.remote['maxControlTemp']
+
+            wg.setRange(0, maxControlTemp)
             wg.setSuffix(u' \xb0C')
 
         elif index.column() == thermal_cycle_row.colRATE:
@@ -428,11 +432,11 @@ class ThermalCurveTable(QtGui.QTableView):
 
     """Table view of a thermal cycle."""
 
-    def __init__(self, parent=None):
+    def __init__(self, remote, parent=None):
         QtGui.QTableView.__init__(self, parent)
         self.curveModel = ThermalCurveModel()
         self.setModel(self.curveModel)
-        self.setItemDelegate(ThermalPointDelegate(self))
+        self.setItemDelegate(ThermalPointDelegate(remote, self))
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.setSelectionModel(self.selection)
 
@@ -532,7 +536,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         menuBar.setNativeMenuBar(False)
         self.main_layout.addWidget(menuBar)
 
-        self.table = ThermalCurveTable()
+        self.table = ThermalCurveTable(remote, self)
         self.model = self.table.model()
 
         self.fileMenu = menuBar.addMenu('File')
@@ -560,11 +564,11 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.on_kiln_stopped_widget = widgets.build(
                 active_instrument, active_instrument.measure, active_instrument.measure.gete('onKilnStopped'))
             self.on_kiln_stopped_widget.button.hide()
-            self.on_kiln_stopped_widget.lay.insertWidget(0, self.on_kiln_stopped_widget.label_widget)
+            self.on_kiln_stopped_widget.lay.insertWidget(
+                0, self.on_kiln_stopped_widget.label_widget)
             self.main_layout.addWidget(self.on_kiln_stopped_widget)
-            
-        self.main_layout.addWidget(self.plot)
 
+        self.main_layout.addWidget(self.plot)
 
     def replot(self, *args):
         crv = self.model.curve(events=False)
