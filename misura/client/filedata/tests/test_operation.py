@@ -5,6 +5,7 @@ import unittest
 import sys
 import os
 import shutil
+import numpy as np
 from misura.client import filedata
 from misura.client.tests import iutils_testing
 from PyQt4 import QtGui
@@ -104,6 +105,39 @@ class TestOperationMisuraImport(unittest.TestCase):
         doc = filedata.MisuraDocument()
         imp.do(doc)
         doc.data['smp0_Sint'].linked.commit('test')
+
+
+
+class FakeProxy():
+    def __init__(self, data):
+        self.data = data
+
+    def col(self, col, n):
+        return self.data
+
+class TestNotInterpolated(unittest.TestCase):
+    def test_not_interpolated_no_adding(self):
+        initial_data = np.array([[0., 123.], [1., 321.]])
+
+        actual_output = filedata.operation.not_interpolated(FakeProxy(initial_data), 0, 0, 1)
+
+        np.testing.assert_array_equal(initial_data.transpose(), actual_output)
+
+    def test_not_interpolated_adding_something_in_the_end(self):
+        initial_data = np.array([[0., 123.], [1., 321.]])
+
+        actual_output = filedata.operation.not_interpolated(FakeProxy(initial_data), 0, 0, 4)
+
+        expected_output = np.array([[0., 123.], [1., 321.], [2., 321.], [3.5, 321.], [5., 321.]]).transpose()
+        np.testing.assert_array_equal(expected_output, actual_output)
+
+    def test_not_interpolated_starting_after_zero(self):
+        initial_data = np.array([[0., 123.], [1., 321.], [2., 456.]])
+
+        actual_output = filedata.operation.not_interpolated(FakeProxy(initial_data), 0, 2, 5)
+
+        expected_output = np.array([[0., 123.], [1., 321.], [2., 456.], [3., 456.], [4.5, 456.], [6., 456.]]).transpose()
+        np.testing.assert_array_equal(expected_output, actual_output)
 
 
 if __name__ == "__main__":
