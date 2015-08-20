@@ -271,6 +271,7 @@ class ImageSlider(QtGui.QWidget):
         self.connect(self.slider.slider, QtCore.SIGNAL(
             'customContextMenuRequested(QPoint)'), self.strip.showMenu)
 #		self.connect(self.slider,QtCore.SIGNAL('set_idx(int)'),self.set_idx)
+        self.slider.slider.valueChanged.connect(self.strip.set_idx)
         self.slider.slider.sliderMoved.connect(self.strip.set_idx)
         self.connect(self.slider, QtCore.SIGNAL(
             'datapathChanged(QString)'), self.setPath)
