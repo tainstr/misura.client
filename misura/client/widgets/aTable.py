@@ -15,13 +15,15 @@ class aTablePointDelegate(QtGui.QItemDelegate):
     def createEditor(self, parent, option, index):
         mod = index.model()
         col = index.column()
+        
         colType = mod.header[col][1]
         logging.debug('%s', colType)
         if colType == 'Float':
             wg = QtGui.QDoubleSpinBox(parent)
-            # TODO: implementare Range e altri argomenti opzionali per colonna.
-            wg.setRange(-1e32, 1e32)
-#           wg.setSuffix(u' \xb0C')
+            wg.setRange(MIN, MAX)
+            val = mod.data(index)
+            dc = extend_decimals(val)
+            wg.setDecimals(dc)
         elif colType == 'Integer':
             wg = QtGui.QSpinBox(parent)
             wg.setRange(-2147483647, 2147483647)
@@ -43,6 +45,7 @@ class aTablePointDelegate(QtGui.QItemDelegate):
         logging.debug('%s', colType)
         if colType in ['Float', 'Integer']:
             val = mod.data(index)
+            print 'setting editor data',val
             editor.setValue(val)
         elif colType == 'String':
             val = mod.data(index)
@@ -65,6 +68,7 @@ class aTablePointDelegate(QtGui.QItemDelegate):
         if colType in ['Float', 'Integer']:
             val = editor.text()
             val = editor.valueFromText(val)
+            print 'setting model data',val
             model.setData(index, val, QtCore.Qt.DisplayRole)
         elif colType == 'Boolean':
             if index.row() == 0:
@@ -150,6 +154,7 @@ class aTableModel(QtCore.QAbstractTableModel):
             s = s == True
             row[icol] = s
         elif colType == 'Float':
+            print 'setting model data', icol,value
             row[icol] = float(value)
         elif colType == 'Integer':
             row[icol] = int(value)

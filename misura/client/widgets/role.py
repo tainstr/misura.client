@@ -98,8 +98,11 @@ class RoleIO(ActiveWidget):
             logging.warning('Cannot get option  %s', self.handle)
             return
         opt = self.prop['options']
-        path = self.server.searchPath(opt[0])
-        obj = self.server.toPath(opt[0])
+        if opt[0] == '.':
+            obj = self.remObj
+        else:
+            path = self.server.searchPath(opt[0])
+            obj = self.server.toPath(opt[0])
         fu = False
         # Is update needed?
         if self.value:

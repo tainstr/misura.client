@@ -4,6 +4,7 @@ import functools
 from time import time
 import collections
 import threading
+import math
 
 from misura.canon.logger import Log as logging
 from misura.canon.csutil import lockme
@@ -13,10 +14,23 @@ from misura.client.clientconf import confdb
 from .. import _
 from misura.client.live import registry
 
+
 from PyQt4 import QtGui, QtCore
 
 from misura.client.parameters import MAX, MIN
 
+def extend_decimals(cur, default = 2, extend_by = 2):
+    """Find out how many decimals to enable in editing for float value `num`"""    
+    cur = float(cur)
+    if abs(cur) < 1 and abs(cur) > 1e-32:
+        print 'extend_decimals for',cur
+        dc = math.log(abs(1. / cur), 10)
+        dc = round(abs(dc),0)
+        print 'extend_decimals for',cur,dc
+        return int(dc) + extend_by 
+    print 'extend decimals default',cur,default
+    return default
+    
 
 def getRemoteDev(server, devpath):
     if devpath == 'None':

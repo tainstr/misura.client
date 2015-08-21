@@ -4,7 +4,7 @@ from .. import _
 from PyQt4 import QtCore, QtGui
 from traceback import format_exc
 from misura.client.parameters import MAX, MIN
-from misura.client.widgets.active import ActiveWidget
+from misura.client.widgets.active import ActiveWidget, extend_decimals
 import math
 from misura.canon.logger import Log as logging
 
@@ -167,13 +167,8 @@ class aNumber(ActiveWidget):
         cur = self.adapt2gui(self.current)
         try:
             if self.double:
-                cur = float(cur)
-                if cur == 0:
-                    self.spinbox.setDecimals(2)
-                elif abs(cur) < 1:
-                    dc = math.log(abs(1. / cur), 10)
-                    dc = int(abs(dc)) + 2
-                    self.spinbox.setDecimals(dc)
+                dc = extend_decimals(cur)
+                self.spinbox.setDecimals(dc)
             else:
                 cur = int(cur)
             self.setRange(self.min, self.max, self.step)
