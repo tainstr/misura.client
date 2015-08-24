@@ -99,6 +99,7 @@ class RoleIO(ActiveWidget):
             return
         opt = self.prop['options']
         if opt[0] == '.':
+            path = '.'
             obj = self.remObj
         else:
             path = self.server.searchPath(opt[0])

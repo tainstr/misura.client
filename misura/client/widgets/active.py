@@ -28,7 +28,6 @@ def extend_decimals(cur, default = 2, extend_by = 2):
         dc = round(abs(dc),0)
         print 'extend_decimals for',cur,dc
         return int(dc) + extend_by 
-    print 'extend decimals default',cur,default
     return default
     
 
