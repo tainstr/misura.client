@@ -14,6 +14,8 @@ set installerDir=%codeBase%\misura\client\installer
 set specFile=%installerDir%\client_windows_pyinst.spec
 set out=%installerDir%\dist
 
-del /q /s "%deployDir%\misura4" 
+REM del /q /s "%deployDir%\misura4" 
+set stamp=%DATE:/=-%_%TIME::=-%
+mv "%deployDir%\misura4" "%deployDir%\build_%stamp%"
 xcopy /E /Y /I "%out%\misura4" "%deployDir%\misura4"
 
