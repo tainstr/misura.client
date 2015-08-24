@@ -287,34 +287,10 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 break
             LF.samples.append(Sample(conf=smp, linked=LF, ref=False, idx=idx))
         logging.debug('%s %s %s %s', 'build', idx + 1, 'samples', LF.samples)
-        elapsed = int(instrobj.measure['elapsed']) + 1
+        elapsed = int(instrobj.measure['elapsed'])
         zerotime = int(instrobj['zerotime'])
-        end = 0
-        # Correct elapsed time
-        # FIXME: SLOW. Elapsed should be correct!
-        for p, col in enumerate(header[:]):
-            if isinstance(self.proxy, RemoteFileProxy):
-                break
-            try:
-                if not self.proxy.len(col):
-                    raise EmptyDataset(col)
-                e = self.proxy.col_at(col, -1, raw=True)[0]
-                if e > end:
-                    end = e
-                z = self.proxy.col_at(col, 0, raw=True)[0]
-                # Update also zerotime, but only if absolute (>zerotime/10.)
-                if zerotime / 10. < z < zerotime or zerotime <= 0:
-                    zerotime = z
-            except:
-                logging.debug(format_exc())
-                header.remove(col)
-                continue
 
-        if end > zerotime:
-            delta = end - zerotime
-        else:
-            delta = end
-        elapsed = int(max(delta, elapsed)) + 1
+
         logging.debug('%s %s', 'got elapsed', elapsed)
         # Create time dataset
         time_sequence = []
@@ -337,13 +313,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 '%s %s', 'No time_sequence! Aborting.', instrobj.measure['elapsed'])
             return []
         # Detect if time sequence needs to be translated or not.
-        if end > zerotime:
-            # translated time sequence
-            ztime_sequence = time_sequence + zerotime
-        else:
-            ztime_sequence = time_sequence
-        startt = ztime_sequence[0]
-        endt = ztime_sequence[-1]
+
+        startt = time_sequence[0]
+        endt = time_sequence[-1]
         outds = {}
         availds = {}
         for p, col0 in enumerate(['t'] + header):
@@ -373,7 +345,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 # Take values column
                 data = not_interpolated(self.proxy, col, startt, endt)[1]
             else:
-                data = interpolated(self.proxy, col, ztime_sequence)
+                data = interpolated(self.proxy, col, time_sequence)
 
             if data is False:
                 data = []
