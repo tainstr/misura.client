@@ -5,6 +5,7 @@ from PyQt4 import QtGui, QtCore
 from .. import widgets
 from .. import navigator
 from veusz.windows import treeeditwindow
+from veusz.windows import consolewindow
 
 
 class Results(QtGui.QTabWidget):
@@ -24,7 +25,12 @@ class Results(QtGui.QTabWidget):
         self.props = treeeditwindow.PropertiesDock(doc, te, self)
         self.formats = treeeditwindow.FormatDock(doc, te, self)
 
+        self.console = consolewindow.ConsoleWindow(doc, self)
+        self.console.checkVisible = lambda *disableCheckVisible: None
+
+
         self.addTab(self.navigator, 'Data')
         self.addTab(self.props, 'Properties')
         self.addTab(self.formats, 'Formatting')
         self.addTab(self.plot.treeedit, 'Objects')
+        self.addTab(self.console, 'Console')
