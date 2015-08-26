@@ -15,8 +15,6 @@ import units
 
 import parameters as params
 
-from misura.canon.logger import Log as logging
-
 default_desc = {}
 
 ao(default_desc, 'lang', **{'name': "Client Language",

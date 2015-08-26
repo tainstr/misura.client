@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import functools
-from time import sleep
+from time import sleep, time
 import threading
 from traceback import format_exc
 import os
@@ -44,6 +44,33 @@ roles = {'motorBase': 'Base Position', 'motorHeight': 'Height Position',
          'angleHeight': 'Height Inclination', 'angleBase': 'Base Inclination',
          'angleRight': 'Right Inclination', 'angleLeft': 'LeftInclination'}
 
+
+def check_time_delta(server):
+    """Detect time delta, warn the user, restart if delta is approved."""
+    if server['isRunning'] or server['runningInstrument']:
+        logging.debug('running analysis: do not check time delta')
+        return True
+    t = time()
+    s = server.time()
+    dt = time() - t
+    delta = int((t - s) + (dt / 3.))
+    if delta < 10:
+        logging.debug('Time delta is not significant',delta)
+        return True
+    pre = server['timeDelta']
+    if pre:
+        logging.debug('Time delta already set: %', server['timeDelta'])
+    btn = QtGui.QMessageBox.warning(self,'Hardware clock error',
+                      'Instrument time is different from your current time (delta: {}s).\n Apply difference and restart?'.format(delta))
+    if btn != QtGui.QMessageBox.Ok:
+        logging.debug('Delta correction aborted')
+        return True
+    #TODO: warn the user about time delta
+    logging.info('Apply time delta to server',delta)
+    server['timeDelta'] = delta
+    r = server.restart()
+    QtGui.QMessageBox.information(self,'Restarting','Instrument is restarting: ' + r)
+    return False
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -140,7 +167,8 @@ class MainWindow(QtGui.QMainWindow):
             self.tasks.close()
         super(MainWindow, self).closeEvent(ev)
     _blockResetFileProxy = False
-
+    
+    
     def setServer(self, server=False):
         self._blockResetFileProxy = True
         logging.debug('%s %s', 'Setting server to', server)
@@ -148,6 +176,8 @@ class MainWindow(QtGui.QMainWindow):
         if not server:
             network.manager.remote.connect()
             self.server = network.manager.remote
+        if not check_time_delta(self.server):
+            return False
         registry.toggle_run(True)
         self.serverDock.hide()
         self.myMenuBar.close()
@@ -182,10 +212,11 @@ class MainWindow(QtGui.QMainWindow):
             remote = getattr(self.server, ri)
             self.setInstrument(remote)
         if self.fixedDoc:
-            return
+            return True
         # Automatically pop-up delayed start dialog
         if self.server['delayStart']:
             self.delayed_start()
+        return True
 
     def add_measure(self):
         # MEASUREMENT INFO
