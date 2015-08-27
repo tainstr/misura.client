@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Standard interface construction utilities"""
+import veusz.dialogs.exceptiondialog
+veusz.dialogs.exceptiondialog._emailUrl = None
+
 from PyQt4 import QtGui, QtCore
 import os
 import sys
