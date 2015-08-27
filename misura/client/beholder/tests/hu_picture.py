@@ -5,7 +5,7 @@ from misura.canon.logger import Log as logging
 import unittest
 import functools
 from misura import utils_testing as ut
-
+from misura.client.tests import iutils_testing
 from misura.client.beholder import picture
 from misura.beholder import sim_camera
 
@@ -30,6 +30,7 @@ class HuViewerPicture(unittest.TestCase):
 
     def setUp(self):
         self.server = ut.dummyServer(Hsm)
+        self.server.hsm.init_instrument()
         self.server.hsm.sample0.analyzer.autoroi['Hmargin'] = 25
         self.server.hsm.sample0.analyzer.autoroi['Vmargin'] = 25
         self.server.hsm['nSamples'] = 1

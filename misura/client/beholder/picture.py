@@ -440,15 +440,15 @@ class ViewerPicture(QtGui.QGraphicsView):
         self.calibrationTool.show()
 
     def save_frame(self):
-        """Save current frame"""
-        # FIXME: multicrop...
-        assert False
+        """Save current frame for each sample"""
         if not self.saveDir:
             self.saveDir = QtGui.QFileDialog.getExistingDirectory(
                 self, "Images destination folder", "/tmp")
         self.saveN += 1
-        self.pix.save('%s/%s_%i.jpg' %
-                      (self.saveDir, self.remote['name'], self.saveN), 'JPG', 25)
+        for i,smp in enumerate(self.samples):
+            out = '{}/{}_smp{}_{}.jpg'.format(
+                    self.saveDir, self.remote['name'], i, self.saveN)
+            smp.pix.save(out, 'JPG', 25)
 
     def toggle(self, do=None):
         """Toggle data streams"""
