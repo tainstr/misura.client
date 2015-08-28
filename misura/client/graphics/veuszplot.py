@@ -206,7 +206,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
 # 				qt4.QApplication.restoreOverrideCursor()
 
     def update_page(self, *foo):
-        """Update the navigator view in order to show colours and styles 
+        """Update the navigator view in order to show colours and styles
         effectively present in the current page"""
         n = self.getPageNumber()
         page = self.document.basewidget.getPage(n)
@@ -243,9 +243,8 @@ class VeuszPlot(QtGui.QWidget):
 
     def addToolBar(self, *args):
         """This function is required during self.plot instantiation."""
-        self.viewtoolbar = args[1]
-        self.lay.addWidget(args[1])
-        self.viewtoolbar.hide()
+        args[1].hide()
+        pass
 
     def showDialog(self, dialog):
         """Show dialog given."""
@@ -254,6 +253,10 @@ class VeuszPlot(QtGui.QWidget):
 
     def addToolBarBreak(self, *a, **k):
         pass
+
+    def enable_shortcuts(self):
+        for action in self.plot.vzactions.itervalues():
+            self.addAction(action)
 
     def set_doc(self, doc=False):
         self.treeedit.close()
@@ -269,6 +272,8 @@ class VeuszPlot(QtGui.QWidget):
         self.ci = document.CommandInterpreter(self.document)
         self.plot = VeuszPlotWindow(self.document, self)
         self.lay.addWidget(self.plot)
+
+        self.enable_shortcuts()
 
         # Faking mainwindow
         self.treeedit = treeeditwindow.TreeEditDock(doc, self)
