@@ -10,19 +10,16 @@ import re
 from scipy.interpolate import InterpolatedUnivariateSpline
 
 import veusz.dataimport.base as base
-import veusz.dataimport.capture as capture
-
 
 from dataset import MisuraDataset, Sample
 import linked
-from proxy import getFileProxy, RemoteFileProxy
+from proxy import getFileProxy
 
 from entry import iterpath
 
 from .. import iutils, live
 from .. import clientconf
 
-from misura.canon.csutil import profile
 from .. import units
 
 from PyQt4 import QtCore
@@ -77,6 +74,7 @@ class ImportParamsMisura(base.ImportParamsBase):
     defaults = deepcopy(base.ImportParamsBase.defaults)
     defaults.update({
         'prefix': '0:',
+        'uid': '',
         'version': -1,  # means latest
         'reduce': False,
         'reducen': 1000,
@@ -132,9 +130,27 @@ def interpolated(proxy, col, ztime_sequence):
     r = f(ztime_sequence)
     return r
 
+def tasks():
+    return getattr(live.registry, 'tasks', False)
 
-tasks = lambda: getattr(live.registry, 'tasks', False)
+def jobs(n, pid="File import"):
+    t = tasks()
+    if not t:
+        return
+    t.jobs(n, pid)
 
+def job(n, pid="File import", label=''):
+    t = tasks()
+    if not t:
+        return
+    t.job(n, pid, label)
+
+def done(pid="File import"):
+    t = tasks()
+    if not t:
+        return
+    t.done(pid)
+    
 
 class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
@@ -155,6 +171,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
         self.linked = True
         self.filename = params.filename
+        self.uid = params.uid
 
         self.rule_exc = False
         if len(params.rule_exc) > 0:
@@ -175,47 +192,40 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         self.rule_unit = clientconf.RulesTable(params.rule_unit)
 
     @classmethod
-    def from_dataset_in_file(cls, dataset_name, linked_filename):
+    def from_dataset_in_file(cls, dataset_name, linked_filename, uid = ''):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
         if ':' in dataset_name:
             dataset_name = dataset_name.split(':')[1]
         p = ImportParamsMisura(filename=linked_filename,
+                               uid = uid,
                                rule_exc=' *',
                                rule_load='^(/summary/)?' + dataset_name + '$',
                                rule_unit=clientconf.confdb['rule_unit'])
         op = OperationMisuraImport(p)
         return op
 
+        
     def do(self, document):
         """Override do() in order to get a reference to the document!"""
         self._doc = document
         base.OperationDataImportBase.do(self, document)
 
-    def jobs(self, n, pid="File import"):
-        t = tasks()
-        if not t:
-            return
-        t.jobs(n, pid)
-
-    def job(self, n, pid="File import", label=''):
-        t = tasks()
-        if not t:
-            return
-        t.job(n, pid, label)
-
-    def done(self, pid="File import"):
-        t = tasks()
-        if not t:
-            return
-        t.done(pid)
-
     def doImport(self):
         """Import data.  Returns a list of datasets which were imported."""
         # Linked file
-        logging.debug('%s', 'OperationmisuraImport')
+        logging.debug('OperationMisuraImport')
         doc = self._doc
+        if self.uid:
+            new = clientconf.confdb.resolve_uid(self.uid)
+            if new:
+                logging.debug('Opening by uid %s: %s instead of %s', self.uid, new, self.filename)
+                self.filename = new[0]
+            else: 
+                logging.debug('Impossible to resolve uid: %s', self.uid)
+        else:
+            logging.debug('No uid defined in params')
         if not self.filename:
-            logging.debug('%s', 'EMPTY FILENAME')
+            logging.debug('EMPTY FILENAME')
             return []
         # Get a the corresponding linked file or create a new one with a new
         # prefix
@@ -223,7 +233,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # Remember linked file configuration
         self.params.prefix = LF.prefix
         self.prefix = LF.prefix
-        self.jobs(3, 'Reading file')
+        jobs(3, 'Reading file')
         # open the file
         fp = getattr(doc, 'proxy', False)
         logging.debug('%s %s %s %s', 'FILENAME', self.filename, type(fp), fp)
@@ -231,7 +241,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             self.proxy = getFileProxy(self.filename)
         else:
             self.proxy = fp
-        self.job(1, 'Reading file', 'Configuration')
+        job(1, 'Reading file', 'Configuration')
         if not self.proxy.isopen():
             self.proxy.reopen()
         if self.proxy.conf is False:
@@ -250,7 +260,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
         ###
         # Set available curves on the LF
-        self.job(2, 'Reading file', 'Header')
+        job(2, 'Reading file', 'Header')
         # Will list only Array-type descending from /summary
         header = self.proxy.header(['Array'], '/summary')
         autoload = []
@@ -275,7 +285,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         logging.debug('%s %s', 'got excluded', len(excluded))
         logging.debug('%s %s', 'got header clean', len(header))
         LF.header = header
-        self.jobs(len(header))
+        jobs(len(header))
         names = []
         # TODO: Samples are no longer needed?
         refsmp = Sample(linked=LF)
@@ -417,7 +427,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 outds[pcol] = ds
             else:
                 availds[pcol] = ds
-            self.job(p + 1)
+            job(p + 1)
         # Detect ds which should be removed from availds because already
         # contained in imported names
         avail_set = set(self._doc.available_data.keys())
@@ -425,8 +435,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         for dup in names_set.intersection(avail_set):
             self._doc.available_data.pop(dup)
         logging.debug('%s', 'emitting done')
-        self.done()
-        self.done('Reading file')
+        done()
+        done('Reading file')
         logging.debug('%s %s', 'imported names:', names)
         self._doc.available_data.update(availds)
         self.outdatasets = outds

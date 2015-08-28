@@ -11,6 +11,7 @@ from PyQt4 import QtCore
 
 from ..canon import option
 from ..canon.option import ao
+from ..canon.indexer import Indexer
 import units
 
 import parameters as params
@@ -143,7 +144,8 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     _Method__name = 'CONF'
     conn = False
     path = ''
-
+    index = False
+    
     def __init__(self, path=False, new=False):
         QtCore.QObject.__init__(self)
         option.ConfigurationProxy.__init__(self)
@@ -155,7 +157,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if os.path.exists(path) and new:
             os.remove(path)
         # Load/create
-
+        self.known_uids = {}
         self.load(path)
 
     _rule_style = RulesTable()
@@ -199,6 +201,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         """Load an existent client configuration database, or create a new one."""
         logging.debug('LOAD %s', path)
         self.nosave_server = []
+        self.index = False
         self.close()
         if path:
             self.path = path
@@ -250,6 +253,18 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self.conn.commit()
         self.emit(QtCore.SIGNAL('load()'))
         self.reset_rules()
+        self.create_index()
+        
+    def create_index(self):
+        self.index = False
+        path = self['database']
+        if path and os.path.exists(path):
+            logging.debug('Creating indexer at %s', path)
+            self.index = Indexer(path)
+            return True
+        else:
+            logging.debug('Default database not found: "%s"', path)
+            return False
 
     def get_table(self, name):
         """Return table `name` as list"""
@@ -292,6 +307,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         cursor.close()
         self.conn.commit()
         self.reset_rules()
+        self.create_index()
 
     def mem(self, name, *arg):
         """Memoize a recent datum"""
@@ -396,6 +412,48 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             if entry[0] == addr:
                 return entry[1], entry[2]
         return '', ''
+    
+    def resolve_uid(self, uid):
+        """Search file path corresponding to uid across default database and recent databases"""
+        if not uid:
+            logging.debug('no uid')
+            return False
+        known = self.known_uids.get(uid, False)
+        if known:
+            logging.debug( 'UID was known %s',known)
+            return known, False
+        else:
+            logging.debug('Uid not previously known %s',uid)
+        if self.index:
+            dbPath = self.index.dbPath
+            file_path = self.index.searchUID(uid)
+            if file_path:
+                logging.debug('uid found in default db %s %s', uid, file_path)
+                return file_path
+        else:
+            dbPath = False
+        file_path = False
+        for path in self.recent_database:
+            path = path[0]
+            if path == dbPath:
+                continue
+            if not os.path.exists(path):
+                logging.debug('Skip db: %s', path)
+                continue
+            try: 
+                db = Indexer(path)
+            except:
+                logging.info('Db open error: \n%s',format_exc())
+                continue
+            file_path = db.searchUID(uid)
+            if file_path: 
+                dbPath = path
+                break
+            logging.debug('UID not found: %s %s', uid, path)
+        if not file_path:
+            return False
+        self.known_uids[self.uid] = file_path
+        return file_path, dbPath
 
 settings = QtCore.QSettings(
     QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope, 'Expert System Solutions', 'Misura 4')

@@ -10,6 +10,7 @@ from veusz.utils import pixmapAsHtml
 from misura.canon.logger import Log as logging
 from misura.canon.csutil import validate_filename
 from .. import _
+from .. import clientconf
 
 from PyQt4 import QtGui, QtCore
 
@@ -81,6 +82,9 @@ class SavePlotMenu(QtGui.QMenu):
         # TODO: replace with tempfile
         tmp = 'tmp_load_file.vsz'
         open(tmp, 'w').write(text)
+        uid = self.proxy.get_uid()
+        path = self.proxy.get_path()
+        clientconf.confdb.known_uids[uid] = path
         self.doc.load(tmp)
         os.remove(tmp)
         self.current_plot_id = plot_id
@@ -101,9 +105,7 @@ class SavePlotMenu(QtGui.QMenu):
         render = open(tmp, 'rb').read()
         if not len(render):
             logging.debug('Failed rendering')
-            render = False
-        uid = self.proxy.get_uid()
-
+            render = False   
         r = self.proxy.save_plot(
             text, plot_id=plot_id, title=name, render=render, render_format='jpg')
 # 		os.remove(tmp)
