@@ -51,6 +51,7 @@ def draw_profile(x, y, margin=50):
     p.end()
     return pix
 
+
 visibleOptions = ['seqnum', 't', 'T', 'd', 'Sint']
 
 
@@ -218,10 +219,13 @@ class DataDecoder(QtCore.QThread):
                 pix.loadFromData(dat, self.comp)
 # 			pix.loadFromData(QtCore.QByteArray(dat),'JPG')
             return t, pix
-        # FIXME: how to detect misura compression? Different Ext? ImageM3
+        # FIXME: how to detect misura compression? Different Ext? Or different ReferenceClass?
         elif self.ext == 'ImageM3':
             logging.debug('%s %s', 'decompressing', seq)
             dat = bitmap.decompress(dat)
+            qimg = QtGui.QImage()
+            qimg.loadFromData(dat,'BMP')
+            return t, qimg
         # Writing a profile onto an image
         elif self.ext == 'Profile':
             logging.debug('%s %s', 'Profile', seq)

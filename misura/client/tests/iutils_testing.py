@@ -23,6 +23,10 @@ def determine_path():
 client_test_dir = os.path.join(determine_path())
 db3_dir = os.path.join(client_test_dir, 'db3')
 db3_path = os.path.join(db3_dir, 'test.mdb')
+db3_dir = '\\\\ess-server\\Company\\Database Misura\\2015\\' 
+db3_path = '\\\\ess-server\\Company\\Database Misura\\2015\\Misura3-2015.mdb' 
+
+
 data_dir = os.path.join(client_test_dir, 'data')
 rem = None
 
@@ -35,7 +39,7 @@ rem = None
 #                                                                              #
 #                                                                              #
 #
-from misura import utils_testing
+#from misura import utils_testing
 #                                                                              #
 ##########################################################################
 

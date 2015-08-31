@@ -6,7 +6,6 @@ pyodbc = False
 import pyodbc
 import datetime
 from time import sleep
-from scipy import array, interpolate, arange
 import numpy
 import platform
 import os
@@ -239,8 +238,8 @@ def getCharacteristicShapes(test, cols):
     sh = {}
     if test[fprv.Tipo_Prova] not in [etp.ProvinoSingolo, etp.ProvinoR, etp.ProvinoL, etp.ProvinoDoppioCompleto]:
         return sh
-    vt = numpy.array(cols[fimg.Tempo])
-    vT = numpy.array(cols[fimg.Temp])
+    vt = numpy.array(cols[fimg.Tempo]).astype('float')
+    vT = numpy.array(cols[fimg.Temp]).astype('float')
     logging.debug('%s', vT)
     for i, name in enumerate('Temp_Sint,Temp_Rammoll,Temp_Sfera,Temp_Mezza_Sfera,Temp_Fusione'.split(',')):
         r = test[getattr(fprv, name)]

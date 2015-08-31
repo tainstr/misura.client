@@ -10,14 +10,14 @@ from misura.canon.logger import Log as logging
 import StringIO
 from traceback import format_exc
 from datetime import datetime
-from time import time
+from time import time, mktime
 import string
 import hashlib
 
 from PIL import Image
 from tables.nodes import filenode
 
-from misura.canon import bitmap, csutil, option, reference
+from misura.canon import bitmap, csutil, option, reference, indexer
 from misura.canon.option import ao
 
 import m3db
@@ -37,11 +37,14 @@ ao(base_dict, 'comment', 'String')
 ao(base_dict, 'dev', 'String')
 ao(base_dict, 'devpath', 'String')
 ao(base_dict, 'fullpath', 'String')
+ao(base_dict, 'zerotime', 'Float')
+ao(base_dict, 'initInstrument', 'Progress')
 
 measure_dict = deepcopy(base_dict)
 measure_dict['name']['current'] = 'Measure'
 ao(measure_dict, 'nSamples', 'Integer', 1)
 ao(measure_dict, 'id', 'String')
+ao(measure_dict, 'uid', 'String')
 ao(measure_dict, 'date', 'Date', '00:00:00 01/01/2000')
 ao(measure_dict, 'elapsed', 'Float', unit='second')
 ao(measure_dict, 'maxT', 'Meta')
@@ -50,15 +53,12 @@ ao(measure_dict, 'maxHeatingRate', 'Meta')
 ao(measure_dict, 'coolingDuration', 'Meta')
 ao(measure_dict, 'maxCoolingRate', 'Meta')
 
-
-std_dict = deepcopy(base_dict)
-std_dict['name']['current'] = 'Standard'
-ao(std_dict, 'end', 'Script', "mi.Point(-1)")
-ao(std_dict, 'maxT', 'Script', """i,t,T=mi.Max('T')
+ao(measure_dict, 'scrEnd', 'Script', "mi.Point(-1)", parent = 'end' )
+ao(measure_dict, 'maxT', 'Script', """i,t,T=mi.Max('T')
 mi.t(t)
 mi.T(T)
 """)
-ao(std_dict, 'maxHeatingRate', 'Script', """
+ao(measure_dict, 'scrMaxHeatingRate', 'Script', """
 T1=mi.TimeDerivative('T')	
 if len(T1)<10: mi.Exit()
 rate=max(T1)
@@ -66,9 +66,9 @@ w=mi.Where(T1==rate)
 if w<0: mi.Exit()
 mi.Value(rate/60)
 mi.Point(w,'T')
-""", 'Maximum Heating Rate')
+""", 'Maximum Heating Rate', parent = ' maxHeatingRate')
 
-ao(std_dict, 'coolingDuration', 'Script', """
+ao(measure_dict, 'scrCoolingDuration', 'Script', """
 if not mi.SelectCooling():
 	mi.Exit()
 t,T=mi.xy('T')
@@ -76,9 +76,9 @@ dT=T[0]-T[-1]
 dt=t[-1]-t[0]
 mi.T(dT)
 mi.t(dt)
-""", 'Total cooling duration')
+""", 'Total cooling duration', parent = 'coolingDuration')
 
-ao(std_dict, 'maxCoolingRate', 'Script', """
+ao(measure_dict, 'scrMaxCoolingRate', 'Script', """
 if not mi.SelectCooling():
 	mi.Exit()
 T1=mi.TimeDerivative('T')
@@ -88,18 +88,38 @@ w=mi.Where(T1==rate)
 if w<0: mi.Exit()
 mi.Value(-rate/60)
 mi.Point(w,'T')
-""", 'Maximum Cooling Rate')
+""", 'Maximum Cooling Rate', parent = 'maxCoolingRate')
 
-std_hsm = deepcopy(std_dict)
-ao(std_hsm, 'Sintering', 'Script', """
+smp_dict = deepcopy(base_dict)
+smp_dict['name']['current'] = 'Sample'
+ao(smp_dict, 'idx', 'Integer')
+ao(smp_dict, 'ii', 'Integer')
+ao(smp_dict, 'initialDimension', 'Float', 3000.)
+ao(smp_dict, 'initialWidth', 'Float', 2000.)
+ao(smp_dict, 'roi', 'Rect', [0, 0, 640, 480])
+ao(smp_dict, 'initialDimension', 'Float')
+ao(smp_dict, 'profile', 'Profile')
+ao(smp_dict, 'frame', 'Image')
+# frame?
+
+hsm_smp_dict = deepcopy(smp_dict)
+ao(hsm_smp_dict, 'Sintering', 'Meta')
+ao(hsm_smp_dict, 'Softening', 'Meta')
+ao(hsm_smp_dict, 'Sphere', 'Meta')
+ao(hsm_smp_dict, 'HalfSphere', 'Meta')
+ao(hsm_smp_dict, 'Melting', 'Meta')
+
+
+# SCRIPTS
+ao(hsm_smp_dict, 'scrSintering', 'Script', """
 factor=script.Opt('param_sint')/100.
 threshold=obj.At('Sint',0)*factor
 ti=obj.Drops('Sint', threshold)
 if ti<0: mi.Exit()
 mi.t(ti)
 mi.T(obj.At('T',ti))
-mi.Value(obj.At('Sint',ti))""")
-ao(std_hsm, 'param_sint', 'Integer', 95,
+mi.Value(obj.At('Sint',ti))""", parent='Sintering')
+ao(hsm_smp_dict, 'param_sint', 'Integer', 95,
    'Height shrinking for Sintering', parent='Sintering')
 
 # ao(std_hsm,'Softening','Script',"""
@@ -113,7 +133,7 @@ ao(std_hsm, 'param_sint', 'Integer', 95,
 # mi.Value(v)""")
 #ao(std_hsm,'param_soft','Integer',5,'Minimum % decrease in h/w ratio for Softening',parent='Softening')
 
-ao(std_hsm, 'Softening', 'Script', """
+ao(hsm_smp_dict, 'scrSoftening', 'Script', """
 threshold=script.Opt('param_soft')
 method=script.Opt('param_softMethod')
 backward=script.Opt('param_softBackward')
@@ -127,26 +147,26 @@ else:
 if ti<0: mi.Exit()
 mi.t(ti)
 mi.T(obj.At('T',ti))
-mi.Value(obj.At('Softening',ti))""")
+mi.Value(obj.At('Softening',ti))""", parent='Softening')
 
-ao(std_hsm, 'param_soft', 'Float', 2.5,
+ao(hsm_smp_dict, 'param_soft', 'Float', 2.5,
    'Softening parameter threshold', parent='Softening')
-ao(std_hsm, 'param_softMethod', 'Chooser', 'Absolute',
+ao(hsm_smp_dict, 'param_softMethod', 'Chooser', 'Absolute',
    'Method for softening thresholding', options=['Absolute', 'Relative'], parent='Softening')
-ao(std_hsm, 'param_softBackward', 'Boolean', False,
+ao(hsm_smp_dict, 'param_softBackward', 'Boolean', False,
    'Search threshold starting from the maximum softening value', parent='Softening')
 
-ao(std_hsm, 'Sphere', 'Script', """
+ao(hsm_smp_dict, 'scrSphere', 'Script', """
 threshold=script.Opt('param_sphere')
 ratio=obj.Ratio('Sint','Width')*obj.Opt('initialDimension')/obj.Opt('initialWidth')
 ti=mi.Where(ratio<threshold)
 if i<0: mi.Exit()
 mi.Point(i)
-mi.Value(ratio[i])""")
-ao(std_hsm, 'param_sphere', 'Float', 1.,
+mi.Value(ratio[i])""", parent='Sphere')
+ao(hsm_smp_dict, 'param_sphere', 'Float', 1.,
    'Ratio h/w for Sphere', parent='Sphere')
 
-ao(std_hsm, 'HalfSphere', 'Script', """
+ao(hsm_smp_dict, 'scrHalfSphere', 'Script', """
 threshold=script.Opt('param_hsphere')
 tol=script.Opt('param_hsphereTol')
 ratio=obj.Ratio('Sint','Width')*obj.Opt('initialDimension')/obj.Opt('initialWidth')
@@ -156,37 +176,25 @@ v=ratio[i]
 if abs(threshold-v)>tol:
 	mi.Exit()
 mi.Point(i)
-mi.Value(v)""")
-ao(std_hsm, 'param_hsphere', 'Float', 0.5,
+mi.Value(v)""", parent='HalfSphere')
+ao(hsm_smp_dict, 'param_hsphere', 'Float', 0.5,
    'Ratio h/w for HalfSphere', parent='HalfSphere')
-ao(std_hsm, 'param_hsphereTol', 'Float', 0.2,
+ao(hsm_smp_dict, 'param_hsphereTol', 'Float', 0.2,
    'Tolerance for HalfSphere', parent='HalfSphere')
 
-ao(std_hsm, 'Melting', 'Script', """
+ao(hsm_smp_dict, 'scrMelting', 'Script', """
 threshold=script.Opt('param_melt')
 ratio=obj.Ratio('Sint','Width')*obj.Opt('initialDimension')/obj.Opt('initialWidth')
 i=mi.Where(ratio<threshold)
 if i<0:
 	mi.Exit()
 mi.Point(i)
-mi.Value(ratio[i])""")
-ao(std_hsm, 'param_melt', 'Float', 0.333,
+mi.Value(ratio[i])""", parent='Melting')
+ao(hsm_smp_dict, 'param_melt', 'Float', 0.333,
    'Ratio h/w for Melting', parent='Melting')
 
-smp_dict = deepcopy(base_dict)
-smp_dict['name']['current'] = 'Sample'
-ao(smp_dict, 'idx', 'Integer')
-ao(smp_dict, 'ii', 'Integer')
-ao(smp_dict, 'initialDimension', 'Float', 3000.)
-ao(smp_dict, 'initialWidth', 'Float', 2000.)
-ao(smp_dict, 'roi', 'Rect', [0, 0, 640, 480])
-ao(smp_dict, 'initialDimension', 'Float')
-ao(smp_dict, 'profile', 'Profile', [(), [], []])
-ao(smp_dict, 'Sintering', 'Meta')
-ao(smp_dict, 'Softening', 'Meta')
-ao(smp_dict, 'Sphere', 'Meta')
-ao(smp_dict, 'HalfSphere', 'Meta')
-ao(smp_dict, 'Melting', 'Meta')
+
+
 
 kiln_dict = deepcopy(base_dict)
 kiln_dict['name']['current'] = 'Kiln'
@@ -202,6 +210,8 @@ ao(kiln_dict, 'S', 'Float', 0, 'Setpoint', unit='celsius')
 instr_dict = deepcopy(base_dict)
 ao(instr_dict, 'camera', 'Role', ['camerapath', 'default'])
 ao(instr_dict, 'devices', 'Point')
+ao(instr_dict, 'initTest', 'Progress')
+ao(instr_dict, 'closingTest', 'Progress')
 
 camera_dict = deepcopy(instr_dict)
 camera_dict['name']['current'] = 'camera'
@@ -214,25 +224,40 @@ ao(camera_dict, 'Analysis_umpx', 'Integer', 1)
 ao(camera_dict, 'nSamples', 'Integer', 1)
 ao(camera_dict, 'Analysis_instrument', 'String', 'hsm')
 ao(camera_dict, 'Analysis_Simulation', 'Boolean', True)
-ao(camera_dict, 'Analysis_AutoROI', 'Boolean', False)
-# TODO: define analyzer!
-ao(camera_dict, 'PreProcessing:BlackWhite', 'Boolean', True)
-ao(camera_dict, 'PreProcessing:AdaptiveThreshold', 'Boolean', False)
+
+
+anl_dict = deepcopy(base_dict)
+ao(anl_dict, 'blackWhite', 'Boolean', True)
+ao(anl_dict, 'adaptiveThreshold', 'Boolean', False)
+ao(anl_dict, 'autoregion', 'Boolean', False)
 
 server_dict = deepcopy(base_dict)
 server_dict['name']['current'] = 'server'
 ao(server_dict, 'name', 'String', 'server')
 ao(server_dict, 'isRunning', 'Boolean', False)
 ao(server_dict, 'runningInstrument', 'String')
-ao(server_dict, 'log', 'String')
+ao(server_dict, 'lastInstrument', 'String')
+ao(server_dict, 'log', 'Log')
 
 empty = {'self': deepcopy(camera_dict)}
-tree_dict = {'self': server_dict,
-             'analyzer': {'self': deepcopy(base_dict), 'hsm': empty, 'odlt': empty, 'odht': empty, 'flex': empty},
-             'hsm': {'self': instr_dict,
+
+# Tree for generical sample
+smp_tree = {'self': smp_dict,
+                'analyzer': {'self': anl_dict },
+}
+
+# Tree for hsm sample
+hsm_smp_tree = {'self': hsm_smp_dict,
+                'analyzer': {'self': anl_dict },
+}
+
+# Tree for generical instrument
+instr_tree = {'self': instr_dict,
                      'measure': {'self': measure_dict},
-                     'sample0': {'self': smp_dict}
-                     },
+}
+
+# Main tree
+tree_dict = {'self': server_dict,
              'kiln': {'self': kiln_dict},
              'beholder': {'self': deepcopy(base_dict),
                           'idx0': {'self': camera_dict}
@@ -245,8 +270,11 @@ def create_tree(outFile, tree, path='/'):
     """Recursive tree structure creation"""
     for key, foo in tree.list():
         logging.debug('%s %s %s', 'Creating group:', path, key)
-        outFile.createGroup(path, key, key)
-        create_tree(outFile, tree.child(key), path=path + key + '/')
+        outFile.create_group(path, key, key)
+        dest = path + key + '/'
+        if outFile.has_node(dest):
+            continue
+        create_tree(outFile, tree.child(key), dest)
 
 
 def clear_data(outFile):
@@ -255,14 +283,14 @@ def clear_data(outFile):
     lst = outFile.listNodes('/')
     for n in lst:
         if getattr(outFile.root, n, False):
-            outFile.removeNode('/' + n, recursive=True)
+            outFile.remove_node('/' + n, recursive=True)
 
 
 def fsignal(*foo, **kwfoo):
     logging.debug('%s %s', 'emit', foo)
 
 
-def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=True, format='m3', signal=fsignal):
+def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=True, frm='m3', signal=fsignal, max_num_images = None):
     """Extract a Misura 3 test and export into a Misura 4 test file"""
 
     # Open DB and import test data
@@ -302,13 +330,15 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
     if os.path.exists(outpath):
         # Keep current images
         if keep_img:
-            outFile = tables.openFile(outpath, mode='a')
-            found = getattr(outFile.root, 'dat', False)
+            outFile = indexer.SharedFile(outpath, mode='a')
+            found = outFile.has_node('/hsm/sample0/frame')
             # If no images: create new file
             if not found:
                 outFile.close()
-                outFile = tables.openFile(outpath, mode='w')
-            # Else, wipe out data points and configuration
+                del outFile
+                os.remove(outpath)
+                outFile = indexer.SharedFile(outpath, mode='w')
+            # Else, wipe out data points and configuration, but keep images
             else:
                 clear_data(outFile)
                 # but keep images!
@@ -316,28 +346,28 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
         # If I am forcing overwriting and not caring about current images,
         # create new file
         elif force:
-            outFile = tables.openFile(outpath, mode='w')
+            os.remove(outpath)
+            outFile = indexer.SharedFile(outpath, mode='w')
         # If I am not forcing neither keeping images, return the current file
         else:
             logging.debug('%s %s', 'Already exported path:', outpath)
             return outpath
     # If it does not exist, create!
     else:
-        outFile = tables.openFile(outpath, mode='w')
-
-    # TODO: log file handling!
+        outFile = indexer.SharedFile(outpath, mode='w')
+        
     zt = time()
-    log_ref = reference.Binary(outFile, '/', server_dict['log'])
+    log_ref = reference.Log(outFile, '/', server_dict['log'])
 
-    def log(msg):
+    def log(msg, priority=10):
         # TODO: check zerotime
-        log_ref.commit([[time(), msg]], zt)
+        log_ref.commit([[time()-zt, (priority, msg)]])
 
-    log('Importing from %s, id %s\n' % (dbpath, tcode))
+    log('Importing from %s, id %s' % (dbpath, tcode))
     log('Conversion Started at ' +
-        datetime.now().strftime("%H:%M:%S, %d/%m/%Y") + '\n')
-    log('Conversion Parameters: \n\tImages: %r, \n\tUpdate: %r, \n\tKeep Images: %r, \n\tImage Format: %r\n' % (
-        img, force, keep_img, format))
+        datetime.now().strftime("%H:%M:%S, %d/%m/%Y"))
+    log('Conversion Parameters: \n\tImages: %r, \n\tUpdate: %r, \n\tKeep Images: %r, \n\tImage Format: %r' % (
+        img, force, keep_img, frm))
 
     signal(11)
     # Heating cycle table
@@ -353,17 +383,17 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
     tree = deepcopy(tree_dict)
     # Create instrument dict
     instr = m3db.getInstrumentName(test[m3db.fprv.Tipo_Prova])
-    if instr != 'hsm':
-        tree[instr] = deepcopy(tree['hsm'])
-        tree[instr]['self']['name']['current'] = instr
-        tree[instr]['standard'] = {'self': deepcopy(std_dict)}
-        del tree[instr]['sample0']['self']['initialWidth']
+    tree[instr] = deepcopy(instr_tree)
+    if instr == 'hsm':
+        tree[instr]['sample0'] = deepcopy(hsm_smp_tree)
     else:
-        tree[instr]['standard'] = {'self': deepcopy(std_hsm)}
+        tree[instr]['sample0'] = deepcopy(smp_tree)
     # Get a configuration proxy
     tree = option.ConfigurationProxy(tree)
     instrobj = getattr(tree, instr)
     tree['runningInstrument'] = instr
+    tree['lastInstrument'] = instr
+    instrobj['name'] = instr
     # Sample
     smp = instrobj.sample0
     smp['name'] = test[m3db.fprv.Desc_Prova]
@@ -379,12 +409,17 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
 
     # Measure
     tid = dbpath + '|' + tcode
-    tdate = test[m3db.fprv.Data].strftime("%H:%M:%S, %d/%m/%Y")
+    tdate0 = test[m3db.fprv.Data]
+    zerotime = mktime(tdate0.timetuple())
+    tdate = tdate0.strftime("%H:%M:%S, %d/%m/%Y")
     logging.debug('%s %s', test[m3db.fprv.Data].strftime("%H:%M:%S, %d/%m/%Y"))
     instrobj.measure['name'] = test[m3db.fprv.Desc_Prova]
     instrobj.measure['comment'] = test[m3db.fprv.Note]
     instrobj.measure['date'] = tdate
     instrobj.measure['id'] = tid
+    uid = hashlib.md5(dbpath + '|' + tcode).hexdigest()
+    instrobj.measure['uid'] = uid
+    instrobj['zerotime'] = zerotime
 
     # Kiln
     tree.kiln['curve'] = cycle
@@ -407,12 +442,12 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
 #	if not hasattr(outFile.root,'conf'):
 #		outFile.close()
 #		os.remove(outpath)
-#		return convert(dbpath, tcode, outdir, img,force, keep_img,format,signal)
+#		return convert(dbpath, tcode, outdir, img,force, keep_img,frm,signal)
 
     signal(13)
 
     arrayRef = {}
-    timecol = rows[:, m3db.fimg.Tempo]
+    timecol = rows[:, m3db.fimg.Tempo].astype('float')
     # Convert data points
     for i, col in enumerate(header):
         data = rows[:, columns[i]].astype('float')
@@ -422,12 +457,15 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
         if col == 't':
             continue
         if col in ['T', 'P', 'S']:
-            arrayRef[col] = reference.Array(outFile, '/kiln', kiln_dict[col])
+            arrayRef[col] = reference.Array(outFile, '/summary/kiln', kiln_dict[col])
         else:
             opt = ao({}, col, 'Float', col, attr=['History'])[col]
             instrobj.sample0.sete(col, opt)
-            arrayRef[col] = reference.Array(outFile, smp_path, opt)
-
+            arrayRef[col] = reference.Array(outFile, '/summary' + smp_path, opt)
+        path = arrayRef[col].path
+        base_path = path[8:]
+        if not outFile.has_node(base_path):
+            outFile.link(base_path, path)
         if col in ['Dil', 'Flex'] or 'Percorso' in col:
             data = data / 1000.
         elif col in ['Sint']:
@@ -437,9 +475,10 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
         elif col == 'Width':
             logging.debug('%s', data)
             data = data / 200.
-        ref = arrayRef[col].ref
+        
+        ref = arrayRef[col]
         ref.append(np.array([timecol, data]).transpose())
-        ref.flush()
+    outFile.flush()
 
     signal(20)
     ###
@@ -457,9 +496,9 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
             ini1 = 2000.
         elif d in ['Dil', 'Flex', 'camA', 'camB']:
             ini1 = ini0 * 100.
-        arrayRef[d].ref.attrs.initialDimension = ini1
-        arrayRef[d].ref.attrs.percent = d not in ['camA', 'camB', 'Width']
-        arrayRef[d].ref.flush()
+        path = arrayRef[d].path
+        outFile.set_attributes(path, attrs={'initialDimension': ini1,
+                                            'percent': d not in ['camA', 'camB', 'Width']})
         # Sets the sample main initial dimension for future storage
         if d in ['Dil', 'Flex', 'Sint']:
             initialDimension = ini1
@@ -471,8 +510,7 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
     ######
     # Final configuration adjustment and writeout
     ######
-
-    instrobj.measure['elapsed'] = float(timecol[-1] - timecol[0])
+    instrobj.measure['elapsed'] = float(timecol[-1]) - float(timecol[0])
     # Get characteristic shapes
     if instr == 'hsm':
         sh = m3db.getCharacteristicShapes(test, rows.transpose())
@@ -482,21 +520,18 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
     # IMAGES
     imgdir = os.path.join(os.path.dirname(dbpath), icode)
     if os.path.exists(imgdir) and img and (instr in ['hsm', 'drop', 'post']):
-        omg = append_images(outFile, rows, imgdir, icode, format, signal)
+        omg = append_images(outFile, rows, imgdir, icode, frm, signal, max_num_images)
         if not omg:
             print 'ERROR Appending images'
 
     # Write conf tree
-    node = filenode.newNode(outFile, where='/', name='conf')
-    node.write(tree.dumps())
-    node.close()
-
+    outFile.save_conf(tree.tree())
+    outFile.set_attributes('/conf', attrs = {'version': '3.0.0',
+                            'instrument': instr,
+                            'date': tdate,
+                            'serial': hashlib.md5(dbpath).hexdigest(),
+                            'uid': uid })
     # Set attributes
-    outFile.root.conf.attrs.version = '3.0.0'
-    outFile.root.conf.attrs.instrument = instr
-    outFile.root.conf.attrs.date = tdate
-    outFile.root.conf.attrs.serial = hashlib.md5(dbpath).hexdigest()
-    outFile.root.conf.attrs.uid = hashlib.md5(dbpath + '|' + tcode).hexdigest()
     signal(35)
 
     log('Conversion ended.')
@@ -505,37 +540,43 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
     return outpath
 
 
-def append_images(outFile, rows, imgdir, icode, format, signal):
-    if format == 'm4':
+def append_images(outFile, rows, imgdir, icode, frm, signal, max_num = None):
+    if frm == 'm4':
         refClass = reference.Image
+        img_type ='Image'
     else:
         refClass = reference.Binary
-    ref = refClass(outFile, '/beholder/idx0', camera_dict['last_frame'])
-    ref.ref.attrs.format = format
+        img_type = 'ImageM3'
+    ref = refClass(outFile, '/hsm/sample0', smp_dict['frame'])
+    a = outFile.get_attributes(ref.path)
+    a['format'] = frm
+    a['type'] = img_type
+    outFile.set_attributes(ref.path, a)
     sjob = 35
     job = (99. - sjob) / len(rows)
     oi = 0
     esz = 0
-    decmap = []
-    for i, r in enumerate(rows[:3]):
+    for i, r in enumerate(rows):
+        if i>=max_num:
+            break
         nj = sjob + i * job
         if i // 10 == 0:
             signal(int(nj))
         logging.debug('%s %s', nj, '%')
 
-        num = r[m3db.fimg.Numero_Immagine]
+        num = int(r[m3db.fimg.Numero_Immagine])
         img = '%sH.%03i' % (icode, int(num))
         img = os.path.join(imgdir, img)
         if not os.path.exists(img):
             logging.debug('%s %s', 'Skipping non-existent image', img)
             continue
 
-        im, size = decompress(img, format)
+        im, size = decompress(img, frm)
 
-        decmap.append((img, '/dat/smp0', 'img%i' % (num - 1)))
         sz = len(im)
         esz += sz
-        ref.commit([[rows[i, m3db.fimg.Tempo], im]])
+        t = float(rows[i, m3db.fimg.Tempo])
+        ref.commit([[t, im]])
         oi += 1
         outFile.flush()
     logging.debug('%s %s', 'Included images:', oi)
@@ -543,28 +584,28 @@ def append_images(outFile, rows, imgdir, icode, format, signal):
     return True
 
 
-def decompress(img, format):
+def decompress(img, frm):
     """Available formats (Storage):
             'm4': misura compression algorithm (Image)
             'm3': legacy Misura3 compression algorithm (Binary)
             other: any PIL supported format (Binary) 
     """
     fr = open(img, 'rb').read()
-    if format == 'm3':
+    if frm == 'm3':
         return (fr, (640, 480))
     try:
         fr = bitmap.decompress(fr)
-        if format == 'bmp':
+        if frm == 'bmp':
             return fr
         fr = fr[::-1]
         im = Image.fromstring('L', (640, 480), fr)
         im = im.convert('L')
-        if format == 'm4':
+        if frm == 'm4':
             return (np.asarray(im), im.size)
         else:
             sio = StringIO.StringIO()
-            im.save(sio, format)
-            im.save('debug.' + format, format)
+            im.save(sio, frm)
+            im.save('debug.' + frm, frm)
             sio.seek(0)
             r = sio.read()
             return (r, im.size)
