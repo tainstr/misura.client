@@ -109,6 +109,7 @@ class MainWindow(QtGui.QMainWindow):
         self.reset_proxy_timer.setInterval(500)
         self.connect(self.reset_proxy_timer, QtCore.SIGNAL(
             'timeout()'), self._resetFileProxy)
+        self.reset_file_proxy_timer = QtCore.QTimer()
 
     def add_server_selector(self):
         """Server selector dock widget"""
@@ -167,8 +168,8 @@ class MainWindow(QtGui.QMainWindow):
             self.tasks.close()
         super(MainWindow, self).closeEvent(ev)
     _blockResetFileProxy = False
-    
-    
+
+
     def setServer(self, server=False):
         self._blockResetFileProxy = True
         logging.debug('%s %s', 'Setting server to', server)
@@ -278,7 +279,7 @@ class MainWindow(QtGui.QMainWindow):
         r = self.remote.copy()
         r.connect()
         result = r.init_instrument(soft)
-        
+
 
     def init_instrument(self, soft=False):
         # TODO: this scheme could be automated via a decorator: @thread
@@ -483,6 +484,8 @@ class MainWindow(QtGui.QMainWindow):
     def slider_released(self):
         self.summaryPlot.set_time(self.current_slider_position)
 
+    def resetFileProxyLater(self, retry, recursion):
+        self.reset_file_proxy_timer.singleShot(1000, lambda : self._resetFileProxy(retry, recursion))
 
     def _resetFileProxy(self, retry=0, recursion=0):
         """Resets acquired data widgets"""
@@ -504,9 +507,8 @@ class MainWindow(QtGui.QMainWindow):
             if recursion == 0:
                 self.tasks.setFocus()
             logging.debug('%s', 'Waiting for initialization to complete...')
-            QtGui.qApp.processEvents()
-            sleep(0.2)
-            return self._resetFileProxy(retry=0, recursion=recursion + 1)
+            self.resetFileProxyLater(0, recursion + 1)
+            return
         else:
             if not self.server['isRunning']:
                 retry = self.max_retry
@@ -516,7 +518,8 @@ class MainWindow(QtGui.QMainWindow):
             QtGui.qApp.processEvents()
             if retry < self.max_retry:
                 sleep(retry / 2.)
-                return self._resetFileProxy(retry=retry + 1, recursion=recursion + 1)
+                self.resetFileProxyLater(retry + 1, recursion + 1)
+                return
             if retry > self.max_retry:
                 self.tasks.done('Waiting for data')
                 QtGui.QMessageBox.critical(self, _('Impossible to retrieve the ongoing test data'),
@@ -563,11 +566,13 @@ class MainWindow(QtGui.QMainWindow):
                 logging.debug(format_exc())
                 doc = False
                 sleep(4)
-                return self._resetFileProxy(retry=retry + 1, recursion=recursion + 1)
+                self.resetFileProxyLater(retry + 1, recursion + 1)
+                return
         self.tasks.done('Waiting for data')
         logging.debug(
             '%s %s %s %s', 'RESETFILEPROXY', doc.filename, doc.data.keys(), doc.up)
         self.set_doc(doc)
+        self._finishFileProxy()
 
     @csutil.unlockme
     def resetFileProxy(self, *a, **k):
@@ -578,13 +583,9 @@ class MainWindow(QtGui.QMainWindow):
         self._blockResetFileProxy = False
         logging.debug('MainWindow.resetFileProxy: Stopping registry')
         registry.toggle_run(False)
-        r = False
-        try:
-            r = self._resetFileProxy(*a, **k)
-        except:
-            logging.debug('%s', format_exc())
-        self._finishFileProxy()
-        return r
+
+        self._resetFileProxy(*a, **k)
+
 
     def _finishFileProxy(self):
         logging.debug('%s', 'MainWindow.resetFileProxy: Restarting registry')
