@@ -380,6 +380,8 @@ class GraphicsApp(veusz_main.VeuszApp):
         if len(args) > 1:
             # load in filenames given
             for filename in args[1:]:
+                if filename.endswith('.py') or filename.endswith('.pyc') or filename.endswith('.pyd'):
+                    continue
                 if not emptywins:
                     MainWindow.CreateWindow(filename)
                 else:

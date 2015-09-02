@@ -53,41 +53,43 @@ ao(measure_dict, 'maxHeatingRate', 'Meta')
 ao(measure_dict, 'coolingDuration', 'Meta')
 ao(measure_dict, 'maxCoolingRate', 'Meta')
 
-ao(measure_dict, 'scrEnd', 'Script', "mi.Point(-1)", parent = 'end' )
+ao(measure_dict, 'scrEnd', 'Script', "mi.Point(idx=-1)", parent = 'end' )
 ao(measure_dict, 'maxT', 'Script', """i,t,T=mi.Max('T')
 mi.t(t)
 mi.T(T)
 """)
 ao(measure_dict, 'scrMaxHeatingRate', 'Script', """
-T1=mi.TimeDerivative('T')	
+print 'scrMaxHeatingRate'       
+T1=kiln.TimeDerivative('T') 
 if len(T1)<10: mi.Exit()
-rate=max(T1)
+rate=max(T1)            
 w=mi.Where(T1==rate)
-if w<0: mi.Exit()
+if w<0: mi.Exit()  
+print 'scrMaxHeatingRate',w 
+mi.Point(idx=w+1)               
 mi.Value(rate/60)
-mi.Point(w,'T')
 """, 'Maximum Heating Rate', parent = ' maxHeatingRate')
 
 ao(measure_dict, 'scrCoolingDuration', 'Script', """
-if not mi.SelectCooling():
-	mi.Exit()
-t,T=mi.xy('T')
-dT=T[0]-T[-1]
-dt=t[-1]-t[0]
+if not mi.SelectCooling():  
+    mi.Exit()
+t,T=mi.xy('T')  
+dT=T[0]-T[-1]           
+dt=t[-1]-t[0]           
 mi.T(dT)
-mi.t(dt)
+mi.t(dt)  
 """, 'Total cooling duration', parent = 'coolingDuration')
 
 ao(measure_dict, 'scrMaxCoolingRate', 'Script', """
-if not mi.SelectCooling():
-	mi.Exit()
+if not mi.SelectCooling():      
+    mi.Exit()                   
 T1=mi.TimeDerivative('T')
 if len(T1)<10: mi.Exit()
 rate=min(T1)
 w=mi.Where(T1==rate)
 if w<0: mi.Exit()
 mi.Value(-rate/60)
-mi.Point(w,'T')
+mi.Point(idx=w)
 """, 'Maximum Cooling Rate', parent = 'maxCoolingRate')
 
 smp_dict = deepcopy(base_dict)
@@ -201,7 +203,7 @@ kiln_dict['name']['current'] = 'Kiln'
 ao(kiln_dict, 'Regulation_Kp', 'Float', 0, 'Proportional Factor')
 ao(kiln_dict, 'Regulation_Ki', 'Float', 0, 'Integral Factor')
 ao(kiln_dict, 'Regulation_Kd', 'Float', 0, 'Derivative Factor')
-ao(kiln_dict, 'curve', 'Hidden', [[0, 0, 0]], 'Heating curve')
+ao(kiln_dict, 'curve', 'Hidden', [[0, 0]], 'Heating curve')
 ao(kiln_dict, 'thermalCycle', 'ThermalCycle', 'default')
 ao(kiln_dict, 'T', 'Float', 0, 'Temperature', unit='celsius')
 ao(kiln_dict, 'P', 'Float', 0, 'Power', unit='percent')
@@ -209,7 +211,7 @@ ao(kiln_dict, 'S', 'Float', 0, 'Setpoint', unit='celsius')
 
 instr_dict = deepcopy(base_dict)
 ao(instr_dict, 'camera', 'Role', ['camerapath', 'default'])
-ao(instr_dict, 'devices', 'Point')
+ao(instr_dict, 'devices', 'List')
 ao(instr_dict, 'initTest', 'Progress')
 ao(instr_dict, 'closingTest', 'Progress')
 
@@ -269,6 +271,9 @@ tree_dict = {'self': server_dict,
 def create_tree(outFile, tree, path='/'):
     """Recursive tree structure creation"""
     for key, foo in tree.list():
+        if outFile.has_node(path, key):
+            logging.debug('Path already found:', path, key)
+            continue
         logging.debug('%s %s %s', 'Creating group:', path, key)
         outFile.create_group(path, key, key)
         dest = path + key + '/'
@@ -372,10 +377,6 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
     signal(11)
     # Heating cycle table
     cycle = m3db.getHeatingCycle(test)
-    for l in cycle:
-        if len(l) == 2:
-            l.append(False)
-        logging.debug('%s', l)
     signal(12)
 
     ###
@@ -459,7 +460,7 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
         if col in ['T', 'P', 'S']:
             arrayRef[col] = reference.Array(outFile, '/summary/kiln', kiln_dict[col])
         else:
-            opt = ao({}, col, 'Float', col, attr=['History'])[col]
+            opt = ao({}, col, 'Float', 0, col, attr=['History'])[col]
             instrobj.sample0.sete(col, opt)
             arrayRef[col] = reference.Array(outFile, '/summary' + smp_path, opt)
         path = arrayRef[col].path
@@ -468,7 +469,7 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
             outFile.link(base_path, path)
         if col in ['Dil', 'Flex'] or 'Percorso' in col:
             data = data / 1000.
-        elif col in ['Sint']:
+        elif col in ['Sint', 'Softening']:
             data = data / 100.
         elif col == 'P':
             data = data / 10.
@@ -527,6 +528,7 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
     # Write conf tree
     outFile.save_conf(tree.tree())
     outFile.set_attributes('/conf', attrs = {'version': '3.0.0',
+                            'zerotime': zerotime,
                             'instrument': instr,
                             'date': tdate,
                             'serial': hashlib.md5(dbpath).hexdigest(),

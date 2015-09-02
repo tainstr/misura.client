@@ -352,6 +352,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.dataset_menu.clear()
         if istime:
             self.act_load = False
+            is_loaded = True
         else:
             is_loaded = self.add_load(node, self.dataset_menu)
         if not is_loaded:

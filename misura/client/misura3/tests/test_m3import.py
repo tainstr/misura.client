@@ -94,9 +94,19 @@ class Convert(unittest.TestCase):
         # TODO: create test files with Width variable!
         fp = indexer.SharedFile(op)
         fp.load_conf()
-        fp.conf.hsm.distribute_scripts()
-        hdf = fp.test
-        fp.conf.hsm.characterization()
+        fp.run_scripts(fp.conf.hsm)
+        end = fp.col('/kiln/T',-1)
+        self.assertEqual(fp.conf.hsm.measure['end']['time'], end[0])
+        self.assertEqual(fp.conf.hsm.measure['end']['temp'], end[1])
+        fp.close()
+        
+    def check_curve(self, op):
+        """Check thermal cycle curve format"""
+        fp = indexer.SharedFile(op)
+        fp.load_conf()
+        curve = fp.conf.kiln['curve']
+        self.assertGreater(len(curve), 1)
+        self.assertEqual(len(curve[0]), 2)
         fp.close()
 
 
@@ -119,15 +129,16 @@ class Convert(unittest.TestCase):
         h0 = t.root.hsm.sample0.Sint[0][1]
         log = t.root.log[:]
         t.close()
-#        self.check_standard(op)
-#        self.check_logging(op)
-#        self.check_import(op, hsm_names)
+        self.check_standard(op)
+        self.check_logging(op)
+        self.check_import(op, hsm_names)
         self.check_images(op,'Image')
+        self.check_curve(op)
 #        self.assertEqual(nrows, max_num_images)
 #        self.assertEqual(t0, 0.0)
 #        self.assertEqual(T0, 361.0)
 #        self.assertEqual(h0, 100.0)
-#        self.assertEqual(inidim, 3000)
+        self.assertEqual(inidim, 3000)
 
     @unittest.skip('')
     def test_1_formats(self):

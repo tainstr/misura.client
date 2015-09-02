@@ -197,7 +197,7 @@ def getPlotCols(tt):
 def getHeatingCycle(entry):
     """Translate heating cycle expressed as Ramp, Temp, Stasis in a PROVE entry, 
     into misura [t,T,S] list format"""
-    out = [[0, 0, 0]]
+    out = [[0, 0]]
     addt = 0
     for i in range(1, 9):
         s = 'Salita%i,TempMax%i,Stasi%i' % (i, i, i)
@@ -207,17 +207,17 @@ def getHeatingCycle(entry):
         S = entry[getattr(fprv, S)]
         if None in [R, T]:
             break
-        t0, T0, c = out[-1]
+        t0, T0 = out[-1]
         R = R * numpy.sign(T - T0)
         t = float(t0 + 60. * (T - T0) / R)
         if i == 1 and t == 0:
             addt = 1
         t += addt
-        out.append([t, T, 0])
+        out.append([t, T])
         if S == None:
             continue
         if S > 0:
-            out.append([t + 60. * S, T, 0])
+            out.append([t + 60. * S, T])
     return out
 
 
