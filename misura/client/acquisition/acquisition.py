@@ -290,7 +290,6 @@ class MainWindow(QtGui.QMainWindow):
         logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance(
         ).activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
 
-#   @csutil.profile
     def setInstrument(self, remote=False, server=False):
         if server is not False:
             self.setServer(server)
@@ -487,17 +486,27 @@ class MainWindow(QtGui.QMainWindow):
     def resetFileProxyLater(self, retry, recursion):
         self.reset_file_proxy_timer.singleShot(1000, lambda : self._resetFileProxy(retry, recursion))
 
+    def release_lock(self):
+        try:
+            self._lock.release()
+        except:
+            pass
+
+    @csutil.profile
     def _resetFileProxy(self, retry=0, recursion=0):
         """Resets acquired data widgets"""
         if self._blockResetFileProxy:
+            self.release_lock()
             return False
-        QtGui.qApp.processEvents()
+
         if self.doc:
             self.doc.close()
+            self.release_lock()
             self.doc = False
         doc = False
         fid = False
         if recursion > sys.getrecursionlimit() - 10:
+            self.release_lock()
             return False
         if self.fixedDoc is not False:
             fid = 'fixedDoc'
@@ -515,9 +524,7 @@ class MainWindow(QtGui.QMainWindow):
             self.tasks.jobs(self.max_retry, 'Waiting for data')
             self.tasks.done('Test initialization')
             self.tasks.job(retry, 'Waiting for data')
-            QtGui.qApp.processEvents()
             if retry < self.max_retry:
-                sleep(retry / 2.)
                 self.resetFileProxyLater(retry + 1, recursion + 1)
                 return
             if retry > self.max_retry:
@@ -525,17 +532,20 @@ class MainWindow(QtGui.QMainWindow):
                 QtGui.QMessageBox.critical(self, _('Impossible to retrieve the ongoing test data'),
                                            _("""A communication error with the instrument does not allow to retrieve the ongoing test data.
                         Please restart the client and/or stop the test."""))
+                self.release_lock()
                 return False
             fid = self.remote.measure['uid']
             if fid == '':
                 logging.debug('%s %s', 'no active test', fid)
                 self.tasks.done('Waiting for data')
+                self.release_lock()
                 return False
             logging.debug('%s %s', 'resetFileProxy to live ', fid)
             self.server.connect()
             live_uid = self.server.storage.test.live.get_uid()
             if not live_uid:
                 logging.debug('No live_uid returned')
+                self.release_lock()
                 return False
             live = getattr(self.server.storage.test, live_uid)
             if not live.has_node('/conf'):
@@ -546,6 +556,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.tasks.job(0, 'Waiting for data',
                                'Conf node not found: acquisition has not been initialized.')
                 self.tasks.done('Waiting for data')
+                self.release_lock()
                 return False
             if fid == self.uid:
                 logging.debug(
@@ -553,6 +564,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.tasks.job(0, 'Waiting for data',
                                'Measure id is still the same. Aborting resetFileProxy.')
                 self.tasks.done('Waiting for data')
+                self.release_lock()
                 return False
             try:
                 #               live.reopen() # does not work when file grows...
@@ -565,7 +577,6 @@ class MainWindow(QtGui.QMainWindow):
                 logging.debug('RESETFILEPROXY error')
                 logging.debug(format_exc())
                 doc = False
-                sleep(4)
                 self.resetFileProxyLater(retry + 1, recursion + 1)
                 return
         self.tasks.done('Waiting for data')
@@ -574,7 +585,7 @@ class MainWindow(QtGui.QMainWindow):
         self.set_doc(doc)
         self._finishFileProxy()
 
-    @csutil.unlockme
+
     def resetFileProxy(self, *a, **k):
         """Locked version of resetFileProxy"""
         if not self._lock.acquire(False):
@@ -586,7 +597,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self._resetFileProxy(*a, **k)
 
-
+    @csutil.unlockme
     def _finishFileProxy(self):
         logging.debug('%s', 'MainWindow.resetFileProxy: Restarting registry')
         registry.toggle_run(True)
