@@ -500,10 +500,7 @@ class MainWindow(QtGui.QMainWindow):
         doc = False
         fid = False
 
-        if self.fixedDoc is not False:
-            fid = 'fixedDoc'
-            doc = self.fixedDoc
-        elif self.server['initTest'] or self.server['closingTest']:
+        if self.server['initTest'] or self.server['closingTest']:
             self.tasks.jobs(0, 'Test initialization')
             if recursion == 0:
                 self.tasks.setFocus()
@@ -570,11 +567,8 @@ class MainWindow(QtGui.QMainWindow):
                 doc = False
                 self.resetFileProxyLater(retry + 1, recursion + 1)
                 return
-        self.tasks.done('Waiting for data')
-        logging.debug(
-            '%s %s %s %s', 'RESETFILEPROXY', doc.filename, doc.data.keys(), doc.up)
-        self.set_doc(doc)
-        self._finishFileProxy()
+
+        self._finishFileProxy(doc)
 
 
     def resetFileProxy(self, *a, **k):
@@ -582,13 +576,25 @@ class MainWindow(QtGui.QMainWindow):
         if not self._lock.acquire(False):
             logging.debug('ANOTHER RESETFILEPROXY IS RUNNING!')
             return False
+
+        if self.fixedDoc is not False:
+            fid = 'fixedDoc'
+            doc = self.fixedDoc
+            self._finishFileProxy(doc)
+            self._lock.release()
+            return
+
         self._blockResetFileProxy = False
         logging.debug('MainWindow.resetFileProxy: Stopping registry')
         registry.toggle_run(False)
 
         self._resetFileProxy(*a, **k)
 
-    def _finishFileProxy(self):
+    def _finishFileProxy(self, doc):
+        self.tasks.done('Waiting for data')
+        logging.debug(
+            '%s %s %s %s', 'RESETFILEPROXY', doc.filename, doc.data.keys(), doc.up)
+        self.set_doc(doc)
         logging.debug('%s', 'MainWindow.resetFileProxy: Restarting registry')
         registry.toggle_run(True)
         self.tasks.done('Waiting for data')
