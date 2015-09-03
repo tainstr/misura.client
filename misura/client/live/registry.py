@@ -58,7 +58,7 @@ class KidRegistry(QtCore.QThread):
         self.updatingCurves = False
         self.doc = False
         self.manager = False
-        self.should_process_doc = True
+        self.should_update_doc = True
 
     @lockme
     def set_manager(self, man=None):
@@ -236,14 +236,14 @@ class KidRegistry(QtCore.QThread):
         """Change update interval"""
         self.interval = ms * .001
 
-    def stop_doc_processing(self):
-        self.should_process_doc = False
+    def stop_updating_doc(self):
+        self.should_update_doc = False
 
-    def restart_doc_processing(self):
-        self.should_process_doc = True
+    def restart_updating_doc(self):
+        self.should_update_doc = True
 
-    def process_doc(self):
-        if self.should_process_doc:
+    def update_doc(self):
+        if self.should_update_doc:
             if self.doc and (self.doc is not self.lastdoc):
                 if self.doc.proxy:
                     self.proxy = self.doc.proxy.copy()
@@ -276,7 +276,7 @@ class KidRegistry(QtCore.QThread):
             return True
         self.obj._reg = self
 
-        self.process_doc()
+        self.update_doc()
 
         r = True
         if not self.updateLog():
