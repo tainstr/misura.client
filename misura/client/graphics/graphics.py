@@ -376,17 +376,18 @@ class GraphicsApp(veusz_main.VeuszApp):
         for w in self.topLevelWidgets():
             if isinstance(w, MainWindow) and w.document.isBlank():
                 emptywins.append(w)
-
+        created = 0
         if len(args) > 1:
             # load in filenames given
             for filename in args[1:]:
                 if filename.endswith('.py') or filename.endswith('.pyc') or filename.endswith('.pyd'):
                     continue
+                created += 1
                 if not emptywins:
                     MainWindow.CreateWindow(filename)
                 else:
                     emptywins[0].openFile(filename)
-        else:
+        if not created:
             # create blank window
             logging.debug('%s', 'creating blank window')
             MainWindow.CreateWindow()

@@ -26,13 +26,13 @@ def setUpModule():
             'Misura3->misura conversion is available only in windows platforms.')
 
 
-hsm_names = set(['0:t', '0:hsm/sample0/Ang', '0:hsm/sample0/Area', '0:hsm/sample0/Sint', '0:hsm/sample0/Ratio', '0:hsm/sample0/Softening', '0:hsm/sample0/Width',
+hsm_names = set(['0:t', '0:hsm/sample0/ang', '0:hsm/sample0/A', '0:hsm/sample0/h', '0:hsm/sample0/eqhw', '0:hsm/sample0/soft', '0:hsm/sample0/w',
                  '0:kiln/P', '0:kiln/T', '0:kiln/S'])  # ,'/hsm/sample0/Width','/hsm/sample0/Softening'
-hsmDoble_names = set(['0:t', '0:kiln/T', '0:hsm/sample0/Sint', '0:hsm/sample0/Ang', '0:hsm/sample0/Ratio',
-                      '0:hsm/sample0/Area'])  # ,'/hsm/sample0/Width','/hsm/sample0/Softening'
-dil_names = set(['0:t', '0:kiln/T', '0:horizontal/sample0/Dil', '0:kiln/S', '0:horizontal/sample0/camA',
+hsmDoble_names = set(['0:t', '0:kiln/T', '0:hsm/sample0/Sint', '0:hsm/sample0/ang', '0:hsm/sample0/eqhw',
+                      '0:hsm/sample0/A'])  # ,'/hsm/sample0/Width','/hsm/sample0/Softening'
+dil_names = set(['0:t', '0:kiln/T', '0:horizontal/sample0/d', '0:kiln/S', '0:horizontal/sample0/camA',
                  '0:/horizontal/sample0/camB', '0:kiln/P', '0:horizontal/sample0/Mov'])
-flex_names = set(['0:t', '0:kiln/T', '0:flex/sample0/Flex',
+flex_names = set(['0:t', '0:kiln/T', '0:flex/sample0/d',
                   '0:kiln/S', '0:flex/sample0/camA', '0:kiln/P', '0:flex/sample0/Mov'])
 
 
@@ -94,6 +94,7 @@ class Convert(unittest.TestCase):
         # TODO: create test files with Width variable!
         fp = indexer.SharedFile(op)
         fp.load_conf()
+        self.assertNotIsInstance(fp.conf.hsm.sample0['Sintering']['time'], basestring)
         fp.run_scripts(fp.conf.hsm)
         end = fp.col('/kiln/T',-1)
         self.assertEqual(fp.conf.hsm.measure['end']['time'], end[0])
@@ -123,17 +124,17 @@ class Convert(unittest.TestCase):
         sumT = t.root.kiln.T
         nrows = len(sumT)
         inidim = getattr(
-            t.root.hsm.sample0.Sint.attrs, 'initialDimension', None)
+            t.root.hsm.sample0.h.attrs, 'initialDimension', None)
         t0 = sumT[0][0]
         T0 = sumT[0][1]
-        h0 = t.root.hsm.sample0.Sint[0][1]
+        h0 = t.root.hsm.sample0.h[0][1]
         log = t.root.log[:]
         t.close()
         self.check_standard(op)
-        self.check_logging(op)
-        self.check_import(op, hsm_names)
-        self.check_images(op,'Image')
-        self.check_curve(op)
+#        self.check_logging(op)
+#        self.check_import(op, hsm_names)
+#        self.check_images(op,'Image')
+#        self.check_curve(op)
 #        self.assertEqual(nrows, max_num_images)
 #        self.assertEqual(t0, 0.0)
 #        self.assertEqual(T0, 361.0)
@@ -173,8 +174,8 @@ class Convert(unittest.TestCase):
         self.assertTrue(op)
         doc = self.check_import(op, hsm_names)
         self.assertEqual(
-            doc.data['0:hsm/sample0/Sint'].m_initialDimension, 3000.)
-        self.assertEqual(doc.data['0:hsm/sample0/Sint'].m_percent, True)
+            doc.data['0:hsm/sample0/h'].m_initialDimension, 3000.)
+        self.assertEqual(doc.data['0:hsm/sample0/h'].m_percent, True)
 #		self.assertEqual(doc.data['/hsm/sample0/Width'].m_initialDimension,2000.)
 #		self.assertEqual(doc.data['/hsm/sample0/Width'].m_percent,False)
 

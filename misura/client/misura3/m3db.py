@@ -135,30 +135,30 @@ def getHeaderCols(tt, tcode='', all=False):
     h = ['t', 'T']
     c = [fimg.Tempo, fimg.Temp]
     if tt in [etp.DilatometroVerticale,  etp.DilatometroOrizzontale, etp.Calibrazione]:
-        h += ['Dil', 'S', 'camA', 'camB', 'P', 'Mov']
+        h += ['d', 'S', 'camA', 'camB', 'P', 'Mov']
         c += [fimg.Sint_SX, fimg.Rapporto_DX, fimg.Angolo_SX,
               fimg.Rapporto_SX,  fimg.Angolo_DX, fimg.Posizione]
     elif tt in [etp.Dilatometro, etp.CorrezioneDilatometro, etp.Impasto, etp.CurvaCorrezione]:
-        h += ['Dil']
+        h += ['d']
         c += [fimg.Sint_SX]
 
     # FLEX
     elif tt in [etp.Flessimetro]:
-        h += ['Flex', 'S', 'camA', 'P', 'Mov']
+        h += ['d', 'S', 'camA', 'P', 'Mov']
         c += [fimg.Sint_SX, fimg.Rapporto_DX,
               fimg.Sint_DX, fimg.Angolo_DX, fimg.Posizione]
 
     # HSM
     elif tt in [etp.ProvinoSingolo, etp.DropAnalysis]:
-        h += ['Sint', 'Ang', 'Ratio', 'Area', 'S', 'P', 'Width', 'Softening']
+        h += ['h', 'ang', 'eqhw', 'A', 'S', 'P', 'w', 'soft']
         c += [fimg.Sint_SX, fimg.Angolo_SX, fimg.Rapporto_SX, fimg.Area_SX,
               fimg.Rapporto_DX, fimg.Angolo_DX, fimg.Larghezza, fimg.Colonna01]
     elif tt == etp.ProvinoR or (tt == etp.ProvinoDoppioCompleto and tcode.endswith('R')):
-        h += ['Sint', 'Ang', 'Ratio', 'Area', 'Width', 'Softening']
+        h += ['h', 'ang', 'eqhw', 'A', 'w', 'soft']
         c += [fimg.Sint_DX, fimg.Angolo_DX, fimg.Rapporto_DX,
               fimg.Area_DX, fimg.Larghezza2, fimg.Colonna02]
     elif tt == etp.ProvinoL or (tt == etp.ProvinoDoppioCompleto and tcode.endswith('L')):
-        h += ['Sint', 'Ang', 'Ratio', 'Area', 'Width', 'Softening']
+        h += ['h', 'ang', 'eqhw', 'A', 'w', 'soft']
         c += [fimg.Sint_SX, fimg.Angolo_SX, fimg.Rapporto_SX,
               fimg.Area_SX, fimg.Larghezza, fimg.Colonna01]
 
@@ -267,8 +267,7 @@ def getCharacteristicShapes(test, cols):
         hnd = shm4[name]
         d = shm4d[hnd]
         ao(sh, hnd, 'Meta', {
-           'time': t, 'temp': T, 'point': idx, 'value': 'None'}, d, priority=100 + i)
-    logging.debug('%s', sh)
+           'time': t, 'temp': T, 'value': 'None'}, d, priority=100 + i)
     return sh
 
 
@@ -552,7 +551,7 @@ class TestDialog(QtGui.QWidget):
                                   force=self.force,
                                   img=self.img,
                                   keep_img=self.keep_img,
-                                  format=self.format,
+                                  frm=self.format,
                                   signal=fsignal)
         logging.debug('%s %s', 'exported to ', outdir)
         progress.hide()

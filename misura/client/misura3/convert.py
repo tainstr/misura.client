@@ -267,7 +267,6 @@ tree_dict = {'self': server_dict,
 
              }
 
-
 def create_tree(outFile, tree, path='/'):
     """Recursive tree structure creation"""
     for key, foo in tree.list():
@@ -467,13 +466,13 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
         base_path = path[8:]
         if not outFile.has_node(base_path):
             outFile.link(base_path, path)
-        if col in ['Dil', 'Flex'] or 'Percorso' in col:
+        if col=='d' or 'Percorso' in col:
             data = data / 1000.
-        elif col in ['Sint', 'Softening']:
+        elif col in ['h', 'soft']:
             data = data / 100.
         elif col == 'P':
             data = data / 10.
-        elif col == 'Width':
+        elif col == 'w':
             logging.debug('%s', data)
             data = data / 200.
         
@@ -484,24 +483,24 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
     signal(20)
     ###
     # ASSIGN INITIAL DIMENSION
-    dim = set(['Dil', 'Flex', 'Sint', 'Width', 'camA', 'camB']).intersection(
+    dim = set(['d', 'h', 'w', 'camA', 'camB']).intersection(
         set(header))
     ini0 = test[m3db.fprv.Inizio_Sint]
     initialDimension = 0
     for d in dim:
         if not arrayRef.has_key(d):
             continue
-        if d == 'Sint':
+        if d == 'h':
             ini1 = 3000.
-        elif d == 'Width':
+        elif d == 'w':
             ini1 = 2000.
-        elif d in ['Dil', 'Flex', 'camA', 'camB']:
+        elif d in ['d', 'camA', 'camB']:
             ini1 = ini0 * 100.
         path = arrayRef[d].path
         outFile.set_attributes(path, attrs={'initialDimension': ini1,
-                                            'percent': d not in ['camA', 'camB', 'Width']})
+                                            'percent': d not in ['camA', 'camB', 'w']})
         # Sets the sample main initial dimension for future storage
-        if d in ['Dil', 'Flex', 'Sint']:
+        if d in ['d', 'h']:
             initialDimension = ini1
     smp['initialDimension'] = initialDimension
     outFile.flush()
@@ -515,7 +514,8 @@ def convert(dbpath, tcode=False, outdir=False, img=True, force=True, keep_img=Tr
     # Get characteristic shapes
     if instr == 'hsm':
         sh = m3db.getCharacteristicShapes(test, rows.transpose())
-        tree.children[instr]['sample0']['self'].update(sh)
+        print 'got characteristic shapes',sh
+        instrobj.sample0.desc.update(sh)
 
     ###
     # IMAGES

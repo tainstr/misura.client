@@ -28,10 +28,10 @@ class BrowserMenuBar(QtGui.QMenuBar):
         self.actNewDb = self.file.addAction(
             _('New Database'), self.new_database)
 
-        
-        self.recentM3db = RecentMenu(confdb, 'm3database', self)
-#       self.connect(self.recentM3db,QtCore.SIGNAL('new(QString)'),self.open_database)
-        self.file.addMenu(self.recentM3db)
+        if confdb['m3_enable']:
+            self.recentM3db = RecentMenu(confdb, 'm3database', self)
+#           self.connect(self.recentM3db,QtCore.SIGNAL('new(QString)'),self.open_database)
+            self.file.addMenu(self.recentM3db)
 
         self.currents = self.addMenu(_('View Tests'))
         self.databases = self.addMenu(_('View Databases'))

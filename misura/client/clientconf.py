@@ -98,6 +98,9 @@ rule_style = [[('Rule', 'String'), ('Range', 'String'), ('Scale', 'Float'),
               ]
 ao(default_desc, 'rule_style', 'Table', rule_style, 'Formatting')
 
+ao(default_desc, 'm3', 'Section', 'Misura 3', 'Misura 3')
+ao(default_desc, 'm3_enable', 'Boolean', True, 'Enable Misura 3 database interface')
+
 recent_tables = 'server,database,file,m3database'.split(',')
 
 

@@ -42,14 +42,19 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.myMenuBar, QtCore.SIGNAL(
             'new_database(QString)'), self.new_database)
 
-        self.connect(self.myMenuBar.recentM3db, QtCore.SIGNAL(
-            'select(QString)'), self.open_m3db)
+
 
         # Recent objects greeter window:
         greeter = confwidget.Greeter(parent=self)
         self.connect(greeter.file, greeter.file.sig_select, self.open_file)
         self.connect(
             greeter.database, greeter.database.sig_select, self.open_database)
+            
+        if confdb['m3_enable']:
+            self.connect(greeter.m3database, greeter.database.sig_select, self.open_m3db)
+            self.connect(self.myMenuBar.recentM3db, QtCore.SIGNAL(
+            'select(QString)'), self.open_m3db)
+            
         win = self.area.addSubWindow(greeter)
         win.show()
 

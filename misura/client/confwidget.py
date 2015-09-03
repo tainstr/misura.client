@@ -222,6 +222,9 @@ class Greeter(QtGui.QWidget):
         self.lay.addWidget(self.file)
         self.database = RecentWidget(confdb, 'database', self)
         self.lay.addWidget(self.database)
+        if confdb['m3_enable']:
+            self.m3database = RecentWidget(confdb, 'm3database', self)
+            self.lay.addWidget(self.m3database)
         # self.server = RecentWidget(confdb, 'server', self)
 #        self.lay.addWidget(self.server)
 
