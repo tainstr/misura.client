@@ -491,16 +491,10 @@ class MainWindow(QtGui.QMainWindow):
     def resetFileProxyLater(self, retry, recursion):
         self.reset_file_proxy_timer.singleShot(1000, lambda : self._resetFileProxy(retry, recursion))
 
-    def release_lock(self):
-        try:
-            self._lock.release()
-        except:
-            pass
-
+    @csutil.unlockme
     def _resetFileProxy(self, retry=0, recursion=0):
         """Resets acquired data widgets"""
         if self._blockResetFileProxy:
-            self.release_lock()
             return False
 
         if self.doc:
@@ -534,40 +528,39 @@ class MainWindow(QtGui.QMainWindow):
                 QtGui.QMessageBox.critical(self, _('Impossible to retrieve the ongoing test data'),
                                            _("""A communication error with the instrument does not allow to retrieve the ongoing test data.
                         Please restart the client and/or stop the test."""))
-                self.release_lock()
                 return False
             fid = self.remote.measure['uid']
             if fid == '':
                 logging.debug('%s %s', 'no active test', fid)
                 self.tasks.done('Waiting for data')
-                self.release_lock()
                 return False
             logging.debug('%s %s', 'resetFileProxy to live ', fid)
             self.server.connect()
             live_uid = self.server.storage.test.live.get_uid()
             if not live_uid:
                 logging.debug('No live_uid returned')
-                self.release_lock()
                 return False
             live = getattr(self.server.storage.test, live_uid)
+
             if not live.has_node('/conf'):
                 live.load_conf()
-            if not live.has_node('/conf'):
-                logging.debug(
-                    '%s', 'Conf node not found: acquisition has not been initialized.')
-                self.tasks.job(0, 'Waiting for data',
-                               'Conf node not found: acquisition has not been initialized.')
-                self.tasks.done('Waiting for data')
-                self.release_lock()
-                return False
+
+                if not live.has_node('/conf'):
+                    logging.debug(
+                        '%s', 'Conf node not found: acquisition has not been initialized.')
+                    self.tasks.job(0, 'Waiting for data',
+                                   'Conf node not found: acquisition has not been initialized.')
+                    self.tasks.done('Waiting for data')
+                    return False
+
             if fid == self.uid:
                 logging.debug(
                     '%s', 'Measure id is still the same. Aborting resetFileProxy.')
                 self.tasks.job(0, 'Waiting for data',
                                'Measure id is still the same. Aborting resetFileProxy.')
                 self.tasks.done('Waiting for data')
-                self.release_lock()
                 return False
+
             try:
                 #               live.reopen() # does not work when file grows...
                 fp = RemoteFileProxy(live, conf=self.server, live=True)
@@ -599,7 +592,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self._resetFileProxy(*a, **k)
 
-    @csutil.unlockme
     def _finishFileProxy(self):
         logging.debug('%s', 'MainWindow.resetFileProxy: Restarting registry')
         registry.toggle_run(True)

@@ -24,7 +24,6 @@ class MainWindow(unittest.TestCase):
         self.instr.init_instrument = lambda *foo: True
         self.main_window = acquisition.MainWindow()
 
-        self.release_lock_calls_count = 0
         self.calls_counter = {}
 
     def increase_calls_to(self, method_name):
@@ -78,11 +77,9 @@ class MainWindow(unittest.TestCase):
         self.assertEqual(main_window.name, 'flex')
 
     def test_resetFileProxyBlocked(self):
-        self.main_window.release_lock = lambda : self.increase_calls_to('release_lock')
         self.main_window._blockResetFileProxy = True
 
         self.assertFalse(self.main_window._resetFileProxy())
-        self.assertEqual(1, self.count_of('release_lock'))
 
     def test_resetFileProxy_during_initTest(self):
         self.main_window.resetFileProxyLater = lambda retry, recursion: self.increase_calls_to('resetFileProxyLater')
