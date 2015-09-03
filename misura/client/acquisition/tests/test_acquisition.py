@@ -25,15 +25,18 @@ class MainWindow(unittest.TestCase):
         self.main_window = acquisition.MainWindow()
 
         self.release_lock_calls_count = 0
-        self.resetFileProxyLater_calls_count = 0
-        self.main_window.release_lock = lambda : self.increase_release_lock_calls()
-        self.main_window.resetFileProxyLater = lambda retry, recursion: self.increase_resetFileProxyLater_calls()
+        self.calls_counter = {}
 
-    def increase_release_lock_calls(self):
-        self.release_lock_calls_count += 1
+    def increase_calls_to(self, method_name):
+        try:
+            self.calls_counter[method_name] += 1
+        except:
+            self.calls_counter[method_name] = 1
 
-    def increase_resetFileProxyLater_calls(self):
-        self.resetFileProxyLater_calls_count += 1
+    def count_of(self, method_name):
+        return self.calls_counter[method_name]
+
+
 
     def tearDown(self):
         self.main_window.close()
@@ -75,21 +78,25 @@ class MainWindow(unittest.TestCase):
         self.assertEqual(main_window.name, 'flex')
 
     def test_resetFileProxyBlocked(self):
+        self.main_window.release_lock = lambda : self.increase_calls_to('release_lock')
         self.main_window._blockResetFileProxy = True
 
         self.assertFalse(self.main_window._resetFileProxy())
-        self.assertEqual(1, self.release_lock_calls_count)
+        self.assertEqual(1, self.count_of('release_lock'))
 
     def test_resetFileProxy_during_initTest(self):
+        self.main_window.resetFileProxyLater = lambda retry, recursion: self.increase_calls_to('resetFileProxyLater')
         self.main_window.server = {'initTest': 1}
         dummy = Dummy()
-        setattr(dummy.__class__, 'jobs', lambda x,y,z: True)
-        setattr(dummy.__class__, 'setFocus', lambda x : True)
+        setattr(dummy.__class__, 'jobs', lambda x,y,z: self.increase_calls_to('jobs'))
+        setattr(dummy.__class__, 'setFocus', lambda x : self.increase_calls_to('setFocus'))
 
         self.main_window._tasks = dummy
 
         self.assertFalse(self.main_window._resetFileProxy())
-        self.assertEqual(1, self.resetFileProxyLater_calls_count)
+        self.assertEqual(1, self.count_of('resetFileProxyLater'))
+        self.assertEqual(1, self.count_of('jobs'))
+        self.assertEqual(1, self.count_of('setFocus'))
 
 
 
