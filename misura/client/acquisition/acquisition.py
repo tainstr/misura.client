@@ -109,11 +109,7 @@ class MainWindow(QtGui.QMainWindow):
         self.myMenuBar = MenuBar(parent=self)
         self.setMenuWidget(self.myMenuBar)
         self.add_server_selector()
-        self.reset_proxy_timer = QtCore.QTimer(parent=self)
-        self.reset_proxy_timer.setSingleShot(True)
-        self.reset_proxy_timer.setInterval(500)
-        self.connect(self.reset_proxy_timer, QtCore.SIGNAL(
-            'timeout()'), self._resetFileProxy)
+
         self.reset_file_proxy_timer = QtCore.QTimer()
 
     def add_server_selector(self):
