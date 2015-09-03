@@ -260,13 +260,15 @@ class Controls(QtGui.QToolBar):
                 return False
         else:
             btn = qm.Discard
+
+        self.show_prog("Stopping current test")
+
         self.isRunning = False
         if btn == qm.Discard:
             self.stopped_nosave.emit()
             self._async(self._stop, False)
         else:
             self._async(self._stop, True)
-        self.show_prog("Stopping current test")
 
     def stop_kiln(self):
         """Stop thermal cycle without interrupting the acquisition"""
