@@ -249,6 +249,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # Load required version
         self.proxy.set_version(self.params.version)
         conf = self.proxy.conf  # ConfigurationProxy
+        elapsed0 = self.proxy.get_node_attr('/conf', 'elapsed')
         LF.conf = conf
         instr = conf['runningInstrument']
         LF.instrument = instr
@@ -298,6 +299,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             LF.samples.append(Sample(conf=smp, linked=LF, ref=False, idx=idx))
         logging.debug('%s %s %s %s', 'build', idx + 1, 'samples', LF.samples)
         elapsed = int(instrobj.measure['elapsed'])
+        elapsed = max(elapsed, elapsed0)
         zerotime = int(instrobj['zerotime'])
 
 
