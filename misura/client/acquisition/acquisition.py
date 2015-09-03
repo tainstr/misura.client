@@ -553,6 +553,17 @@ class MainWindow(QtGui.QMainWindow):
             if not live_uid:
                 logging.debug('No live_uid returned')
                 return False
+
+            if fid == self.uid:
+                logging.debug(
+                    '%s', 'Measure id is still the same. Aborting resetFileProxy.')
+                self.tasks.job(0, 'Waiting for data',
+                               'Measure id is still the same. Aborting resetFileProxy.')
+                self.tasks.done('Waiting for data')
+                return False
+
+
+
             live = getattr(self.server.storage.test, live_uid)
 
             if not live.has_node('/conf'):
@@ -566,13 +577,7 @@ class MainWindow(QtGui.QMainWindow):
                     self.tasks.done('Waiting for data')
                     return False
 
-            if fid == self.uid:
-                logging.debug(
-                    '%s', 'Measure id is still the same. Aborting resetFileProxy.')
-                self.tasks.job(0, 'Waiting for data',
-                               'Measure id is still the same. Aborting resetFileProxy.')
-                self.tasks.done('Waiting for data')
-                return False
+
 
         return live
 
