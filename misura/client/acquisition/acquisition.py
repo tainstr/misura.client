@@ -563,21 +563,18 @@ class MainWindow(QtGui.QMainWindow):
                 return False
 
 
+        live = getattr(self.server.storage.test, live_uid)
 
-            live = getattr(self.server.storage.test, live_uid)
+        if not live.has_node('/conf'):
+            live.load_conf()
 
             if not live.has_node('/conf'):
-                live.load_conf()
-
-                if not live.has_node('/conf'):
-                    logging.debug(
-                        '%s', 'Conf node not found: acquisition has not been initialized.')
-                    self.tasks.job(0, 'Waiting for data',
-                                   'Conf node not found: acquisition has not been initialized.')
-                    self.tasks.done('Waiting for data')
-                    return False
-
-
+                logging.debug(
+                    '%s', 'Conf node not found: acquisition has not been initialized.')
+                self.tasks.job(0, 'Waiting for data',
+                               'Conf node not found: acquisition has not been initialized.')
+                self.tasks.done('Waiting for data')
+                return False
 
         return live
 
