@@ -554,19 +554,19 @@ class MainWindow(QtGui.QMainWindow):
                 self.tasks.done('Waiting for data')
                 return False
 
-            try:
-                #               live.reopen() # does not work when file grows...
-                fp = RemoteFileProxy(live, conf=self.server, live=True)
-                logging.debug('%s', fp.header())
-                doc = filedata.MisuraDocument(proxy=fp)
-                # Remember as the current uid
-                self.uid = fid
-            except:
-                logging.debug('RESETFILEPROXY error')
-                logging.debug(format_exc())
-                doc = False
-                self.resetFileProxyLater(retry + 1, recursion + 1)
-                return
+        try:
+            #               live.reopen() # does not work when file grows...
+            fp = RemoteFileProxy(live, conf=self.server, live=True)
+            logging.debug('%s', fp.header())
+            doc = filedata.MisuraDocument(proxy=fp)
+            # Remember as the current uid
+            self.uid = fid
+        except:
+            logging.debug('RESETFILEPROXY error')
+            logging.debug(format_exc())
+            doc = False
+            self.resetFileProxyLater(retry + 1, recursion + 1)
+            return
 
         self._finishFileProxy(doc)
 
