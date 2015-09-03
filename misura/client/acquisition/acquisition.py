@@ -500,13 +500,33 @@ class MainWindow(QtGui.QMainWindow):
         doc = False
         fid = False
 
+        live = self.get_live_uid_or_retry_later(retry, recursion)
+
+        if live:
+            try:
+                fp = RemoteFileProxy(live, conf=self.server, live=True)
+                logging.debug('%s', fp.header())
+                doc = filedata.MisuraDocument(proxy=fp)
+                # Remember as the current uid
+                self.uid = fid
+            except:
+                logging.debug('RESETFILEPROXY error')
+                logging.debug(format_exc())
+                doc = False
+                self.resetFileProxyLater(retry + 1, recursion + 1)
+                return
+
+            self._finishFileProxy(doc)
+
+
+    def get_live_uid_or_retry_later(self, retry, recursion):
         if self.server['initTest'] or self.server['closingTest']:
             self.tasks.jobs(0, 'Test initialization')
             if recursion == 0:
                 self.tasks.setFocus()
             logging.debug('%s', 'Waiting for initialization to complete...')
             self.resetFileProxyLater(0, recursion + 1)
-            return
+            return False
         else:
             if not self.server['isRunning']:
                 retry = self.max_retry
@@ -515,7 +535,7 @@ class MainWindow(QtGui.QMainWindow):
             self.tasks.job(retry, 'Waiting for data')
             if retry < self.max_retry:
                 self.resetFileProxyLater(retry + 1, recursion + 1)
-                return
+                return False
             if retry > self.max_retry:
                 self.tasks.done('Waiting for data')
                 QtGui.QMessageBox.critical(self, _('Impossible to retrieve the ongoing test data'),
@@ -554,22 +574,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.tasks.done('Waiting for data')
                 return False
 
-        try:
-            #               live.reopen() # does not work when file grows...
-            fp = RemoteFileProxy(live, conf=self.server, live=True)
-            logging.debug('%s', fp.header())
-            doc = filedata.MisuraDocument(proxy=fp)
-            # Remember as the current uid
-            self.uid = fid
-        except:
-            logging.debug('RESETFILEPROXY error')
-            logging.debug(format_exc())
-            doc = False
-            self.resetFileProxyLater(retry + 1, recursion + 1)
-            return
-
-        self._finishFileProxy(doc)
-
+        return live
 
     def resetFileProxy(self, *a, **k):
         """Locked version of resetFileProxy"""
