@@ -79,12 +79,10 @@ class MainWindow(QtGui.QMainWindow):
     doc = False
     uid = False
 
-    def __init__(self):
-        self._tasks = None
 
     @property
     def tasks(self):
-        if self._tasks:
+        if getattr(self, '_tasks', False):
             return self._tasks
 
         # DEBUG needed for UT
@@ -93,6 +91,7 @@ class MainWindow(QtGui.QMainWindow):
             registry.set_manager(network.manager)
             if self.server and not self.fixedDoc:
                 registry.progress.set_server(self.server)
+
         return registry.tasks
 
     def __init__(self, doc=False, parent=None):
