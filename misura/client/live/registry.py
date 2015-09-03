@@ -58,6 +58,7 @@ class KidRegistry(QtCore.QThread):
         self.updatingCurves = False
         self.doc = False
         self.manager = False
+        self.should_process_doc = True
 
     @lockme
     def set_manager(self, man=None):
@@ -235,6 +236,27 @@ class KidRegistry(QtCore.QThread):
         """Change update interval"""
         self.interval = ms * .001
 
+    def stop_doc_processing(self):
+        self.should_process_doc = False
+
+    def restart_doc_processing(self):
+        self.should_process_doc = True
+
+    def process_doc(self):
+        if self.should_process_doc:
+            if self.doc and (self.doc is not self.lastdoc):
+                if self.doc.proxy:
+                    self.proxy = self.doc.proxy.copy()
+                    self.proxy.connect()
+                    self.lastdoc = self.doc
+            # If a doc is registered and remote is running acquisition, update the
+            # document
+            if self.obj['isRunning']:
+                if self.doc:
+                    self.doc.update(proxy=self.proxy)
+            else:
+                self.taskswg.sync.loop(self.obj)
+
     def control_loop(self):
         """Called while the registry is running."""
         self.emit(QtCore.SIGNAL('cycle()'))
@@ -253,20 +275,9 @@ class KidRegistry(QtCore.QThread):
             logging.debug('%s', 'KidRegistry.control_loop: Not connected')
             return True
         self.obj._reg = self
-        if self.doc and (self.doc is not self.lastdoc):
-            if self.doc.proxy:
-                self.proxy = self.doc.proxy.copy()
-                self.proxy.connect()
-                self.lastdoc = self.doc
-#       if self.proxy:
-#           self.proxy.connect()
-        # If a doc is registered and remote is running acquisition, update the
-        # document
-        if self.obj['isRunning']:
-            if self.doc:
-                self.doc.update(proxy=self.proxy)
-        else:
-            self.taskswg.sync.loop(self.obj)
+
+        self.process_doc()
+
         r = True
         if not self.updateLog():
             r = False

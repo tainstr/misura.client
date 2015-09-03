@@ -601,7 +601,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self._blockResetFileProxy = False
         logging.debug('MainWindow.resetFileProxy: Stopping registry')
-        registry.toggle_run(False)
+
+        registry.stop_doc_processing()
 
         self._resetFileProxy(*a, **k)
 
@@ -611,7 +612,9 @@ class MainWindow(QtGui.QMainWindow):
             '%s %s %s %s', 'RESETFILEPROXY', doc.filename, doc.data.keys(), doc.up)
         self.set_doc(doc)
         logging.debug('%s', 'MainWindow.resetFileProxy: Restarting registry')
-        registry.toggle_run(True)
+
+        registry.restart_doc_processing()
+
         self.tasks.done('Waiting for data')
         self.tasks.hide()
 
