@@ -79,8 +79,14 @@ class MainWindow(QtGui.QMainWindow):
     doc = False
     uid = False
 
+    def __init__(self):
+        self._tasks = None
+
     @property
     def tasks(self):
+        if self._tasks:
+            return self._tasks
+
         # DEBUG needed for UT
         if not registry.tasks:
             logging.debug('Preparing registry.tasks object')
@@ -492,7 +498,6 @@ class MainWindow(QtGui.QMainWindow):
         except:
             pass
 
-    @csutil.profile
     def _resetFileProxy(self, retry=0, recursion=0):
         """Resets acquired data widgets"""
         if self._blockResetFileProxy:
@@ -501,13 +506,11 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.doc:
             self.doc.close()
-            self.release_lock()
             self.doc = False
+
         doc = False
         fid = False
-        if recursion > sys.getrecursionlimit() - 10:
-            self.release_lock()
-            return False
+
         if self.fixedDoc is not False:
             fid = 'fixedDoc'
             doc = self.fixedDoc
