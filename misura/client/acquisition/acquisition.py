@@ -500,11 +500,11 @@ class MainWindow(QtGui.QMainWindow):
         doc = False
         fid = False
 
-        live = self.get_live_uid_or_retry_later(retry, recursion)
+        live_file = self.get_live_file_or_retry_later(retry, recursion)
 
-        if live:
+        if live_file:
             try:
-                fp = RemoteFileProxy(live, conf=self.server, live=True)
+                fp = RemoteFileProxy(live_file, conf=self.server, live=True)
                 logging.debug('%s', fp.header())
                 doc = filedata.MisuraDocument(proxy=fp)
                 # Remember as the current uid
@@ -518,6 +518,26 @@ class MainWindow(QtGui.QMainWindow):
 
             self._finishFileProxy(doc)
 
+
+    def get_live_file_or_retry_later(self, retry, recursion):
+        live_uid = self.get_live_uid_or_retry_later(retry, recursion)
+
+        if live_uid:
+            live_file = getattr(self.server.storage.test, live_uid)
+
+            if not live_file.has_node('/conf'):
+                live_file.load_conf()
+
+                if not live_file.has_node('/conf'):
+                    logging.debug(
+                        '%s', 'Conf node not found: acquisition has not been initialized.')
+                    self.tasks.job(0, 'Waiting for data',
+                                   'Conf node not found: acquisition has not been initialized.')
+                    self.tasks.done('Waiting for data')
+                    return False
+            return live_file
+
+        return False
 
     def get_live_uid_or_retry_later(self, retry, recursion):
         if self.server['initTest'] or self.server['closingTest']:
@@ -549,7 +569,9 @@ class MainWindow(QtGui.QMainWindow):
                 return False
             logging.debug('%s %s', 'resetFileProxy to live ', fid)
             self.server.connect()
+
             live_uid = self.server.storage.test.live.get_uid()
+
             if not live_uid:
                 logging.debug('No live_uid returned')
                 return False
@@ -562,21 +584,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.tasks.done('Waiting for data')
                 return False
 
-
-        live = getattr(self.server.storage.test, live_uid)
-
-        if not live.has_node('/conf'):
-            live.load_conf()
-
-            if not live.has_node('/conf'):
-                logging.debug(
-                    '%s', 'Conf node not found: acquisition has not been initialized.')
-                self.tasks.job(0, 'Waiting for data',
-                               'Conf node not found: acquisition has not been initialized.')
-                self.tasks.done('Waiting for data')
-                return False
-
-        return live
+        return live_uid
 
     def resetFileProxy(self, *a, **k):
         """Locked version of resetFileProxy"""
