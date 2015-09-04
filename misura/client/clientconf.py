@@ -71,13 +71,7 @@ hsm/sample\d/Vol$
 /sample\d/d$
 ^(/summary/)?kiln/T$
 ^(/summary/)?kiln/S$
-^(/summary/)?kiln/P
-hsm/sample0/Ang$
-hsm/sample0/Area$
-hsm/sample0/Ratio$
-hsm/sample0/Sint$
-hsm/sample0/Softening$
-hsm/sample0/Width$'''
+^(/summary/)?kiln/P'''
 ao(default_desc, 'rule_load', 'TextArea', rule_load, 'Force loading')
 
 rule_unit = [

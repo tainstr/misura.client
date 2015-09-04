@@ -57,7 +57,7 @@ class MisuraDocument(document.Document):
             up = False
             return
 
-        dec = self.proxy.header(['Binary', 'Profile'])
+        dec = self.proxy.header(['Binary', 'Profile','Image','ImageM3','ImageBMP'])
         logging.debug('%s %s', 'FOUND FOLDERS', dec)
         for fold in dec:
             d = DataDecoder(self)

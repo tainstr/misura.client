@@ -6,7 +6,6 @@ from traceback import format_exc
 
 from .. import widgets, _
 from ..live import registry
-from ..database import ProgressBar
 from misura.canon.csutil import unlockme
 
 from PyQt4 import QtGui, QtCore
@@ -182,14 +181,6 @@ class Controls(QtGui.QToolBar):
                 msg = title
             qm.warning(self, title, msg)
         self.updateActions()
-
-    _prog = False
-
-    @property
-    def prog(self):
-        if not self._prog:
-            self._prog = ProgressBar()
-        return self._prog
 
     msg = ''
 

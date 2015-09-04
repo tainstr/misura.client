@@ -106,14 +106,15 @@ class MainWindow(QtGui.QMainWindow):
             self.m3db.hide()
             self.m3db.close()
             del self.m3db
-        self.m3db = misura3.m3db.TestDialog(path=path)
+        self.m3db = misura3.TestDialog(path=path)
         self.m3db.img = True
         self.m3db.keep_img = True
         self.m3db.force = False
         self.connect(
             self.m3db, QtCore.SIGNAL('select(QString)'), self.open_file)
         confdb.mem_m3database(path)
-        self.m3db.show()
+        win = self.area.addSubWindow(self.m3db)
+        win.show()
 
     def close_tab(self, idx):
         logging.debug('%s %s', 'Tab close requested', idx)

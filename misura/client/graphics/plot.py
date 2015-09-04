@@ -3,7 +3,6 @@
 """Simple plotting for browser and live acquisition."""
 from misura.canon.logger import Log as logging
 from misura.client import plugin
-from misura.client.database import ProgressBar
 from misura.canon import csutil
 from veuszplot import VeuszPlot
 from PyQt4 import QtGui, QtCore

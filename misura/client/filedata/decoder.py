@@ -106,7 +106,8 @@ class DataDecoder(QtCore.QThread):
         if (self.proxy is not False) and (self.datapath is not False):
             self.refClassName = self.proxy.get_node_attr(
                 self.datapath, '_reference_class')
-            self.ext = self.proxy.get_node_attr(self.datapath, 'type')
+#            self.ext = self.proxy.get_node_attr(self.datapath, 'type')
+            self.ext = self.refClassName
             logging.debug(
                 '%s %s %s %s', 'DataDecoder.setDataPath', datapath, self.refClassName, self.ext)
             self.refclass = getattr(reference, self.refClassName)

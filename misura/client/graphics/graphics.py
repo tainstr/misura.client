@@ -22,7 +22,7 @@ from .. import parameters as params
 from ..plugin import *  # ??? devo importarlo per pyinstaller...!
 from .. import navigator
 from ..clientconf import confdb
-from ..database import getDatabaseWidget, getRemoteDatabaseWidget, ProgressBar
+from ..database import getDatabaseWidget, getRemoteDatabaseWidget
 import veuszplot
 from ..confwidget import RecentMenu, ClientConf
 
@@ -301,7 +301,7 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
         self.menu.addMenu(self.recentDatabase)
 
     def open_database(self, path):
-        db = misura3.m3db.TestDialog(path=path)
+        db = misura3.TestDialog(path=path)
         db.keep_img = True
         db.img = True
         db.force = False

@@ -193,23 +193,6 @@ class DatabaseWidget(QtGui.QWidget):
         self.up()
 
 
-class ProgressBar(QtGui.QWidget):
-
-    def __init__(self, title='Operation in progress', label=' ' * 100, status='Ready', parent=None, context='Undefined'):
-        QtGui.QWidget.__init__(self, parent)
-        self.setWindowTitle(_(title))
-        self.lay = QtGui.QVBoxLayout(self)
-        self.bar = QtGui.QProgressBar(self)
-        self.bar.setValue(0)
-        self.label = QtGui.QLabel(self)
-        self.label.setText(label)
-        self.status = QtGui.QLabel(self)
-        self.status.setText(status)
-        self.lay.addWidget(self.label)
-        self.lay.addWidget(self.bar)
-        self.lay.addWidget(self.status)
-
-
 class UploadThread(QtCore.QThread):
 
     def __init__(self, storage, filename, parent=None):

@@ -6,6 +6,7 @@ import unittest
 import sys
 import pickle
 
+import numpy as np
 import tables
 from tables.nodes import filenode
 
@@ -85,8 +86,10 @@ class Convert(unittest.TestCase):
             filedata.ImportParamsMisura(filename=op))
         doc = filedata.MisuraDocument()
         imp.do(doc)
-        if names is not False:
-            self.assertEqual(set(imp.outdatasets), names)
+#        if names is not False:
+#            self.assertEqual(set(imp.outdatasets), names)
+        for ds in doc.data.itervalues():
+            self.assertFalse(np.isnan(ds.data).any())
         return doc
 
     def check_standard(self, op):
@@ -114,7 +117,9 @@ class Convert(unittest.TestCase):
 #	@unittest.skip('')
     def test_0_data(self):
         """Conversion of data and configuration"""
-        op = convert.convert(iut.db3_path, '00001S', force=True, keep_img=True, max_num_images = 10)
+        converter = convert.Converter(iut.db3_path)
+        converter.get_outpath('00001S', force=True, keep_img=True)
+        op = converter.convert(max_num_images = 10)
         self.assertTrue(op, 'Conversion Failed')
         t = tables.openFile(op, mode='r')
         n = filenode.openNode(t.root.conf)
@@ -123,16 +128,15 @@ class Convert(unittest.TestCase):
         self.assertEqual(measure['nSamples']['current'], 1)
         sumT = t.root.kiln.T
         nrows = len(sumT)
-        inidim = getattr(
-            t.root.hsm.sample0.h.attrs, 'initialDimension', None)
+        inidim = getattr(t.root.hsm.sample0.h.attrs, 'initialDimension', None)
         t0 = sumT[0][0]
         T0 = sumT[0][1]
         h0 = t.root.hsm.sample0.h[0][1]
         log = t.root.log[:]
         t.close()
-        self.check_standard(op)
+#        self.check_standard(op)
 #        self.check_logging(op)
-#        self.check_import(op, hsm_names)
+        self.check_import(op, hsm_names)
 #        self.check_images(op,'Image')
 #        self.check_curve(op)
 #        self.assertEqual(nrows, max_num_images)
@@ -144,17 +148,17 @@ class Convert(unittest.TestCase):
     @unittest.skip('')
     def test_1_formats(self):
         # Test jpeg format
-        op = convert.convert(
-            iut.db3_path, '00001S', force=True, img=True, keep_img=False, format='jpeg')
-        self.check_images(op, 'jpeg')
+#        op = convert.convert(
+#            iut.db3_path, '00001S', force=True, img=True, keep_img=False, format='jpeg')
+#        self.check_images(op, 'jpeg')
         # Test m3 format
         op = convert.convert(
-            iut.db3_path, '00001S', force=True, img=True, keep_img=False, format='m3')
-        self.check_images(op, 'm3')
+            iut.db3_path, '00001S', force=True, img=True, keep_img=False, format='ImageM3')
+        self.check_images(op, 'ImageM3')
         # Test m4 format
         op = convert.convert(
-            iut.db3_path, '00001S', force=True, img=True, keep_img=False, format='m4')
-        self.check_images(op, 'm4')
+            iut.db3_path, '00001S', force=True, img=True, keep_img=False, format='Image')
+        self.check_images(op, 'Image')
 
     @unittest.skip('')
     def test_2_noforce(self):
@@ -219,11 +223,11 @@ class Convert(unittest.TestCase):
     def test_double_samples(self):
         op = convert.convert(iut.db3_path, '00008L', force=True, keep_img=True)
         self.assertTrue(op, 'Conversion Failed')
-        self.check_images(op, 'm3')
+        self.check_images(op, 'ImageM3')
         self.check_import(op, hsmDoble_names)
         op = convert.convert(iut.db3_path, '00008R', force=True, keep_img=True)
         self.assertTrue(op, 'Conversion Failed')
-        self.check_images(op, 'm3')
+        self.check_images(op, 'ImageM3')
         self.check_import(op, hsmDoble_names)
 
     @unittest.skip('')

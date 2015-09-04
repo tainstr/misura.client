@@ -1,11 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import functools
-from time import sleep, time
+from time import time
 import threading
 from traceback import format_exc
 import os
-import sys
 import tables
 
 from misura.canon.logger import Log as logging
@@ -17,7 +16,7 @@ from .. import network
 from ..network import TransferThread
 from .. import widgets, beholder
 from .. import fileui, filedata
-from ..misura3 import m3db
+from .. import misura3
 from .. import connection
 from ..clientconf import confdb, settings
 from ..confwidget import RecentWidget
@@ -706,7 +705,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def showDB3(self):
         """Shows selection windows for db3."""
-        self.db3Dia = m3db.TestDialog(self)
+        self.db3Dia = misura3.TestDialog(self)
         self.db3Dia.importAllFields = True
         win = self.centralWidget().addSubWindow(self.db3Dia)
         win.show()
