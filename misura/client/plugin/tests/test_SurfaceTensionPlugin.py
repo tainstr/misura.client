@@ -6,6 +6,8 @@ from misura.canon.logger import Log as logging
 
 from misura.client.tests import iutils_testing as iut
 from misura.client.plugin import SurfaceTensionPlugin
+from misura.client.plugin.SurfaceTensionPlugin import DensityFunction
+
 import numpy as np
 
 
@@ -94,7 +96,12 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
         self.assertEqual(len(out), N)
         logging.debug('%s %s', 'water', out)
 
-    def test_when_temperature_changes_too_little_sample_expansion_and_sample_expansion_temperature_are_empty_to_avoid_interpolation_problems(self):
+    def test_when_temperature_changes_too_little_sample_expansion_and_sample_expansion_temperature_are_empty(self):
+        """
+           If temperature changes too little, it becomes impossible to
+           interpolate data to calculate density variations.
+           So, no variation is assumed.
+        """
         N = 100
         beta = np.ones(N) * 4.3
         R0 = np.ones(N) * 6220
@@ -111,6 +118,14 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
             self.assertEqual('', actual_default_value.default)
 
 
+
+class TestDensityFunction(unittest.TestCase):
+    def test_basic_interpolation(self):
+        density_function = DensityFunction(1000, 25, [0, 0.1, 0.2, 0.3, 0.4], [25, 26, 27, 28, 29], 28, 29)
+
+        self.assertEqual(1000, density_function(25))
+        self.assertGreater(density_function(22), 1000)
+        self.assertLess(density_function(30), 1000)
 
 
 if __name__ == "__main__":

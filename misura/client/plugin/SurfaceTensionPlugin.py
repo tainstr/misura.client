@@ -26,8 +26,9 @@ class DensityFunction(object):
         self.f = interpolate.interp1d(T, dil)
 
         # Extrapolation towards lower T
-        self.low_start = min(T) + 3
-        self.low_end = min(T) + 10
+        minT = min(T)
+        self.low_start = minT + min(3, minT * 3 // 100)
+        self.low_end = minT + min(10, minT // 10)
         self.low_dil = self.f(self.low_start)
         low_e2 = self.f(self.low_end)
         self.low_coef = (low_e2 - self.low_dil) / \
