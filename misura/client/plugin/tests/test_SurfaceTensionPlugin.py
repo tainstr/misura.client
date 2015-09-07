@@ -120,11 +120,12 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
 
 
 class TestDensityFunction(unittest.TestCase):
-    def test_basic_interpolation(self):
+    def test_basic_interpolation_and_extrapolation(self):
         density_function = DensityFunction(1000, 25, [0, 0.1, 0.2, 0.3, 0.4], [25, 26, 27, 28, 29], 28, 29)
 
         self.assertEqual(1000, density_function(25))
         self.assertGreater(density_function(22), 1000)
+        self.assertLess(density_function(25.5), 1000)
         self.assertLess(density_function(30), 1000)
 
 
