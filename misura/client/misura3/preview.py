@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from misura.canon.logger import Log as logging
+from time import sleep
 import os
 from PyQt4 import QtCore, QtGui
 
+from misura.canon import bitmap
 from m3db import fimg
 
 class ImagePreviewModel(QtCore.QAbstractTableModel):
@@ -33,7 +35,6 @@ class ImagePreviewModel(QtCore.QAbstractTableModel):
         if not index.isValid() or not (0 <= index.row() <= self.rowCount()):
             return 0
         if role == QtCore.Qt.DisplayRole:
-            code = os.path.basename(self.path)
             num = self.dat[index.column()][fimg.Numero_Immagine]
             img = '%s.%03i' % (self.path, int(num))
             return img
@@ -78,14 +79,23 @@ class ImageDecoder(QtCore.QThread):
 
     def get(self, path):
         if not path in self.names:
+            if not self.isRunning():
+                logging.debug('Starting m3 decoder')
+                self.start()
             return False
         return self.images[path]
 
     def run(self):
+        empty = 0
         while True:
             if len(self.queue) == 0:
                 sleep(.1)
+                empty += 1
+                if empty > 10:
+                    logging.debug('Stopping m3 decoder')
+                    break
                 continue
+            empty = 0
             # Always read last requested data
             path, index = self.queue.pop(-1)
             self.cache(path)

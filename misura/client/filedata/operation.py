@@ -106,7 +106,6 @@ def not_interpolated(proxy, col, startt, endt):
         vals = np.ones(d) * data[0][1]
         ap = np.array([apt, vals]).transpose()
         data = np.concatenate((ap, data))
-        print 'extend towards start', col, ap
     # Extend towards end
     s = data[-1][0]
     d = int(endt - s)
@@ -115,7 +114,6 @@ def not_interpolated(proxy, col, startt, endt):
         vals = np.ones(d) * data[-1][1]
         ap = np.array([apt, vals]).transpose()
         data = np.concatenate((data, ap))
-        print 'extend towards end', col, ap
     return data.transpose()
 
 
@@ -130,9 +128,6 @@ def interpolated(proxy, col, ztime_sequence):
         return val
     f = InterpolatedUnivariateSpline(t, val, k=1)
     r = f(ztime_sequence)
-    print 'not interpolated',col,val
-    print 'interpolated',col,r
-    print t,ztime_sequence
     return r
 
 def tasks():

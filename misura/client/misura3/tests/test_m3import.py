@@ -134,16 +134,16 @@ class Convert(unittest.TestCase):
         h0 = t.root.hsm.sample0.h[0][1]
         log = t.root.log[:]
         t.close()
-#        self.check_standard(op)
-#        self.check_logging(op)
+        self.check_standard(op)
+        self.check_logging(op)
         self.check_import(op, hsm_names)
-#        self.check_images(op,'Image')
-#        self.check_curve(op)
+        self.check_images(op,'Image')
+        self.check_curve(op)
 #        self.assertEqual(nrows, max_num_images)
 #        self.assertEqual(t0, 0.0)
 #        self.assertEqual(T0, 361.0)
 #        self.assertEqual(h0, 100.0)
-        self.assertEqual(inidim, 3000)
+#        self.assertEqual(inidim, 3000)
 
     @unittest.skip('')
     def test_1_formats(self):

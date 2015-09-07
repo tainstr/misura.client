@@ -99,7 +99,7 @@ class TestDialog(QtGui.QWidget):
         glay.addWidget(self.filterType, j, 0)
         glay.addWidget(self.searchText, j, 1)
 
-        # Mostra opzioni importazione
+        # Show import options
         if importOptions:
             j += 1
             glay.addWidget(self.doPreview, j, 0)
@@ -119,9 +119,9 @@ class TestDialog(QtGui.QWidget):
         # Option to execute a full import to dictionary or only a path|id
         # import:
         self.fullImport = False
-#		self.connect(self.table, QtCore.SIGNAL('doubleClicked(QModelIndex)'), self.select)
-        self.connect(
-            self.table, QtCore.SIGNAL('entered(QModelIndex)'), self.select)
+        self.connect(self.table, QtCore.SIGNAL('doubleClicked(QModelIndex)'), self.select)
+#        self.connect( 
+#            self.table, QtCore.SIGNAL('entered(QModelIndex)'), self.select)
         self.connect(
             self.table, QtCore.SIGNAL('clicked(QModelIndex)'), self.preview)
 
@@ -256,9 +256,11 @@ class TestDialog(QtGui.QWidget):
             self.strip.hide()
             return
         code = self.getCode(i)
-        dir = os.path.dirname(str(self.path)) + '/' + code + '/' + code + 'H'
+        image_dir = os.path.dirname(str(self.path)) + '/' + code + '/' + code + 'H'
         self.cursor.execute(
             "select * from IMMAGINI where IDProve = '%s'" % code)
-        self.strip.dmodel.setPathData(dir, self.cursor.fetchall())
+        rows = self.cursor.fetchall()
+        self.strip.dmodel.setPathData(image_dir, rows)
         self.strip.show()
+        print 'Showing images from',len(rows),image_dir
 
