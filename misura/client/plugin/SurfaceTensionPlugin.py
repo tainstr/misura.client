@@ -98,9 +98,19 @@ class SurfaceTensionPlugin(plugins.DatasetPlugin):
                         'scaling factor, temperature,'
                         'sample expansion curve, media expansion curve.')
 
+    MIN_TEMPERATURE_VARIATION = 100
+
     def __init__(self, beta='', R0='', T='', rho0=1000, T0=25, dil='', dilT='', ex_start=0, ex_end=0, dim='Linear',
-                            grho0=air_density(25), gT0=25, gdil='', gdilT='', gdim='Volumetric', ds_out=''):
+                            grho0=air_density(25), gT0=25, gdil='', gdilT='', gdim='Volumetric', ds_out='', temperature_dataset=[0, MIN_TEMPERATURE_VARIATION]):
         """Define input fields for plugin."""
+
+        default_sample_expansion = dil
+        default_sample_expansion_temperature = dilT
+
+        if max(temperature_dataset) - min(temperature_dataset) < self.MIN_TEMPERATURE_VARIATION:
+            default_sample_expansion = ''
+            default_sample_expansion_temperature = ''
+
         self.fields = [
             plugins.FieldDataset(
                 'beta', 'Capillarity factor dataset', default=beta),
@@ -112,11 +122,10 @@ class SurfaceTensionPlugin(plugins.DatasetPlugin):
                 "rho0", descr=u"Reference sample density (kg/m\u00B3)", default=rho0),
             plugins.FieldFloat(
                 "T0", descr=u"Reference sample temperature (\u00B0C)", default=T0),
-
             plugins.FieldDataset(
-                'dil', 'Sample expansion [blank=fixed] (%)', default=dil),
+                'dil', 'Sample expansion [blank=fixed] (%)', default=default_sample_expansion),
             plugins.FieldDataset(
-                'dilT', u'Sample expansion temperature [blank=as beta] (\u00B0C)', default=dilT),
+                'dilT', u'Sample expansion temperature [blank=as beta] (\u00B0C)', default=default_sample_expansion_temperature),
             plugins.FieldFloat(
                 'ex_start', u'Extrapolate from temperature [0=no] (\u00B0C)', default=ex_start),
             plugins.FieldFloat(

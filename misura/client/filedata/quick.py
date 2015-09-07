@@ -566,14 +566,14 @@ class QuickOps(object):
         from misura.client import plugin
         cls = plugin.SurfaceTensionPlugin
         p = cls(beta=beta, R0=R0, T=T,
-                dil=dil, dilT=T, ds_out=out)
+                dil=dil, dilT=T, ds_out=out, temperature_dataset=self.doc.data[T].data)
         d = PluginDialog(self.mainwindow, self.doc, p, cls)
         self.mainwindow.showDialog(d)
         self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @node
     def keep(self, node=False):
-        """Inverts the 'keep' flag on the current dataset, 
+        """Inverts the 'keep' flag on the current dataset,
         causing it to be saved (or not) on the next file commit."""
         ds, node = self.dsnode(node)
         cur = getattr(ds, 'm_keep', False)

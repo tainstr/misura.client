@@ -42,8 +42,18 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
               'ds_out': 'out'}
 
     def do(self, beta, R0, T, dil='', dilT='', gdil='', gdilT='', **kw):
-        doc = document.Document()
         fields = self.fields.copy()
+        doc = document.Document()
+        p = self.create_plugin(doc, fields, beta, R0, T, dil='', dilT='', gdil='', gdilT='', **kw)
+
+        logging.debug('%s', 'get ds')
+        p.getDatasets(fields)
+        logging.debug('%s', 'update ds')
+        out = p.updateDatasets(fields, veusz.plugins.DatasetPluginHelper(doc))
+        return out
+
+    def create_plugin(self, doc, fields, beta, R0, T, dil='', dilT='', gdil='', gdilT='', **kw):
+
         ds = {'beta': beta, 'R0': R0, 'T': T, 'dil': dil,
               'dilT': dilT, 'gdil': gdil, 'gdilT': gdilT}
         for k in ds.keys():
@@ -56,12 +66,7 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
         fields.update(kw)
         fields['ds_out'] = 'out'
         logging.debug('%s', 'build op')
-        p = SurfaceTensionPlugin(**fields)
-        logging.debug('%s', 'get ds')
-        p.getDatasets(fields)
-        logging.debug('%s', 'update ds')
-        out = p.updateDatasets(fields, veusz.plugins.DatasetPluginHelper(doc))
-        return out
+        return SurfaceTensionPlugin(**fields)
 
     def test_infnan(self):
         """Check tolerance towards nan/inf"""
@@ -88,6 +93,24 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
         out = self.do(beta, R0, T)
         self.assertEqual(len(out), N)
         logging.debug('%s %s', 'water', out)
+
+    def test_when_temperature_changes_too_little_sample_expansion_and_sample_expansion_temperature_are_empty_to_avoid_interpolation_problems(self):
+        N = 100
+        beta = np.ones(N) * 4.3
+        R0 = np.ones(N) * 6220
+        fixed_temperature = np.ones(N) * 25
+
+        fields = self.fields.copy()
+        doc = document.Document()
+
+        plugin = self.create_plugin(doc, fields, beta, R0, fixed_temperature)
+
+        #sample expansion is 'dil'
+        #sample expansion temperature is 'dilT'
+        for actual_default_value in [field for field in plugin.fields if field.name.startswith("dil")]:
+            self.assertEqual('', actual_default_value.default)
+
+
 
 
 if __name__ == "__main__":
