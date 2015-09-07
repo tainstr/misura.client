@@ -453,18 +453,20 @@ class Converter(object):
     
         arrayRef = {}
         timecol = rows[:, m3db.fimg.Tempo].astype('float')
+        timecol, unidx = np.unique(timecol, return_index = True)
         # Set first point as zero time
         timecol -= timecol[0]
         ini_area = 0
         # Convert data points
         for i, col in enumerate(header):
-            data = rows[:, columns[i]].astype('float')
-            # Skip invalid data
-            if np.isnan(data).all():
-                continue
             if col == 't':
                 data = timecol
                 continue
+            data = rows[:, columns[i]].astype('float')[unidx]
+            # Skip invalid data
+            if np.isnan(data).all():
+                continue
+
             if col in ['T', 'P', 'S']:
                 arrayRef[col] = reference.Array(outFile, '/summary/kiln', kiln_dict[col])
             else:

@@ -128,7 +128,6 @@ def interpolated(proxy, col, ztime_sequence):
     # Empty column
     if val is False or len(val) == 0:
         return val
-    print 'time length',len(t),len(set(t))
     f = InterpolatedUnivariateSpline(t, val, k=1)
     r = f(ztime_sequence)
     print 'not interpolated',col,val
