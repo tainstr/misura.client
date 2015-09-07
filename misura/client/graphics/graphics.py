@@ -357,7 +357,7 @@ class Graphics(MainWindow):
         self.m4 = MisuraInterface(self)
         # Misura3 Interface
         # print 'Misura3 Interface'
-        # self.m3=Misura3Interface(self)
+        self.m3 = Misura3Interface(self)
 
     def setupDefaultDoc(self):
         """Make default temperature/time pages"""
