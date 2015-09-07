@@ -8,7 +8,7 @@ from table import TestsTable
 import convert
 from m3db import getImageCode, getConnectionCursor, etp, validate_tabname
 
-from misura.client.live import registry
+from ..live import registry
 from misura.client import widgets
 
 from PyQt4 import QtCore, QtGui
@@ -24,7 +24,8 @@ class TestDialog(QtGui.QWidget):
     img = True  # Require images in the produced file
     keep_img = True  # Keep images in the produced file
     force = True  # Update existing files
-
+    converter = False # File converter
+    
     def __init__(self, parent=None, importOptions=True, path=False):
         global settings
         QtGui.QWidget.__init__(self, parent)
@@ -182,11 +183,17 @@ class TestDialog(QtGui.QWidget):
         prova = self.table.curveModel.tests[row]
         return getImageCode(prova[0])
         
-    def signal(self, step):
-        registry.tasks.job(step, self.pid)
-        
     def done(self, pid):
         if pid != self.pid:
+            return
+        if self.progress_timer:
+            self.progress_timer.stop()
+            self.progress_timer = False
+        if not self.converter:
+            return
+        if self.converter.progress < 100:
+            logging.error('Conversion aborted', self.converter.outpath)
+            self.converter.interrupt = True
             return
         logging.debug('%s %s', 'exported to ', self.outdir)
         self.emit(QtCore.SIGNAL('imported(QString)'), self.outpath)
@@ -215,18 +222,26 @@ class TestDialog(QtGui.QWidget):
             self.keep_img = False
         self.pid = 'Converting to misura format: ' + idprove
         
-        converter = convert.Converter(dbpath, self.outdir)
-        self.outpath = converter.get_outpath(idprove, img=self.img,
+        self.converter = convert.Converter(dbpath, self.outdir)
+        self.outpath = self.converter.get_outpath(idprove, img=self.img,
                                              keep_img=self.keep_img)   
         
         self.connect(registry.tasks, QtCore.SIGNAL('sig_done(QString)'), self.done)
-        
-        run = widgets.RunMethod(converter.convert, frm=self.format, signal=self.signal)
-        
+        run = widgets.RunMethod(self.converter.convert, frm=self.format)
+        run.step = 100        
         run.pid = self.pid
         QtCore.QThreadPool.globalInstance().start(run)
+        self.progress_timer = QtCore.QTimer(self)
+        self.progress_timer.setInterval(300)
+        self.connect(self.progress_timer, QtCore.SIGNAL('timeout()'), self.update_progress)
+        self.progress_timer.start()
         
-        
+    def update_progress(self):
+        if not self.converter:
+            self.progress_timer.stop()
+            return
+        registry.tasks.job(self.converter.progress, self.pid)
+        QtGui.qApp.processEvents()
 
     def select(self, idx=False):
         """Import selected test/tests"""

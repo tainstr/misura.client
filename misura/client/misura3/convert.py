@@ -30,26 +30,26 @@ HeatingCyclePoint = {
 }
 
 base_dict = {}
-ao(base_dict, 'name', 'String')
-ao(base_dict, 'comment', 'String')
-ao(base_dict, 'dev', 'String')
-ao(base_dict, 'devpath', 'String')
-ao(base_dict, 'fullpath', 'String')
-ao(base_dict, 'zerotime', 'Float')
-ao(base_dict, 'initInstrument', 'Progress')
+ao(base_dict, 'name', 'String', 'Name', name='Name')
+ao(base_dict, 'comment', 'String', 'Comment')
+ao(base_dict, 'dev', 'String', attr=['Hidden'])
+ao(base_dict, 'devpath', 'String', attr=['Hidden'])
+ao(base_dict, 'fullpath', 'String', attr=['Hidden'])
+ao(base_dict, 'zerotime', 'Float', name='Start time')
+ao(base_dict, 'initInstrument', 'Progress', attr=['Hidden'])
 
 measure_dict = deepcopy(base_dict)
 measure_dict['name']['current'] = 'Measure'
-ao(measure_dict, 'nSamples', 'Integer', 1)
-ao(measure_dict, 'id', 'String')
-ao(measure_dict, 'uid', 'String')
-ao(measure_dict, 'date', 'Date', '00:00:00 01/01/2000')
-ao(measure_dict, 'elapsed', 'Float', unit='second')
-ao(measure_dict, 'maxT', 'Meta')
-ao(measure_dict, 'end', 'Meta')
-ao(measure_dict, 'maxHeatingRate', 'Meta')
-ao(measure_dict, 'coolingDuration', 'Meta')
-ao(measure_dict, 'maxCoolingRate', 'Meta')
+ao(measure_dict, 'nSamples', 'Integer', 1, attr=['Hidden'])
+ao(measure_dict, 'id', 'String', 'Misura3 ID')
+ao(measure_dict, 'uid', 'String', 'Unique ID')
+ao(measure_dict, 'date', 'Date', '00:00:00 01/01/2000', name='Test date')
+ao(measure_dict, 'elapsed', 'Float', name='Test duration', unit='second')
+ao(measure_dict, 'maxT', 'Meta', name='Maximum temperature')
+ao(measure_dict, 'end', 'Meta', name='End of test')
+ao(measure_dict, 'maxHeatingRate', 'Meta', name='Max heating rate')
+ao(measure_dict, 'coolingDuration', 'Meta', name='Cooling duration')
+ao(measure_dict, 'maxCoolingRate', 'Meta',name='Max cooling rate')
 
 ao(measure_dict, 'scrEnd', 'Script', "mi.Point(idx=-1)", parent = 'end' )
 ao(measure_dict, 'maxT', 'Script', """i,t,T=mi.Max('T')
@@ -92,14 +92,13 @@ mi.Point(idx=w)
 
 smp_dict = deepcopy(base_dict)
 smp_dict['name']['current'] = 'Sample'
-ao(smp_dict, 'idx', 'Integer')
-ao(smp_dict, 'ii', 'Integer')
-ao(smp_dict, 'initialDimension', 'Float', 3000.)
-ao(smp_dict, 'initialWidth', 'Float', 2000.)
-ao(smp_dict, 'roi', 'Rect', [0, 0, 640, 480])
-ao(smp_dict, 'initialDimension', 'Float')
-ao(smp_dict, 'profile', 'Profile')
-ao(smp_dict, 'frame', 'Image')
+ao(smp_dict, 'idx', 'Integer', attr=['Hidden'])
+ao(smp_dict, 'ii', 'Integer', attr=['Hidden'])
+ao(smp_dict, 'initialDimension', 'Float', 3000., name='Initial dimension')
+ao(smp_dict, 'initialWidth', 'Float', 2000., name='Initial width')
+ao(smp_dict, 'roi', 'Rect', [0, 0, 640, 480], attr=['Hidden'])
+ao(smp_dict, 'profile', 'Profile', attr=['Hidden'])
+ao(smp_dict, 'frame', 'Image', attr=['Hidden'])
 # frame?
 
 hsm_smp_dict = deepcopy(smp_dict)
@@ -113,12 +112,12 @@ ao(hsm_smp_dict, 'Melting', 'Meta')
 # SCRIPTS
 ao(hsm_smp_dict, 'scrSintering', 'Script', """
 factor=script.Opt('param_sint')/100.
-threshold=obj.At('Sint',0)*factor
-ti=obj.Drops('Sint', threshold)
+threshold=obj.At('h',0)*factor
+ti=obj.Drops('h', threshold)
 if ti<0: mi.Exit()
 mi.t(ti)
 mi.T(obj.At('T',ti))
-mi.Value(obj.At('Sint',ti))""", parent='Sintering')
+mi.Value(obj.At('h',ti))""", parent='Sintering')
 ao(hsm_smp_dict, 'param_sint', 'Integer', 95,
    'Height shrinking for Sintering', parent='Sintering')
 
@@ -138,16 +137,16 @@ threshold=script.Opt('param_soft')
 method=script.Opt('param_softMethod')
 backward=script.Opt('param_softBackward')
 if method=='Relative':
-	threshold+=mi.At('Softening',0)
+	threshold+=mi.At('soft',0)
 if backward:
 	#... ricerca del massimo e poi all'indietro!
-	ti=obj.Drops('Softening',threshold)
+	ti=obj.Drops('soft',threshold)
 else:
-	ti=obj.Raises('Softening',threshold)
+	ti=obj.Raises('soft',threshold)
 if ti<0: mi.Exit()
 mi.t(ti)
 mi.T(obj.At('T',ti))
-mi.Value(obj.At('Softening',ti))""", parent='Softening')
+mi.Value(obj.At('soft',ti))""", parent='Softening')
 
 ao(hsm_smp_dict, 'param_soft', 'Float', 2.5,
    'Softening parameter threshold', parent='Softening')
@@ -158,7 +157,7 @@ ao(hsm_smp_dict, 'param_softBackward', 'Boolean', False,
 
 ao(hsm_smp_dict, 'scrSphere', 'Script', """
 threshold=script.Opt('param_sphere')
-ratio=obj.Ratio('Sint','Width')*obj.Opt('initialDimension')/obj.Opt('initialWidth')
+ratio=obj.Ratio('h','w')*obj.Opt('initialDimension')/obj.Opt('initialWidth')
 ti=mi.Where(ratio<threshold)
 if i<0: mi.Exit()
 mi.Point(i)
@@ -169,7 +168,7 @@ ao(hsm_smp_dict, 'param_sphere', 'Float', 1.,
 ao(hsm_smp_dict, 'scrHalfSphere', 'Script', """
 threshold=script.Opt('param_hsphere')
 tol=script.Opt('param_hsphereTol')
-ratio=obj.Ratio('Sint','Width')*obj.Opt('initialDimension')/obj.Opt('initialWidth')
+ratio=obj.Ratio('h','w')*obj.Opt('initialDimension')/obj.Opt('initialWidth')
 i=mi.Where(ratio<threshold)
 if i<0: mi.Exit()
 v=ratio[i]
@@ -184,7 +183,7 @@ ao(hsm_smp_dict, 'param_hsphereTol', 'Float', 0.2,
 
 ao(hsm_smp_dict, 'scrMelting', 'Script', """
 threshold=script.Opt('param_melt')
-ratio=obj.Ratio('Sint','Width')*obj.Opt('initialDimension')/obj.Opt('initialWidth')
+ratio=obj.Ratio('h','w')*obj.Opt('initialDimension')/obj.Opt('initialWidth')
 i=mi.Where(ratio<threshold)
 if i<0:
 	mi.Exit()
@@ -209,27 +208,26 @@ ao(kiln_dict, 'S', 'Float', 0, 'Setpoint', unit='celsius')
 
 instr_dict = deepcopy(base_dict)
 ao(instr_dict, 'camera', 'Role', ['camerapath', 'default'])
-ao(instr_dict, 'devices', 'List')
-ao(instr_dict, 'initTest', 'Progress')
-ao(instr_dict, 'closingTest', 'Progress')
+ao(instr_dict, 'devices', 'List', attr=['Hidden'])
+ao(instr_dict, 'initTest', 'Progress', attr=['Hidden'])
+ao(instr_dict, 'closingTest', 'Progress', attr=['Hidden'])
 
 camera_dict = deepcopy(instr_dict)
 camera_dict['name']['current'] = 'camera'
 camera_dict['devpath']['current'] = 'camerapath'
 camera_dict['dev']['current'] = 'camera'
-ao(camera_dict, 'last_frame', 'Image', [])
-ao(camera_dict, 'size', 'List', [640, 480])
-ao(camera_dict, 'Analysis_sampleIdx', 'Integer', 0)
-ao(camera_dict, 'Analysis_umpx', 'Integer', 1)
-ao(camera_dict, 'nSamples', 'Integer', 1)
-ao(camera_dict, 'Analysis_instrument', 'String', 'hsm')
-ao(camera_dict, 'Analysis_Simulation', 'Boolean', True)
+ao(camera_dict, 'last_frame', 'Image', [], attr=['Hidden'])
+ao(camera_dict, 'size', 'List', [640, 480], attr=['Hidden'])
+ao(camera_dict, 'Analysis_umpx', 'Integer', 1, name='Micron to pixel conversion')
+ao(camera_dict, 'nSamples', 'Integer', 1, attr=['Hidden'])
+ao(camera_dict, 'Analysis_instrument', 'String', 'hsm', attr=['Hidden'])
+ao(camera_dict, 'Analysis_Simulation', 'Boolean', True, attr=['Hidden'])
 
 
 anl_dict = deepcopy(base_dict)
-ao(anl_dict, 'blackWhite', 'Boolean', True)
-ao(anl_dict, 'adaptiveThreshold', 'Boolean', False)
-ao(anl_dict, 'autoregion', 'Boolean', False)
+ao(anl_dict, 'blackWhite', 'Boolean', True,  attr=['Hidden'])
+ao(anl_dict, 'adaptiveThreshold', 'Boolean', False,  attr=['Hidden'])
+ao(anl_dict, 'autoregion', 'Boolean', False,  attr=['Hidden'])
 
 server_dict = deepcopy(base_dict)
 server_dict['name']['current'] = 'server'
@@ -281,11 +279,13 @@ def create_tree(outFile, tree, path='/'):
 
 
 
-def fsignal(*foo, **kwfoo):
-    logging.debug('emit % %%', foo)
-
 
 class Converter(object):
+    outpath = ''
+    interrupt = False
+    progress = 0
+    outFile = False
+    
     def __init__(self, dbpath,  outdir=False):
         self.dbpath = dbpath
         if not outdir:
@@ -294,6 +294,13 @@ class Converter(object):
             if not os.path.exists(outdir):
                 os.mkdir(outdir)
         self.outdir = outdir
+        
+    def cancel(self):
+        """Interrupt conversion and remove output file"""
+        if self.outFile:
+            self.outFile.close()
+        if os.path.exists(self.outpath):
+            os.remove(self.outpath)
         
     
     def get_outpath(self, tcode=False, img=True, force=True, keep_img=True):
@@ -306,6 +313,7 @@ class Converter(object):
         tests = cursor.fetchall()
         if len(tests) != 1:
             logging.debug('%s %s', 'Wrong number of tests found', tests)
+            conn.close()
             return False
         test = tests[0]
         self.test = test
@@ -316,8 +324,9 @@ class Converter(object):
         logging.debug('%s %s', 'CONVERT GOT', len(self.rows))
         if len(self.rows) < 1:
             logging.debug('%s %s', 'No points', self.rows)
+            conn.close()
             return False
-    
+        conn.close()
         ###
         # Open Output File
 
@@ -361,7 +370,7 @@ class Converter(object):
         return self.outpath
      
     
-    def convert(self, frm='ImageM3', signal=fsignal, max_num_images = -1):
+    def convert(self, frm='ImageM3', max_num_images = -1):
         """Extract a Misura 3 test and export into a Misura 4 test file"""
         conn, cursor = m3db.getConnectionCursor(self.dbpath)
         outFile = self.outFile
@@ -378,10 +387,10 @@ class Converter(object):
         log('Conversion Parameters: \n\tImages: %r, \n\tUpdate: %r, \n\tKeep Images: %r, \n\tImage Format: %r' % (
             self.img, self.force, self.keep_img, frm))
     
-        signal(11)
+        self.progress = 11
         # Heating cycle table
         cycle = m3db.getHeatingCycle(self.test)
-        signal(12)
+        self.progress = 12
     
         ###
         # CONFIGURATION
@@ -439,6 +448,7 @@ class Converter(object):
         # GET THE ACTUAL DATA
         header, columns = m3db.getHeaderCols(self.test[m3db.fprv.Tipo_Prova], self.tcode)
         rows = np.array(self.rows)
+        self.rows = rows
         logging.debug('%s %s %s %s', header, columns, len(rows[0]), instr)
         instr_path = '/' + instr
         smp_path = instr_path + '/sample0'
@@ -447,9 +457,9 @@ class Converter(object):
     #	if not hasattr(outFile.root,'conf'):
     #		outFile.close()
     #		os.remove(outpath)
-    #		return convert(dbpath, tcode, outdir, img,force, keep_img,frm,signal)
+    #		return convert(dbpath, tcode, outdir, img,force, keep_img,frm)
     
-        signal(13)
+        self.progress = 13
     
         arrayRef = {}
         timecol = rows[:, m3db.fimg.Tempo].astype('float')
@@ -459,6 +469,9 @@ class Converter(object):
         ini_area = 0
         # Convert data points
         for i, col in enumerate(header):
+            if self.interrupt:
+                self.cancel()
+                return False
             if col == 't':
                 data = timecol
                 continue
@@ -496,7 +509,7 @@ class Converter(object):
             ref.append(np.array([timecol, data]).transpose())
         outFile.flush()
     
-        signal(20)
+        self.progress = 20
         ###
         # ASSIGN INITIAL DIMENSION
         dim = set(['d', 'h', 'w', 'camA', 'camB']).intersection(
@@ -523,7 +536,7 @@ class Converter(object):
         smp['initialDimension'] = initialDimension
         outFile.flush()
     
-        signal(21)
+        self.progress = 21
         log('Converted Points: %i\n' % (len(rows) - 1) * len(header))
         ######
         # Final configuration adjustment and writeout
@@ -541,10 +554,14 @@ class Converter(object):
         # IMAGES
         imgdir = os.path.join(os.path.dirname(self.dbpath), self.icode)
         if os.path.exists(imgdir) and self.img and (instr in ['hsm', 'drop', 'post']):
-            omg = append_images(outFile, rows, imgdir, self.icode, frm, signal, max_num_images)
+            omg = self.append_images(imgdir, frm, max_num_images)
             if not omg:
-                print 'ERROR Appending images'
-    
+                if self.interrupt:
+                   return False
+                else:
+                    log('ERROR Appending images')
+            
+            
         # Write conf tree
         outFile.save_conf(tree.tree())
         outFile.set_attributes('/conf', attrs = {'version': '3.0.0',
@@ -555,52 +572,53 @@ class Converter(object):
                                 'serial': hashlib.md5(self.dbpath).hexdigest(),
                                 'uid': uid })
         # Set attributes
-        signal(35)
+        self.progress = 35
     
         log('Conversion ended.')
         outFile.close()
-        signal(100)
+        self.progress = 100
         return self.outpath
 
 
 
-def append_images(outFile, rows, imgdir, icode, frm, signal, max_num_images = -1):
-    refClass = getattr(reference, frm)
-    ref = refClass(outFile, '/hsm/sample0', smp_dict['frame'])
-    a = outFile.get_attributes(ref.path)
-    outFile.set_attributes(ref.path, attrs=a)
-    sjob = 35
-    job = (99. - sjob) / len(rows)
-    oi = 0
-    esz = 0
-    t0 = float(rows[0, m3db.fimg.Tempo])
-    for i, r in enumerate(rows):
-        if i >= max_num_images and max_num_images >= 0:
-            break
-        nj = sjob + i * job
-        if i // 10 == 0:
-            signal(int(nj))
-        logging.debug('%s %s', nj, '%')
-
-        num = int(r[m3db.fimg.Numero_Immagine])
-        img = '%sH.%03i' % (icode, int(num))
-        img = os.path.join(imgdir, img)
-        if not os.path.exists(img):
-            logging.debug('%s %s', 'Skipping non-existent image', img)
-            continue
-
-        im, size = decompress(img, frm)
-
-        sz = len(im)
-        esz += sz
-        t = float(rows[i, m3db.fimg.Tempo]) - t0
-        print 'append_images',t, t0,float(rows[i, m3db.fimg.Tempo])
-        ref.commit([[t, im]])
-        oi += 1
-        outFile.flush()
-    logging.debug('%s %s', 'Included images:', oi)
-    logging.debug('%s %s', 'Expected size:', esz / 1000000.)
-    return True
+    def append_images(self, imgdir, frm, max_num_images = -1):
+        refClass = getattr(reference, frm)
+        ref = refClass(self.outFile, '/hsm/sample0', smp_dict['frame'])
+        a = self.outFile.get_attributes(ref.path)
+        self.outFile.set_attributes(ref.path, attrs=a)
+        sjob = 35
+        job = (99. - sjob) / len(self.rows)
+        oi = 0
+        esz = 0
+        t0 = float(self.rows[0, m3db.fimg.Tempo])
+        for i, r in enumerate(self.rows):
+            if self.interrupt:
+                self.cancel()
+                break
+            if i >= max_num_images and max_num_images >= 0:
+                break
+            nj = sjob + i * job
+            self.progress = int(nj)
+    
+            num = int(r[m3db.fimg.Numero_Immagine])
+            img = '%sH.%03i' % (self.icode, int(num))
+            img = os.path.join(imgdir, img)
+            if not os.path.exists(img):
+                logging.debug('%s %s', 'Skipping non-existent image', img)
+                continue
+    
+            im, size = decompress(img, frm)
+    
+            sz = len(im)
+            esz += sz
+            t = float(self.rows[i, m3db.fimg.Tempo]) - t0
+#            print 'append_images', t, t0, float(self.rows[i, m3db.fimg.Tempo])
+            ref.commit([[t, im]])
+            oi += 1
+            self.outFile.flush()
+        logging.debug('%s %s', 'Included images:', oi)
+        logging.debug('%s %s', 'Expected size:', esz / 1000000.)
+        return True
 
 
 def decompress(img, frm):

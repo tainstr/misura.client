@@ -106,9 +106,9 @@ class LocalTasks(QtGui.QWidget):
         self.connect(self, QtCore.SIGNAL('jobs(int,QString)'), self._jobs)
 
         self.connect(
-            self, QtCore.SIGNAL('job(int,QString,QString)'), self._job)
-        self.connect(self, QtCore.SIGNAL('job(int,QString)'), self._job)
-        self.connect(self, QtCore.SIGNAL('job(int)'), self._job)
+            self, QtCore.SIGNAL('job(int,QString,QString)'), self._job,  QtCore.Qt.QueuedConnection)
+        self.connect(self, QtCore.SIGNAL('job(int,QString)'), self._job,  QtCore.Qt.QueuedConnection)
+        self.connect(self, QtCore.SIGNAL('job(int)'), self._job,  QtCore.Qt.QueuedConnection)
 
         self.connect(self, QtCore.SIGNAL('sig_done(QString)'),
                      self._done, QtCore.Qt.QueuedConnection)
@@ -169,10 +169,11 @@ class LocalTasks(QtGui.QWidget):
         """Progress job `pid` to `step`, and display `label`. A negative step causes the bar to progress by 1."""
         wg = self.prog.get(pid, False)
         if not wg:
-            logging.debug('%s %s', 'LocalTasks.job: no job defined!', pid)
+            logging.debug('LocalTasks.job: no job defined! %s', pid)
             return
         if step < 0:
             step = wg.pb.value() + 1
+        print 'setting progress bar to',pid,step, wg.pb.value(), wg.pb.maximum()
         wg.pb.setValue(step)
         if label != '':
             self.msg(pid + ': ' + label)

@@ -59,6 +59,7 @@ def info_dialog(text, title='Info', parent=None):
 
 class RunMethod(QtCore.QRunnable):
     runnables = []
+    step = 2
 
     def __init__(self, func, *args, **kwargs):
         QtCore.QRunnable.__init__(self)
@@ -71,7 +72,7 @@ class RunMethod(QtCore.QRunnable):
         self.runnables.append(self)
 
     def run(self):
-        registry.tasks.jobs(2, self.pid)
+        registry.tasks.jobs(self.step, self.pid)
         logging.debug(
             'RunMethod.run %s %s %s', self.func, self.args, self.kwargs)
         registry.tasks.job(1, self.pid, self.pid)
