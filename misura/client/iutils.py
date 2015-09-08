@@ -307,4 +307,4 @@ def shorten(name, number_of_chars_to_show=30):
     if len(name) <= number_of_chars_to_show:
         return name
 
-    return name[0:number_of_chars_to_show//2] + "..." + name[-number_of_chars_to_show/2:]
+    return name[0:number_of_chars_to_show / 2] + "..." + name[-number_of_chars_to_show / 2:]
