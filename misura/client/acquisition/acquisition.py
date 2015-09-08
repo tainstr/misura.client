@@ -552,7 +552,7 @@ class MainWindow(QtGui.QMainWindow):
             self.tasks.jobs(self.max_retry, 'Waiting for data')
             self.tasks.done('Test initialization')
             self.tasks.job(retry, 'Waiting for data')
-            if retry < self.max_retry:
+            if retry < self.max_retry and self.remote.measure['elapsed']<10:
                 self.resetFileProxyLater(retry + 1, recursion + 1)
                 return False
             if retry > self.max_retry:
