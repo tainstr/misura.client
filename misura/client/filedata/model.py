@@ -382,7 +382,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
     # Menu creation utilities
 
     def build_datasets_menu(self, menu, func, checkfunc=False):
-        """Builds a hierarchical tree menu for loaded datasets. 
+        """Builds a hierarchical tree menu for loaded datasets.
         Menu actions will trigger `func`, and their checked status is provided by `checkfunc`."""
         self.refresh()
         menu.clear()
@@ -404,7 +404,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         return curveMap, alterMap
 
     def build_available_menu(self, menu, func, checkfunc=lambda ent: ent.status > 1):
-        """Builds a menu of available (but empty) datasets, which can be loaded upon request by calling `func`. 
+        """Builds a menu of available (but empty) datasets, which can be loaded upon request by calling `func`.
         Their action checked status might is provided by `checkfunc`."""
         menu.clear()
         curveMap1 = {}
@@ -458,9 +458,9 @@ class DocumentModel(QtCore.QAbstractItemModel):
         return s.get()
 
     def build_axes_menu(self, menu):
-        """Builds a two-level hierarchy from all visible axes in a plot. 
+        """Builds a two-level hierarchy from all visible axes in a plot.
         The first level contains axes which does not match any other ax (match setting is empty).
-        The second level contains both any other non matched axis, and every other axis 
+        The second level contains both any other non matched axis, and every other axis
         which matches the parent first level axis."""
         menu.clear()
         axs = self.plots['axis'].keys()
@@ -484,8 +484,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
             else:
                 pt0 = basename + '/' + m
                 axs2[pt] = pt0
-                if pt0 in axs1:
-                    axs1.remove(pt0)
 
         for pt in axs1:
             axname = pt.split('/')[-1]
@@ -515,8 +513,8 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
     def match_axes(self, first, second):
         """Add `first`-level axis to the list of matched axes of the `second`-level axis.
-        The first-level axis will remain first-level. 
-        The `second` will become `second`-level and will be listed 
+        The first-level axis will remain first-level.
+        The `second` will become `second`-level and will be listed
         in every other first-level axis referenced in its match setting."""
 
         logging.debug('%s %s %s %s', 'matching ', first, second)
