@@ -295,6 +295,9 @@ class DataDecoder(QtCore.QThread):
 #		self.proxy.close()
         fp = self.proxy.copy()
         fp.connect()
+
+        self._len = self.get_len(fp)
+
         while self.ok:
             if len(self.queue) == 0:
                 # Refresh total length
