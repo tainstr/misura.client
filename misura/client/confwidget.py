@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
 from misura.client import _
+from misura.client import iutils
 from misura.client.clientconf import confdb, settings
 import functools
 import os
@@ -97,7 +98,7 @@ class RecentInterface(object):
             name = row[0]
             if self.category == 'file':
                 if row[1] != '':
-                    name = row[1] + ' (' + row[0] + ')'
+                    name = row[1] + ' (' + iutils.shorten(row[0]) + ')'
             if self.category == 'server':
                 name0 = row[0].replace('//', '/').split('/')[1]
                 name = row[1] + '@' + name

@@ -302,3 +302,9 @@ def get_plotted_tree(base, m=False):
             if not m['axis'].has_key(wg.path):
                 m['axis'][wg.path] = []
     return m
+
+def shorten(name, number_of_chars_to_show=30):
+    if len(name) <= number_of_chars_to_show:
+        return name
+
+    return name[0:number_of_chars_to_show//2] + "..." + name[-number_of_chars_to_show/2:]
