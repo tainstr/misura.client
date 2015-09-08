@@ -18,6 +18,8 @@ class TestListModel(QtCore.QAbstractTableModel):
         return len(self.tests)
 
     def columnCount(self, index=QtCore.QModelIndex()):
+        if not len(self.tests):
+            return 0
         return len(self.tests[0])
 
     def data(self, index, role=QtCore.Qt.DisplayRole):

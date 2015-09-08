@@ -20,7 +20,7 @@ from misura.canon.option import ao
 
 import m3db
 
-valid_chars = "-_.: %s%s" % (string.ascii_letters, string.digits)
+valid_chars = "-_. %s%s" % (string.ascii_letters, string.digits)
 
 # Heating curve point
 HeatingCyclePoint = {
