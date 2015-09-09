@@ -75,7 +75,7 @@ class ImportParamsMisura(base.ImportParamsBase):
     defaults.update({
         'prefix': '0:',
         'uid': '',
-        'version': -1,  # means latest
+        'version': None,  # means latest
         'reduce': False,
         'reducen': 1000,
         'time_interval': 2,  # interpolation interval for time coord
@@ -150,7 +150,7 @@ def done(pid="File import"):
     if not t:
         return
     t.done(pid)
-    
+
 
 class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
@@ -204,7 +204,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         op = OperationMisuraImport(p)
         return op
 
-        
+
     def do(self, document):
         """Override do() in order to get a reference to the document!"""
         self._doc = document
@@ -220,7 +220,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             if new:
                 logging.debug('Opening by uid %s: %s instead of %s', self.uid, new, self.filename)
                 self.filename = new[0]
-            else: 
+            else:
                 logging.debug('Impossible to resolve uid: %s', self.uid)
         else:
             logging.debug('No uid defined in params')
@@ -246,8 +246,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             self.proxy.reopen()
         if self.proxy.conf is False:
             self.proxy.load_conf()
+
         # Load required version
-        self.proxy.set_version(self.params.version)
+        if self.params.version is not None:
+            self.proxy.set_version(self.params.version)
+
         conf = self.proxy.conf  # ConfigurationProxy
         elapsed0 = self.proxy.get_node_attr('/conf', 'elapsed')
         LF.conf = conf
