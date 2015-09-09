@@ -59,7 +59,7 @@ def check_time_delta(server):
     pre = server['timeDelta']
     if pre:
         logging.debug('Time delta already set: %', server['timeDelta'])
-    btn = QtGui.QMessageBox.warning(self,'Hardware clock error',
+    btn = QtGui.QMessageBox.warning(None,'Hardware clock error',
                       'Instrument time is different from your current time (delta: {}s).\n Apply difference and restart?'.format(delta))
     if btn != QtGui.QMessageBox.Ok:
         logging.debug('Delta correction aborted')
@@ -68,7 +68,7 @@ def check_time_delta(server):
     logging.info('Apply time delta to server',delta)
     server['timeDelta'] = delta
     r = server.restart()
-    QtGui.QMessageBox.information(self,'Restarting','Instrument is restarting: ' + r)
+    QtGui.QMessageBox.information(None,'Restarting','Instrument is restarting: ' + r)
     return False
 
 class MainWindow(QtGui.QMainWindow):
