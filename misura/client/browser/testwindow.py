@@ -61,6 +61,7 @@ class TestWindow(acquisition.MainWindow):
         self.menuPlot = fileui.SavePlotMenu(self.fixedDoc)
         self.myMenuBar.measure.addMenu(self.menuPlot)
         self.menuVersions.versionChanged.connect(self.load_version)
+        self.graphWin.show()
 
     def close(self):
         self.play.close()
