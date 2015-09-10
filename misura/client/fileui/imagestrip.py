@@ -137,14 +137,11 @@ class ImageStrip(QtGui.QWidget):
         logging.debug('%s %s', 'strip idx', idx)
         if idx < 0:
             idx = self.idx
-        # Sets the idx to decreasing values starting from idx, from the last to
-        # the first label
-        for i in range(self.n):
-            s = idx - i * self.step
-            if s < 0:
-                self.labels[self.n - i - 1].empty()
-            else:
-                self.labels[self.n - i - 1].set_idx(s)
+
+        for label_index in range(self.n):
+            index_with_step =  max(0, idx + (label_index * self.step) - 1)
+            self.labels[label_index].set_idx(index_with_step)
+
         self.idx = idx
         self.emit(QtCore.SIGNAL('set_idx(int)'), idx)
 

@@ -105,7 +105,8 @@ class MiniImage(QtGui.QWidget):
         ln = len(self.decoder)
         self.slider.setMaximum(ln)
         if self.idx >= ln:
-            logging.debug('%s %s %s', 'Index out of bounds', self.idx, ln)
+            logging.debug('Index out of bounds (%s of %s): setting empty image. ', self.idx, ln)
+            self.empty()
             return False
         logging.debug('%s %s %s %s', 'getting idx from decoder',
                       self.decoder.datapath, self.decoder.ext, idx)
