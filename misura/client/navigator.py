@@ -77,7 +77,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             self.file_menu.addAction(
                 _('Commit data to test file'), self.commit)
             self.file_menu.addAction(_('Update view'), self.refresh)
-            self.ver_menu = self.file_menu.addMenu('Load Version')
+            #  self.ver_menu = self.file_menu.addMenu('Load Version')
 
             ######
             # Sample menu
@@ -190,6 +190,10 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
     #########
 
     def update_file_menu(self, node):
+        temporary_disabled = True
+        return temporary_disabled
+
+    ###########################################################
         if hasattr(self.ver_menu, 'proxy'):
             self.ver_menu.proxy.close()
 
