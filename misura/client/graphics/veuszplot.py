@@ -15,6 +15,7 @@ import veusz.setting.settingdb as setdb
 import veusz.windows.treeeditwindow as treeeditwindow
 import veusz.document as document
 from veusz.dialogs import dataeditdialog
+from veusz.document import registerImportCommand
 
 import veusz.windows.plotwindow as plotwindow
 import veusz.setting as setting
@@ -33,6 +34,13 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         plotwindow.PlotWindow.__init__(self, document, parent)
         self.contextmenu = QtGui.QMenu(self)
         self.sigUpdatePage.connect(self.update_page)
+
+        registerImportCommand('MoveToLastPage', self.moveToLastPage)
+
+    def moveToLastPage(self):
+        number_of_pages = self.document.getNumberPages()
+        self.setPageNumber(number_of_pages - 1)
+
 
     def contextMenuEvent(self, event):
         """Show context menu."""

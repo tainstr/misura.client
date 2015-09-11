@@ -31,10 +31,10 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
                 'template_file_name', 'Template filename', default=template_file_name),
         ]
 
-    def apply(self, cmd, fields):
-        doc = cmd.document
+    def apply(self, command_interface, fields):
+        doc = command_interface.document
         self.doc = doc
-        exe = CommandInterpreter(doc)
+        command_interpreter = CommandInterpreter(doc)
         smp_path0 = fields['sample'].path
         smp_path = smp_path0.split(':')[1]
         vsmp = smp_path.split('/')
@@ -64,13 +64,13 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         d = os.path.join(params.pathArt, fields['template_file_name'])
         # TODO: replace report path
         tpl = open(d, 'rb').read()
-        exe.run(tpl)
+        command_interpreter.run(tpl)
 
         page = doc.resolveFullWidgetPath(report_path)
         # Substitutions
         tc = kiln['curve']
         if len(tc) <= 8:
-            drawCycleOnGraph(cmd, tc, label=False, wdg=report_path +
+            drawCycleOnGraph(command_interface, tc, label=False, wdg=report_path +
                              '/lbl_tc', color='black', size='6pt', create=False)
         else:
             self.toset(page.getChild('lbl_tc'), 'hide', True)
@@ -140,9 +140,9 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         cf = {'graph': graph, 'xT': 'reportxT',
               'yT': 'reportyT', 'xR': 'reportxR', 'yR': 'reportyR'}
         # TODO: convert into a plugin, creating a subplot!
-        ThermalCyclePlot.setup(cmd, **cf)
+        ThermalCyclePlot.setup(command_interface, **cf)
         tc = clean_curve(tc, events=False)
-        ThermalCyclePlot.importCurve(cmd, tc, **cf)
+        ThermalCyclePlot.importCurve(command_interface, tc, **cf)
         cf = {'Label/font': 'Bitstream Vera Sans', 'Label/size': '6pt',
               'TickLabels/font': 'Bitstream Vera Sans',
               'TickLabels/size': '6pt'}
@@ -158,7 +158,10 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 
         self.dict_toset(doc.resolveFullWidgetPath(
             report_path + '/temp/ax:' + fields['measure_to_plot']), cf)
+
         self.apply_ops()
+
+        command_interpreter.run("MoveToLastPage()")
 
 
 plugins.toolspluginregistry.append(ReportPlugin)
