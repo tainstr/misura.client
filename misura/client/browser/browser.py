@@ -49,12 +49,12 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(greeter.file, greeter.file.sig_select, self.open_file)
         self.connect(
             greeter.database, greeter.database.sig_select, self.open_database)
-            
+
         if confdb['m3_enable']:
             self.connect(greeter.m3database, greeter.database.sig_select, self.open_m3db)
             self.connect(self.myMenuBar.recentM3db, QtCore.SIGNAL(
             'select(QString)'), self.open_m3db)
-            
+
         win = self.area.addSubWindow(greeter)
         win.show()
 
@@ -65,7 +65,12 @@ class MainWindow(QtGui.QMainWindow):
     def open_file(self, path):
         path = unicode(path)
         logging.debug('%s %s', 'Browser MainWindow.open_file', path)
-        doc = filedata.MisuraDocument(path)
+        try:
+            doc = filedata.MisuraDocument(path)
+        except Exception as error:
+            QtGui.QMessageBox.warning(self, 'Error', str(error))
+            return False
+
         tw = testwindow.TestWindow(doc)
         cw = self.centralWidget()
         win = cw.addTab(tw, tw.title)
