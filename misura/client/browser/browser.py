@@ -68,6 +68,7 @@ class MainWindow(QtGui.QMainWindow):
         try:
             doc = filedata.MisuraDocument(path)
         except Exception as error:
+            self.myMenuBar.recentFile.conf.rem_file(path)
             QtGui.QMessageBox.warning(self, 'Error', str(error))
             return False
 
