@@ -27,6 +27,17 @@ def _(text, disambiguation=None, context='PlotWindow'):
     """Translate text."""
     return qt4.QCoreApplication.translate(context, text, disambiguation)
 
+def with_busy_cursor(function_to_decorate):
+    def wrapper(*a, **k):
+        qt4.QApplication.setOverrideCursor(qt4.QCursor(qt4.Qt.WaitCursor))
+
+        try:
+            function_to_decorate(*a, **k)
+        finally:
+            qt4.QApplication.restoreOverrideCursor()
+
+    return wrapper
+
 
 class VeuszPlotWindow(plotwindow.PlotWindow):
 
@@ -173,45 +184,33 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
 
             chosenextns = filtertoext[filterused]
 
-            # show busy cursor
-            qt4.QApplication.setOverrideCursor(qt4.QCursor(qt4.Qt.WaitCursor))
-
             filename = fd.selectedFiles()[0]
 
-            # Add a default extension if one isn't supplied
-            # this is the extension without the dot
-            ext = os.path.splitext(filename)[1][1:]
-            if (ext not in validextns) and (ext not in chosenextns):
-                filename += "." + chosenextns[0]
+            self.doExport(filename, validextns, chosenextns)
 
-            export = document.Export(
-                self.document,
-                filename,
-                self.getPageNumber(),
-                bitmapdpi=setdb['export_DPI'],
-                pdfdpi=setdb['export_DPI_PDF'],
-                antialias=setdb['export_antialias'],
-                color=setdb['export_color'],
-                quality=setdb['export_quality'],
-                backcolor=setdb['export_background'],
-                svgtextastext=setdb['export_SVG_text_as_text'],
-            )
 
-# 			try:
-            export.export()
-# 			except (RuntimeError, EnvironmentError) as e:
-# 				if isinstance(e, EnvironmentError):
-# 					msg = cstrerror(e)
-# 				else:
-# 					msg = cstr(e)
-#
-# 				qt4.QApplication.restoreOverrideCursor()
-# 				qt4.QMessageBox.critical(
-# 					self, _("Error - Veusz"),
-# 					_("Error exporting to file '%s'\n\n%s") %
-# 					(filename, msg))
-# 			else:
-# 				qt4.QApplication.restoreOverrideCursor()
+
+
+    @with_busy_cursor
+    def doExport(self, filename, validextns, chosenextns):
+        ext = os.path.splitext(filename)[1][1:]
+        if (ext not in validextns) and (ext not in chosenextns):
+            filename += "." + chosenextns[0]
+
+        export = document.Export(
+            self.document,
+            filename,
+            self.getPageNumber(),
+            bitmapdpi=setdb['export_DPI'],
+            pdfdpi=setdb['export_DPI_PDF'],
+            antialias=setdb['export_antialias'],
+            color=setdb['export_color'],
+            quality=setdb['export_quality'],
+            backcolor=setdb['export_background'],
+            svgtextastext=setdb['export_SVG_text_as_text'],
+        )
+
+        export.export()
 
     def update_page(self, *foo):
         """Update the navigator view in order to show colours and styles
