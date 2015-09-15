@@ -4,7 +4,7 @@ def embed(data, type):
 	encoded_data = base64.b64encode(data)
 	return "<img src='data:image/%s;base64,%s' alt=''>" % (type, encoded_data)
 
-def table_from(images, type='jpg', images_per_line=5):
+def table_from(images, type='gif', images_per_line=5):
 	html = "<table><tr>"
 
 	for index, image in enumerate(images):
