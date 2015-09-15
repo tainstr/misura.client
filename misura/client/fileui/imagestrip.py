@@ -32,6 +32,10 @@ class ImageStrip(QtGui.QWidget):
         self.actIndex.setCheckable(True)
         self.actTime = self.menu.addAction('Step by time', self.by_time)
         self.actTime.setCheckable(True)
+        self.menu.addAction("Export Images", self.export_images)
+
+    def export_images(self):
+        QtGui.QMessageBox.warning(self, 'Error', "Not implemented yet: have faith!")
 
     def set_doc(self, doc, datapath=False):
         logging.debug('%s %s %s', 'ImageStrip.set_doc', doc, datapath)
