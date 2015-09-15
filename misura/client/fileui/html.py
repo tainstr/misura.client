@@ -1,8 +1,10 @@
 import base64
 
+def encode(data):
+	return base64.b64encode(data)
+
 def embed(data, type):
-	encoded_data = base64.b64encode(data)
-	return "<img src='data:image/%s;base64,%s' alt=''>" % (type, encoded_data)
+	return "<img src='data:image/%s;base64,%s' alt=''>" % (type, encode(data))
 
 def table_from(images, type='gif', images_per_line=5):
 	html = "<table><tr>"
@@ -13,3 +15,6 @@ def table_from(images, type='gif', images_per_line=5):
 			html = html + "</tr><tr>"
 
 	return html + "</tr></table>"
+
+def encode_image(image_file_name):
+	return encode(open(image_file_name).read())

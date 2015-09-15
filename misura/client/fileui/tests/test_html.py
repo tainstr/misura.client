@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+import os
 
 from misura.client.fileui import html
 
@@ -42,6 +43,14 @@ class Html(unittest.TestCase):
 		expected_html = "<table><tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr><tr><td>%s</td></tr></table>" % (image_html, image_html, image_html, image_html, image_html, image_html)
 
 		self.assertEqual(expected_html, html.table_from(['any data', 'any data', 'any data', 'any data', 'any data', 'any data']))
+
+	def test_base64_from_image_file(self):
+		image_file_name = os.path.dirname(os.path.abspath(__file__)) +  "/images/ta-logo.gif"
+		expected_encoded_image_start = "R0lGODlhUwBGANUAAL/K2H+WsEBiid/"
+
+		actual_encoded_image = html.encode_image(image_file_name)
+
+		self.assertTrue(actual_encoded_image.startswith(expected_encoded_image_start), "'%s' does not start with '%s'" % (actual_encoded_image, expected_encoded_image_start))
 
 
 
