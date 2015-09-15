@@ -52,6 +52,18 @@ class Html(unittest.TestCase):
 
 		self.assertTrue(actual_encoded_image.startswith(expected_encoded_image_start), "'%s' does not start with '%s'" % (actual_encoded_image, expected_encoded_image_start))
 
+	def test_image_with_labels(self):
+		temperature = "22"
+		time = "01:14"
+		image_html = "<img src='data:image/gif;base64,YW55IGRhdGE=' alt=''>"
+
+		actual_image_html = html.embed_with_labels("any data", temperature, time)
+
+		expected_image_html = "<table><tr><td><img src='data:image/gif;base64,YW55IGRhdGE=' alt=''></td></tr>"
+		expected_image_html += "<tr><td>22&deg;</td></tr><tr><td>01:14</td></tr></table>"
+
+		self.assertEqual(expected_image_html, actual_image_html)
+
 
 
 
