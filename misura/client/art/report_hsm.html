@@ -1,6 +1,33 @@
 <html>
+<header>
+<style>
+@media print {
+        div.divFooter {
+            position: fixed;
+            bottom: 0;
+        }
+        div.divHeader {
+            position: fixed;
+            top: 0;
+        }
+#header {
+  display: table-header-group;
+}
+
+#main {
+  display: table-row-group;
+}
+
+#footer {
+  display: table-footer-group;
+}
+}
+
+</style>
+</header>
 <body>
-<table width="100%">
+<table width="100%" rules="groups">
+<thead>
 
 <!-- LOGO -->
 	<tr>
@@ -37,9 +64,14 @@ width="150" alt="embedded folder icon"></td>
 <td><b>Standard: $standard$</b></td>
 </tr>
 </table>
-	</tr>
+</tr>
 
-<!-- SHAPES -->
+<!-- CONTENT -->
+
+</thead>
+<tbody>
+
+
 	<tr>
 <table width="80%" style="margin-left:0%;"  >
 <tr>
@@ -141,7 +173,9 @@ width="300" alt="Melting Not Found">
 
 
 	</tr>
-
+</tbody>
 </table>
+
+</div>
 </body>
 </html>
