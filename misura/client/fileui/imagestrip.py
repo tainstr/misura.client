@@ -1,9 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import os
 from misura.canon.logger import Log as logging
 from row import RowView
 from PyQt4 import QtGui, QtCore
 from minimage import MiniImage
+from misura.client.fileui import html
+from misura.client.fileui import template
 
 
 class ImageStrip(QtGui.QWidget):
@@ -35,7 +38,25 @@ class ImageStrip(QtGui.QWidget):
         self.menu.addAction("Export Images", self.export_images)
 
     def export_images(self):
-        QtGui.QMessageBox.warning(self, 'Error', "Not implemented yet: have faith!")
+        output_filename = "/home/riccardo/Desktop/output.html"
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        template_filename = current_dir + "/../art/report_hsm_images.html"
+        template_text = open(template_filename).read()
+
+        logo_filename = current_dir + "/../art/ta-logo.gif"
+        image_file_contents = open(logo_filename).read()
+        base64_logo = html.encode(image_file_contents)
+
+        measure = self.decoder.proxy.conf.hsm.measure
+        substitutions_hash = {"$LOGO$": base64_logo,
+                              "$code$": measure['uid'],
+                              "$title$": measure['name'],
+                              "$date$": measure['date']}
+        output_template = template.convert(template_text, substitutions_hash)
+
+        with open(output_filename, 'w') as output_file:
+            output_file.write(output_template)
 
     def set_doc(self, doc, datapath=False):
         logging.debug('%s %s %s', 'ImageStrip.set_doc', doc, datapath)
