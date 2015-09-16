@@ -66,7 +66,7 @@ class ImageStrip(QtGui.QWidget):
             image_number = i + 1
             temp_index = csutil.find_nearest_val(self.doc.data['0:t'].data, time)
             image_temperature = self.doc.data.get('0:kiln/T').data[temp_index]
-            all_images_data.append([image_data, image_number, image_temperature, time])
+            all_images_data.append([image_data, image_number, '%i' % image_temperature, time])
 
         images_table_html = html.table_from(all_images_data, 'png')
 
