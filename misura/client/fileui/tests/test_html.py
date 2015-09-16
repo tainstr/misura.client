@@ -26,8 +26,10 @@ class Html(unittest.TestCase):
 	def test_table_with_one_image(self):
 		image_html = "<img src='data:image/gif;base64,YW55IGRhdGE=' alt=''>"
 		expected_html = "<table>\
-<tr><td><table><tr><td>%s</td></tr><tr><td><b>56</b></td></tr><tr><td>4&deg;C</td></tr>\
-<tr><td>00:10</td></tr></table></td></tr></table>" % image_html
+<tr><td><table><tr><td>%s</td></tr><tr>\
+<td class='number'>56</td></tr><tr>\
+<td><div class='temperature'>4&deg;C</div><div class='time'>00:10</div></td></tr>\
+</table></td></tr></table>" % image_html
 
 		self.assertEqual(expected_html, html.table_from([['any data', 56, 4, '00:10']]))
 
@@ -35,14 +37,14 @@ class Html(unittest.TestCase):
 		image_html = "<img src='data:image/gif;base64,YW55IGRhdGE=' alt=''>"
 
 		expected_html = "<table><tr>\
-<td><table><tr><td>%s</td></tr><tr><td><b>1</b></td></tr><tr><td>10&deg;C</td></tr><tr><td>a time 1</td></tr></table></td>\
-<td><table><tr><td>%s</td></tr><tr><td><b>2</b></td></tr><tr><td>20&deg;C</td></tr><tr><td>a time 2</td></tr></table></td>\
-<td><table><tr><td>%s</td></tr><tr><td><b>3</b></td></tr><tr><td>30&deg;C</td></tr><tr><td>a time 3</td></tr></table></td>\
-<td><table><tr><td>%s</td></tr><tr><td><b>4</b></td></tr><tr><td>40&deg;C</td></tr><tr><td>a time 4</td></tr></table></td>\
-<td><table><tr><td>%s</td></tr><tr><td><b>5</b></td></tr><tr><td>50&deg;C</td></tr><tr><td>a time 5</td></tr></table></td>\
+<td><table><tr><td>%s</td></tr><tr><td class='number'>1</td></tr><tr><td><div class='temperature'>10&deg;C</div><div class='time'>a time 1</div></td></tr></table></td>\
+<td><table><tr><td>%s</td></tr><tr><td class='number'>2</td></tr><tr><td><div class='temperature'>20&deg;C</div><div class='time'>a time 2</div></td></tr></table></td>\
+<td><table><tr><td>%s</td></tr><tr><td class='number'>3</td></tr><tr><td><div class='temperature'>30&deg;C</div><div class='time'>a time 3</div></td></tr></table></td>\
+<td><table><tr><td>%s</td></tr><tr><td class='number'>4</td></tr><tr><td><div class='temperature'>40&deg;C</div><div class='time'>a time 4</div></td></tr></table></td>\
+<td><table><tr><td>%s</td></tr><tr><td class='number'>5</td></tr><tr><td><div class='temperature'>50&deg;C</div><div class='time'>a time 5</div></td></tr></table></td>\
 </tr>\
 <tr>\
-<td><table><tr><td>%s</td></tr><tr><td><b>6</b></td></tr><tr><td>60&deg;C</td></tr><tr><td>a time 6</td></tr></table></td>\
+<td><table><tr><td>%s</td></tr><tr><td class='number'>6</td></tr><tr><td><div class='temperature'>60&deg;C</div><div class='time'>a time 6</div></td></tr></table></td>\
 </tr></table>" % (image_html, image_html, image_html, image_html, image_html, image_html)
 
 		data = [
@@ -71,8 +73,11 @@ class Html(unittest.TestCase):
 
 		actual_image_html = html.embed_with_labels("any data", 456, temperature, time)
 
-		expected_image_html = "<table><tr><td><img src='data:image/gif;base64,YW55IGRhdGE=' alt=''></td></tr>"
-		expected_image_html += "<tr><td><b>456</b></td></tr><tr><td>22&deg;C</td></tr><tr><td>01:14</td></tr></table>"
+		expected_image_html = "<table><tr>\
+<td><img src='data:image/gif;base64,YW55IGRhdGE=' alt=''></td></tr>\
+<tr><td class='number'>456</td></tr><tr>\
+<td><div class='temperature'>22&deg;C</div><div class='time'>01:14</div></td>\
+</tr></table>"
 
 		self.assertEqual(expected_image_html, actual_image_html)
 

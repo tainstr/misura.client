@@ -1,45 +1,75 @@
 <html>
-<body>
-<table width="100%">
+	<head>
+		<style>
+			body {
+			    background-color: white;
+			}
 
-<!-- LOGO -->
-	<tr>
-		<td><img align="center" src="data:image/jpg;base64,$LOGO$"
-width="100" alt="TA logo"></td>
-		<td>
-<div align="center">
-<h2>Heating Microscope</h2>
-<h1>Misura 4</h1>
-<p><small><a href="http://www.tainstruments.com">www.tainstruments.com</a></small><br/>
-<small><a href="mailto:tech@expertsystemsolutions.com">CHE INDIRIZZO EMAIL?</a></small></p>
-</div>
+			h1 {
+			    color: maroon;
+			}
+			h2 {
+				color: black;
+			}
+			.title {
+				vertical-align:middle;
+				text-align: center;
+				display: inline-block;
+			}
+			.logo {
+				padding: 10%;
+				display: inline-block;
+			}
+			.summary{
+				padding: 2%;
+				line-height: 200%;
+			}
+			table{
+				margin: 10px;
+			}
+			table img{
+				width: 150px;
+			}
 
-		</td>
-		<td><img align="center" src="data:image/jpg;base64,$LOGO$"
-width="150" alt="TA logo"></td>
-	</tr>
+			td.number {
+				text-align: center;
+				font-weight: bold;
+			}
 
-<!-- HEADER -->
-	<tr>
+			.temperature {
+				display: inline-block;
+			}
 
-<table width="100%" style="margin-left:0%;">
-<tr>
-	<td><b>Code: $code$</b></td>
-</tr>
-<tr>
-	<td><b>Title: $title$</b></td>
-</tr>
-<tr>
-	<td><b>Date: $date$</b></td>
-</tr>
-</table>
-	</tr>
+			.time {
+				display: inline-block;
+				margin-left: 50px;
+			}
+		</style>
+	</head>
 
-<!-- SHAPES -->
-	<tr>
-$IMAGES_TABLE$
+	<body>
+		<div>
+			<div class='title-container'>
+				<div class='logo'>
+					<img align="center" src="data:image/jpg;base64,$LOGO$" width="100" alt="TA logo">
+				</div>
+				<div class='title'>
+					<h2>Heating Microscope</h2>
+					<h1>Misura 4</h1>
+					<p>
+						<a href="http://www.tainstruments.com">www.tainstruments.com</a></small><br/>
+					</p>
+				</div>
+			</div>
 
+			<div class='summary'>
+				<div><strong>Code</strong>: $code$</div>
+				<div><strong>Title</strong>: $title$</div>
+				<div><strong>Date</strong>: $date$</div>
+			</div>
 
-</table>
-</body>
+			$IMAGES_TABLE$
+
+		</div>
+	</body>
 </html>

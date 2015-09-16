@@ -8,8 +8,10 @@ def embed(data, type):
 
 def embed_with_labels(data, image_number, temperature, time, type='gif'):
 	image_html = embed(data, type)
-	return "<table><tr><td>%s</td></tr><tr><td><b>%s</b></td></tr><tr><td>%s&deg;C</td></tr><tr><td>%s</td></tr></table>" % (image_html, image_number, temperature, time)
-
+	return "<table><tr><td>%s</td></tr><tr>\
+<td class='number'>%s</td></tr><tr>\
+<td><div class='temperature'>%s&deg;C</div><div class='time'>%s</div></td>\
+</tr></table>" % (image_html, image_number, temperature, time)
 def table_from(images, type='gif', images_per_line=5):
 	html = "<table><tr>"
 
