@@ -6,9 +6,9 @@ def encode(data):
 def embed(data, type):
 	return "<img src='data:image/%s;base64,%s' alt=''>" % (type, encode(data))
 
-def embed_with_labels(data, temperature, time, type='gif'):
+def embed_with_labels(data, image_number, temperature, time, type='gif'):
 	image_html = embed(data, type)
-	return "<table><tr><td>%s</td></tr><tr><td>%s&deg;</td></tr><tr><td>%s</td></tr></table>" % (image_html, temperature, time)
+	return "<table><tr><td>%s</td></tr><tr><td><br>%s</br></td></tr><tr><td>%s&deg;</td></tr><tr><td>%s</td></tr></table>" % (image_html, image_number, temperature, time)
 
 def table_from(images, type='gif', images_per_line=5):
 	html = "<table><tr>"

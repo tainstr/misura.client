@@ -57,10 +57,10 @@ class Html(unittest.TestCase):
 		time = "01:14"
 		image_html = "<img src='data:image/gif;base64,YW55IGRhdGE=' alt=''>"
 
-		actual_image_html = html.embed_with_labels("any data", temperature, time)
+		actual_image_html = html.embed_with_labels("any data", 456, temperature, time)
 
 		expected_image_html = "<table><tr><td><img src='data:image/gif;base64,YW55IGRhdGE=' alt=''></td></tr>"
-		expected_image_html += "<tr><td>22&deg;</td></tr><tr><td>01:14</td></tr></table>"
+		expected_image_html += "<tr><td><br>456</br></td></tr><tr><td>22&deg;</td></tr><tr><td>01:14</td></tr></table>"
 
 		self.assertEqual(expected_image_html, actual_image_html)
 
