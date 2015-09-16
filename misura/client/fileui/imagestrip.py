@@ -38,7 +38,13 @@ class ImageStrip(QtGui.QWidget):
         self.menu.addAction("Export Images", self.export_images)
 
     def export_images(self):
-        output_filename = "/home/riccardo/Desktop/output.html"
+        output_filename = QtGui.QFileDialog.getSaveFileName(self, 'Save Report', '', '*.html')
+        if not output_filename:
+            return
+
+        self.do_export_images(output_filename)
+
+    def do_export_images(self, output_filename):
         current_dir = os.path.dirname(os.path.abspath(__file__))
 
         template_filename = current_dir + "/../art/report_hsm_images.html"
@@ -48,11 +54,26 @@ class ImageStrip(QtGui.QWidget):
         image_file_contents = open(logo_filename).read()
         base64_logo = html.encode(image_file_contents)
 
+        total_number_of_images = len(self.decoder)
+        all_images = []
+        for i in range(total_number_of_images):
+            image_data = QtCore.QByteArray()
+            ignored, qimage = self.decoder.get_data(i)
+            buffer = QtCore.QBuffer(image_data)
+            buffer.open(QtCore.QIODevice.WriteOnly)
+            qimage.save(buffer, 'PNG')
+            buffer.close()
+            all_images.append(image_data)
+
+        images_table_html = html.table_from(all_images, 'png')
+
         measure = self.decoder.proxy.conf.hsm.measure
         substitutions_hash = {"$LOGO$": base64_logo,
                               "$code$": measure['uid'],
                               "$title$": measure['name'],
-                              "$date$": measure['date']}
+                              "$date$": measure['date'],
+                              "$IMAGES_TABLE$": images_table_html }
+
         output_template = template.convert(template_text, substitutions_hash)
 
         with open(output_filename, 'w') as output_file:
