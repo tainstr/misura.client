@@ -7,7 +7,7 @@ from PyQt4 import QtGui, QtCore
 from minimage import MiniImage
 from misura.client.fileui import html
 from misura.client.fileui import template
-
+from ...canon import csutil
 
 class ImageStrip(QtGui.QWidget):
 
@@ -55,7 +55,7 @@ class ImageStrip(QtGui.QWidget):
         base64_logo = html.encode(image_file_contents)
 
         total_number_of_images = len(self.decoder)
-        all_images = []
+        all_images_data = []
         for i in range(total_number_of_images):
             image_data = QtCore.QByteArray()
             time, qimage = self.decoder.get_data(i)
@@ -63,9 +63,12 @@ class ImageStrip(QtGui.QWidget):
             buffer.open(QtCore.QIODevice.WriteOnly)
             qimage.save(buffer, 'PNG')
             buffer.close()
-            all_images.append([image_data, i+1, 10, time])
+            image_number = i + 1
+            temp_index = csutil.find_nearest_val(self.doc.data['0:t'].data, time)
+            image_temperature = self.doc.data.get('0:kiln/T').data[temp_index]
+            all_images_data.append([image_data, image_number, image_temperature, time])
 
-        images_table_html = html.table_from(all_images, 'png')
+        images_table_html = html.table_from(all_images_data, 'png')
 
         measure = self.decoder.proxy.conf.hsm.measure
         substitutions_hash = {"$LOGO$": base64_logo,
