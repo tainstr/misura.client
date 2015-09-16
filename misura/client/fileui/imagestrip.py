@@ -57,6 +57,7 @@ class ImageStrip(QtGui.QWidget):
         total_number_of_images = len(self.decoder)
         all_images_data = []
         last_temperature = -100
+        image_count = 1
         for i in range(total_number_of_images):
             image_data = QtCore.QByteArray()
             time, qimage = self.decoder.get_data(i)
@@ -68,8 +69,9 @@ class ImageStrip(QtGui.QWidget):
             temp_index = csutil.find_nearest_val(self.doc.data['0:t'].data, time)
             image_temperature = int(self.doc.data.get('0:kiln/T').data[temp_index])
             if abs(last_temperature - int(image_temperature)) >= 1:
-                all_images_data.append([image_data, image_number, image_temperature, csutil.from_seconds_to_hms(int(time))])
+                all_images_data.append([image_data, image_count, image_temperature, csutil.from_seconds_to_hms(int(time))])
                 last_temperature = image_temperature
+                image_count += 1
 
         images_table_html = html.table_from(all_images_data, 'png')
 
