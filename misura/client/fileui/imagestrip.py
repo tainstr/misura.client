@@ -50,7 +50,7 @@ class ImageStrip(QtGui.QWidget):
         template_filename = current_dir + "/../art/report_hsm_images.html"
         template_text = open(template_filename).read()
 
-        logo_filename = current_dir + "/../art/ta-logo.gif"
+        logo_filename = current_dir + "/../art/ta-logo-small.gif"
         image_file_contents = open(logo_filename).read()
         base64_logo = html.encode(image_file_contents)
 
