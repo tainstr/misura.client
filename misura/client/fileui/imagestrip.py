@@ -58,12 +58,12 @@ class ImageStrip(QtGui.QWidget):
         all_images = []
         for i in range(total_number_of_images):
             image_data = QtCore.QByteArray()
-            ignored, qimage = self.decoder.get_data(i)
+            time, qimage = self.decoder.get_data(i)
             buffer = QtCore.QBuffer(image_data)
             buffer.open(QtCore.QIODevice.WriteOnly)
             qimage.save(buffer, 'PNG')
             buffer.close()
-            all_images.append(image_data)
+            all_images.append([image_data, i+1, 10, time])
 
         images_table_html = html.table_from(all_images, 'png')
 

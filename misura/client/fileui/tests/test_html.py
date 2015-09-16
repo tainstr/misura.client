@@ -25,24 +25,36 @@ class Html(unittest.TestCase):
 
 	def test_table_with_one_image(self):
 		image_html = "<img src='data:image/gif;base64,YW55IGRhdGE=' alt=''>"
-		expected_html = "<table><tr><td>%s</td></tr></table>" % image_html
+		expected_html = "<table>\
+<tr><td><table><tr><td>%s</td></tr><tr><td><b>56</b></td></tr><tr><td>4&deg;C</td></tr>\
+<tr><td>00:10</td></tr></table></td></tr></table>" % image_html
 
-		self.assertEqual(expected_html, html.table_from(['any data']))
-
-	def test_table_with_two_images(self):
-		image_html1 = "<img src='data:image/gif;base64,YW55IGRhdGEgMQ==' alt=''>"
-		image_html2 = "<img src='data:image/gif;base64,YW55IGRhdGEgMg==' alt=''>"
-
-		expected_html = "<table><tr><td>%s</td><td>%s</td></tr></table>" % (image_html1, image_html2)
-
-		self.assertEqual(expected_html, html.table_from(['any data 1', 	'any data 2']))
+		self.assertEqual(expected_html, html.table_from([['any data', 56, 4, '00:10']]))
 
 	def test_table_with_six_images(self):
 		image_html = "<img src='data:image/gif;base64,YW55IGRhdGE=' alt=''>"
 
-		expected_html = "<table><tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr><tr><td>%s</td></tr></table>" % (image_html, image_html, image_html, image_html, image_html, image_html)
+		expected_html = "<table><tr>\
+<td><table><tr><td>%s</td></tr><tr><td><b>1</b></td></tr><tr><td>10&deg;C</td></tr><tr><td>a time 1</td></tr></table></td>\
+<td><table><tr><td>%s</td></tr><tr><td><b>2</b></td></tr><tr><td>20&deg;C</td></tr><tr><td>a time 2</td></tr></table></td>\
+<td><table><tr><td>%s</td></tr><tr><td><b>3</b></td></tr><tr><td>30&deg;C</td></tr><tr><td>a time 3</td></tr></table></td>\
+<td><table><tr><td>%s</td></tr><tr><td><b>4</b></td></tr><tr><td>40&deg;C</td></tr><tr><td>a time 4</td></tr></table></td>\
+<td><table><tr><td>%s</td></tr><tr><td><b>5</b></td></tr><tr><td>50&deg;C</td></tr><tr><td>a time 5</td></tr></table></td>\
+</tr>\
+<tr>\
+<td><table><tr><td>%s</td></tr><tr><td><b>6</b></td></tr><tr><td>60&deg;C</td></tr><tr><td>a time 6</td></tr></table></td>\
+</tr></table>" % (image_html, image_html, image_html, image_html, image_html, image_html)
 
-		self.assertEqual(expected_html, html.table_from(['any data', 'any data', 'any data', 'any data', 'any data', 'any data']))
+		data = [
+			 ['any data', 1, 10, 'a time 1'],
+			 ['any data', 2, 20, 'a time 2'],
+			 ['any data', 3, 30, 'a time 3'],
+			 ['any data', 4, 40, 'a time 4'],
+			 ['any data', 5, 50, 'a time 5'],
+			 ['any data', 6, 60, 'a time 6']
+		]
+
+		self.assertEqual(expected_html, html.table_from(data))
 
 	def test_base64_from_image_file(self):
 		image_file_name = os.path.dirname(os.path.abspath(__file__)) +  "/images/ta-logo.gif"
@@ -60,7 +72,7 @@ class Html(unittest.TestCase):
 		actual_image_html = html.embed_with_labels("any data", 456, temperature, time)
 
 		expected_image_html = "<table><tr><td><img src='data:image/gif;base64,YW55IGRhdGE=' alt=''></td></tr>"
-		expected_image_html += "<tr><td><br>456</br></td></tr><tr><td>22&deg;</td></tr><tr><td>01:14</td></tr></table>"
+		expected_image_html += "<tr><td><b>456</b></td></tr><tr><td>22&deg;C</td></tr><tr><td>01:14</td></tr></table>"
 
 		self.assertEqual(expected_image_html, actual_image_html)
 
