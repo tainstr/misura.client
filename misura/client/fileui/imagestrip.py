@@ -5,7 +5,7 @@ from misura.canon.logger import Log as logging
 from row import RowView
 from PyQt4 import QtGui, QtCore
 from minimage import MiniImage
-from misura.client.fileui import html
+from misura.client.fileui import htmlreport
 from misura.client.fileui import template
 from ...canon import csutil
 
@@ -42,50 +42,17 @@ class ImageStrip(QtGui.QWidget):
         if not output_filename:
             return
 
-        self.do_export_images(output_filename)
-
-    def do_export_images(self, output_filename):
         current_dir = os.path.dirname(os.path.abspath(__file__))
 
         template_filename = current_dir + "/../art/report_hsm_images.html"
-        template_text = open(template_filename).read()
-
         logo_filename = current_dir + "/../art/ta-logo-small.gif"
-        image_file_contents = open(logo_filename).read()
-        base64_logo = html.encode(image_file_contents)
 
-        total_number_of_images = len(self.decoder)
-        all_images_data = []
-        last_temperature = -100
-        image_count = 1
-        for i in range(total_number_of_images):
-            image_data = QtCore.QByteArray()
-            time, qimage = self.decoder.get_data(i)
-            buffer = QtCore.QBuffer(image_data)
-            buffer.open(QtCore.QIODevice.WriteOnly)
-            qimage.save(buffer, 'PNG')
-            buffer.close()
-            image_number = i + 1
-            temp_index = csutil.find_nearest_val(self.doc.data['0:t'].data, time)
-            image_temperature = int(self.doc.data.get('0:kiln/T').data[temp_index])
-            if abs(last_temperature - int(image_temperature)) >= 1:
-                all_images_data.append([image_data, image_count, image_temperature, csutil.from_seconds_to_hms(int(time))])
-                last_temperature = image_temperature
-                image_count += 1
-
-        images_table_html = html.table_from(all_images_data, 'png')
-
-        measure = self.decoder.proxy.conf.hsm.measure
-        substitutions_hash = {"$LOGO$": base64_logo,
-                              "$code$": measure['uid'],
-                              "$title$": measure['name'],
-                              "$date$": measure['date'],
-                              "$IMAGES_TABLE$": images_table_html }
-
-        output_template = template.convert(template_text, substitutions_hash)
+        output_html = htmlreport.create(self.decoder, self.decoder.proxy.conf.hsm.measure, self.doc.data['0:t'].data, self.doc.data.get('0:kiln/T').data, template_filename, logo_filename)
 
         with open(output_filename, 'w') as output_file:
-            output_file.write(output_template)
+            output_file.write(output_html)
+
+
 
     def set_doc(self, doc, datapath=False):
         logging.debug('%s %s %s', 'ImageStrip.set_doc', doc, datapath)
