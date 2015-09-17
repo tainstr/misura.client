@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 from misura.client.fileui import html
 from misura.client.fileui import template
 from PyQt4 import QtGui, QtCore
