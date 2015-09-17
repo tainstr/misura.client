@@ -1,5 +1,6 @@
 sync/tests/data/
 .idea/
+conf.sqlite
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
