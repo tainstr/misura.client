@@ -42,12 +42,7 @@ class ImageStrip(QtGui.QWidget):
         if not output_filename:
             return
 
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-
-        template_filename = current_dir + "/../art/report_hsm_images.html"
-        logo_filename = current_dir + "/../art/ta-logo-small.gif"
-
-        output_html = htmlreport.create(self.decoder, self.decoder.proxy.conf.hsm.measure, self.doc.data['0:t'].data, self.doc.data.get('0:kiln/T').data, template_filename, logo_filename)
+        output_html = htmlreport.create_images_report(self.decoder, self.decoder.proxy.conf.hsm.measure, self.doc.data['0:t'].data, self.doc.data.get('0:kiln/T').data)
 
         with open(output_filename, 'w') as output_file:
             output_file.write(output_html)
