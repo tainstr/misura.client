@@ -12,6 +12,7 @@ def embed_with_labels(data, image_number, temperature, time, type='gif'):
 <td class='number'>%s</td></tr><tr>\
 <td><div class='temperature'>%s&deg;C</div><div class='time'>%s</div></td>\
 </tr></table>" % (image_html, image_number, temperature, time)
+
 def table_from(images, type='gif', images_per_line=5):
 	html = "<table><tr>"
 
