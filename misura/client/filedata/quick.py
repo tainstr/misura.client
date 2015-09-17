@@ -13,6 +13,8 @@ from . import MisuraDocument, ImportParamsMisura, OperationMisuraImport
 from entry import DatasetEntry
 from .. import clientconf
 from proxy import getFileProxy
+import axis_selection
+
 
 ism = isinstance
 
@@ -403,18 +405,24 @@ class QuickOps(object):
 
     def xnames(self, y, page=False):
         """Get X dataset name for Y node y, in `page`"""
-        if page == False:
-            page = self.model().page
         logging.debug('%s %s %s %s', 'XNAMES', y, type(y), y.path)
         logging.debug('%s %s', 'y.linked', y.linked)
         logging.debug('%s %s', 'y.parent.linked', y.parent.linked)
+
+        if page == False:
+            page = self.model().page
         lk = y.linked if y.linked else y.parent.linked
-        p = getattr(lk, 'prefix', '')
-        if page.startswith('/time'):
-            names = [y.linked.prefix + 't']
-        else:
-            names = [y.linked.prefix + 'kiln/T']
-        return names
+
+        self.try_to_load_temperature_path_relative_to(y.path, lk.filename)
+        xname = axis_selection.get_best_x_for(y.path, lk.prefix, self.doc.data, page)
+
+        return [xname]
+
+    def try_to_load_temperature_path_relative_to(self, path, filename):
+        sample_temperature_path = axis_selection.get_temperature_of_sample_with_path(path)
+        op = OperationMisuraImport.from_dataset_in_file(sample_temperature_path, filename)
+        self.doc.applyOperation(op)
+        self.model().refresh(True)
 
     def dsnode(self, node):
         """Get node and corresponding dataset"""
