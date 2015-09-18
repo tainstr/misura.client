@@ -69,9 +69,9 @@ ao(default_desc, 'rule_inc', 'TextArea', rule_inc, 'Force inclusion')
 rule_load = r'''hsm/sample\d/h$
 hsm/sample\d/Vol$
 /sample\d/d$
-^(/summary/)?kiln/T$
+.*/T$
 ^(/summary/)?kiln/S$
-^(/summary/)?kiln/P'''
+^(/summary/)?kiln/P$'''
 ao(default_desc, 'rule_load', 'TextArea', rule_load, 'Force loading')
 
 rule_unit = [
@@ -148,7 +148,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     conn = False
     path = ''
     index = False
-    
+
     def __init__(self, path=False, new=False):
         QtCore.QObject.__init__(self)
         option.ConfigurationProxy.__init__(self)
@@ -257,7 +257,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self.emit(QtCore.SIGNAL('load()'))
         self.reset_rules()
         self.create_index()
-        
+
     def create_index(self):
         self.index = False
         path = self['database']
@@ -324,7 +324,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             tab.append(arg)
 
             return False
-        
+
         tab.append(arg)
 
         lim = self.desc['h' + name]['current']
@@ -415,7 +415,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             if entry[0] == addr:
                 return entry[1], entry[2]
         return '', ''
-    
+
     def resolve_uid(self, uid):
         """Search file path corresponding to uid across default database and recent databases"""
         if not uid:
@@ -443,13 +443,13 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             if not os.path.exists(path):
                 logging.debug('Skip db: %s', path)
                 continue
-            try: 
+            try:
                 db = Indexer(path)
             except:
                 logging.info('Db open error: \n%s',format_exc())
                 continue
             file_path = db.searchUID(uid)
-            if file_path: 
+            if file_path:
                 dbPath = path
                 break
             logging.debug('UID not found: %s %s', uid, path)

@@ -413,16 +413,10 @@ class QuickOps(object):
             page = self.model().page
         lk = y.linked if y.linked else y.parent.linked
 
-        self.try_to_load_temperature_path_relative_to(y.path, lk.filename)
         xname = axis_selection.get_best_x_for(y.path, lk.prefix, self.doc.data, page)
 
         return [xname]
 
-    def try_to_load_temperature_path_relative_to(self, path, filename):
-        sample_temperature_path = axis_selection.get_temperature_of_sample_with_path(path)
-        op = OperationMisuraImport.from_dataset_in_file(sample_temperature_path, filename)
-        self.doc.applyOperation(op)
-        self.model().refresh(True)
 
     def dsnode(self, node):
         """Get node and corresponding dataset"""

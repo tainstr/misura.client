@@ -39,6 +39,16 @@ class AxisSelection(unittest.TestCase):
 		self.assertEqual("a/path/for/sample/T",\
 			axis_selection.get_best_x_for(path, prefix, data, page))
 
+	def test_is_temperature(self):
+		self.assertFalse(axis_selection.is_temperature("0:/hsm/sample0"))
+		self.assertTrue(axis_selection.is_temperature("anything you want /T"))
+		self.assertTrue(axis_selection.is_temperature("anything you want kiln/T and whatever"))
+		self.assertFalse(axis_selection.is_temperature("anything you want kiln/"))
+
+	def test_kiln_temperature_for(self):
+		self.assertEqual("something:kiln/T",\
+			axis_selection.kiln_temperature_for("something:somthing/else"))
+
 
 
 

@@ -12,6 +12,7 @@ from misura.canon.logger import Log as logging
 import utils
 import PercentilePlugin
 from .. import units
+from misura.client.filedata import axis_selection
 
 default_curves = ['T', 'P', 'S', 'h', 'Vol', 'd', 'err']
 an_default_curves = ['T', 'Vol', 'd', 'Dil',  'Sint', 'Flex']
@@ -279,7 +280,7 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
         dsn = fields['dsn']
         vars = []
         timeds = False
-        tempds = False
+        all_temperatures = []
         rp = confdb['rule_plot'].replace('\n', '|')
         if len(rp) > 0:
             rp = re.compile(rp)
@@ -293,11 +294,12 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
             logging.debug('%s %s %s', 'Checking', ds, var)
             if var == 't':
                 timeds = ds
-            elif re.search('kiln/T$', ds1):
-                tempds = ds
-            elif rp and rp.search(ds1):
+            elif re.search('.*/T$', ds1):
+                all_temperatures.append(ds)
+
+            if rp and rp.search(ds1):
                 vars.append(ds)
-            # else: skipped curve
+
         logging.debug('%s %s', "VARS", vars)
         xt = []
         xT = []
@@ -307,13 +309,22 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
             if timeds:
                 xt.append(timeds)
                 yt.append(ds)
-            if tempds:
-                xT.append(tempds)
+
+            if not axis_selection.is_temperature(ds):
                 yT.append(ds)
+
+                ds_temperature = self.find_my_temp(ds, all_temperatures)
+                if ds_temperature:
+                    xT.append(ds_temperature)
+                else:
+                    xT.append(axis_selection.kiln_temperature_for(ds))
+
+
+
         # Plot also T over t
-        if timeds and tempds:
+        if timeds:
             xt.append(timeds)
-            yt.append(tempds)
+            yt.append(axis_selection.kiln_temperature_for(timeds))
 
         p = PlotDatasetPlugin()
         r = p.apply(cmd, {'x': xt, 'y': yt, 'currentwidget': '/time/time'})
@@ -321,6 +332,14 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
         r = p.apply(
             cmd, {'x': xT, 'y': yT, 'currentwidget': '/temperature/temp'})
         return r
+
+    def find_my_temp(self, dataset_name, temperatures):
+        path = "/".join(dataset_name.split("/")[0:-1])
+        sample_temperatures = [t for t in temperatures if re.search(path, t)]
+        if len(sample_temperatures) > 0:
+            return sample_temperatures[0]
+
+        return False
 
 # INTENTIONALLY NOT PUBLISHED
 # plugins.toolspluginregistry.append(PlotDatasetPlugin)
