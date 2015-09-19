@@ -451,6 +451,7 @@ class ThermalCurveTable(QtGui.QTableView):
         m.addAction(_('Insert point'), self.newRow)
         m.addAction(_('Insert checkpoint'), self.newCheckpoint)
         m.addAction(_('Insert movement'), self.newMove)
+        m.addAction(_('Insert control transition'), self.newThermocoupleControlTransition)
 #       a=m.addAction(_('Insert parametric heating'), self.newParam)
 #       a.setEnabled(False)
         m.addAction(_('Remove current row'), self.delRow)
@@ -511,6 +512,20 @@ class ThermalCurveTable(QtGui.QTableView):
         timeout = units.Converter.convert('minute', 'second', cp['timeout'])
         event = '>checkpoint,{:.1f},{:.1f}'.format(cp['deltaST'], timeout)
         self.insert_event(event)
+        
+    def newThermocoupleControlTransition(self):
+        desc = {}
+        option.ao(desc, 'target', 'Float', name="Target Sample Thermocouple Weight",
+                  current=1, min=0, max=1, step=0.01)
+        option.ao(desc, 'rate', 'Float', name="Control temperature switching rate",
+                  unit='celsius/minute', current=5, min=0.1, max=30, step=0.1)
+        cp = option.ConfigurationProxy({'self': desc})
+        chk = conf.InterfaceDialog(cp, cp, desc, parent=self)
+        chk.setWindowTitle(_("Thermocouple Control Transition Configuration"))
+        chk.exec_()
+#         timeout = units.Converter.convert('minute', 'second', cp['timeout'])
+        event = '>tctrans,{:.2f},{:.1f}'.format(cp['target'], cp['rate'])
+        self.insert_event(event)       
 
     def newParam(self):
         # TODO: param window
@@ -542,14 +557,15 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.table = ThermalCurveTable(remote, self)
         self.model = self.table.model()
 
-        self.fileMenu = menuBar.addMenu('File')
-        self.fileMenu.addAction('Import from CSV', self.loadCSV)
-        self.fileMenu.addAction('Export to CSV', self.exportCSV)
-        self.fileMenu.addAction('Clear table', self.clearTable)
-        self.editMenu = menuBar.addMenu('Edit')
-        self.editMenu.addAction('Insert point', self.table.newRow)
-        self.editMenu.addAction('Insert checkpoint', self.table.newCheckpoint)
-        self.editMenu.addAction('Insert movement', self.table.newMove)
+        self.fileMenu = menuBar.addMenu(_('File'))
+        self.fileMenu.addAction(_('Import from CSV'), self.loadCSV)
+        self.fileMenu.addAction(_('Export to CSV'), self.exportCSV)
+        self.fileMenu.addAction(_('Clear table'), self.clearTable)
+        self.editMenu = menuBar.addMenu(_('Edit'))
+        self.editMenu.addAction(_('Insert point'), self.table.newRow)
+        self.editMenu.addAction(_('Insert checkpoint'), self.table.newCheckpoint)
+        self.editMenu.addAction(_('Insert movement'), self.table.newMove)
+        self.editMenu.addAction(_('Insert control transition'), self.table.newThermocoupleControlTransition)
         a = self.editMenu.addAction(
             'Insert parametric heating', self.table.newParam)
         a.setEnabled(False)

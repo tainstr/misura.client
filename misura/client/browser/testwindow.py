@@ -29,7 +29,7 @@ class TestWindow(acquisition.MainWindow):
 # 			pic.setFrameProcessor(d)
 
         self.graphWin.show()
-#		self.summaryPlot.default_plot()
+# 		self.summaryPlot.default_plot()
         self.removeToolBar(self.controls)
         self.connect(self.play, QtCore.SIGNAL('set_idx(int)'), self.set_idx)
         self.connect(self.imageSlider, QtCore.SIGNAL(
@@ -88,6 +88,6 @@ class TestWindow(acquisition.MainWindow):
         # Overwrite
         r = self.fixedDoc.proxy.run_scripts(self.remote)
         if r:
-            #			# Update every ActiveWidget connected to the registry
+            # 			# Update every ActiveWidget connected to the registry
             registry.force_redraw()
             self.summaryPlot.resize(self.summaryPlot.size())
