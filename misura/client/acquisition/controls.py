@@ -40,6 +40,7 @@ class Controls(QtGui.QToolBar):
         self.ended_set = set()
         self.stopped_set = set()
         self.started_set = set()
+        self.finished_messages_shown_set = set()
         self.server = remote.parent()
         self.iniAct = self.addAction('New', self.new)
         self.startAct = self.addAction('Start', self.start)
@@ -146,9 +147,9 @@ class Controls(QtGui.QToolBar):
                 msg = 'A new test was started'
                 sig = self.started
                 self.started_set.add(uid)
-            elif uid not in self.ended_set:
+            elif uid not in self.finished_messages_shown_set:
                 msg = 'Finished test'
-                self.ended_set.add(uid)
+                self.finished_messages_shown_set.add(uid)
             # Show message box
             if msg:
                 QtGui.QMessageBox.warning(self, msg, msg)
