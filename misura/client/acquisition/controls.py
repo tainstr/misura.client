@@ -8,6 +8,7 @@ from .. import widgets, _
 from ..live import registry
 from misura.canon.csutil import unlockme
 
+
 from PyQt4 import QtGui, QtCore
 qm = QtGui.QMessageBox
 
@@ -138,27 +139,27 @@ class Controls(QtGui.QToolBar):
         if uid in self.ended_set:
             self.isRunning=remote_is_running
             return remote_is_running
-        if self.isRunning is not None and self.isRunning != remote_is_running:
-            sig = False
-            msg = False
-            logging.debug(
-                '%s %s %s', 'Controls.updateActions', self.isRunning, remote_is_running)
-            if remote_is_running and uid not in self.started_set:
-                msg = 'A new test was started'
-                sig = self.started
-                self.started_set.add(uid)
-            elif uid not in self.finished_messages_shown_set:
-                msg = 'Finished test'
-                self.finished_messages_shown_set.add(uid)
-            # Show message box
-            if msg:
-                QtGui.QMessageBox.warning(self, msg, msg)
-            # Emit after message
-            if sig:
-                sig.emit()
+
+        self.show_start_stop_notification(self.isRunning, remote_is_running, uid, self.started)
+
         # Locally remember remote_is_running status
         self.isRunning = remote_is_running
         return remote_is_running
+
+    def show_start_stop_notification(self, isRunning, remote_is_running, uid, signal_to_emit_if_started):
+        if isRunning is not None and isRunning != remote_is_running:
+            logging.debug(
+                '%s %s %s', 'Controls.updateActions', isRunning, remote_is_running)
+            if remote_is_running and uid not in self.started_set:
+                msg = 'A new test was started'
+                self.started_set.add(uid)
+                signal_to_emit_if_started.emit()
+                QtGui.QMessageBox.warning(self, msg, msg)
+            elif uid not in self.finished_messages_shown_set:
+                msg = 'Finished test'
+                self.finished_messages_shown_set.add(uid)
+                QtGui.QMessageBox.warning(self, msg, msg)
+
 
     def enterEvent(self, ev):
         self.updateActions()
