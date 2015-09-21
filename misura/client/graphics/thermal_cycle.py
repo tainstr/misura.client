@@ -493,39 +493,42 @@ class ThermalCurveTable(QtGui.QTableView):
         labels = [_('Close furnace'), _('Open furnace')]
         item, ok = QtGui.QInputDialog.getItem(
             self, _('Select furnace movement event'), _('Event type:'), labels, 0, False)
-        if not ok:
-            return
-        val = labels.index(item)
-        val = items[val]
-        self.insert_event(val)
+        if ok:
+            val = labels.index(item)
+            val = items[val]
+            self.insert_event(val)
+        return ok
 
     def newCheckpoint(self):
         desc = {}
-        option.ao(desc, 'deltaST', 'Float', name="Temperature-Setpoint tolerance",
+        option.ao(desc, 'deltaST', 'Float', name=_("Temperature-Setpoint tolerance"),
                   unit='celsius', current=3, min=0, max=100, step=0.1)
-        option.ao(desc, 'timeout', 'Float', name="Timeout",
+        option.ao(desc, 'timeout', 'Float', name=_("Timeout"),
                   unit='minute', current=120, min=0, max=1e3, step=0.1)
         cp = option.ConfigurationProxy({'self': desc})
         chk = conf.InterfaceDialog(cp, cp, desc, parent=self)
         chk.setWindowTitle(_("Checkpoint configuration"))
-        chk.exec_()
-        timeout = units.Converter.convert('minute', 'second', cp['timeout'])
-        event = '>checkpoint,{:.1f},{:.1f}'.format(cp['deltaST'], timeout)
-        self.insert_event(event)
+        ok = chk.exec_()
+        if ok:
+            timeout = units.Converter.convert('minute', 'second', cp['timeout'])
+            event = '>checkpoint,{:.1f},{:.1f}'.format(cp['deltaST'], timeout)
+            self.insert_event(event)
+        return ok
         
     def newThermocoupleControlTransition(self):
         desc = {}
-        option.ao(desc, 'target', 'Float', name="Target Sample Thermocouple Weight",
+        option.ao(desc, 'target', 'Float', name=_("Target Sample Thermocouple Weight"),
                   current=1, min=0, max=1, step=0.01)
-        option.ao(desc, 'rate', 'Float', name="Control temperature switching rate",
-                  unit='celsius/minute', current=5, min=0.1, max=30, step=0.1)
+        option.ao(desc, 'rate', 'Float', name=_("Control temperature switching rate (0=sudden)"),
+                  unit='celsius/minute', current=5, min=0, max=30, step=0.1)
         cp = option.ConfigurationProxy({'self': desc})
         chk = conf.InterfaceDialog(cp, cp, desc, parent=self)
         chk.setWindowTitle(_("Thermocouple Control Transition Configuration"))
-        chk.exec_()
-#         timeout = units.Converter.convert('minute', 'second', cp['timeout'])
-        event = '>tctrans,{:.2f},{:.1f}'.format(cp['target'], cp['rate'])
-        self.insert_event(event)       
+        ok = chk.exec_()
+        if ok:
+            event = '>tctrans,{:.2f},{:.1f}'.format(cp['target'], cp['rate'])
+            self.insert_event(event)       
+        return ok
 
     def newParam(self):
         # TODO: param window
