@@ -7,7 +7,7 @@ from traceback import format_exc
 from .. import widgets, _
 from ..live import registry
 from misura.canon.csutil import unlockme
-
+from misura.client.acquisition.messages import StartedFinishedNotification
 
 from PyQt4 import QtGui, QtCore
 qm = QtGui.QMessageBox
@@ -40,8 +40,7 @@ class Controls(QtGui.QToolBar):
         logging.debug('%s', 'Controls: init')
         self.ended_set = set()
         self.stopped_set = set()
-        self.started_set = set()
-        self.finished_messages_shown_set = set()
+        self.start_stop_notification = StartedFinishedNotification(self, self.started)
         self.server = remote.parent()
         self.iniAct = self.addAction('New', self.new)
         self.startAct = self.addAction('Start', self.start)
@@ -140,25 +139,13 @@ class Controls(QtGui.QToolBar):
             self.isRunning=remote_is_running
             return remote_is_running
 
-        self.show_start_stop_notification(self.isRunning, remote_is_running, uid, self.started)
+        self.start_stop_notification.show(self.isRunning, remote_is_running, uid)
 
         # Locally remember remote_is_running status
         self.isRunning = remote_is_running
         return remote_is_running
 
-    def show_start_stop_notification(self, isRunning, remote_is_running, uid, signal_to_emit_if_started):
-        if isRunning is not None and isRunning != remote_is_running:
-            logging.debug(
-                '%s %s %s', 'Controls.updateActions', isRunning, remote_is_running)
-            if remote_is_running and uid not in self.started_set:
-                msg = 'A new test was started'
-                self.started_set.add(uid)
-                signal_to_emit_if_started.emit()
-                QtGui.QMessageBox.warning(self, msg, msg)
-            elif uid not in self.finished_messages_shown_set:
-                msg = 'Finished test'
-                self.finished_messages_shown_set.add(uid)
-                QtGui.QMessageBox.warning(self, msg, msg)
+
 
 
     def enterEvent(self, ev):
