@@ -74,7 +74,7 @@ class RoleProgress(ActiveWidget):
 
         self.prog = {}
         self.update()
-        self.label_widget.setText('Remote operations')
+        self.label_widget.setText(_('Remote operations'))
 
     def toggle_log(self):
         if self.log.isVisible():
@@ -91,7 +91,7 @@ class RoleProgress(ActiveWidget):
         for k in vis - cur:
             p = self.prog[k]
             txt = self.log.toPlainText()
-            txt += 'Done: ' + p.label_widget.text() + '\n'
+            txt += _('Done: ') + p.label_widget.text() + '\n'
             self.log.setPlainText(txt)
             p.hide()
             p.unregister()
@@ -115,5 +115,5 @@ class RoleProgress(ActiveWidget):
             # Remember progress
             self.prog[k] = p
             # Log line
-            txt = self.log.toPlainText() + 'Started: ' + txt + '\n'
+            txt = self.log.toPlainText() + _('Started: ') + txt + '\n'
             self.log.setPlainText(txt)

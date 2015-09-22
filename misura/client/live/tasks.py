@@ -67,8 +67,6 @@ class LocalTasks(QtGui.QWidget):
 
     """Global server 'progress' option widget. This is a RoleIO pointing to the real 'Progress'-type option being performed"""
     ch = QtCore.pyqtSignal()
-# 	sig_done=QtCore.pyqtSignal(str)
-# 	sig_done0=QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent=parent)
@@ -139,13 +137,13 @@ class LocalTasks(QtGui.QWidget):
             wg.pb.setRange(0, tot)
             if not self.isVisible():
                 self.ch.emit()
-                self.show()
+#                self.show()
             return
-        wg = QtGui.QWidget(self)
-        pb = QtGui.QProgressBar(self)
+        wg = QtGui.QWidget(parent=self)
+        pb = QtGui.QProgressBar(parent=wg)
         pb.setRange(0, tot)
-        lbl = QtGui.QLabel(pid)
-        btn = QtGui.QPushButton('X')
+        lbl = QtGui.QLabel(pid, parent=wg)
+        btn = QtGui.QPushButton('X', parent=wg)
         wg._func_close = functools.partial(self.done, pid)
         btn.connect(btn, QtCore.SIGNAL('clicked()'), wg._func_close)
 
@@ -158,7 +156,7 @@ class LocalTasks(QtGui.QWidget):
         self.mlay.addWidget(wg)
         self.prog[pid] = wg
         if not self.isVisible():
-            self.show()
+#            self.show()
             self.ch.emit()
 
     def jobs(self, tot, pid='Operation'):
@@ -217,10 +215,10 @@ class Tasks(QtGui.QTabWidget):
 
         self.setWindowTitle(_('Pending Tasks'))
 
-        self.progress = PendingTasks(self)
+        self.progress = PendingTasks(parent=self)
         self.addTab(self.progress, _('Remote'))
 
-        self.tasks = LocalTasks(self)
+        self.tasks = LocalTasks(parent=self)
         self.addTab(self.tasks, _('Local'))
 
         self.sync = SyncWidget(parent=self)
