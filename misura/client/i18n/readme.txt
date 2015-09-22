@@ -1,9 +1,11 @@
-Procedura traduzione runtime di Misura4:
-	1. Attivare l'opzione linguist in client/parameters.py
-	2. Utilizzare la porzione di programma che si desidera tradurre. Questo genererà un file runtime.dat contenente tutte le stringe traducibili.
-	3. Eseguire language_sync.py dando in argomento i file runtime.dat
-	4. Questo genererà i file QtLinguist per tutte le lingue, misura4_it.ts, misura4_de.ts, etc
-	5. Aggiornare i file usando QtLinguist
+1. Execute language_sync.py
+2. Update misura_*.ts files with new translations with Qt Linguist.
+3. Execute lrelease on every misura_*.ts file
+
+
+
+
+CHECK:
 
 	
 Procedura per la traduzione delle stringhe statiche (con .tr()):

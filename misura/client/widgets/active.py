@@ -292,7 +292,7 @@ class LabelWidget(QtGui.QLabel):
     def __init__(self, active):
         self.active = active
         prop = active.prop
-        QtGui.QLabel.__init__(self, unicode(_(prop['name'])), parent=active)
+        QtGui.QLabel.__init__(self, unicode(_(prop['name'], context = 'Option')), parent=active)
         self.prop = prop
 
     def mousePressEvent(self, event):

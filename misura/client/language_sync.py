@@ -200,7 +200,7 @@ def collect():
     for h, tr in translations.iteritems():
         out.write('{}\t{}\n'.format(h, tr))
     out.close()
-    return translations.values()
+    return translations
 
 ######################
 # CLIENT CODE ANALYSIS - From Veusz pyqt_find_translatable
@@ -383,8 +383,11 @@ def scan_client_source(path, out=False):
         out = {}
     for ctx, msgs in retn.iteritems():
         if not out.has_key(ctx):
-            out[ctx] = []
-        out[ctx] += [msg.string for msg in msgs]
+            out[ctx] = {}
+        for msg in msgs:
+            v = mescape(msg.string)
+            out[ctx][v] = ('','')
+#         out[ctx] += [msg.string for msg in msgs]
     return out
 
 ######################
@@ -400,13 +403,13 @@ def language_sync():
 
     # Collect from server code analysis
     trcode = collect()
-    for v in trcode:
+    for v in trcode.values():
         v = mescape(v)
         contexts['Option'][v] = ('', '')
 
     # Collect from client code analysis
-    scan_client_source(pathClient)
-
+    contexts = scan_client_source(pathClient, out = contexts)
+    
     statistics = {}
     for l in langs:
         logging.debug('%s %s', 'LANGUAGE:', l)
