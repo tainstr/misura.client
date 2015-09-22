@@ -77,7 +77,8 @@ class MainWindow(QtGui.QMainWindow):
     remote = None
     doc = False
     uid = False
-
+    reset_instrument = QtCore.pyqtSignal()
+    """Connected to setInstrument"""
 
     @property
     def tasks(self):
@@ -110,6 +111,8 @@ class MainWindow(QtGui.QMainWindow):
         self.add_server_selector()
 
         self.reset_file_proxy_timer = QtCore.QTimer()
+        self.reset_instrument_timer = QtCore.QTimer()
+        self.reset_instrument.connect(self.setInstrument)
 
     def add_server_selector(self):
         """Server selector dock widget"""
@@ -289,7 +292,8 @@ class MainWindow(QtGui.QMainWindow):
         QtCore.QThreadPool.globalInstance().start(r)
         logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance(
         ).activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
-
+    
+    
     def setInstrument(self, remote=False, server=False):
         if server is not False:
             self.setServer(server)
@@ -309,17 +313,21 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.qApp.processEvents()
         if not self.fixedDoc and not self.server['isRunning'] and self.name != self.server['lastInstrument']:
             logging.debug('Init instrument')
+            if self.remote['initInstrument'] != 0:
+                logging.debug('Still waiting for initInstrument flag to be 0')
+                self.reset_instrument_timer.singleShot(1000, self.setInstrument)
+                return False               
             if self.remote.init_instrument is not None:
                 self.tasks.job(0, pid, 'Initializing instrument')
                 QtGui.qApp.processEvents()
                 # Async call of init_instrument
                 # soft: only if not already initialized
                 self.init_instrument(soft=True)
-#               QtCore.QThreadPool.globalInstance().waitForDone()
                 logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance(
                 ).activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
-#               sleep(10)
-#               self.remote.init_instrument()
+                logging.debug('setInstrument deferred post initialization')
+                self.reset_instrument_timer.singleShot(1000, self.setInstrument)
+                return False
         self.tasks.job(1, pid, 'Preparing menus')
         self.myMenuBar.close()
         self.myMenuBar = MenuBar(server=self.server, parent=self)
@@ -420,6 +428,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.connect(
                     obj1, QtCore.SIGNAL('hide_show_col(QString,int)'), p)
         self.tasks.done(pid)
+        return True
 
     def addCamera(self, obj, role='', analyzer='hsm'):
         pic = beholder.ViewerControl(obj, self.server, parent=self)
