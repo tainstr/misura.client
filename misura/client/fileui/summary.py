@@ -5,6 +5,7 @@ import os
 from misura.canon.logger import Log as logging
 
 from .. import iutils, _
+import re
 from misura.client import widgets
 from misura.client.clientconf import settings
 # TODO: these functions should be generalized and applied also by the
@@ -68,8 +69,25 @@ class SummaryModel(QtCore.QAbstractTableModel):
         if orientation != QtCore.Qt.Horizontal:
             return
         if role == QtCore.Qt.DisplayRole:
-            h = self._loaded[section]
-            return _('curve:' + h)
+            return self.humanized_header(self._loaded[section])
+
+    def humanized_header(self, inhuman_header):
+        label = getattr(self.doc.data[inhuman_header], "m_label")
+
+        if not label:
+            return inhuman_header
+
+        regex = re.compile("(^[0-9]+):.*/sample([0-9]+)/")
+        matches = regex.match(inhuman_header)
+
+        if not matches:
+            return label
+
+        plot_number, sample_number = matches.groups()
+        if sample_number != "0":
+            label = label + " (%s)" % sample_number
+
+        return label
 
     def rowCount(self, parent):
         if not self.doc:
