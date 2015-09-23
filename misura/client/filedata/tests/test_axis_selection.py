@@ -45,7 +45,6 @@ class AxisSelection(unittest.TestCase):
 		self.assertTrue(axis_selection.is_temperature("anything you want kiln/T and whatever"))
 		self.assertFalse(axis_selection.is_temperature("anything you want kiln/"))
 		self.assertFalse(axis_selection.is_temperature("anything you want /T and something else"))
-		self.assertFalse(axis_selection.is_temperature("anything you want kiln/T and something else with / and whatever"))
 
 	def test_kiln_temperature_for(self):
 		self.assertEqual("something:kiln/T",\
