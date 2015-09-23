@@ -358,9 +358,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 data = time_sequence
             elif not interpolating:
                 # Take values column
-                data = not_interpolated(self.proxy, col, startt, endt)[1]
+                data = not_interpolated(self.proxy, col0, startt, endt)[1]
             else:
-                data = interpolated(self.proxy, col, time_sequence)
+                data = interpolated(self.proxy, col0, time_sequence)
 
             if data is False:
                 data = []
