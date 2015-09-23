@@ -71,6 +71,9 @@ class MisuraDataset(document.Dataset):
         self.m_update = False
         """Update on reload"""
 
+        self.m_label = ''
+        """Label for GUI"""
+
     @property
     def mtype(self):
         """Object type"""

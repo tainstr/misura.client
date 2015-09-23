@@ -9,6 +9,7 @@ import httplib
 from traceback import format_exc
 import threading
 from misura.canon.csutil import lockme
+from misura.canon.option import common_proxy
 
 # Disable ssl cert verification (Misura certs are self-signed)
 import ssl
@@ -430,20 +431,7 @@ class MisuraProxy(object):
         return obj
 
     def from_column(self, col0):
-        """Returns the object able to return the column `col` and the column option name"""
-        sp = self.sep
-        # Remove ':' prefix
-        col = col0.split(':')
-        col = col[0] if len(col) == 1 else col[1]
-        if col.startswith(sp + 'summary' + sp):
-            col = col[9:]
-        v = col.split(sp)
-        if v[0] == '':
-            v.pop(0)
-        name = v.pop(-1)
-        logging.debug('%s %s %s %s', 'from_column', col0, v, name)
-        obj = self.toPath(v)
-        return obj, name
+        return common_proxy.from_column(col0, self)
 
     def parent(self):
         """Get the parent object handling this one"""

@@ -222,10 +222,13 @@ class DocumentModel(QtCore.QAbstractItemModel):
                 return self.decorate(node, role)
             if isinstance(node, DatasetEntry):
                 if role == Qt.DisplayRole:
-                    s = 'curve:' + node.path.replace('summary/', '')
-                    t = _(s)
-                    if s == t:
-                        t = node.legend
+                    t = "%s"
+
+                    if getattr(node.ds, 'm_label', False):
+                        t = node.ds.m_label + " (%s)"
+
+                    t = t % node.legend
+
                     return t
             elif isinstance(node, NodeEntry):
                 r = node.name()

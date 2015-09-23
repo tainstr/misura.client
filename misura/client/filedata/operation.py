@@ -24,6 +24,9 @@ from .. import units
 
 from PyQt4 import QtCore
 
+from misura.client.filedata import configuration
+from misura.client import _
+
 sep = '/'
 
 
@@ -388,6 +391,13 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             ds.m_update = m_update
             ds.m_conf = self.proxy.conf
             ds.unit = str(u) if u else u
+
+            if col0 != 't':
+                ds_object, ds_name = ds.m_conf.from_column(col0)
+                ds.m_label = _(ds_object.gete(ds_name)["name"])
+            else:
+                ds.m_label = _("Time")
+
 
             # Try to read column metadata
             if len(data) > 0 and col != 't':
