@@ -135,7 +135,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
 #        ACTIONS
         a = veusz.utils.makeAction
         self.actions = {
-#                        'm4.connect':  
+#                        'm4.connect':
 #                            a(self, 'Connect to a misura server', 'Connect',
 #                          self.recentServer.new, icon='m4.connect'),
                         'm4.open':
@@ -169,10 +169,11 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         self.mw.ci.addCommand('DefaultPlot', self.defaultPlot)
 
     def open_conf(self):
-        self.cc = ClientConf().show()
+        self.cc = ClientConf()
+        self.cc.show()
 
     def update_page(self, *foo):
-        """Update the navigator view in order to show colours and styles 
+        """Update the navigator view in order to show colours and styles
         effectively present in the current page"""
         n = self.mw.plot.getPageNumber()
         page = self.mw.document.basewidget.getPage(n)
