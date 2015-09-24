@@ -74,8 +74,8 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             self.file_menu.addAction(_('View'), self.viewFile)
             self.file_menu.addAction(_('Reload'), self.reloadFile)
             self.file_menu.addAction(_('Close'), self.closeFile)
-            self.file_menu.addAction(
-                _('Commit data to test file'), self.commit)
+            # self.file_menu.addAction(
+            #     _('Commit data to test file'), self.commit)
             self.file_menu.addAction(_('Update view'), self.refresh)
             #  self.ver_menu = self.file_menu.addMenu('Load Version')
 
@@ -403,7 +403,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.der_menu.addAction(_('Derivatives'), self.derive)
         self.add_percentile(node, self.der_menu)
         self.der_menu.addAction(_('Linear Coefficient'), self.coefficient)
-        self.der_menu.addAction(_('Overwrite parent'), self.overwrite)
+        # self.der_menu.addAction(_('Overwrite parent'), self.overwrite)
         self.add_keep(node, self.der_menu)
         self.der_menu.addAction(_('Delete'), self.deleteData)
         return self.der_menu
