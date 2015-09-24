@@ -24,7 +24,6 @@ from .. import units
 
 from PyQt4 import QtCore
 
-from misura.client.filedata import configuration
 from misura.client import _
 
 sep = '/'
