@@ -31,6 +31,7 @@ HeatingCyclePoint = {
 
 base_dict = {}
 ao(base_dict, 'name', 'String', 'Name', name='Name')
+ao(base_dict, 'mro', 'List', name='mro', attr=['Hidden'])
 ao(base_dict, 'comment', 'String', 'Comment')
 ao(base_dict, 'dev', 'String', attr=['Hidden'])
 ao(base_dict, 'devpath', 'String', attr=['Hidden'])
@@ -483,7 +484,7 @@ class Converter(object):
             if col in ['T', 'P', 'S']:
                 arrayRef[col] = reference.Array(outFile, '/summary/kiln', kiln_dict[col])
             else:
-                opt = ao({}, col, 'Float', 0, col, attr=['History'])[col]
+                opt = ao({}, col, 'Float', 0, col, attr=['History','Hidden'])[col]
                 instrobj.sample0.sete(col, opt)
                 arrayRef[col] = reference.Array(outFile, '/summary' + smp_path, opt)
             # Recreate the reference so the data is clean
