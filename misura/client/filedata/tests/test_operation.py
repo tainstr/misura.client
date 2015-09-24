@@ -97,15 +97,6 @@ class TestOperationMisuraImport(unittest.TestCase):
         self.assertEqual(imp.outnames, m3names)
         self.check_doc(doc, from3)
 
-    def tesmmit(self):
-        path = 'tmp.h5'
-        shutil.copy(from3, 'tmp.h5')
-        imp = filedata.OperationMisuraImport(
-            filedata.ImportParamsMisura(filename=path))
-        doc = filedata.MisuraDocument()
-        imp.do(doc)
-        doc.data['smp0_Sint'].linked.commit('test')
-
 
 
 class FakeProxy():

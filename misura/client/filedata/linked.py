@@ -49,21 +49,3 @@ class LinkedMisuraFile(base.LinkedFileBase):
         """Returns the operation needed for data reloading"""
         from operation import OperationMisuraImport
         return OperationMisuraImport
-
-    def commit(self, doc, name=''):
-        """Save back to summary table."""
-        fp = getFileProxy(self.filename)
-        colnames = []
-        coldatas = []
-        # FIXME: Should accept document as parameter and recover datasets from
-        # it
-        datasets = doc.tree[self]  # etc, etc....
-        datasets = sorted(datasets, key=lambda ds: ds.m_pos)
-        for ds in datasets:
-            if not ds.m_keep:
-                continue
-            logging.debug('%s %s', ds, ds.m_col)
-            colnames.append(ds.m_name)
-            coldatas.append(ds.data[:])
-        logging.debug('%s', coldatas)
-        # FIXME: fp.save_summary(colnames,coldatas,name)
