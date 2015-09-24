@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="it">
+<TS version="2.1" language="it">
 <context>
     <name>Option</name>
     <message>
@@ -208,6 +208,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Invert X&amp;amp;amp;amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;amp;amp;amp;gt;Y</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Contact Qualification</source>
         <translation type="unfinished"></translation>
     </message>
@@ -252,6 +256,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Serial</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Running Instrument</source>
         <translation type="unfinished"></translation>
     </message>
@@ -273,6 +281,10 @@
     </message>
     <message>
         <source>Is Initializing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Last initialized instrument</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -420,8 +432,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Last initialized instrument</source>
-        <translation type="unfinished"></translation>
+        <source>dbcol:file</source>
+        <translation>File</translation>
     </message>
     <message>
         <source>DDC Algorithm Weight</source>
@@ -436,7 +448,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Maximum Cooling Rate</source>
+        <source>dbcol:id</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -572,6 +584,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Maximum power (PV²)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -585,6 +601,10 @@
     </message>
     <message>
         <source>Stepping of the crop region</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>dbcol:instrument</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -605,6 +625,10 @@
     </message>
     <message>
         <source>Apply Predefined Shape</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invert X&amp;amp;amp;lt;-&amp;amp;amp;gt;Y</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -668,7 +692,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Temperature 4</source>
+        <source>dbcol:zerotime</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -677,6 +701,10 @@
     </message>
     <message>
         <source>Scan for CubeCamera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>dbcol:nSamples</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -720,7 +748,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Maximum Cooling Rate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>USB Vendor ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invert X&amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;gt;Y</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -932,6 +968,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Id</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>dbcol:flavour</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Contrast</source>
         <translation type="unfinished"></translation>
     </message>
@@ -953,6 +997,10 @@
     </message>
     <message>
         <source>Load current</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nsamples</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1108,6 +1156,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Invert X&amp;amp;amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;amp;amp;gt;Y</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Linear fitting constant</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1117,6 +1169,10 @@
     </message>
     <message>
         <source>Y8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Elapsed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1141,6 +1197,10 @@
     </message>
     <message>
         <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>dbcol:verify</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1181,6 +1241,10 @@
     </message>
     <message>
         <source>Softening</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invert X&amp;amp;amp;amp;lt;-&amp;amp;amp;amp;gt;Y</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1308,6 +1372,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Flavour</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Heating curve</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1425,6 +1493,10 @@
     </message>
     <message>
         <source>List of available instruments</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>dbcol:serial</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1564,6 +1636,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Temperature 4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Motor align: low=open?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1672,6 +1748,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Invert X&amp;amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;amp;gt;Y</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Starting</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1685,6 +1765,10 @@
     </message>
     <message>
         <source>Phase Angle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Instrument</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1804,6 +1888,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>JPG Quality</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Sample direction domain</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1885,6 +1973,10 @@
     </message>
     <message>
         <source>Idle Power</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Verify</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1972,6 +2064,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>dbcol:name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Current drift</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1996,7 +2092,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>JPG Quality</source>
+        <source>dbcol:comment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2036,6 +2132,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Uid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Zerotime</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Y Motor Position</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2049,6 +2153,10 @@
     </message>
     <message>
         <source>Auto standby</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>dbcol:elapsed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2269,6 +2377,10 @@
     </message>
     <message>
         <source>Stability Slope</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>dbcol:uid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2563,7 +2675,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Misura Browser</source>
+        <source>Started: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2579,11 +2691,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>misura Database: </source>
+        <source>Video output file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Overwriting file</source>
+        <source>Add row before</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2676,7 +2788,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Imaging</source>
+        <source>Test data cannot be trusted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2692,6 +2804,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Thermal cycle interrupted, but no test termination is set: acquisition  may continue indefinitely.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Check for modification</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2700,7 +2816,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Refresh</source>
+        <source>Analysis</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2728,6 +2844,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Current measurement was stopped and its data has been deleted. 
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Measurement stopped and saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2744,11 +2865,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Labels</source>
+        <source>Download queue</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Surface tension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A file with the same name already exists</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2764,7 +2889,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Test data is genuine.</source>
+        <source>Re-evaluate standards</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2784,10 +2909,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Add row before</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Plot</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2800,7 +2921,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Tree Panel</source>
+        <source>Visual factor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2813,10 +2934,6 @@
     </message>
     <message>
         <source>Storage</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Waiting approval</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2872,7 +2989,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Configure</source>
+        <source>Result for option &amp;amp;amp;amp;amp;amp;quot;{}&amp;amp;amp;amp;amp;amp;quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Control temperature switching rate (0=sudden)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2888,6 +3009,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>A communication error with the instrument does not allow to retrieve the ongoing test data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Option Info</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2900,7 +3025,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Output file</source>
+        <source>Query:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Result for option &amp;quot;{}&amp;quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2908,11 +3037,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Test data cannot be trusted.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Client configuration</source>
+        <source>Imaging</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2948,7 +3073,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Re-evaluate standards</source>
+        <source>Documentation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not saved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2964,7 +3093,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Documentation</source>
+        <source>Measure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2992,7 +3121,16 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Download queue</source>
+        <source>Overwriting file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Thermal cycle interrupted, but no test termination is set: acquisition  may continue indefinitely. 
+Manually interrupt or set a maximum test duration.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Axis match</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3016,7 +3154,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Signature check failed</source>
+        <source>Plot name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3032,15 +3170,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Visual factor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>misura Database</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>No pages to export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Current measurement was stopped and its data has been deleted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Temperature-Setpoint tolerance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3060,7 +3202,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Video output file</source>
+        <source>misura Database: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3076,7 +3218,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Databases</source>
+        <source>Save the test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3088,7 +3230,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Show more</source>
+        <source>Labels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3108,7 +3250,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Go to</source>
+        <source>Dataset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3136,12 +3278,11 @@ The test will finish in {:.1f} minutes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Expansion dataset</source>
+        <source>Go to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Thermal cycle interrupted, but no test termination is set: acquisition  may continue indefinitely. 
-Manually interrupt or set a maximum test duration.</source>
+        <source>Tree Panel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3149,7 +3290,7 @@ Manually interrupt or set a maximum test duration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Thermal cycle interrupted</source>
+        <source>Logout</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3157,7 +3298,7 @@ Manually interrupt or set a maximum test duration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Logout</source>
+        <source>Thermal cycle interrupted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3165,7 +3306,7 @@ Manually interrupt or set a maximum test duration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Control temperature switching rate (0=sudden)</source>
+        <source>Client configuration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3201,7 +3342,7 @@ Manually interrupt or set a maximum test duration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Not saved</source>
+        <source>Points</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3214,6 +3355,10 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
     <message>
         <source>Timeout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3253,7 +3398,7 @@ Manually interrupt or set a maximum test duration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Axis match</source>
+        <source>Configure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3285,7 +3430,7 @@ Manually interrupt or set a maximum test duration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Measure</source>
+        <source>Misura Browser</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3334,11 +3479,11 @@ Manually interrupt or set a maximum test duration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Points</source>
+        <source>Done: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Temperature-Setpoint tolerance</source>
+        <source>Waiting approval</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3375,8 +3520,7 @@ Please choose a different one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Current measurement was stopped and its data has been deleted. 
-</source>
+        <source>Dilatometry calibration factor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3388,11 +3532,23 @@ Please choose a different one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Test data is genuine.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Current Connection Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Data Table</source>
+        <source>Expansion dataset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Signature check failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Current measurement was stopped and its data has been saved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3412,10 +3568,6 @@ Please choose a different one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Visual Pixel Length</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Specify a new server address</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3428,11 +3580,15 @@ Please choose a different one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Show more</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Pixel Calibration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Query:</source>
+        <source>Output file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3456,7 +3612,7 @@ Please choose a different one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Analysis</source>
+        <source>Refresh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3464,7 +3620,7 @@ Please choose a different one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Save the test</source>
+        <source>Databases</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3488,6 +3644,10 @@ Please choose a different one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Calibration factor: {}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Delete selection</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3500,15 +3660,11 @@ Please choose a different one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Dilatometry calibration factor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Misura Navigator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Dataset</source>
+        <source>Remote operations</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3516,7 +3672,7 @@ Please choose a different one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Plot name</source>
+        <source>Visual Pixel Length</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3525,6 +3681,10 @@ Please choose a different one.</source>
     </message>
     <message>
         <source>File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Data Table</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

@@ -167,7 +167,7 @@ def collect_conf(module, translations):
 
 def iterpackage(package):
     """Scan a package for all subpackages and all modules containing classes defining conf_def attribute.
-    Accept an imported module as argument. 
+    Accept an imported module as argument.
     Returns translations dictionary and missing count."""
     prefix = package.__name__ + "."
     translations = {}
@@ -192,14 +192,22 @@ def collect():
     Returns all collected strings."""
 
     import misura
+    from misura.canon.indexer import indexer
+
     translations, missing = iterpackage(misura)
     logging.debug('%s %s %s %s', 'Stats', len(
         translations), len(set(translations)), missing)
+
+    for column in indexer.testColumn:
+        translations["dbcol:" + column] = "dbcol:" + column
 
     out = open('static.txt', 'w')
     for h, tr in translations.iteritems():
         out.write('{}\t{}\n'.format(h, tr))
     out.close()
+
+
+
     return translations
 
 ######################
@@ -409,7 +417,7 @@ def language_sync():
 
     # Collect from client code analysis
     contexts = scan_client_source(pathClient, out = contexts)
-    
+
     statistics = {}
     for l in langs:
         logging.debug('%s %s', 'LANGUAGE:', l)

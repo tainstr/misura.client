@@ -49,7 +49,15 @@ class DatabaseModel(QtCore.QAbstractTableModel):
             return
         self.tests = self.remote.query(conditions)
         self.header = self.remote.header()
-        self.sheader = [_('dbcol:' + h) for h in self.header]
+        self.sheader = []
+        for h in self.header:
+            translation_key = 'dbcol:' + h
+            translation = _(translation_key, context="Option")
+            if translation == translation_key:
+                translation = h.capitalize()
+
+            self.sheader.append(translation)
+
         QtCore.QAbstractTableModel.reset(self)
 
 
@@ -185,7 +193,7 @@ class DatabaseWidget(QtGui.QWidget):
             self.emit(
                 QtCore.SIGNAL('selectedRemoteUid(QString,QString)'), self.remote.addr, uid)
 
-    
+
 
     def remove(self):
         fname, instr, file, uid = self.table.getName()
