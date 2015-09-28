@@ -279,6 +279,8 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.act_percent.setChecked(node.m_percent)
 
     def add_keep(self, node, menu):
+        temporary_disabled = True
+        return temporary_disabled
         """Add on-file persistence action"""
         self.act_keep = self.dataset_menu.addAction(
             _('Saved on test file'), self.keep)
