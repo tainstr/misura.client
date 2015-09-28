@@ -24,18 +24,18 @@ ao(default_desc, 'lang', **{'name': "Client Language",
                             'options': ['sys', 'en', 'it', 'fr', 'es', 'ru']
                             })
 ao(default_desc, 'refresh', **{'name': 'Remote Server Refresh Rate (ms)',
-                               'current': 2000,	'max': 20000,	'min': 100, 'type': 'Integer'})
+                               'current': 2000, 'max': 20000,   'min': 100, 'type': 'Integer'})
 
 ao(default_desc, 'database', **
    {'name': 'Default Database', 'current': '', 'type': 'FilePath'})
 ao(default_desc, 'autodownload', **
-   {'name': 'Auto-download finished tests', 'current': True, 'type': 'Boolean'})
+   {'name': 'Auto-download finished tests', 'current': 'Always', 'options':['Never',  'Always',  'Ask'], 'type': 'Chooser'})
 ao(default_desc, 'hserver', **
-   {'name': 'Recent Servers', 'current': 5,	'max': 20, 'min': 0, 'type': 'Integer'})
+   {'name': 'Recent Servers', 'current': 5, 'max': 20, 'min': 0, 'type': 'Integer'})
 ao(default_desc, 'saveLogin', **
    {'name': 'Save User/Password by Default', 'current': True, 'type': 'Boolean'})
 ao(default_desc, 'hdatabase', **
-   {'name': 'Recent Database Files', 'current': 10, 'max': 100,	'min': 1, 'type': 'Integer'})
+   {'name': 'Recent Database Files', 'current': 10, 'max': 100, 'min': 1, 'type': 'Integer'})
 ao(default_desc, 'hfile', **{'name': 'Recent Test Files',
                              'current': 15, 'max': 100, 'min': 1, 'type': 'Integer'})
 ao(default_desc, 'hm3database', **
@@ -232,7 +232,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                 desc.update(self.store.read_table(cursor, 'conf'))
             except:
                 logging.debug(format_exc())
-            self.desc = desc
+            self.desc = self.migrate_desc(desc)
             logging.debug('%s %s', 'Loaded configuration', self.desc)
         else:
             logging.debug('%s', 'Recreating client configuration')
@@ -257,6 +257,15 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self.emit(QtCore.SIGNAL('load()'))
         self.reset_rules()
         self.create_index()
+        
+    def migrate_desc(self, desc):
+        """Migrate saved newdesc to current hard-coded configuration structure default_desc"""
+        for key, val in desc.iteritems():
+            saved_opt = option.Option(**val)
+            coded_opt = option.Option(**default_desc[key])
+            saved_opt.migrate_from(coded_opt)       
+            desc[key] = saved_opt
+        return desc
 
     def create_index(self):
         self.index = False

@@ -658,16 +658,21 @@ class MainWindow(QtGui.QMainWindow):
             logging.debug('UID already saved!')
             return
         self.saved_set.add(uid)
-        dbpath = confdb['database']
         if self.doc:
             self.doc.close()
         self.set_doc(False)
         self.resetFileProxy(retry=10)
+        auto = confdb['autodownload']
+        if auto == 'Never':
+            return False
+        elif auto == 'Always':
+            dbpath = confdb['database']
+            if not os.path.exists(dbpath):
+                dbpath = False
         registry.toggle_run(False)
         # NO db: ask to specify custom location
-        if not os.path.exists(dbpath):
-            logging.debug('%s %s', 'DATABASE PATH DOES NOT EXIST', dbpath)
-            dbpath = False
+        # Happens both if auto==Always but no db set or Ask.
+        if not dbpath:
             d = settings.value('/FileSaveToDir', os.path.expanduser('~'))
             path = os.path.join(str(d), self.remote.measure['name'] + '.h5')
             outfile = QtGui.QFileDialog.getSaveFileName(
@@ -681,17 +686,16 @@ class MainWindow(QtGui.QMainWindow):
                 return False
             auto = True
         else:
-            auto = confdb['autodownload']
             outfile = False
-        # Ask if it's not automatic
-        if not auto:
+        
+        # Ask if it's not automatic. Happens only if auto == 'Ask' but default database is set.
+        if auto == 'Ask' and not outfile:
             auto = QtGui.QMessageBox.question(self, _("Download finished test?"),
-                                              _("Would you like to save the finished test?"))
+                                              _("Would you like to download the finished test?"))
             if auto != QtGui.QMessageBox.Ok:
                 registry.toggle_run(True)
                 return False
-        # TODO: Must wait that current file is closed!!!
-        # Must download
+        # Start download thread
         sy = TransferThread(
             outfile=outfile, uid=uid, server=self.server, dbpath=dbpath)
         sy.set_tasks(self.tasks)
