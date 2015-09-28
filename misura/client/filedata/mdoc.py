@@ -102,7 +102,7 @@ class MisuraDocument(document.Document):
         self.applyOperation(op)
         if not self.proxy:
             self.proxy = op.proxy
-# 		self.proxy.reopen() # apply will close it!
+#       self.proxy.reopen() # apply will close it!
         dsnames = op.outdatasets
         logging.debug('%s %s', 'reloadData dsnames', dsnames.keys())
 
@@ -200,7 +200,7 @@ class MisuraDocument(document.Document):
         for col in self.data.iterkeys():
             ds = self.data[col]
             if len(ds.data) == 0:
-                # 				print 'Skipping empty',col,ds.m_col
+                #               print 'Skipping empty',col,ds.m_col
                 continue
             if not getattr(ds, 'm_col', False):
                 # Not a misura dataset
@@ -224,7 +224,6 @@ class MisuraDocument(document.Document):
                     '%s %s %s %s %s %s', 'Updating', col, opt, updata, from_unit, to_unit)
             N = len(ds.data)
             ds.insertRows(N, 1, {'data': updata})
-#			print 'Updated',col,N,'new val:',updata[0]
             k.append(col)
         self.emit(QtCore.SIGNAL('updated()'))
         return k

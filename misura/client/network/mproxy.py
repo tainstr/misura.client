@@ -431,7 +431,7 @@ class MisuraProxy(object):
         return obj
 
     def from_column(self, col0):
-        return common_proxy.from_column(col0, self)
+        return common_proxy.from_column(col0, self.root)
 
     def parent(self):
         """Get the parent object handling this one"""
