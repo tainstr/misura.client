@@ -583,7 +583,14 @@ class QuickOps(object):
 
     @node
     def save_on_current_version(self, node=False):
-        QtGui.QMessageBox.warning(None,'Error', 'Function not implemented yet.')
+        proxy = getFileProxy(node.linked.filename)
+        prefix = node.linked.prefix
+        try:
+            proxy.save_data(node.ds.m_col, node.ds.data, self.model().doc.data[prefix + "t"])
+        except Exception as e:
+            message = "Impossible to save data.\n\n" + str(e)
+            QtGui.QMessageBox.warning(None,'Error', message)
+        proxy.close()
 
     @node
     def colorize(self, node=False):
