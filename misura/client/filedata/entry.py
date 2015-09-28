@@ -17,8 +17,6 @@ def iterpath(name, parent=False, splt=sep):
     if ':' in v[0]:
         g = v[0].split(':')
         v = g + v[1:]
-#		parent, first=v[0].split(':')
-#		v[0]=first
 
     # Recursively build the path
     isLeaf = False
@@ -47,7 +45,7 @@ def find_pos(dslist, p=0):
 
 class AllDocDataAccessor(object):
 
-    """Simulates a document with access to all data"""
+    """Simulates a document with access to all data, comprising loadable datasets not in the document."""
 
     def __init__(self, doc):
         self.doc = doc
@@ -261,7 +259,6 @@ class NodeEntry(object):
     def insert(self, path, status=1):
         """Insert a pure node"""
         splt = self.splt
-        ds = self.alldoc.get(path, False)
         if self.parent:
             assert self.path.startswith(path)
             # Cut away the common part
@@ -271,10 +268,10 @@ class NodeEntry(object):
 #		logging.debug('%s %s', 'going to insert', path)
         for sub, parent, leaf in iterpath(path):
             #			logging.debug('%s %s %s %s %s %s %s', 'iterating', sub, parent, leaf, repr(item.path), repr(item._name), id(parent))
-            # Remember the first part of the path (summary, 0:summary, etc)
+            # Remember the first part of the path (0:summary, etc)
             if not parent:
                 linked = sub
-            if leaf:
+            if leaf or self.alldoc.get(sub, False):
                 item = DatasetEntry(doc=self.doc, name=sub, parent=item)
                 # Propagate the linked file to the first part of the path
                 if item.ds and item.ds.linked:
@@ -284,7 +281,11 @@ class NodeEntry(object):
                 break
             new = item.get(sub, False)
             if not new:
-                new = NodeEntry(self.doc, sub, item)
+                # Existing dataset
+                if parent and self.alldoc.get(parent+'/'+sub,False):
+                    new = DatasetEntry(doc=self.doc, name=sub, parent=item)
+                else:
+                    new = NodeEntry(doc=self.doc, name=sub, parent=item)
             item = new
 
     def remove(self, child):

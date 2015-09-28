@@ -6,12 +6,10 @@ from copy import copy
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 
-import veusz.widgets
 import veusz.plugins as plugins
 import veusz.document as document
 import utils
 from misura.client import _, units
-from misura.client.filedata import MisuraDataset
 
 from misura.canon.csutil import find_nearest_val
 
@@ -112,7 +110,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         logging.debug('%s %s %s %s', 'T start, end', start, end)
         f = InterpolatedUnivariateSpline(sT, sd, k=2)
         s0 = f(T[0])
-        s_slope = (f(T[-1]) - s0) / (T[-1] - T[0])
+        s_slope = (f(T[-1]) - s0) / (T[-1] - T[0]) # Standard slope
         self.f = f
         self.s_slope = s_slope
 
@@ -120,15 +118,15 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         (quad, slope, const), res, rank, sing, rcond = np.polyfit(
             T, d, 2, full=True)
         self.quad = quad
-        z_slope = (d[-1] - d[0]) / (T[-1] - T[0])
+        z_slope = (d[-1] - d[0]) / (T[-1] - T[0]) # Sample slope
         z_const = ds.data[0]
         res = np.sqrt(res[0] / len(T))
         # Convert from percentage to micron
         um = res * self.inidim / 100
         factor = s_slope / z_slope
         micron = u'\u03bcm'
-        msg = _('Calibration factor: {} \nStandard deviation: \n    {} %\n    {} {}').format(
-            factor, res, um, micron)
+        msg = _('Calibration factor: {} \nCoefficient: {:E}\nStandard deviation: \n    {} %\n    {} {}').format(
+            factor, z_slope, res, um, micron)
 #		logging.debug('%s', msg)
         self.msg = msg
         self.slope, self.const = slope, const

@@ -414,9 +414,11 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         node = self.model().data(self.currentIndex(), role=Qt.UserRole)
         logging.debug('%s %s', 'showContextMenu', node.path)
         if not node.parent:
+            print 'no parent: showing base menu', node.path, type(node)
             self.update_base_menu()
             menu = self.base_menu
         elif node.ds is False:
+            print 'no associated dataset: displaying group menu',node.path, type(node)
             # Identify a "summary" node
             if not node.parent.parent:
                 self.update_file_menu(node)
@@ -429,6 +431,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
                 menu = self.base_menu
         # The DatasetEntry refers to a plugin
         elif hasattr(node.ds, 'getPluginData'):
+            print 'plugin dataset menu:',node.path, type(node)
             if n == 2:
                 menu = self.bin_menu
             else:
@@ -440,6 +443,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             menu = self.bin_menu
         # No active selection
         else:
+            print 'no active selection!',n,node.path, type(node)
             menu = self.base_menu
 
         # menu.popup(self.mapToGlobal(pt))
