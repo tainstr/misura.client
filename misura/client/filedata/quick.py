@@ -582,6 +582,10 @@ class QuickOps(object):
         ds.m_keep = not cur
 
     @node
+    def save_on_current_version(self, node=False):
+        QtGui.QMessageBox.warning(None,'Error', 'Function not implemented yet.')
+
+    @node
     def colorize(self, node=False):
         """Set/unset color markers."""
         plotpath = self.model().is_plotted(node.path)

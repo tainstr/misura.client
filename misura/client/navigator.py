@@ -287,6 +287,10 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.act_keep.setCheckable(True)
         self.act_keep.setChecked(node.m_keep)
 
+    def add_save(self, node, menu):
+        self.dataset_menu.addAction(('Save on current version'), self.save_on_current_version)
+
+
     def add_unit(self, node, menu):
         """Add measurement unit conversion menu"""
         self.units = {}
@@ -389,6 +393,8 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         else:
             self.add_keep(node, self.dataset_menu)
             self.dataset_menu.addAction(_('Delete'), self.deleteData)
+
+        self.add_save(node, self.dataset_menu)
 
         self.add_unit(node, self.dataset_menu)
         return self.dataset_menu
