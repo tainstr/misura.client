@@ -376,10 +376,10 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
             if index.row() == 0:
                 return QtGui.QLabel('undefined', parent)
             wg = QtGui.QDoubleSpinBox(parent)
-            
+
             maxHeatingRate = self.remote['maxHeatingRate']
             wg.setRange(-500, maxHeatingRate)
-            
+
             wg.setSuffix(u' \xb0C/min')
         elif index.column() == thermal_cycle_row.colDUR:
             mod.mode_dwell(index.row())
@@ -450,13 +450,17 @@ class ThermalCurveTable(QtGui.QTableView):
         m = self.menu
         m.addAction(_('Insert point'), self.newRow)
         m.addAction(_('Insert checkpoint'), self.newCheckpoint)
-        m.addAction(_('Insert movement'), self.newMove)
+        if self.motor_is_available(remote):
+            m.addAction(_('Insert movement'), self.newMove)
         m.addAction(_('Insert control transition'), self.newThermocoupleControlTransition)
 #       a=m.addAction(_('Insert parametric heating'), self.newParam)
 #       a.setEnabled(False)
         m.addAction(_('Remove current row'), self.delRow)
         m.addSeparator()
         # self.curveModel.mode_ramp(0)
+
+    def motor_is_available(self, kiln):
+        return not (kiln["motor"][0] == "None")
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))
@@ -514,7 +518,7 @@ class ThermalCurveTable(QtGui.QTableView):
             event = '>checkpoint,{:.1f},{:.1f}'.format(cp['deltaST'], timeout)
             self.insert_event(event)
         return ok
-        
+
     def newThermocoupleControlTransition(self):
         desc = {}
         option.ao(desc, 'target', 'Float', name=_("Target Sample Thermocouple Weight"),
@@ -527,7 +531,7 @@ class ThermalCurveTable(QtGui.QTableView):
         ok = chk.exec_()
         if ok:
             event = '>tctrans,{:.2f},{:.1f}'.format(cp['target'], cp['rate'])
-            self.insert_event(event)       
+            self.insert_event(event)
         return ok
 
     def newParam(self):
