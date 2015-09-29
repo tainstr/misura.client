@@ -1,0 +1,26 @@
+.. include:: substitutions.txt
+
+|m| 3 Data Import
+==================================
+
+|m| 4 can access data acquired from measurement instruments operated by previous |m| 3 software. 
+By enabling the |m| 3 data import function, you can open any |m| 3 database, navigate through stored tests and get a preview of images, and convert the requested tests to the latest |m| file format. 
+
+Once the test data has been converted and stored into the newer format, it can be opened and used exactly as any other |m| file, taking advantage of nice vector plotting, flexible data storage, reporting, and advanced math operations. 
+
+.. hint:: The M3 data import function works only on |win| OS. 
+
+====================
+Enabling the |m| 3 import function
+====================
+
+
+====================
+Opening |m| 3 databases
+====================
+
+====================
+Converting and opening a test
+====================
+* From the Browser
+* From Veusz
