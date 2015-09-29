@@ -16,6 +16,7 @@ from PyQt4 import QtGui, QtCore
 import thermal_cycle_row
 import thermal_cycle_flags
 import collections
+from ..network.mproxy import MisuraProxy
 
 
 def clean_curve(dat, events=True):
@@ -175,7 +176,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
     """Data model for thermal cycle editing"""
     sigModeChanged = QtCore.pyqtSignal()
 
-    def __init__(self, crv=None):
+    def __init__(self, crv=None, is_live=False):
         QtCore.QAbstractTableModel.__init__(self)
         self.dat = []
         self.rows_models = []
@@ -183,6 +184,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         for s in ['Time', 'Temperature', 'Heating Rate', 'Duration']:
             header.append(_(s))
         self.header = header
+        self.is_live = is_live
 
     def rowCount(self, index=QtCore.QModelIndex()):
         return len(self.dat)
@@ -220,7 +222,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             return None
 
     def flags(self, index):
-        return thermal_cycle_flags.execute(self, index)
+        return thermal_cycle_flags.execute(self, index, is_live=self.is_live)
 
     def setData(self, index, value, role=QtCore.Qt.EditRole):
         index_row = index.row()
@@ -435,9 +437,9 @@ class ThermalCurveTable(QtGui.QTableView):
 
     """Table view of a thermal cycle."""
 
-    def __init__(self, remote, parent=None):
+    def __init__(self, remote, parent=None, is_live=True):
         QtGui.QTableView.__init__(self, parent)
-        self.curveModel = ThermalCurveModel()
+        self.curveModel = ThermalCurveModel(is_live=is_live)
         self.setModel(self.curveModel)
         self.setItemDelegate(ThermalPointDelegate(remote, self))
         self.selection = QtGui.QItemSelectionModel(self.model())
@@ -446,18 +448,19 @@ class ThermalCurveTable(QtGui.QTableView):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
-        self.menu = QtGui.QMenu(self)
-        m = self.menu
-        m.addAction(_('Insert point'), self.newRow)
-        m.addAction(_('Insert checkpoint'), self.newCheckpoint)
-        if self.motor_is_available(remote):
-            m.addAction(_('Insert movement'), self.newMove)
-        m.addAction(_('Insert control transition'), self.newThermocoupleControlTransition)
-#       a=m.addAction(_('Insert parametric heating'), self.newParam)
-#       a.setEnabled(False)
-        m.addAction(_('Remove current row'), self.delRow)
-        m.addSeparator()
-        # self.curveModel.mode_ramp(0)
+        if is_live:
+            self.menu = QtGui.QMenu(self)
+            m = self.menu
+            m.addAction(_('Insert point'), self.newRow)
+            m.addAction(_('Insert checkpoint'), self.newCheckpoint)
+            if self.motor_is_available(remote):
+                m.addAction(_('Insert movement'), self.newMove)
+            m.addAction(_('Insert control transition'), self.newThermocoupleControlTransition)
+    #       a=m.addAction(_('Insert parametric heating'), self.newParam)
+    #       a.setEnabled(False)
+            m.addAction(_('Remove current row'), self.delRow)
+            m.addSeparator()
+            # self.curveModel.mode_ramp(0)
 
     def motor_is_available(self, kiln):
         return not (kiln["motor"][0] == "None")
@@ -561,23 +564,28 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         menuBar.setNativeMenuBar(False)
         self.main_layout.addWidget(menuBar)
 
-        self.table = ThermalCurveTable(remote, self)
+        is_live = isinstance(remote, MisuraProxy)
+
+        self.table = ThermalCurveTable(remote, self, is_live=is_live)
         self.model = self.table.model()
 
-        self.fileMenu = menuBar.addMenu(_('File'))
-        self.fileMenu.addAction(_('Import from CSV'), self.loadCSV)
-        self.fileMenu.addAction(_('Export to CSV'), self.exportCSV)
-        self.fileMenu.addAction(_('Clear table'), self.clearTable)
-        self.editMenu = menuBar.addMenu(_('Edit'))
-        self.editMenu.addAction(_('Insert point'), self.table.newRow)
-        self.editMenu.addAction(_('Insert checkpoint'), self.table.newCheckpoint)
-        self.editMenu.addAction(_('Insert movement'), self.table.newMove)
-        self.editMenu.addAction(_('Insert control transition'), self.table.newThermocoupleControlTransition)
-        a = self.editMenu.addAction(
-            'Insert parametric heating', self.table.newParam)
-        a.setEnabled(False)
-        self.editMenu.addAction('Remove current row', self.table.delRow)
-        self.addButtons()
+
+
+        if is_live:
+            self.fileMenu = menuBar.addMenu(_('File'))
+            self.fileMenu.addAction(_('Import from CSV'), self.loadCSV)
+            self.fileMenu.addAction(_('Export to CSV'), self.exportCSV)
+            self.fileMenu.addAction(_('Clear table'), self.clearTable)
+            self.editMenu = menuBar.addMenu(_('Edit'))
+            self.editMenu.addAction(_('Insert point'), self.table.newRow)
+            self.editMenu.addAction(_('Insert checkpoint'), self.table.newCheckpoint)
+            self.editMenu.addAction(_('Insert movement'), self.table.newMove)
+            self.editMenu.addAction(_('Insert control transition'), self.table.newThermocoupleControlTransition)
+            a = self.editMenu.addAction(
+                'Insert parametric heating', self.table.newParam)
+            a.setEnabled(False)
+            self.editMenu.addAction('Remove current row', self.table.delRow)
+            self.addButtons()
 
         self.plot = ThermalCyclePlot()
         self.connect(self.model, QtCore.SIGNAL(

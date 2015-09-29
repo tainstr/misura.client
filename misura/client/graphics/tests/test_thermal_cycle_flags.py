@@ -84,6 +84,19 @@ class TestTermalCycleFlags(unittest.TestCase):
         self.assertEqual(editable, thermal_cycle_flags.execute(
             FakeTermalCurveModel(dat), valid_index))
 
+    def test_nothing_should_be_editalble_when_offline(self):
+        row_index = 0
+        column_index = thermal_cycle_row.colTEMP
+        valid_index = FakeIndex(row_index, column_index, True)
+        dat = [[123, 321, 0, 132]]
+
+        editable = QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsEnabled)
+        is_live = False
+
+        self.assertEqual(editable, thermal_cycle_flags.execute(
+            FakeTermalCurveModel(dat), valid_index, is_live=is_live))
+
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -5,11 +5,11 @@ from PyQt4 import QtCore
 import thermal_cycle_row
 
 
-def execute(thermal_curve_model, index):
+def execute(thermal_curve_model, index, is_live=True):
     row_index = index.row()
     column_index = index.column()
 
-    if not index.isValid():
+    if not index.isValid() or not is_live:
         return QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsEnabled)
 
     if (thermal_curve_model.dat[row_index][0] < 0 and column_index != 1) or (row_index == 0 and column_index != thermal_cycle_row.colTEMP):
