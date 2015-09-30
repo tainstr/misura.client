@@ -4,6 +4,8 @@ from misura.client.widgets.active import *
 from aChooser import aChooser
 from .. import _
 
+from PyQt4 import QtGui
+
 
 class PresetManager(aChooser):
 
@@ -41,6 +43,12 @@ class PresetManager(aChooser):
         self.redraw()
 
     def remove(self):
+        answer = QtGui.QMessageBox.warning(self, "Do you want to delte preset?", "Are you sure you want to delete \"%s\" preset?" %
+                                           self.combo.currentText(), QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
+
+        if answer == QtGui.QMessageBox.No:
+            return
+
         i = self.combo.currentIndex()
         self.combo.setCurrentIndex(0)
         self.remObj.call(self.remove_handle,
