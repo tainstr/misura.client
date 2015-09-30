@@ -51,8 +51,7 @@ class TestWindow(acquisition.MainWindow):
         self.setWindowTitle('Test: ' + self.remote.measure['name'])
 
         # Menu Bar mod
-        self.myMenuBar.connectTo.hide()
-        self.myMenuBar.help.hide()
+        self.myMenuBar.help.menuAction().setVisible(False)
         self.actStandard = self.myMenuBar.measure.addAction(
             _('Re-evaluate standards'), self.re_standard)
 
