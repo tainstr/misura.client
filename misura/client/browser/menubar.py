@@ -4,9 +4,10 @@ from PyQt4 import QtGui, QtCore
 from .. import _
 from ..clientconf import confdb
 from ..confwidget import RecentMenu
+from misura.client.helpmenu import HelpMenu
 
 
-class BrowserMenuBar(QtGui.QMenuBar):
+class BrowserMenuBar(QtGui.QMenuBar, HelpMenu):
     """Browser menus"""
 
     def __init__(self, server=False, parent=None):
@@ -35,6 +36,8 @@ class BrowserMenuBar(QtGui.QMenuBar):
 
         self.currents = self.addMenu(_('View Tests'))
         self.databases = self.addMenu(_('View Databases'))
+
+        self.add_help_menu()
 
     def new_database(self, path=False):
         if not path:
