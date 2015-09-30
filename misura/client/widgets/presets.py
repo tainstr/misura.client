@@ -43,10 +43,7 @@ class PresetManager(aChooser):
         self.redraw()
 
     def remove(self):
-        answer = QtGui.QMessageBox.warning(self, "Do you want to delte preset?", "Are you sure you want to delete \"%s\" preset?" %
-                                           self.combo.currentText(), QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
-
-        if answer == QtGui.QMessageBox.No:
+        if self.user_is_not_sure("Delete \"%s\" preset?" % self.combo.currentText()):
             return
 
         i = self.combo.currentIndex()
@@ -56,8 +53,17 @@ class PresetManager(aChooser):
         self.redraw()
 
     def save_current(self):
+        if self.user_is_not_sure("Overwrite \"%s\" preset?" % self.combo.currentText()):
+            return
+
         self.remObj.call(self.save_handle,
                          self.adapt2srv(self.combo.currentIndex()))
+
+    def user_is_not_sure(self, message):
+        answer = QtGui.QMessageBox.warning(self, "Are you sure?", message, QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
+
+        return answer == QtGui.QMessageBox.No
+
 
     def redraw(self, *args, **kwargs):
         """Overload per introdurre la voce speciale +Add al termine della lista"""
