@@ -187,9 +187,13 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         self.connect(self.conf, QtCore.SIGNAL('rem()'), self.redraw)
         self.lay.addWidget(self.list)
 
-        self.button = QtGui.QPushButton(_('Open') + '...', parent=self)
-        self.connect(self.button, QtCore.SIGNAL('clicked()'), self.new)
-        self.lay.addWidget(self.button)
+        self.open_button = QtGui.QPushButton(_('Open Selected'), parent=self)
+        self.connect(self.open_button, QtCore.SIGNAL('clicked()'), self.select_item)
+        self.lay.addWidget(self.open_button)
+
+        self.add_button = QtGui.QPushButton(_('Add') + '...', parent=self)
+        self.connect(self.add_button, QtCore.SIGNAL('clicked()'), self.new)
+        self.lay.addWidget(self.add_button)
 
         self.redraw()
         self.setLayout(self.lay)
@@ -205,8 +209,13 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
             item.setData(QtCore.Qt.UserRole, sig)
             self.list.addItem(item)
 
-    def select_item(self, item):
+    def select_item(self, item=False):
         """Emit the 'select(QString)' signal with the path of the object"""
+        if not item:
+            item = self.list.currentItem()
+        if not item:
+            return
+
         self.emit(self.sig_select, item.data(QtCore.Qt.UserRole))
 
 
