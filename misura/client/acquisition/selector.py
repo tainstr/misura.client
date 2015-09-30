@@ -25,7 +25,10 @@ class InstrumentSelector(QtGui.QWidget):
         inlist = []
         if server.has_key('instruments'):
             inlist = server['instruments']
+
         for (title, name) in inlist:
+            if title.lower() == 'kiln' and server._writeLevel < 4:
+                continue
             opt = 'eq_' + name
             if server.has_key(opt):
                 if not server[opt]:
