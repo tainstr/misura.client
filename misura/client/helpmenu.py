@@ -14,6 +14,9 @@ class HelpMenu():
 		self.help.addAction(_('Documentation'), self.showDocSite)
 		self.help.addAction(_('Pending operations'), self.showTasks)
 
+	def hide_help_menu(self):
+		self.help.menuAction().setVisible(False)
+
 
 	def showClientConf(self):
 		"""Show client configuration panel"""
