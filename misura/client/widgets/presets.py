@@ -60,10 +60,10 @@ class PresetManager(aChooser):
                          self.adapt2srv(self.combo.currentIndex()))
 
     def user_is_not_sure(self, message):
-        answer = QtGui.QMessageBox.warning(self, "Are you sure?", message, QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
+        answer = QtGui.QMessageBox.warning(
+            self, "Are you sure?", message, QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
 
         return answer == QtGui.QMessageBox.No
-
 
     def redraw(self, *args, **kwargs):
         """Overload per introdurre la voce speciale +Add al termine della lista"""
