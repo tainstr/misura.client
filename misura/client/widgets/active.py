@@ -20,16 +20,16 @@ from PyQt4 import QtGui, QtCore
 from misura.client.parameters import MAX, MIN
 
 def extend_decimals(cur, default = 2, extend_by = 2):
-    """Find out how many decimals to enable in editing for float value `num`"""    
+    """Find out how many decimals to enable in editing for float value `num`"""
     cur = float(cur)
     if abs(cur) < 1 and abs(cur) > 1e-32:
         print 'extend_decimals for',cur
         dc = math.log(abs(1. / cur), 10)
         dc = round(abs(dc),0)
         print 'extend_decimals for',cur,dc
-        return int(dc) + extend_by 
+        return int(dc) + extend_by
     return default
-    
+
 
 def getRemoteDev(server, devpath):
     if devpath == 'None':
@@ -174,7 +174,7 @@ class Active(object):
         return val
 
     def adapt2gui(self, val):
-        """Translate server data types into GUI data type. 
+        """Translate server data types into GUI data type.
         `val` is the server-side data value"""
         val = self.adapt(val)
         val = units.Converter.convert(
@@ -402,10 +402,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         for key, act in self.flags.iteritems():
             out[key] = act.isChecked() > 0
         if self.enable_check:
-            if self.enable_check.isChecked():
-                out['enabled'] = True
-            else:
-                out['enabled'] = False
+            out['enabled'] = self.enable_check.isChecked()
+
         logging.debug('%s %s', 'updating flags', out)
         r = self.remObj.setFlags(self.handle, out)
         return r
