@@ -72,7 +72,7 @@ class SummaryModel(QtCore.QAbstractTableModel):
             return self.humanized_header(self._loaded[section])
 
     def humanized_header(self, inhuman_header):
-        label = getattr(self.doc.data[inhuman_header], "m_label")
+        label = getattr(self.doc.data[inhuman_header], "m_label", False)
 
         if not label:
             return inhuman_header
