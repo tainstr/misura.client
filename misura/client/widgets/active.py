@@ -210,6 +210,11 @@ class Active(object):
     def get(self, *args):
         rem = self.remObj.get(self.handle, *args)
         self._get(rem)
+
+        rem_flags = self.remObj.getFlags(self.handle, *args)
+        if rem_flags and (rem_flags['enabled'] is not None):
+            self.enable_check.setChecked(rem_flags['enabled'])
+
         return rem
 
     def emitSelfChanged(self, nval):
