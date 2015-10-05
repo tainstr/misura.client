@@ -1,0 +1,11 @@
+.. _navigator:
+
+=============
+|m| Navigator
+=============
+
+
+|m| Navigator is a tree view, located on the right of the application by default.
+
+It contains all the currently loaded datasets, and it's an entry point for data manipulation.
+When you right click on a curve, you get a menu that lists all the possible operations you can perform on that curve.

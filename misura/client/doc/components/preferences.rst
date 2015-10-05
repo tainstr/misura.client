@@ -1,3 +1,3 @@
 .. include:: ../substitutions.txt
 
-.. include:: navigator.txt
+.. include:: preferences.txt

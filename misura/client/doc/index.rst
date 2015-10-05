@@ -8,24 +8,24 @@
 |m| documentation project
 =======================================
 
-|m| is the data acquisition and analysis software for non-contact high temperature measurement instruments. 
+|m| is the data acquisition and analysis software for non-contact high temperature measurement instruments.
 
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
-   
+
    install
    instruments
    browser
    components
-   views
+   graphics
    m3
    glossary
-   
-   
-   
+
+
+
 
 
 Indices and tables
