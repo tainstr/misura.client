@@ -220,7 +220,10 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         if page is None:
             logging.debug('%s %s', 'NO PAGE FOUND', n)
             return
-        logging.debug('%s %s', 'update_page', page.path)
+        if self.document.model.page.startswith(page.path):
+            logging.debug('Not update_page %s', page.path)
+            return 
+        logging.debug('VeuszPlot.update_page', self.document.model.page, page.path)
         self.document.model.set_page(page.path)
 
 

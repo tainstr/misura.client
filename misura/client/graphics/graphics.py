@@ -152,7 +152,8 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
 
         def slotfn(klass):
             return lambda: self.mw.treeedit.slotMakeWidgetButton(klass)
-        for widgettype in ('datapoint', 'intercept', 'synaxis', 'imagereference'):
+        #TODO: Find better place for those!
+        for widgettype in []:#  ('datapoint', 'intercept', 'synaxis', 'imagereference'):
             wc = document.thefactory.getWidgetClass(widgettype)
             slot = slotfn(wc)
             self.mw.treeedit.addslots[wc] = slot
@@ -180,7 +181,10 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         if page is None:
             logging.debug('%s %s', 'NO PAGE FOUND', n)
             return
-        logging.debug('%s %s', 'update_page', page.path)
+        if self.openedFiles.model().page.startswith(page.path):
+            logging.debug('Not updating page %s', page.path)
+            return 
+        logging.debug('MisuraInterface.update_page', self.openedFiles.model().page, page.path)
         self.openedFiles.model().set_page(page.path)
         logging.debug('%s', 'done model.set_page')
         for p in self.mw.document.basewidget.children:
@@ -300,8 +304,13 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
         self.connect(self.recentDatabase, QtCore.SIGNAL(
             'select(QString)'), self.open_database)
         self.menu.addMenu(self.recentDatabase)
-
+    
+    m3db = False
     def open_database(self, path):
+        if self.m3db:
+            self.m3db.hide()
+            self.m3db.close()
+            self.m3db = False
         db = misura3.TestDialog(path=path)
         db.keep_img = True
         db.img = True
@@ -319,6 +328,7 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
         p.apply(self.mw.cmd, {'dsn': dsn})
         self.mw.document.enableUpdates()
         self.mw.plot.actionForceUpdate()
+        self.mw.m4.openedFiles.refresh()
 
     def open_file(self, filename, **options):
         """Import misura data from HDF file"""

@@ -53,10 +53,10 @@ ao(measure_dict, 'coolingDuration', 'Meta', name='Cooling duration')
 ao(measure_dict, 'maxCoolingRate', 'Meta',name='Max cooling rate')
 
 ao(measure_dict, 'scrEnd', 'Script', "mi.Point(idx=-1)", parent = 'end' )
-ao(measure_dict, 'maxT', 'Script', """i,t,T=mi.Max('T')
+ao(measure_dict, 'scrMaxT', 'Script', """i,t,T=mi.Max('T')
 mi.t(t)
 mi.T(T)
-""")
+""", parent = 'maxT' )
 ao(measure_dict, 'scrMaxHeatingRate', 'Script', """
 print 'scrMaxHeatingRate'       
 T1=kiln.TimeDerivative('T') 
@@ -67,7 +67,7 @@ if w<0: mi.Exit()
 print 'scrMaxHeatingRate',w 
 mi.Point(idx=w+1)               
 mi.Value(rate/60)
-""", 'Maximum Heating Rate', parent = ' maxHeatingRate')
+""", 'Max Heating Rate', parent = 'maxHeatingRate')
 
 ao(measure_dict, 'scrCoolingDuration', 'Script', """
 if not mi.SelectCooling():  
@@ -114,7 +114,9 @@ ao(hsm_smp_dict, 'Melting', 'Meta')
 ao(hsm_smp_dict, 'scrSintering', 'Script', """
 factor=script.Opt('param_sint')/100.
 threshold=obj.At('h',0)*factor
-ti=obj.Drops('h', threshold)
+r=obj.Drops('h', threshold)
+if r is False: mi.Exit()
+i,ti,val = r 
 if ti<0: mi.Exit()
 mi.t(ti)
 mi.T(obj.At('T',ti))
@@ -141,10 +143,11 @@ if method=='Relative':
 	threshold+=mi.At('soft',0)
 if backward:
 	#... ricerca del massimo e poi all'indietro!
-	ti=obj.Drops('soft',threshold)
+	r=obj.Drops('soft',threshold)
 else:
-	ti=obj.Raises('soft',threshold)
-if ti<0: mi.Exit()
+	r=obj.Raises('soft',threshold)
+if r is False: mi.Exit()
+i,ti,val = r
 mi.t(ti)
 mi.T(obj.At('T',ti))
 mi.Value(obj.At('soft',ti))""", parent='Softening')
@@ -208,6 +211,7 @@ ao(kiln_dict, 'P', 'Float', 0, 'Power', unit='percent')
 ao(kiln_dict, 'S', 'Float', 0, 'Setpoint', unit='celsius')
 
 instr_dict = deepcopy(base_dict)
+ao(instr_dict, 'nSamples', 'Integer', 1, attr=['Hidden'])
 ao(instr_dict, 'camera', 'Role', ['camerapath', 'default'])
 ao(instr_dict, 'devices', 'List', attr=['Hidden'])
 ao(instr_dict, 'initTest', 'Progress', attr=['Hidden'])
