@@ -445,7 +445,18 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         else:
             dbPath = False
         file_path = False
-        for path in self.recent_database:
+        recent = self.recent_database[:]
+        # Add also implicit m3 databases
+        if self['m3_enable']:
+            for r in self.recent_m3database:
+                path = r[0]
+                path = os.path.dirname(path)
+                path = os.path.join(path, 'm4', 'database.sqlite')
+                if not os.path.exists(path):
+                    continue
+                recent.append((path, 0))
+        # Scan all recent db
+        for path in recent:
             path = path[0]
             if path == dbPath:
                 continue

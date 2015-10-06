@@ -282,9 +282,6 @@ def create_tree(outFile, tree, path='/'):
         create_tree(outFile, tree.child(key), dest)
 
 
-
-
-
 class Converter(object):
     outpath = ''
     interrupt = False
@@ -293,12 +290,14 @@ class Converter(object):
     
     def __init__(self, dbpath,  outdir=False):
         self.dbpath = dbpath
+
         if not outdir:
             outdir = os.path.dirname(dbpath)
             outdir = os.path.join(outdir, 'm4')
             if not os.path.exists(outdir):
                 os.mkdir(outdir)
         self.outdir = outdir
+        self.m4db = os.path.join(outdir,'database.sqlite')
         
     def cancel(self):
         """Interrupt conversion and remove output file"""
@@ -589,12 +588,13 @@ class Converter(object):
                                 'date': tdate,
                                 'serial': hashlib.md5(self.dbpath).hexdigest(),
                                 'uid': uid })
-        # Set attributes
-        self.progress = 35
-    
-        log('Conversion ended.')
+        self.progress = 99
+        log('Appending to Misura database')
         outFile.close()
+        indexer.Indexer.append_file_to_database(self.m4db, self.outpath)
+        log('Conversion ended.')
         self.progress = 100
+        
         return self.outpath
 
 
@@ -604,8 +604,8 @@ class Converter(object):
         ref = refClass(self.outFile, '/hsm/sample0', smp_dict['frame'])
         a = self.outFile.get_attributes(ref.path)
         self.outFile.set_attributes(ref.path, attrs=a)
-        sjob = 35
-        job = (99. - sjob) / len(self.rows)
+        sjob = self.progress
+        job = (98. - sjob) / len(self.rows)
         oi = 0
         esz = 0
         t0 = float(self.rows[0, m3db.fimg.Tempo])
