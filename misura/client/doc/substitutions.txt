@@ -1,7 +1,8 @@
 .. include:: <isonum.txt>
 
 .. |m| replace:: Misura\ |trade|
-.. |m4| replace:: Misura\ |trade| 4
+.. |m4| replace:: Misura\ |trade|\ 4
+.. |m3| replace:: Misura\ |trade|\ 3
 .. |M| replace:: |m|
 .. |M4| replace:: |m4|
 .. |win| replace:: Microsoft Windows\ |trade|
