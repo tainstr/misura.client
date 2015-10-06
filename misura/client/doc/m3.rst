@@ -1,4 +1,6 @@
 .. include:: substitutions.txt
+.. |instr| replace:: flex
+.. |instrn| replace:: Fleximeter
 
 |m| 3 Data Import
 ==================================
@@ -73,17 +75,156 @@ Quick Start: Correcting a Flex test from |m| 3 database
 A common task to be performed with |m| 3 data is to correct a Flex test with its corresponding calibration test. The following Quick Start explains how to easily achieve this result, in a quickly reversible way. 
 
 =========================
-Opening the output file
+Opening the output file in Graphics app
 =========================
 
 1. Run ``graphics.exe`` application from the folder where you extracted |m|, or run the link you created on your desktop.
 2. Select **Misura3** menu, **Recent Misura3 databases** submenu, and click on **Open** button.
-3. Browse to the location where you downloaded |smp|, select and open it.
-4. The loading process will start. If the file is considerably big (several GB) or located on network or slow storage drive, it may take several seconds to open.
-5. The file is displayed on a new tab, on the right of the **Databases** tab.
+3. Browse to the location of your |m| 3 database, select and open it.
+4. From the Database Dialog, search for a fleximeter test and its calibration test. Double click on each row in the listing in order to open both.
+5. Each file will be converted and loaded into Graphics, then displayed as a tree of datasets in **Misura Navigator** right window area. Both datasets ``d`` (displacement) are already plotted in with two different line styles. 
+6. If the **Misura Navigator** area is not visible, you can show/hide it by clicking on menu **Misura** -> **Opened Tests Navigator**.
 
-The test file tab is divided in three areas:
+
+Misura Navigator is the tree of recorded datasets (curves), organized by groups. Each group represents a part of the instrument or of the measurement. 
+
+For example:
     
-    * A menu bar and tools bar in the upper part of the window
-    * A right area called **Test Configuration**. It is divided in at least 4 vertical tabs: **Measure**, **Thermal Cycle**, **Sample0** and **Results**.
-    * A central area displaying movable and resizable sub-windows, where you see the **Data Plot** window.
+* /|instr| element represents the |instrn| instrument itself. It generates no datasets, but contains one sample (**sample0**).
+* /kiln element represents the furnace, and contains datasets regarding temperature control (T, temperature; S, setpoint; P, power; etc).
+
+It is the most powerful and versatile component of the interface.
+
+=================================
+Interacting with the Data Plot
+=================================
+
+The Navigator tree is the gate to the most important actions you can perform on the data plot. 
+
+In order to plot one more dataset (for example the temperature setpoint):
+    
+1. Right-click on the dataset you wish to plot on the Navigator tree (``/kiln/S``).
+2. Select the **Plot** action from the context menu.
+
+The same apply for removing a dataset and all its related objects from the plot. 
+The Plot action will be checked if the curve is visible, unchecked if not visibile.
+
+The setpoint curve plot is now referred to its own axis labelled *S (°C)*. 
+To better compare temperature and setpoint, it is useful to refer the setpoint plot to the temperature axis:
+    
+1. Click on the setpoint curve on the plot area window. Visualize the **Properties** area. If it is not visible, click on menu **View**->**Windows**->**Properties window**.
+2. The Properties area lists all the properties of the plotted curve. Search for the bold **Y axis** entry.
+3. Change **Y axis** from **ax:S** to **ax:T**. The curve will be immediately referred to the *T (°C)* axis.
+
+The *S (°C)* axis loses its scale (it's now from 0 to 1). It's no longer useful, so you can hide it:
+1. Click on the setpoint curve on the plot area window, view **Properties** area.
+2. The first entry is **Hide**. Check the checkbox. The axis disappears.
+
+You can freely move any axis by clicking on it and dragging.
+            
+---------------------------------------------------
+Viewing flexion in micron
+---------------------------------------------------
+The ``/flex/sample0/d`` dataset represents flexion. 
+It is recorded in microns and automatically converted to percentile on dataset loading, but is frequently useful to analyze it as an absolute value in microns.
+The percentile is calculated towards the distance between the flex rods, set before starting the test. 
+
+Follow these steps to convert the curve back to microns:
+    
+1. Locate the ``d`` (``/flex/sample0/d``) element in the Navigator.
+2. Right-click and select **Percentile**.
+3. A dialog will appear. Click **Apply**. 
+4. A new temporary label in the dialog confirms the dataset was created (Done). Click **Close**.
+5. If the curve is currently plotted, you immediately view the effect in the graph.
+
+It may happen that the operator forget to measure the sample, or inserts a wrong initial dimension. 
+If the thermal treatment modify the structure of your material, the test must be repeated. 
+In case you are able to recover the correct intial dimension, or you are confident that you can measure it after the test run, you can change its value.
+
+1. Locate the ``d`` element in the Navigator tree.
+2. Right-click and select **Set Initial Dimension**.
+3. Insert the correct value in **Initial dimension value**.
+4. De-select *OR, automatic calculation based on first points* checkbox.
+5. Click **Apply** then **Close**. 
+
+If the curve is currently plotted in percentile, you will se the axis scale changing accordingly to the new initial dimension set.
+
+---------------------------------------------------
+Correcting sample flexion with calibration curve
+---------------------------------------------------
+Once both sample test and calibrationt test are loaded, it is possible to subtract the calibration curve to the test curve.
+
+.. hint:: Although |m| allows to perform operation between curves with unrelated heating cycles, in order for the correction to be meaningful, you should always compare curves obtained with excactly the same heating cycle and starting from approximately the same temperature.
+
+In order to do operations, you should select two datasets at the same time by keeping the Control key 
+pressed while you click on their nodes in the Navigator tree.
+
+1. Select the ``/flex/sample0/d`` node from the sample test tree you wish to correct.
+2. Keeping the Ctrl (control) key pressed, select the corresponding ``/flex/sample0/d`` node from the calibration test tree.  
+3. Having both ``d`` nodes selected, right-click on one of the two and select **Correct**.
+4. A new dialog will open, **Compute: Curve Operation**. Select a new name for the output dataset (eg: correction) in the **Output dataset name** field.
+5. Click **Apply** button.
+6. The Navigator will update showing the new curve as CurveOperation(....). If not, right click in the blank space and select **Update view** action. 
+
+You can plot the corrected dataset as usual by right-click, and compare with the previous, not corrected curve.
+
+
+=================================
+Test Configuration and Data
+=================================
+The most relevant configuration options used for the test run and |m| 3 conversion can be displayed following these steps:
+
+1. From the **Misura Navigator**, locate the root of the tree corresponding to the test you wish like to view. The root node shows the name of the test and a (N:) notation, where N is a number >=0.
+2. Right click on the root node and select **View** from the context menu.
+
+
+A Test Window will be opened showing an embedded plot and a **Test Configuration** area.
+The Test Window is divided in three areas:
+
+* A menu bar in the upper part of the window
+* A right area called **Test Configuration**. It is divided in 4 vertical tabs: **Measure**, **Thermal Cycle**, **Sample0** and **Results**.
+* A central area displaying movable and resizable sub-windows, where you see the **Data Plot** window.
+
+
+
+---------------------
+Measure overview
+---------------------
+The first **Measure** tab contains the list of options regarding the test run. 
+
+Detect the following:
+    
+* **Name**: Name of the test run, the same the test had in |m| 3 database.
+* **Comment**: Note about the test, imported from the database.
+* **id**: Path of the |m| 3 database, followed by a vertical bar and the test id (eg: C:\ess\misura.mdb|00137F)
+* **uid**: Unique id generated during conversion.
+* **Test date**: Date when the test started.
+* **Test duration**: Total test duration in seconds. 
+    
+    
+---------------------
+Thermal cycle
+---------------------
+
+This tab contains a table with points defining the thermal cycle and a graph with a cartesian representation. 
+
+The graph displays two curves: the red line is the setpoint temperature; the blue line is the heating rate. 
+
+If you cannot see the axes and their labels, enlarge the application window and the Test Configuration area. 
+    
+---------------------
+Sample data
+---------------------
+
+Most relevant data in the Sample0 tab are:
+    
+* **Name**: The same as Measure name.
+* **Comment**: empty label.
+* **Initial dimension**: initial dimension set by the operator.
+* **Initial width**: only applicable to Microscope tests.
+        
+---------------------
+Results
+---------------------
+
+            

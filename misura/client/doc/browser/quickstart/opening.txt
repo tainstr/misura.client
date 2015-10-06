@@ -15,6 +15,6 @@ Opening the output file
 
 The test file tab is divided in three areas:
 
-* A menu bar and tools bar in the upper part of the window
+* A menu bar in the upper part of the window
 * A right area called **Test Configuration**. It is divided in at least 4 vertical tabs: **Measure**, **Thermal Cycle**, **Sample0** and **Results**.
 * A central area displaying movable and resizable sub-windows, where you see the **Data Plot** window.

@@ -9,7 +9,7 @@ Contents:
    :maxdepth: 2
 
    live.rst
-   components/client_conf.rst
+   components/configuration
    components/thermal_cycle
    components/preferences
    components/navigator
