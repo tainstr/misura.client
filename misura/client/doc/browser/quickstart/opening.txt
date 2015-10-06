@@ -8,7 +8,7 @@ Opening the output file
 =========================
 
 1. Run ``browser.exe`` application from the folder where you extracted |m|, or run the link you created on your desktop.
-2. In the **Recent data sources** window, under the first column **Recent files**, click on **Open** button.
+2. In the **Recent data sources** window, under the first column **Recent files**, click on **Add** button.
 3. Browse to the location where you downloaded |smp|, select and open it.
 4. The loading process will start. If the file is considerably big (several GB) or located on network or slow storage drive, it may take several seconds to open.
 5. The file is displayed on a new tab, on the right of the **Databases** tab.
