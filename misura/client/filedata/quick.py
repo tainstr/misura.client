@@ -529,7 +529,7 @@ class QuickOps(object):
         T1 = node1.linked.prefix + 'kiln/T'
         from misura.client import plugin
         p = plugin.CurveOperationPlugin(
-            ax=T0, ay=node0.path, bx=T1, by=node0.path)
+            ax=T0, ay=node0.path, bx=T1, by=node1.path)
         # TODO: TC comparison?
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)

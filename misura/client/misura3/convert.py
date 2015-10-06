@@ -32,11 +32,11 @@ HeatingCyclePoint = {
 base_dict = {}
 ao(base_dict, 'name', 'String', 'Name', name='Name')
 ao(base_dict, 'mro', 'List', name='mro', attr=['Hidden'])
-ao(base_dict, 'comment', 'String', 'Comment')
+ao(base_dict, 'comment', 'String', '')
 ao(base_dict, 'dev', 'String', attr=['Hidden'])
 ao(base_dict, 'devpath', 'String', attr=['Hidden'])
 ao(base_dict, 'fullpath', 'String', attr=['Hidden'])
-ao(base_dict, 'zerotime', 'Float', name='Start time')
+ao(base_dict, 'zerotime', 'Float', name='Start time', attr=['Hidden'])
 ao(base_dict, 'initInstrument', 'Progress', attr=['Hidden'])
 
 measure_dict = deepcopy(base_dict)
@@ -484,32 +484,45 @@ class Converter(object):
             # Skip invalid data
             if np.isnan(data).all():
                 continue
-
+            # Unit and client-side unit
+            unit = False
+            csunit = False
+            if col == 'd' or 'Percorso' in col:
+                data = data / 1000.
+                unit = 'micron' 
+            elif col in ['h', 'soft']:
+                data = data / 100.
+                unit =  'percent'
+                csunit = 'micron'
+            elif col == 'A':
+                data *= -1
+                ini_area = data[0]
+                unit =  'percent' 
+                csunit = 'micron^2'
+            elif col == 'P':
+                data = data / 10.
+                unit = 'micron'
+            elif col == 'w':
+                logging.debug('%s', data)
+                data = data / 200.
+                unit = 'micron'
             if col in ['T', 'P', 'S']:
                 arrayRef[col] = reference.Array(outFile, '/summary/kiln', kiln_dict[col])
             else:
                 opt = ao({}, col, 'Float', 0, col, attr=['History','Hidden'])[col]
+                if unit:
+                    opt['unit'] = unit
+                if csunit:
+                    opt['csunit'] = csunit
                 instrobj.sample0.sete(col, opt)
                 arrayRef[col] = reference.Array(outFile, '/summary' + smp_path, opt)
             # Recreate the reference so the data is clean
             arrayRef[col].dump()
             path = arrayRef[col].path
             base_path = path[8:]
+            # Create hard links
             if not outFile.has_node(base_path):
                 outFile.link(base_path, path)
-            if col == 'd' or 'Percorso' in col:
-                data = data / 1000.
-            elif col in ['h', 'soft']:
-                data = data / 100.
-            elif col == 'A':
-                data *= -1
-                ini_area = data[0]
-            elif col == 'P':
-                data = data / 10.
-            elif col == 'w':
-                logging.debug('%s', data)
-                data = data / 200.
-            
             ref = arrayRef[col]
             ref.append(np.array([timecol, data]).transpose())
         outFile.flush()

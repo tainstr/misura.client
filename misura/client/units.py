@@ -184,6 +184,8 @@ class Converter(object):
         return c.from_server(val)
 
     def __init__(self, unit, csunit):
+        if not unit:
+            unit = ''
         x = unit.count('*')
         d = unit.count('/')
         p = unit.count('^')
@@ -200,17 +202,19 @@ class Converter(object):
             self.from_client = lambda val: val
         else:
             group = known_units[csunit]
+            print 'group,unit' ,group,unit,csunit
             cfb = from_base[group][csunit]  # client-to-base
             ctb = to_base[group][self.csunit]  # client-to-base
-            cud = derivatives[group][csunit]
-            sud = derivatives[group][unit]
+            # How to manage different groups? 
+            #cud = derivatives[group][csunit]
+            #sud = derivatives[group][unit]
 
             if base_units.has_key(unit):
                 # If the server unit is a base unit, return the direct conversion
                 # to client-side unit
                 self.from_server = cfb
                 # Conversion derivative server->client
-                self.d = cud
+                #self.d = cud
                 # return the direct conversion from client-side unit
                 self.from_client = ctb
                 # Conversion derivative client->server
@@ -220,7 +224,7 @@ class Converter(object):
                 stb = to_base[group][unit]  # server-to-base
                 self.from_server = lambda val: cfb(stb(val))
                 # Conversion derivative client->server
-                self.d = sud
+                #self.d = sud
                 # convert the value from client-side unit to its base unit,
                 # then convert this new value to the actual server-side unit
                 sfb = from_base[group][unit]

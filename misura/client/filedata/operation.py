@@ -305,8 +305,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         logging.debug('%s %s %s %s', 'build', idx + 1, 'samples', LF.samples)
         elapsed = int(instrobj.measure['elapsed'])
         elapsed = max(elapsed, elapsed0)
-        zerotime = int(instrobj['zerotime'])
-
 
         logging.debug('%s %s', 'got elapsed', elapsed)
         # Create time dataset
@@ -393,7 +391,10 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
             if col0 != 't':
                 ds_object, ds_name = ds.m_conf.from_column(col0)
-                ds.m_label = _(ds_object.gete(ds_name)["name"])
+                opt = ds_object.gete(ds_name)
+                ds.m_label = _(opt["name"])
+                if opt.has_key('csunit'):
+                    ds.old_unit = opt["csunit"]
             else:
                 ds.m_label = _("Time")
 
