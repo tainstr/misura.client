@@ -19,7 +19,7 @@ Prerequisites
 =======
 |m4| for |win| XP / Vista / 7 / 8 can be downloaded as a compressed zip file, containing executable files, libraries and data.
 
-Precompiled packages are available on |m| public repository: `https://bitbucket.org/tainstr/misura.client/downloads`_
+Precompiled executables and example data packages are available on |m| public repository: `https://github.com/tainstr/misura.client/releases`_
 
 1. Extract all contents of the zip file to ``C:\misura``. 
 	.. tip:: Experienced users can choose their preferred location. Please consider that placing the application on external hard-drives or slow storage devices can significantly affect startup time.
@@ -41,4 +41,4 @@ Upgrading involves making a backup copy of the old application folder and instal
 ========
 |m4| for |ults| GNU/Linux operative system does not offer executable files. The application is run directly from the |py| source code. Thus, it requires the installation of the full development environment and the download of the entire source code from the version control repository.
 
-.. _https://bitbucket.org/tainstr/misura.client/downloads: https://bitbucket.org/tainstr/misura.client/downloads
+.. _https://github.com/tainstr/misura.client/releases: https://github.com/tainstr/misura.client/releases

@@ -231,5 +231,5 @@ Most relevant data in the Sample0 tab are:
 * **Initial dimension**: initial dimension set by the operator.
 * **Initial width**: only applicable to Microscope tests.
     
-.. _example Misura3 database: https://bitbucket.org/tainstr/misura.client/downloads/sample_misura3_db.zip
+    .. _example Misura3 database: http://dx.doi.org/10.7910/DVN/9LLJLL
             
