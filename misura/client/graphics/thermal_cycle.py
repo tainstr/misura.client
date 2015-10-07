@@ -9,7 +9,7 @@ from .. import widgets
 from .. import parameters as params
 import plot
 from misura.canon import option
-from misura.canon.csutil import next_point
+from misura.canon.csutil import next_point, find_nearest_val
 from .. import conf
 from .. import units
 from PyQt4 import QtGui, QtCore
@@ -130,7 +130,7 @@ class TimeSpinBox(QtGui.QDoubleSpinBox):
 
     def __init__(self, parent=None):
         QtGui.QDoubleSpinBox.__init__(self, parent)
-        self.setRange(0, 10**7)
+        self.setRange(0, 10 ** 7)
 
     def textFromValue(self, s):
         logging.debug('%s %s', 'textFromValue', s)
@@ -330,6 +330,20 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         return clean_curve(self.dat, events)
 
 
+def find_max_heating_rate(T, rateLimit, maxHeatingRate=80):
+    """Find maximum heating rate for temperature `T` using `rateLimit` table and a default of `maxHeatingRate`"""
+    if not len(rateLimit):
+        print 'no rateLimit curve'
+        return maxHeatingRate
+    i = find_nearest_val(rateLimit, T)
+    rT, rR = rateLimit[i]
+    print 'Checking rateLimit', rT, rR, i, rateLimit,T
+    if rT < T and len(rateLimit) > i + 1:
+        rT, maxHeatingRate = rateLimit[i + 1]
+    elif rT > T:
+        maxHeatingRate = rR
+    return maxHeatingRate
+
 class ThermalPointDelegate(QtGui.QItemDelegate):
 
     """Delegate for thermal cycle table cells"""
@@ -380,6 +394,11 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
             wg = QtGui.QDoubleSpinBox(parent)
 
             maxHeatingRate = self.remote['maxHeatingRate']
+            rateLimit = self.remote['rateLimit'][1:]
+            if len(rateLimit) > 1:
+                t, T, R, d = mod.dat[index.row()]
+                maxHeatingRate = find_max_heating_rate(T, rateLimit, maxHeatingRate)
+            
             wg.setRange(-500, maxHeatingRate)
 
             wg.setSuffix(u' \xb0C/min')
@@ -552,7 +571,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 
     """The configuration interface widget. It builds interactive controls to deal with a misura configuration object (options, settings, peripherals configurations, etc)."""
 
-    def __init__(self, remote, active_instrument, parent=None):
+    def __init__(self, remote, active_instrument, parent=None, force_live=False):
         #       QtGui.QWidget.__init__(self, parent)
         QtGui.QSplitter.__init__(self, parent)
         self.setOrientation(QtCore.Qt.Vertical)
@@ -564,7 +583,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         menuBar.setNativeMenuBar(False)
         self.main_layout.addWidget(menuBar)
 
-        is_live = isinstance(remote, MisuraProxy)
+        is_live = isinstance(remote, MisuraProxy) or force_live
 
         self.table = ThermalCurveTable(remote, self, is_live=is_live)
         self.model = self.table.model()
@@ -616,18 +635,18 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.buttonBar.setLayout(self.buttons)
 
         self.bRead = QtGui.QPushButton("Read")
-        self.connect(self.bRead,  QtCore.SIGNAL('clicked(bool)'), self.refresh)
+        self.connect(self.bRead, QtCore.SIGNAL('clicked(bool)'), self.refresh)
         self.buttons.addWidget(self.bRead)
 
         self.bApp = QtGui.QPushButton("Apply")
-        self.connect(self.bApp,  QtCore.SIGNAL('clicked(bool)'), self.apply)
+        self.connect(self.bApp, QtCore.SIGNAL('clicked(bool)'), self.apply)
         self.buttons.addWidget(self.bApp)
         self.tcc = widgets.ThermalCycleChooser(self.remote, parent=self)
         self.tcc.label_widget.hide()
         self.buttons.addWidget(self.tcc)
-        self.connect(self.tcc.combo,  QtCore.SIGNAL(
+        self.connect(self.tcc.combo, QtCore.SIGNAL(
             'currentIndexChanged(int)'), self.refresh)
-        self.connect(self.tcc,  QtCore.SIGNAL('changed()'), self.refresh)
+        self.connect(self.tcc, QtCore.SIGNAL('changed()'), self.refresh)
         # Disconnect save button from default call
         self.tcc.disconnect(
             self.tcc.bSave, QtCore.SIGNAL('clicked(bool)'), self.tcc.save_current)

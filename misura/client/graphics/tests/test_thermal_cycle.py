@@ -13,14 +13,28 @@ class Designer(unittest.TestCase):
     @unittest.skipIf(__name__ != '__main__', "should be executed only manually")
     def test(self):
         k = kiln.Kiln()
+        lim = k['rateLimit']
+        lim+=[[50,15],[200,20]]
         k._writeLevel = 5
         k._readLevel = 5
         call = lambda f, *ar, **kw: getattr(k, f)(*ar, **kw)
         setattr(k, 'call', call)
-        tcd = thermal_cycle.ThermalCycleDesigner(k, k)
+        tcd = thermal_cycle.ThermalCycleDesigner(k, k, force_live=True)
+        tcd.remote['rateLimit'] = lim
         tcd.show()
         QtGui.qApp.exec_()
-
+        
+    def test_find_max_heating_rate(self):
+        T = 100
+        rateLimit = []
+        maxHeatingRate = 100
+        f =lambda: thermal_cycle.find_max_heating_rate(T, rateLimit, maxHeatingRate)
+        self.assertEqual(f(), maxHeatingRate)
+        rateLimit = [[50,15]]
+        self.assertEqual(f(),maxHeatingRate)
+        rateLimit = [[50,15],[200,20]]
+        self.assertEqual(f(),20)
+        
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
