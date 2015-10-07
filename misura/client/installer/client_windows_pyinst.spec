@@ -5,8 +5,8 @@ import os.path
 from misura.client.parameters import pathClient
 from veusz import utils as vutils
 
-console=False
-debug=False
+console= False
+debug = False
 cli=pathClient+'\\' 
 bin=cli+'bin\\'
 res=vutils.resourceDirectory+'\\' 

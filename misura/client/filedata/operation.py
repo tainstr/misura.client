@@ -136,18 +136,24 @@ def tasks():
     return getattr(live.registry, 'tasks', False)
 
 def jobs(n, pid="File import"):
+    #FIXME: causes random crashes while opening microscope tests in compiled win exe
+    return 
     t = tasks()
     if not t:
         return
     t.jobs(n, pid)
 
 def job(n, pid="File import", label=''):
+    #FIXME: causes random crashes while opening microscope tests in compiled win exe
+    return
     t = tasks()
     if not t:
         return
     t.job(n, pid, label)
 
 def done(pid="File import"):
+    #FIXME: causes random crashes while opening microscope tests in compiled win exe
+    return
     t = tasks()
     if not t:
         return
