@@ -109,7 +109,7 @@ You required a higher shrinking in order to detect the Sintering point, so the p
 ---------------------
 Results
 ---------------------
-The Results tab displays the Navigator tree component. It is the tree of recorded datasets (curves), organized by groups. Each group represents a parts of the instrument or of the measurement. 
+The Results tab displays the :ref:`navigator` tree component. It is the tree of recorded datasets (curves), organized by groups. Each group represents a parts of the instrument or of the measurement. 
 
 For example:
 	

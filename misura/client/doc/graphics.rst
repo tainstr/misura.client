@@ -23,12 +23,11 @@ Once you know the basics of Veusz_, you can start using proficiently |m| plugins
 * Recent Databases - shows the most recent N databases. N can be modified in Preferences (defualt value is 10)
 * Open File - opens a dialog boxes to locate and load a new test file.
 * Opened Tests Navigator - shows/hide the |m| navigator_ panel
-* Preferences - opens preferences_ dialog
-
+* Preferences - opens :ref:`preferences`.
 
 .. include:: components/navigator.txt
 
-.. include:: components/preferences.txt
+
 
 
 

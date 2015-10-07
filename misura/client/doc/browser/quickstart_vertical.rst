@@ -16,7 +16,7 @@ This Demo will guide you through the data analysis of an Vertical Dilatometer ou
 Interacting with the Data Plot
 =================================
 
-The Navigator tree is the gate to the most important actions you can perform on the data plot. 
+The :ref:`navigator` tree is the gate to the most important actions you can perform on the data plot. 
 
 In order to plot one more dataset (for example the temperature setpoint):
 	

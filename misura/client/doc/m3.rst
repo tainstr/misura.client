@@ -95,7 +95,7 @@ Opening the output file in Graphics app
 6. If the **Misura Navigator** area is not visible, you can show/hide it by clicking on menu **Misura** -> **Opened Tests Navigator**.
 
 
-Misura Navigator is the tree of recorded datasets organized by groups. Each group represents a part of the instrument or of the measurement. 
+Misura :ref:`navigator` is the tree of recorded datasets organized by groups. Each group represents a part of the instrument or of the measurement. 
 
 For example:
     
@@ -106,7 +106,7 @@ For example:
 Interacting with the Data Plot
 =================================
 
-The Navigator tree is the gate to the most important actions you can perform on the data plot. 
+The :ref:`navigator` tree is the gate to the most important actions you can perform on the data plot. 
 
 In order to plot one more dataset (for example the temperature setpoint):
     
