@@ -54,21 +54,21 @@ def check_time_delta(server):
     dt = time() - t
     delta = int((t - s) + (dt / 3.))
     if delta < 10:
-        logging.debug('Time delta is not significant',delta)
+        logging.debug('Time delta is not significant', delta)
         return True
     pre = server['timeDelta']
     if pre:
         logging.debug('Time delta already set: %', server['timeDelta'])
-    btn = QtGui.QMessageBox.warning(None,'Hardware clock error',
+    btn = QtGui.QMessageBox.warning(None, 'Hardware clock error',
                       'Instrument time is different from your current time (delta: {}s).\n Apply difference and restart?'.format(delta))
     if btn != QtGui.QMessageBox.Ok:
         logging.debug('Delta correction aborted')
         return True
-    #TODO: warn the user about time delta
-    logging.info('Apply time delta to server',delta)
+    # TODO: warn the user about time delta
+    logging.info('Apply time delta to server', delta)
     server['timeDelta'] = delta
     r = server.restart()
-    QtGui.QMessageBox.information(None,'Restarting','Instrument is restarting: ' + r)
+    QtGui.QMessageBox.information(None, 'Restarting', 'Instrument is restarting: ' + r)
     return False
 
 class MainWindow(QtGui.QMainWindow):
@@ -306,7 +306,7 @@ class MainWindow(QtGui.QMainWindow):
         name = self.remote['devpath']
         self.name = name
         logging.debug('Setting remote %s %s %s', remote, self.remote, name)
-        self.setWindowTitle('misura Acquisition: %s (%s)' %
+        self.setWindowTitle('misura Acquisition: %s (%s)' % 
                             (name, self.remote['comment']))
         pid = 'Instrument: ' + self.name
         self.tasks.jobs(11, pid)
@@ -561,7 +561,7 @@ class MainWindow(QtGui.QMainWindow):
             self.tasks.jobs(self.max_retry, 'Waiting for data')
             self.tasks.done('Test initialization')
             self.tasks.job(retry, 'Waiting for data')
-            if retry < self.max_retry and self.remote.measure['elapsed']<10:
+            if retry < self.max_retry and self.remote.measure['elapsed'] < 10:
                 self.resetFileProxyLater(retry + 1, recursion + 1)
                 return False
             if retry > self.max_retry:
@@ -676,7 +676,7 @@ class MainWindow(QtGui.QMainWindow):
             d = settings.value('/FileSaveToDir', os.path.expanduser('~'))
             path = os.path.join(str(d), self.remote.measure['name'] + '.h5')
             outfile = QtGui.QFileDialog.getSaveFileName(
-                self,   _("Download finished test as"),
+                self, _("Download finished test as"),
                 path,
                 filter="Misura (*.h5)")
             outfile = str(outfile)
