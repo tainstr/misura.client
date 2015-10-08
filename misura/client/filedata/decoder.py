@@ -8,7 +8,7 @@ from time import sleep, time
 import tempfile
 import traceback
 import shutil
-
+import os
 
 from .. import parameters as params
 from misura.canon import bitmap
@@ -78,7 +78,7 @@ class DataDecoder(QtCore.QThread):
 
     def close(self, *foo):
         logging.debug('%s %s', 'CLOSING DataDecoder', self.tmpdir)
-        if self.tmpdir:
+        if self.tmpdir and os.path.exists(self.tmpdir):
             shutil.rmtree(self.tmpdir)
         self.ok = False
         sleep(.05)

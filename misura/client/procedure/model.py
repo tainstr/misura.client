@@ -32,10 +32,11 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
     """Data model for thermal cycle editing"""
     sigModeChanged = QtCore.pyqtSignal()
 
-    def __init__(self, crv=None, is_live=False):
+    def __init__(self, remote={}, crv=None, is_live=False):
         QtCore.QAbstractTableModel.__init__(self)
+        self.remote = remote
         self.dat = []
-        self.rows_models = []
+        self.row_modes = []
         header = []
         for s in ['Time', 'Temperature', 'Heating Rate', 'Duration']:
             header.append(_(s))
@@ -67,7 +68,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             modes_dict[row.colRATE] = 'ramp'
             modes_dict[row.colDUR] = 'dwell'
 
-            current_row_mode = self.rows_models[index.row()]
+            current_row_mode = self.row_modes[index.row()]
             current_column_mode = modes_dict[col]
             has_to_be_highligthed = index.row(
             ) > 0 and current_row_mode == current_column_mode
@@ -94,8 +95,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             '%s %s %s %s %s', 'setData:', index_row, index_column, value, row_entry[index_column])
         row_entry[index_column] = value
         self.dat[index_row] = row_entry
-        for ir in range(index_row, self.rowCount()):
-            self.updateRow(ir)
+        self.update_rows_from(index_row)
         self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.index(index_row, 0),
                   self.index(self.rowCount(), self.columnCount()))
         # Emetto la durata totale del ciclo termico
@@ -112,7 +112,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             values = [0] * self.columnCount()
         for current_row_index in range(rows_number):
             self.dat.insert(position + current_row_index, values)
-            self.rows_models.insert(position + current_row_index, 'ramp')
+            self.row_modes.insert(position + current_row_index, 'ramp')
 
         self.endInsertRows()
 
@@ -134,7 +134,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             return QtGui.QBrush(QtGui.QColor(10, 200, 10))
 
     def mode_to(self, modename, row):
-        self.rows_models[row] = modename
+        self.row_modes[row] = modename
         self.emit(QtCore.SIGNAL(
             "headerDataChanged(Qt::Orientation,int,int)"), QtCore.Qt.Horizontal, 0, self.columnCount() - 1)
         self.sigModeChanged.emit()
@@ -173,13 +173,26 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             if progressBar:
                 progressBar.setValue(i)
                 # QtGui.QApplication.processEvents()
-        # Segnalo che l'intera tabella è cambiata:
+        # Signal the entire table changed
         self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.index(0, 0),
                   self.index(self.rowCount(), self.columnCount()))
 
-    def updateRow(self, row_index):
-        self.dat[row_index] = row.ThermalCycleRow().update_row(
-            self.dat, row_index, self.rows_models[row_index])
+    def update_rows_from(self, row_index=0):
+        """Update all model rows starting from `row_index`"""
+        maxHeatingRate = 80
+        if self.remote.has_key('maxHeatingRate'):
+            maxHeatingRate = self.remote['maxHeatingRate']
+        rateLimit = []
+        if self.remote.has_key('rateLimit'):
+            rateLimit = self.remote['rateLimit'][1:]
+        time_correction = 0
+        for ir in range(row_index, self.rowCount()):
+            # Update row
+            new_row, time_correction = row.update_row(
+                self.dat, ir, self.row_modes[ir], time_correction, maxHeatingRate, rateLimit)
+            # Save row and time correction for next iter
+            self.dat[ir] = new_row
+        
 
     def curve(self, events=True):
         """Format table for plotting or transmission"""

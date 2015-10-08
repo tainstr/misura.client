@@ -21,7 +21,7 @@ class ThermalCurveTable(QtGui.QTableView):
 
     def __init__(self, remote, parent=None, is_live=True):
         QtGui.QTableView.__init__(self, parent)
-        self.curveModel = ThermalCurveModel(is_live=is_live)
+        self.curveModel = ThermalCurveModel(remote, is_live=is_live)
         self.setModel(self.curveModel)
         self.setItemDelegate(ThermalPointDelegate(remote, self))
         self.selection = QtGui.QItemSelectionModel(self.model())

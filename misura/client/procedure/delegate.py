@@ -57,17 +57,8 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
             if index.row() == 0:
                 return QtGui.QLabel('undefined', parent)
             wg = QtGui.QDoubleSpinBox(parent)
-                
             
             maxHeatingRate = self.remote['maxHeatingRate']
-#             ################
-#             rateLimit = []
-#             if self.remote.has_key('rateLimit'):
-#                 rateLimit = self.remote['rateLimit'][1:]
-#             if len(rateLimit) > 1:
-#                 t, T, R, d = mod.dat[index.row()]
-#                 maxHeatingRate = find_max_heating_rate(T, rateLimit, maxHeatingRate)
-#             #########################
             wg.setRange(-500, maxHeatingRate)
 
             wg.setSuffix(u' \xb0C/min')

@@ -4,10 +4,6 @@
 from misura.canon.logger import Log as logging
 from .. import _
 from .. import widgets
-from misura.canon import option
-from misura.canon.csutil import next_point
-from .. import conf
-from .. import units
 from PyQt4 import QtGui, QtCore
 import row
 from ..network.mproxy import MisuraProxy

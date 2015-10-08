@@ -29,7 +29,7 @@ class TimeSpinBox(QtGui.QDoubleSpinBox):
             h, m, s = qstr.split(':')
             r = int(h) * 3600 + int(m) * 60 + float(s)
         else:
-            r = float(qstr)
+            return float(qstr)
         return r / 60
 
     def setTime(self, t):
