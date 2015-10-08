@@ -236,7 +236,7 @@ class MainWindow(QtGui.QMainWindow):
         # SNAPSHOTS
         self.rem('snapshotsDock', 'snapshotsStrip')
         self.snapshotsDock = QtGui.QDockWidget(self.centralWidget())
-        self.snapshotsDock.setWindowTitle('Snapshots')
+        self.snapshotsDock.setWindowTitle('Story Board')
         self.imageSlider = fileui.ImageSlider()
         self.snapshotsDock.setWidget(self.imageSlider)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.snapshotsDock)
@@ -292,8 +292,8 @@ class MainWindow(QtGui.QMainWindow):
         QtCore.QThreadPool.globalInstance().start(r)
         logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance(
         ).activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
-    
-    
+
+
     def setInstrument(self, remote=False, server=False):
         if server is not False:
             self.setServer(server)
@@ -306,7 +306,7 @@ class MainWindow(QtGui.QMainWindow):
         name = self.remote['devpath']
         self.name = name
         logging.debug('Setting remote %s %s %s', remote, self.remote, name)
-        self.setWindowTitle('misura Acquisition: %s (%s)' % 
+        self.setWindowTitle('misura Acquisition: %s (%s)' %
                             (name, self.remote['comment']))
         pid = 'Instrument: ' + self.name
         self.tasks.jobs(11, pid)
@@ -316,7 +316,7 @@ class MainWindow(QtGui.QMainWindow):
             if self.remote['initInstrument'] != 0:
                 logging.debug('Still waiting for initInstrument flag to be 0')
                 self.reset_instrument_timer.singleShot(1000, self.setInstrument)
-                return False               
+                return False
             if self.remote.init_instrument is not None:
                 self.tasks.job(0, pid, 'Initializing instrument')
                 QtGui.qApp.processEvents()
@@ -687,7 +687,7 @@ class MainWindow(QtGui.QMainWindow):
             auto = True
         else:
             outfile = False
-        
+
         # Ask if it's not automatic. Happens only if auto == 'Ask' but default database is set.
         if auto == 'Ask' and not outfile:
             auto = QtGui.QMessageBox.question(self, _("Download finished test?"),
