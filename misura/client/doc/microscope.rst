@@ -136,7 +136,7 @@ This tab contains:
 - *Stop after thermal cycle*: when set, the acquisition will stop when the thermal cycle is over. If not set, the acquisition will go on until the operator won't stop it manually.
 - *Operator*: the operator running the test
 - *Type*: the type of test. Only *Standard* is supported to date
-- *Start at* is the time and date the test was started
+- *Start at*: date and time when the test was started
 - *Number of samples*: sets the number of samples to analyze (can be from 1 to 8)
 - *Kiln position before acquisition*: the position where the kiln will be placed right before the start of the acquisition
 - *Kiln position after acquisition*: the position where the kiln will be placed after the end of the acquisition
