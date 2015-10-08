@@ -161,7 +161,6 @@ Each tab contains the details of its sample:
 
 - *Configuration preset* is the currentrly loaded preset. You can change it, save it if you make any change, and delete it.
 - *Name* is the name of the sample
-- *Max acquisition frequency* XXX
 - *Temperature* is the current sample temperature
 - *Initial sample dimension* is the size of the specimen, before the start of the test
 - *Record frames* defines wether tha raw frame of the sample should be saved or not
