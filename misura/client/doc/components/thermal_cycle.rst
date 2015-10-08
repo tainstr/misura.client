@@ -1,6 +1,6 @@
--------------
-Thermal Cycle
--------------
+----------------------
+Thermal Cycle Designer
+----------------------
 
 The Thermal Cycle designer contains the controls to setup the wanted thermal cycle.
 

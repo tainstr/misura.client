@@ -101,7 +101,7 @@ It's composed of a series of tab:
 
 - Status_
 - Measure_
-- `Thermal Cycle`_
+- `Thermal Cycle Designer`_
 - Samples_
 - Results_
 
