@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 from misura.canon.csutil import next_point
 
 colTIME = 0

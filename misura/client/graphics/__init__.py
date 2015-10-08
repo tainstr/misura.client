@@ -8,4 +8,4 @@ for name in API_NAMES:
     sip.setapi(name, API_VERSION)
 from graphics import Misura3Interface, MisuraInterface, Graphics, GraphicsApp
 from plot import Plot
-import thermal_cycle
+from veuszplot import VeuszPlot

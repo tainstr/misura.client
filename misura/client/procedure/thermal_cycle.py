@@ -7,7 +7,7 @@ from numpy import array
 from .. import _
 from .. import widgets
 from .. import parameters as params
-import plot
+from ..graphics.plot import VeuszPlot
 from misura.canon import option
 from misura.canon.csutil import next_point, find_nearest_val
 from .. import conf
@@ -37,7 +37,7 @@ def clean_curve(dat, events=True):
     return crv
 
 
-class ThermalCyclePlot(plot.VeuszPlot):
+class ThermalCyclePlot(VeuszPlot):
 
     """Simple plot for thermal cycle preview"""
 
@@ -86,7 +86,7 @@ class ThermalCyclePlot(plot.VeuszPlot):
         cmd.Set(R + '/MarkerFill/color', 'blue')
 
     def __init__(self, parent=None):
-        plot.VeuszPlot.__init__(self, parent=parent)
+        VeuszPlot.__init__(self, parent=parent)
         self.set_doc()
         ThermalCyclePlot.setup(self.cmd)
         self.plot.setPageNumber(2)
@@ -394,7 +394,9 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
             wg = QtGui.QDoubleSpinBox(parent)
 
             maxHeatingRate = self.remote['maxHeatingRate']
-            rateLimit = self.remote['rateLimit'][1:]
+            rateLimit = []
+            if self.remote.has_key('rateLimit'):
+                rateLimit = self.remote['rateLimit'][1:]
             if len(rateLimit) > 1:
                 t, T, R, d = mod.dat[index.row()]
                 maxHeatingRate = find_max_heating_rate(T, rateLimit, maxHeatingRate)
