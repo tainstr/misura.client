@@ -132,7 +132,15 @@ This tab contains:
 
 - *Configuration preset*: a combo that allows you to load a previously saved configuration. *Save* and *Del* buttons respectively save and delete currently selected preset.
 - *Name*: the name to give to the test.
-- [TBD]
+- *Maximum test duration*: defines the amount of passed time that will cause the end of the test, even if the thermal cycle is not completed (-1 removes this timeout)
+- *Stop after thermal cycle*: when set, the acquisition will stop when the thermal cycle is over. If not set, the acquisition will go on until the operator won't stop it manually.
+- *Operator*: the operator running the test
+- *Type*: the type of test. Only *Standard* is supported to date
+- *Start at* is the time and date the test was started
+- *Number of samples*: sets the number of samples to analyze (can be from 1 to 8)
+- *Kiln position before acquisition*: the position where the kiln will be placed right before the start of the acquisition
+- *Kiln position after acquisition*: the position where the kiln will be placed after the end of the acquisition
+- *End status*: displays the reason of the acquisition's termination
 
 
 .. include:: components/thermal_cycle.rst
