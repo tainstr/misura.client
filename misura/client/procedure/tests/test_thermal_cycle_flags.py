@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import unittest
-from misura.client.graphics import thermal_cycle_flags
-from misura.client.graphics import thermal_cycle_row
+from misura.client.procedure import flags as thermal_cycle_flags
+from misura.client.procedure import row as thermal_cycle_row
 
 from PyQt4 import QtCore
 

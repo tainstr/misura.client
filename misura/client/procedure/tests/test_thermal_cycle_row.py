@@ -1,13 +1,24 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import unittest
-from misura.client.graphics.thermal_cycle_row import ThermalCycleRow
+from misura.client.procedure.row import ThermalCycleRow, find_max_heating_rate
 
 
 class TestTermalCycleRow(unittest.TestCase):
 
     def setUp(self):
         self.thermal_cycle_row = ThermalCycleRow()
+        
+    def test_find_max_heating_rate(self):
+        T = 100
+        rateLimit = []
+        maxHeatingRate = 100
+        f =lambda: find_max_heating_rate(T, rateLimit, maxHeatingRate)
+        self.assertEqual(f(), maxHeatingRate)
+        rateLimit = [[50,15]]
+        self.assertEqual(f(),maxHeatingRate)
+        rateLimit = [[50,15],[200,20]]
+        self.assertEqual(f(),20)
 
     def test_string_value_are_ignored(self):
         rows = [[None, 'any string', None, None]]

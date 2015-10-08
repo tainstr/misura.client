@@ -3,7 +3,7 @@
 """Test for thermal cycle editor"""
 import unittest
 from misura.client.tests import iutils_testing
-from misura.client.graphics import thermal_cycle
+from misura.client.procedure import thermal_cycle
 from misura import kiln
 from PyQt4 import QtGui, QtCore
 
@@ -24,16 +24,7 @@ class Designer(unittest.TestCase):
         tcd.show()
         QtGui.qApp.exec_()
         
-    def test_find_max_heating_rate(self):
-        T = 100
-        rateLimit = []
-        maxHeatingRate = 100
-        f =lambda: thermal_cycle.find_max_heating_rate(T, rateLimit, maxHeatingRate)
-        self.assertEqual(f(), maxHeatingRate)
-        rateLimit = [[50,15]]
-        self.assertEqual(f(),maxHeatingRate)
-        rateLimit = [[50,15],[200,20]]
-        self.assertEqual(f(),20)
+
         
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from misura.canon.csutil import next_point
+from misura.canon.csutil import next_point, find_nearest_val
 
 colTIME = 0
 colTEMP = 1
@@ -8,8 +8,8 @@ colRATE = 2
 colDUR = 3
 colMODE = 4
 
-def is_row_an_event(row):
-        temp_value = row[colTEMP]
+def is_row_an_event(row_entry):
+        temp_value = row_entry[colTEMP]
         return isinstance(temp_value, basestring) and temp_value.startswith('>')
 
 def previous_not_event_row_index(current_index, rows):
@@ -17,6 +17,21 @@ def previous_not_event_row_index(current_index, rows):
     while(is_row_an_event(rows[index_to_take])):
         index_to_take -= 1
     return index_to_take
+
+
+def find_max_heating_rate(T, rateLimit, maxHeatingRate=80):
+    """Find maximum heating rate for temperature `T` using `rateLimit` table and a default of `maxHeatingRate`"""
+    if not len(rateLimit):
+        print 'no rateLimit curve'
+        return maxHeatingRate
+    i = find_nearest_val(rateLimit, T)
+    rT, rR = rateLimit[i]
+    print 'Checking rateLimit', rT, rR, i, rateLimit,T
+    if rT < T and len(rateLimit) > i + 1:
+        rT, maxHeatingRate = rateLimit[i + 1]
+    elif rT > T:
+        maxHeatingRate = rR
+    return maxHeatingRate
 
 
 class ThermalCycleRow():
@@ -39,6 +54,7 @@ class ThermalCycleRow():
                 heating_rate = 0
             else:
                 heating_rate = (temperature - next_temperature) / duration
+                
         elif mode == 'ramp':  # rate/temperature (Rate)
             if heating_rate != 0:
                 duration = (temperature - next_temperature) / heating_rate
