@@ -175,14 +175,9 @@ Results
 
 The *Results* tab contains another series of tabs, which are:
 
-- `Data Tab`_: a tree that contains all plottable data to allow you to perform operations over it
+- *Data Tab*: a tree that contains all plottable data to allow you to perform operations over it.
 - *Properties* and *Formatting*: are the equivalent of Properties and Formatting on the right click menu of the `Data Plot`_. Operations are applied on the object selected in the Objects tab or on the plot.
 - *Objects* is a 1 to 1 representation of the plot; it allows to select objects to perform operations in other contexts.
 - *Console* is the Veusz_ output console.
 
 .. _Veusz: http://home.gna.org/veusz/
-
-Data Tab
-________
-
-[TBD]
