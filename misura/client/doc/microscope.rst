@@ -155,12 +155,37 @@ In the lower part of the tab a graphical representation of the cycle is displyed
 Samples
 -------
 
-[TBD]
+Every sample has its own tab, named Sample0, Sample1, ...
+
+Each tab contains the details of its sample:
+
+- *Configuration preset* is the currentrly loaded preset. You can change it, save it if you make any change, and delete it.
+- *Name* is the name of the sample
+- *Running acquisition* tells you if the acquisition of this sample is running or not.
+- *Consecutive errors* is the current number of consecutive acquisition errors that occurred
+- *Maximum number of errors before aborting acquisition* sets the number of consecutive errors that have to be considered a not recoverable error, hence the acquisition is stopeed.
+- *Measurement error* XXX
+- *Status* XXX
+- *Max acquisition frequency* XXX
+- *Temperature* is the current sample temperature
+- *Initial sample dimension* is the size of the specimen, before the start of the test
+- *Record frames* XXX
+- *Record profiles* defines wether the sample profiles have to be saved or not
 
 -------
 Results
 -------
 
-The *Results* tab shows is a tree that contains all the data being acquired, and allows you to plot them in the `Data Plot`_.
+The *Results* tab contains another series of tabs, which are:
+
+- `Data Tab`_: a tree that contains all plottable data to allow you to perform operations over it
+- *Properties* and *Formatting*: are the equivalent of Properties and Formatting on the right click menu of the `Data Plot`_. Operations are applied on the object selected in the Objects tab or on the plot.
+- *Objects* is a 1 to 1 representation of the plot; it allows to select objects to perform operations in other contexts.
+- *Console* is the Veusz_ output console.
+
+.. _Veusz: http://home.gna.org/veusz/
+
+Data Tab
+________
 
 [TBD]
