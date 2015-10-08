@@ -46,7 +46,27 @@ By right-clicking on the window, you gain access to a menu with a series of func
 Data Plot
 ---------
 
-[TBD]
+Data plot allows you to plot acquired data.
+
+To view it, click on Measure menu and select *Data Plot*.
+
+To access the visualization's tweaks, you can right click on an element of the plot to get its options menu:
+
+- *Axis* allows you to change what axis measures are plotted towards.
+- *Curves* allows you to select what curves to plot.
+- *View* allows you to select if you want data to be plotted by *temperature* or by *time*.
+- *Reset* rebuilds the data plot
+- *Update* forces a reload of data.
+- *Properties* allows you to set behavioural features of the clicked element
+- *Formatting* allows you to set appearance features of the clicked element
+- *Zoom* changes the zoom level
+- *Preious / Next Page* changes the currently visualized page.
+- *Full Screen* toggles fullscreen mode.
+- *Updates* allows you to change the update frequency of th page.
+- *Antialias* toggles antialias
+- *Export* allows you to export the current page to a pdf
+
+Other visualization options are accesible via the Results_ tab.
 
 
 Data Table
@@ -54,7 +74,7 @@ Data Table
 
 The *Data Table* is a table that contains plotted data.
 
-To view it, click on *Measure* menu and select *Data Plot*.
+To view it, click on *Measure* menu and select *Data Table*.
 
 The menu that appears by right clicking the header, allows you to export data in *csv* format and to hide or show columns.
 

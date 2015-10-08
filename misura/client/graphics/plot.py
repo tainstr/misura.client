@@ -7,6 +7,8 @@ from misura.canon import csutil
 from veuszplot import VeuszPlot
 from PyQt4 import QtGui, QtCore
 
+from .. import iutils, _
+
 qt4 = QtGui
 
 MAX = 10**5
@@ -108,7 +110,6 @@ class Plot(VeuszPlot):
 
         self.plot.contextmenu.addAction('Reset', self.reset)
         self.plot.contextmenu.addAction('Update', self.update)
-        self.plot.contextmenu.addAction('Save to...', self.save_to_file)
         logging.debug('%s %s %s', 'Calling reload data on document',
                       self.document, self.document.filename)
         self.document.reloadData()
