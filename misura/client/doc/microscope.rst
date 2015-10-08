@@ -161,16 +161,13 @@ Each tab contains the details of its sample:
 
 - *Configuration preset* is the currentrly loaded preset. You can change it, save it if you make any change, and delete it.
 - *Name* is the name of the sample
-- *Running acquisition* tells you if the acquisition of this sample is running or not.
-- *Consecutive errors* is the current number of consecutive acquisition errors that occurred
-- *Maximum number of errors before aborting acquisition* sets the number of consecutive errors that have to be considered a not recoverable error, hence the acquisition is stopeed.
-- *Measurement error* XXX
-- *Status* XXX
 - *Max acquisition frequency* XXX
 - *Temperature* is the current sample temperature
 - *Initial sample dimension* is the size of the specimen, before the start of the test
-- *Record frames* XXX
+- *Record frames* defines wether tha raw frame of the sample should be saved or not
 - *Record profiles* defines wether the sample profiles have to be saved or not
+- *Border angle* is the angle of currently detected border
+- *Total displacement* is the current displacement from initial position
 
 -------
 Results
