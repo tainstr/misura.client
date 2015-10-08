@@ -184,3 +184,5 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
     def curve(self, events=True):
         """Format table for plotting or transmission"""
         return clean_curve(self.dat, events)
+    
+    
