@@ -7,6 +7,7 @@ To open the HSM controls, you have to select HSM in the selection window that ap
 
 HSM window is made of three main parts:
 
+- `Buttons bar`_
 - `Camera Window`_
 - `Data Plot`_
 - `Data Table`_
@@ -14,6 +15,17 @@ HSM window is made of three main parts:
 - `Test Configuration panel`_
 
 
+Buttons bar
+-----------
+
+The button bar in the upper side of the main window has four buttons:
+
+- *New*: reinitialize the current instrument for a new test
+- *Start*: starts a new `Live Acquisition`_
+- *Stop*: stops the current `Live Acquisition`_
+- *Cool*: stops the thermal cycle, but continue acquisition.
+
+.. _Live Acquisition: live.html
 
 Camera window
 -------------
