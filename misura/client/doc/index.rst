@@ -22,7 +22,6 @@
    graphics
    m3
    access
-   options
    glossary
 
 
