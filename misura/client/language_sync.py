@@ -33,6 +33,7 @@ u_entry = """
 """
 
 from misura.canon.logger import Log as logging
+from misura.canon.option import Option
 from time import time
 from sys import argv
 import os
@@ -103,7 +104,7 @@ def update(lang, ctx, base='misura'):
             if not t:
                 t = ''
             t = mescape(t)
-#			print '\tfound translation:',c,s,t
+# 			print '\tfound translation:',c,s,t
             ctx[c][s] = (t, m)
     return ctx
 
@@ -125,7 +126,146 @@ def write_ts(lang, ctx):
     out.write(footer)
 
 # this is the package we are inspecting -- for example 'email' from stdlib
+import inspect
+autodoc_dir = "/opt/misura4/misura/client/doc/options"
+if not os.path.exists(autodoc_dir):
+    os.makedirs(autodoc_dir) 
 
+def as_rst(opt):
+    """Format option entry dictionary `opt` as restructured text for documentation.
+    """
+    len_name = len(opt['name']) + 2
+    text = ''
+    h0 = '=' * len_name + '\n'
+    text += h0 + opt['name'] + '\n' + h0
+    text += 'The following table lists default values for this Option.\n\n'
+    # Build a simple table out of properties
+    table = ''
+    space = '  '
+    # Find max length of fields for table headers
+    len_key = 8
+    len_val = 5
+    for key, val in opt.iteritems():
+        if len(key) > len_key:
+            len_key = len(key)
+        val = repr(val)
+        if len(val) > len_val:
+            len_val = len(val)
+    len_key += 2
+    len_val += 4  # includes also ``` engraving
+    # table content
+    keys = opt.keys()
+    keys.sort()
+    for key in keys:
+        if key == 'name': continue
+        val = '`' + repr(opt[key]) + '`'
+        table += key.ljust(len_key) + space + val.ljust(len_val) + '\n'
+    
+    # Build header
+    header0 = '=' * len_key + space + '=' * len_key + '\n'
+    header = 'Property'.ljust(len_key) + space + 'Value'.ljust(len_val) + '\n'
+    # Compose table
+    table = header0 + header + header0 + table + header0
+    text += table + '\n\n'
+    return text
+
+class_header = '''
+
+Configuration options for  `{}` objects
+===============================================
+
+'''
+
+def generate_rst(conf_def, parent_def=[], class_name='', rst=''):
+    """Generate rst paragraphs out of conf_def list of options"""
+    add_rst = ''
+    for el in conf_def:
+        # Check valid Option
+        if not isinstance(el, dict):
+            continue
+        if not el.has_key('handle'):
+            continue
+        # Skip if identical in parent object
+        if el in parent_def:
+            continue
+        # If option label is already present in rst
+        anchor = '.. _option_{}_{}:'.format(class_name, el['handle'])
+        if  anchor in rst or anchor in add_rst:
+            print 'ANCHOR already found', anchor
+            continue
+        opt = Option(**el)
+        opt.validate()
+        add_rst += anchor + '\n\n' + as_rst(opt) 
+    
+    if len(add_rst)>0:
+        add_rst = class_header.format(class_name) + add_rst
+    return rst + add_rst  
+
+start_tag = '.. misura_autodoc_start\n\n'
+end_tag = '.. misura_autodoc_end\n\n'
+
+def update_rst(conf_def, rst='', parent_conf=[], class_name=''):
+    """Update text in old `rst` from class `obj`"""
+    header = ''
+    footer = ''
+    rst0 = rst
+    # Slice text if already edited
+    i = rst.find(start_tag)
+    if i >= 0:
+        header = rst[:i]
+        rst = rst[i + len(start_tag):]
+    j = rst.find(end_tag)
+    if j >= i:
+        footer = rst[j + len(end_tag):]
+        rst = rst[:j]
+    n = len(rst)
+    rst = generate_rst(conf_def, parent_conf, class_name, rst)
+    if len(rst) == n:
+        return rst0
+    if not start_tag in header:
+        header += start_tag
+    if not end_tag in footer:
+        footer = end_tag + footer
+    # Rebuild full text
+    rst = header + rst + footer
+    return rst
+
+def autodoc(obj):
+    """Autodocument all Options for class `obj`"""
+    mro = list(inspect.getmro(obj))
+    mro.reverse()
+    # Keep parent object in order to write only missing options
+    if len(mro) > 1:
+        parent_class = mro[-2]
+    else: 
+        parent_class = False 
+    # Keep only names
+    mro = [cls.__name__ for cls in mro]
+    # Skip xmlrpc stuff
+    if not 'ConfigurationInterface' in mro:
+        print 'Object does not inherit from base ConfigurationInterface class. Skipping autodoc.', mro
+        return False
+    i = mro.index('ConfigurationInterface')
+    mro = mro[i:]
+   
+    fname = '.'.join(mro) + '.rst'
+    path_rst = os.path.join(autodoc_dir, fname)
+    
+
+    if not os.path.exists(path_rst):
+        logging.debug('Creating index.rst %s', path_rst)
+        open(path_rst, 'w').close()
+    
+    rst = open(path_rst, 'r').read()
+    parent_conf = getattr(parent_class, 'conf_def', [])
+    rst = update_rst(obj.conf_def, rst, parent_conf, obj.__name__)
+    # Write on output file
+    if len(rst)>0:
+        open(path_rst, 'w').write(rst)
+    return True    
+    
+
+done = set([])
 
 def collect_conf(module, translations):
     """Scan a module for all classes defining a conf_def iterable attribute."""
@@ -137,10 +277,16 @@ def collect_conf(module, translations):
             continue
         if not hasattr(obj, 'conf_def'):
             continue
-        conf_def = getattr(obj, 'conf_def')
+        conf_def = getattr(obj, 'conf_def', False)
         if not conf_def:
             continue
+        # Skip modules defining a conf_def list at their root.
+        if getattr(obj, '__bases__', False) is False:
+            continue
+        if obj in done: continue
+        done.add(obj)
         logging.debug('%s %s %s', 'Found conf_def', obj.__name__, conf_def)
+        autodoc(obj)
         for el in conf_def:
             if not isinstance(el, dict):
                 continue
@@ -266,7 +412,7 @@ class PythonMessageVisitor(ast.NodeVisitor):
         if len(obj.args) + len(obj.keywords) not in (1, 2, 3) or len(obj.args) < 1:
             sys.stderr.write(
                 'WARNING: Translatable call to %s in %s:%i '
-                'requires 1 to 3 parameters\n' %
+                'requires 1 to 3 parameters\n' % 
                 (repr(fn), self.filename, obj.lineno))
             return
 
@@ -277,7 +423,7 @@ class PythonMessageVisitor(ast.NodeVisitor):
         except AttributeError:
             sys.stderr.write(
                 'WARNING: Parameter to translatable function '
-                '%s in %s:%i is not string\n' %
+                '%s in %s:%i is not string\n' % 
                 (repr(fn), self.filename, obj.lineno))
             return
 
@@ -307,7 +453,7 @@ class PythonMessageVisitor(ast.NodeVisitor):
 
         if self.verbose:
             sys.stdout.write(
-                'Found text %s (context=%s, disambiguation=%s) in %s:%i\n' %
+                'Found text %s (context=%s, disambiguation=%s) in %s:%i\n' % 
                 (repr(text), repr(context), repr(comment),
                  self.filename, obj.lineno))
 
@@ -338,7 +484,7 @@ class PythonMessageVisitor(ast.NodeVisitor):
         except AttributeError:
             sys.stderr.write(
                 "WARNING: Translation function definition %s in "
-                "%s:%i does not have default string for 'context'\n" %
+                "%s:%i does not have default string for 'context'\n" % 
                 (repr(name), self.filename, obj.lineno))
             return
 
@@ -351,7 +497,7 @@ class PythonMessageVisitor(ast.NodeVisitor):
         if self.verbose:
             sys.stdout.write(
                 'Found translation function %s with default '
-                'context %s in %s:%i\n' %
+                'context %s in %s:%i\n' % 
                 (repr(name), repr(context), self.filename, obj.lineno))
 
         # map function name to default context
@@ -394,7 +540,7 @@ def scan_client_source(path, out=False):
             out[ctx] = {}
         for msg in msgs:
             v = mescape(msg.string)
-            out[ctx][v] = ('','')
+            out[ctx][v] = ('', '')
 #         out[ctx] += [msg.string for msg in msgs]
     return out
 
@@ -416,7 +562,7 @@ def language_sync():
         contexts['Option'][v] = ('', '')
 
     # Collect from client code analysis
-    contexts = scan_client_source(pathClient, out = contexts)
+    contexts = scan_client_source(pathClient, out=contexts)
 
     statistics = {}
     for l in langs:
@@ -427,7 +573,7 @@ def language_sync():
         statistics[l] = stats(ctx)
         # cancello tutte le traduzioni, mantenendo però le chiavi
         contexts = {}
-        for c,  v in ctx.iteritems():
+        for c, v in ctx.iteritems():
             if not contexts.has_key(c):
                 contexts[c] = {}
             for k, e in v.iteritems():
@@ -436,7 +582,7 @@ def language_sync():
     logging.debug('%s', 'Completeness:')
     for l in langs:
         s = statistics[l]
-        logging.debug('%s %s %s', '%s: %.2f %% (missing: %i)' %
+        logging.debug('%s %s %s', '%s: %.2f %% (missing: %i)' % 
                       (l.upper(), 100. * s[1] / (s[1] + s[2]), s[2]))
 
 if __name__ == '__main__':

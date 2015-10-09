@@ -11,7 +11,6 @@
 |m| is the data acquisition and analysis software for non-contact high temperature measurement instruments.
 
 
-Contents:
 
 .. toctree::
    :maxdepth: 2
@@ -23,6 +22,7 @@ Contents:
    graphics
    m3
    access
+   options
    glossary
 
 

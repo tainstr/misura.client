@@ -3,7 +3,6 @@
 """Database synchronization service and widget"""
 import os
 import logging
-from time import sleep
 from traceback import format_exc
 
 from .. import _
