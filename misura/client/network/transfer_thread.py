@@ -31,12 +31,25 @@ class TransferThread(QtCore.QThread):
     def __init__(self, url=False, outfile=False, uid=False, server=False, dbpath=False, post=False, parent=None):
         QtCore.QThread.__init__(self, parent)
         self.url = url
+        """directly download URL to outfile"""
+        
         self.outfile = outfile
+        """local file where to save the downloaded data, or local source for upload data"""
+        
         self.dbpath = dbpath
+        """location of local database where to append downloaded test files"""
+        
         self.uid = uid
+        """remote test UID to be searched and downloaded"""
+        
         self.server = server
+        """remote server object"""
+        
         self.post = post
+        """POST dictionary used for uploading files"""
+        
         self.prefix = 'Download: '
+        """Prefix for transfer job in pending tasks"""
 
     @property
     def pid(self):
@@ -241,14 +254,27 @@ class TransferThread(QtCore.QThread):
 
     def run(self):
         """Download the configured file in a separate thread"""
-        if (not (self.outfile or self.dbpath)) or not ((self.uid and self.server) or self.url) or not (self.post and self.outfile and self.url):
-            logging.debug('%s %s %s %s %s %s', 'Impossible to download',
-                          self.url, self.uid, self.server, self.outfile, self.post)
+        # Send file to remote url
         if self.post:
+            if not (self.url and self.outfile):
+                logging.debug('TransferThread upload impossible: url, outfile, post: %s %s %s', 
+                              self.url, self.outfile, self.post)
+                return False
             self.upload(self.url, self.outfile, self.post)
+        # Download specific UID from server storage
         elif self.uid:
+            if not (self.server and self.outfile):
+                logging.debug('TransferThread uid download impossible: server, uid, outfile: %s %s %s', 
+                              self.server, self.uid, self.outfile)
+                return False
             # Reconnect because we are in a different thread
             self.server.connect()
             self.download_uid(self.server, self.uid, self.outfile)
+        # Download specific complete URL to outfile
         elif self.url:
+            if not self.outfile:
+                logging.debug('TransferThread url download impossible: outfile: %s', 
+                              self.outfile)
+                return False
             self.download_url(self.url, self.outfile)
+        return True

@@ -6,7 +6,6 @@ Data Browser
 
 The browser has a tab interface, where the first tab is reserved to Databases, and any  additional tab represents a test file. 
 
-Contents:
 	
 	.. toctree::
 		:maxdepth: 2

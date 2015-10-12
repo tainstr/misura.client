@@ -441,7 +441,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             file_path = self.index.searchUID(uid)
             if file_path:
                 logging.debug('uid found in default db %s %s', uid, file_path)
-                return file_path
+                return file_path, dbPath
         else:
             dbPath = False
         file_path = False

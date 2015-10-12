@@ -1,5 +1,7 @@
 .. include:: substitutions.txt
 
+.. _live_acquisition:
+
 Live Acquisition
 ==================================
 

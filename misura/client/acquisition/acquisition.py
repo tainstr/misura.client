@@ -605,7 +605,7 @@ class MainWindow(QtGui.QMainWindow):
             doc = self.fixedDoc
             self._finishFileProxy(doc)
             self._lock.release()
-            return
+            return False
 
         self._blockResetFileProxy = False
         logging.debug('MainWindow.resetFileProxy: Stopping registry')
@@ -654,20 +654,24 @@ class MainWindow(QtGui.QMainWindow):
         """Offer option to download the remote file"""
         # HTTPS data url
         uid = self.remote.measure['uid']
+        logging.debug('acquisition.MainWindow.stopped %s', uid)
         if uid in self.saved_set:
-            logging.debug('UID already saved!')
-            return
+            logging.debug('UID already saved! %s', uid)
+            return False
         self.saved_set.add(uid)
         if self.doc:
             self.doc.close()
         self.set_doc(False)
-        self.resetFileProxy(retry=10)
+        # Why do we resetFileProxy here? 
+        #self.resetFileProxy(retry=10)
         auto = confdb['autodownload']
         if auto == 'Never':
+            logging.debug('No autodownload: denied by user option set to %s', auto)
             return False
         elif auto == 'Always':
             dbpath = confdb['database']
             if not os.path.exists(dbpath):
+                logging.debug('A non-existent db path was specified %s', dbpath)
                 dbpath = False
         registry.toggle_run(False)
         # NO db: ask to specify custom location
@@ -682,6 +686,7 @@ class MainWindow(QtGui.QMainWindow):
             outfile = str(outfile)
             settings.setValue('/FileSaveToDir', os.path.dirname(outfile))
             if not len(outfile):
+                logging.debug('User refused to save test')
                 registry.toggle_run(True)
                 return False
             auto = True

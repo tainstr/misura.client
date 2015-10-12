@@ -22,7 +22,7 @@ Limitations
 Enabling the |m3| import function
 ====================
 
-The import function can be configured in the Preferences panel. This panel is accessible from the Help menu in Browser and from the Misura menu in Graphics. 
+The import function can be configured in the :ref:`preferences` panel. This panel is accessible from the Help menu in Browser and from the Misura menu in Graphics. 
 
 You find a specific **Misura3** tab where you can enable or disable compatibility mode. After enabling it, click **Save** button (upper-right), then exit from any opened |m| window. 
 

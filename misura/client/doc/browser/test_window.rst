@@ -3,7 +3,7 @@ Test Window
 ==================================
 The |m| Test Window opens in Browser's tabs once a test has been selected. 
 
-Its appearance is very similar to the Live Acquisition window, with a central area displaying a plot and a lateral area showing test configurations and data Navigator.
+Its appearance is very similar to the :ref:`live_acquisition` window, with a central area displaying a plot and a lateral area showing test configurations and data Navigator.
 
 The values contained in the configuration tabs (Measure, Sample 0...n, Thermal Cycle) are the ones recorded at the end of the test.
 

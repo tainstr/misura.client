@@ -245,6 +245,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # open the file
         fp = getattr(doc, 'proxy', False)
         logging.debug('%s %s %s %s', 'FILENAME', self.filename, type(fp), fp)
+        print 'FILENAME', self.filename, type(fp), fp, self.uid
         if fp is False or not fp.isopen():
             self.proxy = getFileProxy(self.filename)
         else:

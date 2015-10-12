@@ -3,7 +3,7 @@
 Installation
 ==================================
 
-This documents describe installation and quick start of |m4| software. 
+This document describes the installation and quick start of |m4| software. 
 
 ==============================
 Prerequisites

@@ -21,8 +21,8 @@ Buttons bar
 The button bar in the upper side of the main window has four buttons:
 
 - *New*: reinitialize the current instrument for a new test
-- *Start*: starts a new `Live Acquisition`_
-- *Stop*: stops the current `Live Acquisition`_
+- *Start*: starts a new :ref:`live_acquisition`.
+- *Stop*: stops the current :ref:`live_acquisition`.
 - *Cool*: stops the thermal cycle, but continue acquisition.
 
 .. _Live Acquisition: live.html
