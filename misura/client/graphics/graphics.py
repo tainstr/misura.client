@@ -99,7 +99,7 @@ def set_data_val(self, dsname, column, row, val):
     """Set dataset `dsname` to `val` in range `row`. row can be a slice in case val is array."""
     op = document.OperationDatasetSetVal(dsname, column, row, val)
     self.document.applyOperation(op)
-       
+
 # Add the SetDataVal command to the CommandInterface class
 imp = 'SetDataVal'
 safe = list(document.CommandInterface.safe_commands)
@@ -114,7 +114,7 @@ def set_data_attr(self, dsname, attrname, val):
     print 'setting attr',dsname,attrname,val
     op = document.OperationDatasetSet(dsname, ds)
     self.document.applyOperation(op)
-     
+
 # Add the SetDataAttr command to the CommandInterface class
 imp = 'SetDataAttr'
 safe = list(document.CommandInterface.safe_commands)
@@ -214,46 +214,10 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         logging.debug('MisuraInterface.update_page', self.openedFiles.model().page, page.path)
         self.openedFiles.model().set_page(page.path)
         logging.debug('%s', 'done model.set_page')
-        for p in self.mw.document.basewidget.children:
-            if not p.typename == 'page':
-                continue
-            self.update_title(p)
         self.connect(
             self.mw.plot, QtCore.SIGNAL("sigUpdatePage"), self.update_page)
 
-    def update_title(self, pg):
-        """Update title label if present in page `pg`"""
-        quick_fix_for_impossible_to_change_title = True
-        return quick_fix_for_impossible_to_change_title
-#       print 'Update title',pg.path
-        if pg.getChild('title') is None:
-            return
-        avplot = self.openedFiles.model().plots['plot']
-        datasets = []
-        for p in avplot:
-            if p.startswith(pg.path):
-                datasets += avplot[p]
-        if len(datasets) == 0:
-            return
-        smpl = []
-        tit = []
-        for ds in datasets:
-            smp = getattr(ds, 'm_smp', False)
-            if not smp:
-                continue
-            if smp in smpl:
-                continue
-            if smp.ref:
-                continue
-            smpl.append(smp)
-            tit.append(smp.conf['name'])
 
-        twg = pg.getChild('title')
-        tit = 'Title' if len(tit) == 0 else ' + '.join(tit)
-        tit = tit.replace('_', '\\_')
-        if twg.settings.label != tit:
-            twg.settings.label = tit
-            self.mw.plot.actionForceUpdate()
 
     def nav_select(self, path):
         """Collect selection signals from the navigators and route them to the widgets tree"""
