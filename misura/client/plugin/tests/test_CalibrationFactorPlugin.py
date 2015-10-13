@@ -7,7 +7,7 @@ import veusz.document as document
 from misura.client import filedata
 from misura.client.tests import iutils_testing as iut
 from misura.client import plugin
-from PyQt4 import QtGui
+
 
 nativem4 = os.path.join(iut.data_dir, 'calibration.h5')
 

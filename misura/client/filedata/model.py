@@ -16,7 +16,6 @@ import functools
 from misura.client.iutils import namingConvention
 from misura.canon.csutil import find_nearest_val
 from entry import iterpath, NodeEntry, dstats
-import collections
 
 from misura.client.iutils import get_plotted_tree
 

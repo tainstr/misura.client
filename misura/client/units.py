@@ -76,7 +76,7 @@ to_base = {'length': {'micron': lambda v: v, "nanometer": lambda v: v * 1E-3, 'm
            # time
            'time': {'second': lambda v: v, 'minute': lambda v: v * 60., 'hour': lambda v: v * 3600., 'day': lambda v: v * 86400.},
            'part': {'percent': lambda v: v, 'permille': lambda v: v / 10., 'permyriad': lambda v: v / 100.,  # parts
-                    'ppm': lambda v: v / 10000., 'ppb': lambda v: 1. * v / (10**7), 'ppt': lambda v: 1. * v / 10**10},  # freq
+                    'ppm': lambda v: v / 10000., 'ppb': lambda v: 1. * v / (10 ** 7), 'ppt': lambda v: 1. * v / 10 ** 10},  # freq
            'frequency': {'hertz': lambda v: v, 'kilohertz': lambda v: v * 1000.},
            'memory': {
                     'byte': lambda v: v * 1E-3,
@@ -85,18 +85,18 @@ to_base = {'length': {'micron': lambda v: v, "nanometer": lambda v: v * 1E-3, 'm
                     'gigabyte': lambda v: v * 1E6,
                     },
            'viscosity': {
-                    'poise': lambda v: v * 0.1, 
+                    'poise': lambda v: v * 0.1,
                     'pascal/s': lambda v: v,
                     }
 }
 
 # Veusz symbols
-symbols = {'micron': '{\mu}m',	'nanometer': 'nm',	'millimeter': 'mm',
+symbols = {'micron': '{\mu}m', 	'nanometer': 'nm', 	'millimeter': 'mm',
            'micron^3': '{{\mu}m^3}', 'micron^2': '{{\mu}m^2}',
            'nanometer^3': '{nm^3}', 'nanometer^2': '{nm^2}',
            'millimeter^3': '{mm^3}', 'millimeter^2': '{mm^2}',
-           'degree': '{\deg}',	'radian': 'rad',
-           'celsius': '{\deg}C', 'kelvin': '{\deg}K',	'fahrenheit': '{\deg}F',
+           'degree': '{\deg}', 	'radian': 'rad',
+           'celsius': '{\deg}C', 'kelvin': '{\deg}K', 	'fahrenheit': '{\deg}F',
            'second': 's', 'minute': 'min', 'hour': 'hr', 'day': 'd',
            'percent': '%', 'permille': '{\\textperthousand}',
            'hertz': 'Hz', 'kilohertz': 'kHz',
@@ -148,7 +148,7 @@ def get_unit_info(unit, units):
         p = int(p[1])
     else:
         p = 1
-#	print units
+# 	print units
     for key, group in units.iteritems():
         # Get unit conversion function
         if not group.has_key(unit):
@@ -193,7 +193,7 @@ class Converter(object):
             if not known_units.has_key(unit):
                 unit = 'None'
             self.unit = unit
-        #...
+        # ...
         self.csunit = csunit
 
         if self.csunit == self.unit or 'None' in [self.unit, self.csunit]:
@@ -202,19 +202,19 @@ class Converter(object):
             self.from_client = lambda val: val
         else:
             group = known_units[csunit]
-            print 'group,unit' ,group,unit,csunit
+            print 'group,unit' , group, unit, csunit
             cfb = from_base[group][csunit]  # client-to-base
             ctb = to_base[group][self.csunit]  # client-to-base
             # How to manage different groups? 
-            #cud = derivatives[group][csunit]
-            #sud = derivatives[group][unit]
+            # cud = derivatives[group][csunit]
+            # sud = derivatives[group][unit]
 
             if base_units.has_key(unit):
                 # If the server unit is a base unit, return the direct conversion
                 # to client-side unit
                 self.from_server = cfb
                 # Conversion derivative server->client
-                #self.d = cud
+                # self.d = cud
                 # return the direct conversion from client-side unit
                 self.from_client = ctb
                 # Conversion derivative client->server
@@ -224,7 +224,7 @@ class Converter(object):
                 stb = to_base[group][unit]  # server-to-base
                 self.from_server = lambda val: cfb(stb(val))
                 # Conversion derivative client->server
-                #self.d = sud
+                # self.d = sud
                 # convert the value from client-side unit to its base unit,
                 # then convert this new value to the actual server-side unit
                 sfb = from_base[group][unit]
@@ -239,10 +239,10 @@ import numpy as np
 def convert(ds0, to_unit):
     """Convert dataset `ds` to `to_unit`"""
     # In case ds derived from a plugin, return the original plugin dataset
-    ds=getattr(ds0, 'pluginds', ds0)
+    ds = getattr(ds0, 'pluginds', ds0)
     from_unit = getattr(ds, 'unit', False)
     if not from_unit or to_unit in ['None', '', None, False]:
-        print 'conversion error',from_unit, to_unit
+        print 'conversion error', from_unit, to_unit
         raise plugins.DatasetPluginException(
             'Selected dataset does not have a measurement unit.')
     # Implicit To-From percentile conversion
@@ -265,7 +265,7 @@ def convert(ds0, to_unit):
     out = Converter.convert(from_unit, to_unit, np.array(ds1.data))
     ini = getattr(ds, 'm_initialDimension', 0)
     old_unit = getattr(ds, 'old_unit', from_unit)
-    old_group = known_units[old_unit]
+    old_group = known_units.get(old_unit, None)
     if ini and (old_group == to_group == from_group) and 'part' != to_group:
         ini1 = Converter.convert(from_unit, to_unit, ini)
         ds.m_initialDimension = ini1

@@ -11,6 +11,7 @@ from PyQt4 import QtGui, QtCore
 import veusz.utils
 from veusz.windows.mainwindow import MainWindow
 import veusz.document as document
+
 import veusz.setting as setting
 from veusz import veusz_main
 
@@ -94,6 +95,32 @@ safe.append(imp)
 document.CommandInterface.safe_commands = safe
 document.CommandInterface.ImportMisura = misura_import
 
+def set_data_val(self, dsname, column, row, val):
+    """Set dataset `dsname` to `val` in range `row`. row can be a slice in case val is array."""
+    op = document.OperationDatasetSetVal(dsname, column, row, val)
+    self.document.applyOperation(op)
+       
+# Add the SetDataVal command to the CommandInterface class
+imp = 'SetDataVal'
+safe = list(document.CommandInterface.safe_commands)
+safe.append(imp)
+document.CommandInterface.safe_commands = safe
+document.CommandInterface.SetDataVal = set_data_val
+
+def set_data_attr(self, dsname, attrname, val):
+    """Set dataset attribute `attrname` to `val`"""
+    ds = self.document.data[dsname]
+    setattr(ds, attrname, val)
+    print 'setting attr',dsname,attrname,val
+    op = document.OperationDatasetSet(dsname, ds)
+    self.document.applyOperation(op)
+     
+# Add the SetDataAttr command to the CommandInterface class
+imp = 'SetDataAttr'
+safe = list(document.CommandInterface.safe_commands)
+safe.append(imp)
+document.CommandInterface.safe_commands = safe
+document.CommandInterface.SetDataAttr = set_data_attr
 
 class MisuraInterface(CustomInterface, QtCore.QObject):
 

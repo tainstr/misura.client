@@ -53,6 +53,8 @@ class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         ds1 = units.percentile_conversion(ds, fields['action'], fields['auto'])
         ds = ds1
         self.ops.append(document.OperationDatasetSet(fields['ds'], ds1))
+        #self.ops.append(document.OperationDatasetSetVal(fields['ds'], 'data',slice(None,None),ds1.data[:]))
+        
         self.apply_ops()
         logging.debug('%s %s %s', 'Converted %s %s using initial dimension %.2f.' % (
             fields['ds'], fields['action'], ds.m_initialDimension))

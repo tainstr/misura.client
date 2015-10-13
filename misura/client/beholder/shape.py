@@ -65,6 +65,11 @@ class BaseHeight(Overlay):
         self.height = QtGui.QGraphicsLineItem(parent=self)
         self.height.setPen(self.pen)
         self.umpx = umpx
+        
+    def unscale(self, factor):
+        Overlay.unscale(self, factor)
+        self.base.setPen(self.pen)
+        self.height.setPen(self.pen)      
 
     def up(self):
         if self.moving:

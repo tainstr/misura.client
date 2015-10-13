@@ -68,7 +68,10 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         x = xds.data
         y = yds.data
         # If percent, convert to absolute
-        if percent != 0. and getattr(yds, 'm_percent', False):
+        if getattr(yds, 'm_percent', False):
+            if percent == 0:
+                percent = yds.m_initialDimension
+        if percent != 0.:
             y *= percent / 100.
         # Search the beginning of the coefficient
         chk = numpy.abs(x - start)

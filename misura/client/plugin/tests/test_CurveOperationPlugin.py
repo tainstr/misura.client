@@ -38,18 +38,13 @@ class TestCurveOperationPlugin(unittest.TestCase):
     """Tests the CurveOperationPlugin."""
 
     def do(self, ax, ay, bx, by, op='A-B', **kw):
-        logging.debug('%s', 'creating doc')
         doc = document.Document()
-        logging.debug('%s', 'inserting data')
         insertData(doc, {'ax': ax, 'ay': ay, 'bx': bx, 'by': by})
         fields = {'ax': 'ax', 'ay': 'ay', 'bx': 'bx', 'by': 'by', 'ds_out': 'out',
                   'operation': op, 'smooth': False, 'relative': True, 'tolerance': 1.}
         fields.update(kw)
-        logging.debug('%s', 'build op')
         p = CurveOperationPlugin(**fields)
-        logging.debug('%s', 'get ds')
         p.getDatasets(fields)
-        logging.debug('%s', 'update ds')
         out = p.updateDatasets(fields, veusz.plugins.DatasetPluginHelper(doc))
         return out
 

@@ -51,7 +51,7 @@ class MisuraDataset(document.Dataset):
 
     def __init__(self, data=[], linked=False):
         document.Dataset.__init__(self, data=data, linked=linked)
-#		assert linked!=False
+# 		assert linked!=False
         self.m_keep = True
         """Save on commit"""
         self.m_name = ''
@@ -70,7 +70,10 @@ class MisuraDataset(document.Dataset):
         """Initial dimension configured for the dataset."""
         self.m_update = False
         """Update on reload"""
-
+        self.unit = None
+        """Measurement unit"""
+        self.old_unit = None
+        """Original measurement unit"""
         self.m_label = ''
         """Label for GUI"""
 
@@ -78,3 +81,19 @@ class MisuraDataset(document.Dataset):
     def mtype(self):
         """Object type"""
         return self.__class__.__name__
+    
+    def saveDataRelationToText(self, fileobj, name):
+        """Write data if changed from the linked file"""
+        # TODO: only if ds is not equal to its original version
+        # build up descriptor
+        out = "SetDataVal('{}','data', slice(None,None), [" .format(name)
+        fileobj.write(out)
+        fileobj.write(self.datasetAsText(fmt='%e', join=' ').replace('\n', ', '))
+        fileobj.write("])\n")
+        
+        for attr in ('m_keep', 'm_name', 'm_pos', 'm_col', 'm_var',
+                     'm_label', 'm_initialDimension', 'm_percent', 'm_update',
+                     'unit','old_unit'):
+            out = "SetDataAttr({!r}, {!r}, {!r})\n".format(name, attr, getattr(self, attr))
+            fileobj.write(out)
+        
