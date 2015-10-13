@@ -210,7 +210,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
             return
         if self.openedFiles.model().page.startswith(page.path):
             logging.debug('Not updating page %s', page.path)
-            return 
+            return
         logging.debug('MisuraInterface.update_page', self.openedFiles.model().page, page.path)
         self.openedFiles.model().set_page(page.path)
         logging.debug('%s', 'done model.set_page')
@@ -223,6 +223,8 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
 
     def update_title(self, pg):
         """Update title label if present in page `pg`"""
+        quick_fix_for_impossible_to_change_title = True
+        return quick_fix_for_impossible_to_change_title
 #       print 'Update title',pg.path
         if pg.getChild('title') is None:
             return
@@ -331,7 +333,7 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
         self.connect(self.recentDatabase, QtCore.SIGNAL(
             'select(QString)'), self.open_database)
         self.menu.addMenu(self.recentDatabase)
-    
+
     m3db = False
     def open_database(self, path):
         if self.m3db:
