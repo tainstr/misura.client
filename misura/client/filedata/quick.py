@@ -498,6 +498,8 @@ class QuickOps(object):
         w = max(5, len(ds.data) / 50)
         ds_x = self.xnames(node, '/temperature')[0]
         ini = getattr(ds, 'm_initialDimension', 0)
+        if getattr(ds, 'm_percent', False):
+            ini = 0. # No conversion if already percent  
         from misura.client import plugin
         p = plugin.CoefficientPlugin(
             ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '_cf', smooth=w, percent=ini)

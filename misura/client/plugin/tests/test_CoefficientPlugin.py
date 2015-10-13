@@ -36,10 +36,15 @@ def insertData(doc, datadict):
 class TestCurveOperationPlugin(unittest.TestCase):
 
     """Tests the CurveOperationPlugin."""
-
+    
+    set_y_percent = False
+    
     def do(self, ds_x, ds_y, start=50., percent=0., reconfigure='Continue', smooth=5, smode='X and Y', ds_out='coeff'):
         doc = document.Document()
         insertData(doc, {'ds_x': ds_x, 'ds_y': ds_y})
+        ds = doc.data['ds_y']
+        ds.m_percent = self.set_y_percent
+        doc.setData('ds_y', ds)
         fields = {'ds_x': 'ds_x', 'ds_y': 'ds_y', 'start':start, 'percent':percent, 'reconfigure': reconfigure, 'smooth': smooth, 'smode':smode, 'ds_out': ds_out}
         p = CoefficientPlugin(**fields)
         p.getDatasets(fields)
@@ -48,25 +53,24 @@ class TestCurveOperationPlugin(unittest.TestCase):
 
 
     def test(self):
-        """Test the operation from a Misura3 file"""
+        """Coefficient for a straight line"""
         x = np.linspace(0, 1000, 1001)
         inidim = 10000
-        teor = 10 ** -3
+        teor = 10 ** -4
+        # Absolute expansion
         y = x * teor * inidim
-        yp = y / inidim
+        # Percent expansion
+        yp = 100 * y / inidim
         
-        print x[50], y[50]
-        out = self.do(x, y)[0].data
+        out = self.do(x, y, percent=inidim)[0].data
         self.assertTrue((out[:51] == np.zeros(51)).all())
         
-        print out[51:100]
-        
-        print 'ABOLUTE'
-        print x[50], yp[50]
+        self.set_y_percent = True
         out = self.do(x, yp, percent=inidim)[0].data
         self.assertTrue((out[:51] == np.zeros(51)).all())
-        
-        print out[51:100]       
+        delta = teor*10**-8
+        self.assertAlmostEqual(out[51:].std(), 0, delta = delta*10**-2)
+        self.assertAlmostEqual(out[51:].mean(), teor, delta = delta)
         
         
 

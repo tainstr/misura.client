@@ -18,7 +18,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
     description_short = 'Calculate coefficient'
 
     # string goes in dialog box
-    description_full = ('Calculate a coefficient')
+    description_full = ('Calculate a coefficient between a fixed start value and any subsequent value in a curve')
 
     def __init__(self, ds_x='', ds_y='', start=50., percent=0., reconfigure='Continue', smooth=5, smode='X and Y', ds_out='coeff'):
         """Define input fields for plugin."""
@@ -27,7 +27,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
             plugins.FieldDataset('ds_y', 'Y Dataset', default=ds_y),
             plugins.FieldFloat('start', 'Starting X value', default=start),
             plugins.FieldFloat(
-                'percent', descr='From percentile factor', default=percent),
+                'percent', descr='Initial dimension', default=percent),
             plugins.FieldCombo('reconfigure', descr='When cooling is found', items=[
                                'Continue', 'Restart', 'Stop'], default=reconfigure),
             plugins.FieldInt('smooth', 'Smoothing Window', default=smooth),
@@ -65,13 +65,14 @@ class CoefficientPlugin(plugins.DatasetPlugin):
 
         xds = helper.getDataset(fields['ds_x'])
         yds = helper.getDataset(fields['ds_y'])
+        _yds = helper._doc.data.get(fields['ds_y'])
         x = xds.data
         y = yds.data
-        # If percent, convert to absolute
-        if getattr(yds, 'm_percent', False):
-            if percent == 0:
-                percent = yds.m_initialDimension
-        if percent != 0.:
+        # If dataset is implicitly defined as absolute
+        if getattr(_yds, 'm_percent', False):
+            if (percent == 0):
+                # Recover from dataset initial dimension
+                percent = _yds.m_initialDimension
             y *= percent / 100.
         # Search the beginning of the coefficient
         chk = numpy.abs(x - start)
@@ -92,7 +93,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         xstart = x[i]
         ystart = y[i]
         # COEFFICIENT
-        out = (y - ystart) / (x - xstart) / (percent + ystart)
+        out = (y - ystart) / (x - xstart) / (percent )#+ ystart)
         out[:i + 1] = 0
         # TODO: multiple ramps
         # Detect the maximum temperature
