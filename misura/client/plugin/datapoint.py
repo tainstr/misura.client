@@ -39,7 +39,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         self.addAction(veusz.widgets.widget.Action('up', self.actionUp,
                                                    descr='Update Data Point',
                                                    usertext='Update Data Point'))
-        
+
         self.addAction(veusz.widgets.widget.Action('removeGaps', self.removeGaps,
                                                    descr='Remove Gaps',
                                                    usertext='Remove Gaps'))
@@ -55,7 +55,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         dataset_name = self.xy.settings.get('yData').val
         dataset = copy(self.document.data[dataset_name])
         data_without_gap = remove_gaps_from(data, gaps_thershold, start_index, end_index)
-        
+
         dataset.data = data_without_gap
         operation = document.OperationDatasetSet(dataset_name, dataset)
 
@@ -63,12 +63,12 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         self.up_coord(yData = data_without_gap)
 
         self.apply_ops('Remove Gap')
-        
-        
 
 
 
-        
+
+
+
 
 
     @classmethod
@@ -78,13 +78,13 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
         s.add(setting.Float(
             'remove_gaps_range', 100,
-            descr = "Remove gaps range", 
+            descr = "Remove gaps range",
             usertext = "Remove gaps range"),
             1)
 
         s.add(setting.Float(
             'remove_gaps_thershold', 10,
-            descr = "Remove gaps thershold", 
+            descr = "Remove gaps thershold",
             usertext = "Remove gaps thershold"),
             2
             )
@@ -131,13 +131,13 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         n.parent = s
         s.setdict['positioning'] = n
 
-        n = setting.DatasetExtended('width', [0.06],
+        n = setting.DatasetExtended('width', [0.04],
                                     descr='List of fractional widths or dataset',
                                     usertext='Widths',
                                     formatting=False)
         n.parent = s
         s.setdict['width'] = n
-        n = setting.DatasetExtended('height', [0.06],
+        n = setting.DatasetExtended('height', [0.04],
                                     descr='List of fractional heights or dataset',
                                     usertext='Heights',
                                     formatting=False)
@@ -146,7 +146,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
         # FORMATTING
         s.add(setting.Marker('marker',
-                             'asterisk',
+                             'linecross',
                              descr='Type of marker to plot',
                              usertext='Marker', formatting=True), 0)
 
