@@ -301,9 +301,9 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
                 self.ops.append(
                     document.OperationWidgetAdd(self.parent, 'label', name=name))
                 self.toset(self, 'coordLabel', name)
-        # Destroy if no longer needed
-        elif labelwidget and not s.showLabel:
-            self.ops.append(document.OperationWidgetDelete(labelwidget))
+#         # Destroy if no longer needed
+#         elif labelwidget and not s.showLabel:
+#             self.ops.append(document.OperationWidgetDelete(labelwidget))
 
         self.apply_ops('Datapoint: Dependencies')
 
