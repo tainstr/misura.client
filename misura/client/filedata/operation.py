@@ -405,21 +405,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             else:
                 ds.m_label = _("Time")
 
-
-            # Try to read column metadata
-            if len(data) > 0 and col != 't':
-                for meta in ['percent', 'initialDimension']:
-                    val = 0
-                    if self.proxy.has_node_attr(col, meta):
-                        val = self.proxy.get_node_attr(col, meta)
-                        if type(val) == type([]):
-                            val = 0
-                    setattr(ds, 'm_' + meta, val)
-                # Units conversion
-                nu = self.rule_unit(col)
-                if u and nu:
-                    ds = units.convert(ds, nu[0])
-
             # Find out the sample index to which this dataset refers
             var, idx = iutils.namingConvention(col)
             if '/sample' in col:
@@ -436,6 +421,22 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 # Retrieve initial dimension from sample
                 if var == 'd' and smp.conf.has_key('initialDimension'):
                     ds.m_initialDimension = smp.conf['initialDimension']
+                    
+            # Try to read column metadata from node attrs
+            if len(data) > 0 and col != 't':
+                for meta in ['percent', 'initialDimension']:
+                    val = 0
+                    if self.proxy.has_node_attr(col, meta):
+                        val = self.proxy.get_node_attr(col, meta)
+                        if type(val) == type([]):
+                            val = 0
+                    setattr(ds, 'm_' + meta, val)
+                # Units conversion
+                nu = self.rule_unit(col)
+                if u and nu:
+                    ds = units.convert(ds, nu[0])                    
+            
+                    
             if ds.m_smp is False:
                 ds.m_smp = refsmp
             # Add the hierarchy tags

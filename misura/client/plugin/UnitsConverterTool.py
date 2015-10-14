@@ -51,6 +51,10 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
         ds1 = units.convert(ds, fields['convert'])
         self.ops.append(document.OperationDatasetSet(fields['ds'], ds1))
         self.apply_ops()
+        
+        # Update DataPoints
+        convert_func = units.convert_func(ds, fields['convert'])
+        utils.convert_datapoint_units(convert_func, fields['ds'], self.doc)
 
         ####
         # PROPAGATION

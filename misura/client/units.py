@@ -169,19 +169,25 @@ class Converter(object):
     d = 1
     """Derivative factor for the conversion server->client"""
     unit = None
-
+    
     @classmethod
-    def convert(cls, from_unit, to_unit, val):
-        """Direct conversion of `val` from `from_unit` to `to_unit`, without issuing a class instance"""
+    def convert_func(cls, from_unit, to_unit):
+        """Returns the conversion function from `from_unit` to `to_unit`"""
         if from_unit in ('None', None):
-            return val
+            return lambda val: val
         if from_unit == to_unit:
-            return val
+            return lambda val: val
         if to_unit == None:
             dom = known_units[from_unit]
             to_unit = user_defaults[dom]
         c = cls(from_unit, to_unit)
-        return c.from_server(val)
+        return c.from_server
+
+    @classmethod
+    def convert(cls, from_unit, to_unit, val):
+        """Direct conversion of `val` from `from_unit` to `to_unit`"""
+        func = cls.convert_func(from_unit, to_unit)
+        return func(val)
 
     def __init__(self, unit, csunit):
         if not unit:
@@ -235,14 +241,11 @@ import veusz.plugins as plugins
 from copy import copy
 import numpy as np
 
-
-def convert(ds0, to_unit):
-    """Convert dataset `ds` to `to_unit`"""
-    # In case ds derived from a plugin, return the original plugin dataset
-    ds = getattr(ds0, 'pluginds', ds0)
+def get_from_unit(ds, to_unit):
+    """Get starting conversion unit for dataset `ds0` to convert it to `to_unit`"""
+#     ds = getattr(ds0, 'pluginds', ds0)
     from_unit = getattr(ds, 'unit', False)
     if not from_unit or to_unit in ['None', '', None, False]:
-        print 'conversion error', from_unit, to_unit
         raise plugins.DatasetPluginException(
             'Selected dataset does not have a measurement unit.')
     # Implicit To-From percentile conversion
@@ -252,32 +255,53 @@ def convert(ds0, to_unit):
         if 'part' not in (from_group, to_group):
             raise plugins.DatasetPluginException(
                 'Incompatible conversion: from {} to {}'.format(from_unit, to_unit))
-        ds1 = percentile_conversion(ds)
         if to_group == 'part':
             from_unit = 'percent'
         elif from_group == 'part':
             # Guess default unit for destination dimension
             from_unit = getattr(ds, 'old_unit', user_defaults[to_group])
-    else:
-        # No implicit percentile conversion
-        ds1 = copy(ds)
+    
+    return from_unit, to_unit, from_group, to_group
 
-    out = Converter.convert(from_unit, to_unit, np.array(ds1.data))
+def convert_func(ds, to_unit):
+    """Returns conversion function which can be applied over an array or value 
+    to convert `ds0` to `to_unit`"""
+#     ds = getattr(ds0, 'pluginds', ds0)
+    from_unit, to_unit, from_group, to_group = get_from_unit(ds, to_unit)
+    func = Converter.convert_func(from_unit, to_unit)
+    ret = func
+    # If groups differ, concatenate a percentile conversion to func 
+    if from_group != to_group:
+        action = percentile_action(ds, 'Invert')
+        pfunc = percentile_func(ds, action)
+        ret = lambda out: func(pfunc(out))
+    return ret
+        
+def convert(ds, to_unit):
+    """Convert dataset `ds` to `to_unit`.
+    Returns a new dataset."""
+    # In case ds derived from a plugin, return the original plugin dataset
+#     ds = getattr(ds0, 'pluginds', ds0)
+    from_unit, to_unit, from_group, to_group = get_from_unit(ds, to_unit)
+    func = convert_func(ds, to_unit)
+    
+    ds1 = copy(ds)
+    out = func(np.array(ds1.data))
+    ds1.data = plugins.numpyCopyOrNone(out) 
+    ds1.unit = to_unit
+    
     ini = getattr(ds, 'm_initialDimension', 0)
     old_unit = getattr(ds, 'old_unit', from_unit)
     old_group = known_units.get(old_unit, None)
     if ini and (old_group == to_group == from_group) and 'part' != to_group:
-        ini1 = Converter.convert(from_unit, to_unit, ini)
+        ini1 = func(ini)
         ds.m_initialDimension = ini1
         ds1.m_initialDimension = ini1
         logging.debug('%s %s %s', 'converting m_initialDimension', ini, ini1)
-    ds1.data = plugins.numpyCopyOrNone(out)
-    ds1.unit = to_unit
     return ds1
 
-
-def percentile_conversion(ds, action='Invert', auto=True):
-    ds = copy(ds)
+def percentile_action(ds, action='Invert'):
+    """Autodetect percentile conversion action to be performed"""
     cur = getattr(ds, 'm_percent', False)
     # invert action
     if action == 'Invert':
@@ -285,31 +309,46 @@ def percentile_conversion(ds, action='Invert', auto=True):
             action = 'To Absolute'
         else:
             action = 'To Percent'
-        logging.debug('%s %s %s', 'percentile_conversion doing', action, cur)
-
+    logging.debug('percentile_action %s',action)
+    return action 
+    
+def percentile_func(ds, action='To Absolute', auto=True):
+    """Returns the function used to convert dataset `ds` to percent or back to absolute"""
     ini = getattr(ds, 'm_initialDimension', False)
-    out = np.array(ds.data)
     # Auto initial dimension
     if not ini:
         if not auto or action != 'To Percent':
             raise plugins.DatasetPluginException('Selected dataset does not have an initial dimension set. \
-		Please first run "Initial dimension..." tool.')
-        ds.m_initialDimension = out[:5].mean()
+        Please first run "Initial dimension..." tool. {}{}{}'.format(action,ds.m_col, ds.m_initialDimension))
+        ds.m_initialDimension = np.array(ds.data[:5]).mean()
+        
+    if action == 'To Absolute':
+        u = getattr(ds, 'unit', 'percent')
+        # If current dataset unit is not percent, convert to
+        convert_func = Converter.convert_func(u, 'percent')
+        func = lambda out: convert_func(out * ds.m_initialDimension / 100.)
+    elif action == 'To Percent':
+        func = lambda out: 100. * out / ds.m_initialDimension
+    return func
 
+def percentile_conversion(ds, action='Invert', auto=True):
+    ds = copy(ds)
+    action = percentile_action(ds, action)
+    func = percentile_func(ds, action, auto)
+    out = func(np.array(ds.data))
+    
     # Evaluate if the conversion is needed
     # based on the current status and the action requested by the user
     if action == 'To Absolute':
-        out = out * ds.m_initialDimension / 100.
         ds.m_percent = False
         u = getattr(ds, 'unit', 'percent')
-        # If current dataset unit is not percent, convert to
-        out = Converter.convert(u, 'percent', out)
         ds.unit = getattr(ds, 'old_unit', False)
         ds.old_unit = u
     elif action == 'To Percent':
-        out = 100. * out / ds.m_initialDimension
         ds.m_percent = True
         ds.old_unit = getattr(ds, 'unit', False)
         ds.unit = 'percent'
     ds.data = plugins.numpyCopyOrNone(out)
     return ds
+
+
