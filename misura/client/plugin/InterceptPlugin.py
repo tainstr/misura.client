@@ -21,7 +21,7 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     # text to appear in dialog box
     description_full = 'Intercept all curves pertaining to a file, sample or dataset by placing descriptive datapoints'
 
-    def __init__(self, target=[], axis='X', val=0., search='None', searchRange=25, text='Intercept\\\\%(xlabel)s=%(x)i\\\\%(ylabel)s=%(y)E'):
+    def __init__(self, target=[], axis='X', val=0., search='Nearest (Fixed X)', searchRange=25, text='Intercept\\\\%(xlabel)s=%(x)i\\\\%(ylabel)s=%(y)E'):
         """Make list of fields."""
         self.fields = [
             plugins.FieldDatasetMulti(
@@ -30,7 +30,7 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 "axis", descr="Intercept on X or Y axis", items=['X', 'Y'], default=axis),
             plugins.FieldFloat('val', 'Value', default=val),
             plugins.FieldCombo("search", descr="Place nearest", items=[
-                               'None', 'Maximum', 'Minimum', 'Inflection', 'Stationary'], default=search),
+                               'Nearest (Fixed X)', 'Nearest', 'Maximum', 'Minimum', 'Inflection', 'Stationary'], default=search),
             plugins.FieldFloat(
                 'searchRange', descr='Nearest search range', default=searchRange),
             plugins.FieldText('text', 'Label text', default=text),

@@ -40,9 +40,10 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
                                                    descr='Update Data Point',
                                                    usertext='Update Data Point'))
 
-        self.addAction(veusz.widgets.widget.Action('removeGaps', self.removeGaps,
-                                                   descr='Remove Gaps',
-                                                   usertext='Remove Gaps'))
+        self.addAction(
+            veusz.widgets.widget.Action('removeGaps', self.removeGaps,
+                                        descr='Remove Gaps',
+                                        usertext='Remove Gaps'))
 
         self.labelwidget = None
 
@@ -54,22 +55,16 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         data = self.xy.settings.get('yData').getFloatArray(self.document)
         dataset_name = self.xy.settings.get('yData').val
         dataset = copy(self.document.data[dataset_name])
-        data_without_gap = remove_gaps_from(data, gaps_thershold, start_index, end_index)
+        data_without_gap = remove_gaps_from(
+            data, gaps_thershold, start_index, end_index)
 
         dataset.data = data_without_gap
         operation = document.OperationDatasetSet(dataset_name, dataset)
 
         self.ops.append(operation)
-        self.up_coord(yData = data_without_gap)
+        self.up_coord(yData=data_without_gap)
 
         self.apply_ops('Remove Gap')
-
-
-
-
-
-
-
 
     @classmethod
     def addSettings(klass, s):
@@ -78,16 +73,16 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
         s.add(setting.Float(
             'remove_gaps_range', 100,
-            descr = "Remove gaps range",
-            usertext = "Remove gaps range"),
+            descr="Remove gaps range",
+            usertext="Remove gaps range"),
             1)
 
         s.add(setting.Float(
             'remove_gaps_thershold', 10,
-            descr = "Remove gaps thershold",
-            usertext = "Remove gaps thershold"),
+            descr="Remove gaps thershold",
+            usertext="Remove gaps thershold"),
             2
-            )
+        )
 
         s.add(setting.WidgetChoice(
             'xy', '',
@@ -97,8 +92,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             3)
 
         s.add(setting.ChoiceSwitch(
-            'search', ['None', 'Maximum', 'Minimum',
-                       'Inflection', 'Stationary'], 'None',
+            'search', ['Nearest (Fixed X)', 'Nearest', 'Maximum', 'Minimum',
+                       'Inflection', 'Stationary'], 'Nearest (Fixed X)',
             settingstrue=['searchRange'], settingsfalse=[], showfn=lambda val: val != 'None',
             descr='Search nearest critical point',
             usertext='Search nearest'),
@@ -317,9 +312,28 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             xRange = self.xRange
         if yRange is None:
             yRange = self.yRange
-        dst = ((xData - x) / xRange)**2 + ((yData - y) / yRange)**2
+
+        dst = ((xData - x) / xRange) ** 2 + ((yData - y) / yRange) ** 2
         i = np.where(dst == dst.min())[0][0]
         return i, xData[i], yData[i]
+
+    def distance_fixed_x(self, x, y, xData=None, yData=None, xRange=None, yRange=None):
+        """Curve-point distance with fixed x"""
+        if xData is None:
+            xData = self.xData
+        if yData is None:
+            yData = self.yData
+        if xRange is None:
+            xRange = self.xRange
+        if yRange is None:
+            yRange = self.yRange
+
+        x_distances = np.abs(self.xData - x)
+        sorted_by_x_distance_indexs = x_distances.argsort()[:10]
+        y_distances_of_nearest_points = np.abs(self.yData[sorted_by_x_distance_indexs] - y)
+        index = sorted_by_x_distance_indexs[y_distances_of_nearest_points.argmin()]
+
+        return index, self.xData[index], self.yData[index]
 
     def up_coord(self, oldx=None, oldy=None, xData=None, yData=None):
         """Place in the nearest point to the current x,y coord"""
@@ -367,8 +381,11 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         self.xRange = xRange
         self.yRange = yRange
         self.N = N
-        # Curve-curve distance
-        self.i, self.x, self.y = self.distance(oldx, oldy)
+
+        type_of_point = self.settings.search
+
+        self.i, self.x, self.y = {'Nearest (Fixed X)': self.distance_fixed_x}.get(
+            type_of_point, self.distance)(oldx, oldy)
 
         self.xMax = xMax
         self.xMin = xMin
@@ -378,17 +395,16 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         self.yAx = yAx
 
         # perform nearest critical point search
-        self.critical_search()  # may update self.x, self.y, self.i
+        if type_of_point != 'Nearest (Fixed X)' and type_of_point != 'Nearest':
+            self.critical_search(type_of_point)
+
         self.ops.append(document.OperationSettingSet(ox_set, float(self.x)))
         self.ops.append(document.OperationSettingSet(oy_set, float(self.y)))
         return True
 
-    def critical_search(self):
+    def critical_search(self, src):
         """Search for critical points in curve"""
-        src = self.settings.search
-        if src == 'None':
-            logging.debug('%s', 'No search defined')
-            return False
+
         # Calculate slice
         rg = self.settings.searchRange / 2.
 
@@ -512,20 +528,20 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             dx = (line.settings.xPos2[0] - line.settings.xPos[0])
             dy = (line.settings.yPos2[0] - line.settings.yPos[0])
             ang0 = np.arctan2(dy, dx)
-            L = np.sqrt(dx**2 + dy**2)
+            L = np.sqrt(dx ** 2 + dy ** 2)
             # Rotate the length in order to maintain the same apparent length
-            c2 = c**2
-            s2 = s**2
-            c02 = np.cos(ang0)**2
-            s02 = np.sin(ang0)**2
-            xR2 = self.xRange**2
-            yR2 = self.yRange**2
-            dn = (L**2) * (xR2 * s02 + yR2 * c02)
+            c2 = c ** 2
+            s2 = s ** 2
+            c02 = np.cos(ang0) ** 2
+            s02 = np.sin(ang0) ** 2
+            xR2 = self.xRange ** 2
+            yR2 = self.yRange ** 2
+            dn = (L ** 2) * (xR2 * s02 + yR2 * c02)
             nr = (xR2 * s2 + yR2 * c2)
             L = np.sqrt(dn / nr)
             logging.debug('%s %s', 'convL', L)
         else:
-            L = np.sqrt(self.xRange**2 + self.yRange**2) / 2
+            L = np.sqrt(self.xRange ** 2 + self.yRange ** 2) / 2
 
         logging.debug('%s %s %s %s', 'preL', L, c, s)
 
