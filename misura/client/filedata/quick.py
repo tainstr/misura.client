@@ -14,7 +14,7 @@ from entry import DatasetEntry
 from .. import clientconf
 from proxy import getFileProxy
 import axis_selection
-
+import re
 
 ism = isinstance
 
@@ -499,7 +499,7 @@ class QuickOps(object):
         ds_x = self.xnames(node, '/temperature')[0]
         ini = getattr(ds, 'm_initialDimension', 0)
         if getattr(ds, 'm_percent', False):
-            ini = 0. # No conversion if already percent  
+            ini = 0. # No conversion if already percent
         from misura.client import plugin
         p = plugin.CoefficientPlugin(
             ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '_cf', smooth=w, percent=ini)
@@ -513,7 +513,9 @@ class QuickOps(object):
         """Call the DeriveDatasetPlugin on the current node"""
         ds, node = self.dsnode(node)
         w = max(5, len(ds.data) / 50)
-        ds_x = self.xnames(node)[0]  # in current page
+
+        ds_x = self.xnames(node, "/time")[0]  # in current page
+
         from misura.client import plugin
         p = plugin.DeriveDatasetPlugin(
             ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '_d', smooth=w)
