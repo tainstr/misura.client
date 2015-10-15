@@ -3,6 +3,8 @@
 """A point connected to an xy plot."""
 from misura.canon.logger import Log as logging
 from PyQt4 import QtGui
+from PyQt4 import QtCore
+
 import veusz.utils
 import veusz.widgets
 import veusz.document as document
@@ -13,6 +15,7 @@ import utils
 from ...canon import csutil
 from misura.client.plugin.RemoveGaps import remove_gaps_from
 from copy import copy
+from misura.client import _
 
 
 def searchWidgetName(widget, name):
@@ -46,6 +49,10 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
                                         usertext='Remove Gaps'))
 
         self.labelwidget = None
+        self.settings.Fill.add(setting.Bool('extended_clicakble_area', True,
+                descr = _('If enabled, datapoint is easier to select, but can create problems when printing.'),
+                usertext=_('Extend clickable area')) )
+
 
     def removeGaps(self):
         gap_range = self.settings.setdict['remove_gaps_range'].val
@@ -65,6 +72,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         self.up_coord(yData=data_without_gap)
 
         self.apply_ops('Remove Gap')
+
+
 
     @classmethod
     def addSettings(klass, s):
@@ -197,8 +206,16 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         s = self.settings
         h = 1 + min((rect.width(), rect.height())) / 3
         path, enablefill = veusz.utils.getPainterPath(painter, s.marker, h)
-        veusz.utils.brushExtFillPath(
-            painter, s.Fill, path, stroke=painter.pen())
+
+        veusz.utils.brushExtFillPath(painter, s.Fill, path, stroke=painter.pen())
+
+        if s.Fill.extended_clicakble_area:
+            brush = setting.collections.BrushExtended('tempbrush')
+            brush.hide = False
+            brush.transparency = 99
+            brush.color = QtCore.Qt.darkGray
+            path.addRect(rect)
+            veusz.utils.brushExtFillPath(painter, brush, path)
 
     def check_axis(self):
         aligned = self.toset(self, 'positioning', 'axes')
