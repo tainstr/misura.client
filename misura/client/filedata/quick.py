@@ -14,7 +14,6 @@ from entry import DatasetEntry
 from .. import clientconf
 from proxy import getFileProxy
 import axis_selection
-import re
 
 ism = isinstance
 
