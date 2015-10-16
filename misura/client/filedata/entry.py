@@ -5,6 +5,7 @@ from misura.canon.logger import Log as logging
 from veusz import document
 from compiler.ast import flatten
 import collections
+
 sep = '/'
 # Statuses
 dstats = collections.namedtuple(
@@ -258,6 +259,11 @@ class NodeEntry(object):
 
     def insert(self, path, status=1):
         """Insert a pure node"""
+
+        if self.doc.data.has_key(path) and isinstance(self.doc.data[path], document.datasets.Dataset1DPlugin):
+            dataset_plugin_is_already_loaded_as_child_of_the_dataset_it_derived_from = False
+            return dataset_plugin_is_already_loaded_as_child_of_the_dataset_it_derived_from
+
         splt = self.splt
         if self.parent:
             assert self.path.startswith(path)
@@ -374,7 +380,7 @@ class NodeEntry(object):
 
 class DatasetEntry(NodeEntry):
 
-    """A wrapper object to represent a dataset by name and document, 
+    """A wrapper object to represent a dataset by name and document,
     without actually keeping any reference to it."""
     _parents = []
 

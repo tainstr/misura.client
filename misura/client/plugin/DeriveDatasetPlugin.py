@@ -101,6 +101,7 @@ class DeriveDatasetPlugin(plugins.DatasetPlugin):
             out = self.derive(ds_y, method, order)
 
         self.ds_out.update(data=out)
+        helper._doc.model.refresh()
         return [self.ds_out]
 
 # add plugin classes to this list to get used
