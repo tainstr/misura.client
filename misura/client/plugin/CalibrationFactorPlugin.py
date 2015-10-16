@@ -172,7 +172,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         dsf.unit = 'percent'
         dsf.m_initialDimension = self.inidim
         dsf.m_percent = True
-        dsf.m_label = 'Calibration Fitting'
+        dsf.m_label = _('Calibration Fitting')
         self.ops.append(
             document.OperationDatasetSet(p + '_fit', dsf))
 
@@ -191,7 +191,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         dsd.old_unit = old_unit
         dsd.m_initialDimension = self.inidim
         dsd.m_percent = True
-        dsf.m_label = _(name)
+        dsd.m_label = _(name)
         self.ops.append(
             document.OperationDatasetSet(p, dsd))
 
