@@ -16,7 +16,7 @@ from misura.canon.csutil import find_nearest_val
 # name: (T, %dL/L20°C)
 standards = {
     # https://www-s.nist.gov/srmors/view_cert.cfm?srm=738
-    'NIST SRM738': (	np.array([20,  27,  67, 107, 147, 187, 227, 267, 307, 347, 387, 427, 467, 507]),
+    'NIST-SRM738': (	np.array([20,  27,  67, 107, 147, 187, 227, 267, 307, 347, 387, 427, 467, 507]),
                      np.array([0,  69, 466, 872, 1288, 1714, 2149, 2593,
                                3048, 3511, 3984, 4467, 4959, 5461]) * 10**-4
                      ),
@@ -27,12 +27,12 @@ standards = {
             [0.,     92.,   3550.,   8100.,   9960.,  11900.,  12900.]) * 10**-4,
     ),
     # http://www.ceramics.nist.gov/srd/scd/Z00665.htm
-    'Al2O3 Dil': (np.array([0,   27,   77,  127,  177,  227,  277,  327,  377,  427,  477, 527,  627,  727,  827,  927, 1027, 1127, 1227, 1327, 1427, 1527, 1627, 1727]),
+    'Al2O3-Dil': (np.array([0,   27,   77,  127,  177,  227,  277,  327,  377,  427,  477, 527,  627,  727,  827,  927, 1027, 1127, 1227, 1327, 1427, 1527, 1627, 1727]),
                   np.array([0.,    150.93,    442.75,    767.08,   1116.87,   1484.58, 1869.75,   2266.11,   2672.93,   3087.21,   3510.72,   3941.96,
                             4809.09,   5699.68,   6591.19,   7490.16,   8390.59,   9297.75,  10208.64,  11120.26,  12043.88,  12964.23,  13878.31,  14800.39]) * 10**-4,
                   ),
     # http://www.ceramics.nist.gov/srd/scd/Z00662.htm
-    'Al2O3 N Diffraction': (
+    'Al2O3-N-Diffraction': (
         np.array([20, 	100,		200, 	300,  400,  500,  600,  700,  800,  900,  1000,
                   1100,  1200,  1300,  1400,  1500,  1600,  1700,  1800,  1900,  2000,  2050]),
         np.array([0.,    756.6,   1540.8,   2343.6,   3165.6,   4012.,	4806.,   5732.3,   6624.8,   7535.7,   8468.,   9408.3,
@@ -62,7 +62,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         'Get calibration factor from standard expansion curve')
     preserve = True
 
-    def __init__(self, d='', T='', std='NIST SRM738', start=50, end=50, label=True, add=True):
+    def __init__(self, d='', T='', std='NIST-SRM738', start=50, end=50, label=True, add=True):
         """Make list of fields."""
 
         self.fields = [
