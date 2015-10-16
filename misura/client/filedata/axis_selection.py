@@ -23,3 +23,6 @@ def is_temperature(path):
 
 def kiln_temperature_for(path):
     return path.split(':')[0] + ":kiln/T"
+
+def is_calibratable(path):
+    return re.search('horizontal/.*sample0/d$|vertical/.*sample0/d$', path)

@@ -381,11 +381,14 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             self.add_percentile(node, self.dataset_menu)
             self.dataset_menu.addAction(_('Smoothing'), self.smooth)
             self.dataset_menu.addAction(_('Derivatives'), self.derive)
-            self.dataset_menu.addAction(_('Calibration'), self.calibration)
+            if filedata.axis_selection.is_calibratable(node.path):
+                self.dataset_menu.addAction(_('Calibration'), self.calibration)
             self.dataset_menu.addAction(
                 _('Linear Coefficient'), self.coefficient)
             self.add_styles(node, self.dataset_menu)
             self.add_rules(node, self.dataset_menu)
+
+
         if '/hsm/sample' in node.path:
             self.dataset_menu.addAction(
                 _('Characteristic points'), self.showPoints)

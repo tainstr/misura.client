@@ -50,6 +50,12 @@ class AxisSelection(unittest.TestCase):
 		self.assertEqual("something:kiln/T",\
 			axis_selection.kiln_temperature_for("something:somthing/else"))
 
+	def test_is_calibratable(self):
+		self.assertFalse(axis_selection.is_calibratable("0:something:somthing/else"))
+		self.assertTrue(axis_selection.is_calibratable("0:horizontal/sample0/d"))
+		self.assertTrue(axis_selection.is_calibratable("1:vertical/sample0/d"))
+		self.assertFalse(axis_selection.is_calibratable("3:vertical/sample0/d/something/else"))
+
 
 
 
