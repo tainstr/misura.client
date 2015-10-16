@@ -523,6 +523,19 @@ class QuickOps(object):
         self.mainwindow.showDialog(d)
         self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
+    @node
+    def calibration(self, node=False):
+        """Call the CalibrationFactorPlugin on the current node"""
+        ds, node = self.dsnode(node)
+
+        T = self.xnames(node, "/temperature")[0]  # in current page
+
+        from misura.client import plugin
+        p = plugin.CalibrationFactorPlugin(d=node.path, T=T)
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.CalibrationFactorPlugin)
+        self.mainwindow.showDialog(d)
+        self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
+
     @nodes
     def correct(self, nodes=[]):
         """Call the CurveOperationPlugin on the current nodes"""
