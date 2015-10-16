@@ -144,6 +144,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         if fields['add']:
             self.add_datasets(si, d[0])
         self.apply_ops()
+        self.doc.model.refresh()
         return factor, res
 
     def add_datasets(self, start_index, start_value):
