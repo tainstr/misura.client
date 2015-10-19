@@ -62,7 +62,8 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         themral_cycle_options = {
             'onKilnStopped': active_instrument.measure.gete('onKilnStopped'),
             'kilnBeforeStart': active_instrument.measure.gete('kilnBeforeStart'),
-            'kilnAfterEnd': active_instrument.measure.gete('kilnAfterEnd'), }
+            'kilnAfterEnd': active_instrument.measure.gete('kilnAfterEnd'),
+            'duration': active_instrument.measure.gete('duration'), }
 
         self.themral_cycle_optionsWidget = conf.Interface(
             remote.parent(), remote.measure, themral_cycle_options, parent=self)
