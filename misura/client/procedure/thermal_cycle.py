@@ -61,7 +61,6 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 
         themral_cycle_options = {
             'onKilnStopped': active_instrument.measure.gete('onKilnStopped'),
-            'maxErr': active_instrument.measure.gete('maxErr'),
             'kilnBeforeStart': active_instrument.measure.gete('kilnBeforeStart'),
             'kilnAfterEnd': active_instrument.measure.gete('kilnAfterEnd'), }
 
