@@ -7,9 +7,11 @@ from .. import widgets
 from PyQt4 import QtGui, QtCore
 import row
 from ..network.mproxy import MisuraProxy
+from .. import conf
 
 from plot import ThermalCyclePlot
 from table import ThermalCurveTable
+
 
 class ThermalCycleDesigner(QtGui.QSplitter):
 
@@ -32,8 +34,6 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.table = ThermalCurveTable(remote, self, is_live=is_live)
         self.model = self.table.model()
 
-
-
         if is_live:
             self.fileMenu = menuBar.addMenu(_('File'))
             self.fileMenu.addAction(_('Import from CSV'), self.loadCSV)
@@ -41,9 +41,11 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.fileMenu.addAction(_('Clear table'), self.clearTable)
             self.editMenu = menuBar.addMenu(_('Edit'))
             self.editMenu.addAction(_('Insert point'), self.table.newRow)
-            self.editMenu.addAction(_('Insert checkpoint'), self.table.newCheckpoint)
+            self.editMenu.addAction(
+                _('Insert checkpoint'), self.table.newCheckpoint)
             self.editMenu.addAction(_('Insert movement'), self.table.newMove)
-            self.editMenu.addAction(_('Insert control transition'), self.table.newThermocoupleControlTransition)
+            self.editMenu.addAction(
+                _('Insert control transition'), self.table.newThermocoupleControlTransition)
             a = self.editMenu.addAction(
                 'Insert parametric heating', self.table.newParam)
             a.setEnabled(False)
@@ -57,21 +59,16 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 
         self.main_layout.addWidget(self.table)
 
+        themral_cycle_options = {
+            'onKilnStopped': active_instrument.measure.gete('onKilnStopped'),
+            'maxErr': active_instrument.measure.gete('maxErr'),
+            'kilnBeforeStart': active_instrument.measure.gete('kilnBeforeStart'),
+            'kilnAfterEnd': active_instrument.measure.gete('kilnAfterEnd'), }
 
-        self.addLine('onKilnStopped', active_instrument)
-        self.addLine('maxErr', active_instrument)
-        self.addLine('kilnBeforeStart', active_instrument)
-        self.addLine('kilnAfterEnd', active_instrument)
-
+        self.themral_cycle_optionsWidget = conf.Interface(
+            remote.parent(), remote.measure, themral_cycle_options, parent=self)
+        self.main_layout.addWidget(self.themral_cycle_optionsWidget)
         self.main_layout.addWidget(self.plot)
-
-    def addLine(self, key, active_instrument):
-        if active_instrument.measure.has_key(key):
-            self.max_err_widget = widgets.build(
-                active_instrument, active_instrument.measure, active_instrument.measure.gete(key))
-            self.max_err_widget.lay.insertWidget(
-                0, self.max_err_widget.label_widget)
-            self.main_layout.addWidget(self.max_err_widget)
 
     def replot(self, *args):
         crv = self.model.curve(events=False)
