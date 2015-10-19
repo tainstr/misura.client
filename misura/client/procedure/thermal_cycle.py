@@ -57,15 +57,21 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 
         self.main_layout.addWidget(self.table)
 
-        if active_instrument.measure.has_key('onKilnStopped'):
-            self.on_kiln_stopped_widget = widgets.build(
-                active_instrument, active_instrument.measure, active_instrument.measure.gete('onKilnStopped'))
-            self.on_kiln_stopped_widget.button.hide()
-            self.on_kiln_stopped_widget.lay.insertWidget(
-                0, self.on_kiln_stopped_widget.label_widget)
-            self.main_layout.addWidget(self.on_kiln_stopped_widget)
+
+        self.addLine('onKilnStopped', active_instrument)
+        self.addLine('maxErr', active_instrument)
+        self.addLine('kilnBeforeStart', active_instrument)
+        self.addLine('kilnAfterEnd', active_instrument)
 
         self.main_layout.addWidget(self.plot)
+
+    def addLine(self, key, active_instrument):
+        if active_instrument.measure.has_key(key):
+            self.max_err_widget = widgets.build(
+                active_instrument, active_instrument.measure, active_instrument.measure.gete(key))
+            self.max_err_widget.lay.insertWidget(
+                0, self.max_err_widget.label_widget)
+            self.main_layout.addWidget(self.max_err_widget)
 
     def replot(self, *args):
         crv = self.model.curve(events=False)
