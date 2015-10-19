@@ -35,6 +35,9 @@ class TestWindow(acquisition.MainWindow):
         self.connect(self.imageSlider, QtCore.SIGNAL(
             'set_idx(int)'), self.play.set_idx)
 
+        registry.taskswg.removeStorageAndRemoteTabs()
+
+
 # 	@profile
     def load_version(self, v=-1):
         logging.debug('%s %s', "SETTING VERSION", v)

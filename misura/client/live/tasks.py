@@ -228,6 +228,10 @@ class Tasks(QtGui.QTabWidget):
         self.progress.ch.connect(self.hide_show)
         self.sync.ch.connect(self.hide_show)
 
+    def removeStorageAndRemoteTabs(self):
+        self.removeTab(2)
+        self.removeTab(0)
+
     def set_server(self, server):
         server = server.copy()
         server.connect()
