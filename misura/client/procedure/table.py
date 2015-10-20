@@ -4,7 +4,7 @@
 from misura.canon.logger import Log as logging
 from .. import _
 from misura.canon import option
-from misura.canon.csutil import next_point
+from misura.canon.csutil import next_point, decode_cool_event
 from .. import conf
 from .. import units
 from PyQt4 import QtGui, QtCore
@@ -35,6 +35,7 @@ class ThermalCurveTable(QtGui.QTableView):
             m = self.menu
             m.addAction(_('Insert point'), self.newRow)
             m.addAction(_('Insert checkpoint'), self.newCheckpoint)
+            m.addAction(_('Insert natural cooling'), self.newCool)
             if self.motor_is_available(remote):
                 m.addAction(_('Insert movement'), self.newMove)
             m.addAction(_('Insert control transition'), self.newThermocoupleControlTransition)
@@ -72,8 +73,14 @@ class ThermalCurveTable(QtGui.QTableView):
         # Find latest valid time from crow
         t = 0
         idx, ent = next_point(self.model().dat, crow, -1)
+        timeout = 0
         if ent is not False:
             t = ent[0]
+        if event.startswith('>cool'):
+            T, timeout = decode_cool_event(event)
+            print 'insert_event cool', t, timeout
+            if timeout > 0:
+                t += timeout / 60.
         self.model().insertRows(crow + 1, values=[t, event, 0, 0])
         self.setSpan(crow + 1, row.colTEMP, 1, 3)
 
@@ -89,6 +96,16 @@ class ThermalCurveTable(QtGui.QTableView):
         return ok
 
     def newCheckpoint(self):
+        crow = self.selection.currentIndex().row()
+        if crow == 0:
+            QtGui.QMessageBox.warning(self, _('Impossible event requested'), 
+                                      _('Cannot insert a checkpoint event as first row'))
+            return False
+        elif isinstance(self.model().dat[crow][1], basestring):
+            # Currently unsupported
+            QtGui.QMessageBox.warning(self, _('Impossible event requested'), 
+                                      _('Cannot insert a checkpoint event after another event'))
+            return False          
         desc = {}
         option.ao(desc, 'deltaST', 'Float', name=_("Temperature-Setpoint tolerance"),
                   unit='celsius', current=3, min=0, max=100, step=0.1)
@@ -101,6 +118,24 @@ class ThermalCurveTable(QtGui.QTableView):
         if ok:
             timeout = units.Converter.convert('minute', 'second', cp['timeout'])
             event = '>checkpoint,{:.1f},{:.1f}'.format(cp['deltaST'], timeout)
+            self.insert_event(event)
+        return ok
+
+    def newCool(self):
+        desc = {}
+        option.ao(desc, 'target', 'Float', name=_("Target cooling temperature"),
+                  unit='celsius', current=50, min=0, max=100, step=0.1)
+        option.ao(desc, 'timeout', 'Float', name=_("Timeout (<=0 means forever)"),
+                  unit='minute', current=-1, min=-1, max=1e3, step=0.1)
+        cp = option.ConfigurationProxy({'self': desc})
+        chk = conf.InterfaceDialog(cp, cp, desc, parent=self)
+        chk.setWindowTitle(_("Natural cooling configuration"))
+        ok = chk.exec_()
+        if ok:
+            timeout = units.Converter.convert('minute', 'second', cp['timeout'])
+            if timeout < 0: 
+                timeout = -1
+            event = '>cool,{:.1f},{:.1f}'.format(cp['target'], timeout)
             self.insert_event(event)
         return ok
 

@@ -5,7 +5,7 @@ import unittest
 from misura.client.tests import iutils_testing
 from misura.client.procedure import thermal_cycle
 from misura import kiln
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
 
 class Designer(unittest.TestCase):

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from misura.canon.csutil import next_point, find_nearest_val
+from misura.canon.csutil import next_point, decode_cool_event, find_nearest_val,\
+    decode_checkpoint_event
 
 colTIME = 0
 colTEMP = 1
@@ -33,29 +34,49 @@ def find_max_heating_rate(T, rateLimit, maxHeatingRate=80):
         maxHeatingRate = rR
     return maxHeatingRate
     
+
     
 def update_row(rows, row_index, mode, time_correction=0, maxRate=80, rateLimit=[]):
     """Adjust `row_index` of `rows` model, following ajusting `mode` rules 
     and enforcing rate limit `maxRate` and rate limiting curve `rateLimit`.
     Returns the adjusted row entry and the time correction to be applied to all subsequent entries."""
     current_row = rows[row_index]
-    if isinstance(current_row[colTEMP], basestring):
-        current_row[0] += time_correction
-        return current_row, time_correction
-    
     # Apply time_correction from previous rows
     current_row[0] += time_correction
     
-    
     # Previous point: search backwards
-    prev_row_index, prev_row = next_point(rows, row_index - 1, -1)
-    
+    prev_row_index, prev_row = next_point(rows, row_index - 1, delta=-1, events=True)
     if prev_row is False:
-        return current_row, time_correction
-
+        return current_row, time_correction 
+      
     time, temperature, heating_rate, duration = current_row
-    prev_time, prev_temperature, prev_heating_rate, prev_duration = prev_row
+    prev_time, prev_temperature, prev_heating_rate, prev_duration = prev_row   
+    # Extract start temperature from a previous cooling/checkpoint event 
+    while isinstance(prev_temperature, basestring):
+        if prev_temperature.startswith('>cool'):
+            prev_temperature, prev_timeout = decode_cool_event(prev_temperature)
+        elif prev_temperature.startswith('>checkpoint'):
+            prev_row_index1, prev_row1 = next_point(rows, prev_row_index - 1, delta=-1, events=True)
+            prev_temperature = prev_row1[1]
+            
     
+    if isinstance(temperature, basestring):
+        # Update time_correction for natural cooling events
+        if temperature.startswith('>cool'):
+            temperature, timeout = decode_cool_event(temperature)
+            timeout /= 60.
+            time_correction += timeout
+            current_row[0] = prev_time + timeout
+        elif temperature.startswith('>checkpoint'):
+            tolerance, timeout = decode_checkpoint_event(temperature)
+            # assume a 10min delay/tolerance
+            timeout = 10./tolerance
+#             timeout /= 60.
+            time_correction += timeout
+            current_row[0] = prev_time + timeout         
+                 
+        return current_row, time_correction
+        
     if temperature != 0:
         maxRate = find_max_heating_rate(temperature, rateLimit, maxRate)
 

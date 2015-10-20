@@ -3,26 +3,55 @@
 """Designer per il ciclo termico."""
 from misura.canon.logger import Log as logging
 from .. import _
-from misura.canon.csutil import next_point
+from misura.canon.csutil import next_point, decode_cool_event
 from PyQt4 import QtGui, QtCore
 import row
 import flags
 import collections
 
 def clean_curve(dat, events=True):
+    """Convert `dat` model thermal cycle to a (time,Temp) list of points. 
+    Include `events` or try to convert them to numerical values."""
     crv = []
+    # Event-based time correction
+    time_correction = 0
     for index_row, ent in enumerate(dat):
+        print 'EVENT', index_row, ent
         t, T = ent[:2]
         if None in ent:
             logging.debug('%s %s', 'Skipping row', index_row)
             continue
         if isinstance(T, basestring):
+            print 'Basestring', T
+            logging.debug('%s %s', 'EVENT', index_row)
+            T = str(T)
             if events:
-                T = str(T)
+                t += time_correction  
+                crv.append([t * 60, T]) 
+                continue
+            ev = T.split(',')
+            timeout = -1
+            if ev[0] =='>cool':
+                T = float(ev[1])
+                if len(ev) > 2:
+                    timeout = float(ev[2])/60.
+                # assume a 50°C/min ramp
+                if timeout < 0 and len(crv) > 1:  
+                    T0 = crv[-1][1]
+                    timeout = (T0 - T) / 50.
+            elif T.startswith('>checkpoint'):
+                dT = float(ev[1])
+                T = crv[-1][1]
+                # assume a 10 min dwell time / delta
+                timeout = 10/dT
             else:
                 logging.debug('%s %s', 'Skipping EVENT', index_row)
                 continue
-
+            if timeout < 0:
+                logging.debug('Cannot render event %s', index_row, ev)
+                continue
+            time_correction += timeout
+        t += time_correction  
         crv.append([t * 60, T])
     return crv
 
@@ -160,7 +189,15 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             D = 0
             R = 0
             if i > 0:
-                idx, ent = next_point(crv, i - 1, -1)
+                idx, ent = next_point(crv, i - 1, -1, events=True)
+                if isinstance(ent[1], basestring):
+                    if ent[1].startswith('>cool'):
+                        cT, to = decode_cool_event(ent[1])
+                        ent[1] = cT
+                    elif ent[1].startswith('>checkpoint'):
+                        idx, ent = next_point(crv, i - 1, -1, events=False)
+                    else:
+                        ent = False
                 if ent is False:
                     ent = row
                 t0, T0 = ent

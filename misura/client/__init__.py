@@ -57,7 +57,7 @@ def configure_logger():
         logging.Formatter("%(levelname)s: %(asctime)s %(message)s"))
     logging.getLogger().addHandler(rotating_file_handler)
     level = confdb['loglevel']
-#	level=50
+#     level = 0
     logging.getLogger().setLevel(level)
 
 configure_logger()

@@ -43,6 +43,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.editMenu.addAction(_('Insert point'), self.table.newRow)
             self.editMenu.addAction(
                 _('Insert checkpoint'), self.table.newCheckpoint)
+            self.editMenu.addAction(_('Insert natural cooling'), self.table.newCool)
             self.editMenu.addAction(_('Insert movement'), self.table.newMove)
             self.editMenu.addAction(
                 _('Insert control transition'), self.table.newThermocoupleControlTransition)
