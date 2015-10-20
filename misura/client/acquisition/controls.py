@@ -42,7 +42,6 @@ class Controls(QtGui.QToolBar):
         self.stopped_set = set()
         self.start_stop_notification = StartedFinishedNotification(self, self.started)
         self.server = remote.parent()
-        self.iniAct = self.addAction('New', self.new)
         self.startAct = self.addAction('Start', self.start)
         self.stopAct = self.addAction('Stop', self.stop)
         self.name = self.remote['devpath'].lower()
@@ -133,7 +132,6 @@ class Controls(QtGui.QToolBar):
             self.coolAct.setEnabled(remote_is_running)
 
         self.startAct.setEnabled(remote_is_running ^ 1)
-        self.iniAct.setEnabled(remote_is_running ^ 1)
         uid = self.remote.measure['uid']
         if uid in self.ended_set:
             self.isRunning=remote_is_running
