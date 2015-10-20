@@ -210,6 +210,9 @@ class Tasks(QtGui.QTabWidget):
     user_show = False
     """Detect if the user asked to view this widget"""
 
+    hide_signal = QtCore.pyqtSignal()
+    show_signal = QtCore.pyqtSignal()
+
     def __init__(self):
         QtGui.QTabWidget.__init__(self)
 
@@ -253,11 +256,12 @@ class Tasks(QtGui.QTabWidget):
 
     def hide_show(self):
         """Decide if to automatically hide or show this window"""
-        if self.update_active():
-            if not self.isVisible():
-                self.show()
-        elif not self.user_show:
+        if self.update_active() or self.user_show:
+            self.show()
+            self.show_signal.emit()
+        else:
             self.hide()
+            self.hide_signal.emit()
 
     def hideEvent(self, e):
         self.user_show = False

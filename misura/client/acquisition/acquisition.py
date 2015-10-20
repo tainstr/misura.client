@@ -166,6 +166,21 @@ class MainWindow(QtGui.QMainWindow):
         network.manager.set_remote(rem)
         registry.set_manager(network.manager)
         self.setServer(rem)
+        self.tasks_dock = QtGui.QDockWidget(self.centralWidget())
+        self.tasks_dock.setWindowTitle("Pending Tasks")
+        self.tasks_dock.setWidget(registry.taskswg)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.tasks_dock)
+
+        registry.taskswg.show_signal.connect(self.pending_task_shown)
+        registry.taskswg.hide_signal.connect(self.pending_task_hidden)
+
+    def pending_task_shown(self):
+        self.tasks_dock.show()
+
+    def pending_task_hidden(self):
+        self.tasks_dock.hide()
+
+
 
     def closeEvent(self, ev):
         if not self.fixedDoc:
