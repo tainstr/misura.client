@@ -18,6 +18,7 @@ from .. import widgets, beholder
 from .. import fileui, filedata
 from .. import misura3
 from .. import connection
+from .. import iutils
 from ..clientconf import confdb, settings
 from ..confwidget import RecentWidget
 from .menubar import MenuBar
@@ -114,6 +115,7 @@ class MainWindow(QtGui.QMainWindow):
         self.reset_instrument_timer = QtCore.QTimer()
         self.reset_instrument.connect(self.setInstrument)
 
+
     def add_server_selector(self):
         """Server selector dock widget"""
         self.serverDock = QtGui.QDockWidget(self.centralWidget())
@@ -170,6 +172,8 @@ class MainWindow(QtGui.QMainWindow):
             registry.toggle_run(False)
             self.tasks.close()
         super(MainWindow, self).closeEvent(ev)
+        iutils.app.quit()
+
     _blockResetFileProxy = False
 
 
@@ -662,7 +666,7 @@ class MainWindow(QtGui.QMainWindow):
         if self.doc:
             self.doc.close()
         self.set_doc(False)
-        # Why do we resetFileProxy here? 
+        # Why do we resetFileProxy here?
         #self.resetFileProxy(retry=10)
         auto = confdb['autodownload']
         if auto == 'Never':

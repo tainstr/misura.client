@@ -7,6 +7,7 @@ from .. import confwidget
 from .. import filedata
 from .. import misura3
 from ..clientconf import confdb
+from .. import iutils
 from misura.client.database import getDatabaseWidget, getRemoteDatabaseWidget
 import menubar
 import testwindow
@@ -58,9 +59,8 @@ class MainWindow(QtGui.QMainWindow):
         win = self.area.addSubWindow(greeter)
         win.show()
 
-    def close(self):
-        # TODO: close all tabs!
-        return QtGui.QMainWindow.close(self)
+    def closeEvent(self, event):
+        iutils.app.quit()
 
     def open_file(self, path):
         path = unicode(path)
