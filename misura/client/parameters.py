@@ -10,7 +10,7 @@ from time import time
 from misura.canon.logger import Log as logging
 from PyQt4 import QtCore
 from traceback import print_exc
-
+from os.path import expanduser
 
 def determine_path(root=False):
     if hasattr(sys, 'frozen'):
@@ -31,7 +31,7 @@ def determine_path(root=False):
 pathClient = determine_path()
 logging.debug('%s %s', 'pathClient', pathClient)
 # Percorso utilizzato per immagazzinare la configurazione del client
-pathConf = os.path.join(pathClient, 'conf.sqlite')
+pathConf = os.path.join(expanduser("~"), '.conf.sqlite')
 pathLang = os.path.join(pathClient, 'i18n')
 logging.debug('%s %s', 'pathLang', pathLang)
 pathArt = os.path.join(pathClient, 'art')
