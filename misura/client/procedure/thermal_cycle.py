@@ -60,15 +60,18 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 
         self.main_layout.addWidget(self.table)
 
-        themral_cycle_options = {
-            'onKilnStopped': active_instrument.measure.gete('onKilnStopped'),
-            'kilnBeforeStart': active_instrument.measure.gete('kilnBeforeStart'),
-            'kilnAfterEnd': active_instrument.measure.gete('kilnAfterEnd'),
-            'duration': active_instrument.measure.gete('duration'), }
-
-        self.themral_cycle_optionsWidget = conf.Interface(
-            remote.parent(), remote.measure, themral_cycle_options, parent=self)
-        self.main_layout.addWidget(self.themral_cycle_optionsWidget)
+        thermal_cycle_options = {}
+        for opt in ('onKilnStopped', 'kilnBeforeStart','kilnAfterEnd','duration',
+                    'coolingBelowTemp', 'coolingAfterTime'):
+            if not active_instrument.measure.has_key(opt):
+                logging.debug('Measure has no option %s', opt)
+                continue
+            thermal_cycle_options[opt] = active_instrument.measure.gete(opt)
+            print 'OPT', thermal_cycle_options[opt]
+        if thermal_cycle_options:
+            self.thermal_cycle_optionsWidget = conf.Interface(
+            remote.parent(), remote.measure, thermal_cycle_options, parent=self)
+            self.main_layout.addWidget(self.thermal_cycle_optionsWidget)
         self.main_layout.addWidget(self.plot)
 
     def replot(self, *args):
