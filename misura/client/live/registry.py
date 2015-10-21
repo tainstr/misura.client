@@ -68,7 +68,7 @@ class KidRegistry(QtCore.QThread):
             self.wait(1)
         self.manager = man
         logging.debug('KidRegistry.set_manager %s', man)
-        self.taskswg = Tasks()
+        self.taskswg = Tasks.instance()
         self.connect(
             self, QtCore.SIGNAL('set_server(PyQt_PyObject)'), self.taskswg.set_server)
         if man is not None:

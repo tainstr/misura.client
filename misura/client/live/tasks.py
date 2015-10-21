@@ -213,6 +213,14 @@ class Tasks(QtGui.QTabWidget):
     hide_signal = QtCore.pyqtSignal()
     show_signal = QtCore.pyqtSignal()
 
+    _instance = None
+
+    @classmethod
+    def instance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
     def __init__(self):
         QtGui.QTabWidget.__init__(self)
 
