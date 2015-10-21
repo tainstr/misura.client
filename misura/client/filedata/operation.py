@@ -136,24 +136,18 @@ def tasks():
     return getattr(live.registry, 'tasks', False)
 
 def jobs(n, pid="File import"):
-    #FIXME: causes random crashes while opening microscope tests in compiled win exe
-    return 
     t = tasks()
     if not t:
         return
     t.jobs(n, pid)
 
 def job(n, pid="File import", label=''):
-    #FIXME: causes random crashes while opening microscope tests in compiled win exe
-    return
     t = tasks()
     if not t:
         return
     t.job(n, pid, label)
 
 def done(pid="File import"):
-    #FIXME: causes random crashes while opening microscope tests in compiled win exe
-    return
     t = tasks()
     if not t:
         return
@@ -431,14 +425,14 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 # Retrieve initial dimension from sample
                 if var == 'd' and smp.conf.has_key('initialDimension'):
                     ds.m_initialDimension = smp.conf['initialDimension']
-                    
+
             if len(data) > 0 and col != 't':
                 # Units conversion
                 nu = self.rule_unit(col)
                 if u and nu:
-                    ds = units.convert(ds, nu[0])                    
-            
-                    
+                    ds = units.convert(ds, nu[0])
+
+
             if ds.m_smp is False:
                 ds.m_smp = refsmp
             # Add the hierarchy tags

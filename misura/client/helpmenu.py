@@ -3,10 +3,10 @@
 
 from PyQt4 import QtGui, QtCore
 from . import _
-from misura.client.confwidget import ClientConf
-from misura.client.live import registry
+from confwidget import ClientConf
+from live import registry
 from misura.canon.version import __version__ as canon_version
-from misura.client.version import __version__ as client_version
+from version import __version__ as client_version
 
 about="""
 <h1> Misura &trade;</h1>

@@ -8,11 +8,11 @@ import math
 
 from misura.canon.logger import Log as logging
 from misura.canon.csutil import lockme
-from misura.client import network
-from misura.client import units
-from misura.client.clientconf import confdb
+from .. import network
+from .. import units
+from ..clientconf import confdb
 from .. import _
-from misura.client.live import registry
+from ..live import registry
 
 
 from PyQt4 import QtGui, QtCore

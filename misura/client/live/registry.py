@@ -93,8 +93,9 @@ class KidRegistry(QtCore.QThread):
     @property
     def tasks(self):
         """Return local tasks widget"""
-        if not self.taskswg:
+        if self.taskswg is False:
             return False
+
         return self.taskswg.tasks
 
     @lockme
