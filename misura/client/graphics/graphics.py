@@ -39,7 +39,7 @@ def loadIcons():
     # artdir=os.path.join(*tuple(d))
 
     for key in ['m4.connect', 'm4.db', 'm4.open', 'm4.sintering', 'm4.softening', 'm4.sphere', 'm4.halfSphere', 'm4.melting']:
-        n = key.split('.')[1] + '.svg'
+        n = key.split('.')[1] + '.png'
         n = os.path.join(params.pathArt, n)
         logging.debug('%s', n)
         if not os.path.exists(n):
