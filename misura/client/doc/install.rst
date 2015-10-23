@@ -27,6 +27,8 @@ Precompiled executables and example data packages are available on |m| public re
 3. For each executable file, right click on it and select "Create link". A new file will be created each time (E.g.: ``C:\misura\browser.exe - link``). 
 4. Copy or move the newly created link files to your Desktop, in order to find them more easily.
 
+.. hint:: You should extract all contents of the zip file. Moving or copying the executables somewhere else from the relative position they have in the extracted folder will cause severe errors. Create shortcuts if you want to easily reach executables from your preferred positions.
+
 
 ----------
 Upgrading
