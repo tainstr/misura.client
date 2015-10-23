@@ -74,11 +74,18 @@ class CustomInterface(object):
 
 def misura_import(self, filename, **options):
     """Import misura data from HDF file"""
-
+    defaults = {'rule_exc': confdb['rule_exc'],
+                'rule_inc': confdb['rule_inc'],
+                'rule_load': confdb['rule_load'] + '\n' + confdb['rule_plot'],
+                'rule_unit': confdb['rule_unit']}
+    for k, v in defaults.iteritems():
+        if options.has_key(k): continue
+        options[k] = v
     # lookup filename
     filename = unicode(filename)
     realfilename = self.findFileOnImportPath(filename)
     logging.debug('%s %s %s', 'open_file:', filename, realfilename)
+    print 'misura_import with params', options
     p = filedata.ImportParamsMisura(filename=realfilename, **options)
     op = filedata.OperationMisuraImport(p)
 
@@ -274,12 +281,9 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
 
     def open_file(self, filename,  **options):
         """Import misura data from HDF file"""
-        options['rule_inc'] = confdb['rule_inc']
-        options['rule_exc'] = confdb['rule_inc']
-        options['rule_load'] = confdb['rule_load'] + '\n' + confdb['rule_plot']
-        options['rule_unit'] = confdb['rule_unit']
         # lookup filename
         filename = unicode(filename)
+        print 'importing misura with defaults'
         dsnames = self.mw.cmd.ImportMisura(filename, **options)
         self.openedFiles.refresh()
         return dsnames
