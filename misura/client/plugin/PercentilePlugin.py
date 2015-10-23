@@ -34,7 +34,7 @@ class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plugins.FieldCombo("action", descr="Conversion mode:", items=[
                                'Invert', 'To Percent', 'To Absolute'], default=action),
             plugins.FieldBool(
-                "auto", descr="Auto initial dimension", default=True)
+                "auto", descr="Auto initial dimension", default=auto)
         ]
 
     def apply(self, interface, fields):

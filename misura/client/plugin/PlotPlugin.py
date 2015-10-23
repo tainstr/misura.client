@@ -149,7 +149,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         # A conversion should happen
         logging.debug('%s %s %s', 'CONVERTING', cvt, pc)
         self.ops.append(document.OperationToolsPlugin(PercentilePlugin.PercentilePlugin(
-        ), {'ds': dsn, 'propagate': False, 'action': 'Invert'}))
+        ), {'ds': dsn, 'propagate': False, 'action': 'Invert', 'auto': False}))
         return True
 
     def apply(self, cmd, fields):
