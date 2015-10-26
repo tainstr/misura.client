@@ -27,3 +27,6 @@ REM Consolidate local build
 xcopy %out%\configuration\* %out%\misura4
 xcopy %out%\browser\* %out%\misura4
 xcopy %out%\acquisition\* %out%\misura4
+
+REM hack to make svg icons work also on Windows Vista
+copy C:\Python27\Lib\site-packages\PyQt4\plugins\imageformats\qsvg4.dll %out%\misura4\qt4_plugins\imageformats
