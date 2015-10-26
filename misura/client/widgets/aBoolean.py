@@ -29,14 +29,18 @@ class aBoolean(ActiveWidget):
         if self.current:
             self.chk.setChecked(QtCore.Qt.Checked)
             self.chk.setText(_('True'))
-            if self.handle == 'isRunning':
+            if self.should_color():
                 self.chk.setStyleSheet("background-color:red; color:white;")
         else:
             self.chk.setChecked(QtCore.Qt.Unchecked)
             self.chk.setText(_('False'))
-            if self.handle == 'isRunning':
+            if self.should_color():
                 self.chk.setStyleSheet("background-color:green; color:white;")
         self.chk.update(self.chk.visibleRegion())
+
+
+    def should_color(self):
+        return self.handle == 'isRunning' or self.handle == 'analysis'
 
 
 class aBooleanAction(QtGui.QAction):

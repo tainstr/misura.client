@@ -15,6 +15,9 @@ class Status(QtGui.QWidget):
         self.lay.setRowWrapPolicy(QtGui.QFormLayout.WrapLongRows)
         wg = widgets.build(server, server, server.gete('isRunning'))
         self.insert_widget(wg)
+
+        wg = widgets.build(server, server.kiln, server.kiln.gete('analysis'))
+        self.insert_widget(wg)
         for opt in 'name', 'elapsed':
             wg = widgets.build(
                 server, remObj.measure, remObj.measure.gete(opt))
