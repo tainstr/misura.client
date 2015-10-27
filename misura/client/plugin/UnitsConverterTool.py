@@ -75,7 +75,7 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
             for k, nds in self.doc.data.iteritems():
                 if k == fields['ds']:
                     continue
-                if nds.m_var != 't':
+                if getattr(nds, 'm_var', False) != 't':
                     continue
                 cvt.append(k)
         cvt = list(set(cvt))
