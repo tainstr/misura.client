@@ -41,6 +41,7 @@ class Status(QtGui.QWidget):
                 self.add_samples_option(server, remObj, 'h')
             elif n in ('vertical', 'horizontal', 'flex'):
                 self.add_samples_option(server, remObj, 'd')
+                self.add_samples_option(server, remObj, 'initialDimension')
 
         self.setLayout(self.lay)
 
