@@ -35,19 +35,21 @@ class Status(QtGui.QWidget):
                 wg.force_update = True
             self.insert_widget(wg)
         n = remObj['devpath']
-        opt = False
+
         if n != 'kiln':
             if n == 'hsm':
-                opt = 'h'
+                self.add_samples_option(server, remObj, 'h')
             elif n in ('vertical', 'horizontal', 'flex'):
-                opt = 'd'
-        if opt:
-            for i in range(remObj.measure['nSamples']):
-                smp = getattr(remObj, 'sample' + str(i))
-                print 'Building widget', smp['fullpath'], opt
-                wg = widgets.build(server, smp, smp.gete(opt))
-                self.insert_widget(wg)
+                self.add_samples_option(server, remObj, 'd')
+
         self.setLayout(self.lay)
+
+    def add_samples_option(self, server, remObj, option):
+        for i in range(remObj.measure['nSamples']):
+            smp = getattr(remObj, 'sample' + str(i))
+            print 'Building widget', smp['fullpath'], option
+            wg = widgets.build(server, smp, smp.gete(option))
+            self.insert_widget(wg)
 
     def insert_widget(self, wg):
         self.widgets[wg.prop['kid']] = wg
