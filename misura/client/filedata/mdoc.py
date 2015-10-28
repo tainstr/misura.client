@@ -188,7 +188,9 @@ class MisuraDocument(document.Document):
         header = set(header)
         ks = set(self.data.keys()) | set(self.available_data.keys())
         dh = header - ks
-        if len(dh) > 0:
+
+        temporary_disabled = False
+        if temporary_disabled and len(dh) > 0:
             logging.debug(
                 '%s %s', 'RELOADING DATA: HEADER DIFFERS. Missing:', dh)
             logging.debug('%s %s', 'header', header)
@@ -197,6 +199,7 @@ class MisuraDocument(document.Document):
             dsnames = self.reloadData()
             self._lock.acquire(False)
             return dsnames
+
         for col in self.data.iterkeys():
             ds = self.data[col]
             if len(ds.data) == 0:
