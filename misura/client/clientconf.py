@@ -28,8 +28,6 @@ ao(default_desc, 'refresh', **{'name': 'Remote Server Refresh Rate (ms)',
 
 ao(default_desc, 'database', **
    {'name': 'Default Database', 'current': '', 'type': 'FilePath'})
-ao(default_desc, 'autodownload', **
-   {'name': 'Auto-download finished tests', 'current': 'Always', 'options':['Never',  'Always',  'Ask'], 'type': 'Chooser'})
 ao(default_desc, 'hserver', **
    {'name': 'Recent Servers', 'current': 5, 'max': 20, 'min': 0, 'type': 'Integer'})
 ao(default_desc, 'saveLogin', **
@@ -77,7 +75,9 @@ ao(default_desc, 'rule_load', 'TextArea', rule_load, 'Force loading')
 rule_unit = [
     [('Rule', 'String'), ('Unit', 'String')],
     [r'/hsm/sample\d/h$', 'percent'],
-    [r'/hsm/sample\d/Vol$', 'percent']
+    [r'/hsm/sample\d/Vol$', 'percent'],
+    [r'/vertical/sample\d/d$', 'percent'],
+    [r'/horizontal/sample\d/d$', 'percent']
 ]
 ao(default_desc, 'rule_unit', 'Table', rule_unit, 'Dataset units')
 
@@ -257,15 +257,19 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self.emit(QtCore.SIGNAL('load()'))
         self.reset_rules()
         self.create_index()
-        
+
     def migrate_desc(self, desc):
         """Migrate saved newdesc to current hard-coded configuration structure default_desc"""
+        desc_ret = {}
+
         for key, val in desc.iteritems():
-            saved_opt = option.Option(**val)
-            coded_opt = option.Option(**default_desc[key])
-            saved_opt.migrate_from(coded_opt)       
-            desc[key] = saved_opt
-        return desc
+            if default_desc.has_key(key):
+                saved_opt = option.Option(**val)
+                coded_opt = option.Option(**default_desc[key])
+                saved_opt.migrate_from(coded_opt)
+                desc_ret[key] = saved_opt
+
+        return desc_ret
 
     def create_index(self):
         self.index = False

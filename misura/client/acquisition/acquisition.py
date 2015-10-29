@@ -671,57 +671,26 @@ class MainWindow(QtGui.QMainWindow):
 
     def stopped(self):
         """Offer option to download the remote file"""
-        # HTTPS data url
+        registry.toggle_run(False)
+
         uid = self.remote.measure['uid']
         logging.debug('acquisition.MainWindow.stopped %s', uid)
         if uid in self.saved_set:
             logging.debug('UID already saved! %s', uid)
             return False
         self.saved_set.add(uid)
+
         if self.doc:
             self.doc.close()
         self.set_doc(False)
-        # Why do we resetFileProxy here?
-        #self.resetFileProxy(retry=10)
-        auto = confdb['autodownload']
-        if auto == 'Never':
-            logging.debug('No autodownload: denied by user option set to %s', auto)
-            return False
-        elif auto == 'Always':
-            dbpath = confdb['database']
-            if not os.path.exists(dbpath):
-                logging.debug('A non-existent db path was specified %s', dbpath)
-                dbpath = False
-        registry.toggle_run(False)
-        # NO db: ask to specify custom location
-        # Happens both if auto==Always but no db set or Ask.
-        if not dbpath:
-            d = settings.value('/FileSaveToDir', os.path.expanduser('~'))
-            path = os.path.join(str(d), self.remote.measure['name'] + '.h5')
-            outfile = QtGui.QFileDialog.getSaveFileName(
-                self, _("Download finished test as"),
-                path,
-                filter="Misura (*.h5)")
-            outfile = str(outfile)
-            settings.setValue('/FileSaveToDir', os.path.dirname(outfile))
-            if not len(outfile):
-                logging.debug('User refused to save test')
-                registry.toggle_run(True)
-                return False
-            auto = True
-        else:
-            outfile = False
 
-        # Ask if it's not automatic. Happens only if auto == 'Ask' but default database is set.
-        if auto == 'Ask' and not outfile:
-            auto = QtGui.QMessageBox.question(self, _("Download finished test?"),
-                                              _("Would you like to download the finished test?"))
-            if auto != QtGui.QMessageBox.Ok:
-                registry.toggle_run(True)
-                return False
+        dbpath = confdb['database']
+        if not os.path.exists(dbpath):
+            logging.debug('A non-existent db path was specified %s', dbpath)
+            return False
+
         # Start download thread
-        sy = TransferThread(
-            outfile=outfile, uid=uid, server=self.server, dbpath=dbpath)
+        sy = TransferThread(outfile=False, uid=uid, server=self.server, dbpath=dbpath)
         sy.set_tasks(self.tasks)
         sy.start()
         # Keep a reference

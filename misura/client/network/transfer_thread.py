@@ -32,22 +32,22 @@ class TransferThread(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         self.url = url
         """directly download URL to outfile"""
-        
+
         self.outfile = outfile
         """local file where to save the downloaded data, or local source for upload data"""
-        
+
         self.dbpath = dbpath
         """location of local database where to append downloaded test files"""
-        
+
         self.uid = uid
         """remote test UID to be searched and downloaded"""
-        
+
         self.server = server
         """remote server object"""
-        
+
         self.post = post
         """POST dictionary used for uploading files"""
-        
+
         self.prefix = 'Download: '
         """Prefix for transfer job in pending tasks"""
 
@@ -257,14 +257,14 @@ class TransferThread(QtCore.QThread):
         # Send file to remote url
         if self.post:
             if not (self.url and self.outfile):
-                logging.debug('TransferThread upload impossible: url, outfile, post: %s %s %s', 
+                logging.debug('TransferThread upload impossible: url, outfile, post: %s %s %s',
                               self.url, self.outfile, self.post)
                 return False
             self.upload(self.url, self.outfile, self.post)
         # Download specific UID from server storage
         elif self.uid:
-            if not (self.server and self.outfile):
-                logging.debug('TransferThread uid download impossible: server, uid, outfile: %s %s %s', 
+            if not self.server and (not self.outfile or not self.dbpath):
+                logging.debug('TransferThread uid download impossible: server, uid, outfile: %s %s %s',
                               self.server, self.uid, self.outfile)
                 return False
             # Reconnect because we are in a different thread
@@ -273,7 +273,7 @@ class TransferThread(QtCore.QThread):
         # Download specific complete URL to outfile
         elif self.url:
             if not self.outfile:
-                logging.debug('TransferThread url download impossible: outfile: %s', 
+                logging.debug('TransferThread url download impossible: outfile: %s',
                               self.outfile)
                 return False
             self.download_url(self.url, self.outfile)
