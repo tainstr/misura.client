@@ -17,6 +17,8 @@ import units
 
 import parameters as params
 
+default_misuradb_path = os.path.expanduser("~/MisuraData/misuradb")
+
 default_desc = {}
 
 ao(default_desc, 'lang', **{'name': "Client Language",
@@ -28,7 +30,7 @@ ao(default_desc, 'refresh', **{'name': 'Remote Server Refresh Rate (ms)',
                                'current': 2000, 'max': 20000,   'min': 100, 'type': 'Integer'})
 
 ao(default_desc, 'database', **
-   {'name': 'Default Database', 'current': os.path.expanduser("~/MisuraData/misuradb"), 'type': 'FilePath'})
+   {'name': 'Default Database', 'current': default_misuradb_path, 'type': 'FilePath'})
 ao(default_desc, 'hserver', **
    {'name': 'Recent Servers', 'current': 5, 'max': 20, 'min': 0, 'type': 'Integer'})
 ao(default_desc, 'saveLogin', **
@@ -276,6 +278,11 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     def create_index(self):
         self.index = False
         path = self['database']
+        if path.strip() == '':
+            path = default_misuradb_path
+            self['database'] = path
+            self.save()
+
         if path and os.path.exists(path):
             logging.debug('Creating indexer at %s', path)
             self.index = Indexer(path)
