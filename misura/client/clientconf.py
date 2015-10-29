@@ -10,6 +10,7 @@ from traceback import format_exc
 from PyQt4 import QtCore
 
 from ..canon import option
+from ..canon import csutil
 from ..canon.option import ao
 from ..canon.indexer import Indexer
 import units
@@ -27,7 +28,7 @@ ao(default_desc, 'refresh', **{'name': 'Remote Server Refresh Rate (ms)',
                                'current': 2000, 'max': 20000,   'min': 100, 'type': 'Integer'})
 
 ao(default_desc, 'database', **
-   {'name': 'Default Database', 'current': '', 'type': 'FilePath'})
+   {'name': 'Default Database', 'current': os.path.expanduser("~/MisuraData/misuradb"), 'type': 'FilePath'})
 ao(default_desc, 'hserver', **
    {'name': 'Recent Servers', 'current': 5, 'max': 20, 'min': 0, 'type': 'Integer'})
 ao(default_desc, 'saveLogin', **
@@ -40,7 +41,7 @@ ao(default_desc, 'hm3database', **
    {'name': 'Recent Misura3 Databases', 'current': 10, 'max': 100, 'min': 1, 'type': 'Integer'})
 
 ao(default_desc, 'logfile', **{'name': 'Log files directory', 'current':
-                               os.path.expanduser("~/.misura_log/misura.log"), 'type': 'FilePath'})
+                               os.path.expanduser("~/MisuraData/misura.log"), 'type': 'FilePath'})
 ao(default_desc, 'loglevel', **{'name': 'Logging Level', 'current': 30,
                                 'max': 50, 'min': -1, 'step': 10, 'type': 'Integer', 'parent': 'logfile'})
 ao(default_desc, 'logsize', **{'name': 'Size of each log file', 'current':
@@ -208,6 +209,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self.close()
         if path:
             self.path = path
+            csutil.ensure_directory_existence(path)
         self.conn = sqlite3.connect(
             self.path, detect_types=sqlite3.PARSE_DECLTYPES)
         self.conn.text_factory = unicode

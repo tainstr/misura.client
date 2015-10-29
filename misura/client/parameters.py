@@ -31,7 +31,7 @@ def determine_path(root=False):
 pathClient = determine_path()
 logging.debug('%s %s', 'pathClient', pathClient)
 # Percorso utilizzato per immagazzinare la configurazione del client
-pathConf = os.path.join(expanduser("~"), '.conf.sqlite')
+pathConf = os.path.expanduser("~/MisuraData/conf.sqlite")
 pathLang = os.path.join(pathClient, 'i18n')
 logging.debug('%s %s', 'pathLang', pathLang)
 pathArt = os.path.join(pathClient, 'art')
