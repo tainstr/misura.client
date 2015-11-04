@@ -201,6 +201,7 @@ class Controls(QtGui.QToolBar):
         self.mainWin = self.parent()
         self.mDock = self.mainWin.measureDock
         self.measureTab = self.mDock.widget()
+        self.measureTab.setCurrentIndex(0)
         self.measureTab.checkCurve()
         if not self.validate():
             return False
