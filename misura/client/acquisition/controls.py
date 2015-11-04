@@ -202,6 +202,12 @@ class Controls(QtGui.QToolBar):
         self.mDock = self.mainWin.measureDock
         self.measureTab = self.mDock.widget()
         self.measureTab.setCurrentIndex(0)
+        confirmation = QtGui.QMessageBox.warning(self, "Start test",
+                       "Do you confirm test's start?",
+                       QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
+        if confirmation != QtGui.QMessageBox.Yes:
+            return
+
         self.measureTab.checkCurve()
         if not self.validate():
             return False
