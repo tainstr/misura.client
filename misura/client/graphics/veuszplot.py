@@ -84,7 +84,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         intgrp = qt4.QActionGroup(self)
 
         def slotfn(v):
-            return lambda: self.actionSetTimeout(v)
+            return lambda: self.actionSetTimeout(v, False)
 
         # bind interval options to actions
         for intv, text in self.updateintervals:
@@ -222,7 +222,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
             return
         if self.document.model.page.startswith(page.path):
             logging.debug('Not update_page %s', page.path)
-            return 
+            return
         logging.debug('VeuszPlot.update_page', self.document.model.page, page.path)
         self.document.model.set_page(page.path)
 
