@@ -88,11 +88,11 @@ def getInstrumentName(tp):
     """Converts Misura3 test type into misura instrument type name"""
     if tp in [0, 1, 2, 3, 4, 110, 111]:
         return 'hsm'
-    if tp in [6, 7, 9]:
+    if tp in [6, 7, 9, 10]:
         return 'horizontal'
     if tp == etp.DilatometroVerticale:
         return 'vertical'
-    if tp in [5, 10, 12]:
+    if tp in [5, 12]:
         return 'flex'
     if tp == etp.Rodaggio:
         return 'kiln'
@@ -190,7 +190,7 @@ def getPlotCols(tt):
 
 
 def getHeatingCycle(entry):
-    """Translate heating cycle expressed as Ramp, Temp, Stasis in a PROVE entry, 
+    """Translate heating cycle expressed as Ramp, Temp, Stasis in a PROVE entry,
     into misura [t,T,S] list format"""
     out = [[0, 0]]
     addt = 0
