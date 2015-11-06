@@ -2,6 +2,15 @@
 
 # symbolic link needed for python bug
 # https://bugs.python.org/issue11374
+
+# copy Veusz C++ helpers ###########################################################
+VEUSZ_ROOT=/opt/misura4/veusz
+cd $VEUSZ_ROOT
+python setup.py build
+cp build/lib.linux-x86_64-2.7/veusz/helpers/*.so /opt/misura4/veusz/veusz/helpers/
+cd -
+####################################################################################
+
 ln -s /opt/misura4/misura.canon/misura/canon /opt/misura4/misura.client/misura/canon
 
 pyinstaller -y client_linux_pyinst.spec
