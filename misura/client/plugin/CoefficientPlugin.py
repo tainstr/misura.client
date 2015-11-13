@@ -29,7 +29,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
             plugins.FieldFloat(
                 'percent', descr='Initial dimension', default=percent),
             plugins.FieldCombo('reconfigure', descr='When cooling is found', items=[
-                               'Continue', 'Restart', 'Stop'], default=reconfigure),
+                               'Continue', 'Stop'], default=reconfigure),
             plugins.FieldInt('smooth', 'Smoothing Window', default=smooth),
             plugins.FieldCombo('smode', descr='Apply Smoothing to', items=[
                                'X and Y', 'Y alone', 'Output'], default=smode),
@@ -99,8 +99,10 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         # and start a new coefficient point
         if recon == 'Stop':
             out[j:] = float('NaN')
-        elif recon == 'Restart':
-            out[j:] = (y[j:] - ymax) / (x[j:] - xmax) / (initial_dimension + ymax)
+        else:
+            numpy.place(out, out<0, [float('NaN')])
+            numpy.place(out, abs(out - numpy.nanmean(out)) > 2*numpy.nanstd(out), [float('NaN')])
+
         # Smooth output curve
         if smooth > 0 and smode == 'Output':
             out[i:j] = SmoothDatasetPlugin.smooth(out[i:j], smooth, 'hanning')
