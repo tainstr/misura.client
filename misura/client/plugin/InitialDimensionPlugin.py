@@ -23,7 +23,7 @@ class InitialDimensionPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     # string goes in dialog box
     description_full = ('Configure initial dimension')
 
-    def __init__(self, ds='', ini=100., auto=True, num=20, method='mean', ds_x=''):
+    def __init__(self, ds='', ini=100., auto=False, num=20, method='mean', ds_x=''):
         """Define input fields for plugin."""
         self.fields = [
             plugins.FieldDataset('ds', 'Dataset to configure', default=ds),
