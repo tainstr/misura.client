@@ -348,7 +348,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         x_distances = np.abs(self.xData - x)
         sorted_by_x_distance_indexs = x_distances.argsort()[:10]
         y_distances_of_nearest_points = np.abs(self.yData[sorted_by_x_distance_indexs] - y)
-        index = sorted_by_x_distance_indexs[y_distances_of_nearest_points.argmin()]
+        index = sorted_by_x_distance_indexs[np.nanargmin(y_distances_of_nearest_points)]
 
         return index, self.xData[index], self.yData[index]
 

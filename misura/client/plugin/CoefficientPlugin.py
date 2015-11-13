@@ -20,7 +20,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
     # string goes in dialog box
     description_full = ('Calculate a coefficient between a fixed start value and any subsequent value in a curve')
 
-    def __init__(self, ds_x='', ds_y='', start=50., percent=0., reconfigure='Continue', smooth=5, smode='X and Y', ds_out='coeff'):
+    def __init__(self, ds_x='', ds_y='', start=50., percent=0., reconfigure='Stop', smooth=5, smode='X and Y', ds_out='coeff'):
         """Define input fields for plugin."""
         self.fields = [
             plugins.FieldDataset('ds_x', 'X Dataset', default=ds_x),
@@ -61,20 +61,14 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         recon = fields['reconfigure']
         smode = fields['smode']
         start = fields['start']
-        percent = fields['percent']
+        initial_dimension = fields['percent']
 
         xds = helper.getDataset(fields['ds_x'])
         yds = helper.getDataset(fields['ds_y'])
         _yds = helper._doc.data.get(fields['ds_y'])
         x = xds.data
         y = yds.data
-        # If dataset is implicitly defined as absolute
-        if getattr(_yds, 'm_percent', False):
-            if (percent == 0):
-                # Recover from dataset initial dimension
-                percent = _yds.m_initialDimension
-            y *= percent / 100.
-        # Search the beginning of the coefficient
+
         chk = numpy.abs(x - start)
         i = numpy.where(chk == min(chk))[0][0]
         j = None
@@ -91,17 +85,22 @@ class CoefficientPlugin(plugins.DatasetPlugin):
                 x[i:j] = SmoothDatasetPlugin.smooth(x[i:j], smooth, 'hanning')
 
         xstart = x[i]
-        ystart = y[i]
+        ystart = y[i] or 1
         # COEFFICIENT
-        out = (y - ystart) / (x - xstart) / (percent )#+ ystart)
-        out[:i + 1] = 0
+        denominator = 100
+        is_not_percent = getattr(_yds, 'm_percent', False)
+        if is_not_percent:
+            denominator = ystart
+        out = (y - ystart) / (x - xstart) / denominator
+        out[:i + 1] = float('NaN')
+
         # TODO: multiple ramps
         # Detect the maximum temperature
         # and start a new coefficient point
         if recon == 'Stop':
-            out[j:] = 0.
+            out[j:] = float('NaN')
         elif recon == 'Restart':
-            out[j:] = (y[j:] - ymax) / (x[j:] - xmax) / (percent + ymax)
+            out[j:] = (y[j:] - ymax) / (x[j:] - xmax) / (initial_dimension + ymax)
         # Smooth output curve
         if smooth > 0 and smode == 'Output':
             out[i:j] = SmoothDatasetPlugin.smooth(out[i:j], smooth, 'hanning')
