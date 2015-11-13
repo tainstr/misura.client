@@ -159,6 +159,8 @@ class DatabaseWidget(QtGui.QWidget):
         self.lay.addWidget(self.bar)
         self.bar.hide()
 
+        self.resize(QtGui.QApplication.desktop().screen().rect().width() / 2, QtGui.QApplication.desktop().screen().rect().height() / 2)
+
     def rebuild(self):
         self.remote.rebuild()
         self.up()
@@ -192,6 +194,12 @@ class DatabaseWidget(QtGui.QWidget):
         if self.remote.addr != 'LOCAL':
             self.emit(
                 QtCore.SIGNAL('selectedRemoteUid(QString,QString)'), self.remote.addr, uid)
+
+
+        isGraphics = self.parent() is None
+        if isGraphics:
+            self.close()
+
 
 
 
