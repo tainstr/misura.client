@@ -179,6 +179,9 @@ class DatabaseWidget(QtGui.QWidget):
                 continue
             self.qfilter.addItem(_(sh[i]), h)
 
+        id_column = 3
+        self.table.resizeColumnToContents(id_column)
+
     def query(self):
         d = self.qfilter.itemData(self.qfilter.currentIndex())
         d = str(d)
