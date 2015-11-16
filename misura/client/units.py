@@ -169,7 +169,7 @@ class Converter(object):
     d = 1
     """Derivative factor for the conversion server->client"""
     unit = None
-    
+
     @classmethod
     def convert_func(cls, from_unit, to_unit):
         """Returns the conversion function from `from_unit` to `to_unit`"""
@@ -211,7 +211,7 @@ class Converter(object):
             print 'group,unit' , group, unit, csunit
             cfb = from_base[group][csunit]  # client-to-base
             ctb = to_base[group][self.csunit]  # client-to-base
-            # How to manage different groups? 
+            # How to manage different groups?
             # cud = derivatives[group][csunit]
             # sud = derivatives[group][unit]
 
@@ -260,23 +260,23 @@ def get_from_unit(ds, to_unit):
         elif from_group == 'part':
             # Guess default unit for destination dimension
             from_unit = getattr(ds, 'old_unit', user_defaults[to_group])
-    
+
     return from_unit, to_unit, from_group, to_group
 
 def convert_func(ds, to_unit):
-    """Returns conversion function which can be applied over an array or value 
+    """Returns conversion function which can be applied over an array or value
     to convert `ds0` to `to_unit`"""
 #     ds = getattr(ds0, 'pluginds', ds0)
     from_unit, to_unit, from_group, to_group = get_from_unit(ds, to_unit)
     func = Converter.convert_func(from_unit, to_unit)
     ret = func
-    # If groups differ, concatenate a percentile conversion to func 
+    # If groups differ, concatenate a percentile conversion to func
     if from_group != to_group:
         action = percentile_action(ds, 'Invert')
         pfunc = percentile_func(ds, action)
         ret = lambda out: func(pfunc(out))
     return ret
-        
+
 def convert(ds, to_unit):
     """Convert dataset `ds` to `to_unit`.
     Returns a new dataset."""
@@ -284,12 +284,13 @@ def convert(ds, to_unit):
 #     ds = getattr(ds0, 'pluginds', ds0)
     from_unit, to_unit, from_group, to_group = get_from_unit(ds, to_unit)
     func = convert_func(ds, to_unit)
-    
+
     ds1 = copy(ds)
     out = func(np.array(ds1.data))
-    ds1.data = plugins.numpyCopyOrNone(out) 
+    ds1.data = plugins.numpyCopyOrNone(out)
     ds1.unit = to_unit
-    
+    ds1.m_percent = to_group == 'part'
+
     ini = getattr(ds, 'm_initialDimension', 0)
     old_unit = getattr(ds, 'old_unit', from_unit)
     old_group = known_units.get(old_unit, None)
@@ -310,8 +311,8 @@ def percentile_action(ds, action='Invert'):
         else:
             action = 'To Percent'
     logging.debug('percentile_action %s',action)
-    return action 
-    
+    return action
+
 def percentile_func(ds, action='To Absolute', auto=True):
     """Returns the function used to convert dataset `ds` to percent or back to absolute"""
     ini = getattr(ds, 'm_initialDimension', False)
@@ -321,7 +322,7 @@ def percentile_func(ds, action='To Absolute', auto=True):
             raise plugins.DatasetPluginException('Selected dataset does not have an initial dimension set. \
         Please first run "Initial dimension..." tool. {}{}{}'.format(action,ds.m_col, ds.m_initialDimension))
         ds.m_initialDimension = np.array(ds.data[:5]).mean()
-        
+
     if action == 'To Absolute':
         u = getattr(ds, 'unit', 'percent')
         # If current dataset unit is not percent, convert to
@@ -336,7 +337,7 @@ def percentile_conversion(ds, action='Invert', auto=True):
     action = percentile_action(ds, action)
     func = percentile_func(ds, action, auto)
     out = func(np.array(ds.data))
-    
+
     # Evaluate if the conversion is needed
     # based on the current status and the action requested by the user
     if action == 'To Absolute':

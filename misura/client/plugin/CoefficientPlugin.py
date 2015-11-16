@@ -88,9 +88,9 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         ystart = y[i] or 1
         # COEFFICIENT
         denominator = 100
-        is_not_percent = getattr(_yds, 'm_percent', False)
-        if is_not_percent:
-            denominator = ystart * 100
+        is_percent = getattr(_yds, 'm_percent', False)
+        if not is_percent:
+            denominator = (initial_dimension + ystart)
         out = (y - ystart) / (x - xstart) / denominator
         out[:i + 1] = numpy.nan
 
@@ -104,8 +104,8 @@ class CoefficientPlugin(plugins.DatasetPlugin):
             ystart = y[start_index]
             xstart = x[start_index]
             denominator = 100
-            if is_not_percent:
-                denominator = ystart * 100
+            if not is_percent:
+                denominator = (initial_dimension + ystart)
             out[start_index:] = (y[start_index:] - ystart) / (x[start_index:] - xstart) / denominator
             out[start_index:][x[start_index:] > x[start_index]-1] = numpy.nan
 
