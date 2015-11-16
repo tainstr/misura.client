@@ -103,6 +103,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         if doc:
             self.set_doc(doc)
 
+
     def set_idx(self, n):
         return self.model().set_idx(n)
 
@@ -123,6 +124,10 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.expandAll()
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.set_status()
+        self.doc.signalModified.connect(self.refresh_model)
+
+    def refresh_model(self):
+        self.model().refresh(True)
 
     def set_status(self):
         final = set()
