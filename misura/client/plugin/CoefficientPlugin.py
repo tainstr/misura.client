@@ -29,7 +29,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
             plugins.FieldFloat(
                 'percent', descr='Initial dimension', default=percent),
             plugins.FieldCombo('reconfigure', descr='When cooling is found', items=[
-                               'Continue', 'Stop'], default=reconfigure),
+                               'Restart', 'Stop'], default=reconfigure),
             plugins.FieldInt('smooth', 'Smoothing Window', default=smooth),
             plugins.FieldCombo('smode', descr='Apply Smoothing to', items=[
                                'X and Y', 'Y alone', 'Output'], default=smode),
@@ -69,14 +69,14 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         x = xds.data
         y = yds.data
 
-        chk = numpy.abs(x - start)
-        i = numpy.where(chk == min(chk))[0][0]
+        i = numpy.where(x > start)[0][0]
         j = None
         # Define the end of calc
-        if recon != 'Continue':
-            j = numpy.where(x == x.max())[0][0]
-            ymax = y[j]
-            xmax = x[j]
+
+        j = numpy.where(x == x.max())[0][0]
+        ymax = y[j]
+        xmax = x[j]
+
         # Smooth input curves
         if smooth > 0:
             if smode != 'Output':
@@ -90,18 +90,24 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         denominator = 100
         is_not_percent = getattr(_yds, 'm_percent', False)
         if is_not_percent:
-            denominator = ystart
+            denominator = ystart * 100
         out = (y - ystart) / (x - xstart) / denominator
-        out[:i + 1] = float('NaN')
+        out[:i + 1] = numpy.nan
 
         # TODO: multiple ramps
         # Detect the maximum temperature
         # and start a new coefficient point
         if recon == 'Stop':
-            out[j:] = float('NaN')
+            out[j:] = numpy.nan
         else:
-            numpy.place(out, out<0, [float('NaN')])
-            numpy.place(out, abs(out - numpy.nanmean(out)) > 2*numpy.nanstd(out), [float('NaN')])
+            start_index = numpy.where(x == x.max())[0][0]
+            ystart = y[start_index]
+            xstart = x[start_index]
+            denominator = 100
+            if is_not_percent:
+                denominator = ystart * 100
+            out[start_index:] = (y[start_index:] - ystart) / (x[start_index:] - xstart) / denominator
+            out[start_index:][x[start_index:] > x[start_index]-1] = numpy.nan
 
         # Smooth output curve
         if smooth > 0 and smode == 'Output':
