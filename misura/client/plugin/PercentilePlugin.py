@@ -10,7 +10,7 @@ import utils
 from misura.client.iutils import get_plotted_tree
 from .. import units
 
-     
+
 class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
     """Convert to percentile value"""
@@ -32,7 +32,7 @@ class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plugins.FieldBool(
                 "propagate", descr="Apply to all datasets sharing the same Y axis:", default=propagate),
             plugins.FieldCombo("action", descr="Conversion mode:", items=[
-                               'Invert', 'To Percent', 'To Absolute'], default=action),
+                               'Invert'], default=action),
             plugins.FieldBool(
                 "auto", descr="Auto initial dimension", default=auto)
         ]
@@ -49,23 +49,23 @@ class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         if not ds:
             raise plugins.DatasetPluginException(
                 'Dataset not found' + fields['ds'])
-                
+
         action = units.percentile_action(ds, fields['action'])
         ds1 = units.percentile_conversion(ds, action, fields['auto'])
         ds = ds1
         self.ops.append(document.OperationDatasetSet(fields['ds'], ds))
         #self.ops.append(document.OperationDatasetSetVal(fields['ds'], 'data',slice(None,None),ds1.data[:]))
-        
+
         self.apply_ops()
         logging.debug('%s %s %s', 'Converted %s %s using initial dimension %.2f.' % (
             fields['ds'], fields['action'], ds.m_initialDimension))
 # 		QtGui.QMessageBox.information(None,'Percentile output',
 # 				'Converted %s %s using initial dimension %.2f.' % (fields['ds'], msg, ds.m_initialDimension))
-        
+
         # updating all dependent datapoints
         convert_func = units.percentile_func(ds, action, fields['auto'])
         utils.convert_datapoint_units(convert_func, fields['ds'], self.doc)
-        
+
         if not fields['propagate']:
             return
         # Find all datasets plotted with the same Y axis
