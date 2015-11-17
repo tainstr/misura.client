@@ -18,7 +18,8 @@ class CoefficientPlugin(plugins.DatasetPlugin):
     description_short = 'Calculate coefficient'
 
     # string goes in dialog box
-    description_full = ('Calculate a coefficient between a fixed start value and any subsequent value in a curve')
+    description_full = (
+        'Calculate a coefficient between a fixed start value and any subsequent value in a curve')
 
     def __init__(self, ds_x='', ds_y='', start=50., percent=0., reconfigure='Stop', smooth=5, smode='X and Y', ds_out='coeff'):
         """Define input fields for plugin."""
@@ -87,7 +88,8 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         xstart = x[i]
         ystart = y[i] or 1
 
-        out = self.calculate_coefficient(x, y, xstart, ystart, initial_dimension, getattr(_yds, 'm_percent', False))
+        out = self.calculate_coefficient(
+            x, y, xstart, ystart, initial_dimension, getattr(_yds, 'm_percent', False))
         out[:i + 1] = numpy.nan
 
         # TODO: multiple ramps
@@ -96,12 +98,12 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         if recon == 'Stop':
             out[j:] = numpy.nan
         else:
-            start_index = numpy.where(x == x.max())[0][0]
-            ystart = y[start_index]
-            xstart = x[start_index]
+            restart_index = numpy.where(x == x.max())[0][0]
 
-            out[start_index:] = self.calculate_coefficient(x[start_index:], y[start_index:], xstart, ystart, initial_dimension, getattr(_yds, 'm_percent', False))
-            out[start_index:][x[start_index:] > x[start_index]-1] = numpy.nan
+            out[restart_index:] = self.calculate_coefficient(x[restart_index:], y[restart_index:],
+                                                             x[restart_index],  y[restart_index],
+                                                             initial_dimension, getattr(_yds, 'm_percent', False))
+            out[restart_index:][x[restart_index:] > x[restart_index] - 1] = numpy.nan
 
         # Smooth output curve
         if smooth > 0 and smode == 'Output':
@@ -115,7 +117,6 @@ class CoefficientPlugin(plugins.DatasetPlugin):
             denominator = (initial_dimension + y_start)
 
         return (y_dataset - y_start) / (x_dataset - x_start) / denominator
-
 
 
 # add plugin classes to this list to get used
