@@ -345,6 +345,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         if yRange is None:
             yRange = self.yRange
 
+        y = np.nan_to_num(y)
+
         x_distances = np.abs(self.xData - x)
         sorted_by_x_distance_indexs = x_distances.argsort()[:10]
         y_distances_of_nearest_points = np.abs(self.yData[sorted_by_x_distance_indexs] - y)
@@ -654,7 +656,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         if self.y / self.yRange > 0.7:
             ysig = -4
         self.toset(labelwidget, 'xPos', self.x + xsig * self.xRange / 100)
-        self.toset(labelwidget, 'yPos', self.y + ysig * self.yRange / 100)
+        self.toset(labelwidget, 'yPos', self.y)
         # Styling
         self.toset(labelwidget, 'Text/color', self.xy.settings.PlotLine.color)
 
