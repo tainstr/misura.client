@@ -86,12 +86,8 @@ class CoefficientPlugin(plugins.DatasetPlugin):
 
         xstart = x[i]
         ystart = y[i] or 1
-        # COEFFICIENT
-        denominator = 100
-        is_percent = getattr(_yds, 'm_percent', False)
-        if not is_percent:
-            denominator = (initial_dimension + ystart)
-        out = (y - ystart) / (x - xstart) / denominator
+
+        out = self.calculate_coefficient(x, y, xstart, ystart, initial_dimension, getattr(_yds, 'm_percent', False))
         out[:i + 1] = numpy.nan
 
         # TODO: multiple ramps
@@ -103,10 +99,8 @@ class CoefficientPlugin(plugins.DatasetPlugin):
             start_index = numpy.where(x == x.max())[0][0]
             ystart = y[start_index]
             xstart = x[start_index]
-            denominator = 100
-            if not is_percent:
-                denominator = (initial_dimension + ystart)
-            out[start_index:] = (y[start_index:] - ystart) / (x[start_index:] - xstart) / denominator
+
+            out[start_index:] = self.calculate_coefficient(x[start_index:], y[start_index:], xstart, ystart, initial_dimension, getattr(_yds, 'm_percent', False))
             out[start_index:][x[start_index:] > x[start_index]-1] = numpy.nan
 
         # Smooth output curve
@@ -114,6 +108,14 @@ class CoefficientPlugin(plugins.DatasetPlugin):
             out[i:j] = SmoothDatasetPlugin.smooth(out[i:j], smooth, 'hanning')
         self.ds_out.update(data=out)
         return [self.ds_out]
+
+    def calculate_coefficient(self, x_dataset, y_dataset, x_start, y_start, initial_dimension, is_percent):
+        denominator = 100
+        if not is_percent:
+            denominator = (initial_dimension + y_start)
+
+        return (y_dataset - y_start) / (x_dataset - x_start) / denominator
+
 
 
 # add plugin classes to this list to get used
