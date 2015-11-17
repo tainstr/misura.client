@@ -124,10 +124,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.expandAll()
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.set_status()
-        self.doc.signalModified.connect(self.refresh_model)
-
-    def refresh_model(self):
-        self.model().refresh(True)
+        self.doc.signalModified.connect(self.model().refresh)
 
     def set_status(self):
         final = set()
