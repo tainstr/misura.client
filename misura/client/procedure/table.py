@@ -45,6 +45,11 @@ class ThermalCurveTable(QtGui.QTableView):
             m.addSeparator()
             # self.curveModel.mode_ramp(0)
 
+    def enable(self, enabled):
+        self.menu.setEnabled(enabled)
+        edit_trigger = QtGui.QTableView.AllEditTriggers if enabled else QtGui.QTableView.NoEditTriggers
+        self.setEditTriggers(edit_trigger)
+
     def motor_is_available(self, kiln):
         return not (kiln["motor"][0] == "None")
 
@@ -98,14 +103,14 @@ class ThermalCurveTable(QtGui.QTableView):
     def newCheckpoint(self):
         crow = self.selection.currentIndex().row()
         if crow == 0:
-            QtGui.QMessageBox.warning(self, _('Impossible event requested'), 
+            QtGui.QMessageBox.warning(self, _('Impossible event requested'),
                                       _('Cannot insert a checkpoint event as first row'))
             return False
         elif isinstance(self.model().dat[crow][1], basestring):
             # Currently unsupported
-            QtGui.QMessageBox.warning(self, _('Impossible event requested'), 
+            QtGui.QMessageBox.warning(self, _('Impossible event requested'),
                                       _('Cannot insert a checkpoint event after another event'))
-            return False          
+            return False
         desc = {}
         option.ao(desc, 'deltaST', 'Float', name=_("Temperature-Setpoint tolerance"),
                   unit='celsius', current=3, min=0, max=100, step=0.1)
@@ -133,7 +138,7 @@ class ThermalCurveTable(QtGui.QTableView):
         ok = chk.exec_()
         if ok:
             timeout = units.Converter.convert('minute', 'second', cp['timeout'])
-            if timeout < 0: 
+            if timeout < 0:
                 timeout = -1
             event = '>cool,{:.1f},{:.1f}'.format(cp['target'], timeout)
             self.insert_event(event)

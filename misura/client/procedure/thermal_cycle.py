@@ -74,6 +74,12 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.main_layout.addWidget(self.thermal_cycle_optionsWidget)
         self.main_layout.addWidget(self.plot)
 
+    def enable(self, enabled):
+        self.table.enable(enabled)
+        self.buttonBar.setEnabled(enabled)
+        self.fileMenu.setEnabled(enabled)
+        self.editMenu.setEnabled(enabled)
+
     def replot(self, *args):
         crv = self.model.curve(events=False)
         logging.debug('%s %s', 'replotting', crv)

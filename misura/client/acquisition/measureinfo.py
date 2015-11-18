@@ -116,7 +116,7 @@ class MeasureInfo(QtGui.QTabWidget):
 
     def up_isRunning(self):
         is_running = registry.values.get('/isRunning', False)
-        self.thermalCycleView.setEnabled(not is_running)
+        self.thermalCycleView.enable(not is_running)
         self.tabBar().setStyleSheet("background-color:" + ('red;' if is_running else 'green;'))
 
         # Update isRunning widget
