@@ -98,7 +98,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.bApp = QtGui.QPushButton("Apply")
         self.connect(self.bApp, QtCore.SIGNAL('clicked(bool)'), self.apply)
         self.buttons.addWidget(self.bApp)
-        self.tcc = widgets.ThermalCycleChooser(self.remote, parent=self)
+        self.tcc = widgets.ThermalCycleChooser(self.remote, parent=self, table=self.table)
         self.tcc.label_widget.hide()
         self.buttons.addWidget(self.tcc)
         self.connect(self.tcc.combo, QtCore.SIGNAL(
