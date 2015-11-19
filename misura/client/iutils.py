@@ -16,6 +16,7 @@ import network
 from live import registry  # needed for initialization
 from clientconf import confdb, settings
 signal.signal(signal.SIGINT, signal.SIG_DFL)  # cattura i segnali
+import veusz.utils
 
 app = None
 translators = []
@@ -308,3 +309,19 @@ def shorten(name, number_of_chars_to_show=30):
         return name
 
     return name[0:number_of_chars_to_show / 2] + "..." + name[-number_of_chars_to_show / 2:]
+
+# Caricamento icone
+
+
+def loadIcons():
+    """Icons loading. Must be called after qapplication init."""
+    # d=list(os.path.split(veusz.utils.utilfuncs.resourceDirectory))[:-1]+['misura','client','art']
+    # artdir=os.path.join(*tuple(d))
+
+    for key in ['m4.connect', 'm4.db', 'm4.open', 'm4.sintering', 'm4.softening', 'm4.sphere', 'm4.halfSphere', 'm4.melting', 'm4.single-ramp']:
+        n = key.split('.')[1] + '.svg'
+        n = os.path.join(params.pathArt, n)
+        logging.debug('%s', n)
+        if not os.path.exists(n):
+            continue
+        veusz.utils.action._iconcache[key] = QtGui.QIcon(n)

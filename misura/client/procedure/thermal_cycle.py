@@ -11,6 +11,8 @@ from .. import conf
 
 from plot import ThermalCyclePlot
 from table import ThermalCurveTable
+import veusz.utils
+from misura.client import iutils
 
 
 class ThermalCycleDesigner(QtGui.QSplitter):
@@ -18,6 +20,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
     """The configuration interface widget. It builds interactive controls to deal with a misura configuration object (options, settings, peripherals configurations, etc)."""
 
     def __init__(self, remote, active_instrument, parent=None, force_live=False):
+        iutils.loadIcons()
         #       QtGui.QWidget.__init__(self, parent)
         QtGui.QSplitter.__init__(self, parent)
         self.setOrientation(QtCore.Qt.Vertical)
@@ -51,6 +54,9 @@ class ThermalCycleDesigner(QtGui.QSplitter):
                 'Insert parametric heating', self.table.newParam)
             a.setEnabled(False)
             self.editMenu.addAction('Remove current row', self.table.delRow)
+            self.templatesMenu = menuBar.addMenu(_('Templates'))
+
+            self.templatesMenu.addAction(veusz.utils.action.getIcon('m4.single-ramp'), _('Single Ramp'), self.singl_ramp_template)
             self.addButtons()
 
         self.plot = ThermalCyclePlot()
@@ -73,6 +79,9 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             active_instrument.root, active_instrument.measure, thermal_cycle_options, parent=self)
             self.main_layout.addWidget(self.thermal_cycle_optionsWidget)
         self.main_layout.addWidget(self.plot)
+
+    def singl_ramp_template(self):
+        pass
 
     def enable(self, enabled):
         self.table.enable(enabled)

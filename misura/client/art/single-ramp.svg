@@ -1,0 +1,52 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="531px" height="531px" version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+<desc>Veusz output document</desc>
+<defs>
+<clipPath id="c0">
+<path d="m0,0l531.49,0l0,531.49l-531.49,0l0,-531.49"/>
+</clipPath>
+<clipPath id="c1">
+<path d="m60.23,7.08l464.17,0l0,464.17l-464.17,0l0,-464.17"/>
+</clipPath>
+</defs>
+<g stroke-linejoin="bevel" stroke-linecap="square" stroke="#000000" fill-rule="evenodd">
+<g clip-path="url(#c0)">
+<g fill="#ffffff" stroke="none" stroke-width="1">
+<path d="m60.23,7.08l464.17,0l0,464.17l-464.17,0l0,-464.17"/>
+</g>
+</g>
+<g clip-path="url(#c1)">
+<g fill="none" stroke="#ff0000" stroke-width="37.5">
+<polyline fill="none" points="60.23,471.25 524.4,7.08"/>
+</g>
+<g fill="#000000" stroke-linejoin="miter" stroke-width="0.62">
+<g transform="translate(60.23,471.25)">
+<path d="m3.75,0c0,2.07,-1.67,3.75,-3.75,3.75c-2.07,0,-3.75,-1.67,-3.75,-3.75c0,-2.07,1.67,-3.75,3.75,-3.75c2.07,0,3.75,1.67,3.75,3.75" id="p0"/>
+</g>
+<use xlink:href="#p0" x="524.4" y="7.08"/>
+</g>
+</g>
+<g clip-path="url(#c0)">
+<g fill="none" stroke-linecap="butt" stroke-width="6.25">
+<path d="M60.23,471.25l0,-464.17"/>
+</g>
+<g fill="none" stroke-linecap="butt" stroke-width="0.62">
+<path d="M60.23,471.25l3.75,0M60.23,448.05l3.75,0M60.23,424.84l3.75,0M60.23,401.63l3.75,0M60.23,378.42l3.75,0M60.23,355.21l3.75,0M60.23,332l3.75,0M60.23,308.79l3.75,0M60.23,285.59l3.75,0M60.23,262.38l3.75,0M60.23,239.17l3.75,0M60.23,215.96l3.75,0M60.23,192.75l3.75,0M60.23,169.54l3.75,0M60.23,146.33l3.75,0M60.23,123.12l3.75,0M60.23,99.92l3.75,0M60.23,76.71l3.75,0M60.23,53.5l3.75,0M60.23,30.29l3.75,0M60.23,7.08l3.75,0"/>
+</g>
+<g fill="none" stroke-linecap="butt" stroke-width="6.25">
+<path d="M60.23,471.25l7.5,0M60.23,378.42l7.5,0M60.23,285.59l7.5,0M60.23,192.75l7.5,0M60.23,99.92l7.5,0M60.23,7.08l7.5,0"/>
+<path d="M60.23,471.25l464.17,0"/>
+</g>
+<g fill="none" stroke-linecap="butt" stroke-width="0.62">
+<path d="M60.23,471.25l0,-3.75M83.44,471.25l0,-3.75M106.65,471.25l0,-3.75M129.86,471.25l0,-3.75M153.07,471.25l0,-3.75M176.27,471.25l0,-3.75M199.48,471.25l0,-3.75M222.69,471.25l0,-3.75M245.9,471.25l0,-3.75M269.11,471.25l0,-3.75M292.32,471.25l0,-3.75M315.53,471.25l0,-3.75M338.74,471.25l0,-3.75M361.94,471.25l0,-3.75M385.15,471.25l0,-3.75M408.36,471.25l0,-3.75M431.57,471.25l0,-3.75M454.78,471.25l0,-3.75M477.99,471.25l0,-3.75M501.2,471.25l0,-3.75M524.4,471.25l0,-3.75"/>
+</g>
+<g fill="none" stroke-linecap="butt" stroke-width="6.25">
+<path d="M60.23,471.25l0,-7.5M153.07,471.25l0,-7.5M245.9,471.25l0,-7.5M338.74,471.25l0,-7.5M431.57,471.25l0,-7.5M524.4,471.25l0,-7.5"/>
+</g>
+</g>
+</g>
+</svg>

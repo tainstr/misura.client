@@ -26,25 +26,11 @@ from ..clientconf import confdb
 from ..database import getDatabaseWidget, getRemoteDatabaseWidget
 import veuszplot
 from ..confwidget import RecentMenu, ClientConf
-
+from misura.client import iutils
 
 setting.transient_settings['unsafe_mode'] = True
 
-# Caricamento icone
 
-
-def loadIcons():
-    """Icons loading. Must be called after qapplication init."""
-    # d=list(os.path.split(veusz.utils.utilfuncs.resourceDirectory))[:-1]+['misura','client','art']
-    # artdir=os.path.join(*tuple(d))
-
-    for key in ['m4.connect', 'm4.db', 'm4.open', 'm4.sintering', 'm4.softening', 'm4.sphere', 'm4.halfSphere', 'm4.melting']:
-        n = key.split('.')[1] + '.png'
-        n = os.path.join(params.pathArt, n)
-        logging.debug('%s', n)
-        if not os.path.exists(n):
-            continue
-        veusz.utils.action._iconcache[key] = QtGui.QIcon(n)
 
 
 class CustomInterface(object):
@@ -352,7 +338,7 @@ class Graphics(MainWindow):
         return
 
     def __init__(self, *a):
-        loadIcons()
+        iutils.loadIcons()
         logging.debug('%s', 'Load Icons OK')
         self._document = MisuraDocument()
         # Shortcuts to command interpreter and interface
