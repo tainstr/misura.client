@@ -38,6 +38,9 @@ class FakeTermalCurveModel():
     def row_modes(self):
         return self.fake_row_modes
 
+    def mode_of_column(self, column):
+        return 'any mode'
+
 
 class TestTermalCycleFlags(unittest.TestCase):
 
