@@ -92,13 +92,8 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             return r
 
         if role == QtCore.Qt.ForegroundRole:
-            modes_dict = collections.defaultdict(bool)
-            modes_dict[row.colTIME] = 'points'
-            modes_dict[row.colRATE] = 'ramp'
-            modes_dict[row.colDUR] = 'dwell'
-
             current_row_mode = self.row_modes[index.row()]
-            current_column_mode = modes_dict[col]
+            current_column_mode = self.mode_of_column(col)
             has_to_be_highligthed = index.row() > 0 and current_row_mode == current_column_mode
 
             if has_to_be_highligthed:
@@ -177,13 +172,16 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         self.mode_to('dwell', row)
 
     def update_mode_of_row_with_mode_of_column(self, current_row, column):
+        self.mode_to(self.mode_of_column(column), current_row)
+
+    def mode_of_column(self, column):
         modes_dict = collections.defaultdict(bool)
 
         modes_dict[row.colTIME] = 'points'
         modes_dict[row.colRATE] = 'ramp'
         modes_dict[row.colDUR] = 'dwell'
 
-        self.mode_to(modes_dict[column], current_row)
+        return modes_dict[column]
 
 
     def setCurve(self, crv, progressBar=False):

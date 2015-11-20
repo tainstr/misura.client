@@ -9,16 +9,11 @@ def execute(thermal_curve_model, index, is_live=True):
     row_index = index.row()
     column_index = index.column()
 
-    modes_dict = collections.defaultdict(bool)
-    modes_dict[row.colTIME] = 'points'
-    modes_dict[row.colRATE] = 'ramp'
-    modes_dict[row.colDUR] = 'dwell'
-
     if not index.isValid() or not is_live:
         return QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsEnabled)
 
     current_row_mode = thermal_curve_model.row_modes[row_index]
-    current_column_mode = modes_dict[column_index]
+    current_column_mode = thermal_curve_model.mode_of_column(column_index)
 
     if (thermal_curve_model.dat[row_index][row.colTIME] < 0 and column_index != row.colTEMP) or (row_index == 0 and column_index != row.colTEMP):
         return QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsEnabled)
