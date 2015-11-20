@@ -23,9 +23,15 @@ class Designer(unittest.TestCase):
         tcd.remote['rateLimit'] = lim
         tcd.show()
         QtGui.qApp.exec_()
-        
 
-        
+    def test_ramp_to_thermal_cycle_table(self):
+        self.assertEqual([[0.0, 0], [3000.0, 1000.0]], thermal_cycle.ramp_to_thermal_cycle_curve(1000, 20))
+        self.assertEqual([[0.0, 0], [2600.0, 1300.0]], thermal_cycle.ramp_to_thermal_cycle_curve(1300, 30))
+        self.assertEqual([[0.0, 0], [1350.0, 1800.0]], thermal_cycle.ramp_to_thermal_cycle_curve(1800, 80))
+
+
+
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

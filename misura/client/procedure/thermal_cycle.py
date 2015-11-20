@@ -13,7 +13,11 @@ from plot import ThermalCyclePlot
 from table import ThermalCurveTable
 import veusz.utils
 from misura.client import iutils
+from misura.canon import option
 
+def ramp_to_thermal_cycle_curve(end_temperature, heating_rate):
+    time_elapsed_in_seconds = end_temperature / float(heating_rate) * 60.
+    return [[0.0, 0], [time_elapsed_in_seconds, end_temperature]]
 
 class ThermalCycleDesigner(QtGui.QSplitter):
 
@@ -21,8 +25,8 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 
     def __init__(self, remote, active_instrument, parent=None, force_live=False):
         iutils.loadIcons()
-        #       QtGui.QWidget.__init__(self, parent)
         QtGui.QSplitter.__init__(self, parent)
+        self.parent = parent
         self.setOrientation(QtCore.Qt.Vertical)
         self.remote = remote
         self.main_layout = self
@@ -56,7 +60,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.editMenu.addAction('Remove current row', self.table.delRow)
             self.templatesMenu = menuBar.addMenu(_('Templates'))
 
-            self.templatesMenu.addAction(veusz.utils.action.getIcon('m4.single-ramp'), _('Single Ramp'), self.singl_ramp_template)
+            self.templatesMenu.addAction(veusz.utils.action.getIcon('m4.single-ramp'), _('Single Ramp'), self.single_ramp_template)
             self.addButtons()
 
         self.plot = ThermalCyclePlot()
@@ -80,8 +84,20 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.main_layout.addWidget(self.thermal_cycle_optionsWidget)
         self.main_layout.addWidget(self.plot)
 
-    def singl_ramp_template(self):
-        pass
+    def single_ramp_template(self):
+        ramp_options = {}
+        option.ao(ramp_options, 'temperature', 'Float', name=_("Ramp end Temperature"),
+                  unit='celsius', current=1000, min=0, max=2000, step=0.1)
+        option.ao(ramp_options, 'heatingRate', 'Float', name=_("Heating Rate"),
+                  unit='celsius/minute', current=20, min=0.1, max=80, step=0.1)
+        temperature_configuration_proxy = option.ConfigurationProxy({'self': ramp_options})
+        temperature_dialog = conf.InterfaceDialog(temperature_configuration_proxy, temperature_configuration_proxy, ramp_options, parent=self.parent)
+        temperature_dialog.setWindowTitle(_('Single ramp template'))
+        if temperature_dialog.exec_():
+            new_curve = ramp_to_thermal_cycle_curve(temperature_configuration_proxy['temperature'], temperature_configuration_proxy['heatingRate'])
+            self.model.setCurve(new_curve)
+            self.replot()
+            self.apply()
 
     def enable(self, enabled):
         self.table.enable(enabled)
