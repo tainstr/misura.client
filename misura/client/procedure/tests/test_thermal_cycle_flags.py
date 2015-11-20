@@ -26,12 +26,17 @@ class FakeIndex():
 
 class FakeTermalCurveModel():
 
-    def __init__(self, dat):
+    def __init__(self, dat, row_modes=['any mode', 'another mode']):
         self.fake_dat = dat
+        self.fake_row_modes = row_modes
 
     @property
     def dat(self):
         return self.fake_dat
+
+    @property
+    def row_modes(self):
+        return self.fake_row_modes
 
 
 class TestTermalCycleFlags(unittest.TestCase):
@@ -90,11 +95,34 @@ class TestTermalCycleFlags(unittest.TestCase):
         valid_index = FakeIndex(row_index, column_index, True)
         dat = [[123, 321, 0, 132]]
 
-        editable = QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsEnabled)
+        not_editable = QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsEnabled)
         is_live = False
 
-        self.assertEqual(editable, thermal_cycle_flags.execute(
-            FakeTermalCurveModel(dat), valid_index, is_live=is_live))
+        self.assertEqual(not_editable, thermal_cycle_flags.execute(
+            FakeTermalCurveModel(dat, ['any mode']), valid_index, is_live=is_live))
+
+    def test_rate_is_not_editable_when_not_int_rate_mode(self):
+        row_index = 1
+        column_index = thermal_cycle_row.colRATE
+        valid_index = FakeIndex(row_index, column_index, True)
+        dat = [[], [123, 321, 80, 132]]
+        modes = ['any mode', 'points']
+
+        not_editable = QtCore.Qt.ItemFlags(QtCore.Qt.ItemIsEnabled)
+
+        self.assertEqual(not_editable, thermal_cycle_flags.execute(FakeTermalCurveModel(dat, modes), valid_index))
+
+    def test_temperature_is_always_editable(self):
+        row_index = 1
+        column_index = thermal_cycle_row.colTEMP
+        valid_index = FakeIndex(row_index, column_index, True)
+        dat = [[], [123, 321, 80, 132]]
+        modes = ['any mode', 'any mode']
+
+        editable = QtCore.Qt.ItemFlags(
+            QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
+
+        self.assertEqual(editable, thermal_cycle_flags.execute(FakeTermalCurveModel(dat, modes), valid_index))
 
 
 

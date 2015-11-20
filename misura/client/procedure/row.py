@@ -7,7 +7,7 @@ colTIME = 0
 colTEMP = 1
 colRATE = 2
 colDUR = 3
-colMODE = 4
+
 
 def is_row_an_event(row_entry):
         temp_value = row_entry[colTEMP]

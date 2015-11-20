@@ -10,7 +10,7 @@ import flags
 import collections
 
 def clean_curve(dat, events=True):
-    """Convert `dat` model thermal cycle to a (time,Temp) list of points. 
+    """Convert `dat` model thermal cycle to a (time,Temp) list of points.
     Include `events` or try to convert them to numerical values."""
     crv = []
     # Event-based time correction
@@ -26,8 +26,8 @@ def clean_curve(dat, events=True):
             logging.debug('%s %s', 'EVENT', index_row)
             T = str(T)
             if events:
-                t += time_correction  
-                crv.append([t * 60, T]) 
+                t += time_correction
+                crv.append([t * 60, T])
                 continue
             ev = T.split(',')
             timeout = -1
@@ -36,7 +36,7 @@ def clean_curve(dat, events=True):
                 if len(ev) > 2:
                     timeout = float(ev[2])/60.
                 # assume a 50°C/min ramp
-                if timeout < 0 and len(crv) > 1:  
+                if timeout < 0 and len(crv) > 1:
                     T0 = crv[-1][1]
                     timeout = (T0 - T) / 50.
             elif T.startswith('>checkpoint'):
@@ -51,7 +51,7 @@ def clean_curve(dat, events=True):
                 logging.debug('Cannot render event %s', index_row, ev)
                 continue
             time_correction += timeout
-        t += time_correction  
+        t += time_correction
         crv.append([t * 60, T])
     return crv
 
@@ -99,8 +99,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
 
             current_row_mode = self.row_modes[index.row()]
             current_column_mode = modes_dict[col]
-            has_to_be_highligthed = index.row(
-            ) > 0 and current_row_mode == current_column_mode
+            has_to_be_highligthed = index.row() > 0 and current_row_mode == current_column_mode
 
             if has_to_be_highligthed:
                 return QtGui.QBrush(QtCore.Qt.darkRed)
@@ -229,10 +228,10 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
                 self.dat, ir, self.row_modes[ir], time_correction, maxHeatingRate, rateLimit)
             # Save row and time correction for next iter
             self.dat[ir] = new_row
-        
+
 
     def curve(self, events=True):
         """Format table for plotting or transmission"""
         return clean_curve(self.dat, events)
-    
-    
+
+
