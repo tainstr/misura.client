@@ -176,6 +176,17 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
     def mode_dwell(self, row):
         self.mode_to('dwell', row)
 
+    def mode(self, current_row, column):
+        modes_dict = collections.defaultdict(bool)
+
+        modes_dict[row.colTIME] = 'points'
+        modes_dict[row.colRATE] = 'ramp'
+        modes_dict[row.colDUR] = 'dwell'
+        modes_dict[row.colTEMP] = self.row_modes[current_row]
+
+        self.mode_to(modes_dict[column], current_row)
+
+
     def setCurve(self, crv, progressBar=False):
         self.removeRows(0, self.rowCount())
         self.insertRows(0, len(crv))

@@ -39,6 +39,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         is_live = isinstance(remote, MisuraProxy) or force_live
 
         self.table = ThermalCurveTable(remote, self, is_live=is_live)
+        self.table.doubleClicked.connect(self.set_mode_of_cell)
         self.model = self.table.model()
 
         if is_live:
@@ -83,6 +84,9 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             active_instrument.root, active_instrument.measure, thermal_cycle_options, parent=self)
             self.main_layout.addWidget(self.thermal_cycle_optionsWidget)
         self.main_layout.addWidget(self.plot)
+
+    def set_mode_of_cell(self, index_model):
+        cell_mode = self.model.mode(index_model.row(), index_model.column())
 
     def single_ramp_template(self):
         ramp_options = {}
