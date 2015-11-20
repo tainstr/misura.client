@@ -33,50 +33,50 @@ def find_max_heating_rate(T, rateLimit, maxHeatingRate=80):
     elif rT >= T:
         maxHeatingRate = rR
     return maxHeatingRate
-    
 
-    
+
+
 def update_row(rows, row_index, mode, time_correction=0, maxRate=80, rateLimit=[]):
-    """Adjust `row_index` of `rows` model, following ajusting `mode` rules 
+    """Adjust `row_index` of `rows` model, following ajusting `mode` rules
     and enforcing rate limit `maxRate` and rate limiting curve `rateLimit`.
     Returns the adjusted row entry and the time correction to be applied to all subsequent entries."""
     current_row = rows[row_index]
     # Apply time_correction from previous rows
-    current_row[0] += time_correction
-    
+    current_row[colTIME] += time_correction
+
     # Previous point: search backwards
     prev_row_index, prev_row = next_point(rows, row_index - 1, delta=-1, events=True)
     if prev_row is False:
-        return current_row, time_correction 
-      
+        return current_row, time_correction
+
     time, temperature, heating_rate, duration = current_row
-    prev_time, prev_temperature, prev_heating_rate, prev_duration = prev_row   
-    # Extract start temperature from a previous cooling/checkpoint event 
+    prev_time, prev_temperature, prev_heating_rate, prev_duration = prev_row
+    # Extract start temperature from a previous cooling/checkpoint event
     while isinstance(prev_temperature, basestring):
         if prev_temperature.startswith('>cool'):
             prev_temperature, prev_timeout = decode_cool_event(prev_temperature)
         elif prev_temperature.startswith('>checkpoint'):
             prev_row_index1, prev_row1 = next_point(rows, prev_row_index - 1, delta=-1, events=True)
-            prev_temperature = prev_row1[1]
-            
-    
+            prev_temperature = prev_row1[colTEMP]
+
+
     if isinstance(temperature, basestring):
         # Update time_correction for natural cooling events
         if temperature.startswith('>cool'):
             temperature, timeout = decode_cool_event(temperature)
             timeout /= 60.
             time_correction += timeout
-            current_row[0] = prev_time + timeout
+            current_row[colTIME] = prev_time + timeout
         elif temperature.startswith('>checkpoint'):
             tolerance, timeout = decode_checkpoint_event(temperature)
             # assume a 10min delay/tolerance
             timeout = 10./tolerance
 #             timeout /= 60.
             time_correction += timeout
-            current_row[0] = prev_time + timeout         
-                 
+            current_row[colTIME] = prev_time + timeout
+
         return current_row, time_correction
-        
+
     if temperature != 0:
         maxRate = find_max_heating_rate(temperature, rateLimit, maxRate)
 
@@ -86,7 +86,7 @@ def update_row(rows, row_index, mode, time_correction=0, maxRate=80, rateLimit=[
             heating_rate = 0
         else:
             heating_rate = (temperature - prev_temperature) / duration
-            
+
     elif mode == 'ramp':  # rate/temperature (Rate)
         if heating_rate != 0:
             duration = (temperature - prev_temperature) / heating_rate
@@ -94,7 +94,7 @@ def update_row(rows, row_index, mode, time_correction=0, maxRate=80, rateLimit=[
             index_to_take = previous_not_event_row_index(row_index, rows)
             temperature = rows[index_to_take][colTEMP]
         time = prev_time + duration
-        
+
     elif mode == 'dwell':  # duration/temperature (Duration)
         if duration == 0:
             heating_rate = 0
@@ -106,21 +106,21 @@ def update_row(rows, row_index, mode, time_correction=0, maxRate=80, rateLimit=[
         ret = [prev_time + 1, prev_temperature, 0, 1]
     else:
         ret = [time, temperature, heating_rate, duration]
-        
+
     # Limit heating rate
-    if ret[2] > maxRate:
-        delay = ret[3] * ((ret[2] / maxRate) - 1) 
-        print temperature, prev_temperature, ret[3], ret[2], maxRate
+    if ret[colRATE] > maxRate:
+        delay = ret[colDUR] * ((ret[colRATE] / maxRate) - 1)
+        print temperature, prev_temperature, ret[colDUR], ret[colRATE], maxRate
         # Fix heating rate
-        ret[2] = maxRate
+        ret[colRATE] = maxRate
         # Increase time target
-        ret[0] += delay
+        ret[colTIME] += delay
         # Increase duration to accommodate delay
-        ret[3] += delay
+        ret[colDUR] += delay
         # Increase time_correction so next point is delayed according to the lower heating rate
         time_correction += delay
-        
-    
+
+
     return ret, time_correction
-    
+
 
