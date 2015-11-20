@@ -85,15 +85,15 @@ class MenuBar(QtGui.QMenuBar, HelpMenu):
             return
         r = self.server.users.logout()
         confdb.logout(self.server.addr)
-        QtGui.QMessageBox.information(self, 'Logged out',
+        QtGui.QMessageBox.information(self, _('Logged out'),
                                       'You have been logged out (%s): \n %r' % (network.manager.user, r))
 
     def shutdown(self):
-        QtGui.QMessageBox.information(self, 'Shutting Down',
+        QtGui.QMessageBox.information(self, _('Shutting Down'),
                                       'Server is shutting down:\n %r' % network.manager.remote.shutdown())
 
     def restart(self):
-        QtGui.QMessageBox.information(self, 'Shutting Down',
+        QtGui.QMessageBox.information(self, _('Shutting Down'),
                                       'Server is restarting:\n %r' % network.manager.remote.restart())
 
     def getConnection(self, srv):
@@ -178,38 +178,38 @@ class MenuBar(QtGui.QMenuBar, HelpMenu):
         self.windows['measureDock'] = parent.measureDock
         self.showMeasureDock = functools.partial(self.hideShow, 'measureDock')
         act = self.measure.addAction(
-            'Test Configuration', self.showMeasureDock)
+            _('Test Configuration'), self.showMeasureDock)
         self.lstActions.append((act, 'measureDock'))
 
         self.windows['snapshotsDock'] = parent.snapshotsDock
         self.showSnapshotsStrip = functools.partial(
             self.hideShow, 'snapshotsDock')
-        act = self.measure.addAction('Snapshots', self.showSnapshotsStrip)
+        act = self.measure.addAction(_('Storyboard'), self.showSnapshotsStrip)
         self.lstActions.append((act, 'snapshotsDock'))
 
         self.windows['graphWin'] = parent.graphWin
         self.showGraph = functools.partial(self.hideShow, 'graphWin')
-        act = self.measure.addAction('Data Plot', self.showGraph)
+        act = self.measure.addAction(_('Data Plot'), self.showGraph)
         self.lstActions.append((act, 'graphWin'))
 
         self.windows['tableWin'] = parent.tableWin
         self.showTable = functools.partial(self.hideShow, 'tableWin')
-        act = self.measure.addAction('Data Table', self.showTable)
+        act = self.measure.addAction(_('Data Table'), self.showTable)
         self.lstActions.append((act, 'tableWin'))
 
         self.windows['logDock'] = parent.logDock
         self.showLogWindow = functools.partial(self.hideShow, 'logDock')
-        act = self.measure.addAction('Log Window', self.showLogWindow)
+        act = self.measure.addAction(_('Log Window'), self.showLogWindow)
         self.lstActions.append((act, 'logDock'))
 
-        self.measure.addAction('Reload data', self.reload_data)
+        self.measure.addAction(_('Reload data'), self.reload_data)
 
         if self.fixedDoc:
             self.measure.addSeparator()
-            self.measure.addAction('Save to file')
-            self.measure.addAction('Close')
+            self.measure.addAction(_('Save to file'))
+            self.measure.addAction(_('Close')
         else:
-            self.measure.addAction('Quit Client')
+            self.measure.addAction(_('Quit Client'))
         self.measure.setEnabled(True)
 
         # SETTINGS Menu
@@ -222,7 +222,7 @@ class MenuBar(QtGui.QMenuBar, HelpMenu):
         self.lstActions.append((act, self.remote))
 
         # DEVICES SubMenu
-        self.devices = self.settings.addMenu('Devices')
+        self.devices = self.settings.addMenu(_('Devices'))
         self.connect(
             self.devices, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
         paths = self.remote['devices']
@@ -247,7 +247,7 @@ class MenuBar(QtGui.QMenuBar, HelpMenu):
     def appendGlobalConf(self):
         self.objects['mconf'] = functools.partial(conf.MConf, self.server)
         self.showMConf = functools.partial(self.hideShow, 'mconf')
-        act = self.settings.addAction('Global', self.showMConf)
+        act = self.settings.addAction(_('Global'), self.showMConf)
         act.setCheckable(True)
         self.lstActions.append((act, 'mconf'))
 
