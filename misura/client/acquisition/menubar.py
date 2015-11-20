@@ -207,7 +207,7 @@ class MenuBar(QtGui.QMenuBar, HelpMenu):
         if self.fixedDoc:
             self.measure.addSeparator()
             self.measure.addAction(_('Save to file'))
-            self.measure.addAction(_('Close')
+            self.measure.addAction(_('Close'))
         else:
             self.measure.addAction(_('Quit Client'))
         self.measure.setEnabled(True)
