@@ -86,7 +86,8 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.main_layout.addWidget(self.plot)
 
     def set_mode_of_cell(self, index_model):
-        cell_mode = self.model.mode(index_model.row(), index_model.column())
+        if index_model.column() != row.colTEMP:
+            self.model.update_mode_of_row_with_mode_of_column(index_model.row(), index_model.column())
 
     def single_ramp_template(self):
         ramp_options = {}
