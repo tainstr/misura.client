@@ -64,7 +64,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 
             self.act_del = self.base_menu.addAction(
                 _('Delete'), self.deleteChildren)
-            self.base_menu.addAction(_('Update view'), self.refresh)
+            self.base_menu.addAction(_('Update view'), self.refresh_model)
 
             ######
             # File menu
@@ -76,7 +76,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             self.file_menu.addAction(_('Close'), self.closeFile)
             # self.file_menu.addAction(
             #     _('Commit data to test file'), self.commit)
-            self.file_menu.addAction(_('Update view'), self.refresh)
+            self.file_menu.addAction(_('Update view'), self.refresh_model)
             #  self.ver_menu = self.file_menu.addMenu('Load Version')
 
             ######
@@ -99,7 +99,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 
         else:
             self.connect(
-                self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.refresh)
+                self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.refresh_model)
         if doc:
             self.set_doc(doc)
 
@@ -126,8 +126,9 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.set_status()
         self.doc.signalModified.connect(self.refresh_model)
 
-    def refresh_model(self):
-        self.model().refresh(False)
+    def refresh_model(self, ismodified=True):
+        if ismodified:
+            self.model().refresh(False)
 
     def set_status(self):
         final = set()
@@ -142,7 +143,6 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.model().status = final
         logging.debug('%s %s', 'STATUS SET TO', final)
         self.collapseAll()
-        self.refresh()
         self.expandAll()
 
     def select(self, idx):

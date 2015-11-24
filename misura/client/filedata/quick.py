@@ -105,10 +105,6 @@ class QuickOps(object):
             return self
         return self._mainwindow
 
-    def refresh(self):
-        logging.debug('%s %s', 'refreshing model', self.doc)
-        self.model().refresh(True)
-
     @node
     def intercept(self, node=False):
         """Intercept all curves derived/pertaining to the current object"""
@@ -145,7 +141,7 @@ class QuickOps(object):
         for ds in self.doc.data.values():
             if ds.linked == lk:
                 self.deleteData(ds)
-        self.refresh()
+
 
     @node
     def reloadFile(self, node=False):
@@ -153,14 +149,14 @@ class QuickOps(object):
         if not node.linked:
             return False
         logging.debug('%s', node.linked.reloadLinks(self.doc))
-        self.refresh()
+
 
     def load_version(self, LF, version):
         # FIXME: VERSIONING!
         logging.debug('%s', 'LOAD VERSION')
         LF.params.version = version
         LF.reloadLinks(self.doc)
-        self.refresh()
+
         fl = self.model().files
         logging.debug('%s %s', 'got linked files', self.model().files[:])
 
@@ -174,7 +170,7 @@ class QuickOps(object):
             return
         logging.debug('%s %s', 'Committing data to', node.filename)
         node.commit(unicode(name))
-        self.refresh()
+
 
     ###
     # Sample actions
@@ -187,7 +183,7 @@ class QuickOps(object):
             if not sub.ds:
                 continue
             self.deleteData(sub)
-# 		self.refresh()
+#
 
     @node
     def showPoints(self, node=False):
@@ -262,10 +258,10 @@ class QuickOps(object):
             logging.debug('%s %s', 'Unloading', node.path)
             node.ds.data = []
             self.previous_selection = False
-            self.refresh()
+
             return
         self._load(node)
-        self.refresh()
+
         pass
 
     @node
@@ -276,7 +272,6 @@ class QuickOps(object):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.ThermalCyclePlugin)
         self.mainwindow.showDialog(d)
-        self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @node
     def setInitialDimension(self, node=False):
@@ -292,7 +287,6 @@ class QuickOps(object):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.InitialDimensionPlugin)
         self.mainwindow.showDialog(d)
-# 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @node
     def convertPercentile(self, node=False):
@@ -302,7 +296,6 @@ class QuickOps(object):
         p = plugin.PercentilePlugin(ds=n, propagate=True)
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.PercentilePlugin)
         self.mainwindow.showDialog(d)
-# 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @node
     def set_unit(self, node=False, convert=False):
@@ -316,7 +309,6 @@ class QuickOps(object):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.UnitsConverterTool)
         self.mainwindow.showDialog(d)
-# 		self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @node
     def deleteData(self, node=False, remove_dataset=True, recursive=True):
@@ -475,7 +467,6 @@ class QuickOps(object):
         dialog = self.mainwindow.slotDataEdit(name)
         if ds is not y:
             dialog.slotDatasetEdit()
-#		self.connect(dialog, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @node
     def smooth(self, node=False):
@@ -488,7 +479,6 @@ class QuickOps(object):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.SmoothDatasetPlugin)
         self.mainwindow.showDialog(d)
-        self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @node
     def coefficient(self, node=False):
@@ -505,7 +495,6 @@ class QuickOps(object):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.CoefficientPlugin)
         self.mainwindow.showDialog(d)
-        self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @node
     def derive(self, node=False):
@@ -521,7 +510,6 @@ class QuickOps(object):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.DeriveDatasetPlugin)
         self.mainwindow.showDialog(d)
-        self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @node
     def calibration(self, node=False):
@@ -534,7 +522,6 @@ class QuickOps(object):
         p = plugin.CalibrationFactorPlugin(d=node.path, T=T)
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.CalibrationFactorPlugin)
         self.mainwindow.showDialog(d)
-        self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @nodes
     def correct(self, nodes=[]):
@@ -550,7 +537,6 @@ class QuickOps(object):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
         self.mainwindow.showDialog(d)
-        self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @nodes
     def surface_tension(self, nodes):
@@ -587,7 +573,6 @@ class QuickOps(object):
                 dil=dil, dilT=T, ds_out=out, temperature_dataset=self.doc.data[T].data)
         d = PluginDialog(self.mainwindow, self.doc, p, cls)
         self.mainwindow.showDialog(d)
-        self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
 
     @node
     def keep(self, node=False):
@@ -649,4 +634,3 @@ class QuickOps(object):
             a=node.parent.path, b=node.path, delete=True)
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.OverwritePlugin)
         self.mainwindow.showDialog(d)
-        self.connect(d, QtCore.SIGNAL('dialogFinished'), self.refresh)
