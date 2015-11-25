@@ -254,7 +254,7 @@ class QuickOps(object):
         if not node.linked.filename:
             logging.debug('%s %s', 'Cannot load: no filename!', node)
             return
-        if len(node.ds) > 0:
+        if len(node.data) > 0:
             logging.debug('%s %s', 'Unloading', node.path)
             node.ds.data = []
             self.previous_selection = False

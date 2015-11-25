@@ -263,7 +263,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         self.defaultPlot(dsn)
         self.mw.document.enableUpdates()
         self.mw.plot.actionForceUpdate()
-        self.openedFiles.refresh()
+        self.openedFiles.refresh_model()
 
     def open_file(self, filename,  **options):
         """Import misura data from HDF file"""
@@ -271,7 +271,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         filename = unicode(filename)
         print 'importing misura with defaults'
         dsnames = self.mw.cmd.ImportMisura(filename, **options)
-        self.openedFiles.refresh()
+        self.openedFiles.refresh_model()
         return dsnames
 
 
@@ -311,7 +311,7 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
         p.apply(self.mw.cmd, {'dsn': dsn})
         self.mw.document.enableUpdates()
         self.mw.plot.actionForceUpdate()
-        self.mw.m4.openedFiles.refresh()
+        self.mw.m4.openedFiles.refresh_model()
 
     def open_file(self, filename, **options):
         """Import misura data from HDF file"""

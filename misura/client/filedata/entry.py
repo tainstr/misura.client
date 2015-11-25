@@ -180,6 +180,8 @@ class NodeEntry(object):
 
     @property
     def data(self):
+        if not self.ds:
+            return []
         return self.ds.data
 
     @property
@@ -256,6 +258,7 @@ class NodeEntry(object):
         self._linked = LF
 
     # ROOT ENTRY METHODS
+
 
     def insert(self, path, status=1):
         """Insert a pure node"""
@@ -356,7 +359,7 @@ class NodeEntry(object):
         self.doc = doc
         self.alldoc = AllDocDataAccessor(doc)
         self.names = {}
-        for dn, d in self.alldoc.iteritems():
+        for dn, d in self.alldoc.items():
             dn1 = dn
             if hasattr(d, 'm_var'):
                 dn1 = d.m_var
@@ -376,6 +379,7 @@ class NodeEntry(object):
                     status = oldst
 
             self.insert(dn, status)
+
 
 
 class DatasetEntry(NodeEntry):

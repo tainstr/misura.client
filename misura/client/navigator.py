@@ -43,6 +43,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 
         self.connect(self, QtCore.SIGNAL('clicked(QModelIndex)'), self.select)
 
+
         # Menu creation
         if menu:
             self.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -128,6 +129,11 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 
     def refresh_model(self, ismodified=True):
         if ismodified:
+            ##########################################################################
+            # NOTE: to cause segmentation fault of ticket #944, pass True to refresh #
+            # self.model().refresh(True)                                             #
+            ##########################################################################
+
             self.model().refresh(False)
 
     def set_status(self):

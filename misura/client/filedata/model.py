@@ -18,6 +18,8 @@ from misura.canon.csutil import find_nearest_val
 from entry import iterpath, NodeEntry, dstats
 
 from misura.client.iutils import get_plotted_tree
+from misura.canon.csutil import lockme
+import threading
 
 
 def ism(obj, cls):
@@ -46,7 +48,9 @@ class DocumentModel(QtCore.QAbstractItemModel):
     _plots = False
 
     def __init__(self, doc, status=dstats, refresh=True, cols=2):
+        self.keys = set()
         QtCore.QAbstractItemModel.__init__(self)
+        self._lock = threading.Lock()
         self.ncols = cols
         self.status = status
         self.doc = doc
@@ -57,6 +61,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             self.tree = self.doc.model.tree
         controls.Marker._generateIcons()
         controls.LineStyle._generateIcons()
+
 
     idx = 0
 
@@ -88,9 +93,9 @@ class DocumentModel(QtCore.QAbstractItemModel):
         self.paused = do
         if do:
             self.disconnect(
-                self.doc, QtCore.SIGNAL("sigModified"), self.refresh)
+                self.doc, QtCore.SIGNAL("signalModified"), self.refresh)
         else:
-            self.connect(self.doc, QtCore.SIGNAL("sigModified"), self.refresh)
+            self.connect(self.doc, QtCore.SIGNAL("signalModified"), self.refresh)
 
     page = '/temperature/temp'
 
@@ -112,29 +117,32 @@ class DocumentModel(QtCore.QAbstractItemModel):
             self.changeset = self.doc.changeset
         return self._plots
 
+    @lockme
     def refresh(self, force=False):
         if not force:
             if self.paused:
                 logging.debug('%s %s', 'NOT REFRESHING MODEL', self.paused)
                 return
-            elif self.changeset == self.doc.changeset:
-                logging.debug(
-                    '%s %s %s', 'NOTHING CHANGED', self.changeset, self.doc.changeset)
+            elif self.keys == set(self.doc.data.keys()):
+                logging.debug('model.refresh(): NOTHING CHANGED')
                 return
+
         logging.debug('%s %s', 'REFRESHING MODEL', self.paused)
         self.paused = True
         self.doc.suspendUpdates()
         self.emit(QtCore.SIGNAL('beginResetModel()'))
 
-        # New-style tree management
         self.tree.set_doc(self.doc)
+        self._lock.release()
 
         self.emit(QtCore.SIGNAL('endResetModel()'))
         self.paused = False
         logging.debug('%s', 'End reset model sent')
         self.emit(QtCore.SIGNAL('modelReset()'))
+
         logging.debug('%s', 'Model reset sent')
         self.changeset = self.doc.changeset
+        self.keys = set(self.doc.data.keys())
         self.doc.enableUpdates()
 
     def is_plotted(self, key, page=False):
@@ -152,9 +160,10 @@ class DocumentModel(QtCore.QAbstractItemModel):
             return index.internalPointer()
         else:
             # print 'nodeFromIndex
-            # invalid',index.row(),index.column(),index.internalPointer()
+            # print 'invalid ', index.row(),index.column(),index.internalPointer(), " <-----------------"
             return self.tree
 
+    @lockme
     def rowCount(self, parent):
         node = self.nodeFromIndex(parent)
         rc = len(node.recursive_status(self.status, depth=0))
@@ -208,7 +217,11 @@ class DocumentModel(QtCore.QAbstractItemModel):
             return QtGui.QBrush(xy)
         return void
 
+    @lockme
     def data(self, index, role=QtCore.Qt.DisplayRole):
+        if not index.isValid():
+            return void
+
         if role not in [Qt.DisplayRole, Qt.ForegroundRole, Qt.DecorationRole, Qt.UserRole]:
             return void
         col = index.column()
@@ -250,6 +263,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
                     return str(node.ds.data[self.idx])
         return void
 
+    @lockme
     def index(self, row, column, parent=voididx):
         parent = self.nodeFromIndex(parent)
         if not (isinstance(parent, DatasetEntry) or isinstance(parent, NodeEntry)):
@@ -268,6 +282,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         idx = self.createIndex(row, column, child)
         return idx
 
+    @lockme
     def parent(self, child):
         child = self.nodeFromIndex(child)
         if not (isinstance(child, DatasetEntry) or isinstance(child, NodeEntry)):
