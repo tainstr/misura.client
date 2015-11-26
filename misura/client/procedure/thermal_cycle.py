@@ -62,6 +62,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.templatesMenu = menuBar.addMenu(_('Templates'))
 
             self.templatesMenu.addAction(veusz.utils.action.getIcon('m4.single-ramp'), _('Single Ramp'), self.single_ramp_template)
+            self.templatesMenu.addAction(veusz.utils.action.getIcon('m4.steps'), _('Steps'), self.steps_template)
             self.addButtons()
 
         self.plot = ThermalCyclePlot()
@@ -103,6 +104,9 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.model.setCurve(new_curve)
             self.replot()
             self.apply()
+
+    def steps_template(self):
+        pass
 
     def enable(self, enabled):
         self.table.enable(enabled)
