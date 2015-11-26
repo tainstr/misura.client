@@ -55,12 +55,20 @@ class DocumentModel(QtCore.QAbstractItemModel):
         self.status = status
         self.doc = doc
         self.tree = NodeEntry()
+
+        # keeps references to old trees to avoid bug #944  ##############
+        self.old_trees_to_avoid_qt_segmentation_fault = []              #
+        #################################################################
+
         if refresh:
             self.refresh()
         else:
             self.tree = self.doc.model.tree
         controls.Marker._generateIcons()
         controls.LineStyle._generateIcons()
+
+        self.counter = 0
+
 
 
     idx = 0
@@ -132,18 +140,19 @@ class DocumentModel(QtCore.QAbstractItemModel):
         self.doc.suspendUpdates()
         self.emit(QtCore.SIGNAL('beginResetModel()'))
 
-        self.tree.set_doc(self.doc)
+        self.old_trees_to_avoid_qt_segmentation_fault.append(self.tree)
+        new_tree = NodeEntry()
+        new_tree.set_doc(self.doc)
+        self.tree = new_tree
         self._lock.release()
 
         self.emit(QtCore.SIGNAL('endResetModel()'))
         self.paused = False
-        logging.debug('%s', 'End reset model sent')
-        self.emit(QtCore.SIGNAL('modelReset()'))
 
-        logging.debug('%s', 'Model reset sent')
         self.changeset = self.doc.changeset
         self.keys = set(self.doc.data.keys())
         self.doc.enableUpdates()
+        self.emit(QtCore.SIGNAL('modelReset()'))
 
     def is_plotted(self, key, page=False):
         plots = self.plots['dataset'].get(key, [])

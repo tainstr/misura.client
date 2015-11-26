@@ -200,7 +200,7 @@ class MisuraDocument(document.Document):
             self._lock.acquire(False)
             return dsnames
 
-        for col in self.data.iterkeys():
+        for col in self.data.keys():
             ds = self.data[col]
             if len(ds.data) == 0:
                 #               print 'Skipping empty',col,ds.m_col

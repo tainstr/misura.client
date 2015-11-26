@@ -256,7 +256,8 @@ class QuickOps(object):
             return
         if len(node.data) > 0:
             logging.debug('%s %s', 'Unloading', node.path)
-            node.ds.data = []
+            # node.ds.data = []
+            self.deleteData(node=node)
             self.previous_selection = False
 
             return
