@@ -184,19 +184,7 @@ class Plot(VeuszPlot):
         self.reloadData(update=True)
         self.set_idx()
 
-    def save_to_file(self):
-        name = QtGui.QFileDialog.getSaveFileName(self, _('Save this plot to file'),
-                                                 _(
-                                                     'Choos a filename and format where to save the file.'),
-                                                 filter='Veusz (*.vsz);;Images (*.png *.jpg);;Vector (*svg *pdf *eps)')
-        name = unicode(name)
-        if len(name) == 0:
-            logging.debug('%s %s', 'cancelled', name)
-            return
-        logging.debug('%s %s', 'Saving to', name)
-        f = open(name, 'w')
-        self.document.saveToFile(f)
-        f.close()
+
 
     def set_idx(self, seq=-1):
         """Moves the position line according to the requested point sequence index."""

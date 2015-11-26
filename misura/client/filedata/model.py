@@ -139,7 +139,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
         self.paused = True
         self.doc.suspendUpdates()
         self.emit(QtCore.SIGNAL('beginResetModel()'))
-
         self.old_trees_to_avoid_qt_segmentation_fault.append(self.tree)
         new_tree = NodeEntry()
         new_tree.set_doc(self.doc)

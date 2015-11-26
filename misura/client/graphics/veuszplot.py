@@ -108,7 +108,20 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         menu.addSeparator()
         # Export to PDF
         menu.addAction('Export', self.slotFileExport)
+        # menu.addAction('Save', self.save_to_file)
         menu.exec_(qt4.QCursor.pos())
+        
+    def save_to_file(self):
+        name = QtGui.QFileDialog.getSaveFileName(self, _('Save this plot to file'),
+                                                 _(
+                                                     'runtime.vsz'),
+                                                 filter='Veusz (*.vsz);;Images (*.png *.jpg);;Vector (*svg *pdf *eps)')
+        name = unicode(name)
+        if len(name) == 0:
+            return
+        f = open(name, 'w')
+        self.document.saveToFile(f)
+        f.close()
 
     def edit_properties(self, pos, frm=False):
         widget = self.painthelper.identifyWidgetAtPoint(
