@@ -30,23 +30,22 @@ def steps_template_to_thermal_cycle_curve(values):
     step_ramp_duration = float(step_delta_T) / heating_rate * 60
 
     curve = ramp_to_thermal_cycle_curve(first_step_temperature, heating_rate)
-    last_step_time = curve[-1][0]
-    last_step_temperature = curve[-1][1]
-
-    curve.append([last_step_time + step_duration, first_step_temperature])
+    curve.append([last_point_time(curve) + step_duration, first_step_temperature])
 
     for current_step in range(number_of_steps-1):
-        last_step_time = curve[-1][0]
-        last_step_temperature = curve[-1][1]
-
-        ramp_end_time = last_step_time + step_ramp_duration
-        ramp_end_remperature = last_step_temperature + step_delta_T
+        ramp_end_time = last_point_time(curve) + step_ramp_duration
+        ramp_end_remperature = last_point_temperature(curve) + step_delta_T
 
         curve.append([ramp_end_time, ramp_end_remperature])
-        # curve.append([last_step_time + step_ramp_duration, last_step_temperature + step_delta_T])
         curve.append([ramp_end_time + step_duration, ramp_end_remperature])
 
     return curve
+
+def last_point_time(curve):
+    return curve[-1][0]
+
+def last_point_temperature(curve):
+    return curve[-1][1]
 
 
 class ThermalCycleDesigner(QtGui.QSplitter):
