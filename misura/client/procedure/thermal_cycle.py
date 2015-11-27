@@ -15,9 +15,39 @@ import veusz.utils
 from misura.client import iutils
 from misura.canon import option
 
+
 def ramp_to_thermal_cycle_curve(end_temperature, heating_rate):
     time_elapsed_in_seconds = end_temperature / float(heating_rate) * 60.
     return [[0.0, 0], [time_elapsed_in_seconds, end_temperature]]
+
+
+def steps_template_to_thermal_cycle_curve(values):
+    heating_rate = values['heatingRate']
+    number_of_steps = values['numberOfSteps']
+    step_duration = values['stasisDuration']
+    step_delta_T = values['stepsDeltaT']
+    first_step_temperature = values['firstStepTemperature']
+    step_ramp_duration = float(step_delta_T) / heating_rate * 60
+
+    curve = ramp_to_thermal_cycle_curve(first_step_temperature, heating_rate)
+    last_step_time = curve[-1][0]
+    last_step_temperature = curve[-1][1]
+
+    curve.append([last_step_time + step_duration, first_step_temperature])
+
+    for current_step in range(number_of_steps-1):
+        last_step_time = curve[-1][0]
+        last_step_temperature = curve[-1][1]
+
+        ramp_end_time = last_step_time + step_ramp_duration
+        ramp_end_remperature = last_step_temperature + step_delta_T
+
+        curve.append([ramp_end_time, ramp_end_remperature])
+        # curve.append([last_step_time + step_ramp_duration, last_step_temperature + step_delta_T])
+        curve.append([ramp_end_time + step_duration, ramp_end_remperature])
+
+    return curve
+
 
 class ThermalCycleDesigner(QtGui.QSplitter):
 
@@ -51,7 +81,8 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.editMenu.addAction(_('Insert point'), self.table.newRow)
             self.editMenu.addAction(
                 _('Insert checkpoint'), self.table.newCheckpoint)
-            self.editMenu.addAction(_('Insert natural cooling'), self.table.newCool)
+            self.editMenu.addAction(
+                _('Insert natural cooling'), self.table.newCool)
             self.editMenu.addAction(_('Insert movement'), self.table.newMove)
             self.editMenu.addAction(
                 _('Insert control transition'), self.table.newThermocoupleControlTransition)
@@ -61,8 +92,10 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.editMenu.addAction('Remove current row', self.table.delRow)
             self.templatesMenu = menuBar.addMenu(_('Templates'))
 
-            self.templatesMenu.addAction(veusz.utils.action.getIcon('m4.single-ramp'), _('Single Ramp'), self.single_ramp_template)
-            self.templatesMenu.addAction(veusz.utils.action.getIcon('m4.steps'), _('Steps'), self.steps_template)
+            self.templatesMenu.addAction(veusz.utils.action.getIcon(
+                'm4.single-ramp'), _('Single Ramp'), self.single_ramp_template)
+            self.templatesMenu.addAction(
+                veusz.utils.action.getIcon('m4.steps'), _('Steps'), self.steps_template)
             self.addButtons()
 
         self.plot = ThermalCyclePlot()
@@ -73,7 +106,8 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.main_layout.addWidget(self.table)
 
         thermal_cycle_options = {}
-        for opt in ('onKilnStopped', 'kilnBeforeStart','kilnAfterEnd','duration',
+        for opt in (
+            'onKilnStopped', 'kilnBeforeStart', 'kilnAfterEnd', 'duration',
                     'coolingBelowTemp', 'coolingAfterTime'):
             if not active_instrument.measure.has_key(opt):
                 logging.debug('Measure has no option %s', opt)
@@ -82,31 +116,61 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             print 'OPT', thermal_cycle_options[opt]
         if thermal_cycle_options:
             self.thermal_cycle_optionsWidget = conf.Interface(
-            active_instrument.root, active_instrument.measure, thermal_cycle_options, parent=self)
+                active_instrument.root, active_instrument.measure, thermal_cycle_options, parent=self)
             self.main_layout.addWidget(self.thermal_cycle_optionsWidget)
         self.main_layout.addWidget(self.plot)
 
     def set_mode_of_cell(self, index_model):
         if index_model.column() != row.colTEMP:
-            self.model.update_mode_of_row_with_mode_of_column(index_model.row(), index_model.column())
+            self.model.update_mode_of_row_with_mode_of_column(
+                index_model.row(), index_model.column())
 
     def single_ramp_template(self):
         ramp_options = {}
-        option.ao(ramp_options, 'temperature', 'Float', name=_("Ramp end Temperature"),
+        option.ao(
+            ramp_options, 'temperature', 'Float', name=_("Ramp end Temperature"),
                   unit='celsius', current=1000, min=0, max=2000, step=0.1)
         option.ao(ramp_options, 'heatingRate', 'Float', name=_("Heating Rate"),
                   unit='celsius/minute', current=20, min=0.1, max=80, step=0.1)
-        temperature_configuration_proxy = option.ConfigurationProxy({'self': ramp_options})
-        temperature_dialog = conf.InterfaceDialog(temperature_configuration_proxy, temperature_configuration_proxy, ramp_options, parent=self.parent)
+        temperature_configuration_proxy = option.ConfigurationProxy(
+            {'self': ramp_options})
+        temperature_dialog = conf.InterfaceDialog(
+            temperature_configuration_proxy, temperature_configuration_proxy, ramp_options, parent=self.parent)
         temperature_dialog.setWindowTitle(_('Single ramp template'))
         if temperature_dialog.exec_():
-            new_curve = ramp_to_thermal_cycle_curve(temperature_configuration_proxy['temperature'], temperature_configuration_proxy['heatingRate'])
+            new_curve = ramp_to_thermal_cycle_curve(temperature_configuration_proxy[
+                                                    'temperature'], temperature_configuration_proxy['heatingRate'])
             self.model.setCurve(new_curve)
             self.replot()
             self.apply()
 
     def steps_template(self):
-        pass
+        steps_options = {}
+        option.ao(
+            steps_options, 'heatingRate', 'Float', name=_("Heating Rate"),
+                  unit='celsius/minute', current=80, min=0.1, max=80, step=0.1)
+        option.ao(
+            steps_options, 'firstStepTemperature', 'Float', name=_("First step Temperature"),
+                  unit='celsius', current=1000, min=0, max=1800, step=0.1)
+        option.ao(
+            steps_options, 'stasisDuration', 'Float', name=_("Stasis Duration"),
+                  unit='seconds', current=600, step=1)
+        option.ao(steps_options, 'numberOfSteps', 'Integer',
+                  name=_("Number of Steps"), current=10, step=1)
+        option.ao(
+            steps_options, 'stepsDeltaT', 'Float', name=_("Steps delta T"),
+                  unit='celsius', current=20, min=0, max=100, step=0.1)
+
+        configuration_proxy = option.ConfigurationProxy(
+            {'self': steps_options})
+        temperature_dialog = conf.InterfaceDialog(
+            configuration_proxy, configuration_proxy, steps_options, parent=self.parent)
+        temperature_dialog.setWindowTitle(_('Single ramp template'))
+        if temperature_dialog.exec_():
+            new_curve = steps_template_to_thermal_cycle_curve(configuration_proxy)
+            self.model.setCurve(new_curve)
+            self.replot()
+            self.apply()
 
     def enable(self, enabled):
         self.table.enable(enabled)
@@ -132,7 +196,8 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.bApp = QtGui.QPushButton("Apply")
         self.connect(self.bApp, QtCore.SIGNAL('clicked(bool)'), self.apply)
         self.buttons.addWidget(self.bApp)
-        self.tcc = widgets.ThermalCycleChooser(self.remote, parent=self, table=self.table)
+        self.tcc = widgets.ThermalCycleChooser(
+            self.remote, parent=self, table=self.table)
         self.tcc.label_widget.hide()
         self.buttons.addWidget(self.tcc)
         self.connect(self.tcc.combo, QtCore.SIGNAL(
