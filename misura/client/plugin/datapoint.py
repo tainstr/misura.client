@@ -331,7 +331,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             yRange = self.yRange
 
         dst = ((xData - x) / xRange) ** 2 + ((yData - y) / yRange) ** 2
-        i = np.where(dst == dst.min())[0][0]
+
+        i = np.where(dst == np.nanmin(dst))[0][0]
         return i, xData[i], yData[i]
 
     def distance_fixed_x(self, x, y, xData=None, yData=None, xRange=None, yRange=None):
@@ -373,11 +374,11 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         if None in [xAx, yAx]:
             return False
         m = lambda v, alt: v if v != 'Auto' else alt
-        xMax = m(xAx.settings.max, xData.max())
-        xMin = m(xAx.settings.min, xData.min())
+        xMax = m(xAx.settings.max, np.nanmax(xData))
+        xMin = m(xAx.settings.min, np.nanmin(xData))
         xRange = xMax - xMin
-        yMax = m(yAx.settings.max, yData.max())
-        yMin = m(yAx.settings.min, yData.min())
+        yMax = m(yAx.settings.max, np.nanmax(yData))
+        yMin = m(yAx.settings.min, np.nanmin(yData))
         yRange = yMax - yMin
 
         # Calc new coord
@@ -388,7 +389,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         if oldy is None:
             oldy = oy_set.get()
 
-        if 0 in [xRange, yRange]:
+        if (0 in [xRange, yRange]) or np.isnan(xRange) or np.isnan(yRange):
             logging.debug(
                 '%s %s %s', 'ERROR: Datapoint divide for ranges', xRange, yRange)
             return
