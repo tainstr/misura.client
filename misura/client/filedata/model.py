@@ -223,6 +223,13 @@ class DocumentModel(QtCore.QAbstractItemModel):
             xy = plotwg.settings.get('PlotLine').get('color').color()
 #				print ' ForegroundRole' ,node.m_var,xy.value()
             return QtGui.QBrush(xy)
+
+        if role == Qt.FontRole:
+            current_font = QtGui.QFont()
+            current_font.setBold(len(ent.data) > 0 and 0 in self.status)
+
+
+            return current_font
         return void
 
     @lockme
@@ -230,7 +237,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         if not index.isValid():
             return void
 
-        if role not in [Qt.DisplayRole, Qt.ForegroundRole, Qt.DecorationRole, Qt.UserRole]:
+        if role not in [Qt.DisplayRole, Qt.ForegroundRole, Qt.DecorationRole, Qt.UserRole, Qt.FontRole]:
             return void
         col = index.column()
         row = index.row()
@@ -238,7 +245,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         if role == Qt.UserRole:
             return node
         if col == 0:
-            if role in [Qt.ForegroundRole, Qt.DecorationRole]:
+            if role in [Qt.ForegroundRole, Qt.DecorationRole, Qt.FontRole]:
                 return self.decorate(node, role)
             if isinstance(node, DatasetEntry):
                 if role == Qt.DisplayRole:

@@ -121,7 +121,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.mod = self.doc.model
         self.mod.ncols = self.ncols
         self.setModel(self.mod)
-        self.mod.modelReset.connect(self.restore_selection)
+        # self.mod.modelReset.connect(self.restore_selection)
         self.expandAll()
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.set_status()
@@ -146,6 +146,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
     def ensure_sync_of_view_and_model(self):
         self.collapseAll()
         self.expandAll()
+        self.restore_selection()
 
     def set_status(self):
         final = set()
@@ -177,28 +178,14 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 
     def restore_selection(self):
         """Restore previous selection after a model reset."""
-        if self.model().paused:
-            return False
-        self.expandAll()
-        return False
         logging.debug(
             '%s %s', 'restoring previous selection', self.previous_selection)
-        if self.previous_selection:
-            node = self.model().tree.traverse(self.previous_selection)
-            if not node:
-                return
-            jdx = self.model().index_path(node)
-            n = len(jdx)
-            for i, idx in enumerate(jdx):
-                if i < n - 1:
-                    # Expand all parent objects
-                    self.setExpanded(idx, True)
-                else:
-                    # Select the leaf
-                    self.selectionModel().setCurrentIndex(
-                        jdx[-1], QtGui.QItemSelectionModel.Select)
-        else:
-            self.expandAll()
+
+        if(len(self.selectedIndexes()) > 0):
+            self.scrollTo(self.selectedIndexes()[0])
+
+
+
 
     ##############
     # BASE MENU
@@ -446,6 +433,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         sel = self.selectedIndexes()
         n = len(sel)
         node = self.model().data(self.currentIndex(), role=Qt.UserRole)
+        self.previous_selection = node.path
         logging.debug('%s %s', 'showContextMenu', node.path)
         if not node.parent:
             self.update_base_menu()
