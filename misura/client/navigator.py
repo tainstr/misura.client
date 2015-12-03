@@ -65,7 +65,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 
             self.act_del = self.base_menu.addAction(
                 _('Delete'), self.deleteChildren)
-            self.base_menu.addAction(_('Update view'), self.refresh_model)
+            self.base_menu.addAction(_('Update view'), self.update_view)
 
             ######
             # File menu
@@ -127,6 +127,10 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.set_status()
         self.doc.signalModified.connect(self.refresh_model)
 
+    def update_view(self):
+        self.model().refresh(True)
+        self.ensure_sync_of_view_and_model()
+
     def refresh_model(self, ismodified=True):
         if ismodified:
             ##########################################################################
@@ -135,6 +139,13 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             ##########################################################################
 
             self.model().refresh(False)
+            self.ensure_sync_of_view_and_model()
+
+
+
+    def ensure_sync_of_view_and_model(self):
+        self.collapseAll()
+        self.expandAll()
 
     def set_status(self):
         final = set()
