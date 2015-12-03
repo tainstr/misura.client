@@ -255,8 +255,7 @@ class KidRegistry(QtCore.QThread):
             if self.obj['isRunning']:
                 if self.doc:
                     self.doc.update(proxy=self.proxy)
-            else:
-                self.taskswg.sync.loop(self.obj)
+
 
     def control_loop(self):
         """Called while the registry is running."""
@@ -278,6 +277,7 @@ class KidRegistry(QtCore.QThread):
         self.obj._reg = self
 
         self.update_doc()
+        self.taskswg.sync.loop(self.obj)
 
         r = True
         if not self.updateLog():
