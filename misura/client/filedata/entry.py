@@ -344,8 +344,6 @@ class NodeEntry(object):
                         '%s %s %s %s', 'rec skip', child, child.status, st)
             if depth > 0 or depth < 0:  # depth=0 will block!
                 r += child.recursive_status(st, depth=depth - 1)
-        r = sorted(
-            r, key=lambda child: child._name if not child.ds else child.m_pos)
         return r
 
     def set_doc(self, doc, default_status=0):
