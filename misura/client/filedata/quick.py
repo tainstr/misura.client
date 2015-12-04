@@ -313,20 +313,19 @@ class QuickOps(object):
     @node
     def deleteData(self, node=False, remove_dataset=True, recursive=True):
         """Delete a dataset and all depending graphical widgets."""
-        ds = node.ds
-        pt = node.path
+        node_path = node.path
         # Remove and exit if dataset was only in available_data
-        if self.doc.available_data.has_key(pt):
-            self.doc.available_data.pop(pt)
-            if not self.doc.data.has_key(pt):
+        if self.doc.available_data.has_key(node_path):
+            self.doc.available_data.pop(node_path)
+            if not self.doc.data.has_key(node_path):
                 return True
         # Remove and exit if no plot is associated
-        if not self.model().plots['dataset'].has_key(pt):
-            self.doc.deleteDataset(pt)
+        if not self.model().plots['dataset'].has_key(node_path):
+            self.doc.deleteDataset(node_path)
             self.doc.setModified()
             return True
 
-        plots = self.model().plots['dataset'][pt]
+        plots = self.model().plots['dataset'][node_path]
         # Collect involved graphs
         graphs = []
         # Collect plots to be removed
@@ -363,7 +362,7 @@ class QuickOps(object):
                     refobj = g.getChild(o)
                     if refobj is None:
                         continue
-                    if refobj not in plots + [pt]:
+                    if refobj not in plots + [node_path]:
                         continue
                     if obj not in remplot + remax + remobj:
                         remobj.append(obj)
@@ -374,9 +373,8 @@ class QuickOps(object):
             obj.parent.removeChild(obj.name)
         # Finally, delete dataset
         if remove_dataset:
-            # 			n=self.doc.datasetName(ds)
-            self.doc.deleteDataset(pt)
-            logging.debug('%s %s', 'deleted', pt)
+            self.doc.deleteDataset(node_path)
+            logging.debug('%s %s', 'deleted', node_path)
 
         # Recursive call over derived datasets
         if recursive:
