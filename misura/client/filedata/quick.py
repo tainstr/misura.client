@@ -14,6 +14,7 @@ from entry import DatasetEntry
 from .. import clientconf
 from proxy import getFileProxy
 import axis_selection
+import numpy as np
 
 ism = isinstance
 
@@ -257,7 +258,13 @@ class QuickOps(object):
         if len(node.data) > 0:
             logging.debug('%s %s', 'Unloading', node.path)
             # node.ds.data = []
+            ds = node.ds
             self.deleteData(node=node)
+            # self.deleteData(node=node, remove_dataset=False, recursive=False)
+            ds.data = np.array([])
+            self.doc.available_data[node.path] = ds
+            self.model().pause(False)
+            self.doc.setModified()
 
             return
         self._load(node)
@@ -321,8 +328,10 @@ class QuickOps(object):
                 return True
         # Remove and exit if no plot is associated
         if not self.model().plots['dataset'].has_key(node_path):
-            self.doc.deleteDataset(node_path)
-            self.doc.setModified()
+            if remove_dataset:
+                self.doc.deleteDataset(node_path)
+                self.doc.setModified()
+
             return True
 
         plots = self.model().plots['dataset'][node_path]

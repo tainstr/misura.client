@@ -48,8 +48,9 @@ class DocumentModel(QtCore.QAbstractItemModel):
     _plots = False
 
     def __init__(self, doc, status=dstats, refresh=True, cols=2):
-        self.keys = set()
         QtCore.QAbstractItemModel.__init__(self)
+        self.keys = set()
+        self.available_keys = set()
         self._lock = threading.Lock()
         self.ncols = cols
         self.status = status
@@ -131,7 +132,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             if self.paused:
                 logging.debug('%s %s', 'NOT REFRESHING MODEL', self.paused)
                 return
-            elif self.keys == set(self.doc.data.keys()):
+            elif self.keys == set(self.doc.data.keys()) and self.available_keys == set(self.doc.available_data.keys()):
                 logging.debug('model.refresh(): NOTHING CHANGED')
                 return
 
@@ -150,6 +151,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
         self.changeset = self.doc.changeset
         self.keys = set(self.doc.data.keys())
+        self.available_keys = set(self.doc.available_data.keys())
         self.doc.enableUpdates()
         self.emit(QtCore.SIGNAL('modelReset()'))
 
@@ -165,7 +167,8 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
     def nodeFromIndex(self, index):
         if index.isValid():
-            return index.internalPointer()
+            return self.tree.traverse(str(index.internalPointer()))
+
         else:
             # print 'nodeFromIndex
             # print 'invalid ', index.row(),index.column(),index.internalPointer(), " <-----------------"
@@ -294,7 +297,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         child = lst[row]
         # Update entries dictionary ???
         self.doc.ent[id(child)] = child
-        idx = self.createIndex(row, column, child)
+        idx = self.createIndex(row, column, child.path)
         return idx
 
     @lockme
@@ -319,14 +322,14 @@ class DocumentModel(QtCore.QAbstractItemModel):
             return voididx
         # Position of parent in grandpa
         row = lst.index(parent)
-        return self.createIndex(row, 0, parent)
+        return self.createIndex(row, 0, parent.path)
 
     def indexFromNode(self, node):
         """Return the model index corresponding to node. Useful in ProxyModels"""
         parent = self.parent(node)
         row = parent.recursive_status(self.status, depth=0).index(node)
 # 		row=parent.children.values().index(node)
-        return self.createIndex(row, 0, parent)
+        return self.createIndex(row, 0, parent.path)
 
     def index_path(self, node):
         """Returns the sequence of model indexes starting from a node."""

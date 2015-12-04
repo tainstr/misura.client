@@ -206,6 +206,9 @@ class NodeEntry(object):
     def __len__(self):
         return len(self._children)
 
+    def __nonzero__(self):
+        return True
+
     def keys(self, status=1):
         """List keys based on status.
         `status` 1 = Visible; 0 = Hidden ; -1 = Available"""
@@ -227,9 +230,9 @@ class NodeEntry(object):
 
     def traverse(self, path):
         item = self
-        for sub, parent, leaf in iterpath(path):
+        for sub, parent, isLeaf in iterpath(path):
             item = item.get(sub, False)
-            if leaf:
+            if isLeaf:
                 break
             if item is False:
                 return False
@@ -398,7 +401,7 @@ class DatasetEntry(NodeEntry):
         if ds is False:
             self.parent.remove(self)
             return 0
-        return len(ds) > 0
+        return int(len(ds) > 0)
 
     @property
     def children(self):
