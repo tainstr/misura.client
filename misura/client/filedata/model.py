@@ -57,10 +57,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
         self.doc = doc
         self.tree = NodeEntry()
 
-        # keeps references to old trees to avoid bug #944  ##############
-        self.old_trees_to_avoid_qt_segmentation_fault = []              #
-        #################################################################
-
         if refresh:
             self.refresh()
         else:
@@ -140,7 +136,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
         self.paused = True
         self.doc.suspendUpdates()
         self.emit(QtCore.SIGNAL('beginResetModel()'))
-        self.old_trees_to_avoid_qt_segmentation_fault.append(self.tree)
         new_tree = NodeEntry()
         new_tree.set_doc(self.doc)
         self.tree = new_tree
@@ -343,7 +338,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
         n.reverse()
 
-        jdx = [self.createIndex(0, 0, self.tree)]
+        jdx = [self.createIndex(0, 0, '')]
         for obj in n:
             # Find position in siblings
             i = obj.parent.recursive_status(self.status, depth=0).index(obj)

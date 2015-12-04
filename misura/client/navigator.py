@@ -131,11 +131,6 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 
     def refresh_model(self, ismodified=True):
         if ismodified:
-            ##########################################################################
-            # NOTE: to cause segmentation fault of ticket #944, pass True to refresh #
-            # self.model().refresh(True)                                             #
-            ##########################################################################
-
             self.model().refresh(False)
             self.ensure_sync_of_view_and_model()
 
