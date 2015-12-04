@@ -258,7 +258,6 @@ class QuickOps(object):
             logging.debug('%s %s', 'Unloading', node.path)
             # node.ds.data = []
             self.deleteData(node=node)
-            self.previous_selection = False
 
             return
         self._load(node)
@@ -325,7 +324,6 @@ class QuickOps(object):
         if not self.model().plots['dataset'].has_key(pt):
             self.doc.deleteDataset(pt)
             self.doc.setModified()
-            self.previous_selection = False
             return True
 
         plots = self.model().plots['dataset'][pt]
@@ -379,13 +377,11 @@ class QuickOps(object):
             # 			n=self.doc.datasetName(ds)
             self.doc.deleteDataset(pt)
             logging.debug('%s %s', 'deleted', pt)
-            self.previous_selection = False
 
         # Recursive call over derived datasets
         if recursive:
             for sub in node.children.itervalues():
                 self.deleteData(sub, remove_dataset, recursive)
-        self.previous_selection = False
         self.doc.setModified()
         return True
 

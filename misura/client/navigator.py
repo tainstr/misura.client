@@ -26,8 +26,6 @@ class StylesMenu(QtGui.QMenu):
 class Navigator(filedata.QuickOps, QtGui.QTreeView):
 
     """List of currently opened misura Tests and reference to datasets names"""
-    previous_selection = False
-
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=filedata.dstats.loaded, cols=1):
         QtGui.QTreeView.__init__(self, parent)
         self.status = status
@@ -165,7 +163,6 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 
     def select(self, idx):
         node = self.model().data(idx, role=Qt.UserRole)
-        self.previous_selection = node.path
         logging.debug('%s %s', 'select', node)
         self.emit(QtCore.SIGNAL('select()'))
         plotpath = self.model().is_plotted(node.path)
@@ -178,8 +175,6 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 
     def restore_selection(self):
         """Restore previous selection after a model reset."""
-        logging.debug(
-            '%s %s', 'restoring previous selection', self.previous_selection)
 
         if(len(self.selectedIndexes()) > 0):
             self.scrollTo(self.selectedIndexes()[0])
@@ -433,7 +428,6 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         sel = self.selectedIndexes()
         n = len(sel)
         node = self.model().data(self.currentIndex(), role=Qt.UserRole)
-        self.previous_selection = node.path
         logging.debug('%s %s', 'showContextMenu', node.path)
         if not node.parent:
             self.update_base_menu()
