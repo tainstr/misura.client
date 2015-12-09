@@ -131,8 +131,8 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
 
     def refresh_model(self, ismodified=True):
         if ismodified:
-            self.model().refresh(False)
-            self.ensure_sync_of_view_and_model()
+            if self.model().refresh(False):
+                self.ensure_sync_of_view_and_model()
 
 
 

@@ -127,10 +127,10 @@ class DocumentModel(QtCore.QAbstractItemModel):
         if not force:
             if self.paused:
                 logging.debug('%s %s', 'NOT REFRESHING MODEL', self.paused)
-                return
+                return False
             elif self.keys == set(self.doc.data.keys()) and self.available_keys == set(self.doc.available_data.keys()):
                 logging.debug('model.refresh(): NOTHING CHANGED')
-                return
+                return False
 
         logging.debug('%s %s', 'REFRESHING MODEL', self.paused)
         self.paused = True
@@ -149,6 +149,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         self.available_keys = set(self.doc.available_data.keys())
         self.doc.enableUpdates()
         self.emit(QtCore.SIGNAL('modelReset()'))
+        return True
 
     def is_plotted(self, key, page=False):
         plots = self.plots['dataset'].get(key, [])
