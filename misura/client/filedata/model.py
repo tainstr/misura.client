@@ -163,7 +163,10 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
     def nodeFromIndex(self, index):
         if index.isValid():
-            return self.tree.traverse(str(index.internalPointer()))
+            node = self.tree.traverse(str(index.internalPointer()))
+            if not node:
+                print '######### nodeFromIndex',index.internalPointer()
+            return node
 
         else:
             # print 'nodeFromIndex
@@ -173,6 +176,8 @@ class DocumentModel(QtCore.QAbstractItemModel):
     @lockme
     def rowCount(self, parent):
         node = self.nodeFromIndex(parent)
+        if node is False:
+            return 0
         rc = len(node.recursive_status(self.status, depth=0))
         return rc
 
@@ -293,7 +298,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         child = lst[row]
         # Update entries dictionary ???
         self.doc.ent[id(child)] = child
-        idx = self.createIndex(row, column, child.path)
+        idx = self.createIndex(row, column, child.model_path)
         return idx
 
     @lockme
@@ -318,13 +323,13 @@ class DocumentModel(QtCore.QAbstractItemModel):
             return voididx
         # Position of parent in grandpa
         row = lst.index(parent)
-        return self.createIndex(row, 0, parent.path)
+        return self.createIndex(row, 0, parent.model_path)
 
     def indexFromNode(self, node):
         """Return the model index corresponding to node. Useful in ProxyModels"""
         parent = self.parent(node)
         row = parent.recursive_status(self.status, depth=0).index(node)
-        return self.createIndex(row, 0, parent.path)
+        return self.createIndex(row, 0, parent.model_path)
 
     def index_path(self, node):
         """Returns the sequence of model indexes starting from a node."""
@@ -341,7 +346,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         for obj in n:
             # Find position in siblings
             i = obj.parent.recursive_status(self.status, depth=0).index(obj)
-            jdx.append(self.createIndex(i,0,obj.path))
+            jdx.append(self.createIndex(i,0,obj.model_path))
         logging.debug('%s %s', 'index_path', jdx)
         return jdx
 

@@ -5,6 +5,7 @@ from misura.canon.logger import Log as logging
 from veusz import document
 from compiler.ast import flatten
 import collections
+import path
 
 sep = '/'
 # Statuses
@@ -83,7 +84,11 @@ class AllDocDataAccessor(object):
         return self.get(k)
 
     def items(self):
-        return self.data.items() + self.available_data.items()
+        return [(k,self.get(k)) for k in self.keys()]
+    
+    def keys(self):
+        k = self.data.keys() + self.available_data.keys()
+        return sorted(k)
 
     def iteritems(self):
         for item in self.data.iteritems():
@@ -104,6 +109,7 @@ class NodeEntry(object):
     """Node base name"""
     _path = False  # auto calc
     """Node full path or dataset key in doc.data"""
+    _model_path =False
     parent = False
     """Parent node"""
     parents = []
@@ -113,13 +119,14 @@ class NodeEntry(object):
     _linked = False
     """Linked file for first-level nodes"""
 
-    def __init__(self, doc=False, name='', parent=False, path=False, splt=sep):
+    def __init__(self, doc=False, name='', parent=False, path=False, model_path=False, splt=sep):
         self.splt = splt
         self.doc = doc
         self.alldoc = AllDocDataAccessor(doc)
         self._name = name
         self._children = collections.OrderedDict()
         self._path = path
+        self._model_path = model_path
         if parent is not False:
             parent.append(self)
         if doc is not False:
@@ -162,6 +169,12 @@ class NodeEntry(object):
         else:
             self._path = self.splt.join([self.parent.path, self._name])
         return self._path
+    
+    @property
+    def model_path(self):
+        if not self._model_path:
+            return self.path
+        return self._model_path
 
     @path.setter
     def path(self, nval):
@@ -265,7 +278,8 @@ class NodeEntry(object):
 
     def insert(self, path, status=1):
         """Insert a pure node"""
-
+        if self.doc.data.has_key(path) and isinstance(self.doc.data[path], document.datasets.Dataset1DPlugin):
+            return False
         splt = self.splt
         if self.parent:
             assert self.path.startswith(path)
@@ -376,6 +390,7 @@ class NodeEntry(object):
                     status = oldst
 
             self.insert(dn, status)
+            
 
 
 
@@ -402,15 +417,19 @@ class DatasetEntry(NodeEntry):
     @property
     def children(self):
         """Scan the document for other datasets depending on itself."""
-        path = self.path
-        # Clean from non-existent entries
-        for path, entry in self._children.items():
-            if not isinstance(entry, DatasetEntry):
+        print 'calculating children of',self.path,self.model_path
+        for name, ds in self.alldoc.iteritems():
+            if name == self.path:
                 continue
-            if self.alldoc.has_key(entry.path):
+            if not isinstance(ds, document.datasets.Dataset1DPlugin):
                 continue
-            del self._children[path]
-
+            involved = flatten(ds.pluginmanager.fields.values())
+            if self.path in involved:
+                sub = name.replace('/','-').replace(':','_')
+                model_path = self.model_path+'/'+sub
+                entry = self._children.get(sub, False)
+                if entry is False:
+                    entry = DatasetEntry(doc=self.doc, name=sub, path=name, model_path=model_path, parent=self)                
         return self._children
 
     @property

@@ -157,6 +157,8 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.expandAll()
 
     def select(self, idx):
+        if not idx.isValid():
+            return
         node = self.model().data(idx, role=Qt.UserRole)
         logging.debug('%s %s', 'select', node)
         self.emit(QtCore.SIGNAL('select()'))
