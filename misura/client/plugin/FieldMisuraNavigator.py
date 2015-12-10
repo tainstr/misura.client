@@ -34,14 +34,7 @@ class FieldMisuraNavigator(plugins.Field):
             return (l, c)
 
         jdx = otm.index_path(obj)
-        n = len(jdx)
-        for i, idx in enumerate(jdx):
-            if i < n - 1:
-                # Expand all parent objects
-                c.setExpanded(idx, True)
-            else:
-                # Select the leaf
-                c.selectionModel().setCurrentIndex(
+        c.selectionModel().setCurrentIndex(
                     jdx[-1], QtGui.QItemSelectionModel.Select)
         return (l, c)
 

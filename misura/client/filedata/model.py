@@ -324,7 +324,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
         """Return the model index corresponding to node. Useful in ProxyModels"""
         parent = self.parent(node)
         row = parent.recursive_status(self.status, depth=0).index(node)
-# 		row=parent.children.values().index(node)
         return self.createIndex(row, 0, parent.path)
 
     def index_path(self, node):
@@ -338,14 +337,11 @@ class DocumentModel(QtCore.QAbstractItemModel):
                 break
 
         n.reverse()
-
-        jdx = [self.createIndex(0, 0, '')]
+        jdx = []
         for obj in n:
             # Find position in siblings
             i = obj.parent.recursive_status(self.status, depth=0).index(obj)
-            # Create index
-            jdx.append(self.index(i, 0, jdx[-1]))
-
+            jdx.append(self.createIndex(i,0,obj.path))
         logging.debug('%s %s', 'index_path', jdx)
         return jdx
 
