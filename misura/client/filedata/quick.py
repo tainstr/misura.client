@@ -479,7 +479,7 @@ class QuickOps(object):
         w = max(5, len(ds.data) / 50)
         from misura.client import plugin
         p = plugin.SmoothDatasetPlugin(
-            ds_in=node.path, ds_out=node.m_name + '_sm', window=int(w))
+            ds_in=node.path, ds_out=node.m_name + '/sm', window=int(w))
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.SmoothDatasetPlugin)
         self.mainwindow.showDialog(d)
@@ -495,7 +495,7 @@ class QuickOps(object):
             ini = 0. # No conversion if already percent
         from misura.client import plugin
         p = plugin.CoefficientPlugin(
-            ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '_cf', smooth=w, percent=ini)
+            ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '/cf', smooth=w, percent=ini)
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.CoefficientPlugin)
         self.mainwindow.showDialog(d)
@@ -510,7 +510,7 @@ class QuickOps(object):
 
         from misura.client import plugin
         p = plugin.DeriveDatasetPlugin(
-            ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '_d', smooth=w)
+            ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '/d', smooth=w)
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.DeriveDatasetPlugin)
         self.mainwindow.showDialog(d)

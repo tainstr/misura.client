@@ -266,10 +266,6 @@ class NodeEntry(object):
     def insert(self, path, status=1):
         """Insert a pure node"""
 
-        if self.doc.data.has_key(path) and isinstance(self.doc.data[path], document.datasets.Dataset1DPlugin):
-            dataset_plugin_is_already_loaded_as_child_of_the_dataset_it_derived_from = False
-            return dataset_plugin_is_already_loaded_as_child_of_the_dataset_it_derived_from
-
         splt = self.splt
         if self.parent:
             assert self.path.startswith(path)
@@ -414,21 +410,7 @@ class DatasetEntry(NodeEntry):
             if self.alldoc.has_key(entry.path):
                 continue
             del self._children[path]
-        for name, ds in self.alldoc.iteritems():
-            if name == path:
-                continue
-            if not isinstance(ds, document.datasets.Dataset1DPlugin):
-                continue
-            involved = flatten(ds.pluginmanager.fields.values())
-            if path in involved:
-                logging.debug(
-                    '%s %s %s %s', 'path involved', path, involved, name)
-                # Recover an already defined dataset
-                entry = self._children.get(name, False)
-                if entry is False:
-                    # Create a new one
-                    entry = DatasetEntry(
-                        doc=self.doc, name=name, path=name, parent=self)
+
         return self._children
 
     @property
