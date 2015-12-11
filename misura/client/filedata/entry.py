@@ -5,7 +5,6 @@ from misura.canon.logger import Log as logging
 from veusz import document
 from compiler.ast import flatten
 import collections
-import path
 
 sep = '/'
 # Statuses
