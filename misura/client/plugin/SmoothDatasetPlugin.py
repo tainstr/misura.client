@@ -44,7 +44,6 @@ class SmoothDatasetPlugin(plugins.DatasetPlugin):
         # make a new dataset with name in fields['ds_out']
         logging.debug('%s %s', 'DSOUT', fields)
         self.ds_out = plugins.Dataset1D(fields['ds_out'])
-
         # return list of datasets
         return [self.ds_out]
 

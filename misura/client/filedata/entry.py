@@ -416,7 +416,6 @@ class DatasetEntry(NodeEntry):
     @property
     def children(self):
         """Scan the document for other datasets depending on itself."""
-        print 'calculating children of',self.path,self.model_path
         for name, ds in self.alldoc.iteritems():
             if name == self.path:
                 continue
@@ -457,6 +456,8 @@ class DatasetEntry(NodeEntry):
         vars = []
         for p in self.parents:
             ds = self.alldoc[p]
+            if p==self.path:
+                continue
             if hasattr(ds, 'm_var'):
                 vars.append(ds.m_var)
             else:
@@ -476,9 +477,9 @@ class DatasetEntry(NodeEntry):
         pm = ds.pluginmanager
         vars = ','.join(self.vars)
         if pm.plugin.name == 'Coefficient':
-            v = 'Coeff(%i) ' % (pm.fields['start'])
+            v = 'Coeff(%s,%i\degC) ' % (pm.fields['start'],vars)
         elif pm.plugin.name == 'Derive':
-            v = 'Der(%i)' % (pm.fields['order'])
+            v = 'Der(%i\deg,%s)' % (pm.fields['order'],vars)
         else:
             v = getattr(ds, 'm_var', vars)
         return v
@@ -492,7 +493,7 @@ class DatasetEntry(NodeEntry):
         pm = self.ds.pluginmanager
         if pm.plugin.name == 'SmoothData':
             name = getattr(self.parent, 'm_var', self.parent.path)
-            return 'Smooth(%i,%s)' % (pm.fields['window'], name)
+            return 'Smooth(%s,%ipts)' % (name, pm.fields['window'])
         else:
             return '%s(%s)' % (pm.plugin.name, ','.join(self.vars))
 
