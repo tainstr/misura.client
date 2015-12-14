@@ -99,6 +99,7 @@ class DatabaseTable(QtGui.QTableView):
         self.connect(
             self, QtCore.SIGNAL('doubleClicked(QModelIndex)'), self.select)
         self.setHorizontalHeader(DatabaseHeader(parent=self))
+        # self.horizontalHeader().setMovable(True);
 
     def select(self, idx):
         self.emit(QtCore.SIGNAL('selected()'))
@@ -179,8 +180,33 @@ class DatabaseWidget(QtGui.QWidget):
                 continue
             self.qfilter.addItem(_(sh[i]), h)
 
+        file_column = 0
+        serial_column = 1
+        uid_column = 2
         id_column = 3
-        self.table.resizeColumnToContents(id_column)
+        zero_time_column = 4
+        instrument_column = 5
+        flavour_column = 6
+        name_column = 7
+        elapsed_column = 8
+        number_of_samples_column = 9
+        comment_cilumn = 10
+        verify_column = 11
+        incremental_id_column = 12
+
+        self.table.horizontalHeader().moveSection(name_column, 0)
+        self.table.horizontalHeader().moveSection(incremental_id_column, 1)
+        self.table.horizontalHeader().moveSection(serial_column, 2)
+
+        self.table.horizontalHeader().hideSection(id_column)
+        self.table.horizontalHeader().hideSection(uid_column)
+        self.table.horizontalHeader().hideSection(verify_column)
+        self.table.horizontalHeader().hideSection(file_column)
+        self.table.horizontalHeader().hideSection(flavour_column)
+
+        self.table.resizeColumnToContents(name_column)
+        # name_column =
+
 
     def query(self):
         d = self.qfilter.itemData(self.qfilter.currentIndex())
