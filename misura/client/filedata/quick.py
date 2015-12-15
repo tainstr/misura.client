@@ -117,7 +117,9 @@ class QuickOps(object):
         else:
             dslist = []
         from misura.client import plugin
-        p = plugin.InterceptPlugin(target=dslist, axis='X')
+        xnames = self.xnames(node, page='/time')
+        xnames.append('')
+        p = plugin.InterceptPlugin(target=dslist, axis='X', critical_x=xnames[0])
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.InterceptPlugin)
         self.mainwindow.showDialog(d)
 

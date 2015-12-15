@@ -3,8 +3,7 @@
 """Derive a dataset."""
 import veusz.plugins as plugins
 import numpy as np
-import SmoothDatasetPlugin
-
+from utils import derive, xyderive, smooth
 
 class DeriveDatasetPlugin(plugins.DatasetPlugin):
 
@@ -49,33 +48,8 @@ class DeriveDatasetPlugin(plugins.DatasetPlugin):
                 'Input and output datasets cannot be the same.')
         # make a new dataset with name in fields['ds_out']
         self.ds_out = plugins.Dataset1D(fields['ds_out'])
-
         # return list of datasets
         return [self.ds_out]
-
-    def derive(self, v, method, order=1):
-        """Derive one time an array, always returning an array of the same length"""
-        if method == 'Middle':
-            return np.gradient(v, order)
-        d = np.diff(v, order)
-        if method == 'Right':
-            app = np.array([d[-1]] * order)
-            d = np.concatenate((d, app))
-            return d
-        app = np.array([d[0]] * order)
-        d = np.concatenate((app, d))
-        return d
-
-    def xyderive(self, x, y, order, method):
-        """Compute order-th derivative of `y` with respect to `x`"""
-        for i in range(order - 1):
-            x = self.derive(x, 'Middle')
-            y = self.derive(y, 'Middle')
-            y = y / x
-        x = self.derive(x, method)
-        y = self.derive(y, method)
-        n = min(len(x), len(y))
-        return y[:n] / x[:n]
 
     def updateDatasets(self, fields, helper):
         """	This function should *update* the dataset(s) returned by getDatasets
@@ -86,19 +60,19 @@ class DeriveDatasetPlugin(plugins.DatasetPlugin):
         # get the value to add
         order = fields['order']
         method = fields['method']
-        smooth = fields['smooth']
+        smooth_num = fields['smooth']
         ds_x = None
-        if smooth > 0:
-            ds_y = SmoothDatasetPlugin.smooth(ds_y, smooth, 'hanning')
+        if smooth_num > 0:
+            ds_y = smooth(ds_y, smooth_num, 'hanning')
         if fields['ds_x'] != '':
             # Derive with respect to X
             ds_x = np.array(helper.getDataset(fields['ds_x']).data)
-            if smooth > 0:
-                ds_x = SmoothDatasetPlugin.smooth(ds_x, smooth, 'hanning')
-            out = self.xyderive(ds_x, ds_y, order, method)
+            if smooth_num > 0:
+                ds_x = smooth(ds_x, smooth_num, 'hanning')
+            out = xyderive(ds_x, ds_y, order, method)
         else:
             # Derive with respect to point indexes
-            out = self.derive(ds_y, method, order)
+            out = derive(ds_y, method, order)
 
         self.ds_out.update(data=out)
         return [self.ds_out]

@@ -89,6 +89,26 @@ def smooth(x, window=10, method='hanning'):
     y = y[window:-window + 1]
     return y
 
+def derive(v, method, order=1):
+    """Derive one time an array, always returning an array of the same length"""
+    if method == 'Middle':
+        return np.gradient(v, order)
+    d = np.diff(v, order)
+    if method == 'Right':
+        app = np.array([d[-1]] * order)
+        d = np.concatenate((d, app))
+        return d
+    app = np.array([d[0]] * order)
+    d = np.concatenate((app, d))
+    return d
+
+def xyderive( x, y, order, method):
+    """Compute order-th derivative of `y` with respect to `x`"""
+    x = derive(x, method)
+    for i in range(order):
+        y = derive(y, method)
+        y = y / x
+    return y
 
 class OperationWrapper(object):
 

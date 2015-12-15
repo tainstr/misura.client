@@ -103,7 +103,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         s.add(setting.ChoiceSwitch(
             'search', ['Nearest (Fixed X)', 'Nearest', 'Maximum', 'Minimum',
                        'Inflection', 'Stationary'], 'Nearest (Fixed X)',
-            settingstrue=['searchRange'], settingsfalse=[], showfn=lambda val: val != 'None',
+            settingstrue=['searchRange','critical_x'], settingsfalse=[], showfn=lambda val: not val.startswith('Nearest'),
             descr='Search nearest critical point',
             usertext='Search nearest'),
             4)
@@ -112,19 +112,25 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             descr='Critical search range',
             usertext='Search range'),
             5)
+        
+        s.add(setting.Dataset(
+            'critical_x','',
+            descr='Critical search X dataset',
+            usertext='Critical X'),
+            6)
 
         s.add(setting.WidgetChoice(
             'secondPoint', '',
             descr='Second Data Point for passing-through line placement.',
             widgettypes=('datapoint',),
             usertext='Second Data Point'),
-            6)
+            7)
         s.add(setting.WidgetChoice(
             'pt2ptLine', '',
             descr='Dispose this line as passing through this and second data point.',
             widgettypes=('line',),
             usertext='Passing-through Line'),
-            7)
+            8)
 
         # OVERRIDES
         n = setting.Choice('positioning',
@@ -464,16 +470,18 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             return True
 
         r = []
-        xm1 = xm[sl]
+        # Substitute X with critical X
+        crix = self.settings.get('critical_x').get()
+        crix = self.document.data[crix].data
+        xm1 = crix[sl]
         ym1 = ym[sl]
-        step = int(min(50, len(xm1) / 3.) + 1)
         if src == 'Stationary':
-            sp = interpolate.LSQUnivariateSpline(
-                xm1, ym1, xm1[step:-step:step], k=4)
+            sp = interpolate.UnivariateSpline(
+                xm1, ym1, k=4)
             r = sp.derivative(1).roots()
         elif src == 'Inflection':
-            sp = interpolate.LSQUnivariateSpline(
-                xm1, ym1, xm1[step:-step:step], k=5)
+            sp = interpolate.UnivariateSpline(
+                xm1, ym1, k=5)
             r = sp.derivative(2).roots()
         if len(r) == 0:
             logging.debug('%s %s', 'NO CRITICAL POINTS FOUND', src)
