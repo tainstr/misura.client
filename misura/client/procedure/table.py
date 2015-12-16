@@ -128,8 +128,13 @@ class ThermalCurveTable(QtGui.QTableView):
 
     def newCool(self):
         desc = {}
+
+        current_row = self.selection.currentIndex().row()
+        previous_row = row.previous_not_event_row_index(current_row + 1, self.model().dat)
+        previous_temperature = self.model().dat[previous_row][1]
+
         option.ao(desc, 'target', 'Float', name=_("Target cooling temperature"),
-                  unit='celsius', current=50, min=0, max=1600, step=0.1)
+                  unit='celsius', current=50, min=0, max=previous_temperature, step=0.1)
         option.ao(desc, 'timeout', 'Float', name=_("Timeout (<=0 means forever)"),
                   unit='minute', current=-1, min=-1, max=1e3, step=0.1)
         cp = option.ConfigurationProxy({'self': desc})
