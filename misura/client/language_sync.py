@@ -129,7 +129,7 @@ def write_ts(lang, ctx):
 import inspect
 autodoc_dir = "/opt/misura4/misura/client/doc/options"
 if not os.path.exists(autodoc_dir):
-    os.makedirs(autodoc_dir) 
+    os.makedirs(autodoc_dir)
 
 def as_rst(opt):
     """Format option entry dictionary `opt` as restructured text for documentation.
@@ -160,7 +160,7 @@ def as_rst(opt):
         if key == 'name': continue
         val = '`' + repr(opt[key]) + '`'
         table += key.ljust(len_key) + space + val.ljust(len_val) + '\n'
-    
+
     # Build header
     header0 = '=' * len_key + space + '=' * len_key + '\n'
     header = 'Property'.ljust(len_key) + space + 'Value'.ljust(len_val) + '\n'
@@ -195,11 +195,11 @@ def generate_rst(conf_def, parent_def=[], class_name='', rst=''):
             continue
         opt = Option(**el)
         opt.validate()
-        add_rst += anchor + '\n\n' + as_rst(opt) 
-    
+        add_rst += anchor + '\n\n' + as_rst(opt)
+
     if len(add_rst)>0:
         add_rst = class_header.format(class_name) + add_rst
-    return rst + add_rst  
+    return rst + add_rst
 
 start_tag = '.. misura_autodoc_start\n\n'
 end_tag = '.. misura_autodoc_end\n\n'
@@ -237,8 +237,8 @@ def autodoc(obj):
     # Keep parent object in order to write only missing options
     if len(mro) > 1:
         parent_class = mro[-2]
-    else: 
-        parent_class = False 
+    else:
+        parent_class = False
     # Keep only names
     mro = [cls.__name__ for cls in mro]
     # Skip xmlrpc stuff
@@ -247,23 +247,23 @@ def autodoc(obj):
         return False
     i = mro.index('ConfigurationInterface')
     mro = mro[i:]
-   
+
     fname = '.'.join(mro) + '.rst'
     path_rst = os.path.join(autodoc_dir, fname)
-    
+
 
     if not os.path.exists(path_rst):
         logging.debug('Creating index.rst %s', path_rst)
         open(path_rst, 'w').close()
-    
+
     rst = open(path_rst, 'r').read()
     parent_conf = getattr(parent_class, 'conf_def', [])
     rst = update_rst(obj.conf_def, rst, parent_conf, obj.__name__)
     # Write on output file
     if len(rst)>0:
         open(path_rst, 'w').write(rst)
-    return True    
-    
+    return True
+
 
 done = set([])
 
@@ -344,7 +344,7 @@ def collect():
     logging.debug('%s %s %s %s', 'Stats', len(
         translations), len(set(translations)), missing)
 
-    for column in indexer.testColumn:
+    for column in indexer.columns_to_translate:
         translations["dbcol:" + column] = "dbcol:" + column
 
     out = open('static.txt', 'w')
@@ -412,7 +412,7 @@ class PythonMessageVisitor(ast.NodeVisitor):
         if len(obj.args) + len(obj.keywords) not in (1, 2, 3) or len(obj.args) < 1:
             sys.stderr.write(
                 'WARNING: Translatable call to %s in %s:%i '
-                'requires 1 to 3 parameters\n' % 
+                'requires 1 to 3 parameters\n' %
                 (repr(fn), self.filename, obj.lineno))
             return
 
@@ -423,7 +423,7 @@ class PythonMessageVisitor(ast.NodeVisitor):
         except AttributeError:
             sys.stderr.write(
                 'WARNING: Parameter to translatable function '
-                '%s in %s:%i is not string\n' % 
+                '%s in %s:%i is not string\n' %
                 (repr(fn), self.filename, obj.lineno))
             return
 
@@ -453,7 +453,7 @@ class PythonMessageVisitor(ast.NodeVisitor):
 
         if self.verbose:
             sys.stdout.write(
-                'Found text %s (context=%s, disambiguation=%s) in %s:%i\n' % 
+                'Found text %s (context=%s, disambiguation=%s) in %s:%i\n' %
                 (repr(text), repr(context), repr(comment),
                  self.filename, obj.lineno))
 
@@ -484,7 +484,7 @@ class PythonMessageVisitor(ast.NodeVisitor):
         except AttributeError:
             sys.stderr.write(
                 "WARNING: Translation function definition %s in "
-                "%s:%i does not have default string for 'context'\n" % 
+                "%s:%i does not have default string for 'context'\n" %
                 (repr(name), self.filename, obj.lineno))
             return
 
@@ -497,7 +497,7 @@ class PythonMessageVisitor(ast.NodeVisitor):
         if self.verbose:
             sys.stdout.write(
                 'Found translation function %s with default '
-                'context %s in %s:%i\n' % 
+                'context %s in %s:%i\n' %
                 (repr(name), repr(context), self.filename, obj.lineno))
 
         # map function name to default context
@@ -582,7 +582,7 @@ def language_sync():
     logging.debug('%s', 'Completeness:')
     for l in langs:
         s = statistics[l]
-        logging.debug('%s %s %s', '%s: %.2f %% (missing: %i)' % 
+        logging.debug('%s %s %s', '%s: %.2f %% (missing: %i)' %
                       (l.upper(), 100. * s[1] / (s[1] + s[2]), s[2]))
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@
 
 pro='./misura4.pro'
 echo '' > $pro
-for f in `ls /opt/misura4/misura/client/*.py`
+for f in `ls /opt/misura4/misura.client/misura/client/*.py`
 	do echo "SOURCES += $f" >> $pro
 	echo "SOURCES += $f"
 	done

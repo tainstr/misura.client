@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="en">
+<TS version="2.0" language="fr">
 
 <context>
     <name>Option</name>
@@ -408,12 +408,6 @@
     </message>
 
     <message>
-        <source>Port</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Is Initializing</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -643,7 +637,7 @@
 
     <message>
         <source>dbcol:file</source>
-	<translation>File</translation>
+	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -822,7 +816,7 @@
     </message>
 
     <message>
-        <source>Remote setpoint provider</source>
+        <source>Global Reset Release</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1164,7 +1158,19 @@
     </message>
 
     <message>
+        <source>Temperature 2</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Invert X&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;Y</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Temperature 8</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1332,12 +1338,6 @@
     </message>
 
     <message>
-        <source>Consecutive communication errors</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Maximum heating rate</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -1392,7 +1392,7 @@
     </message>
 
     <message>
-        <source>Global Reset Release</source>
+        <source>Remote setpoint provider</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1416,7 +1416,7 @@
     </message>
 
     <message>
-        <source>Low power limit</source>
+        <source>Camera Right</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1429,6 +1429,12 @@
 
     <message>
         <source>Full power</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Id</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1458,12 +1464,6 @@
     </message>
 
     <message>
-        <source>Invert X&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;Y</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Running thermal cycle</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -1483,6 +1483,12 @@
 
     <message>
         <source>Position of the limiting micro interruptor/s</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Thermocouple type4</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1860,7 +1866,7 @@
     </message>
 
     <message>
-        <source>Perturbate Exponential propagation factor</source>
+        <source>Port</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2190,7 +2196,7 @@
     </message>
 
     <message>
-        <source>Camera Right</source>
+        <source>Consecutive communication errors</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2334,7 +2340,7 @@
     </message>
 
     <message>
-        <source>Temperature 2</source>
+        <source>Chop Off Number</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2496,7 +2502,7 @@
     </message>
 
     <message>
-        <source>Temperature 8</source>
+        <source>Scan for CubeCamera</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2880,13 +2886,7 @@
     </message>
 
     <message>
-        <source>Chop Off Number</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Thermocouple type4</source>
+        <source>Invert X&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;Y</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2928,7 +2928,7 @@
     </message>
 
     <message>
-        <source>Id</source>
+        <source>Perturbate Exponential propagation factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3217,7 +3217,7 @@
 
     <message>
         <source>Uid</source>
-	<translation>uid</translation>
+	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -3360,7 +3360,7 @@
     </message>
 
     <message>
-        <source>Kiln position after acquisition</source>
+        <source>Maximum geometric displacement from zero line</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3468,12 +3468,6 @@
     </message>
 
     <message>
-        <source>Scan for CubeCamera</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Shutter Type</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -3547,12 +3541,18 @@
 
     <message>
         <source>dbcol:incremental_id</source>
-	<translation>Incremental ID</translation>
+	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Logic</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Exec on test finish</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3625,7 +3625,7 @@
 
     <message>
         <source>dbcol:uid</source>
-	<translation>uid</translation>
+	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -3942,7 +3942,7 @@
     </message>
 
     <message>
-        <source>Maximum geometric displacement from zero line</source>
+        <source>Low power limit</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3954,7 +3954,7 @@
     </message>
 
     <message>
-        <source>Exec on test finish</source>
+        <source>Kiln position after acquisition</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4192,6 +4192,12 @@
     </message>
 
     <message>
+        <source>Rules</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Save this plot to file</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -4282,6 +4288,12 @@
     </message>
 
     <message>
+        <source>Remote operations</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Log Window</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -4294,7 +4306,7 @@
     </message>
 
     <message>
-        <source>Not saved</source>
+        <source>View</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4372,7 +4384,8 @@
     </message>
 
     <message>
-        <source>Specify a new server address</source>
+        <source>Current measurement was stopped and its data has been deleted. 
+</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4493,12 +4506,6 @@
 
     <message>
         <source>Disconnect</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Profile</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4642,13 +4649,19 @@
     </message>
 
     <message>
-        <source>Output file</source>
+        <source>Edit</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Result for option &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;{}&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Output file</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4696,7 +4709,7 @@
     </message>
 
     <message>
-        <source>Remote operations</source>
+        <source>Close furnace</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4721,6 +4734,12 @@
 
     <message>
         <source>Storyboard</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Rendering source</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4811,13 +4830,19 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
+        <source>Save new plot</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Control temperature switching rate (0=sudden)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Values Label</source>
+        <source>Data Plot</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4859,7 +4884,7 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
-        <source>Rules</source>
+        <source>Measurement stopped and saved</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4961,7 +4986,19 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
+        <source>Not saved</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Smoothing</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Clear table</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5019,7 +5056,7 @@ Standard deviation:
     </message>
 
     <message>
-        <source>Query:</source>
+        <source>Change</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5122,7 +5159,7 @@ The test will finish in {:.1f} minutes.</source>
     </message>
 
     <message>
-        <source>Sample </source>
+        <source>Set Initial Dimension</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5218,7 +5255,7 @@ The test will finish in {:.1f} minutes.</source>
     </message>
 
     <message>
-        <source>Data Plot</source>
+        <source>Values Label</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5255,13 +5292,6 @@ The test will finish in {:.1f} minutes.</source>
 
     <message>
         <source>Event type:</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Current measurement was stopped and its data has been deleted. 
-</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5321,7 +5351,7 @@ The test will finish in {:.1f} minutes.</source>
     </message>
 
     <message>
-        <source>Change</source>
+        <source>Connect</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5394,7 +5424,7 @@ The test will finish in {:.1f} minutes.</source>
     </message>
 
     <message>
-        <source>Starting new test</source>
+        <source>Calibration</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5406,7 +5436,7 @@ The test will finish in {:.1f} minutes.</source>
     </message>
 
     <message>
-        <source>Measurement stopped and saved</source>
+        <source>Last temperature margin</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5430,13 +5460,7 @@ The test will finish in {:.1f} minutes.</source>
     </message>
 
     <message>
-        <source>Connect</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Done: </source>
+        <source>Characteristic points</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5473,7 +5497,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Set Initial Dimension</source>
+        <source>Sample </source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5485,7 +5509,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Opened misura Tests</source>
+        <source>Thermocouple Control Transition Configuration</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5528,12 +5552,6 @@ Please choose a different one.</source>
 
     <message>
         <source>Current Connection Status</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Characteristic points</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5587,7 +5605,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Rendering source</source>
+        <source>Specify a new server address</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5611,7 +5629,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Styles</source>
+        <source>Profile</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5629,25 +5647,19 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Pixel Calibration</source>
+        <source>Steps delta T</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Edit</source>
+        <source>Query:</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Update view</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Steps delta T</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5701,19 +5713,19 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Clear table</source>
+        <source>Pixel Calibration</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Thermocouple Control Transition Configuration</source>
+        <source>Opened misura Tests</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Save new plot</source>
+        <source>Styles</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5725,13 +5737,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>View</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Close furnace</source>
+        <source>Client configuration</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5749,19 +5755,13 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Last temperature margin</source>
+        <source>Starting new test</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>New factor</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Calibration</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5797,7 +5797,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Client configuration</source>
+        <source>Done: </source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>

@@ -6,6 +6,12 @@
     <name>Option</name>
 
     <message>
+        <source>EPF Phase</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Output change rate limit, %/s</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -18,13 +24,19 @@
     </message>
 
     <message>
+        <source>D Amplitude</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Department</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Calibration factor</source>
+        <source>Knots number for spline approximation (% perimeter)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -54,7 +66,7 @@
     </message>
 
     <message>
-        <source>EPF Phase</source>
+        <source>Invert low limit</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -180,7 +192,7 @@
     </message>
 
     <message>
-        <source>1600x1200</source>
+        <source>Rate fitness threshold for integral update</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -204,13 +216,13 @@
     </message>
 
     <message>
-        <source>High power limit</source>
+        <source>Lossy JPEG</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Temperature Delta Sample 2</source>
+        <source>Power Step</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -222,13 +234,13 @@
     </message>
 
     <message>
-        <source>Driver version</source>
+        <source>Max acquisition frequency</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Zoom Y</source>
+        <source>Process managing opened tests</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -246,7 +258,7 @@
     </message>
 
     <message>
-        <source>Setpoint target</source>
+        <source> Flip Vertically</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -288,12 +300,6 @@
     </message>
 
     <message>
-        <source>Enable delayed start</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Sample 0 path</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -312,7 +318,7 @@
     </message>
 
     <message>
-        <source>Channel 2</source>
+        <source>Contact Qualification</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -360,7 +366,7 @@
     </message>
 
     <message>
-        <source>Right Upper Angle</source>
+        <source>Minimum power for first step</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -372,7 +378,7 @@
     </message>
 
     <message>
-        <source>Auto</source>
+        <source>Access level passcode</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -390,7 +396,7 @@
     </message>
 
     <message>
-        <source>End of test</source>
+        <source>USB Product ID</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -402,13 +408,13 @@
     </message>
 
     <message>
-        <source>Wait minutes</source>
+        <source>Maximum Power</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Enable heat load simulation</source>
+        <source>Sample detection refining (% length)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -420,8 +426,8 @@
     </message>
 
     <message>
-        <source>dbcol:file</source>
-	<translation>File</translation>
+        <source>Last initialized instrument</source>
+	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -432,19 +438,13 @@
     </message>
 
     <message>
-        <source>Latency</source>
+        <source>Stopping</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Fitting-filtering iterations</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Apply to any other sample</source>
+        <source>Free</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -456,7 +456,7 @@
     </message>
 
     <message>
-        <source>Firing enabled</source>
+        <source>DDC Algorithm Weight</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -498,19 +498,13 @@
     </message>
 
     <message>
-        <source>Linear fitting domain</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Equator width</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Invert low limit</source>
+        <source>Stability Slope</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -547,12 +541,6 @@
 
     <message>
         <source>Alignment calibration in progress</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Invert X&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;Y</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -654,19 +642,19 @@
     </message>
 
     <message>
-        <source>Last initialized instrument</source>
+        <source>dbcol:file</source>
+	<translation>File</translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Firing enabled</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>DDC Algorithm Weight</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Derivative resolution (% length)</source>
+        <source>Linear fitting domain</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -738,6 +726,12 @@
     </message>
 
     <message>
+        <source>Invert X&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;Y</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Alarmed</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -780,7 +774,7 @@
     </message>
 
     <message>
-        <source>Hardware clock time delta (UTC)</source>
+        <source>Flip Horizontally</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -804,7 +798,7 @@
     </message>
 
     <message>
-        <source>Eurotherm Thermoregulator</source>
+        <source>List of available SimMotor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -828,7 +822,7 @@
     </message>
 
     <message>
-        <source>Remote setpoint provider</source>
+        <source>Global Reset Release</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -882,7 +876,7 @@
     </message>
 
     <message>
-        <source>Thermal cycle</source>
+        <source>Wb Kg</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -894,7 +888,7 @@
     </message>
 
     <message>
-        <source>Kiln Temperature</source>
+        <source>Maximum power (PV²)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -930,7 +924,7 @@
     </message>
 
     <message>
-        <source>Right sample holder distance from middle camera, um</source>
+        <source>Retry chances</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -954,13 +948,7 @@
     </message>
 
     <message>
-        <source>Internal Heat</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Power Step</source>
+        <source>Initializing devices</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1002,7 +990,7 @@
     </message>
 
     <message>
-        <source>Opened</source>
+        <source>Total displacement</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1014,7 +1002,7 @@
     </message>
 
     <message>
-        <source>Backup/restore progress</source>
+        <source>Chop Off Number</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1056,13 +1044,13 @@
     </message>
 
     <message>
-        <source>D Amplitude</source>
+        <source>Output value</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Last profile</source>
+        <source>Scan for CubeCamera</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1170,13 +1158,19 @@
     </message>
 
     <message>
+        <source>Temperature 2</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Invert X&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;Y</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Morph open kernel Y</source>
+        <source>Temperature 8</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1212,7 +1206,7 @@
     </message>
 
     <message>
-        <source>Initialization iterations</source>
+        <source>List of served device classes</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1248,7 +1242,19 @@
     </message>
 
     <message>
+        <source>Quadratic Error on Radius</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>X Origin</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Invert X&amp;lt;-&amp;gt;Y</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1284,13 +1290,19 @@
     </message>
 
     <message>
+        <source>Internal Heat</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Cold junction temperature</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Flip Horizontally</source>
+        <source>Hardware clock time delta (UTC)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1326,12 +1338,6 @@
     </message>
 
     <message>
-        <source>60Hz</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Aeag</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -1345,6 +1351,12 @@
 
     <message>
         <source>Parity</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Derivative resolution (% length)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1392,7 +1404,7 @@
     </message>
 
     <message>
-        <source>Global Reset Release</source>
+        <source>Remote setpoint provider</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1404,25 +1416,19 @@
     </message>
 
     <message>
-        <source>Current Right absolute calibration factor</source>
+        <source>Delay Phase</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>60Hz</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Download new software version</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Camera Right</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Low power limit</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1482,7 +1488,25 @@
     </message>
 
     <message>
+        <source>End of test</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Position of the limiting micro interruptor/s</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Nsamples</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Roughness</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1512,7 +1536,7 @@
     </message>
 
     <message>
-        <source>Interval</source>
+        <source>Dissipative Output Component</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1554,7 +1578,13 @@
     </message>
 
     <message>
-        <source>Quadratic Error on Radius</source>
+        <source>Sensor Pixel Clock Freq Hz</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Scan for LinuxCamera</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1602,13 +1632,13 @@
     </message>
 
     <message>
-        <source>Height shrinking for Sintering</source>
+        <source>Thermocouple type5</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Thermocouple type4</source>
+        <source>Cropping rectangle</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1728,6 +1758,12 @@
     </message>
 
     <message>
+        <source>Elapsed</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Start fitting line, X</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -1746,7 +1782,7 @@
     </message>
 
     <message>
-        <source>Dissipative Output Component</source>
+        <source>Interval</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1758,7 +1794,7 @@
     </message>
 
     <message>
-        <source>Name</source>
+        <source>Frequency filter </source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1782,7 +1818,7 @@
     </message>
 
     <message>
-        <source>Maximum power (PV²)</source>
+        <source>Kiln Temperature</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1806,12 +1842,6 @@
     </message>
 
     <message>
-        <source> Flip Vertically</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Stability Calculation Interval</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -1830,7 +1860,7 @@
     </message>
 
     <message>
-        <source>Kiln position before acquisition</source>
+        <source>Temperature Delta Sample 2</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1854,7 +1884,7 @@
     </message>
 
     <message>
-        <source>Base correction amplitude</source>
+        <source>dbcol:id</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1908,7 +1938,7 @@
     </message>
 
     <message>
-        <source>Process managing opened tests</source>
+        <source>Zoom Y</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1932,19 +1962,25 @@
     </message>
 
     <message>
-        <source>Max acquisition frequency</source>
+        <source>Driver version</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Maximum Heating Rate</source>
+        <source>Setpoint target</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Upgrade/restore progress</source>
+        <source>Chop Off Threshold</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Max COM serial ports to be scanned</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1968,13 +2004,19 @@
     </message>
 
     <message>
-        <source>Free</source>
+        <source>Apply to any other sample</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Restore software backup</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Full power, double winding</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -1993,12 +2035,6 @@
 
     <message>
         <source>Class hierarchy</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Aperture size for square filter</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2035,12 +2071,6 @@
 
     <message>
         <source>Flavour</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Circle fitting precision (% of perimeter to use)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2166,7 +2196,7 @@
     </message>
 
     <message>
-        <source>Contact angle limit for sessile capillarity (0=no)</source>
+        <source>Unchanged</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2178,7 +2208,7 @@
     </message>
 
     <message>
-        <source>Consecutive communication errors</source>
+        <source>Camera Right</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2262,13 +2292,13 @@
     </message>
 
     <message>
-        <source>dbcol:id</source>
+        <source>Auto</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Thermocouple type5</source>
+        <source>Height shrinking for Sintering</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2286,19 +2316,31 @@
     </message>
 
     <message>
-        <source>Chop Off Threshold</source>
+        <source>Upgrade/restore progress</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Full power, double winding</source>
+        <source>Thermocouple type4</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Reset</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Integral Factor</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Invert X&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;Y</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2316,7 +2358,7 @@
     </message>
 
     <message>
-        <source>Temperature 2</source>
+        <source>Backup/restore progress</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2328,13 +2370,13 @@
     </message>
 
     <message>
-        <source>Manual</source>
+        <source>Automatic image crop</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Automatic image crop</source>
+        <source>Manual</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2442,13 +2484,19 @@
     </message>
 
     <message>
+        <source>Curvature Radius</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Morphology opening iterations</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Output value</source>
+        <source>Complete Address</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2472,7 +2520,7 @@
     </message>
 
     <message>
-        <source>Temperature 8</source>
+        <source>Last profile</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2496,19 +2544,19 @@
     </message>
 
     <message>
-        <source>Simulated Left camera position</source>
+        <source>Derivative Factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Cropping rectangle</source>
+        <source>Morph open kernel X</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Perturbate Environmental Temperature</source>
+        <source>Closed</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2568,13 +2616,13 @@
     </message>
 
     <message>
-        <source>Delay Amplitude</source>
+        <source>Error value</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Stability Slope</source>
+        <source>Delay Amplitude</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2640,7 +2688,7 @@
     </message>
 
     <message>
-        <source>Rate fitness threshold for integral update</source>
+        <source>1600x1200</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2670,7 +2718,7 @@
     </message>
 
     <message>
-        <source>Contact Qualification</source>
+        <source>Channel 2</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2694,7 +2742,7 @@
     </message>
 
     <message>
-        <source>Sample detection refining (% length)</source>
+        <source>Latency</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2754,25 +2802,25 @@
     </message>
 
     <message>
-        <source>List of available SimMotor</source>
+        <source>Eurotherm Thermoregulator</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Exponential</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Complete Address</source>
+        <source>Perturbate Dissipative Constant</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Frame timestamp</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Maximum Heating Rate</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2814,13 +2862,19 @@
     </message>
 
     <message>
+        <source>Sessile beta</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Flash motor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Minimum power for first step</source>
+        <source>Right Upper Angle</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2839,18 +2893,6 @@
 
     <message>
         <source>D Phase</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Chop Off Number</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Access level passcode</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2880,12 +2922,6 @@
     </message>
 
     <message>
-        <source>USB Product ID</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Has motion control</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -2893,6 +2929,12 @@
 
     <message>
         <source>Upper-left index</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Kiln position after acquisition</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -2994,13 +3036,19 @@
     </message>
 
     <message>
-        <source>Maximum Power</source>
+        <source>Wait minutes</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Gammay</source>
+        <source>Control Temperature</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>MoSi2</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3012,7 +3060,7 @@
     </message>
 
     <message>
-        <source>Volume</source>
+        <source>SiC</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3030,7 +3078,7 @@
     </message>
 
     <message>
-        <source>Elapsed time</source>
+        <source>Enable heat load simulation</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3042,19 +3090,19 @@
     </message>
 
     <message>
-        <source>Derivative Factor</source>
+        <source>Simulated Left camera position</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Morph open kernel X</source>
+        <source>Gammay</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Elapsed</source>
+        <source>Morph open kernel Y</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3078,7 +3126,13 @@
     </message>
 
     <message>
-        <source>Invert X&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;-&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;Y</source>
+        <source>Delay rate adjustment</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Current drift</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3090,7 +3144,7 @@
     </message>
 
     <message>
-        <source>Reset</source>
+        <source>Aperture size for square filter</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3102,7 +3156,7 @@
     </message>
 
     <message>
-        <source>Perturbate Dissipative Constant</source>
+        <source>Exponential</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3234,7 +3288,7 @@
     </message>
 
     <message>
-        <source>Closed</source>
+        <source>Perturbate Environmental Temperature</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3252,7 +3306,7 @@
     </message>
 
     <message>
-        <source>Roughness</source>
+        <source>Measurement error</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3282,25 +3336,31 @@
     </message>
 
     <message>
+        <source>Current Right absolute calibration factor</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Calibration Model data</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Move to position</source>
+        <source>Invert X&lt;-&gt;Y</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Frequency filter </source>
+        <source>Name</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Current drift</source>
+        <source>Elapsed time</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3312,13 +3372,7 @@
     </message>
 
     <message>
-        <source>Kiln position after acquisition</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Sensor Pixel Clock Freq Hz</source>
+        <source>Low power limit</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3336,7 +3390,7 @@
     </message>
 
     <message>
-        <source>Knots number for spline approximation (% perimeter)</source>
+        <source>Calibration factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3372,7 +3426,7 @@
     </message>
 
     <message>
-        <source>Lossy JPEG</source>
+        <source>High power limit</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3402,7 +3456,7 @@
     </message>
 
     <message>
-        <source>Stopping</source>
+        <source>Fitting-filtering iterations</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3420,13 +3474,7 @@
     </message>
 
     <message>
-        <source>Scan for CubeCamera</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Scan for new devices</source>
+        <source>Shutter Type</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3462,13 +3510,13 @@
     </message>
 
     <message>
-        <source>Wb Kg</source>
+        <source>Thermal cycle</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Retry chances</source>
+        <source>Right sample holder distance from middle camera, um</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3480,7 +3528,7 @@
     </message>
 
     <message>
-        <source>Total displacement</source>
+        <source>Opened</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3494,6 +3542,12 @@
     <message>
         <source>No</source>
 	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>dbcol:incremental_id</source>
+	<translation>Incremental ID</translation>
 	<translatorcomment></translatorcomment>
     </message>
 
@@ -3534,7 +3588,7 @@
     </message>
 
     <message>
-        <source>Delay Phase</source>
+        <source>Consecutive communication errors</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3576,7 +3630,7 @@
     </message>
 
     <message>
-        <source>List of served device classes</source>
+        <source>Initialization iterations</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3672,13 +3726,19 @@
     </message>
 
     <message>
-        <source>Max COM serial ports to be scanned</source>
+        <source>Enable delayed start</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Enable Horizontal Optical Dilatometer</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Kiln position before acquisition</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3708,7 +3768,7 @@
     </message>
 
     <message>
-        <source>Unchanged</source>
+        <source>Contact angle limit for sessile capillarity (0=no)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3732,7 +3792,7 @@
     </message>
 
     <message>
-        <source>Measurement error</source>
+        <source>Heating rate limits</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3774,6 +3834,12 @@
     </message>
 
     <message>
+        <source>Move to position</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Closing the current test</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -3786,7 +3852,7 @@
     </message>
 
     <message>
-        <source>Micron to pixel conversion factor</source>
+        <source>Available backups</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3804,13 +3870,13 @@
     </message>
 
     <message>
-        <source>MoSi2</source>
+        <source>Circle fitting precision (% of perimeter to use)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>SiC</source>
+        <source>Volume</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3858,13 +3924,19 @@
     </message>
 
     <message>
+        <source>Base correction amplitude</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Enable Histogram Equalization for dynamic contrast</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Shutter Type</source>
+        <source>Scan for new devices</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -3930,7 +4002,7 @@
     </message>
 
     <message>
-        <source>Available backups</source>
+        <source>Micron to pixel conversion factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4011,12 +4083,6 @@
     </message>
 
     <message>
-        <source>Misura Browser</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Started: </source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -4035,25 +4101,31 @@
     </message>
 
     <message>
+        <source>Insert natural cooling</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>New Database</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>misura Database: </source>
+        <source>Video output file</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Overwriting file</source>
+        <source>Add row before</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Confirm initial sample dimension</source>
+        <source>Data Table</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4090,7 +4162,7 @@
     </message>
 
     <message>
-        <source>Time (min)</source>
+        <source>Logged out</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4174,7 +4246,19 @@
     </message>
 
     <message>
+        <source>Result for option "{}"</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Validate</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Stasis Duration</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4192,7 +4276,7 @@
     </message>
 
     <message>
-        <source>Imaging</source>
+        <source>Test data cannot be trusted.</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4204,13 +4288,19 @@
     </message>
 
     <message>
+        <source>runtime.vsz</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Download finished test?</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Signature check succeeded</source>
+        <source>Log Window</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4246,13 +4336,25 @@
     </message>
 
     <message>
-        <source>Go to</source>
+        <source>Steps</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Measurement data discarded!</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Target cooling temperature</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Plots</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4270,7 +4372,13 @@
     </message>
 
     <message>
-        <source>Found at line:</source>
+        <source>Cannot insert a checkpoint event after another event</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Not saved</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4288,13 +4396,20 @@
     </message>
 
     <message>
+        <source>Current measurement was stopped and its data has been deleted. 
+</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Measurement stopped and saved</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Temperature (\deg C)</source>
+        <source>Found at line:</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4312,7 +4427,13 @@
     </message>
 
     <message>
-        <source>Labels</source>
+        <source>Timeout (&amp;lt;=0 means forever)</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Download queue</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4324,13 +4445,25 @@
     </message>
 
     <message>
-        <source>Remote operations</source>
+        <source>Impossible event requested</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>A file with the same name already exists</source>
+        <source>Check signature</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Timeout (&lt;=0 means forever)</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Download finished test as</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4348,37 +4481,7 @@
     </message>
 
     <message>
-        <source>Result for option &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;{}&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
         <source>Error - Veusz</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Open Selected</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Circle Fitting</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Target Sample Thermocouple Weight</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Delete style</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4390,13 +4493,25 @@
     </message>
 
     <message>
-        <source>Previous</source>
+        <source>Circle Fitting</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Add row before</source>
+        <source>If enabled, datapoint is easier to select, but can create problems when printing.</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Delete style</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Previous</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4420,7 +4535,7 @@
     </message>
 
     <message>
-        <source>Tree Panel</source>
+        <source>Visual factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4439,12 +4554,6 @@
 
     <message>
         <source>Storage</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Waiting approval</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4516,13 +4625,19 @@
     </message>
 
     <message>
-        <source>Save configuration</source>
+        <source>Ramp end Temperature</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Styles</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Measure</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4540,13 +4655,13 @@
     </message>
 
     <message>
-        <source>Version name</source>
+        <source>Steps delta T</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Option name</source>
+        <source>Single Ramp</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4576,7 +4691,13 @@
     </message>
 
     <message>
-        <source>Output file</source>
+        <source>Query:</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Result for option &amp;quot;{}&amp;quot;</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4588,7 +4709,13 @@
     </message>
 
     <message>
-        <source>Test data cannot be trusted.</source>
+        <source>Imaging</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Single ramp template</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4600,7 +4727,7 @@
     </message>
 
     <message>
-        <source>Plots</source>
+        <source>Done</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4636,13 +4763,31 @@
     </message>
 
     <message>
+        <source>Time (min)</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>None</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Test data is genuine.</source>
+        <source>Storyboard</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Open Selected</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Extend clickable area</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4696,7 +4841,13 @@
     </message>
 
     <message>
-        <source>Result for option "{}"</source>
+        <source>Confirm initial sample dimension</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Target Sample Thermocouple Weight</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4708,7 +4859,20 @@
     </message>
 
     <message>
-        <source>Download queue</source>
+        <source>Overwriting file</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Thermal cycle interrupted, but no test termination is set: acquisition  may continue indefinitely. 
+Manually interrupt or set a maximum test duration.</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Calibration Fitting</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4738,13 +4902,19 @@
     </message>
 
     <message>
+        <source>Natural cooling configuration</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>New version</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Signature check failed</source>
+        <source>Plot name</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4762,7 +4932,7 @@
     </message>
 
     <message>
-        <source>Visual factor</source>
+        <source>Heating Rate</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4781,6 +4951,12 @@
 
     <message>
         <source>Current measurement was stopped and its data has been deleted.</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Temperature-Setpoint tolerance</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4810,7 +4986,7 @@
     </message>
 
     <message>
-        <source>Video output file</source>
+        <source>misura Database: </source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4834,7 +5010,7 @@
     </message>
 
     <message>
-        <source>Databases</source>
+        <source>Save the test</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4858,7 +5034,13 @@
     </message>
 
     <message>
-        <source>Show more</source>
+        <source>Labels</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Result for option &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;{}&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4870,7 +5052,7 @@
     </message>
 
     <message>
-        <source>Download finished test as</source>
+        <source>Current measurement was stopped and its data has been saved.</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4904,6 +5086,12 @@ Standard deviation:
     </message>
 
     <message>
+        <source>Dataset</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Change</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -4923,6 +5111,12 @@ The test will finish in {:.1f} minutes.</source>
     </message>
 
     <message>
+        <source>Save configuration</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>View Tests</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -4935,20 +5129,13 @@ The test will finish in {:.1f} minutes.</source>
     </message>
 
     <message>
-        <source>Expansion dataset</source>
+        <source>Go to</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Thermal cycle interrupted, but no test termination is set: acquisition  may continue indefinitely. 
-Manually interrupt or set a maximum test duration.</source>
-	<translation type="unfinished"></translation>
-	<translatorcomment></translatorcomment>
-    </message>
-
-    <message>
-        <source>Result for option &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;{}&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;</source>
+        <source>Tree Panel</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4960,7 +5147,7 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
-        <source>Thermal cycle interrupted</source>
+        <source>Logout</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4972,7 +5159,7 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
-        <source>Logout</source>
+        <source>Thermal cycle interrupted</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -4984,7 +5171,7 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
-        <source>Client configuration</source>
+        <source>View</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5020,7 +5207,19 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
+        <source>Quit Client</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Draw calibration label</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Number of Steps</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5032,13 +5231,19 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
+        <source>Devices</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Video Export Configuration</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Not saved</source>
+        <source>Points</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5074,13 +5279,19 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
-        <source>Check signature</source>
+        <source>Data Plot</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Next</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Save to file</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5128,13 +5339,19 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
-        <source>Points</source>
+        <source>Temperature (\deg C)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
         <source>Characteristic points</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Shutting Down</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5152,7 +5369,7 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
-        <source>Done</source>
+        <source>Cannot insert a checkpoint event as first row</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5170,7 +5387,7 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
-        <source>Measure</source>
+        <source>Misura Browser</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5207,6 +5424,12 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
+        <source>A file with the same name already exists</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Rate (\deg C/min)</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -5225,7 +5448,13 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
-        <source>Starting new test</source>
+        <source>Calibration</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Result for option &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;{}&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5237,13 +5466,13 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
-        <source>Instrument</source>
+        <source>Test Configuration</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Result for option &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;{}&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;</source>
+        <source>Instrument</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5255,7 +5484,13 @@ Manually interrupt or set a maximum test duration.</source>
     </message>
 
     <message>
-        <source>Temperature-Setpoint tolerance</source>
+        <source>Signature check succeeded</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Waiting approval</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5310,8 +5545,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Current measurement was stopped and its data has been deleted. 
-</source>
+        <source>Dilatometry calibration factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5329,19 +5563,25 @@ Please choose a different one.</source>
     </message>
 
     <message>
+        <source>Test data is genuine.</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Current Connection Status</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Data Table</source>
+        <source>Expansion dataset</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Current measurement was stopped and its data has been saved.</source>
+        <source>Signature check failed</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5365,13 +5605,13 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Address</source>
+        <source>Reload data</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Visual Pixel Length</source>
+        <source>Address</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5389,6 +5629,18 @@ Please choose a different one.</source>
     </message>
 
     <message>
+        <source>First step Temperature</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Templates</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>About</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -5401,13 +5653,19 @@ Please choose a different one.</source>
     </message>
 
     <message>
+        <source>Show more</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Pixel Calibration</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
 
     <message>
-        <source>Query:</source>
+        <source>Output file</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5443,6 +5701,12 @@ Please choose a different one.</source>
     </message>
 
     <message>
+        <source>Global</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>Analysis</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -5455,7 +5719,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Save the test</source>
+        <source>Databases</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5485,7 +5749,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>View</source>
+        <source>Client configuration</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5503,6 +5767,12 @@ Please choose a different one.</source>
     </message>
 
     <message>
+        <source>Starting new test</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
         <source>New factor</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
@@ -5515,7 +5785,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Dilatometry calibration factor</source>
+        <source>Option name</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5527,7 +5797,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Dataset</source>
+        <source>Remote operations</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5539,7 +5809,7 @@ Please choose a different one.</source>
     </message>
 
     <message>
-        <source>Plot name</source>
+        <source>Visual Pixel Length</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5552,6 +5822,12 @@ Please choose a different one.</source>
 
     <message>
         <source>File</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Version name</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
@@ -5576,6 +5852,12 @@ Please choose a different one.</source>
 
     <message>
         <source>Action aborted. The measurement maybe still running.</source>
+	<translation type="unfinished"></translation>
+	<translatorcomment></translatorcomment>
+    </message>
+
+    <message>
+        <source>Result for option &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;{}&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;quot;</source>
 	<translation type="unfinished"></translation>
 	<translatorcomment></translatorcomment>
     </message>
