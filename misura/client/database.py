@@ -51,6 +51,14 @@ class DatabaseModel(QtCore.QAbstractTableModel):
             val = str(dt).split('.')[0]
         return val
 
+    def setData(self, index, value, role):
+        uid = self.tests[index.row()][uid_column]
+        name = self.tests[index.row()][name_column]
+        file_name = self.tests[index.row()][file_column]
+        changed_lines = self.remote.change_name(value, uid, file_name)
+        self.up()
+        return changed_lines
+
     def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
         if orientation != QtCore.Qt.Horizontal:
             return
