@@ -10,6 +10,19 @@ from misura.canon import csutil, indexer
 from misura.client.clientconf import settings
 from misura.client.connection import addrConnection
 
+file_column = 0
+serial_column = 1
+uid_column = 2
+id_column = 3
+zero_time_column = 4
+instrument_column = 5
+flavour_column = 6
+name_column = 7
+elapsed_column = 8
+number_of_samples_column = 9
+comment_cilumn = 10
+verify_column = 11
+incremental_id_column = 12
 
 class DatabaseModel(QtCore.QAbstractTableModel):
 
@@ -43,6 +56,14 @@ class DatabaseModel(QtCore.QAbstractTableModel):
             return
         if role == QtCore.Qt.DisplayRole:
             return self.sheader[section]
+
+    def flags(self, index):
+        flags = QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
+
+        if index.column() == name_column:
+            flags = flags | QtCore.Qt.ItemIsEditable
+
+        return QtCore.Qt.ItemFlags(flags)
 
     def up(self, conditions={}):
         if not self.remote:
@@ -99,7 +120,6 @@ class DatabaseTable(QtGui.QTableView):
         self.connect(
             self, QtCore.SIGNAL('doubleClicked(QModelIndex)'), self.select)
         self.setHorizontalHeader(DatabaseHeader(parent=self))
-        # self.horizontalHeader().setMovable(True);
 
     def select(self, idx):
         self.emit(QtCore.SIGNAL('selected()'))
@@ -179,20 +199,6 @@ class DatabaseWidget(QtGui.QWidget):
             if hh.isSectionHidden(i):
                 continue
             self.qfilter.addItem(_(sh[i]), h)
-
-        file_column = 0
-        serial_column = 1
-        uid_column = 2
-        id_column = 3
-        zero_time_column = 4
-        instrument_column = 5
-        flavour_column = 6
-        name_column = 7
-        elapsed_column = 8
-        number_of_samples_column = 9
-        comment_cilumn = 10
-        verify_column = 11
-        incremental_id_column = 12
 
         self.table.horizontalHeader().moveSection(name_column, 0)
         self.table.horizontalHeader().moveSection(incremental_id_column, 1)
