@@ -43,7 +43,7 @@ class DatabaseModel(QtCore.QAbstractTableModel):
             return 0
         row = self.tests[index.row()]
         col = index.column()
-        if role != QtCore.Qt.DisplayRole:
+        if role != QtCore.Qt.DisplayRole and role != QtCore.Qt.EditRole:
             return
         val = row[col]
         if self.header[col] == 'elapsed':
@@ -124,7 +124,9 @@ class DatabaseTable(QtGui.QTableView):
         self.setModel(self.curveModel)
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.setSelectionModel(self.selection)
+
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.setEditTriggers(QtGui.QAbstractItemView.EditKeyPressed)
         self.connect(
             self, QtCore.SIGNAL('doubleClicked(QModelIndex)'), self.select)
         self.setHorizontalHeader(DatabaseHeader(parent=self))
