@@ -72,7 +72,7 @@ def misura_import(self, filename, **options):
     realfilename = self.findFileOnImportPath(filename)
     logging.debug('%s %s %s', 'open_file:', filename, realfilename)
     print 'misura_import with params', options
-    p = filedata.ImportParamsMisura(filename=realfilename, **options)
+    p = filedata.ImportParamsMisura(filename=realfilename, version=-1, **options)
     op = filedata.OperationMisuraImport(p)
 
     self.document.applyOperation(op)
