@@ -102,7 +102,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
         s.add(setting.ChoiceSwitch(
             'search', ['Nearest (Fixed X)', 'Nearest', 'Maximum', 'Minimum',
-                       'Inflection', 'Stationary'], 'Nearest (Fixed X)',
+                       'Inflection', 'Stationary', 'None'], 'Nearest (Fixed X)',
             settingstrue=['searchRange','critical_x'], settingsfalse=[], showfn=lambda val: not val.startswith('Nearest'),
             descr='Search nearest critical point',
             usertext='Search nearest'),
@@ -112,7 +112,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             descr='Critical search range',
             usertext='Search range'),
             5)
-        
+
         s.add(setting.Dataset(
             'critical_x','',
             descr='Critical search X dataset',
@@ -470,10 +470,15 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             return True
 
         r = []
+        xm1 = xm[sl]
+
         # Substitute X with critical X
-        crix = self.settings.get('critical_x').get()
-        crix = self.document.data[crix].data
-        xm1 = crix[sl]
+
+        if self.settings.get('critical_x').get() != '':
+            crix = self.settings.get('critical_x').get()
+            crix = self.document.data[crix].data
+            xm1 = crix[sl]
+
         ym1 = ym[sl]
         if src == 'Stationary':
             sp = interpolate.UnivariateSpline(

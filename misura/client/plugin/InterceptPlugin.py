@@ -21,7 +21,7 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     # text to appear in dialog box
     description_full = 'Intercept all curves pertaining to a file, sample or dataset by placing descriptive datapoints'
 
-    def __init__(self, target=[], axis='X', val=0., search='Nearest (Fixed X)', searchRange=25, critical_x='', 
+    def __init__(self, target=[], axis='X', val=0., search='Nearest (Fixed X)', searchRange=25, critical_x='',
                  text='Intercept\\\\%(xlabel)s=%(x).0f\\\\%(ylabel)s=%(y)E'):
         """Make list of fields."""
         self.fields = [
@@ -31,7 +31,7 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 "axis", descr="Intercept on X or Y axis", items=['X', 'Y'], default=axis),
             plugins.FieldFloat('val', 'Value', default=val),
             plugins.FieldCombo("search", descr="Place nearest", items=[
-                               'Nearest (Fixed X)', 'Nearest', 'Maximum', 'Minimum', 'Inflection', 'Stationary'], default=search),
+                               'Nearest (Fixed X)', 'Nearest', 'Maximum', 'Minimum', 'Inflection', 'Stationary', 'None'], default=search),
             plugins.FieldFloat(
                 'searchRange', descr='Nearest search range', default=searchRange),
             plugins.FieldDataset('critical_x',descr="Critical search X dataset", default=critical_x),
@@ -94,8 +94,11 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                      'xAxis': obj.settings.xAxis, 'yAxis': obj.settings.yAxis,
                      'xPos': float(x[i]), 'yPos': float(y[i]),
                      'coordLabel': lblname, 'labelText': text,
-                     'search': fields['search'], 'searchRange': fields['searchRange'],
-                     'critical_x':fields['critical_x']}
+                     'search': fields['search'], 'searchRange': fields['searchRange']}
+
+            if fields.has_key('critical_x'):
+                dpset['critical_x'] = fields['critical_x']
+
             self.ops.append(
                 document.OperationWidgetAdd(g, 'datapoint', **dpset))
             # Apply operation list
