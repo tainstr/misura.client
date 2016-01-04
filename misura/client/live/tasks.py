@@ -137,8 +137,8 @@ class LocalTasks(QtGui.QWidget):
             wg.pb.setRange(0, tot)
             if not self.isVisible():
                 self.ch.emit()
-#                self.show()
             return
+
         wg = QtGui.QWidget(parent=self)
         pb = QtGui.QProgressBar(parent=wg)
         pb.setRange(0, tot)
@@ -156,7 +156,6 @@ class LocalTasks(QtGui.QWidget):
         self.mlay.addWidget(wg)
         self.prog[pid] = wg
         if not self.isVisible():
-#            self.show()
             self.ch.emit()
 
     def jobs(self, tot, pid='Operation'):
@@ -223,6 +222,7 @@ class Tasks(QtGui.QTabWidget):
 
     def __init__(self):
         QtGui.QTabWidget.__init__(self)
+        self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Preferred)
 
         self.setWindowTitle(_('Pending Tasks'))
 
@@ -251,6 +251,7 @@ class Tasks(QtGui.QTabWidget):
 
     def update_active(self):
         """Switch the active tab"""
+
         if len(self.progress):
             self.setCurrentIndex(0)
         elif len(self.tasks):
