@@ -153,6 +153,7 @@ class Controls(QtGui.QToolBar):
     def _async(self, method, *a, **k):
         """Execute `method` in global thread pool, passing `*a`,`**k` arguments."""
         r = widgets.RunMethod(method, *a, **k)
+        r.pid = self.async_pid
         QtCore.QThreadPool.globalInstance().start(r)
         return True
 
@@ -198,6 +199,7 @@ class Controls(QtGui.QToolBar):
                       _('Result: ') + msg)
 
     def start(self):
+        self.async_pid = "Starting"
         self.tasks.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Preferred)
 
         self.mainWin = self.parent()
@@ -235,6 +237,7 @@ class Controls(QtGui.QToolBar):
         self.paused = False
 
     def stop(self):
+        self.async_pid = "Stopping"
         self.tasks.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Preferred)
 
         if not self.updateActions():
