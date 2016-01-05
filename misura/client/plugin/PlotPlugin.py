@@ -319,19 +319,9 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
                 else:
                     xT.append(axis_selection.kiln_temperature_for(ds))
 
-
-
-        # Plot also T over t
-        if timeds:
-            xt.append(timeds)
-            yt.append(axis_selection.kiln_temperature_for(timeds))
-
-        p = PlotDatasetPlugin()
-        r = p.apply(cmd, {'x': xt, 'y': yt, 'currentwidget': '/time/time'})
-        p = PlotDatasetPlugin()
-        r = p.apply(
-            cmd, {'x': xT, 'y': yT, 'currentwidget': '/temperature/temp'})
-        return r
+        result = PlotDatasetPlugin().apply(cmd, {'x': xt, 'y': yt, 'currentwidget': '/time/time'})
+        result.update(PlotDatasetPlugin().apply(cmd, {'x': xT, 'y': yT, 'currentwidget': '/temperature/temp'}))
+        return result
 
     def find_my_temp(self, dataset_name, temperatures):
         path = "/".join(dataset_name.split("/")[0:-1])
