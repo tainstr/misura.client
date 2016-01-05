@@ -104,9 +104,9 @@ class LocalTasks(QtGui.QWidget):
         self.connect(self, QtCore.SIGNAL('jobs(int,QString)'), self._jobs)
 
         self.connect(
-            self, QtCore.SIGNAL('job(int,QString,QString)'), self._job,  QtCore.Qt.QueuedConnection)
-        self.connect(self, QtCore.SIGNAL('job(int,QString)'), self._job,  QtCore.Qt.QueuedConnection)
-        self.connect(self, QtCore.SIGNAL('job(int)'), self._job,  QtCore.Qt.QueuedConnection)
+            self, QtCore.SIGNAL('job(int,QString,QString)'), self._job)
+        self.connect(self, QtCore.SIGNAL('job(int,QString)'), self._job)
+        self.connect(self, QtCore.SIGNAL('job(int)'), self._job)
 
         self.connect(self, QtCore.SIGNAL('sig_done(QString)'),
                      self._done, QtCore.Qt.QueuedConnection)
@@ -251,12 +251,14 @@ class Tasks(QtGui.QTabWidget):
     def update_active(self):
         """Switch the active tab"""
 
+        browser_mode = self.count() == 1
+
         if len(self.progress):
             self.setCurrentIndex(0)
         elif len(self.tasks):
             print 'switch tab to local tasks', self.tasks.prog
             self.setCurrentIndex(1)
-        elif len(self.sync):
+        elif len(self.sync) and not browser_mode:
             self.setCurrentIndex(2)
         else:
             return False
