@@ -198,10 +198,13 @@ class Controls(QtGui.QToolBar):
                       _('Result: ') + msg)
 
     def start(self):
+        self.tasks.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Preferred)
+
         self.mainWin = self.parent()
         self.mDock = self.mainWin.measureDock
         self.measureTab = self.mDock.widget()
         self.measureTab.setCurrentIndex(0)
+
         confirmation = QtGui.QMessageBox.warning(self, "Start test",
                        "Do you confirm test's start?",
                        QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
@@ -232,6 +235,8 @@ class Controls(QtGui.QToolBar):
         self.paused = False
 
     def stop(self):
+        self.tasks.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Preferred)
+
         if not self.updateActions():
             self.warning(
                 _('Already stopped'), _('No acquisition is running. Nothing to do.'))

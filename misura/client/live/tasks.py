@@ -222,7 +222,6 @@ class Tasks(QtGui.QTabWidget):
 
     def __init__(self):
         QtGui.QTabWidget.__init__(self)
-        self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Preferred)
 
         self.setWindowTitle(_('Pending Tasks'))
 
