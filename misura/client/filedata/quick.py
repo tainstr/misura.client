@@ -45,6 +45,7 @@ def node(func):
             n = self.model().data(self.currentIndex(), role=Qt.UserRole)
         elif isinstance(n, document.Dataset):
             n = docname(n)
+
         # If node was expressed as/converted to string, get its corresponding
         # tree entry
         if isinstance(n, str) or isinstance(n, unicode):
@@ -145,6 +146,7 @@ class QuickOps(object):
             if ds.linked == lk:
                 self.deleteData(ds)
 
+        self.model().refresh(True)
 
     @node
     def reloadFile(self, node=False):
@@ -322,6 +324,7 @@ class QuickOps(object):
     @node
     def deleteData(self, node=False, remove_dataset=True, recursive=True):
         """Delete a dataset and all depending graphical widgets."""
+
         node_path = node.path
         # Remove and exit if dataset was only in available_data
         if self.doc.available_data.has_key(node_path):
@@ -391,6 +394,7 @@ class QuickOps(object):
         if recursive:
             for sub in node.children.itervalues():
                 self.deleteData(sub, remove_dataset, recursive)
+
         self.doc.setModified()
         return True
 

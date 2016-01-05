@@ -425,8 +425,8 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         sel = self.selectedIndexes()
         n = len(sel)
         node = self.model().data(self.currentIndex(), role=Qt.UserRole)
-        logging.debug('%s %s', 'showContextMenu', node.path)
-        if not node.parent:
+        logging.debug('%s %s', 'showContextMenu', node)
+        if node is None or not node.parent:
             self.update_base_menu()
             menu = self.base_menu
         elif node.ds is False:
