@@ -9,6 +9,7 @@ from .. import _
 from ..clientconf import confdb
 from ...canon import indexer
 from ..network import TransferThread, remote_dbdir
+from .sync_table_model import SyncTableModel
 
 from PyQt4 import QtCore, QtGui, QtSql
 
@@ -211,8 +212,8 @@ class StorageSync(object):
         return r
 
     def loop(self, server=False):
-        """Inner synchronization loop. 
-        If called from a different thread, can pass optional `server` 
+        """Inner synchronization loop.
+        If called from a different thread, can pass optional `server`
         in order to avoid multithreading reconnection issues."""
         if not server:
             server = self.server
@@ -234,14 +235,8 @@ class SyncTable(QtGui.QTableView):
 
     def __init__(self, dbpath, table_name, parent=None):
         super(SyncTable, self).__init__(parent)
-        db = QtSql.QSqlDatabase.addDatabase('QSQLITE')
-        self.dbpath = dbpath
-        db.setDatabaseName(dbpath)
-        db.open()
-        model = QtSql.QSqlTableModel()
-        model.setTable(table_name)
-        model.select()
-        self.setModel(model)
+        self.model_reference = SyncTableModel(indexer.Indexer(dbpath), table_name)
+        self.setModel(self.model_reference)
         for i in (0, 6, 9, 11):
             self.hideColumn(i)
         self.selection = QtGui.QItemSelectionModel(self.model())
