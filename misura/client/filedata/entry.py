@@ -84,7 +84,7 @@ class AllDocDataAccessor(object):
 
     def items(self):
         return [(k,self.get(k)) for k in self.keys()]
-    
+
     def keys(self):
         k = self.data.keys() + self.available_data.keys()
         return sorted(k)
@@ -168,7 +168,7 @@ class NodeEntry(object):
         else:
             self._path = self.splt.join([self.parent.path, self._name])
         return self._path
-    
+
     @property
     def model_path(self):
         if not self._model_path:
@@ -389,7 +389,7 @@ class NodeEntry(object):
                     status = oldst
 
             self.insert(dn, status)
-            
+
 
 
 
@@ -427,7 +427,7 @@ class DatasetEntry(NodeEntry):
                 model_path = self.model_path+'/'+sub
                 entry = self._children.get(sub, False)
                 if entry is False:
-                    entry = DatasetEntry(doc=self.doc, name=sub, path=name, model_path=model_path, parent=self)                
+                    entry = DatasetEntry(doc=self.doc, name=sub, path=name, model_path=model_path, parent=self)
         return self._children
 
     @property
@@ -477,7 +477,7 @@ class DatasetEntry(NodeEntry):
         pm = ds.pluginmanager
         vars = ','.join(self.vars)
         if pm.plugin.name == 'Coefficient':
-            v = 'Coeff(%s,%i\degC) ' % (pm.fields['start'],vars)
+            v = 'Coeff(%i,%s\degC) ' % (pm.fields['start'],vars)
         elif pm.plugin.name == 'Derive':
             v = 'Der(%i\deg,%s)' % (pm.fields['order'],vars)
         else:
