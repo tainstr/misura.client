@@ -1,14 +1,5 @@
 #!/usr/bin/bash
 
-BUILD_IN_PROGRSS_FILE=./build_in_progress
-LAST_BUILD_STATUS_FILE=./last_build_status
-touch $LAST_BUILD_STATUS_FILE
-
-if [ -a $BUILD_IN_PROGRSS_FILE ]; then
-	echo "Build already in progrss."
-	exit 0
-fi
-
 CODE_BASE=$USERPROFILE/Desktop/misura4
 DEPLOY_DIR=//Ess-server/company/Installations/Misura4
 CLIENT_DIR=$CODE_BASE/misura.client/misura/client
@@ -21,6 +12,16 @@ DISTRIBUTION_DIR=$INSTALLER_DIR/dist
 OUTPUT_MISURA4_DIR=$DISTRIBUTION_DIR/misura4
 CANON_LINK=$CLIENT_DIR/../canon
 
+BUILD_IN_PROGRSS_FILE=$INSTALLER_DIR/build_in_progress
+LAST_BUILD_STATUS_FILE=$INSTALLER_DIR/last_build_status
+touch $LAST_BUILD_STATUS_FILE
+
+if [ -a $BUILD_IN_PROGRSS_FILE ]; then
+	echo "Build already in progrss."
+	exit 0
+fi
+
+git remote update
 NEW_COMMITS=$(git log HEAD..origin/master --oneline)
 if [ -z "$NEW_COMMITS" ]; then
 	echo "No changes detected."
@@ -29,6 +30,9 @@ fi
 
 echo "Changes detected on remote. Pulling sources..."
 git pull
+cd $CANON_DIR
+git pull
+cd -
 echo "Done."
 echo "Removing old local build..."
 rm -rf "$DISTRIBUTION_DIR"
