@@ -36,7 +36,6 @@ cd -
 echo "Done."
 echo "Removing old local build..."
 rm -rf "$DISTRIBUTION_DIR"
-rm -rf "$INSTALLER_DIR"/build
 echo "Done."
 
 echo "Let's start..."
