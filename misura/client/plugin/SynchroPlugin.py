@@ -21,14 +21,14 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     # text to appear in dialog box
     description_full = 'Synchronize two or more curves so they equals to a reference curve at the requested x-point.'
 
-    def __init__(self):
+    def __init__(self, reference_curve_full_path='/', translating_curve_full_path='/'):
         """Make list of fields."""
 
         self.fields = [
             plugins.FieldWidget(
-                "ref", descr="Reference curve:", widgettypes=set(['xy'])),
+                "ref", descr="Reference curve:", widgettypes=set(['xy']), default=reference_curve_full_path),
             plugins.FieldWidget(
-                "trans", descr="Translating curve:", widgettypes=set(['xy'])),
+                "trans", descr="Translating curve:", widgettypes=set(['xy']), default=translating_curve_full_path),
             plugins.FieldFloat("x", descr="Matching X Value", default=0.),
             #			plugins.FieldDatasetMulti('dslist','')
             plugins.FieldCombo("mode", descr="Translation Mode:", items=[

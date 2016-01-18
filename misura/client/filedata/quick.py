@@ -405,6 +405,29 @@ class QuickOps(object):
         for n in nodes:
             self.deleteData(node=n)
 
+    @nodes
+    def synchronize(self, nodes=[]):
+        from misura.client import plugin
+
+        reference_curve_full_path = self.widget_path_for(nodes[0])
+        translating_curve_full_path = self.widget_path_for(nodes[1])
+
+        sync_plugin = plugin.SynchroPlugin(
+            reference_curve_full_path, translating_curve_full_path)
+
+        dialog = PluginDialog(
+            self.mainwindow, self.doc, sync_plugin, plugin.SynchroPlugin)
+        self.mainwindow.showDialog(dialog)
+
+
+    def widget_path_for(self, node):
+        result = '/'
+        full_path = self.doc.model.is_plotted(node.path)
+        if full_path:
+            result = full_path[0]
+
+        return result
+
     def xnames(self, y, page=False):
         """Get X dataset name for Y node y, in `page`"""
         logging.debug('%s %s %s %s', 'XNAMES', y, type(y), y.path)

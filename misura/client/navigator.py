@@ -95,6 +95,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             self.bin_menu = QtGui.QMenu(self)
             self.bin_menu.addAction(_('Correct'), self.correct)
             self.bin_menu.addAction(_('Delete selection'), self.deleteDatas)
+            self.bin_menu.addAction(_('Synchronize'), self.synchronize)
 
         else:
             self.connect(
