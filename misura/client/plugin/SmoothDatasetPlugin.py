@@ -21,14 +21,17 @@ class SmoothDatasetPlugin(plugins.DatasetPlugin):
     description_full = ('Smooth data.'
                         'Smooth data.')
 
-    def __init__(self, ds_in='', method='hanning', window=5, ds_out=''):
+    def __init__(self, ds_in='', method='hanning', window=5, ds_out='', end_index=0):
         """Define input fields for plugin."""
+
         self.fields = [
             plugins.FieldDataset(
                 'ds_in', 'Dataset to be smoothed', default=ds_in),
             plugins.FieldCombo('method', 'Smoothing method', default=method, items=(
                 'flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'kaiser'), editable=False),
             plugins.FieldInt('window', 'Window length', default=window),
+            plugins.FieldInt('start_index', 'Start index', minval=0, default=0),
+            plugins.FieldInt('end_index', 'End index (0 = last)', minval=0, default=end_index),
             plugins.FieldDataset(
                 'ds_out', 'Output dataset name', default=ds_out)
         ]
@@ -57,7 +60,15 @@ class SmoothDatasetPlugin(plugins.DatasetPlugin):
         # get the value to add
         window = fields['window']
         method = fields['method']
+        start_index = fields['start_index']
+        end_index = fields['end_index']
+
+        if end_index == 0:
+            end_index = len(ds_in.data)
+
         x = numpy.array(ds_in.data)
+        x = x[start_index:end_index]
+
         if ds_in == helper.getDataset(fields['ds_out']):
             raise plugins.DatasetPluginException(
                 "Input and output datasets should differ.")
@@ -73,6 +84,8 @@ class SmoothDatasetPlugin(plugins.DatasetPlugin):
             raise plugins.DatasetPluginException(
                 "Mehtod is one of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
         y = smooth(x, window, method)
+        y = numpy.concatenate((ds_in.data[0:start_index], y, ds_in.data[end_index:]))
+
         # update output dataset with input dataset (plus value) and errorbars
         self.ds_out.update(
             data=y, serr=ds_in.serr, perr=ds_in.perr, nerr=ds_in.nerr)
