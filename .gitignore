@@ -1,6 +1,8 @@
 .tags
 .tags_sorted_by_file
 .ropeproject
+last_build_status
+build_in_progress
 
 
 libvideodev.version
