@@ -13,7 +13,9 @@ set installerDir=%clientDir%\\installer
 set specFile=%installerDir%\client_windows_pyinst.spec
 set out=%installerDir%\dist
 
-set stamp=%DATE:/=-%_%TIME::=-%
-mv "%deployDir%\misura4" "%deployDir%\build_%stamp%"
+set day=%date:~0,2%
+set month=%date:~3,2%
+set year=%date:~6,4%
+set stamp=%year%%month%%day%_%TIME::=-%
+move "%deployDir%\misura4" "%deployDir%\build_%stamp%"
 xcopy /E /Y /I "%out%\misura4" "%deployDir%\misura4"
-
