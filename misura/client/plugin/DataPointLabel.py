@@ -16,25 +16,25 @@ class DataPointLabel(TextLabel):
 
     def update(self):
         """Update output label with the coordinates of the point."""
-        s = self.parent.settings
-        txt = s.labelText
-        var = {'xlabel': self.parent.xAx.settings.label,
-               'ylabel': self.parent.yAx.settings.label,
-               'x': self.parent.x,	'y': self.parent.y}
-        txt = txt % var
-        self.parent.toset(self, 'label', txt)
-        self.parent.toset(self, 'positioning', 'axes')
-        self.parent.cpset(self.parent, self, 'xAxis')
-        self.parent.cpset(self.parent, self, 'yAxis')
+        datapoint = self.parent
+
+        text_values = {'xlabel': datapoint.xAx.settings.label,
+                       'ylabel': datapoint.yAx.settings.label,
+                       'x': datapoint.x,
+                       'y': datapoint.y}
+        datapoint.toset(self, 'label', datapoint.settings.labelText % text_values)
+        datapoint.toset(self, 'positioning', 'axes')
+        datapoint.cpset(datapoint, self, 'xAxis')
+        datapoint.cpset(datapoint, self, 'yAxis')
         xsig = 5
-        if self.parent.x / self.parent.xRange > 0.7:
+        if datapoint.x / datapoint.xRange > 0.7:
             xsig = -15
         ysig = 2
-        if self.parent.y / self.parent.yRange > 0.7:
+        if datapoint.y / datapoint.yRange > 0.7:
             ysig = -4
-        self.parent.toset(self, 'xPos', self.parent.x + xsig * self.parent.xRange / 100)
-        self.parent.toset(self, 'yPos', self.parent.y)
+        datapoint.toset(self, 'xPos', datapoint.x + xsig * datapoint.xRange / 100)
+        datapoint.toset(self, 'yPos', datapoint.y)
         # Styling
-        self.parent.toset(self, 'Text/color', self.parent.xy.settings.PlotLine.color)
+        datapoint.toset(self, 'Text/color', datapoint.xy.settings.PlotLine.color)
 
 document.thefactory.register(DataPointLabel)
