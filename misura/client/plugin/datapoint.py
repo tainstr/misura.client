@@ -49,7 +49,6 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
                                         descr='Remove Gaps',
                                         usertext='Remove Gaps'))
 
-        self.labelwidget = None
         self.settings.Fill.add(setting.Bool('extended_clicakble_area', True,
                 descr = _('If enabled, datapoint is easier to select, but can create problems when printing.'),
                 usertext=_('Extend clickable area')) )
@@ -323,16 +322,17 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             self.ops.append(document.OperationWidgetDelete(tg))
 
         # Label
-        labelwidget = s.get('coordLabel').findWidget()
-        if labelwidget is None:
-            if s.showLabel:
-                name = 'lbl_' + self.name
-                self.ops.append(
-                    document.OperationWidgetAdd(self, 'datapointlabel', name=name))
-                self.toset(self, 'coordLabel', name)
-#         # Destroy if no longer needed
-#         elif labelwidget and not s.showLabel:
-#             self.ops.append(document.OperationWidgetDelete(labelwidget))
+        has_label = len(self.children) > 0
+        if not has_label and s.showLabel:
+            name = 'lbl_' + self.name
+            self.ops.append(
+                document.OperationWidgetAdd(self, 'datapointlabel', name=name))
+            self.toset(self, 'coordLabel', name)
+
+        if not s.showLabel:
+            for label in self.children:
+                self.ops.append(document.OperationWidgetDelete(label))
+
 
         self.apply_ops('Datapoint: Dependencies')
 
@@ -659,31 +659,9 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         self.toset(pp, 'yPos2', pt2.settings.yPos[0])
 
     def updateOutputLabel(self):
-        """Update output label with the coordinates of the point."""
-        s = self.settings
-        labelwidget = s.get('coordLabel').findWidget()
-        if labelwidget is None:
-            return
-        txt = s.labelText
-        self.labelwidget = labelwidget
-        var = {'xlabel': self.xAx.settings.label,
-               'ylabel': self.yAx.settings.label,
-               'x': self.x,	'y': self.y}
-        txt = txt % var
-        self.toset(labelwidget, 'label', txt)
-        self.toset(labelwidget, 'positioning', 'axes')
-        self.cpset(self, labelwidget, 'xAxis')
-        self.cpset(self, labelwidget, 'yAxis')
-        xsig = 5
-        if self.x / self.xRange > 0.7:
-            xsig = -15
-        ysig = 2
-        if self.y / self.yRange > 0.7:
-            ysig = -4
-        self.toset(labelwidget, 'xPos', self.x + xsig * self.xRange / 100)
-        self.toset(labelwidget, 'yPos', self.y)
-        # Styling
-        self.toset(labelwidget, 'Text/color', self.xy.settings.PlotLine.color)
+        for label in self.children:
+            label.update()
+
 
     def updateControlItem(self, cgi):
         """If control items are moved, update line."""
