@@ -16,6 +16,7 @@ from ...canon import csutil
 from misura.client.plugin.RemoveGaps import remove_gaps_from
 from copy import copy
 from misura.client import _
+from misura.client.plugin.DataPointLabel import DataPointLabel
 
 
 def searchWidgetName(widget, name):
@@ -53,6 +54,16 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
                 descr = _('If enabled, datapoint is easier to select, but can create problems when printing.'),
                 usertext=_('Extend clickable area')) )
 
+
+    def draw(self, posn, phelper, outerbounds = None):
+        veusz.widgets.BoxShape.draw(self, posn, phelper, None)
+
+        for c in self.children:
+            c.draw(posn, phelper, None)
+
+    def getAxes(self, *args, **kwargs):
+        """Needed to allow children drawing"""
+        return self.parent.getAxes(*args, **kwargs)
 
     def removeGaps(self):
         gap_range = self.settings.setdict['remove_gaps_range'].val
@@ -175,7 +186,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         s.add(setting.WidgetChoice(
             'coordLabel', '',
             descr='Write coordinates to this label.',
-            widgettypes=('label',),
+            widgettypes=('datapointlabel',),
             usertext='Coord. label',
             formatting=True),
             3)
@@ -317,7 +328,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             if s.showLabel:
                 name = 'lbl_' + self.name
                 self.ops.append(
-                    document.OperationWidgetAdd(self.parent, 'label', name=name))
+                    document.OperationWidgetAdd(self, 'datapointlabel', name=name))
                 self.toset(self, 'coordLabel', name)
 #         # Destroy if no longer needed
 #         elif labelwidget and not s.showLabel:

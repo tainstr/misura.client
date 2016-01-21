@@ -86,9 +86,6 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             name = g.createUniqueName(
                 'datapoint_' + obj.name) if not basename else basename + '_' + obj.name
             lblname = name + '_lbl'
-            # Create the output label
-            self.ops.append(
-                document.OperationWidgetAdd(g, 'label', name=lblname))
             # Create the datapoint
             dpset = {'name': name, 'xy': obj.name,
                      'xAxis': obj.settings.xAxis, 'yAxis': obj.settings.yAxis,
