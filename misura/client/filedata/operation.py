@@ -395,6 +395,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             ds.m_update = m_update
             ds.m_conf = self.proxy.conf
             ds.unit = str(u) if u else u
+            ds.old_unit = ds.unit
 
             if col0 != 't':
                 ds_object, ds_name = ds.m_conf.from_column(col0)
