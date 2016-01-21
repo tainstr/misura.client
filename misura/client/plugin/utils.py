@@ -6,7 +6,7 @@ import veusz.document as document
 import numpy as np
 
 def iter_widgets(base, typename, direction = 0):
-    """Yields all widgets of type `typename` starting from `base` widget. 
+    """Yields all widgets of type `typename` starting from `base` widget.
     The search can be restricted to upward (`direction`=-1), downward (`direction`=1) or both (`direction`=0)."""
     if isinstance(typename, str):
         typename = [typename]
@@ -32,10 +32,10 @@ def iter_widgets(base, typename, direction = 0):
         if found is not None:
             yield found
     # Nothing found
-    yield None 
-    
+    yield None
+
 def searchFirstOccurrence(base, typename, direction=0):
-    """Search for the nearest occurrence of a widget of type `typename` starting from `base`. 
+    """Search for the nearest occurrence of a widget of type `typename` starting from `base`.
     The search can be restricted to upward (`direction`=-1), downward (`direction`=1) or both (`direction`=0)."""
     for wg in iter_widgets(base, typename, direction):
         if wg:
@@ -43,18 +43,22 @@ def searchFirstOccurrence(base, typename, direction=0):
 
 
 def convert_datapoint_units(convert_func, dsname, doc):
-    """Convert all DataPoint widgets in `doc` using dataset `dsname` 
+    """Convert all DataPoint widgets in `doc` using dataset `dsname`
     as the x or y of the curve they are attached to."""
     for wg in iter_widgets(doc.basewidget, 'datapoint', 1):
         if not wg:
             continue
         curve = wg.settings.get('xy').findWidget()
+
+        if not curve:
+            continue
+
         print wg.settings.xPos, wg.settings.yPos
         if curve.settings.yData == dsname:
             wg.settings.yPos = convert_func(wg.settings.yPos[0])
             wg.actionUp()
         elif curve.settings.xData == dsname:
-            wg.settings.xPos = convert_func(wg.settings.xPos[0])  
+            wg.settings.xPos = convert_func(wg.settings.xPos[0])
             wg.actionUp()
 
 
