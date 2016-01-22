@@ -10,6 +10,7 @@ import veusz.widgets
 import veusz.document as document
 import veusz.setting as setting
 from veusz.widgets.point import PointPlotter
+from veusz.widgets.graph import Graph
 
 import numpy as np
 from scipy import interpolate
@@ -42,7 +43,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
     @classmethod
     def allowedParentTypes(klass):
         """Get types of widgets this can be a child of."""
-        return (PointPlotter,)
+        return (PointPlotter,Graph)
 
     def __init__(self, parent, name=None):
         veusz.widgets.BoxShape.__init__(self, parent, name=name)
@@ -64,7 +65,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
 
     def draw(self, posn, phelper, outerbounds = None):
-        self.parent.getAxes = self.getAxes
+        if not hasattr(self.parent, 'getAxes'):
+            self.parent.getAxes = self.getAxes
         veusz.widgets.BoxShape.draw(self, posn, phelper, outerbounds)
 
         for c in self.children:
