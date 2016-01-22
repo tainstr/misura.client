@@ -9,6 +9,8 @@ import veusz.utils
 import veusz.widgets
 import veusz.document as document
 import veusz.setting as setting
+from veusz.widgets.point import PointPlotter
+
 import numpy as np
 from scipy import interpolate
 import utils
@@ -37,6 +39,11 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
     description = 'Data Point'
     allowusercreation = True
 
+    @classmethod
+    def allowedParentTypes(klass):
+        """Get types of widgets this can be a child of."""
+        return (PointPlotter,)
+
     def __init__(self, parent, name=None):
         veusz.widgets.BoxShape.__init__(self, parent, name=name)
         if type(self) == DataPoint:
@@ -57,14 +64,16 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
 
     def draw(self, posn, phelper, outerbounds = None):
-        veusz.widgets.BoxShape.draw(self, posn, phelper, None)
+        self.parent.getAxes = self.getAxes
+        veusz.widgets.BoxShape.draw(self, posn, phelper, outerbounds)
 
         for c in self.children:
-            c.draw(posn, phelper, None)
+            c.draw(posn, phelper, outerbounds)
 
     def getAxes(self, *args, **kwargs):
         """Needed to allow children drawing"""
-        return self.parent.getAxes(*args, **kwargs)
+        graph_ancestor = utils.searchFirstOccurrence(self, "graph", -1)
+        return graph_ancestor.getAxes(*args, **kwargs)
 
     def removeGaps(self):
         gap_range = self.settings.setdict['remove_gaps_range'].val
@@ -251,10 +260,9 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
         d = self.document
         self.doc = d
-        s = self.settings
         self.ops = []
 
-        xy = s.get('xy').findWidget()
+        xy = self.parent
         if xy is None:
             logging.debug('%s', 'No xy widget was defined!')
             return False

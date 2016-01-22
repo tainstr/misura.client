@@ -56,25 +56,24 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         text = fields['text']
         basename = fields.get('basename', False)
         targetds = fields['target']
-#		targetds=target
         doc = cmd.document
 
         hor = axn == 'X'
         actions = []
         logging.debug('%s %s', 'targets', targetds)
-        for obj in g.children:
-            if not isinstance(obj, veusz.widgets.point.PointPlotter):
+        for datapoint_parent in g.children:
+            if not isinstance(datapoint_parent, veusz.widgets.point.PointPlotter):
                 continue
-            if obj.settings.hide:
-                logging.debug('%s %s', 'Skipping hidden object', obj.path)
+            if datapoint_parent.settings.hide:
+                logging.debug('%s %s', 'Skipping hidden object', datapoint_parent.path)
                 continue
-            if obj.settings.yData not in targetds and len(targetds) > 0:
+            if datapoint_parent.settings.yData not in targetds and len(targetds) > 0:
                 logging.debug(
-                    '%s %s %s', 'Skipping non-targeted object', obj.path, obj.settings.yData)
+                    '%s %s %s', 'Skipping non-targeted object', datapoint_parent.path, datapoint_parent.settings.yData)
                 continue
             # Search the nearest point
-            x = obj.settings.get('xData').getFloatArray(doc)
-            y = obj.settings.get('yData').getFloatArray(doc)
+            x = datapoint_parent.settings.get('xData').getFloatArray(doc)
+            y = datapoint_parent.settings.get('yData').getFloatArray(doc)
             dst = abs(x - val) if hor else abs(y - val)
             i = np.where(dst == dst.min())[0]
             if len(i) == 0:
@@ -83,29 +82,31 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             i = i[0]
             # Add the datapoint
             cmd.To(g.path)
-            name = g.createUniqueName(
-                'datapoint_' + obj.name) if not basename else basename + '_' + obj.name
+            name = datapoint_parent.createUniqueName(
+                'datapoint_' + datapoint_parent.name) if not basename else basename + '_' + datapoint_parent.name
             lblname = name + '_lbl'
+
             # Create the datapoint
-            dpset = {'name': name, 'xy': obj.name,
-                     'xAxis': obj.settings.xAxis, 'yAxis': obj.settings.yAxis,
-                     'xPos': float(x[i]), 'yPos': float(y[i]),
-                     'coordLabel': lblname, 'labelText': text,
-                     'search': fields['search'], 'searchRange': fields['searchRange']}
+            datapoint_settings = {'name': name, 'xy': datapoint_parent.name,
+                                  'xAxis': datapoint_parent.settings.xAxis,
+                                  'yAxis': datapoint_parent.settings.yAxis,
+                                  'xPos': float(x[i]),
+                                  'yPos': float(y[i]),
+                                  'coordLabel': lblname,
+                                  'labelText': text,
+                                  'search': fields['search'],
+                                  'searchRange': fields['searchRange']}
 
             if fields.has_key('critical_x'):
-                dpset['critical_x'] = fields['critical_x']
+                datapoint_settings['critical_x'] = fields['critical_x']
 
-            self.ops.append(
-                document.OperationWidgetAdd(g, 'datapoint', **dpset))
-            # Apply operation list
-# 			doc.applyOperation(document.OperationMultiple(self.ops, descr='intercept'))
+            self.ops.append(document.OperationWidgetAdd(datapoint_parent,
+                                                        'datapoint',
+                                                        **datapoint_settings))
+
             # Call the update action in order to correctly position the
             # datapoints
-            actions.append(g.path + '/' + name)
-
-# 			cmd.To(g.path + '/' + name)
-# 			cmd.Action('up')
+            actions.append(datapoint_parent.path + '/' + name)
 
         logging.debug('%s %s', 'Intercepting', self.ops)
         self.apply_ops('Intercept')
