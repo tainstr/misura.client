@@ -39,6 +39,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
     def __init__(self, parent, name=None):
         veusz.widgets.BoxShape.__init__(self, parent, name=name)
+        if type(self) == DataPoint:
+            self.readDefaults()
 
         self.addAction(veusz.widgets.widget.Action('up', self.actionUp,
                                                    descr='Update Data Point',

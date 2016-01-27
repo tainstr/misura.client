@@ -8,6 +8,13 @@ class DataPointLabel(TextLabel):
     typename = 'datapointlabel'
     description = "Label for datapoints"
 
+    def __init__(self, *args, **kwargs):
+        TextLabel.__init__(self, *args, **kwargs)
+        if type(self) == DataPointLabel:
+            self.readDefaults()
+
+
+
     @classmethod
     def allowedParentTypes(klass):
         """Get types of widgets this can be a child of."""
