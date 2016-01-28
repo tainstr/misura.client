@@ -10,7 +10,6 @@ import veusz.widgets
 import veusz.document as document
 import veusz.setting as setting
 from veusz.widgets.point import PointPlotter
-from veusz.widgets.graph import Graph
 
 import numpy as np
 from scipy import interpolate
@@ -43,7 +42,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
     @classmethod
     def allowedParentTypes(klass):
         """Get types of widgets this can be a child of."""
-        return (PointPlotter,Graph)
+        return (PointPlotter,)
 
     def __init__(self, parent, name=None):
         veusz.widgets.BoxShape.__init__(self, parent, name=name)
@@ -65,8 +64,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
 
     def draw(self, posn, phelper, outerbounds = None):
-        if not hasattr(self.parent, 'getAxes'):
-            self.parent.getAxes = self.getAxes
+        self.parent.getAxes = self.getAxes
         veusz.widgets.BoxShape.draw(self, posn, phelper, outerbounds)
 
         for c in self.children:
@@ -82,8 +80,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         gaps_thershold = self.settings.setdict['remove_gaps_thershold'].val
         start_index = int(round(self.i - gap_range / 2.0))
         end_index = start_index + gap_range
-        data = self.xy.settings.get('yData').getFloatArray(self.document)
-        dataset_name = self.xy.settings.get('yData').val
+        data = self.parent.settings.get('yData').getFloatArray(self.document)
+        dataset_name = self.parent.settings.get('yData').val
         dataset = copy(self.document.data[dataset_name])
         data_without_gap = remove_gaps_from(
             data, gaps_thershold, start_index, end_index)
@@ -115,13 +113,6 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             usertext="Remove gaps thershold"),
             2
         )
-
-        s.add(setting.WidgetChoice(
-            'xy', '',
-            descr='Curve this point is attached to.',
-            widgettypes=('xy',),
-            usertext='XY Reference'),
-            3)
 
         s.add(setting.ChoiceSwitch(
             'search', ['Nearest (Fixed X)', 'Nearest', 'Maximum', 'Minimum',
@@ -248,12 +239,12 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
     def check_axis(self):
         aligned = self.toset(self, 'positioning', 'axes')
-        aligned = aligned and self.eqset(self.xy, 'xAxis')
-        aligned = aligned and self.eqset(self.xy, 'yAxis')
+        aligned = aligned and self.eqset(self.parent, 'xAxis')
+        aligned = aligned and self.eqset(self.parent, 'yAxis')
 
         # Styling
-        self.toset(self, 'Border/color', self.xy.settings.PlotLine.color)
-        self.toset(self, 'Border/style', self.xy.settings.PlotLine.style)
+        self.toset(self, 'Border/color', self.parent.settings.PlotLine.color)
+        self.toset(self, 'Border/style', self.parent.settings.PlotLine.style)
 
         return aligned
 
@@ -263,12 +254,6 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         d = self.document
         self.doc = d
         self.ops = []
-
-        xy = self.parent
-        if xy is None:
-            logging.debug('%s', 'No xy widget was defined!')
-            return False
-        self.xy = xy
 
         # Settings coerence
         aligned = self.check_axis()
@@ -388,8 +373,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         """Place in the nearest point to the current x,y coord"""
         d = self.document
         s = self.settings
-        xSet = self.xy.settings.get('xData')
-        ySet = self.xy.settings.get('yData')
+        xSet = self.parent.settings.get('xData')
+        ySet = self.parent.settings.get('yData')
 
         if (xData is None):
             xData = xSet.getFloatArray(d)
@@ -561,7 +546,6 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         aligned = aligned and self.cpset(self, pt, 'yAxis')
         if name:
             self.toset(pt, name, self.name)
-            self.cpset(self, pt, 'xy')
             self.cpset(self, pt, 'xAxis')
             self.cpset(self, pt, 'yAxis')
         return aligned

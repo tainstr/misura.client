@@ -42,6 +42,6 @@ class DataPointLabel(TextLabel):
         datapoint.toset(self, 'xPos', datapoint.x + xsig * datapoint.xRange / 100)
         datapoint.toset(self, 'yPos', datapoint.y)
         # Styling
-        datapoint.toset(self, 'Text/color', datapoint.xy.settings.PlotLine.color)
+        datapoint.toset(self, 'Text/color', datapoint.parent.settings.PlotLine.color)
 
 document.thefactory.register(DataPointLabel)

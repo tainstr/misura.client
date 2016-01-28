@@ -54,12 +54,11 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         axn = fields['axis']
         val = fields['val']
         text = fields['text']
-        basename = fields.get('basename', False)
         targetds = fields['target']
         doc = cmd.document
 
         hor = axn == 'X'
-        actions = []
+        datapoint_paths = []
         logging.debug('%s %s', 'targets', targetds)
         for datapoint_parent in g.children:
             if not isinstance(datapoint_parent, veusz.widgets.point.PointPlotter):
@@ -82,12 +81,11 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             i = i[0]
             # Add the datapoint
             cmd.To(g.path)
-            name = datapoint_parent.createUniqueName(
-                'datapoint_' + datapoint_parent.name) if not basename else basename + '_' + datapoint_parent.name
+            name = datapoint_parent.createUniqueName('datapoint')
             lblname = name + '_lbl'
 
             # Create the datapoint
-            datapoint_settings = {'name': name, 'xy': datapoint_parent.name,
+            datapoint_settings = {'name': name,
                                   'xAxis': datapoint_parent.settings.xAxis,
                                   'yAxis': datapoint_parent.settings.yAxis,
                                   'xPos': float(x[i]),
@@ -104,15 +102,13 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                                                         'datapoint',
                                                         **datapoint_settings))
 
-            # Call the update action in order to correctly position the
-            # datapoints
-            actions.append(datapoint_parent.path + '/' + name)
+            datapoint_paths.append(datapoint_parent.path + '/' + name)
 
         logging.debug('%s %s', 'Intercepting', self.ops)
         self.apply_ops('Intercept')
-        # Force update call
-        for p in actions:
-            cmd.To(p)
+
+        for path in datapoint_paths:
+            cmd.To(path)
             cmd.Action('up')
 
 
