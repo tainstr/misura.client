@@ -67,13 +67,13 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
     def add_versions_to_file(self):
         command_interface = document.CommandInterface(self.doc)
         command_interface.AddCustom(u"constant",
-                                    u"canon version",
-                                    canon_version.__version__)
+                                    u"canon_version",
+                                    canon_version.__version__.replace(".", "-"))
         command_interface.AddCustom(u"constant",
-                                    u"client version",
-                                    client_version.__version__)
+                                    u"client_version",
+                                    client_version.__version__.replace(".", "-"))
         command_interface.AddCustom(u"constant",
-                                    u"vsz file format version",
+                                    u"vsz_file_format_version",
                                     client_version.__vsz_file_format_version__)
 
 
