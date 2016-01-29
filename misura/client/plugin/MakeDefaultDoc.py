@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Simple plotting for browser and live acquisition."""
 from misura.canon.logger import Log as logging
+from misura.canon import version as canon_version
+from misura.client import version as client_version
 import veusz.plugins
 import veusz.document as document
 import utils
@@ -59,8 +61,20 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
             props = {'xPos': 0.1, 'yPos': 0.96, 'label': 'Title'}
             self.dict_toset(g.parent.getChild('title'), props)
         self.apply_ops('MakeDefaultDoc: Custom')
-#		doc.setModified(True)
-#		doc.setModified(False)
+        self.add_versions_to_file()
+
+
+    def add_versions_to_file(self):
+        command_interface = document.CommandInterface(self.doc)
+        command_interface.AddCustom(u"constant",
+                                    u"canon version",
+                                    canon_version.__version__)
+        command_interface.AddCustom(u"constant",
+                                    u"client version",
+                                    client_version.__version__)
+        command_interface.AddCustom(u"constant",
+                                    u"vsz file format version",
+                                    client_version.__vsz_file_format_version__)
 
 
 def makeDefaultDoc(cmd, title=False):
