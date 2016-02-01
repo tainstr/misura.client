@@ -60,7 +60,7 @@ def node(func):
             a[0] = n
             a = tuple(a)
         logging.debug(
-            '%s %s %s %s %s', '@node with', n, type(n), isinstance(n, unicode))
+            '%s %s %s %s', '@node with', n, type(n), isinstance(n, unicode))
         return func(self, *a, **k)
     return node_wrapper
 
