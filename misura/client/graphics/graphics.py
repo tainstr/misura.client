@@ -78,7 +78,7 @@ def misura_import(self, filename, **options):
     self.document.applyOperation(op)
     confdb.mem_file(realfilename, op.measurename)
     dsnames = op.outdatasets
-    logging.debug('%s %s', "Imported datasets %s" % (' '.join(dsnames), ))
+    logging.debug('Imported datasets %s' % (' '.join(dsnames), ))
     return dsnames
 
 # Add the ImportMisura command to the CommandInterface class
