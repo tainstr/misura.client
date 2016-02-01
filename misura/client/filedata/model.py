@@ -549,7 +549,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         The `second` will become `second`-level and will be listed
         in every other first-level axis referenced in its match setting."""
 
-        logging.debug('%s %s %s %s', 'matching ', first, second)
+        logging.debug('matching %s %s', first, second)
         s = self.doc.resolveFullSettingPath(first + '/linked')
         s1 = self.doc.resolveFullSettingPath(first + '/linkedaxis')
         ops = []

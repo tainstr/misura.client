@@ -57,7 +57,7 @@ class aMeta(ActiveWidget):
             return
         foo, path, t, T = txt.split(':')
         if not self.prop['kid'].startswith(path):
-            logging.debug("Wrong destination %s %s", path)
+            logging.debug("Wrong destination %s", path)
         self.current['time'] = float(t)
         self.current['temp'] = float(T)
         self.current['value'] = 'None'

@@ -48,7 +48,7 @@ def clean_curve(dat, events=True):
                 logging.debug('%s %s', 'Skipping EVENT', index_row)
                 continue
             if timeout < 0:
-                logging.debug('Cannot render event %s', index_row, ev)
+                logging.debug('Cannot render event %s %s', index_row, ev)
                 continue
             time_correction += timeout
         t += time_correction
@@ -241,5 +241,3 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
     def curve(self, events=True):
         """Format table for plotting or transmission"""
         return clean_curve(self.dat, events)
-
-

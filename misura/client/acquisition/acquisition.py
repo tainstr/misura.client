@@ -55,11 +55,11 @@ def check_time_delta(server):
     dt = time() - t
     delta = int((t - s) + (dt / 3.))
     if delta < 10:
-        logging.debug('Time delta is not significant', delta)
+        logging.debug('Time delta is not significant %s', delta)
         return True
     pre = server['timeDelta']
     if pre:
-        logging.debug('Time delta already set: %', server['timeDelta'])
+        logging.debug('Time delta already set: %s', server['timeDelta'])
     btn = QtGui.QMessageBox.warning(None, 'Hardware clock error',
                       'Instrument time is different from your current time (delta: {}s).\n Apply difference and restart?'.format(delta))
     if btn != QtGui.QMessageBox.Ok:
@@ -355,7 +355,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Close cameras
         for p, (pic, win) in self.cameras.iteritems():
-            logging.debug('deleting cameras', p, pic, win)
+            logging.debug('deleting cameras %s %s %s', p, pic, win)
             pic.close()
             win.hide()
             win.close()

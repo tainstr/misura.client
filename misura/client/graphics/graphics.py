@@ -204,7 +204,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         if self.openedFiles.model().page.startswith(page.path):
             logging.debug('Not updating page %s', page.path)
             return
-        logging.debug('MisuraInterface.update_page', self.openedFiles.model().page, page.path)
+        logging.debug('MisuraInterface.update_page %s %s', self.openedFiles.model().page, page.path)
         self.openedFiles.model().set_page(page.path)
         logging.debug('%s', 'done model.set_page')
         self.connect(

@@ -110,7 +110,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         menu.addAction('Export', self.slotFileExport)
         # menu.addAction('Save', self.save_to_file)
         menu.exec_(qt4.QCursor.pos())
-        
+
     def save_to_file(self):
         name = QtGui.QFileDialog.getSaveFileName(self, _('Save this plot to file'),
                                                  _(
@@ -236,7 +236,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         if self.document.model.page.startswith(page.path):
             logging.debug('Not update_page %s', page.path)
             return
-        logging.debug('VeuszPlot.update_page', self.document.model.page, page.path)
+        logging.debug('VeuszPlot.update_page %s %s', self.document.model.page, page.path)
         self.document.model.set_page(page.path)
 
 

@@ -58,30 +58,30 @@ mi.t(t)
 mi.T(T)
 """, parent = 'maxT' )
 ao(measure_dict, 'scrMaxHeatingRate', 'Script', """
-print 'scrMaxHeatingRate'       
-T1=kiln.TimeDerivative('T') 
+print 'scrMaxHeatingRate'
+T1=kiln.TimeDerivative('T')
 if len(T1)<10: mi.Exit()
-rate=max(T1)            
+rate=max(T1)
 w=mi.Where(T1==rate)
-if w<0: mi.Exit()  
-print 'scrMaxHeatingRate',w 
-mi.Point(idx=w+1)               
+if w<0: mi.Exit()
+print 'scrMaxHeatingRate',w
+mi.Point(idx=w+1)
 mi.Value(rate/60)
 """, 'Max Heating Rate', parent = 'maxHeatingRate')
 
 ao(measure_dict, 'scrCoolingDuration', 'Script', """
-if not mi.SelectCooling():  
+if not mi.SelectCooling():
     mi.Exit()
-t,T=mi.xy('T')  
-dT=T[0]-T[-1]           
-dt=t[-1]-t[0]           
+t,T=mi.xy('T')
+dT=T[0]-T[-1]
+dt=t[-1]-t[0]
 mi.T(dT)
-mi.t(dt)  
+mi.t(dt)
 """, 'Total cooling duration', parent = 'coolingDuration')
 
 ao(measure_dict, 'scrMaxCoolingRate', 'Script', """
-if not mi.SelectCooling():      
-    mi.Exit()                   
+if not mi.SelectCooling():
+    mi.Exit()
 T1=mi.TimeDerivative('T')
 if len(T1)<10: mi.Exit()
 rate=min(T1)
@@ -116,7 +116,7 @@ factor=script.Opt('param_sint')/100.
 threshold=obj.At('h',0)*factor
 r=obj.Drops('h', threshold)
 if r is False: mi.Exit()
-i,ti,val = r 
+i,ti,val = r
 if ti<0: mi.Exit()
 mi.t(ti)
 mi.T(obj.At('T',ti))
@@ -272,7 +272,7 @@ def create_tree(outFile, tree, path='/'):
     """Recursive tree structure creation"""
     for key, foo in tree.list():
         if outFile.has_node(path, key):
-            logging.debug('Path already found:', path, key)
+            logging.debug('Path already found: %s %s', path, key)
             continue
         logging.debug('%s %s %s', 'Creating group:', path, key)
         outFile.create_group(path, key, key)
@@ -287,7 +287,7 @@ class Converter(object):
     interrupt = False
     progress = 0
     outFile = False
-    
+
     def __init__(self, dbpath,  outdir=False):
         self.dbpath = dbpath
 
@@ -298,15 +298,15 @@ class Converter(object):
                 os.mkdir(outdir)
         self.outdir = outdir
         self.m4db = os.path.join(outdir,'database.sqlite')
-        
+
     def cancel(self):
         """Interrupt conversion and remove output file"""
         if self.outFile:
             self.outFile.close()
         if os.path.exists(self.outpath):
             os.remove(self.outpath)
-        
-    
+
+
     def get_outpath(self, tcode=False, img=True, force=True, keep_img=True):
         # Open DB and import test data
         if not tcode:
@@ -337,7 +337,7 @@ class Converter(object):
         safeName = ''.join(
             c for c in self.test[m3db.fprv.Desc_Prova] if c in valid_chars)
         outpath = os.path.join(self.outdir, safeName + '_' + tcode + '.h5')
-        
+
         # Manage overwriting options
         if os.path.exists(outpath):
             # Keep current images
@@ -372,30 +372,30 @@ class Converter(object):
         self.keep_img = keep_img
         self.force = force
         return self.outpath
-     
-    
+
+
     def convert(self, frm='ImageM3', max_num_images = -1):
         """Extract a Misura 3 test and export into a Misura 4 test file"""
         conn, cursor = m3db.getConnectionCursor(self.dbpath)
         outFile = self.outFile
         zt = time()
         log_ref = reference.Log(outFile, '/', server_dict['log'])
-    
+
         def log(msg, priority=10):
             # TODO: check zerotime
             log_ref.commit([[time()-zt, (priority, msg)]])
-    
+
         log('Importing from %s, id %s' % (self.dbpath, self.tcode))
         log('Conversion Started at ' +
             datetime.now().strftime("%H:%M:%S, %d/%m/%Y"))
         log('Conversion Parameters: \n\tImages: %r, \n\tUpdate: %r, \n\tKeep Images: %r, \n\tImage Format: %r' % (
             self.img, self.force, self.keep_img, frm))
-    
+
         self.progress = 11
         # Heating cycle table
         cycle = m3db.getHeatingCycle(self.test)
         self.progress = 12
-    
+
         ###
         # CONFIGURATION
         tree = deepcopy(tree_dict)
@@ -415,7 +415,7 @@ class Converter(object):
         # Sample
         smp = instrobj.sample0
         smp['name'] = self.test[m3db.fprv.Desc_Prova]
-    
+
         # Set ROI
         roi = [0, 0, 640, 480]
         if self.tcode.endswith('L'):
@@ -424,7 +424,7 @@ class Converter(object):
             roi[0] = 320.
             roi[2] = 320.
         smp['roi'] = roi
-    
+
         # Measure
         tid = self.dbpath + '|' + self.tcode
         tdate0 = self.test[m3db.fprv.Data]
@@ -438,16 +438,16 @@ class Converter(object):
         uid = hashlib.md5(self.dbpath + '|' + self.tcode).hexdigest()
         instrobj.measure['uid'] = uid
         instrobj['zerotime'] = zerotime
-    
+
         # Kiln
         tree.kiln['curve'] = cycle
         tree.kiln['Regulation_Kp'] = self.test[m3db.fprv.Pb]
         tree.kiln['Regulation_Ki'] = self.test[m3db.fprv.ti]
         tree.kiln['Regulation_Kd'] = self.test[m3db.fprv.td]
-    
+
         # Create the hierarchy
         create_tree(outFile, tree)
-    
+
         ###
         # GET THE ACTUAL DATA
         header, columns = m3db.getHeaderCols(self.test[m3db.fprv.Tipo_Prova], self.tcode)
@@ -456,15 +456,15 @@ class Converter(object):
         logging.debug('%s %s %s %s', header, columns, len(rows[0]), instr)
         instr_path = '/' + instr
         smp_path = instr_path + '/sample0'
-    
+
         # TODO: Check conf node (???)
     #	if not hasattr(outFile.root,'conf'):
     #		outFile.close()
     #		os.remove(outpath)
     #		return convert(dbpath, tcode, outdir, img,force, keep_img,frm)
-    
+
         self.progress = 13
-    
+
         arrayRef = {}
         timecol = rows[:, m3db.fimg.Tempo].astype('float')
         timecol, unidx = np.unique(timecol, return_index = True)
@@ -488,7 +488,7 @@ class Converter(object):
             csunit = False
             if col == 'd' or 'Percorso' in col:
                 data = data / 1000.
-                unit = 'micron' 
+                unit = 'micron'
             elif col in ['h', 'soft']:
                 data = data / 100.
                 unit =  'percent'
@@ -496,7 +496,7 @@ class Converter(object):
             elif col == 'A':
                 data *= -1
                 ini_area = data[0]
-                unit =  'percent' 
+                unit =  'percent'
                 csunit = 'micron^2'
             elif col == 'P':
                 data = data / 10.
@@ -525,7 +525,7 @@ class Converter(object):
             ref = arrayRef[col]
             ref.append(np.array([timecol, data]).transpose())
         outFile.flush()
-    
+
         self.progress = 20
         ###
         # ASSIGN INITIAL DIMENSION
@@ -552,7 +552,7 @@ class Converter(object):
                 initialDimension = ini1
         smp['initialDimension'] = initialDimension
         outFile.flush()
-    
+
         self.progress = 21
         log('Converted Points: %i\n' % (len(rows) - 1) * len(header))
         ######
@@ -566,7 +566,7 @@ class Converter(object):
             sh = m3db.getCharacteristicShapes(self.test, rows.transpose())
             print 'got characteristic shapes',sh
             instrobj.sample0.desc.update(sh)
-    
+
         ###
         # IMAGES
         imgdir = os.path.join(os.path.dirname(self.dbpath), self.icode)
@@ -577,8 +577,8 @@ class Converter(object):
                    return False
                 else:
                     log('ERROR Appending images')
-            
-            
+
+
         # Write conf tree
         outFile.save_conf(tree.tree())
         outFile.set_attributes('/conf', attrs = {'version': '3.0.0',
@@ -594,7 +594,7 @@ class Converter(object):
         indexer.Indexer.append_file_to_database(self.m4db, self.outpath)
         log('Conversion ended.')
         self.progress = 100
-        
+
         return self.outpath
 
 
@@ -617,16 +617,16 @@ class Converter(object):
                 break
             nj = sjob + i * job
             self.progress = int(nj)
-    
+
             num = int(r[m3db.fimg.Numero_Immagine])
             img = '%sH.%03i' % (self.icode, int(num))
             img = os.path.join(imgdir, img)
             if not os.path.exists(img):
                 logging.debug('%s %s', 'Skipping non-existent image', img)
                 continue
-    
+
             im, size = decompress(img, frm)
-    
+
             sz = len(im)
             esz += sz
             t = float(self.rows[i, m3db.fimg.Tempo]) - t0
@@ -643,7 +643,7 @@ def decompress(img, frm):
     """Available formats (Storage):
             'Image': misura compression algorithm (Image)
             'ImageM3': legacy Misura3 compression algorithm (Binary)
-            other: any PIL supported format (Binary) 
+            other: any PIL supported format (Binary)
     """
     fr = open(img, 'rb').read()
     if frm == 'ImageM3':

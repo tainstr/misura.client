@@ -146,7 +146,7 @@ class ViewerPicture(QtGui.QGraphicsView):
             # Invert controls and appearance?
             orient = m.slider.orientation()
             invc = (align > 0 and orient == QtCore.Qt.Horizontal) or (align < 0 and orient == QtCore.Qt.Vertical )
-            logging.debug('############ INVERSION?',m.prop['kid'],invc)
+            logging.debug('############ INVERSION? %s %s', m.prop['kid'], invc)
             # Skip if no change
             if ps != m.slider.pageStep() or s != m.slider.singleStep() or invc != m.slider.invertedControls():
                 m.slider.setPageStep(ps)
