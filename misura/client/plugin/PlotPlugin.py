@@ -13,6 +13,7 @@ import utils
 import PercentilePlugin
 from .. import units
 from misura.client.filedata import axis_selection
+from misura.client import iutils
 
 default_curves = ['T', 'P', 'S', 'h', 'Vol', 'd', 'err']
 an_default_curves = ['T', 'Vol', 'd', 'Dil',  'Sint', 'Flex']
@@ -152,20 +153,18 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         ), {'ds': dsn, 'propagate': False, 'action': 'Invert', 'auto': False}))
         return True
 
-    def arrange(self, fields, graphics_names=None):
-        arrange_fields = {'currentwidget': fields['currentwidget'],
-                  'dataset': 'Line Color',
-                  'sample': 'Line Style',
-                  'space': True}
+    def arrange(self, graphics_names, plotted_curve='no plotted curve'):
+        arrange_fields = {'currentwidget': '/time/time',
+                          'dataset': 'Line Color',
+                          'sample': 'Line Style',
+                          'space': True,
+                          'plotted_curve_widget_cleaned_partial_name': utils.clean_all_separators(plotted_curve)}
 
-        if graphics_names is None:
-            self.ops.append(document.OperationToolsPlugin(ArrangePlugin(),
-                                                      arrange_fields.copy()))
-        else:
-            for gname in graphics_names:
-                arrange_fields['currentwidget'] = gname
-                self.ops.append(
-                    document.OperationToolsPlugin(ArrangePlugin(), arrange_fields.copy()))
+        for gname in graphics_names:
+            arrange_fields['currentwidget'] = gname
+            self.ops.append(
+                document.OperationToolsPlugin(ArrangePlugin(),
+                                              arrange_fields.copy()))
 
         self.apply_ops('PlotDataset: Arrange')
 
@@ -178,8 +177,6 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         doc = cmd.document
         self.doc = doc
         self.cmd = cmd
-
-        self.arrange(fields)
 
         cur = fields['currentwidget']
         g = self.doc.resolveFullWidgetPath(cur)
@@ -255,7 +252,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             cnames[y] = cname
 
         self.apply_ops('PlotDataset: Customize')
-        self.arrange(fields, gnames)
+        self.arrange(gnames, fields['y'][0].split(':')[-1])
 
         return cnames
 
