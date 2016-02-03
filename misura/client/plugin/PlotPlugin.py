@@ -13,7 +13,6 @@ import utils
 import PercentilePlugin
 from .. import units
 from misura.client.filedata import axis_selection
-from misura.client import iutils
 
 default_curves = ['T', 'P', 'S', 'h', 'Vol', 'd', 'err']
 an_default_curves = ['T', 'Vol', 'd', 'Dil',  'Sint', 'Flex']
