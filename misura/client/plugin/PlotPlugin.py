@@ -152,6 +152,23 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         ), {'ds': dsn, 'propagate': False, 'action': 'Invert', 'auto': False}))
         return True
 
+    def arrange(self, fields, graphics_names=None):
+        arrange_fields = {'currentwidget': fields['currentwidget'],
+                  'dataset': 'Line Color',
+                  'sample': 'Line Style',
+                  'space': True}
+
+        if graphics_names is None:
+            self.ops.append(document.OperationToolsPlugin(ArrangePlugin(),
+                                                      arrange_fields.copy()))
+        else:
+            for gname in graphics_names:
+                arrange_fields['currentwidget'] = gname
+                self.ops.append(
+                    document.OperationToolsPlugin(ArrangePlugin(), arrange_fields.copy()))
+
+        self.apply_ops('PlotDataset: Arrange')
+
     def apply(self, cmd, fields):
         """Do the work of the plugin.
         cmd: veusz command line interface object (exporting commands)
@@ -161,6 +178,9 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         doc = cmd.document
         self.doc = doc
         self.cmd = cmd
+
+        self.arrange(fields)
+
         cur = fields['currentwidget']
         g = self.doc.resolveFullWidgetPath(cur)
         g = utils.searchFirstOccurrence(g, 'graph')
@@ -235,18 +255,10 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             cnames[y] = cname
 
         self.apply_ops('PlotDataset: Customize')
+        self.arrange(fields, gnames)
 
-        # Arrange colors and axes
-        fields = {'currentwidget': '/time/time',
-                  'dataset': 'Line Color',
-                  'sample': 'Line Style',
-                  'space': True}
-        for gname in gnames:
-            fields['currentwidget'] = gname
-            self.ops.append(
-                document.OperationToolsPlugin(ArrangePlugin(), fields.copy()))
-        self.apply_ops('PlotDataset: Arrange')
         return cnames
+
 
 
 from ..clientconf import confdb
