@@ -354,7 +354,7 @@ class Graphics(MainWindow):
         self.m3 = Misura3Interface(self)
         self.datadock.hide()
 
-        self.plot.doPick = lambda mouse_position: plugin.InterceptPlugin.clicked_curve(mouse_position, self.plot)
+        self.plot.doPick = lambda mouse_position: plugin.InterceptPlugin.clicked_curve(mouse_position, self)
 
     def setupDefaultDoc(self):
         """Make default temperature/time pages"""

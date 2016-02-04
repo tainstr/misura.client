@@ -5,6 +5,7 @@ from misura.canon.logger import Log as logging
 import veusz.widgets
 import veusz.plugins as plugins
 import veusz.document as document
+from veusz.dialogs.plugin import PluginDialog
 import numpy as np
 import utils
 
@@ -40,7 +41,10 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         ]
 
     @classmethod
-    def clicked_curve(self, mouse_position, plot):
+    def clicked_curve(self, mouse_position, main_window):
+        plot = main_window.plot
+        doc = main_window._document
+
         self.pickerwidgets = []
 
         pickinfo = veusz.widgets.PickInfo()
@@ -65,7 +69,11 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             self.pickeritem.hide()
             return
 
-        plot.emitPicked(pickinfo)
+        curve_to_intercept = pickinfo.widget.settings['yData']
+        p = InterceptPlugin(target=[curve_to_intercept], axis='X', critical_x='0:t')
+        d = PluginDialog(main_window, doc, p, InterceptPlugin)
+        main_window.showDialog(d)
+
 
     def apply(self, cmd, fields):
         """Do the work of the plugin.
