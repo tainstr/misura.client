@@ -9,6 +9,7 @@ import numpy as np
 import utils
 
 
+
 class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
     """Intercept all curves at a given x or y by placing datapoints"""
@@ -37,6 +38,34 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plugins.FieldDataset('critical_x',descr="Critical search X dataset", default=critical_x),
             plugins.FieldText('text', 'Label text', default=text),
         ]
+
+    @classmethod
+    def clicked_curve(self, mouse_position, plot):
+        self.pickerwidgets = []
+
+        pickinfo = veusz.widgets.PickInfo()
+        pos = plot.mapToScene(mouse_position)
+
+        for w, bounds in plot.painthelper.widgetBoundsIterator():
+            try:
+                # ask the widget for its (visually) closest point to the cursor
+                info = w.pickPoint(pos.x(), pos.y(), bounds)
+
+                # this is a pickable widget, so remember it for future key navigation
+                self.pickerwidgets.append(w)
+
+                if info.distance < pickinfo.distance:
+                    # and remember the overall closest
+                    pickinfo = info
+            except AttributeError:
+                # ignore widgets that don't support axes or picking
+                continue
+
+        if not pickinfo:
+            self.pickeritem.hide()
+            return
+
+        plot.emitPicked(pickinfo)
 
     def apply(self, cmd, fields):
         """Do the work of the plugin.
