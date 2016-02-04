@@ -70,7 +70,10 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             return
 
         curve_to_intercept = pickinfo.widget.settings['yData']
-        p = InterceptPlugin(target=[curve_to_intercept], axis='X', critical_x='0:t')
+        p = InterceptPlugin(target=[curve_to_intercept],
+                            axis='X',
+                            critical_x='0:t',
+                            val=pickinfo.coords[0])
         d = PluginDialog(main_window, doc, p, InterceptPlugin)
         main_window.showDialog(d)
 
