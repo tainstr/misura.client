@@ -469,19 +469,19 @@ class DatasetEntry(NodeEntry):
         ds = self.ds
         if getattr(ds, 'm_smp', False) is not False:
             return ds.m_var
-        # Single-parameter plugin
-        if len(self.parents) == 1:
+
+        pm = ds.pluginmanager
+
+        if len(self.parents) == 1 or pm.plugin.name == 'SmoothData':
             return self.parent.m_var
         if not isinstance(self.ds, document.datasets.Dataset1DPlugin):
             return getattr(ds, 'm_var', self.path)
-        pm = ds.pluginmanager
+
         vars = ','.join(self.vars)
         if pm.plugin.name == 'Coefficient':
             v = 'Coeff(%i,%s\degC) ' % (pm.fields['start'],vars)
         elif pm.plugin.name == 'Derive':
             v = 'Der(%i\deg,%s)' % (pm.fields['order'],vars)
-        elif pm.plugin.name == 'SmoothData':
-            v = getattr(self.parent, 'm_var', vars)
         else:
             v = getattr(ds, 'm_var', vars)
         return v
