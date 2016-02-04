@@ -480,6 +480,8 @@ class DatasetEntry(NodeEntry):
             v = 'Coeff(%i,%s\degC) ' % (pm.fields['start'],vars)
         elif pm.plugin.name == 'Derive':
             v = 'Der(%i\deg,%s)' % (pm.fields['order'],vars)
+        elif pm.plugin.name == 'SmoothData':
+            v = getattr(self.parent, 'm_var', vars)
         else:
             v = getattr(ds, 'm_var', vars)
         return v
