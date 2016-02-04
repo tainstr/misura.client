@@ -23,7 +23,14 @@ class InitialDimensionPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     # string goes in dialog box
     description_full = ('Configure initial dimension')
 
-    def __init__(self, ds='', ini=100., auto=False, num=20, method='mean', ds_x=''):
+    def __init__(self, ds='',
+                 ini=100.,
+                 auto=False,
+                 num=20,
+                 method='mean',
+                 ds_x='',
+                 suppress_messageboxes=False):
+
         """Define input fields for plugin."""
         self.fields = [
             plugins.FieldDataset('ds', 'Dataset to configure', default=ds),
@@ -36,6 +43,9 @@ class InitialDimensionPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                                default=method, items=('linear-regression', 'mean')),
             plugins.FieldDataset(
                 'ds_x', 'X Dataset for linear regression', default=ds_x),
+            plugins.FieldBool('suppress_messageboxes',
+                              'Suppress confirmation message boxes',
+                              default=suppress_messageboxes)
         ]
 
     def apply(self, interface, fields):
@@ -79,7 +89,7 @@ class InitialDimensionPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             out = 100. * out / ini
             ds1.data = plugins.numpyCopyOrNone(out)
         orig = getattr(ds, 'm_initialDimension', False)
-        if orig and orig != ini:
+        if orig and orig != ini and not fields['suppress_messageboxes']:
             repl = QtGui.QMessageBox.warning(None, 'Initial dimension',
                                              'Changing initial dimension from %.2f to %.2f. Confirm?' % (
                                                  orig, ini),
@@ -92,8 +102,10 @@ class InitialDimensionPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         ds1.m_initialDimension = ini
         self.ops.append(document.OperationDatasetSet(fields['ds'], ds1))
         self.apply_ops()
-        QtGui.QMessageBox.information(
-            None, 'Initial dimension output', 'Initial dimension configured to %.2f' % ini)
+        if not fields['suppress_messageboxes']:
+            QtGui.QMessageBox.information(None,
+                                          'Initial dimension output',
+                                          'Initial dimension configured to %.2f' % ini)
 
 
 plugins.toolspluginregistry.append(InitialDimensionPlugin)

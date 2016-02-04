@@ -1,9 +1,10 @@
-#!/usr/bin/python
+ #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Custom Misura plotting facilities."""
 import veusz.plugins as plugins
 import veusz.document as document
 from ArrangePlugin import ArrangePlugin
+from InitialDimensionPlugin import InitialDimensionPlugin
 from time import time
 from misura.client import iutils
 from misura.client.iutils import get_plotted_tree
@@ -135,8 +136,24 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             logging.debug('%s %s', 'No m_percent attribute defined', dsn)
             return False
         if getattr(ds, 'm_initialDimension', None) is None:
-            logging.debug('%s %s', 'No initial dimension defined', dsn)
-            return False
+            parent_initial_dimension = getattr(ds.parent.ds, 'm_initialDimension', None)
+            if parent_initial_dimension is None:
+                logging.debug('%s %s', 'No initial dimension defined', dsn)
+                return False
+
+            initial_dimension_fields = {'ds': ds.path,
+                                        'ini': parent_initial_dimension,
+                                        'num': 20,
+                                        'auto': False,
+                                        'method': 'mean',
+                                        'ds_x': '',
+                                        'suppress_messageboxes': True}
+
+            self.ops.append(document.OperationToolsPlugin(InitialDimensionPlugin(),
+                                                          initial_dimension_fields.copy()))
+
+            self.apply_ops('PlotDataset: InitialDimension')
+
         cvt = None
         for nds in dslist:
             if nds == dsn:
