@@ -124,9 +124,10 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             # Set colors according to axes
             obj = doc.resolveFullWidgetPath(plotpath)
 
-            plotted_curve = fields.get('plotted_curve_widget_cleaned_partial_name', False)
+            plotted_curve = fields.get('plotted_curve', False)
+            current_curve = obj.settings['yData']
 
-            if not plotted_curve or plotted_curve in utils.clean_all_separators(plotpath):
+            if not plotted_curve or plotted_curve == current_curve.split(':')[-1]:
                 color = axcolors[obj.settings.yAxis]
                 props = {'PlotLine/color': color,
                          'MarkerFill/color': color,

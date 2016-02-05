@@ -174,7 +174,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                           'dataset': 'Line Color',
                           'sample': 'Line Style',
                           'space': True,
-                          'plotted_curve_widget_cleaned_partial_name': utils.clean_all_separators(plotted_curve)}
+                          'plotted_curve': plotted_curve}
 
         for gname in graphics_names:
             arrange_fields['currentwidget'] = gname

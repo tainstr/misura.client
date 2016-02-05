@@ -199,14 +199,3 @@ class OperationWrapper(object):
             ds.m_update = up
             n += 1
         return n
-
-
-def clean_separators(string_with_separators, separators_to_remove):
-    string_without_separators = string_with_separators
-    for separator in separators_to_remove:
-        string_without_separators = string_without_separators.replace(separator, '')
-
-    return string_without_separators
-
-def clean_all_separators(string_with_separators):
-    return clean_separators(string_with_separators, [' ', '/', '-', '_', ':'])

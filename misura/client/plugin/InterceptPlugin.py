@@ -43,7 +43,6 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     @classmethod
     def clicked_curve(self, mouse_position, main_window):
         plot = main_window.plot
-        doc = main_window._document
 
         self.pickerwidgets = []
 
@@ -74,7 +73,7 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                             axis='X',
                             critical_x='0:t',
                             val=pickinfo.coords[0])
-        d = PluginDialog(main_window, doc, p, InterceptPlugin)
+        d = PluginDialog(main_window, main_window._document, p, InterceptPlugin)
         main_window.showDialog(d)
 
 
