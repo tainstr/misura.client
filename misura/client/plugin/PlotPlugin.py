@@ -268,7 +268,8 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             cnames[y] = cname
 
         self.apply_ops('PlotDataset: Customize')
-        self.arrange(gnames, fields['y'][0].split(':')[-1])
+        if len(fields) > 0 and len(fields['y']) > 0:
+            self.arrange(gnames, fields['y'][0].split(':')[-1])
 
         return cnames
 
