@@ -127,7 +127,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plotted_curve = fields.get('plotted_curve', False)
             current_curve = obj.settings['yData']
 
-            if not plotted_curve or plotted_curve == current_curve.split(':')[-1]:
+            if not plotted_curve or plotted_curve in current_curve:
                 color = axcolors[obj.settings.yAxis]
                 props = {'PlotLine/color': color,
                          'MarkerFill/color': color,
