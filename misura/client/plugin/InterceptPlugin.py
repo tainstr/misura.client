@@ -44,8 +44,6 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     def clicked_curve(self, mouse_position, main_window):
         plot = main_window.plot
 
-        self.pickerwidgets = []
-
         pickinfo = veusz.widgets.PickInfo()
         pos = plot.mapToScene(mouse_position)
 
@@ -53,9 +51,6 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             try:
                 # ask the widget for its (visually) closest point to the cursor
                 info = w.pickPoint(pos.x(), pos.y(), bounds)
-
-                # this is a pickable widget, so remember it for future key navigation
-                self.pickerwidgets.append(w)
 
                 if info.distance < pickinfo.distance:
                     # and remember the overall closest
