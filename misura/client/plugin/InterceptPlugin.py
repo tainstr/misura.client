@@ -65,7 +65,6 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 continue
 
         if not pickinfo:
-            self.pickeritem.hide()
             return
 
         curve_to_intercept = pickinfo.widget.settings['yData']
