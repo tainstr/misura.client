@@ -206,27 +206,24 @@ class Active(object):
             self.current = rem
             self.emitChanged()
 
-    @lockme
-    def get(self, *args):
-        rem = self.remObj.get(self.handle, *args)
-        self._get(rem)
-
+    def _check_flags(self, *args):
         rem_flags = self.remObj.getFlags(self.handle, *args)
         if rem_flags and (rem_flags['enabled'] is not None):
             self.enable_check.setChecked(rem_flags['enabled'])
 
+    def call_function_then_emitchanged_and_checkflags(self, function, *args):
+        rem = function(self.handle, *args)
+        self._get(rem)
+        self._check_flags(*args)
         return rem
+
+    @lockme
+    def get(self, *args):
+        self.call_function_then_emitchanged_and_checkflags(self.remObj.get, *args)
 
     @lockme
     def soft_get(self, *args):
-        rem = self.remObj.soft_get(self.handle, *args)
-        self._get(rem)
-
-        rem_flags = self.remObj.getFlags(self.handle, *args)
-        if rem_flags and (rem_flags['enabled'] is not None):
-            self.enable_check.setChecked(rem_flags['enabled'])
-
-        return rem
+        self.call_function_then_emitchanged_and_checkflags(self.remObj.soft_get, *args)
 
     def emitSelfChanged(self, nval):
         self._get(nval)
