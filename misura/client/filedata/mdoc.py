@@ -172,7 +172,7 @@ class MisuraDocument(document.Document):
         if (elp - lastt) < self.interval:
             logging.debug('%s %s %s', 'Update not needed', elp, lastt)
             return []
-        logging.debug('%s %s', 'Update needed: %.2f>%.2f doc' % (elp, lastt))
+        logging.debug('Update needed: %.2f>%.2f doc' % (elp, lastt))
         # New time point in time units
         nt = [units.Converter.convert('second', tu, elp)]
         k = []
