@@ -211,7 +211,7 @@ class Active(object):
         if rem_flags and (rem_flags['enabled'] is not None):
             self.enable_check.setChecked(rem_flags['enabled'])
 
-    def call_function_then_emitchanged_and_checkflags(self, function, *args):
+    def _call_function_then_emitchanged_and_checkflags(self, function, *args):
         rem = function(self.handle, *args)
         self._get(rem)
         self._check_flags(*args)
@@ -219,11 +219,11 @@ class Active(object):
 
     @lockme
     def get(self, *args):
-        self.call_function_then_emitchanged_and_checkflags(self.remObj.get, *args)
+        self._call_function_then_emitchanged_and_checkflags(self.remObj.get, *args)
 
     @lockme
     def soft_get(self, *args):
-        self.call_function_then_emitchanged_and_checkflags(self.remObj.soft_get, *args)
+        self._call_function_then_emitchanged_and_checkflags(self.remObj.soft_get, *args)
 
     def emitSelfChanged(self, nval):
         self._get(nval)
