@@ -343,7 +343,6 @@ class ViewerPicture(QtGui.QGraphicsView):
     def reset_regions(self):
         """Re-init samples, resetting regions of interest."""
         r=self.remote.init_samples()
-        QtGui.QMessageBox.information(self, 'Region reset', r)
 
     def add_motion_actions(self, menu):
         """Create menu actions for motion control"""
