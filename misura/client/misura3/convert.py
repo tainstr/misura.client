@@ -479,6 +479,9 @@ class Converter(object):
             if col == 't':
                 data = timecol
                 continue
+            if columns[i] >= rows.shape[1]:
+                logging.debug("Skipping undefined column. Old db? %s", columns[i])
+                continue
             data = rows[:, columns[i]].astype('float')[unidx]
             # Skip invalid data
             if np.isnan(data).all():
