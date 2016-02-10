@@ -43,8 +43,10 @@ def export(sh, frame='/hsm/sample0/frame',
     w = roi['w']
     h = roi['h']
     # Translate to 0
-    x -= min(x)
-    y -= min(y)
+    x_translation = min(x)
+    y_translation = min(y)
+    x -= x_translation
+    y -= y_translation
     # Max dimension (video resolution)
     wMax = int(max(x + w))
     hMax = int(max(y + h))
@@ -55,7 +57,7 @@ def export(sh, frame='/hsm/sample0/frame',
         prog.setMaximum(N)
     i = 0
     ti = 0
-    while i < N:
+    while i < N: 
         # Get image
         t, img = ref[i]
 # 		print 'exporting {:.2f} {} {:.0f}'.format(100.*i/N,i,t)
@@ -66,10 +68,11 @@ def export(sh, frame='/hsm/sample0/frame',
             im = np.ones((hMax, wMax), np.uint8) * 255
             # Color black area contained in path
             ((w, h), x, y) = img
+            x -= x_translation
+            y -= y_translation
             # Avoid black-white inversion
-# 			h=max(y)
-            x = np.concatenate(([x[0]], x, [x[-1], x[0]]))
-            y = np.concatenate(([hMax], y, [hMax, hMax]))
+            x = np.concatenate(([0,       0], x, [wMax,  wMax,    0])) 
+            y = np.concatenate(([hMax, y[0]], y, [y[-1], hMax, hMax])) 
             p = np.array([x, y], np.int32).transpose()
             cv.fillPoly(im, [p], 0)
             im = np.dstack((im, im, im))
