@@ -186,8 +186,9 @@ class MainWindow(QtGui.QMainWindow):
         if not self.fixedDoc:
             registry.toggle_run(False)
             self.tasks.close()
-        super(MainWindow, self).closeEvent(ev)
+        ret = super(MainWindow, self).closeEvent(ev)
         iutils.app.quit()
+        return ret
 
     _blockResetFileProxy = False
 

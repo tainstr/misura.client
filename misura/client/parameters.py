@@ -1,9 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# 0=always visible; 1=user ; 2=expert ; 3=advanced ; 4=technician ;
-# 5=developer; 6=never visible
-configuration_level = 5
+
 import sys
 import os
 from time import time

@@ -32,7 +32,7 @@ def desc2html(desc):
     return t
 
 
-def orgSections(prop_dict):
+def orgSections(prop_dict, configuration_level=5):
     """Riordina le chiavi a seconda delle sezioni cui appartengono."""
     # Move children options into their parent's "children" key
     prop_dict = prop_dict.copy()
@@ -73,7 +73,7 @@ def orgSections(prop_dict):
     for handle, prop in prop_dict.iteritems():
         if not prop.has_key('readLevel'):
             prop['readLevel'] = -1
-        if prop['readLevel'] > params.configuration_level:
+        if prop['readLevel'] > configuration_level:
             continue
         if ':' in handle:
             spl = ':'
@@ -163,7 +163,7 @@ class Interface(QtGui.QTabWidget):
 
     """Interfaccia grafica ad un dizionario di configurazione."""
 
-    def __init__(self,  server, remObj, prop_dict=False, parent=None, context='Option'):
+    def __init__(self, server, remObj, prop_dict=False, parent=None, context='Option'):
         QtGui.QTabWidget.__init__(self, parent)
         self.server = server
         self.remObj = remObj
@@ -174,7 +174,7 @@ class Interface(QtGui.QTabWidget):
             logging.critical(
                 'Impossible to get object description %s', self.remObj._Method__name)
             return
-        self.sections = orgSections(prop_dict)
+        self.sections = orgSections(prop_dict, remObj._readLevel)
         self.prop_dict = prop_dict
         self.name = ''
         if prop_dict.has_key('name'):

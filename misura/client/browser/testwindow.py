@@ -65,9 +65,10 @@ class TestWindow(acquisition.MainWindow):
         self.menuVersions.versionChanged.connect(self.load_version)
         self.graphWin.show()
 
-    def closeEvent(self, event):
+    def closeEvent(self, ev):
         should_not_close_application = True
-        return should_not_close_application
+        ret = QtGui.QMainWindow.closeEvent(self,ev)
+        return ret
 
     def close(self):
         self.play.close()
