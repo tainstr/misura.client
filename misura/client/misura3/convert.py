@@ -15,7 +15,7 @@ import hashlib
 
 from PIL import Image
 
-from misura.canon import bitmap,  option, reference, indexer
+from misura.canon import bitmap, option, reference, indexer
 from misura.canon.option import ao
 
 import m3db
@@ -50,13 +50,13 @@ ao(measure_dict, 'maxT', 'Meta', name='Maximum temperature')
 ao(measure_dict, 'end', 'Meta', name='End of test')
 ao(measure_dict, 'maxHeatingRate', 'Meta', name='Max heating rate')
 ao(measure_dict, 'coolingDuration', 'Meta', name='Cooling duration')
-ao(measure_dict, 'maxCoolingRate', 'Meta',name='Max cooling rate')
+ao(measure_dict, 'maxCoolingRate', 'Meta', name='Max cooling rate')
 
-ao(measure_dict, 'scrEnd', 'Script', "mi.Point(idx=-1)", parent = 'end' )
+ao(measure_dict, 'scrEnd', 'Script', "mi.Point(idx=-1)", parent='end')
 ao(measure_dict, 'scrMaxT', 'Script', """i,t,T=mi.Max('T')
 mi.t(t)
 mi.T(T)
-""", parent = 'maxT' )
+""", parent='maxT')
 ao(measure_dict, 'scrMaxHeatingRate', 'Script', """
 print 'scrMaxHeatingRate'
 T1=kiln.TimeDerivative('T')
@@ -67,7 +67,7 @@ if w<0: mi.Exit()
 print 'scrMaxHeatingRate',w
 mi.Point(idx=w+1)
 mi.Value(rate/60)
-""", 'Max Heating Rate', parent = 'maxHeatingRate')
+""", 'Max Heating Rate', parent='maxHeatingRate')
 
 ao(measure_dict, 'scrCoolingDuration', 'Script', """
 if not mi.SelectCooling():
@@ -77,7 +77,7 @@ dT=T[0]-T[-1]
 dt=t[-1]-t[0]
 mi.T(dT)
 mi.t(dt)
-""", 'Total cooling duration', parent = 'coolingDuration')
+""", 'Total cooling duration', parent='coolingDuration')
 
 ao(measure_dict, 'scrMaxCoolingRate', 'Script', """
 if not mi.SelectCooling():
@@ -89,7 +89,7 @@ w=mi.Where(T1==rate)
 if w<0: mi.Exit()
 mi.Value(-rate/60)
 mi.Point(idx=w)
-""", 'Maximum Cooling Rate', parent = 'maxCoolingRate')
+""", 'Maximum Cooling Rate', parent='maxCoolingRate')
 
 smp_dict = deepcopy(base_dict)
 smp_dict['name']['current'] = 'Sample'
@@ -129,11 +129,11 @@ ao(hsm_smp_dict, 'param_sint', 'Integer', 95,
 # ratio=mi.Ratio('Sint','Width')*obj.Opt('initialDimension')/obj.Opt('initialWidth')
 # ratio=(ratio/ratio[0])
 # i=mi.Drops(ratio,min_decrease/100.)
-#if i<0: mi.Exit()
+# if i<0: mi.Exit()
 # v=ratio[i]
 # mi.Point(i)
 # mi.Value(v)""")
-#ao(std_hsm,'param_soft','Integer',5,'Minimum % decrease in h/w ratio for Softening',parent='Softening')
+# ao(std_hsm,'param_soft','Integer',5,'Minimum % decrease in h/w ratio for Softening',parent='Softening')
 
 ao(hsm_smp_dict, 'scrSoftening', 'Script', """
 threshold=script.Opt('param_soft')
@@ -230,9 +230,9 @@ ao(camera_dict, 'Analysis_Simulation', 'Boolean', True, attr=['Hidden'])
 
 
 anl_dict = deepcopy(base_dict)
-ao(anl_dict, 'blackWhite', 'Boolean', True,  attr=['Hidden'])
-ao(anl_dict, 'adaptiveThreshold', 'Boolean', False,  attr=['Hidden'])
-ao(anl_dict, 'autoregion', 'Boolean', False,  attr=['Hidden'])
+ao(anl_dict, 'blackWhite', 'Boolean', True, attr=['Hidden'])
+ao(anl_dict, 'adaptiveThreshold', 'Boolean', False, attr=['Hidden'])
+ao(anl_dict, 'autoregion', 'Boolean', False, attr=['Hidden'])
 
 server_dict = deepcopy(base_dict)
 server_dict['name']['current'] = 'server'
@@ -288,7 +288,7 @@ class Converter(object):
     progress = 0
     outFile = False
 
-    def __init__(self, dbpath,  outdir=False):
+    def __init__(self, dbpath, outdir=False):
         self.dbpath = dbpath
 
         if not outdir:
@@ -297,7 +297,7 @@ class Converter(object):
             if not os.path.exists(outdir):
                 os.mkdir(outdir)
         self.outdir = outdir
-        self.m4db = os.path.join(outdir,'database.sqlite')
+        self.m4db = os.path.join(outdir, 'database.sqlite')
 
     def cancel(self):
         """Interrupt conversion and remove output file"""
@@ -331,7 +331,7 @@ class Converter(object):
             conn.close()
             return False
         conn.close()
-        ###
+        # ##
         # Open Output File
 
         safeName = ''.join(
@@ -374,7 +374,7 @@ class Converter(object):
         return self.outpath
 
 
-    def convert(self, frm='ImageM3', max_num_images = -1):
+    def convert(self, frm='ImageM3', max_num_images=-1):
         """Extract a Misura 3 test and export into a Misura 4 test file"""
         conn, cursor = m3db.getConnectionCursor(self.dbpath)
         outFile = self.outFile
@@ -383,10 +383,10 @@ class Converter(object):
 
         def log(msg, priority=10):
             # TODO: check zerotime
-            log_ref.commit([[time()-zt, (priority, msg)]])
+            log_ref.commit([[time() - zt, (priority, msg)]])
 
         log('Importing from %s, id %s' % (self.dbpath, self.tcode))
-        log('Conversion Started at ' +
+        log('Conversion Started at ' + 
             datetime.now().strftime("%H:%M:%S, %d/%m/%Y"))
         log('Conversion Parameters: \n\tImages: %r, \n\tUpdate: %r, \n\tKeep Images: %r, \n\tImage Format: %r' % (
             self.img, self.force, self.keep_img, frm))
@@ -396,7 +396,7 @@ class Converter(object):
         cycle = m3db.getHeatingCycle(self.test)
         self.progress = 12
 
-        ###
+        # ##
         # CONFIGURATION
         tree = deepcopy(tree_dict)
         # Create instrument dict
@@ -448,7 +448,7 @@ class Converter(object):
         # Create the hierarchy
         create_tree(outFile, tree)
 
-        ###
+        # ##
         # GET THE ACTUAL DATA
         header, columns = m3db.getHeaderCols(self.test[m3db.fprv.Tipo_Prova], self.tcode)
         rows = np.array(self.rows)
@@ -458,16 +458,16 @@ class Converter(object):
         smp_path = instr_path + '/sample0'
 
         # TODO: Check conf node (???)
-    #	if not hasattr(outFile.root,'conf'):
-    #		outFile.close()
-    #		os.remove(outpath)
-    #		return convert(dbpath, tcode, outdir, img,force, keep_img,frm)
+    # 	if not hasattr(outFile.root,'conf'):
+    # 		outFile.close()
+    # 		os.remove(outpath)
+    # 		return convert(dbpath, tcode, outdir, img,force, keep_img,frm)
 
         self.progress = 13
 
         arrayRef = {}
         timecol = rows[:, m3db.fimg.Tempo].astype('float')
-        timecol, unidx = np.unique(timecol, return_index = True)
+        timecol, unidx = np.unique(timecol, return_index=True)
         # Set first point as zero time
         timecol -= timecol[0]
         ini_area = 0
@@ -494,12 +494,12 @@ class Converter(object):
                 unit = 'micron'
             elif col in ['h', 'soft']:
                 data = data / 100.
-                unit =  'percent'
+                unit = 'percent'
                 csunit = 'micron'
             elif col == 'A':
                 data *= -1
                 ini_area = data[0]
-                unit =  'percent'
+                unit = 'percent'
                 csunit = 'micron^2'
             elif col == 'P':
                 data = data / 10.
@@ -511,7 +511,7 @@ class Converter(object):
             if col in ['T', 'P', 'S']:
                 arrayRef[col] = reference.Array(outFile, '/summary/kiln', kiln_dict[col])
             else:
-                opt = ao({}, col, 'Float', 0, col, attr=['History','Hidden'])[col]
+                opt = ao({}, col, 'Float', 0, col, attr=['History', 'Hidden'])[col]
                 if unit:
                     opt['unit'] = unit
                 if csunit:
@@ -530,7 +530,7 @@ class Converter(object):
         outFile.flush()
 
         self.progress = 20
-        ###
+        # ##
         # ASSIGN INITIAL DIMENSION
         dim = set(['d', 'h', 'w', 'camA', 'camB']).intersection(
             set(header))
@@ -563,28 +563,28 @@ class Converter(object):
         ######
         elapsed = float(timecol[-1])
         instrobj.measure['elapsed'] = elapsed
-        print 'final timecol',timecol[0],timecol[-1]
+        print 'final timecol', timecol[0], timecol[-1]
         # Get characteristic shapes
         if instr == 'hsm':
             sh = m3db.getCharacteristicShapes(self.test, rows.transpose())
-            print 'got characteristic shapes',sh
+            print 'got characteristic shapes', sh
             instrobj.sample0.desc.update(sh)
 
-        ###
+        # ##
         # IMAGES
         imgdir = os.path.join(os.path.dirname(self.dbpath), self.icode)
         if os.path.exists(imgdir) and self.img and (instr in ['hsm', 'drop', 'post']):
             omg = self.append_images(imgdir, frm, max_num_images)
             if not omg:
                 if self.interrupt:
-                   return False
+                    return False
                 else:
                     log('ERROR Appending images')
 
 
         # Write conf tree
         outFile.save_conf(tree.tree())
-        outFile.set_attributes('/conf', attrs = {'version': '3.0.0',
+        outFile.set_attributes('/conf', attrs={'version': '3.0.0',
                                 'zerotime': zerotime,
                                 'elapsed': elapsed,
                                 'instrument': instr,
@@ -602,7 +602,7 @@ class Converter(object):
 
 
 
-    def append_images(self, imgdir, frm, max_num_images = -1):
+    def append_images(self, imgdir, frm, max_num_images=-1):
         refClass = getattr(reference, frm)
         ref = refClass(self.outFile, '/hsm/sample0', smp_dict['frame'])
         a = self.outFile.get_attributes(ref.path)

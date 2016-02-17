@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Utilities for importing data into Misura HDF file format"""
-
+import os
 from misura.canon.option import ao
 from misura.canon.logger import Log as logging
 
@@ -103,3 +103,21 @@ def create_tree(outFile, tree, path='/'):
         if outFile.has_node(dest):
             continue
         create_tree(outFile, tree.child(key), dest)
+        
+class Converter(object):
+    outpath = ''
+    interrupt = False
+    progress = 0
+    outFile = False
+    
+    def cancel(self):
+        """Interrupt conversion and remove output file"""
+        if self.outFile:
+            self.outFile.close()
+        if os.path.exists(self.outpath):
+            os.remove(self.outpath)
+     
+    def convert(self):
+        """Override this to do the real conversion"""
+        assert False,'Unimplemented'
+        

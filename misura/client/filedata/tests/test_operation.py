@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 """Testing the datasets.py module."""
 import unittest
-import sys
 import os
-import shutil
 import numpy as np
 from misura.client import filedata
 from misura.client.tests import iutils_testing
-from PyQt4 import QtGui
 
+# Needed for doc creation to work! (must register widgets)
 import veusz.document as document
 import veusz.widgets
 
