@@ -5,70 +5,75 @@ from misura.canon.option import ao
 from misura.canon.logger import Log as logging
 
 def base_dict():
-    base_dict = {}
-    ao(base_dict, 'name', 'String', 'Name', name='Name')
-    ao(base_dict, 'mro', 'List', name='mro', attr=['Hidden'])
-    ao(base_dict, 'comment', 'String', '')
-    ao(base_dict, 'dev', 'String', attr=['Hidden'])
-    ao(base_dict, 'devpath', 'String', attr=['Hidden'])
-    ao(base_dict, 'fullpath', 'String', attr=['Hidden'])
-    ao(base_dict, 'zerotime', 'Float', name='Start time', attr=['Hidden'])
-    ao(base_dict, 'initInstrument', 'Progress', attr=['Hidden'])
-    return base_dict
+    """Returns a dictionary containing typical options for a legal configurable object"""
+    out = {}
+    ao(out, 'name', 'String', 'Name', name='Name')
+    ao(out, 'mro', 'List', name='mro', attr=['Hidden'])
+    ao(out, 'comment', 'String', '')
+    ao(out, 'dev', 'String', attr=['Hidden'])
+    ao(out, 'devpath', 'String', attr=['Hidden'])
+    ao(out, 'fullpath', 'String', attr=['Hidden'])
+    ao(out, 'zerotime', 'Float', name='Start time', attr=['Hidden'])
+    ao(out, 'initInstrument', 'Progress', attr=['Hidden'])
+    return out
 
 def measure_dict():
-    measure_dict = base_dict()
-    measure_dict['name']['current'] = 'Measure'
-    ao(measure_dict, 'nSamples', 'Integer', 1, attr=['Hidden'])
-    ao(measure_dict, 'id', 'String', 'Conversion source ID')
-    ao(measure_dict, 'uid', 'String', 'Unique ID')
-    ao(measure_dict, 'date', 'Date', '00:00:00 01/01/2000', name='Test date')
-    ao(measure_dict, 'elapsed', 'Float', name='Test duration', unit='second')
-    ao(measure_dict, 'operator', 'String', 'Operator')
-    return measure_dict
+    """Returns a dictionary containing typical options for a generic Measure object"""
+    out = base_dict()
+    out['name']['current'] = 'Measure'
+    ao(out, 'nSamples', 'Integer', 1, attr=['Hidden'])
+    ao(out, 'id', 'String', 'Conversion source ID')
+    ao(out, 'uid', 'String', 'Unique ID')
+    ao(out, 'date', 'Date', '00:00:00 01/01/2000', name='Test date')
+    ao(out, 'elapsed', 'Float', name='Test duration', unit='second')
+    ao(out, 'operator', 'String', 'Operator')
+    return out
 
 def smp_dict():
-    smp_dict = base_dict()
-    smp_dict['name']['current'] = 'Sample'
-    ao(smp_dict, 'idx', 'Integer', attr=['Hidden'])
-    ao(smp_dict, 'ii', 'Integer', attr=['Hidden'])
-    ao(smp_dict, 'initialDimension', 'Float', 0., name='Initial Dimension')
-    return smp_dict
+    """Returns a dictionary containing typical options for a generic Sample object"""
+    out = base_dict()
+    out['name']['current'] = 'Sample'
+    ao(out, 'idx', 'Integer', attr=['Hidden'])
+    ao(out, 'ii', 'Integer', attr=['Hidden'])
+    ao(out, 'initialDimension', 'Float', 0., name='Initial Dimension')
+    return out
     
 def kiln_dict():
-    kiln_dict = base_dict()
-    kiln_dict['name']['current'] = 'Kiln'
-    ao(kiln_dict, 'serial', 'String')
-    ao(kiln_dict, 'curve', 'Hidden', [[0, 0]], 'Heating curve')
-    ao(kiln_dict, 'thermalCycle', 'ThermalCycle', 'default')
-    ao(kiln_dict, 'T', 'Float', 0, 'Temperature', unit='celsius')
-    ao(kiln_dict, 'P', 'Float', 0, 'Power', unit='percent')
-    ao(kiln_dict, 'S', 'Float', 0, 'Setpoint', unit='celsius')
-    ao(kiln_dict, 'maxHeatingRate', 'Float', 0, 'Max Heating Rate')
-    ao(kiln_dict, 'maxControlTemp', 'Float', 0, 'Max Control Temp')
-    ao(kiln_dict, 'minControlTemp', 'Float', 0, 'Min Control Temp')
-    ao(kiln_dict, 'maxElementTemp', 'Float', 0, 'Max Element Temp')
-    ao(kiln_dict, 'minElementTemp', 'Float', 0, 'Min Element Temp')
-    return kiln_dict
+    """Returns a dictionary containing typical options for Kiln object"""
+    out = base_dict()
+    out['name']['current'] = 'Kiln'
+    ao(out, 'serial', 'String')
+    ao(out, 'curve', 'Hidden', [[0, 0]], 'Heating curve')
+    ao(out, 'thermalCycle', 'ThermalCycle', 'default')
+    ao(out, 'T', 'Float', 0, 'Temperature', unit='celsius')
+    ao(out, 'P', 'Float', 0, 'Power', unit='percent')
+    ao(out, 'S', 'Float', 0, 'Setpoint', unit='celsius')
+    ao(out, 'maxHeatingRate', 'Float', 0, 'Max Heating Rate')
+    ao(out, 'maxControlTemp', 'Float', 0, 'Max Control Temp')
+    ao(out, 'minControlTemp', 'Float', 0, 'Min Control Temp')
+    ao(out, 'maxElementTemp', 'Float', 0, 'Max Element Temp')
+    ao(out, 'minElementTemp', 'Float', 0, 'Min Element Temp')
+    return out
 
 def instr_dict():
-    instr_dict = base_dict()
-    ao(instr_dict, 'nSamples', 'Integer', 1, attr=['Hidden'])
-    ao(instr_dict, 'camera', 'Role', ['camerapath', 'default'])
-    ao(instr_dict, 'devices', 'List', attr=['Hidden'])
-    ao(instr_dict, 'initTest', 'Progress', attr=['Hidden'])
-    ao(instr_dict, 'closingTest', 'Progress', attr=['Hidden'])
-    return instr_dict
+    """Returns a dictionary containing typical options for generic instrument object"""
+    out = base_dict()
+    ao(out, 'nSamples', 'Integer', 1, attr=['Hidden'])
+    ao(out, 'camera', 'Role', ['camerapath', 'default'])
+    ao(out, 'devices', 'List', attr=['Hidden'])
+    ao(out, 'initTest', 'Progress', attr=['Hidden'])
+    ao(out, 'closingTest', 'Progress', attr=['Hidden'])
+    return out
 
 def server_dict():
-    server_dict = base_dict()
-    server_dict['name']['current'] = 'server'
-    ao(server_dict, 'name', 'String', 'server')
-    ao(server_dict, 'isRunning', 'Boolean', False)
-    ao(server_dict, 'runningInstrument', 'String')
-    ao(server_dict, 'lastInstrument', 'String')
-    ao(server_dict, 'log', 'Log')
-    return server_dict
+    out = base_dict()
+    out['name']['current'] = 'server'
+    ao(out, 'name', 'String', 'server')
+    ao(out, 'isRunning', 'Boolean', False)
+    ao(out, 'runningInstrument', 'String')
+    ao(out, 'lastInstrument', 'String')
+    ao(out, 'log', 'Log')
+    return out
 
 
 def smp_tree():
