@@ -105,10 +105,12 @@ def create_tree(outFile, tree, path='/'):
         create_tree(outFile, tree.child(key), dest)
         
 class Converter(object):
-    outpath = ''
-    interrupt = False
-    progress = 0
-    outFile = False
+    
+    def __init__(self):
+        self.outpath = ''
+        self.interrupt = False
+        self.progress = 0
+        self.outFile = False
     
     def cancel(self):
         """Interrupt conversion and remove output file"""
