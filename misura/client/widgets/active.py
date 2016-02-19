@@ -512,7 +512,11 @@ class ActiveWidget(Active, QtGui.QWidget):
 
     def do_hide_menu(self):
         """Delayed hiding"""
-        cur = self.mapFromGlobal(QtGui.QCursor.pos())
+        try:
+            cur = self.mapFromGlobal(QtGui.QCursor.pos())
+        except RuntimeError:
+            # Widget was deleted in the meanwhile...
+            return
         x, y = cur.x(), cur.y()
         if x < 0 or y < 0 or x > self.width() or y > self.height():
             self.bmenu.hide()

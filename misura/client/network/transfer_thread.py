@@ -259,14 +259,14 @@ class TransferThread(QtCore.QThread):
             if not (self.url and self.outfile):
                 logging.debug('TransferThread upload impossible: url, outfile, post: %s %s %s',
                               self.url, self.outfile, self.post)
-                return False
+                return
             self.upload(self.url, self.outfile, self.post)
         # Download specific UID from server storage
         elif self.uid:
             if not self.server and (not self.outfile or not self.dbpath):
                 logging.debug('TransferThread uid download impossible: server, uid, outfile: %s %s %s',
                               self.server, self.uid, self.outfile)
-                return False
+                return
             # Reconnect because we are in a different thread
             self.server.connect()
             self.download_uid(self.server, self.uid, self.outfile)
@@ -275,6 +275,6 @@ class TransferThread(QtCore.QThread):
             if not self.outfile:
                 logging.debug('TransferThread url download impossible: outfile: %s',
                               self.outfile)
-                return False
+                return
             self.download_url(self.url, self.outfile)
-        return True
+        return
