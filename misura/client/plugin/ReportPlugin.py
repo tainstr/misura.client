@@ -135,7 +135,8 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
                 'Standard', sample['preset'], 50))
 
         # Thermal cycle plotting
-        from ..procedure.thermal_cycle import ThermalCyclePlot, clean_curve
+        from ..procedure.thermal_cycle import ThermalCyclePlot
+        from ..procedure.model import clean_curve
         graph = report_path + '/tc'
         cf = {'graph': graph, 'xT': 'reportxT',
               'yT': 'reportyT', 'xR': 'reportxR', 'yR': 'reportyR'}
