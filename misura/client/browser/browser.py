@@ -2,16 +2,18 @@
 # -*- coding: utf-8 -*-
 from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
+from misura.canon import dataimport
+
 from .. import _
 from .. import confwidget
 from .. import filedata
 from .. import misura3
 from ..clientconf import confdb
 from .. import iutils
-from .. import dataimport
-from misura.client.database import getDatabaseWidget, getRemoteDatabaseWidget
-import menubar
-import testwindow
+from ..database import getDatabaseWidget, getRemoteDatabaseWidget
+
+from . import menubar
+from . import testwindow
 
 
 class MainWindow(QtGui.QMainWindow):

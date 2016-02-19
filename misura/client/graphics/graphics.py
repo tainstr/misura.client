@@ -15,6 +15,8 @@ import veusz.document as document
 import veusz.setting as setting
 from veusz import veusz_main
 
+from misura.canon import dataimport
+
 from .. import _
 from .. import misura3
 from .. import filedata
@@ -26,8 +28,7 @@ from ..clientconf import confdb
 from ..database import getDatabaseWidget, getRemoteDatabaseWidget
 import veuszplot
 from ..confwidget import RecentMenu, ClientConf
-from .. import dataimport
-from misura.client import iutils
+from .. import iutils
 
 setting.transient_settings['unsafe_mode'] = True
 

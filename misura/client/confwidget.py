@@ -7,7 +7,7 @@ from .clientconf import confdb, settings
 import functools
 import os
 from misura.canon.logger import Log as logging
-from . import dataimport
+from misura.canon import dataimport
 
 
 class Path(QtGui.QWidget):

@@ -17,7 +17,7 @@ from PIL import Image
 
 from misura.canon import bitmap, option, reference, indexer
 from misura.canon.option import ao
-from .. import dataimport
+from misura.canon import dataimport
 
 import m3db
 
