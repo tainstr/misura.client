@@ -48,6 +48,8 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             self.connect(self, QtCore.SIGNAL(
                 'customContextMenuRequested(QPoint)'), self.showContextMenu)
             
+            self.connect(self, QtCore.SIGNAL('doubleClicked(QModelIndex)'),self.double_clicked)
+            
             ######
             # File menu
             self.file_menu = QtGui.QMenu(self)
@@ -106,6 +108,13 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
                 self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.refresh_model)
         if doc:
             self.set_doc(doc)
+            
+    def double_clicked(self, index):
+        n = self.model().data(index, role=Qt.UserRole)
+        if isinstance(n, filedata.DatasetEntry) :
+            self.plot(n)
+        else:
+            print 'Not a valid node', n
 
 
     def set_idx(self, n):
