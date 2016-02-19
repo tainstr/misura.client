@@ -17,6 +17,7 @@ from PIL import Image
 
 from misura.canon import bitmap, option, reference, indexer
 from misura.canon.option import ao
+from .. import dataimport
 
 import m3db
 
@@ -282,7 +283,9 @@ def create_tree(outFile, tree, path='/'):
         create_tree(outFile, tree.child(key), dest)
 
 
-class Converter(object):
+class Converter(dataimport.Converter):
+    name = 'Misura3'
+    file_pattern = '*.mdb'
     outpath = ''
     interrupt = False
     progress = 0
@@ -298,14 +301,6 @@ class Converter(object):
                 os.mkdir(outdir)
         self.outdir = outdir
         self.m4db = os.path.join(outdir, 'database.sqlite')
-
-    def cancel(self):
-        """Interrupt conversion and remove output file"""
-        if self.outFile:
-            self.outFile.close()
-        if os.path.exists(self.outpath):
-            os.remove(self.outpath)
-
 
     def get_outpath(self, tcode=False, img=True, force=True, keep_img=True):
         # Open DB and import test data

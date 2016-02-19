@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
-from misura.client import _
-from misura.client import iutils
-from misura.client.clientconf import confdb, settings
+from . import _
+from . import iutils
+from .clientconf import confdb, settings
 import functools
 import os
 from misura.canon.logger import Log as logging
+from . import dataimport
 
 
 class Path(QtGui.QWidget):
@@ -88,6 +89,7 @@ class RecentInterface(object):
         else:
             self.label = 'Recent {}'.format(self.name.capitalize())
         self.sig_select = QtCore.SIGNAL('select(QString)')
+        self.sig_convert = QtCore.SIGNAL('convert(QString)')
 
     def getNameSigList(self):
         tab = getattr(self.conf, 'recent_' + self.category)
@@ -111,23 +113,32 @@ class RecentInterface(object):
         setattr(self.conf, 'recent_' + self.category, [])
         self.conf.save()
         self.conf.emit(QtCore.SIGNAL('rem()'))
+        
 
     def new(self, *a):
         if self.category in ['server']:
             path = QtGui.QInputDialog.getText(self, _('Specify a new server address'), _(
                 'Address'), text='https://IP:3880/RPC')[0]
         else:
-            tab = getattr(self.conf, 'recent_' + self.category)
-            logging.debug('%s %s %s', 'new: tab', self.category, tab)
-            d = ''
-            if len(tab) > 0:
-                d = os.path.dirname(tab[-1][0])
+            d= self.conf.last_directory(self.category)
             path = QtGui.QFileDialog.getOpenFileName(
                 self, _("Open a new ") + self.category, d)
         if not path:
             return
         self.emit(QtCore.SIGNAL('new(QString)'), path)
         self.emit(QtCore.SIGNAL('select(QString)'), path)
+
+    def data_import(self, *a):
+        d= self.conf.last_directory(self.category)
+        file_filter = ''
+        for converter in dataimport.registry:
+            file_filter+= '{} ({});;'.format(_(converter.name),converter.file_pattern)
+            print 'adding filter', file_filter
+        path = QtGui.QFileDialog.getOpenFileName(
+            self, _("Data import"), 
+            d,
+            file_filter)
+        self.emit(QtCore.SIGNAL('convert(QString)'), path)
 
 
 class RecentMenu(RecentInterface, QtGui.QMenu):
@@ -153,6 +164,8 @@ class RecentMenu(RecentInterface, QtGui.QMenu):
         self.addSeparator()
         self.addAction(_("Clear list"), self.clear_recent)
         self.addAction(_("Open") + '...', self.new)
+        if self.name == 'file' and len(dataimport.registry) > 0:
+            self.addAction(_("Import") + '...', self.data_import)
         if self.category == 'server':
             self.addAction(_('Disconnect'), self.server_disconnect)
             self.addAction(_('Restart'), self.server_restart)
@@ -188,12 +201,20 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         self.lay.addWidget(self.list)
 
         self.open_button = QtGui.QPushButton(_('Open Selected'), parent=self)
-        self.connect(self.open_button, QtCore.SIGNAL('clicked()'), self.select_item)
+        self.connect(
+            self.open_button, QtCore.SIGNAL('clicked()'), self.select_item)
         self.lay.addWidget(self.open_button)
 
         self.add_button = QtGui.QPushButton(_('Add') + '...', parent=self)
         self.connect(self.add_button, QtCore.SIGNAL('clicked()'), self.new)
         self.lay.addWidget(self.add_button)
+
+        if category == 'file' and len(dataimport.registry) > 0:
+            self.import_button = QtGui.QPushButton(
+                _('Import') + '...', parent=self)
+            self.connect(
+                self.import_button, QtCore.SIGNAL('clicked()'), self.data_import)
+            self.lay.addWidget(self.import_button)
 
         self.redraw()
         self.setLayout(self.lay)

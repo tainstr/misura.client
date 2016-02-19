@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """Utilities for importing data into Misura HDF file format"""
 import os
+from fnmatch import fnmatch
 from misura.canon.option import ao
 from misura.canon.logger import Log as logging
+
+registry = []
 
 def base_dict():
     """Returns a dictionary containing typical options for a legal configurable object"""
@@ -105,6 +108,8 @@ def create_tree(outFile, tree, path='/'):
         create_tree(outFile, tree.child(key), dest)
         
 class Converter(object):
+    name = 'Base Converter'
+    file_pattern = '*'
     
     def __init__(self):
         self.outpath = ''
@@ -123,3 +128,19 @@ class Converter(object):
         """Override this to do the real conversion"""
         assert False,'Unimplemented'
         
+def search_registry(filename):
+    """Find a matching converter for filename"""
+    for converter in registry:
+        if fnmatch(filename, converter.file_pattern):
+            print 'Found converter', filename, converter.file_pattern
+            return converter
+    print 'No converter found', filename
+    return False
+
+def convert_file(path):
+    """Do the conversion"""
+    #TODO: implement threading and progress notification
+    converter_class = search_registry(path)
+    converter = converter_class()
+    outpath = converter.convert(path)
+    return outpath

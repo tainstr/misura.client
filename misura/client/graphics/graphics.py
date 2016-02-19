@@ -26,6 +26,7 @@ from ..clientconf import confdb
 from ..database import getDatabaseWidget, getRemoteDatabaseWidget
 import veuszplot
 from ..confwidget import RecentMenu, ClientConf
+from .. import dataimport
 from misura.client import iutils
 
 setting.transient_settings['unsafe_mode'] = True
@@ -141,7 +142,9 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         # Recent Files Menus
         self.recentFile = RecentMenu(confdb, 'file', self.mw)
         self.connect(
-            self.recentFile, QtCore.SIGNAL('select(QString)'), self.liveImport)
+            self.recentFile, self.recentFile.sig_select, self.liveImport)
+        self.connect(
+            self.recentFile, self.recentFile.sig_convert, self.convert_file)
         self.menu.addMenu(self.recentFile)
         self.recentDatabase = RecentMenu(confdb, 'database', self.mw)
         self.connect(self.recentDatabase, QtCore.SIGNAL(
@@ -264,6 +267,10 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         self.mw.document.enableUpdates()
         self.mw.plot.actionForceUpdate()
         self.openedFiles.refresh_model()
+        
+    def convert_file(self, path):
+        outpath = dataimport.convert_file(path)
+        self.liveImport(outpath)
 
     def open_file(self, filename,  **options):
         """Import misura data from HDF file"""

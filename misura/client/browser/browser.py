@@ -8,6 +8,7 @@ from .. import filedata
 from .. import misura3
 from ..clientconf import confdb
 from .. import iutils
+from .. import dataimport
 from misura.client.database import getDatabaseWidget, getRemoteDatabaseWidget
 import menubar
 import testwindow
@@ -38,29 +39,36 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.myMenuBar.recentFile, QtCore.SIGNAL(
             'select(QString)'), self.open_file)
 
+        self.connect(self.myMenuBar.recentFile, QtCore.SIGNAL(
+            'convert(QString)'), self.convert_file)
+
         self.connect(self.myMenuBar.recentDatabase, QtCore.SIGNAL(
             'select(QString)'), self.open_database)
         self.connect(self.myMenuBar, QtCore.SIGNAL(
             'new_database(QString)'), self.new_database)
 
-
-
         # Recent objects greeter window:
         greeter = confwidget.Greeter(parent=self)
         self.connect(greeter.file, greeter.file.sig_select, self.open_file)
+        self.connect(greeter.file, greeter.file.sig_convert, self.convert_file)
         self.connect(
             greeter.database, greeter.database.sig_select, self.open_database)
 
         if confdb['m3_enable']:
-            self.connect(greeter.m3database, greeter.database.sig_select, self.open_m3db)
+            self.connect(
+                greeter.m3database, greeter.database.sig_select, self.open_m3db)
             self.connect(self.myMenuBar.recentM3db, QtCore.SIGNAL(
-            'select(QString)'), self.open_m3db)
+                'select(QString)'), self.open_m3db)
 
         win = self.area.addSubWindow(greeter)
         win.show()
 
     def closeEvent(self, event):
         iutils.app.quit()
+
+    def convert_file(self, path):
+        outpath = dataimport.convert_file(path)
+        self.open_file(outpath)
 
     def open_file(self, path):
         path = unicode(path)
@@ -105,7 +113,6 @@ class MainWindow(QtGui.QMainWindow):
         path = addr + '|' + uid
         self.open_file(path)
 
-
     def open_m3db(self, path):
         m3db = misura3.TestDialog(path=path)
         m3db.img = True
@@ -128,4 +135,5 @@ class MainWindow(QtGui.QMainWindow):
         del w
 
     def remove_close_button_from_tab(self, tab_index):
-        self.tab.tabBar().tabButton(tab_index, QtGui.QTabBar.RightSide).resize(0,0)
+        self.tab.tabBar().tabButton(
+            tab_index, QtGui.QTabBar.RightSide).resize(0, 0)

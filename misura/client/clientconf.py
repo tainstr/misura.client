@@ -95,9 +95,9 @@ rule_style = [[('Rule', 'String'), ('Range', 'String'), ('Scale', 'Float'),
               ]
 ao(default_desc, 'rule_style', 'Table', rule_style, 'Formatting')
 
-ao(default_desc, 'm3', 'Section', 'Misura 3', 'Misura 3')
+ao(default_desc, 'm3', 'Section', 'Data import', 'Data import')
 ao(default_desc, 'm3_enable', 'Boolean', True, 'Enable Misura 3 database interface')
-
+ao(default_desc, 'm3_plugins', 'TextArea', '', 'Import plugins by name')
 recent_tables = 'server,database,file,m3database'.split(',')
 
 
@@ -490,6 +490,23 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             return False
         self.known_uids[self.uid] = file_path
         return file_path, dbPath
+    
+    def last_directory(self, category):
+        """Return most recently used directory for files in `category`"""
+        tab = getattr(self, 'recent_' + category)
+        logging.debug('%s %s %s', 'new: tab', category, tab)
+        d = ''
+        if len(tab) > 0:
+            d = os.path.dirname(tab[-1][0])
+        return d
+    
+import importlib
+def data_import(confdb):
+    plugins = confdb['m3_plugins'].splitlines()
+    for plug in plugins:
+        plug = plug.replace('\n','')
+        print 'PLugging: ', plug
+        importlib.import_module(plug)
 
 settings = QtCore.QSettings(
     QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope, 'Expert System Solutions', 'Misura 4')
@@ -501,3 +518,6 @@ elif os.path.exists(cf):
     params.pathConf = cf
     confdb = ConfDb(path=cf)
 settings.setValue('/Configuration', confdb.path)
+data_import(confdb)
+
+
