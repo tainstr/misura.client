@@ -47,24 +47,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             self.setContextMenuPolicy(Qt.CustomContextMenu)
             self.connect(self, QtCore.SIGNAL(
                 'customContextMenuRequested(QPoint)'), self.showContextMenu)
-            ######
-            # Group or No-selection menu
-            self.base_menu = QtGui.QMenu(self)
-
-            self.acts_status = []
-            for i, s in enumerate(filedata.dstats):
-                name = filedata.dstats._fields[i]
-                act = self.base_menu.addAction(
-                    _(name.capitalize()), self.set_status)
-                act.setCheckable(True)
-                if s == status:
-                    act.setChecked(True)
-                self.acts_status.append(act)
-
-            self.act_del = self.base_menu.addAction(
-                _('Delete'), self.deleteChildren)
-            self.base_menu.addAction(_('Update view'), self.update_view)
-
+            
             ######
             # File menu
             self.file_menu = QtGui.QMenu(self)
@@ -77,6 +60,27 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             #     _('Commit data to test file'), self.commit)
             self.file_menu.addAction(_('Update view'), self.refresh_model)
             #  self.ver_menu = self.file_menu.addMenu('Load Version')
+            
+            ######
+            # Group or No-selection menu
+            self.base_menu = QtGui.QMenu(self)
+
+            self.acts_status = []
+            for i, s in enumerate(filedata.dstats):
+                name = filedata.dstats._fields[i]
+                act = self.base_menu.addAction(
+                    _(name.capitalize()), self.set_status)
+                act1 = self.file_menu.addAction(act)
+                act.setCheckable(True)
+                if s == status:
+                    act.setChecked(True)
+                self.acts_status.append(act)
+
+            self.act_del = self.base_menu.addAction(
+                _('Delete'), self.deleteChildren)
+            self.base_menu.addAction(_('Update view'), self.update_view)
+
+
 
             ######
             # Sample menu
