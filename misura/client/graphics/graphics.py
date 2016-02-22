@@ -193,6 +193,11 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
 
         self.mw.ci.addCommand('DefaultPlot', self.defaultPlot)
 
+        self.clean_about_icon()
+
+    def clean_about_icon(self):
+        self.mw.vzactions['help.about'].setIcon(QtGui.QIcon())
+
     def open_conf(self):
         self.cc = ClientConf()
         self.cc.show()
