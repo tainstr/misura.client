@@ -39,11 +39,11 @@ class CustomInterface(object):
 
     def __init__(self, mainwindow, name):
         self.mw = mainwindow
-        self.menu = self.mw.menuBar().addMenu(name)
+        self.menu = QtGui.QMenu(name)
+        menu_bar = self.mw.menuBar()
+        help_action = menu_bar.actions()[-1]
+        menu_bar.insertMenu(help_action, self.menu)
         self.name = name
-#       imp='Import'+name
-#       self.mw.ci.addCommand(imp, self.open_file)
-#       self.mw.document.eval_context[imp]=self.open_file
 
     def buildMenus(self, actions):
         # Build menus
@@ -268,7 +268,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         self.mw.document.enableUpdates()
         self.mw.plot.actionForceUpdate()
         self.openedFiles.refresh_model()
-        
+
     def convert_file(self, path):
         outpath = dataimport.convert_file(path)
         self.liveImport(outpath)
