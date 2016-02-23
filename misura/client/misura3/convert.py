@@ -486,7 +486,8 @@ class Converter(dataimport.Converter):
             csunit = False
             if col == 'd' or 'Percorso' in col:
                 data = data / 1000.
-                unit = 'micron'
+                unit = 'percent'
+                csunit = 'micron'
             elif col in ['h', 'soft']:
                 data = data / 100.
                 unit = 'percent'
