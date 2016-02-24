@@ -6,7 +6,7 @@ from traceback import format_exc
 from misura.canon.logger import Log as logging
 
 from .. import _
-from active import Active, ActiveObject, ActiveWidget, Autoupdater, info_dialog, RunMethod
+from active import Active, ActiveObject, ActiveWidget, info_dialog, RunMethod
 from aBoolean import aBoolean,  aBooleanAction
 from aButton import aButton
 from aChooser import aChooser

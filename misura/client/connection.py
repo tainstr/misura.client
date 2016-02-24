@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # CHIARIRE QUESTI IMPORT!!!
 from PyQt4 import QtGui, QtCore
-from widgets.active import Autoupdater
 from misura.client import _
 import network
 from clientconf import confdb
@@ -231,8 +230,8 @@ from time import strftime, time
 from datetime import datetime
 
 
-class LiveLog(QtGui.QTextEdit, Autoupdater):
-
+class LiveLog(QtGui.QTextEdit):
+    _max_character_length = 1e6
     def __init__(self, parent=None):
         QtGui.QTextEdit.__init__(self, parent)
         self.setReadOnly(True)
@@ -240,10 +239,10 @@ class LiveLog(QtGui.QTextEdit, Autoupdater):
         self.nlog = 0
         self.label = _('Log')
         self.menu = QtGui.QMenu(self)
+        self.menu.addAction('Update now', self.slotUpdate)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
-        Autoupdater.__init__(self, callback=self.update, menu=self.menu)
         if registry != None:
             self.connect(registry, QtCore.SIGNAL(
                 'log()'), self.slotUpdate, QtCore.Qt.QueuedConnection)
@@ -251,13 +250,13 @@ class LiveLog(QtGui.QTextEdit, Autoupdater):
         self.setFont(QtGui.QFont('TypeWriter',  7, 50, False))
 
     def slotUpdate(self):
-        logging.debug('%s', 'LiveLog.slotUpdate')
+        logging.debug('LiveLog.slotUpdate')
         if registry == None:
-            logging.debug('%s', 'No registry')
+            logging.debug('No registry')
             return
         buf = registry.log_buf
         if len(buf) <= self.nlog:
-            logging.debug('%s', 'No new log')
+            logging.debug('No new log')
             return
         txt = ''
         for line in buf[self.nlog:]:
@@ -272,7 +271,7 @@ class LiveLog(QtGui.QTextEdit, Autoupdater):
         txt = txt.rstrip('\n')
         self.append(txt)
         txt = self.toPlainText()
-        if len(txt) > 5000:
+        if len(txt) > self._max_character_length:
             txt = txt[-3000:]
             self.setPlainText(txt)
             self.moveCursor(QtGui.QTextCursor.End)
@@ -281,5 +280,8 @@ class LiveLog(QtGui.QTextEdit, Autoupdater):
         self.nlog = len(buf)
 
     def update(self):
-        logging.debug('%s', 'LiveLog.update')
+        logging.debug('LiveLog.update')
         registry.updateLog()
+        
+    def showMenu(self, pt):
+        self.menu.popup(self.mapToGlobal(pt))
