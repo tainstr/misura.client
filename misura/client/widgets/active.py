@@ -19,14 +19,15 @@ from PyQt4 import QtGui, QtCore
 
 from misura.client.parameters import MAX, MIN
 
-def extend_decimals(cur, default = 2, extend_by = 2):
+
+def extend_decimals(cur, default=2, extend_by=2):
     """Find out how many decimals to enable in editing for float value `num`"""
     cur = float(cur)
     if abs(cur) < 1 and abs(cur) > 1e-32:
-        print 'extend_decimals for',cur
+        print 'extend_decimals for', cur
         dc = math.log(abs(1. / cur), 10)
-        dc = round(abs(dc),0)
-        print 'extend_decimals for',cur,dc
+        dc = round(abs(dc), 0)
+        print 'extend_decimals for', cur, dc
         return int(dc) + extend_by
     return default
 
@@ -219,11 +220,13 @@ class Active(object):
 
     @lockme
     def get(self, *args):
-        self._call_function_then_emitchanged_and_checkflags(self.remObj.get, *args)
+        self._call_function_then_emitchanged_and_checkflags(
+            self.remObj.get, *args)
 
     @lockme
     def soft_get(self, *args):
-        self._call_function_then_emitchanged_and_checkflags(self.remObj.soft_get, *args)
+        self._call_function_then_emitchanged_and_checkflags(
+            self.remObj.soft_get, *args)
 
     def emitSelfChanged(self, nval):
         self._get(nval)
@@ -305,7 +308,8 @@ class LabelWidget(QtGui.QLabel):
     def __init__(self, active):
         self.active = active
         prop = active.prop
-        QtGui.QLabel.__init__(self, unicode(_(prop['name'], context = 'Option')), parent=active)
+        QtGui.QLabel.__init__(
+            self, unicode(_(prop['name'], context='Option')), parent=active)
         self.prop = prop
 
     def mousePressEvent(self, event):
@@ -349,6 +353,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.label = self.tr(self.name)
         self.label_widget = LabelWidget(self)  # Info label
         self.emenu = QtGui.QMenu(self)
+        self.presets_menu = QtGui.QMenu(_('Presets'), parent=self)
+        self.presets_menu.aboutToShow.connect(self.build_presets_menu)
         self.build_extended_menu()
         self.connect(self, QtCore.SIGNAL('destroyed()'),
                      self.unregister, QtCore.Qt.QueuedConnection)
@@ -471,6 +477,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.emenu.addAction(_('Set default value'), self.set_default)
         self.emenu.addAction(_('Check for modification'), self.get)
         self.emenu.addAction(_('Option Info'), self.show_info)
+        if self.remObj.compare_presets is not None:
+            self.emenu.addMenu(self.presets_menu)
         #self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
         # Units button
         self.bmenu = LabelUnit(self.prop, self)
@@ -482,6 +490,17 @@ class ActiveWidget(Active, QtGui.QWidget):
             self.bmenu.hide()
         self.set_label()
         self.lay.addWidget(self.bmenu)
+
+    def build_presets_menu(self):
+        self.presets_menu.clear()
+        comparison = self.remObj.compare_presets(self.handle)
+        for preset, value in comparison.iteritems():
+            if preset == '***current***':
+                continue
+            value = repr(value)
+            value = (value[:15] + '..') if len(value) > 15 else value
+            label = '{}: {}'.format(preset, value)
+            self.presets_menu.addAction(label)
 
     def isVisible(self):
         try:
@@ -611,8 +630,7 @@ class Autoupdater(QtCore.QObject):
             self.connect(menu, QtCore.SIGNAL('aboutToShow()'), self.updateMenu)
 
     def callback(self):
-        from misura.client import conf
-        registry.updateCurves()
+        pass
 
     def interval(self):
         from misura.client import conf
