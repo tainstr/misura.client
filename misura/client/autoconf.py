@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Auto configuration script for standard Misura4 full-optional"""
-from misura.client import from_argv
+
 
 ##################
 # Configuration
@@ -321,7 +321,7 @@ class FirstSetupWizard(object):
         m.kiln.setattr('Ts2', 'options', [ht, 'default', 'ch1'])
         m.kiln.setattr('Tk', 'options', [ht, 'default', 'ch2'])
         m.kiln.setattr('Th', 'options', [ht, 'default', 'ch3'])
-    
+        
         m.kiln.setattr('Te', 'options', [ts, 'default', 'ch1'])
     
         m.kiln.setattr('P', 'options', [pw, 'default', 'power'])
@@ -336,6 +336,8 @@ class FirstSetupWizard(object):
         self.configure_encoders()
         self.configure_kiln()
         
-m = from_argv()
-fsw = FirstSetupWizard(m)
-fsw.do()
+if __name__ == '__main__':
+    from misura.client import from_argv
+    m = from_argv()
+    fsw = FirstSetupWizard(m)
+    fsw.do()
