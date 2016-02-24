@@ -2,15 +2,22 @@
 # -*- coding: utf-8 -*-
 """Check discrepancies between current values and saved ones."""
 
-def configuration_check(obj, output=[], iterate=True):
-    print 'configuration_checking ',obj['fullpath']
+def configuration_check(obj, output=False, iterate=True):
+    print 'configuration_check ',obj['fullpath']
+    if output is False:
+        output = []
     desc = obj.describe()
     for k, opt in desc.iteritems():
-        if k=='log':
+        if k in ('log', 'preset'):
             continue
         if 'Runtime' in opt['attr']:
             continue
+        print '...',k
         comparison = obj.compare_presets(k)
+        if comparison is None:
+            #TODO: manage server-side
+            output.append((opt, 'MISSING'))
+            continue
         vals = [repr(v) for v in comparison.values()]
         # No change in configurations
         if len(set(vals)) == 1:

@@ -206,6 +206,7 @@ class ServerView(QtGui.QTreeView):
         self.menu.addAction('Open', self.objOpen)
         self.menu.addAction('Open in New Tab', self.objNewTab)
         self.menu.addAction('Object Table', self.objTable)
+        self.menu.addAction('Presets Table', self.presetsTable)
         self.menu.addAction('Update View', self.update)
         self.expandToDepth(0)
 
@@ -253,3 +254,7 @@ class ServerView(QtGui.QTreeView):
     def objTable(self):
         self.objOpen()
         self.emit(QtCore.SIGNAL('objTable(QModelIndex)'), self.currentIndex())
+    
+    def presetsTable(self):
+        self.objOpen()
+        self.emit(QtCore.SIGNAL('presetsTable(QModelIndex)'), self.currentIndex())

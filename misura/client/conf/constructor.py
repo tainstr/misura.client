@@ -9,8 +9,7 @@ from misura.canon.option import sorter, prop_sorter
 
 from .. import _
 from .. import widgets
-from ..import parameters as params
-
+from ..configuration_check import configuration_check, render_configuration_check
 
 def desc2html(desc):
     """Crea una rappresentazione HTML del dizionario di descrizione."""
@@ -260,6 +259,13 @@ class Interface(QtGui.QTabWidget):
         """Show full configuration as HTML table"""
         self.desc = self.remObj.describe()
         widgets.info_dialog(desc2html(self.desc), 'Details for Object: %s' % self.desc.get(
+            'name', {'current': 'Object'})['current'], parent=self)
+        
+    def presets_table(self):
+        self.desc = self.remObj.describe()
+        output = configuration_check(self.remObj, iterate=False)
+        output = render_configuration_check(output).replace('\n','<br/>')
+        widgets.info_dialog(output, 'Presets Comparison, %s' % self.desc.get(
             'name', {'current': 'Object'})['current'], parent=self)
 
 
