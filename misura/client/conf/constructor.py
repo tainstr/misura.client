@@ -264,7 +264,7 @@ class Interface(QtGui.QTabWidget):
     def presets_table(self):
         self.desc = self.remObj.describe()
         output = configuration_check(self.remObj, iterate=False)
-        output = render_configuration_check(output).replace('\n','<br/>')
+        output = render_configuration_check(*output)
         widgets.info_dialog(output, 'Presets Comparison, %s' % self.desc.get(
             'name', {'current': 'Object'})['current'], parent=self)
 

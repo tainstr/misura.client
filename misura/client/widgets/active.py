@@ -159,9 +159,9 @@ class Active(object):
         self.emitOptional()
 #       print 'emitChanged', self.label
 
-    def emitSelfChanged(self, nval):
-        """Called from diff threads"""
-        self.emit(QtCore.SIGNAL('selfchanged'), nval)
+#    def emitSelfChanged(self, nval):
+#        """Called from diff threads"""
+#        self.emit(QtCore.SIGNAL('selfchanged'), nval)
 
     def emitError(self, msg):
         msg = self.tr(msg)
@@ -194,9 +194,15 @@ class Active(object):
         """Set a new value `val` to server. Convert val into server units."""
         val = self.adapt2srv(val)
         if val == self.current:
+            logging.debug('Not setting',self.handle, repr(val))
             return True
         out = self.remObj.set(self.handle,  val)
         logging.debug('%s %s %s %s', 'Active.set', self.handle, repr(val), out)
+        self.get()
+        
+    def set_raw(self, val):
+        """Set value directly, without adapt2srv conversion"""
+        self.remObj.set(self.handle, val)
         self.get()
 
     def _get(self, rem=None):
@@ -491,17 +497,22 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.set_label()
         self.lay.addWidget(self.bmenu)
 
+    
     def build_presets_menu(self):
+        self.presets = {}
         self.presets_menu.clear()
         comparison = self.remObj.compare_presets(self.handle)
-        for preset, value in comparison.iteritems():
+        for preset, val in comparison.iteritems():
             if preset == '***current***':
                 continue
-            value = repr(value)
+            value = repr(val)
             value = (value[:15] + '..') if len(value) > 15 else value
             label = '{}: {}'.format(preset, value)
-            self.presets_menu.addAction(label)
-
+            print 'preset action',preset, val
+            p = functools.partial(self.set_raw, val)
+            self.presets_menu.addAction(label, p)
+            self.presets[preset] = (p, val)
+    
     def isVisible(self):
         try:
             return QtGui.QWidget.isVisible(self)
