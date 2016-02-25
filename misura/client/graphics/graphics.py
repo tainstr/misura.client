@@ -6,7 +6,7 @@ import os
 from misura.canon.logger import Log as logging
 import sip
 sip.setapi('QString', 2)
-from PyQt4 import QtGui, QtCore, uic
+from PyQt4 import QtGui, QtCore
 # Veusz libraries
 import veusz.utils
 from veusz.windows.mainwindow import MainWindow
@@ -16,6 +16,7 @@ import veusz.setting as setting
 from veusz import veusz_main
 
 from misura.canon import dataimport
+from misura.client import helpmenu
 
 from .. import _
 from .. import misura3
@@ -194,20 +195,14 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         self.mw.ci.addCommand('DefaultPlot', self.defaultPlot)
 
         self.mw.vzactions['help.about'].setText('About Veusz')
-        about_misura_action =veusz.utils.makeAction(self,
-                                                    _('Displays information about Misura'),
-                                                    _('About Misura'),
-                                                    self.slotHelpAboutMisura)
+        about_misura_action = veusz.utils.makeAction(self,
+                                                     _('Displays information about Misura'),
+                                                     _('About Misura'),
+                                                     helpmenu.showAbout)
         about_misura_action.setIcon(QtGui.QIcon('/opt/misura4/misura.client/misura/client/art/about.png'))
         self.mw.menuBar().actions()[-1].menu().addAction(about_misura_action)
 
-    def slotHelpAboutMisura(self):
-        dialog = QtGui.QDialog(self.mw)
-        uic.loadUi('/opt/misura4/misura.client/misura/client/ui/about_misura.ui',
-                   dialog)
-        dialog.logo_label.setScaledContents(True)
-        dialog.logo_label.setPixmap(QtGui.QPixmap('/opt/misura4/misura.client/misura/client/art/logo.png'))
-        dialog.exec_()
+
 
 
 

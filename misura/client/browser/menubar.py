@@ -37,8 +37,11 @@ class BrowserMenuBar(QtGui.QMenuBar):
         self.currents = self.addMenu(_('View Tests'))
         self.databases = self.addMenu(_('View Databases'))
 
-        self.help_menu = HelpMenu(self)
-        self.help_menu.add_help_menu()
+        self.help_menu = HelpMenu()
+        self.help_menu.add_help_menu(self)
+
+
+
 
     def new_database(self, path=False):
         if not path:

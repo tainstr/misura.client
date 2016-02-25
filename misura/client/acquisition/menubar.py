@@ -19,7 +19,6 @@ class MenuBar(QtGui.QMenuBar):
 
     def __init__(self, server=False, parent=None):
         QtGui.QMenuBar.__init__(self, parent)
-        self.help_menu = HelpMenu(self)
         self.remote = False
         self.server = server
         self.windows = {}
@@ -40,7 +39,8 @@ class MenuBar(QtGui.QMenuBar):
             self.measure.setEnabled(False)
             self.settings.setEnabled(False)
 
-        self.help_menu.add_help_menu()
+        self.help_menu = HelpMenu()
+        self.help_menu.add_help_menu(self)
 
         if server is not False:
             self.setServer(server)

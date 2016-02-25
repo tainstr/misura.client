@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore, uic
 from . import _
 from confwidget import ClientConf
 from live import registry
@@ -16,17 +16,23 @@ misura.canon version: {}</p>
 <p><small>See public source code repository page for licensing information</small></p>
 """.format(client_version, canon_version)
 
+def showAbout():
+        dialog = QtGui.QDialog()
+        uic.loadUi('/opt/misura4/misura.client/misura/client/ui/about_misura.ui',
+                   dialog)
+        dialog.logo_label.setScaledContents(True)
+        dialog.logo_label.setPixmap(QtGui.QPixmap('/opt/misura4/misura.client/misura/client/art/logo.png'))
+        dialog.exec_()
+
+
 class HelpMenu():
 
-    def __init__(self, menu_bar):
-        self.menu_bar = menu_bar
-
-    def add_help_menu(self):
-        self.help = self.menu_bar.addMenu('Help')
+    def add_help_menu(self, menu_bar):
+        self.help = menu_bar.addMenu('Help')
         self.help.addAction(_('Client configuration'), self.showClientConf)
         self.help.addAction(_('Documentation'), self.showDocSite)
         self.help.addAction(_('Pending operations'), self.showTasks)
-        self.help.addAction(_('About'), self.showAbout)
+        self.help.addAction(_('About'), showAbout)
 
     def showClientConf(self):
         """Show client configuration panel"""
@@ -40,12 +46,3 @@ class HelpMenu():
     def showTasks(self):
         registry.taskswg.user_show = True
         registry.taskswg.show()
-
-    def showAbout(self):
-        label = QtGui.QLabel()
-        label.setText(about)
-        lay = QtGui.QHBoxLayout()
-        lay.addWidget(label)
-        dia = QtGui.QDialog()
-        dia.setLayout(lay)
-        dia.exec_()
