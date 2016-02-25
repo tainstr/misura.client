@@ -114,7 +114,16 @@ class MainWindow(QtGui.QMainWindow):
         self.reset_file_proxy_timer = QtCore.QTimer()
         self.reset_instrument_timer = QtCore.QTimer()
         self.reset_instrument.connect(self.setInstrument)
-
+        self.tray_icon = QtGui.QSystemTrayIcon(self)
+        self.connect(self.tray_icon, QtCore.SIGNAL('messageClicked()'), self.focus_logging)
+    
+    def notify(self,msg):
+        print 'notify',msg
+        self.tray_icon.show()
+        self.tray_icon.showMessage('Misura Server', msg, msecs=2000)
+        
+    def focus_logging(self):
+        self.logDock.show()
 
     def add_server_selector(self):
         """Server selector dock widget"""
@@ -173,6 +182,7 @@ class MainWindow(QtGui.QMainWindow):
 
         registry.taskswg.show_signal.connect(self.pending_task_shown)
         registry.taskswg.hide_signal.connect(self.pending_task_hidden)
+        self.connect(registry, QtCore.SIGNAL('logCritical(QString)'), self.notify)
 
     def pending_task_shown(self):
         self.tasks_dock.show()
@@ -326,8 +336,9 @@ class MainWindow(QtGui.QMainWindow):
         name = self.remote['devpath']
         self.name = name
         logging.debug('Setting remote %s %s %s', remote, self.remote, name)
-        self.setWindowTitle('misura Acquisition: %s (%s)' %
-                            (name, self.remote['comment']))
+        title = _('Misura Acquisition: %s (%s)') %  (name, self.remote['comment'])
+        self.setWindowTitle(title)
+        self.tray_icon.setToolTip(title)
         pid = 'Instrument: ' + self.name
         self.tasks.jobs(11, pid)
         QtGui.qApp.processEvents()
