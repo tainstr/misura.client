@@ -18,16 +18,15 @@ misura.canon version: {}</p>
 
 class HelpMenu():
 
+    def __init__(self, menu_bar):
+        self.menu_bar = menu_bar
+
     def add_help_menu(self):
-        self.help = self.addMenu('Help')
+        self.help = self.menu_bar.addMenu('Help')
         self.help.addAction(_('Client configuration'), self.showClientConf)
         self.help.addAction(_('Documentation'), self.showDocSite)
         self.help.addAction(_('Pending operations'), self.showTasks)
         self.help.addAction(_('About'), self.showAbout)
-
-    def hide_help_menu(self):
-        self.help.menuAction().setVisible(False)
-
 
     def showClientConf(self):
         """Show client configuration panel"""

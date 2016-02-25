@@ -13,12 +13,13 @@ from PyQt4 import QtGui, QtCore
 import functools
 
 
-class MenuBar(QtGui.QMenuBar, HelpMenu):
+class MenuBar(QtGui.QMenuBar):
 
     """Main acquisition menus"""
 
     def __init__(self, server=False, parent=None):
         QtGui.QMenuBar.__init__(self, parent)
+        self.help_menu = HelpMenu(self)
         self.remote = False
         self.server = server
         self.windows = {}
@@ -39,7 +40,7 @@ class MenuBar(QtGui.QMenuBar, HelpMenu):
             self.measure.setEnabled(False)
             self.settings.setEnabled(False)
 
-        self.add_help_menu()
+        self.help_menu.add_help_menu()
 
         if server is not False:
             self.setServer(server)
@@ -276,4 +277,3 @@ class MenuBar(QtGui.QMenuBar, HelpMenu):
     def reload_data(self):
         self.parent().uid = False
         self.parent().resetFileProxy()
-

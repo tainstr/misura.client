@@ -7,7 +7,7 @@ from ..confwidget import RecentMenu
 from misura.client.helpmenu import HelpMenu
 
 
-class BrowserMenuBar(QtGui.QMenuBar, HelpMenu):
+class BrowserMenuBar(QtGui.QMenuBar):
     """Browser menus"""
 
     def __init__(self, server=False, parent=None):
@@ -37,7 +37,8 @@ class BrowserMenuBar(QtGui.QMenuBar, HelpMenu):
         self.currents = self.addMenu(_('View Tests'))
         self.databases = self.addMenu(_('View Databases'))
 
-        self.add_help_menu()
+        self.help_menu = HelpMenu(self)
+        self.help_menu.add_help_menu()
 
     def new_database(self, path=False):
         if not path:
