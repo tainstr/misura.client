@@ -331,6 +331,16 @@ class MainWindow(QtGui.QMainWindow):
         pid = 'Instrument: ' + self.name
         self.tasks.jobs(11, pid)
         QtGui.qApp.processEvents()
+        # Close cameras
+        for p, (pic, win) in self.cameras.iteritems():
+            logging.debug('deleting cameras %s %s %s', p, pic, win)
+            pic.close()
+            win.hide()
+            win.close()
+            win.deleteLater()
+        self.cameras = {}
+        QtGui.qApp.processEvents()
+        # Send init_instrument
         if not self.fixedDoc and not self.server['isRunning'] and self.name != self.server['lastInstrument']:
             logging.debug('Init instrument')
             if self.remote['initInstrument'] != 0:
@@ -354,14 +364,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setMenuWidget(self.myMenuBar)
         logging.debug('%s', 'Done menubar')
 
-        # Close cameras
-        for p, (pic, win) in self.cameras.iteritems():
-            logging.debug('deleting cameras %s %s %s', p, pic, win)
-            pic.close()
-            win.hide()
-            win.close()
-            win.deleteLater()
-        self.cameras = {}
+
         # Remove any remaining subwindow
         self.centralWidget().closeAllSubWindows()
 
