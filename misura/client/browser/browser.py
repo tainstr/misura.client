@@ -62,7 +62,10 @@ class MainWindow(QtGui.QMainWindow):
             self.connect(self.myMenuBar.recentM3db, QtCore.SIGNAL(
                 'select(QString)'), self.open_m3db)
 
-        win = self.area.addSubWindow(greeter, QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinMaxButtonsHint)
+        win = self.area.addSubWindow(greeter,
+                                     QtCore.Qt.CustomizeWindowHint |
+                                     QtCore.Qt.WindowTitleHint |
+                                     QtCore.Qt.WindowMinMaxButtonsHint)
 
     def closeEvent(self, event):
         iutils.app.quit()
