@@ -99,7 +99,8 @@ class ViewerPicture(QtGui.QGraphicsView):
 #       self.sampleProcessor=False
         if self.calibrationTool:
             self.calibrationTool.close()
-
+            
+    _oldproc = None
     def setFrameProcessor(self, fp=False):
         """Create or set the thread receiving frames from the remote camera"""
         if not fp:
@@ -486,7 +487,8 @@ class ViewerPicture(QtGui.QGraphicsView):
 
     def updateImage(self, *args):
         self.updateFrame(*args, img=True)
-
+    
+    _unzoomed = False
     def updateFrame(self, i, x, y, w, h, data, img=False):
         """Called when a new frame is available from processor"""
         # Nota: non posso usare direttamente QPixmap.loadFromData per via di un
@@ -506,6 +508,10 @@ class ViewerPicture(QtGui.QGraphicsView):
         smp.pixItem.setPixmap(smp.pix)
         smp.update({'roi': [x, y, w, h]})
         self.emit(QtCore.SIGNAL('frameUpdated()'))
+        if self._oldproc is None and not self._unzoomed:
+            self.unzoom()
+            self._unzoomed = True
+        
 
     def reconnectSample(self):
         """Remove and regenerate all samples."""
