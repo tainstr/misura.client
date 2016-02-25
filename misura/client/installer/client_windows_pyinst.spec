@@ -7,10 +7,10 @@ from veusz import utils as vutils
 
 console= True
 debug = False
-cli=pathClient+'\\' 
+cli=pathClient+'\\'
 bin=cli+'bin\\'
-res=vutils.resourceDirectory+'\\' 
-vzd=res+'..\\' 
+res=vutils.resourceDirectory+'\\'
+vzd=res+'..\\'
 
 
 rthooks=[cli+'\\installer\\rthook_pyqt4.py']
@@ -55,7 +55,7 @@ for name in ['icons/*.png','icons/*.ico','icons/*.svg','examples/*.vsz',
 		binaries.append( (installed_path, source_path, 'DATA') )
 
 # misura4 specific data dirs
-for ddir in ['art','i18n']:
+for ddir in ['art','i18n','ui']:
 	fdir=os.path.join(cli,ddir)
 	for fname in os.listdir(fdir):
 		source_path=os.path.join(fdir,fname)

@@ -3,10 +3,12 @@
 
 from PyQt4 import QtGui, QtCore, uic
 from . import _
-from confwidget import ClientConf
-from live import registry
+from .confwidget import ClientConf
+from .live import registry
 from misura.canon.version import __version__ as canon_version
+from . import parameters
 from version import __version__ as client_version
+import os
 
 about="""
 <h1> Misura &trade;</h1>
@@ -17,12 +19,12 @@ misura.canon version: {}</p>
 """.format(client_version, canon_version)
 
 def showAbout():
-        dialog = QtGui.QDialog()
-        uic.loadUi('/opt/misura4/misura.client/misura/client/ui/about_misura.ui',
-                   dialog)
-        dialog.logo_label.setScaledContents(True)
-        dialog.logo_label.setPixmap(QtGui.QPixmap('/opt/misura4/misura.client/misura/client/art/logo.png'))
-        dialog.exec_()
+    dialog = QtGui.QDialog()
+    uic.loadUi(os.path.join(parameters.pathUi, 'about_misura.ui'), dialog)
+    dialog.logo_label.setScaledContents(True)
+
+    dialog.logo_label.setPixmap(QtGui.QPixmap(os.path.join(parameters.pathArt, 'logo.png')))
+    dialog.exec_()
 
 
 class HelpMenu():

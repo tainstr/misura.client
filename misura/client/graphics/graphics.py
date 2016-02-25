@@ -199,7 +199,8 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
                                                      _('Displays information about Misura'),
                                                      _('About Misura'),
                                                      helpmenu.showAbout)
-        about_misura_action.setIcon(QtGui.QIcon('/opt/misura4/misura.client/misura/client/art/about.png'))
+        about_misura_action.setIcon(QtGui.QIcon(os.path.join(params.pathArt, 'about.png')))
+
         self.mw.menuBar().actions()[-1].menu().addAction(about_misura_action)
 
 
