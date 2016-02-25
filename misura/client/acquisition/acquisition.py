@@ -120,7 +120,6 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowIcon(QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
 
     def notify(self,msg):
-        print 'notify',msg
         self.tray_icon.show()
         self.tray_icon.showMessage('Misura Server', msg, msecs=2000)
 
