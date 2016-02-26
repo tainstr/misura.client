@@ -384,6 +384,10 @@ class Graphics(MainWindow):
         self.loadDefaultStylesheet()
         self.loadDefaultCustomDefinitions()
 
+    def updateTitlebar(self):
+        filename = 'Untitled' if self.filename == '' else os.path.basename(self.filename)
+        self.setWindowTitle(_('%s - Misura') % filename)
+
 
 class GraphicsApp(veusz_main.VeuszApp):
 
