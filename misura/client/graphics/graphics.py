@@ -377,6 +377,7 @@ class Graphics(MainWindow):
         self.datadock.hide()
 
         self.plot.doPick = lambda mouse_position: plugin.InterceptPlugin.clicked_curve(mouse_position, self)
+        self.setWindowIcon(veusz.utils.getIcon('m4.icon'))
 
     def setupDefaultDoc(self):
         """Make default temperature/time pages"""

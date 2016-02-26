@@ -318,7 +318,9 @@ def loadIcons():
     # d=list(os.path.split(veusz.utils.utilfuncs.resourceDirectory))[:-1]+['misura','client','art']
     # artdir=os.path.join(*tuple(d))
 
-    for key in ['m4.connect', 'm4.db', 'm4.open', 'm4.sintering', 'm4.softening', 'm4.sphere', 'm4.halfSphere', 'm4.melting', 'm4.single-ramp']:
+    for key in ['m4.connect', 'm4.db', 'm4.open', 'm4.sintering',
+                'm4.softening', 'm4.sphere', 'm4.halfSphere',
+                'm4.melting', 'm4.single-ramp', 'm4.icon']:
         n = key.split('.')[1] + '.svg'
         n = os.path.join(params.pathArt, n)
         logging.debug('%s', n)
