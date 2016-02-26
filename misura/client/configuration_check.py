@@ -1,7 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Check discrepancies between current values and saved ones."""
-
+import tempfile
+import os
+import subprocess
 
 def configuration_check(obj):
     print 'configuration_check ', obj['fullpath']
@@ -81,20 +83,20 @@ def recursive_configuration_check(obj, final=True):
     return render
 
 
-def wiring(obj):
-    """Render a dot file representing all RoleIO relations."""
-    """
-    digraph structs {
-        node [shape=record];
-        A[label="<out1> first out|<out2> second out|<out3> third out"]
-        B[label="<role1> first role|<role2> second role|<role3> third role"]
-        A:out1 -> B:role2;
-    }
-    """
-    desc = obj.describe()
-    for k, opt in desc:
-        if not opt['type'] == 'RoleIO':
-            continue
+def render_wiring(dot):
+    """Render wiring dot graph to temporary svg file.
+    Return rendered file path"""
+    print 'GRAPH:\n',dot
+    handle, filename = tempfile.mkstemp()
+    print 'tmpfile',handle, filename
+    os.write(handle, dot)
+    os.close(handle)
+    out = subprocess.check_output('dot -O -T svg {}'.format(filename), shell=True)
+    print 'dot call:', out
+    svg_filename = filename+'.svg'
+    os.remove(filename)
+    return svg_filename
+
         
 
 if __name__ == '__main__':

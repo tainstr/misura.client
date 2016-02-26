@@ -3,8 +3,10 @@
 """Configuration interface for misura.
 Global instrument parametrization and setup."""
 
+
 from misura.canon.logger import Log as logging
-from misura.client import network
+from .. import network
+
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 
@@ -207,6 +209,7 @@ class ServerView(QtGui.QTreeView):
         self.menu.addAction('Open in New Tab', self.objNewTab)
         self.menu.addAction('Object Table', self.objTable)
         self.menu.addAction('Presets Table', self.presetsTable)
+        self.menu.addAction('Wiring Graph', self.wiringGraph)
         self.menu.addAction('Update View', self.update)
         self.expandToDepth(0)
 
@@ -258,3 +261,13 @@ class ServerView(QtGui.QTreeView):
     def presetsTable(self):
         self.objOpen()
         self.emit(QtCore.SIGNAL('presetsTable(QModelIndex)'), self.currentIndex())
+        
+    def wiringGraph(self):
+        self.objOpen()
+        self.emit(QtCore.SIGNAL('wiringGraph(QModelIndex)'), self.currentIndex())
+        
+
+        
+        
+        
+        

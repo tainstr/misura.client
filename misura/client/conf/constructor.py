@@ -2,14 +2,17 @@
 # -*- coding: utf-8 -*-
 """Programmatic interface construction utilities"""
 from misura.canon.logger import Log as logging
-from PyQt4 import QtGui, QtCore
 import functools
+import os
+
 from misura.canon import option
 from misura.canon.option import sorter, prop_sorter
 
 from .. import _
 from .. import widgets
-from ..configuration_check import recursive_configuration_check
+from ..configuration_check import recursive_configuration_check, render_wiring
+
+from PyQt4 import QtGui, QtCore, QtSvg
 
 def desc2html(desc):
     """Crea una rappresentazione HTML del dizionario di descrizione."""
@@ -266,6 +269,31 @@ class Interface(QtGui.QTabWidget):
         output = recursive_configuration_check(self.remObj)
         widgets.info_dialog(output, 'Presets Comparison, %s' % self.desc.get(
             'name', {'current': 'Object'})['current'], parent=self)
+        
+    _wiring = False
+    def wiring_graph(self):
+        if self._wiring:
+            self._wiring.hide()
+            self._wiring.close()
+            self._wiring = False
+        # Temp file
+        svg_filename = render_wiring(self.remObj.wiring())
+        
+        # Scene
+        scene = QtGui.QGraphicsScene()
+        view =QtGui.QGraphicsView()
+        view.setScene(scene)
+        svg = QtSvg.QGraphicsSvgItem(svg_filename)
+        scene.addItem(svg)
+        # Display widget
+        wg = QtGui.QWidget()
+        lay = QtGui.QVBoxLayout()
+        wg.setLayout(lay)
+        lay.addWidget(view)
+        wg.show()    
+        self._wiring=wg
+        # Cleanup
+        os.remove(svg_filename)
 
 
 class InterfaceDialog(QtGui.QDialog):

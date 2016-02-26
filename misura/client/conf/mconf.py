@@ -33,6 +33,8 @@ class TreePanel(QtGui.QSplitter):
         self.connect(
             self.view, QtCore.SIGNAL('presetsTable(QModelIndex)'), self.presetsTable)
         self.connect(
+            self.view, QtCore.SIGNAL('wiringGraph(QModelIndex)'), self.wiringGraph)
+        self.connect(
             self.view, QtCore.SIGNAL('objNewTab(QModelIndex)'), self.objNewTab)
         self.connect(
             self.tab, QtCore.SIGNAL('tabCloseRequested(int)'), self.closeTab)
@@ -48,6 +50,9 @@ class TreePanel(QtGui.QSplitter):
         
     def presetsTable(self):
         self.tab.currentWidget().presets_table()
+        
+    def wiringGraph(self):
+        self.tab.currentWidget().wiring_graph()
 
     def objNewTab(self, index):
         """Opens in a new tab"""
