@@ -4,6 +4,7 @@ from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 from misura.canon import dataimport
 
+import os
 from .. import _
 from .. import confwidget
 from .. import filedata
@@ -11,6 +12,7 @@ from .. import misura3
 from ..clientconf import confdb
 from .. import iutils
 from ..database import getDatabaseWidget, getRemoteDatabaseWidget
+from .. import parameters
 
 from . import menubar
 from . import testwindow
@@ -66,6 +68,8 @@ class MainWindow(QtGui.QMainWindow):
                                      QtCore.Qt.CustomizeWindowHint |
                                      QtCore.Qt.WindowTitleHint |
                                      QtCore.Qt.WindowMinMaxButtonsHint)
+
+        self.setWindowIcon(QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
 
     def closeEvent(self, event):
         iutils.app.quit()

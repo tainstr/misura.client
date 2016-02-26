@@ -19,6 +19,7 @@ from .. import fileui, filedata
 from .. import misura3
 from .. import connection
 from .. import iutils
+from .. import parameters
 from ..clientconf import confdb, settings
 from ..confwidget import RecentWidget
 from .menubar import MenuBar
@@ -116,12 +117,13 @@ class MainWindow(QtGui.QMainWindow):
         self.reset_instrument.connect(self.setInstrument)
         self.tray_icon = QtGui.QSystemTrayIcon(self)
         self.connect(self.tray_icon, QtCore.SIGNAL('messageClicked()'), self.focus_logging)
-    
+        self.setWindowIcon(QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
+
     def notify(self,msg):
         print 'notify',msg
         self.tray_icon.show()
         self.tray_icon.showMessage('Misura Server', msg, msecs=2000)
-        
+
     def focus_logging(self):
         self.logDock.show()
 
