@@ -24,6 +24,8 @@ def showAbout():
     dialog.logo_label.setScaledContents(True)
 
     dialog.logo_label.setPixmap(QtGui.QPixmap(os.path.join(parameters.pathArt, 'logo.png')))
+    dialog.setWindowIcon(QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
+
     dialog.exec_()
 
 
