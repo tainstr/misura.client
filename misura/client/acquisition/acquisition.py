@@ -548,7 +548,7 @@ class MainWindow(QtGui.QMainWindow):
         if live_file:
             try:
                 fp = RemoteFileProxy(live_file, conf=self.server, live=True)
-                logging.debug('%s', fp.header())
+                self.refresh_header()
                 doc = filedata.MisuraDocument(proxy=fp)
                 # Remember as the current uid
                 self.uid = fid
@@ -560,6 +560,9 @@ class MainWindow(QtGui.QMainWindow):
                 return
 
             self._finishFileProxy(doc)
+
+    def refresh_header(self):
+        self.server.storage.test.live.header(['Array'], False, True)
 
 
     def get_live_file_or_retry_later(self, retry, recursion):
