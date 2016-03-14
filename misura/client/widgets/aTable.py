@@ -17,7 +17,6 @@ class aTablePointDelegate(QtGui.QItemDelegate):
         col = index.column()
         
         colType = mod.header[col][1]
-        logging.debug('%s', colType)
         if colType == 'Float':
             wg = QtGui.QDoubleSpinBox(parent)
             wg.setRange(MIN, MAX)
@@ -120,9 +119,9 @@ class aTableModel(QtCore.QAbstractTableModel):
 
     def up(self):
         hp = self.tableObj.current
-        # Table header is the first row in the property
+        # Table header is the first row in the option
         self.header = hp[0]
-        # Rows are the rest of the property
+        # Rows are the rest of the option
         self.rows = hp[1:]
         QtCore.QAbstractTableModel.reset(self)
 
