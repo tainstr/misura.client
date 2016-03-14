@@ -47,9 +47,9 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             self.setContextMenuPolicy(Qt.CustomContextMenu)
             self.connect(self, QtCore.SIGNAL(
                 'customContextMenuRequested(QPoint)'), self.showContextMenu)
-            
+
             self.connect(self, QtCore.SIGNAL('doubleClicked(QModelIndex)'),self.double_clicked)
-            
+
             ######
             # File menu
             self.file_menu = QtGui.QMenu(self)
@@ -62,7 +62,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
             #     _('Commit data to test file'), self.commit)
             self.file_menu.addAction(_('Update view'), self.refresh_model)
             #  self.ver_menu = self.file_menu.addMenu('Load Version')
-            
+
             ######
             # Group or No-selection menu
             self.base_menu = QtGui.QMenu(self)
@@ -108,7 +108,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
                 self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.refresh_model)
         if doc:
             self.set_doc(doc)
-            
+
     def double_clicked(self, index):
         n = self.model().data(index, role=Qt.UserRole)
         if isinstance(n, filedata.DatasetEntry) :
@@ -428,7 +428,6 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.der_menu.addAction(_('Intercept this curve'), self.intercept)
         self.der_menu.addAction(_('Smoothing'), self.smooth)
         self.der_menu.addAction(_('Derivatives'), self.derive)
-        self.add_percentile(node, self.der_menu)
         self.der_menu.addAction(_('Linear Coefficient'), self.coefficient)
         # self.der_menu.addAction(_('Overwrite parent'), self.overwrite)
         self.add_keep(node, self.der_menu)

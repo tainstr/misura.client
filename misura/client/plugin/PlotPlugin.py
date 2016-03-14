@@ -58,10 +58,11 @@ def dataset_curve_name(ds, dsn):
 
     ax_label = dsvar.split('_')[::-1]
     ax_label = '_'.join(ax_label)
-    if ds.unit:
-        logging.debug('%s %s %s', 'getting symbol for', ds.unit, units.symbols)
-        u = units.symbols.get(ds.unit, ds.unit)
-        logging.debug('%s %s %s', 'got symbol', ds.unit, u)
+    unit = ds.unit or ds.parent.unit
+    if unit:
+        logging.debug('%s %s %s', 'getting symbol for', unit, units.symbols)
+        u = units.symbols.get(unit, unit)
+        logging.debug('%s %s %s', 'got symbol', unit, u)
         ax_label += ' ({{{}}})'.format(u)
     ax_name = 'ax:' + ds.m_var.replace("/", ":")
     return curve_name, ax_name, ax_label
@@ -131,28 +132,19 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         g = self.doc.resolveFullWidgetPath(gname)
         tree = get_plotted_tree(g)
         dslist = tree['axis'].get(g.path + '/' + ax_name, [])
+
+        is_derived = hasattr(ds, 'ds') and isinstance(ds.ds,
+                                                      document.datasets.Dataset1DPlugin)
+        if is_derived:
+            ds.m_initialDimension = getattr(ds.parent.ds,
+                                            'm_initialDimension',
+                                            None)
+            ds.m_percent = getattr(ds.parent.ds, 'm_percent', None)
+
         pc = getattr(ds, 'm_percent', None)
         if pc is None:
             logging.debug('%s %s', 'No m_percent attribute defined', dsn)
             return False
-        if getattr(ds, 'm_initialDimension', None) is None:
-            parent_initial_dimension = getattr(ds.parent.ds, 'm_initialDimension', None)
-            if parent_initial_dimension is None:
-                logging.debug('%s %s', 'No initial dimension defined', dsn)
-                return False
-
-            initial_dimension_fields = {'ds': ds.path,
-                                        'ini': parent_initial_dimension,
-                                        'num': 20,
-                                        'auto': False,
-                                        'method': 'mean',
-                                        'ds_x': '',
-                                        'suppress_messageboxes': True}
-
-            self.ops.append(document.OperationToolsPlugin(InitialDimensionPlugin(),
-                                                          initial_dimension_fields.copy()))
-
-            self.apply_ops('PlotDataset: InitialDimension')
 
         cvt = None
         for nds in dslist:
