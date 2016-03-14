@@ -8,7 +8,6 @@ import os
 from .. import _
 from .. import confwidget
 from .. import filedata
-from .. import misura3
 from ..clientconf import confdb
 from .. import iutils
 from ..database import getDatabaseWidget, getRemoteDatabaseWidget
@@ -16,6 +15,11 @@ from .. import parameters
 
 from . import menubar
 from . import testwindow
+
+try:
+    from .. import misura3
+except:
+    misura3 = False
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -58,7 +62,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(
             greeter.database, greeter.database.sig_select, self.open_database)
 
-        if confdb['m3_enable']:
+        if confdb['m3_enable'] and misura3:
             self.connect(
                 greeter.m3database, greeter.database.sig_select, self.open_m3db)
             self.connect(self.myMenuBar.recentM3db, QtCore.SIGNAL(

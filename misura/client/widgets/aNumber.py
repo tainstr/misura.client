@@ -46,12 +46,13 @@ class FocusableSlider(QtGui.QSlider):
 class aNumber(ActiveWidget):
     zoom_factor = 10.
     zoomed = False
-
+    precision = -1
     def __init__(self, server, remObj, prop, parent=None, slider_class=FocusableSlider):
         ActiveWidget.__init__(self, server, remObj, prop, parent)
         min = self.prop.get('min', None)
         max = self.prop.get('max', None)
         step = self.prop.get('step', False)
+        self.precision = self.prop.get('precision', -1)
         self.divider = 1.
         # If max/min are defined, create the slider widget
         self.slider = False
@@ -167,7 +168,10 @@ class aNumber(ActiveWidget):
         cur = self.adapt2gui(self.current)
         try:
             if self.double:
-                dc = extend_decimals(cur)
+                if self.precision>=0:
+                    dc = self.precision
+                else:
+                    dc = extend_decimals(cur)
                 self.spinbox.setDecimals(dc)
             else:
                 cur = int(cur)

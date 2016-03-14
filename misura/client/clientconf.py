@@ -5,9 +5,9 @@ import os
 from misura.canon.logger import Log as logging
 import sqlite3
 import re
-from traceback import format_exc
+from traceback import format_exc, print_exc
 
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
 
 from ..canon import option
 from ..canon import csutil
@@ -506,7 +506,10 @@ def data_import(confdb):
     for plug in plugins:
         plug = plug.replace('\n','')
         print 'PLugging: ', plug
-        importlib.import_module(plug)
+        try:
+		    importlib.import_module(plug)
+        except:
+            print_exc()
 
 settings = QtCore.QSettings(
     QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope, 'Expert System Solutions', 'Misura 4')
