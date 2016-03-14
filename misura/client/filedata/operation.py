@@ -465,4 +465,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         logging.debug('%s %s', 'imported names:', names)
         self._doc.available_data.update(availds)
         self.outdatasets = outds
+
+        LF.params.rule_load = '\n'.join(map(lambda name: "/" + name + "$",
+                                            names_set)).replace('0:', '')
+
         return names
