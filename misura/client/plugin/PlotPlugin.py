@@ -22,7 +22,7 @@ power_axes = {'kiln/P': 'Power', 'kiln/kP': 'Power', 'kiln/kI': 'Power',
               'kiln/kD': 'Power', 'kiln/pC': 'Power', 'kiln/pD': 'Power',
               'kiln/T': 'Temperature', 'kiln/S': 'Temperature'}
 
-# FIXME: add also misura names along camA/camB (which are Misura3)
+# FIXME: add also Misura4 names along camA/camB (which are Misura3)
 bounded_axes = {'odlt': {'camA': 'Dil', 'camB': 'Dil', 'const': 'pos'},
                 'odht': {'camA': 'Dil', 'camB': 'Dil', 'const': 'pos'},
                 'flex': {'camA': 'Flex', 'const': 'pos'},
@@ -64,7 +64,8 @@ def dataset_curve_name(ds, dsn):
         u = units.symbols.get(unit, unit)
         logging.debug('%s %s %s', 'got symbol', unit, u)
         ax_label += ' ({{{}}})'.format(u)
-    ax_name = 'ax:' + ds.m_var.replace("/", ":")
+    ax_name = 'ax:' + dsvar.replace("/", ":")
+    print 'dataset_curve_name',curve_name, ax_name, dsvar, ds.m_var
     return curve_name, ax_name, ax_label
 
 
@@ -89,7 +90,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         ]
 
     def initCurve(self, name='Curve', xData='xD', yData='yD',
-                  yAxis='y', axisLabel='Curve', idx=0, graph='/page/graph'):
+                  yAxis='y', axisLabel='Curve', graph='/page/graph'):
         """Configure a new curve (appearance, axes positions, data labels"""
         logging.debug('%s %s %s %s', 'initCurve', name, xData, yData)
 
@@ -220,7 +221,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             # If the ds is recursively derived, substitute it by its entry
             if not hasattr(ds, 'm_smp'):
                 logging.debug('%s %s', 'Retrieving ent', y)
-                # warining: can change size during iter!
+                # warning: can change size during iter!
                 for eid, entry in doc.ent.items():
                     if entry.path == y:
                         logging.debug(
@@ -244,17 +245,12 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 ax_name = 'ax:' + bax
                 ax_lbl = bax
 
-            # Color index
-            idx = 0
-            if ds.m_var in default_curves:
-                idx = default_curves.index(ds.m_var)
-
             gname = g.path
 
             self.auto_percentile(ds, y, gname, ax_name)
 
             self.initCurve(name=cname, xData=x, yData=y,
-                           yAxis=ax_name, axisLabel=ax_lbl, idx=0, graph=gname)
+                           yAxis=ax_name, axisLabel=ax_lbl, graph=gname)
             if gname not in gnames:
                 gnames.append(gname)
             cnames[y] = cname
