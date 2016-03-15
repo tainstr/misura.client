@@ -4,19 +4,30 @@
 import re
 
 def get_best_x_for(y_path, prefix, data, page):
+    # Default x datasets:
     if page.startswith('/time'):
+        target = 't'
         xname = prefix + 't'
     else:
-        sample_temperature_path = get_temperature_of_sample_with_path(y_path)
-        if sample_temperature_path in data:
-            xname = sample_temperature_path
-        else:
-            xname = prefix + 'kiln/T'
-
+        target = 'T'
+        xname = prefix + 'kiln/T'
+    # Possible nearby  datasets: 
+    subordered_x = get_suborderd_x(y_path, name=target)
+    neighbor_x = get_neighbor_x(y_path, name=target)
+    # Subordered has precedence
+    if subordered_x in data:
+        xname = subordered_x
+    # Then neighbor
+    elif neighbor_x in data:
+        xname = neighbor_x
+    # Then default
     return xname
 
-def get_temperature_of_sample_with_path(sample_path):
-    return "/".join(sample_path.split("/")[0:-1]) + "/T"
+def get_suborderd_x(dataset_path, name='T'):
+    return dataset_path + "/" + name
+
+def get_neighbor_x(dataset_path, name='T'):
+    return "/".join(dataset_path.split("/")[0:-1]) + "/" + name
 
 def is_temperature(path):
     return re.search('.*/T$|.*kiln/T', path)
