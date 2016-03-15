@@ -9,10 +9,9 @@ class SyncTableModel(QtCore.QAbstractTableModel):
         self.database = database
         self.table_name = table_name
         self._header_data = []
-	self.where = False
+        self._data = []
+        self.where = False
         self.select()
-
-
 
     def rowCount(self, index=QtCore.QModelIndex()):
         return len(self._data)
@@ -39,12 +38,12 @@ class SyncTableModel(QtCore.QAbstractTableModel):
             return self._header_data[section]
 
     def setFilter(self,where=False):
-	self.where = where
+        self.where = where
 
     def select(self):
-	cmd = "SELECT * from {}".format(self.table_name)
-	if self.where:
-	    cmd += ' WHERE {}'.format(self.where)
-        self._data = self.database.execute_fetchall("SELECT * from {}".format(self.table_name))
-        self._header_data = map(lambda row: row[1], self.database.execute_fetchall("pragma table_info({})".format(self.table_name)))
-        QtCore.QAbstractTableModel.reset(self)
+        cmd = "SELECT * from {}".format(self.table_name)
+        if self.where:
+            cmd += ' WHERE {}'.format(self.where)
+            self._data = self.database.execute_fetchall("SELECT * from {}".format(self.table_name))
+            self._header_data = map(lambda row: row[1], self.database.execute_fetchall("pragma table_info({})".format(self.table_name)))
+            QtCore.QAbstractTableModel.reset(self)
