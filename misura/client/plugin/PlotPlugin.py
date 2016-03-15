@@ -1,4 +1,4 @@
- #!/usr/bin/python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Custom Misura plotting facilities."""
 import veusz.plugins as plugins
@@ -58,7 +58,7 @@ def dataset_curve_name(ds, dsn):
 
     ax_label = dsvar.split('_')[::-1]
     ax_label = '_'.join(ax_label)
-    unit = ds.unit or ds.parent.unit
+    unit = ds.unit or getattr(getattr(ds, 'parent', False), 'unit', False)
     if unit:
         logging.debug('%s %s %s', 'getting symbol for', unit, units.symbols)
         u = units.symbols.get(unit, unit)
@@ -266,7 +266,6 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         return cnames
 
 
-
 from ..clientconf import confdb
 import re
 
@@ -337,8 +336,10 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
                 else:
                     xT.append(axis_selection.kiln_temperature_for(ds))
 
-        result = PlotDatasetPlugin().apply(cmd, {'x': xt, 'y': yt, 'currentwidget': '/time/time'})
-        result.update(PlotDatasetPlugin().apply(cmd, {'x': xT, 'y': yT, 'currentwidget': '/temperature/temp'}))
+        result = PlotDatasetPlugin().apply(
+            cmd, {'x': xt, 'y': yt, 'currentwidget': '/time/time'})
+        result.update(PlotDatasetPlugin().apply(
+            cmd, {'x': xT, 'y': yT, 'currentwidget': '/temperature/temp'}))
         return result
 
     def find_my_temp(self, dataset_name, temperatures):
