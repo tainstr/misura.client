@@ -338,6 +338,10 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         self.LF.header = header
         # available, loaded
         self.available = header
+        # First import T dataset (needed for Event's local T calculation)
+        if '/summary/kiln/T' in autoload:
+            autoload.remove('/summary/kiln/T')
+            autoload.insert(0, '/summary/kiln/T')
         self.autoload = autoload
         return self.available, self.autoload
 
@@ -383,14 +387,17 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
     def assign_label(self, ds, col0):
         """Assigns an m_label to the dataset"""
-        if col0 != 't':
+        if col0 == 't':
+            ds.m_label = _("Time")
+        elif col0 == 'T':
+            ds.m_label = _("Temperature")
+        else:
             ds_object, ds_name = ds.m_conf.from_column(col0)
             opt = ds_object.gete(ds_name)
             ds.m_label = _(opt["name"])
             if opt.has_key('csunit'):
                 ds.old_unit = opt["csunit"]
-        else:
-            ds.m_label = _("Time")
+            
 
     def assign_node_attributes(self, ds):
         """Try to read column metadata from node attrs"""
@@ -445,7 +452,27 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             self.assign_node_attributes(ds)
 
         return ds
-
+    
+    def create_local_datasets(self, pcol, sub_time_sequence, time_sequence):
+        """Create subordered time and temperature datasets"""
+        subcol = pcol+sep+'t'
+        subvar = 't'
+        subt = self.create_dataset(sub_time_sequence, subcol,
+                                            subvar, subvar, subvar)
+        T = self.prefix+'kiln/T'
+        # Search in doc and in current outdatasets (kiln/T should be the first dataset imported!)
+        T = self._doc.data.get(T, self.outdatasets.get(T, False))
+        # No main temperature dataset found: cannot build subordered T 
+        if T is False:
+            return [subt]
+        temperature_function = InterpolatedUnivariateSpline(time_sequence, T.data, k=1)
+        sub_temperature_sequence = temperature_function(sub_time_sequence)
+        subcol = pcol+sep+'T'
+        subvar = 'T'
+        subT = self.create_dataset(sub_temperature_sequence, subcol,
+                                   subvar, subvar, subvar)
+        return [subt, subT]
+    
     def doImport(self):
         """Import data.  Returns a list of datasets which were imported."""
         # Linked file
@@ -471,7 +498,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 '%s %s', 'No time_sequence! Aborting.', self.instrobj.measure['elapsed'])
             return []
 
-        outds = {}
         availds = {}
         names = []
         for p, col0 in enumerate(['t'] + available):
@@ -524,20 +550,16 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 #           LF.children.append(pcol) #???
             if len(ds.data) > 0:
                 names.append(pcol)
-                outds[pcol] = ds
+                self.outdatasets[pcol] = ds
             else:
                 availds[pcol] = ds
                 
             # Create sub-time dataset
             if sub_time_sequence is not False:
-                subcol = pcol+sep+'t'
-                subvar = 't'
-                subds = self.create_dataset(sub_time_sequence, subcol,
-                                            subvar, subvar, subvar)
-                names.append(subcol)
-                outds[subcol] = subds
-                
-            
+                subds = self.create_local_datasets(pcol, sub_time_sequence, time_sequence)
+                for sub in subds:
+                    names.append(sub.m_name)
+                    self.outdatasets[sub.m_name] = sub
             
             job(p + 1)
 
@@ -552,7 +574,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         done('Reading file')
         logging.debug('%s %s', 'imported names:', names)
         self._doc.available_data.update(availds)
-        self.outdatasets = outds
 
         LF.params.rule_load = '\n'.join(map(lambda name: "/" + name + "$",
                                             names_set)).replace('0:', '')
