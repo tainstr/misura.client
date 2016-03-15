@@ -76,6 +76,7 @@ class MisuraDataset(document.Dataset):
         """Original measurement unit"""
         self.m_label = ''
         """Label for GUI"""
+        self.tags = set([])
 
     @property
     def mtype(self):

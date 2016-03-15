@@ -101,8 +101,13 @@ def not_interpolated(proxy, col, startt, endt):
     data = data0.view(np.float64).reshape((len(data0), 2))
     # Extend towards start
     s = data[0][0]
+    # Translate natural times
+    if s > 10**8:
+        data[0][:] -= s
+        s = 0
     if s > startt:
         d = s - startt
+
         apt = np.linspace(0, d - 1, d)
         vals = np.ones(d) * data[0][1]
         ap = np.array([apt, vals]).transpose()
@@ -131,27 +136,34 @@ def interpolated(proxy, col, ztime_sequence):
     r = f(ztime_sequence)
     return r
 
+
 def tasks():
     return getattr(live.registry, 'tasks', False)
 
+
 def jobs(n, pid="File import"):
-    #FIXME: causes random crashes while opening microscope tests in compiled win exe
+    # FIXME: causes random crashes while opening microscope tests in compiled
+    # win exe
     return
     t = tasks()
     if not t:
         return
     t.jobs(n, pid)
 
+
 def job(n, pid="File import", label=''):
-    #FIXME: causes random crashes while opening microscope tests in compiled win exe
+    # FIXME: causes random crashes while opening microscope tests in compiled
+    # win exe
     return
     t = tasks()
     if not t:
         return
     t.job(n, pid, label)
 
+
 def done(pid="File import"):
-    #FIXME: causes random crashes while opening microscope tests in compiled win exe
+    # FIXME: causes random crashes while opening microscope tests in compiled
+    # win exe
     return
     t = tasks()
     if not t:
@@ -199,41 +211,38 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         self.rule_unit = clientconf.RulesTable(params.rule_unit)
 
     @classmethod
-    def from_dataset_in_file(cls, dataset_name, linked_filename, uid = ''):
+    def from_dataset_in_file(cls, dataset_name, linked_filename, uid=''):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
         if ':' in dataset_name:
             dataset_name = dataset_name.split(':')[1]
         p = ImportParamsMisura(filename=linked_filename,
-                               uid = uid,
+                               uid=uid,
                                rule_exc=' *',
                                rule_load='^(/summary/)?' + dataset_name + '$',
                                rule_unit=clientconf.confdb['rule_unit'])
         op = OperationMisuraImport(p)
         return op
 
-
     def do(self, document):
         """Override do() in order to get a reference to the document!"""
         self._doc = document
         base.OperationDataImportBase.do(self, document)
 
-    def doImport(self):
-        """Import data.  Returns a list of datasets which were imported."""
-        # Linked file
-        logging.debug('OperationMisuraImport')
+    def get_file_proxy(self):
+        """Try to open a FileProxy and a LinkedFile from the parameters (filename and uid)"""
         doc = self._doc
         if self.uid:
             new = clientconf.confdb.resolve_uid(self.uid)
             if new:
-                logging.debug('Opening by uid %s: %s instead of %s', self.uid, new, self.filename)
+                logging.debug(
+                    'Opening by uid %s: %s instead of %s', self.uid, new, self.filename)
                 self.filename = new[0]
             else:
                 logging.debug('Impossible to resolve uid: %s', self.uid)
         else:
             logging.debug('No uid defined in params')
         if not self.filename:
-            logging.debug('EMPTY FILENAME')
-            return []
+            return False
         # Get a the corresponding linked file or create a new one with a new
         # prefix
         LF = get_linked(doc, self.params)
@@ -258,21 +267,44 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # Load required version
         if self.params.version is not None:
             self.proxy.set_version(self.params.version)
-
         conf = self.proxy.conf  # ConfigurationProxy
-        elapsed0 = self.proxy.get_node_attr('/conf', 'elapsed')
         LF.conf = conf
         instr = conf['runningInstrument']
         LF.instrument = instr
-        instrobj = getattr(conf, instr)
-        LF.instr = instrobj
+        self.instrobj = getattr(conf, instr)
+        LF.instr = self.instrobj
         # get the prefix from the test title
-        LF.title = instrobj.measure['name']
+        LF.title = self.instrobj.measure['name']
         self.measurename = LF.title
+        self.LF = LF
+        return True
 
-        ###
-        # Set available curves on the LF
-        job(2, 'Reading file', 'Header')
+    def get_time_sequence(self, instrobj):
+        # Detect main time dataset
+        elapsed0 = self.proxy.get_node_attr('/conf', 'elapsed')
+        elapsed = int(instrobj.measure['elapsed'])
+        elapsed = max(elapsed, elapsed0)
+        logging.debug('%s %s', 'got elapsed', elapsed)
+        # Create time dataset
+        time_sequence = []
+        if self._doc.data.has_key(self.prefix + 't'):
+            logging.debug(
+                '%s %s', 'Document already have a time sequence for this prefix', self.prefix)
+            ds = self._doc.data[self.prefix + 't']
+            try:
+                ds = units.convert(ds, 'second')
+            except:
+                pass
+            time_sequence = ds.data
+        if len(time_sequence) == 0:
+            time_sequence = np.linspace(0, elapsed - 1, elapsed)
+        if len(time_sequence) == 0:
+            return False
+        return time_sequence
+
+    def get_available_autoload(self):
+        """Return the list of available node names and the list of nodes which should 
+        be loaded during this import operation."""
         # Will list only Array-type descending from /summary
         header = self.proxy.header(['Array'], '/summary')
         autoload = []
@@ -296,50 +328,168 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         logging.debug('%s %s', 'got autoload', autoload)
         logging.debug('%s %s', 'got excluded', len(excluded))
         logging.debug('%s %s', 'got header clean', len(header))
-        LF.header = header
-        jobs(len(header))
-        names = []
-        # TODO: Samples are no longer needed?
-        refsmp = Sample(linked=LF)
-        LF.samples.append(refsmp)
+        self.LF.header = header
+        # available, loaded
+        self.available = header
+        self.autoload = autoload
+        return self.available, self.autoload
+
+    def create_samples(self):
+        """Create Sample object and append them to the LinkedFile.samples list.
+        Returns the reference sample"""
+        refsmp = Sample(linked=self.LF)
+        self.LF.samples.append(refsmp)
         # build a list of samples
-        for idx in range(instrobj.measure['nSamples']):
-            smp = getattr(instrobj, 'sample' + str(idx), False)
+        for idx in range(self.instrobj.measure['nSamples']):
+            smp = getattr(self.instrobj, 'sample' + str(idx), False)
             if not smp:
                 break
-            LF.samples.append(Sample(conf=smp, linked=LF, ref=False, idx=idx))
-        logging.debug('%s %s %s %s', 'build', idx + 1, 'samples', LF.samples)
-        elapsed = int(instrobj.measure['elapsed'])
-        elapsed = max(elapsed, elapsed0)
+            self.LF.samples.append(
+                Sample(conf=smp, linked=self.LF, ref=False, idx=idx))
+        logging.debug(
+            '%s %s %s %s', 'build', idx + 1, 'samples', self.LF.samples)
+        return refsmp
 
-        logging.debug('%s %s', 'got elapsed', elapsed)
-        # Create time dataset
-        time_sequence = []
-        interpolating = True
-        if doc.data.has_key(self.prefix + 't'):
+    def assign_sample_to_dataset(self, ds):
+        """Find out the sample index to which this dataset refers"""
+        col = ds.m_col
+        var, idx = iutils.namingConvention(col)
+        if '/sample' in col:
+            parts = col.split(sep)
+            for q in parts:
+                if q.startswith('sample'):
+                    break
+            i = int(q[6:]) + 1
+            smp = self.LF.samples[i]
             logging.debug(
-                '%s %s', 'Document already have a time sequence for this prefix', self.prefix)
-            ds = doc.data[self.prefix + 't']
-            try:
-                ds = units.convert(ds, 'second')
-            except:
-                pass
-            time_sequence = ds.data
-        if len(time_sequence) == 0:
-            time_sequence = np.linspace(0, elapsed - 1, elapsed)
+                '%s %s %s %s %s %s', 'Assigning sample', i, 'to curve', col, smp, smp.ref)
+            ds.m_smp = smp
+            ds.m_var = var
+            # Retrieve initial dimension from sample
+            if var == 'd' and smp.conf.has_key('initialDimension'):
+                ds.m_initialDimension = smp.conf['initialDimension']
+
+        if ds.m_smp is False:
+            ds.m_smp = self.refsmp
+            return False
+        return True
+
+    def assign_label(self, ds, col0):
+        """Assigns an m_label to the dataset"""
+        if col0 != 't':
+            ds_object, ds_name = ds.m_conf.from_column(col0)
+            opt = ds_object.gete(ds_name)
+            ds.m_label = _(opt["name"])
+            if opt.has_key('csunit'):
+                ds.old_unit = opt["csunit"]
         else:
-            interpolating = True
-        if len(time_sequence) == 0:
-            logging.debug(
-                '%s %s', 'No time_sequence! Aborting.', instrobj.measure['elapsed'])
-            return []
-        # Detect if time sequence needs to be translated or not.
+            ds.m_label = _("Time")
 
-        startt = time_sequence[0]
-        endt = time_sequence[-1]
+    def assign_node_attributes(self, ds):
+        """Try to read column metadata from node attrs"""
+        for meta in ['percent', 'initialDimension']:
+            val = 0
+            if self.proxy.has_node_attr(ds.m_col, meta):
+                val = self.proxy.get_node_attr(ds.m_col, meta)
+                if type(val) == type([]):
+                    val = 0
+            setattr(ds, 'm_' + meta, val)
+
+    def create_dataset(self, pcol, p, col, col0, time_sequence):
+        m_var = col.split('/')[-1]
+        # Set m_update
+        if m_var == 't' or col0 in self.autoload:
+            m_update = True
+        else:
+            m_update = False
+        # Configure dataset
+        if not m_update:
+            # completely skip processing if dataset is already in document
+            if self._doc.data.has_key(pcol):
+                return False
+            # data is not loaded anyway
+            data = []
+        elif col == 't':
+            data = time_sequence
+        else:
+            data = interpolated(self.proxy, col0, time_sequence)
+        # Interpolation error
+        if data is False:
+            data = []
+
+        # Get meas. unit
+        u = 'None'
+        if col == 't':
+            u = 'second'
+        else:
+            u = self.proxy.get_node_attr(col, 'unit')
+            if u in ['', 'None', None, False, 0]:
+                u = False
+            # Correct missing celsius indication
+            if not u and m_var == 'T':
+                u = 'celsius'
+        logging.debug('%s', 'building the dataset')
+        ds = MisuraDataset(data=data, linked=self.LF)
+        ds.m_name = pcol
+        ds.m_pos = p
+        ds.m_smp = self.refsmp
+        ds.m_var = m_var
+        ds.m_col = col
+        ds.m_update = m_update
+        ds.m_conf = self.proxy.conf
+        ds.unit = str(u) if u else u
+        ds.old_unit = ds.unit
+
+        # Automatic unit conversion
+        if len(data) > 0 and col != 't':
+            # Units conversion
+            nu = self.rule_unit(col)
+            if u and nu:
+                ds = units.convert(ds, nu[0])
+
+        # Add the hierarchy tags
+        for sub, parent, leaf in iterpath(pcol):
+            if leaf:
+                ds.tags.add(parent)
+
+        self.assign_sample_to_dataset(ds)
+
+        self.assign_label(ds, col0)
+        if len(data) > 0 and col != 't':
+            self.assign_node_attributes(ds)
+
+        return ds
+
+    def doImport(self):
+        """Import data.  Returns a list of datasets which were imported."""
+        # Linked file
+        logging.debug('OperationMisuraImport')
+        if not self.get_file_proxy():
+            logging.debug('EMPTY FILENAME')
+            return []
+        doc = self._doc
+        LF = self.LF
+
+        # Set available curves on the LF
+        job(2, 'Reading file', 'Header')
+        available, autoload = self.get_available_autoload()
+
+        # Emit the number of jobs
+        jobs(len(autoload))
+
+        self.refsmp = self.create_samples()
+
+        # Get time sequence
+        time_sequence = self.get_time_sequence(self.instrobj)
+        if time_sequence is False:
+            logging.debug(
+                '%s %s', 'No time_sequence! Aborting.', self.instrobj.measure['elapsed'])
+            return []
+
         outds = {}
         availds = {}
-        for p, col0 in enumerate(['t'] + header):
+        names = []
+        for p, col0 in enumerate(['t'] + available):
             col = col0.replace('/summary/', '/')
             mcol = col
             if mcol.startswith(sep):
@@ -347,107 +497,15 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             if mcol.endswith(sep):
                 mcol = mcol[:-1]
             pcol = self.prefix + mcol
-            m_var = col.split('/')[-1]
-            # Set m_update
-            if m_var == 't' or col0 in autoload:
-                m_update = True
-            else:
-                m_update = False
-            # Configure dataset
-            if not m_update:
-                # completely skip processing if dataset is already in document
-                if doc.data.has_key(pcol):
-                    continue
-                # data is not loaded anyway
-                data = []
-            elif col == 't':
-                data = time_sequence
-            elif not interpolating:
-                # Take values column
-                data = not_interpolated(self.proxy, col0, startt, endt)[1]
-            else:
-                data = interpolated(self.proxy, col0, time_sequence)
 
-            if data is False:
-                data = []
-#               continue
-            # Get meas. unit
-            u = 'None'
-            if col == 't':
-                u = 'second'
-            else:
-                u = self.proxy.get_node_attr(col, 'unit')
-                if u in ['', 'None', None, False, 0]:
-                    u = False
-                # Correct missing celsius indication
-                if not u and m_var == 'T':
-                    u = 'celsius'
+            # Create the dataset
+            ds = self.create_dataset(pcol, p, col, col0, time_sequence)
+            if ds is False:
+                continue
 
-            logging.debug('%s', 'building the dataset')
-            ds = MisuraDataset(data=data, linked=LF)
-            ds.m_name = pcol
-            ds.tags = set([])
-            ds.m_pos = p
-            ds.m_smp = refsmp
-            ds.m_var = m_var
-            ds.m_col = col
-            ds.m_update = m_update
-            ds.m_conf = self.proxy.conf
-            ds.unit = str(u) if u else u
-            ds.old_unit = ds.unit
-
-            if col0 != 't':
-                ds_object, ds_name = ds.m_conf.from_column(col0)
-                opt = ds_object.gete(ds_name)
-                ds.m_label = _(opt["name"])
-                if opt.has_key('csunit'):
-                    ds.old_unit = opt["csunit"]
-            else:
-                ds.m_label = _("Time")
-
-            # Try to read column metadata from node attrs
-            if len(data) > 0 and col != 't':
-                for meta in ['percent', 'initialDimension']:
-                    val = 0
-                    if self.proxy.has_node_attr(col, meta):
-                        val = self.proxy.get_node_attr(col, meta)
-                        if type(val) == type([]):
-                            val = 0
-                    setattr(ds, 'm_' + meta, val)
-
-            # Find out the sample index to which this dataset refers
-            var, idx = iutils.namingConvention(col)
-            if '/sample' in col:
-                parts = col.split(sep)
-                for q in parts:
-                    if q.startswith('sample'):
-                        break
-                i = int(q[6:]) + 1
-                smp = LF.samples[i]
-                logging.debug(
-                    '%s %s %s %s %s %s', 'Assigning sample', i, 'to curve', col, smp, smp.ref)
-                ds.m_smp = smp
-                ds.m_var = var
-                # Retrieve initial dimension from sample
-                if var == 'd' and smp.conf.has_key('initialDimension'):
-                    ds.m_initialDimension = smp.conf['initialDimension']
-
-            if len(data) > 0 and col != 't':
-                # Units conversion
-                nu = self.rule_unit(col)
-                if u and nu:
-                    ds = units.convert(ds, nu[0])
-
-
-            if ds.m_smp is False:
-                ds.m_smp = refsmp
-            # Add the hierarchy tags
-            for sub, parent, leaf in iterpath(pcol):
-                if leaf:
-                    ds.tags.add(parent)
-            # Actually set the data
-#           LF.children.append(pcol)
-            if len(data) > 0:
+            # Count the dataset
+#           LF.children.append(pcol) #???
+            if len(ds.data) > 0:
                 names.append(pcol)
                 outds[pcol] = ds
             else:
