@@ -282,8 +282,14 @@ class LabelUnit(QtGui.QLabel):
         QtGui.QLabel.__init__(self, '.', parent=parent)
         self.prop = prop
         self.menu = False
-        self.setMaximumWidth(30)
-        self.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        #self.setMaximumWidth(30)
+        self.setMinimumSize(0,0)
+        self.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        
+    def sizeHint(self):
+        r = QtGui.QLabel.sizeHint(self)
+        self.setMaximumWidth(r.width())
+        return r
 
     def setMenu(self, menu):
         self.menu = menu

@@ -12,9 +12,17 @@ base_units = {'micron': 'length',
               'percent': 'part',
               'hertz': 'frequency',
               'kilobyte': 'memory',
-              'poise': 'viscosity'}
+              'poise': 'viscosity',
+              'cm^2/s': 'diffusivity',
+              'gram': 'weight',
+              'volt': 'tension'}
 
-from_base = {'length': {'micron': lambda v: v, 'nanometer': lambda v: v * 1E3, 'millimeter': lambda v: v * 1E-3},  # length
+from_base = {'length': {'micron': lambda v: v,
+                        'nanometer': lambda v: v * 1E3,
+                        'millimeter': lambda v: v * 1E-3,
+                        'centimeter': lambda v: v * 1E-4,
+                        'meter': lambda v: v * 1E-6,
+                        },
              # area
              'area': {'micron^2': lambda v: v, 'nanometer^2': lambda v: v * 1E6, 'millimeter^2': lambda v: v * 1E-6},
              # volume
@@ -28,43 +36,70 @@ from_base = {'length': {'micron': lambda v: v, 'nanometer': lambda v: v * 1E3, '
              'part': {'percent': lambda v: v, 'permille': lambda v: v * 10., 'permyriad': lambda v: v * 100.,
                       'ppm': lambda v: v * 10000., 'ppb': lambda v: v * (1.E7), 'ppt': lambda v: v * (1.E10)},
              'frequency': {'hertz': lambda v: v, 'kilohertz': lambda v: v / 1000.},
-             'memory': {
+            'memory': {
                 'byte': lambda v: v * 1000,
                 'kilobyte': lambda v: v,
                 'megabyte': lambda v: v * 1E-3,
                 'gigabyte': lambda v: v * 1E-6,
                 },
             'viscosity': {'poise': lambda v: v * 10,
-                          'pascal/s': lambda v: v,
-                          }
-}
-
-derivatives = {'length': {'micron': 1, 'nanometer': 1E3, 'millimeter': 1E-3},  # length
-               # area
-               'area': {'micron^2': lambda v: v, 'nanometer^2': lambda v: v * 1E6, 'millimeter^2': lambda v: v * 1E-6},
-               # volume
-               'volume': {'micron^3': lambda v: v, 'nanometer^3': lambda v: v * 1E9, 'millimeter^3': lambda v: v * 1E-9},
-               'angle': {'degree': 1, 'radian': pi / 180.},  # angle
-               # temperature
-               'temperature': {'celsius': 1, 'kelvin': 1, 'fahrenheit': 9 / 5.},
-               # time
-               'time': {'second': 1, 'minute': 1 / 60., 'hour': 1 / 3600., 'day': 1 / 86400.},
-               'part': {'percent': 1, 'permille': 10., 'permyriad': 100.,  # parts
-                        'ppm': 10000., 'ppb': 1.E7, 'ppt': 1.E10},
-               'frequency': {'hertz': 1, 'kilohertz': 1 / 1000.},  # freq
-               'memory': {
-                    'byte': 1000,
-                    'kilobyte': 1,
-                    'megabyte': 1E-3,
-                    'gigabyte': 1E-6,
+                'pascal/s': lambda v: v,
                 },
-               'viscosity': {
-                            'poise': 10,
-                            'pascal/s': 1,
-                }
+            'diffusivity': {'cm^2/s': lambda v: v,
+                            'm^2/s': lambda v: v * 1E-4,
+                'mm^2/s': lambda v: v * 1E2,
+                },
+            'weight': {'gram': lambda v: v,
+                'kilogram': lambda v: v * 1E-3,
+                'milligram': lambda v: v * 1E3
+                },
+            'tension': {'volt': lambda v: v,
+                'millivolt': lambda v: v * 1E3
+                },
 }
 
-to_base = {'length': {'micron': lambda v: v, "nanometer": lambda v: v * 1E-3, 'millimeter': lambda v: v * 1E3},  # length
+derivatives = {'length': {'micron': 1,
+                          'nanometer': 1E3,
+                          'millimeter': 1E-3,
+                          'centimeter': 1E-4,
+                          'meter': 1E-6},
+           'area': {'micron^2': lambda v: v, 'nanometer^2': lambda v: v * 1E6, 'millimeter^2': lambda v: v * 1E-6},
+           'volume': {'micron^3': lambda v: v, 'nanometer^3': lambda v: v * 1E9, 'millimeter^3': lambda v: v * 1E-9},
+           'angle': {'degree': 1, 'radian': pi / 180.},  # angle
+           'temperature': {'celsius': 1, 'kelvin': 1, 'fahrenheit': 9 / 5.},
+           'time': {'second': 1, 'minute': 1 / 60., 'hour': 1 / 3600., 'day': 1 / 86400.},
+           'part': {'percent': 1, 'permille': 10., 'permyriad': 100.,  # parts
+                    'ppm': 10000., 'ppb': 1.E7, 'ppt': 1.E10},
+           'frequency': {'hertz': 1, 'kilohertz': 1 / 1000.},  # freq
+           'memory': {
+                'byte': 1000,
+                'kilobyte': 1,
+                'megabyte': 1E-3,
+                'gigabyte': 1E-6,
+                },
+                'viscosity': {
+                'poise': 10,
+                'pascal/s': 1,
+                },
+            'diffusivity': {'cm^2/s': 1,
+                'm^2/s': 1E-4,
+                'mm^2/s': 1E2,
+                },
+            'weight': {'gram': 1,
+                'kilogram': 1E-3,
+                'milligram': 1E3
+                },
+            'tension': {'volt': 1,
+                'millivolt': 1E3
+                },
+}
+
+to_base = {'length': {'micron': lambda v: v,
+                      "nanometer": lambda v: v * 1E-3,
+                      'millimeter': lambda v: v * 1E3,
+                      'centimeter': lambda v: v * 1E4,
+                      'meter': lambda v: v * 1E6,
+                      },
            # area
            'area': {'micron^2': lambda v: v, 'nanometer^2': lambda v: v * 1E-6, 'millimeter^2': lambda v: v * 1E6},
            # volume
@@ -79,19 +114,30 @@ to_base = {'length': {'micron': lambda v: v, "nanometer": lambda v: v * 1E-3, 'm
                     'ppm': lambda v: v / 10000., 'ppb': lambda v: 1. * v / (10 ** 7), 'ppt': lambda v: 1. * v / 10 ** 10},  # freq
            'frequency': {'hertz': lambda v: v, 'kilohertz': lambda v: v * 1000.},
            'memory': {
-                    'byte': lambda v: v * 1E-3,
-                    'kilobyte': lambda v: v,
-                    'megabyte': lambda v: v * 1E3,
-                    'gigabyte': lambda v: v * 1E6,
-                    },
-           'viscosity': {
-                    'poise': lambda v: v * 0.1,
-                    'pascal/s': lambda v: v,
-                    }
+                'byte': lambda v: v * 1E-3,
+                'kilobyte': lambda v: v,
+                'megabyte': lambda v: v * 1E3,
+                'gigabyte': lambda v: v * 1E6,
+                },
+            'viscosity': {
+                'poise': lambda v: v * 0.1,
+                'pascal/s': lambda v: v,
+                },
+            'diffusivity': {'cm^2/s': lambda v: v,
+                'm^2/s': lambda v: v * 1E4,
+                'mm^2/s': lambda v: v * 1E-2,
+                },
+            'weight': {'gram': lambda v: v,
+               'kilogram': lambda v: v * 1E3,
+               'milligram': lambda v: v * 1E-3},
+            'tension': {'volt': lambda v: v,
+                'millivolt': lambda v: v * 1E-3,
+                },
 }
 
-# Veusz symbols
+# Latex symbols for Veusz
 symbols = {'micron': '{\mu}m', 	'nanometer': 'nm', 	'millimeter': 'mm',
+           'centimeter': 'cm', 'meter': 'm',
            'micron^3': '{{\mu}m^3}', 'micron^2': '{{\mu}m^2}',
            'nanometer^3': '{nm^3}', 'nanometer^2': '{nm^2}',
            'millimeter^3': '{mm^3}', 'millimeter^2': '{mm^2}',
@@ -106,17 +152,28 @@ symbols = {'micron': '{\mu}m', 	'nanometer': 'nm', 	'millimeter': 'mm',
            'gigabyte': 'GB',
            'poise': 'P',
            'pascal/s': 'Pa/s',
+           'cm^2/s': '{cm^2}{s^-1}',
+           'm^2/s': '{m^2}{s^-1}',
+           'mm^2/s': '{mm^2}{s^-1}',
+           'gram': 'g',
+           'milligram': 'mg',
+           'kilogram': 'kg',
+           'volt': 'V',
+           'millivolt': 'mV',
            }
 
-# HTML symbols
+# HTML symbols for Qt
 hsymbols = symbols.copy()
 hsymbols.update({'micron': u'\u03bcm', 'micron^2': u'\u03bcm²', 'micron^3': u'\u03bcm³',
                  'nanometer^2': u'nm²', 'nanometer^3': u'nm³',
-                                'millimeter^2': u'mm²', 'millimeter^3': u'mm³',
-                                'degree': u'°',
-                                'celsius': u'°C', 'kelvin': u'°K', 'fahrenheit': u'°F',
-                                'permille': u'\u2030',
-                                'pixel': 'px'
+                 'millimeter^2': u'mm²', 'millimeter^3': u'mm³',
+                 'degree': u'°',
+                 'celsius': u'°C', 'kelvin': u'°K', 'fahrenheit': u'°F',
+                 'permille': u'\u2030',
+                 'pixel': 'px',
+                 'cm^2/s': u'cm²s⁻¹',
+                 'm^2/s': u'm²s⁻¹',
+                 'mm^2/s': u'mm²s⁻¹',
                  })
 
 
@@ -137,6 +194,9 @@ user_defaults = {'length': 'micron',
                  'time': 'second',
                  'part': 'percent',
                  'viscosity': 'posie',
+                 'diffusivity': 'cm^2/s',
+                 'weight': 'gram',
+                 'tension': 'volt',
                  }
 
 
@@ -145,7 +205,7 @@ def get_unit_info(unit, units):
     p = unit.split('^')
     u = p[0]
     if len(p) == 2:
-        p = int(p[1])
+        p = int(p[1].split('/')[0])
     else:
         p = 1
 # 	print units
@@ -208,7 +268,7 @@ class Converter(object):
             self.from_client = lambda val: val
         else:
             group = known_units[csunit]
-            print 'group,unit' , group, unit, csunit
+            print 'group,unit', group, unit, csunit
             cfb = from_base[group][csunit]  # client-to-base
             ctb = to_base[group][self.csunit]  # client-to-base
             # How to manage different groups?
@@ -241,6 +301,7 @@ import veusz.plugins as plugins
 from copy import copy
 import numpy as np
 
+
 def get_from_unit(ds, to_unit):
     """Get starting conversion unit for dataset `ds0` to convert it to `to_unit`"""
 #     ds = getattr(ds0, 'pluginds', ds0)
@@ -263,6 +324,7 @@ def get_from_unit(ds, to_unit):
 
     return from_unit, to_unit, from_group, to_group
 
+
 def convert_func(ds, to_unit):
     """Returns conversion function which can be applied over an array or value
     to convert `ds0` to `to_unit`"""
@@ -276,6 +338,7 @@ def convert_func(ds, to_unit):
         pfunc = percentile_func(ds, action)
         ret = lambda out: func(pfunc(out))
     return ret
+
 
 def convert(ds, to_unit):
     """Convert dataset `ds` to `to_unit`.
@@ -301,6 +364,7 @@ def convert(ds, to_unit):
         logging.debug('%s %s %s', 'converting m_initialDimension', ini, ini1)
     return ds1
 
+
 def percentile_action(ds, action='Invert'):
     """Autodetect percentile conversion action to be performed"""
     cur = getattr(ds, 'm_percent', False)
@@ -310,8 +374,9 @@ def percentile_action(ds, action='Invert'):
             action = 'To Absolute'
         else:
             action = 'To Percent'
-    logging.debug('percentile_action %s',action)
+    logging.debug('percentile_action %s', action)
     return action
+
 
 def percentile_func(ds, action='To Absolute', auto=True):
     """Returns the function used to convert dataset `ds` to percent or back to absolute"""
@@ -320,7 +385,7 @@ def percentile_func(ds, action='To Absolute', auto=True):
     if not ini:
         if not auto or action != 'To Percent':
             raise plugins.DatasetPluginException('Selected dataset does not have an initial dimension set. \
-        Please first run "Initial dimension..." tool. {}{}{}'.format(action,ds.m_col, ds.m_initialDimension))
+        Please first run "Initial dimension..." tool. {}{}{}'.format(action, ds.m_col, ds.m_initialDimension))
         ds.m_initialDimension = np.array(ds.data[:5]).mean()
 
     if action == 'To Absolute':
@@ -331,6 +396,7 @@ def percentile_func(ds, action='To Absolute', auto=True):
     elif action == 'To Percent':
         func = lambda out: 100. * out / ds.m_initialDimension
     return func
+
 
 def percentile_conversion(ds, action='Invert', auto=True):
     ds = copy(ds)
@@ -351,5 +417,3 @@ def percentile_conversion(ds, action='Invert', auto=True):
         ds.unit = 'percent'
     ds.data = plugins.numpyCopyOrNone(out)
     return ds
-
-
