@@ -87,6 +87,14 @@ class ImportParamsMisura(base.ImportParamsBase):
     })
 
 
+def read_data(proxy, col):
+    """Read `col` node from `proxy`"""
+    data0 = np.array(proxy.col(col, (0, None)))
+    # FIXME: now superfluous?
+    data = data0.view(np.float64).reshape((len(data0), 2))
+    return data
+
+
 def not_interpolated(proxy, col, startt, endt):
     """Retrieve `col` from `proxy` and extend its time range from `startt` to `endt`"""
     logging.debug('%s %s %s %s', 'not interpolating col', col, startt, endt)
@@ -96,12 +104,11 @@ def not_interpolated(proxy, col, startt, endt):
         logging.debug('%s %s %s', 'Skipping column: no data', col, zt)
         return False, False
     zt = zt[0]
-    data0 = np.array(proxy.col(col, (0, None)))
-    # FIXME: now superfluous?
-    data = data0.view(np.float64).reshape((len(data0), 2))
+    data = read_data(proxy, col)
     # Extend towards start
     s = data[0][0]
     # Translate natural times
+    # FIXME: used only for old test files!
     if s > 10**8:
         data[0][:] -= s
         s = 0
@@ -395,28 +402,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                     val = 0
             setattr(ds, 'm_' + meta, val)
 
-    def create_dataset(self, pcol, p, col, col0, time_sequence):
-        m_var = col.split('/')[-1]
-        # Set m_update
-        if m_var == 't' or col0 in self.autoload:
-            m_update = True
-        else:
-            m_update = False
-        # Configure dataset
-        if not m_update:
-            # completely skip processing if dataset is already in document
-            if self._doc.data.has_key(pcol):
-                return False
-            # data is not loaded anyway
-            data = []
-        elif col == 't':
-            data = time_sequence
-        else:
-            data = interpolated(self.proxy, col0, time_sequence)
-        # Interpolation error
-        if data is False:
-            data = []
-
+    def create_dataset(self, data, pcol, col, col0, m_var, m_update=True, p=0):
         # Get meas. unit
         u = 'None'
         if col == 't':
@@ -467,7 +453,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         if not self.get_file_proxy():
             logging.debug('EMPTY FILENAME')
             return []
-        doc = self._doc
         LF = self.LF
 
         # Set available curves on the LF
@@ -497,9 +482,41 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             if mcol.endswith(sep):
                 mcol = mcol[:-1]
             pcol = self.prefix + mcol
+            m_var = col.split('/')[-1]
+            # Set m_update
+            if m_var == 't' or col0 in self.autoload:
+                m_update = True
+            else:
+                m_update = False
+
+            sub_time_sequence = False
+            attr = self.proxy.get_node_attr(col, 'attr')
+            if attr in ['', 'None', None, False, 0]:
+                attr = []
+
+            # Read data
+            if not m_update:
+                # completely skip processing if dataset is already in document
+                if self._doc.data.has_key(pcol):
+                    return False
+                # data is not loaded anyway
+                data = []
+            elif col == 't':
+                data = time_sequence
+            elif 'Event' not in attr:
+                data = interpolated(self.proxy, col0, time_sequence)
+                # Interpolation error
+                if data is False:
+                    data = []
+            else:
+                # Get raw data and time_sequence
+                data = read_data(self.proxy, col).transpose()
+                sub_time_sequence = data[0]
+                data = data[1]
 
             # Create the dataset
-            ds = self.create_dataset(pcol, p, col, col0, time_sequence)
+            ds = self.create_dataset(
+                data, pcol, col, col0, m_var, m_update, p)
             if ds is False:
                 continue
 
@@ -510,7 +527,20 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 outds[pcol] = ds
             else:
                 availds[pcol] = ds
+                
+            # Create sub-time dataset
+            if sub_time_sequence is not False:
+                subcol = pcol+sep+'t'
+                subvar = 't'
+                subds = self.create_dataset(sub_time_sequence, subcol,
+                                            subvar, subvar, subvar)
+                names.append(subcol)
+                outds[subcol] = subds
+                
+            
+            
             job(p + 1)
+
         # Detect ds which should be removed from availds because already
         # contained in imported names
         avail_set = set(self._doc.available_data.keys())
