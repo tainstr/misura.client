@@ -304,10 +304,15 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         cursor.close()
         return r
 
+    def clean_rules(self):
+        for rule in ['rule_load', 'rule_exc', 'rule_inc']:
+            self[rule] = self[rule].strip()
+
     def save(self, path=False):
         """Save to an existent client configuration database."""
         logging.debug('%s', 'SAVING')
         cursor = self.conn.cursor()
+        self.clean_rules()
         self.store.write_table(cursor, 'conf', desc=self.desc)
         for name in recent_tables:
             tname = "recent_" + name
@@ -490,7 +495,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             return False
         self.known_uids[self.uid] = file_path
         return file_path, dbPath
-    
+
     def last_directory(self, category):
         """Return most recently used directory for files in `category`"""
         tab = getattr(self, 'recent_' + category)
@@ -499,7 +504,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if len(tab) > 0:
             d = os.path.dirname(tab[-1][0])
         return d
-    
+
 import importlib
 def data_import(confdb):
     plugins = confdb['m3_plugins'].splitlines()
@@ -522,5 +527,3 @@ elif os.path.exists(cf):
     confdb = ConfDb(path=cf)
 settings.setValue('/Configuration', confdb.path)
 data_import(confdb)
-
-
