@@ -22,6 +22,24 @@ except:
     misura3 = False
 
 
+class DatabasesArea(QtGui.QMdiArea):
+    convert = QtCore.pyqtSignal(str)
+    def __init__(self, parent=None):
+        super(DatabasesArea, self).__init__(parent)
+        self.setAcceptDrops(True)
+        
+    def dragEnterEvent(self, event):
+        logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, drop_event):
+        urls = drop_event.mimeData().urls()
+        for url in urls:
+            url = url.toString().replace('file://','')
+            self.convert.emit(url)
+
+
 class MainWindow(QtGui.QMainWindow):
 
     """Open single files, local databases, remote databases."""
@@ -29,7 +47,8 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(QtGui.QMainWindow, self).__init__(parent)
         self.tab = QtGui.QTabWidget()
-        self.area = QtGui.QMdiArea()
+        self.setAcceptDrops(True)
+        self.area = DatabasesArea(self)
         self.tab.addTab(self.area, _('Databases'))
         self.tab.setTabsClosable(True)
         self.tab.setDocumentMode(True)
@@ -49,6 +68,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.myMenuBar.recentFile, QtCore.SIGNAL(
             'convert(QString)'), self.convert_file)
+        
+        self.area.convert.connect(self.convert_file)
 
         self.connect(self.myMenuBar.recentDatabase, QtCore.SIGNAL(
             'select(QString)'), self.open_database)
@@ -79,8 +100,11 @@ class MainWindow(QtGui.QMainWindow):
         iutils.app.quit()
 
     def convert_file(self, path):
-        outpath = dataimport.convert_file(path)
-        self.open_file(outpath)
+        if path.endswith('.h5'):
+            self.open_file(path)
+        else:
+            outpath = dataimport.convert_file(path)
+            self.open_file(outpath)
 
     def open_file(self, path):
         path = unicode(path)
