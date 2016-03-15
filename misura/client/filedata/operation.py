@@ -375,7 +375,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             logging.debug(
                 '%s %s %s %s %s %s', 'Assigning sample', i, 'to curve', col, smp, smp.ref)
             ds.m_smp = smp
-            ds.m_var = var
             # Retrieve initial dimension from sample
             if var == 'd' and smp.conf.has_key('initialDimension'):
                 ds.m_initialDimension = smp.conf['initialDimension']
