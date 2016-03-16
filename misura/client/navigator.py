@@ -38,7 +38,7 @@ class Navigator(filedata.QuickOps, QtGui.QTreeView):
         self.setSelectionBehavior(QtGui.QTreeView.SelectItems)
         self.setSelectionMode(QtGui.QTreeView.ExtendedSelection)
         self.setUniformRowHeights(True)
-
+        self.setIconSize(QtCore.QSize(24, 16))
         self.connect(self, QtCore.SIGNAL('clicked(QModelIndex)'), self.select)
 
 

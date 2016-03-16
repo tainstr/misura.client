@@ -43,6 +43,31 @@ void = None
 voididx = QtCore.QModelIndex()
 
 
+def get_item_icon(plotwg):
+    style = plotwg.settings.get('PlotLine').get('style').val
+    i = veusz.setting.LineStyle._linestyles.index(style)
+    line_icon = controls.LineStyle._icons[i]
+    marker = plotwg.settings.get('marker').val
+    if marker is False or str(marker)=='none':
+        return line_icon
+    i = veusz.utils.MarkerCodes.index(marker)
+    marker_icon = controls.Marker._icons[i]
+    
+    combined = QtGui.QIcon()
+    pix = QtGui.QPixmap(24, 16)
+    pix.fill()
+    marker_pix = marker_icon.pixmap(10,10)
+    line_pix = line_icon.pixmap(24, 8)
+    painter = QtGui.QPainter(pix)
+    painter.setRenderHint(QtGui.QPainter.Antialiasing)
+    painter.drawPixmap(0, 8, line_pix)
+    painter.drawPixmap(14, 0, marker_pix)
+    
+    painter.end()
+    combined.addPixmap(pix)
+    
+    return combined
+
 class DocumentModel(QtCore.QAbstractItemModel):
     changeset = 0
     _plots = False
@@ -192,7 +217,8 @@ class DocumentModel(QtCore.QAbstractItemModel):
                 return _('Dataset')
             # TODO!
             return _('Value')
-
+        
+        
     def decorate(self, ent, role):
         """Find text color and icon decorations for dataset ds"""
         if not ent.ds:
@@ -207,19 +233,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             # No plots
             if plotwg is False:
                 return void
-            # No marker
-            mkr = plotwg.settings.get('marker').val
-            if mkr is False:
-                return void
-            if mkr == 'none':
-                # Retrieve line style instead
-                style = plotwg.settings.get('PlotLine').get('style').val
-#					print 'GOT STYLE',node.m_var,style
-                i = veusz.setting.LineStyle._linestyles.index(style)
-                return controls.LineStyle._icons[i]
-            # Other markers
-            i = veusz.utils.MarkerCodes.index(mkr)
-            return controls.Marker._icons[i]
+            return get_item_icon(plotwg)
         if role == Qt.ForegroundRole:
             if plotwg is False:
                 return void
