@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/pythonthin
 # -*- coding: utf-8 -*-
 """Arrange curves and axes"""
 from misura.canon.logger import Log as logging
@@ -165,11 +165,10 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             props['marker'] = veusz.utils.MarkerCodes[iax]
         elif self.fields['dataset'] == 'Line Style':
             props['PlotLine/style'] = lineStyles[iax]
-            props['marker'] = 'none'
         
         # Set the unused style component to default
-        uvar, um_var, udefvar = defvars[unused_formatting_opt]
-        props[uvar] = udefvar
+        #uvar, um_var, udefvar = defvars[unused_formatting_opt]
+        #props[uvar] = udefvar
 
         # Secondary style value
         ax_datasets = tree['axis'][yax.path]

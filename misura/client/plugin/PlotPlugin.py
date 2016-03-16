@@ -119,9 +119,14 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             document.OperationMultiple(preop, descr='PlotDataset:Create'))
 
         obj = gobj.getChild(name)
-        self.toset(obj, 'marker', u'none')
+        n = len(doc.data[yData].data)
+        thin = int(max(1, n/100))
+        if n > 10:
+            self.toset(obj, 'marker', u'none')
+        else:
+            self.toset(obj, 'marker', u'circle')
         self.toset(obj, 'markerSize', u'2pt')
-        self.toset(obj, 'thinfactor', 10)
+        self.toset(obj, 'thinfactor', thin)
         self.toset(obj, 'yData', yData)
         self.toset(obj, 'xData', xData)
         self.toset(obj, 'key', name.replace('_', '\\_'))
