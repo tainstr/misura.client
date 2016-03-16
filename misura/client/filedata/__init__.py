@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from model import ism, DocumentModel
-from operation import ImportParamsMisura, OperationMisuraImport
+from operation import ImportParamsMisura, OperationMisuraImport, jobs, job, done
 from linked import LinkedMisuraFile
 from entry import DatasetEntry, NodeEntry, dstats
 from dataset import MisuraDataset, Sample

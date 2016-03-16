@@ -65,6 +65,7 @@ class RunMethod(QtCore.QRunnable):
 
     def __init__(self, func, *args, **kwargs):
         QtCore.QRunnable.__init__(self)
+        self.notifier = QtCore.QObject()
         self.func = func
         self.args = args
         self.kwargs = kwargs
@@ -82,6 +83,7 @@ class RunMethod(QtCore.QRunnable):
         logging.debug('RunMethod.run result %s', r)
         self.runnables.remove(self)
         registry.tasks.done(self.pid)
+        self.notifier.emit(QtCore.SIGNAL('done()'))
 
 
 class Active(object):

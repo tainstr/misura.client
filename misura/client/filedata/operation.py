@@ -21,7 +21,7 @@ from .. import clientconf
 
 from .. import units
 
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
 
 from misura.client import _
 
@@ -145,37 +145,38 @@ def interpolated(proxy, col, ztime_sequence):
 
 
 def tasks():
-    return getattr(live.registry, 'tasks', False)
+    r = getattr(live.registry, 'tasks', False)
+    if r is False:
+        print 'NO TASKS'
+    return r
 
 
 def jobs(n, pid="File import"):
     # FIXME: causes random crashes while opening microscope tests in compiled
     # win exe
-    return
+    #return
     t = tasks()
-    if not t:
-        return
-    t.jobs(n, pid)
+    if t:
+        t.jobs(n, pid)
+        
 
 
 def job(n, pid="File import", label=''):
     # FIXME: causes random crashes while opening microscope tests in compiled
     # win exe
-    return
+    #return
     t = tasks()
-    if not t:
-        return
-    t.job(n, pid, label)
+    if t:
+        t.job(n, pid, label)
 
 
 def done(pid="File import"):
     # FIXME: causes random crashes while opening microscope tests in compiled
     # win exe
-    return
+    #return
     t = tasks()
-    if not t:
-        return
-    t.done(pid)
+    if t:
+        t.done(pid)
 
 
 class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):

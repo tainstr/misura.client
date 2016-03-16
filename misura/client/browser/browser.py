@@ -10,6 +10,7 @@ from .. import confwidget
 from .. import filedata
 from ..clientconf import confdb
 from .. import iutils
+from .. import widgets
 from ..database import getDatabaseWidget, getRemoteDatabaseWidget
 from .. import parameters
 
@@ -102,9 +103,19 @@ class MainWindow(QtGui.QMainWindow):
     def convert_file(self, path):
         if path.endswith('.h5'):
             self.open_file(path)
-        else:
-            outpath = dataimport.convert_file(path)
-            self.open_file(outpath)
+            return True
+        self.converter = False
+        converter = dataimport.get_converter(path)
+        run = widgets.RunMethod(converter.convert, path, filedata.jobs, filedata.job, filedata.done)
+        run.step = 100        
+        run.pid = converter.pid
+        self.connect(run.notifier, QtCore.SIGNAL('done()'), self._open_converted, QtCore.Qt.QueuedConnection)
+        QtCore.QThreadPool.globalInstance().start(run)
+        self.converter = converter
+        return True
+            
+    def _open_converted(self):
+        self.open_file(self.converter.outpath)
 
     def open_file(self, path):
         path = unicode(path)
