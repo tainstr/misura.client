@@ -7,6 +7,7 @@ import veusz.utils
 from misura.client.iutils import get_plotted_tree
 from misura.client.colors import colorize, colorLevels
 import utils
+from matplotlib.axis import YAxis
 
 lineStyles = ['solid', 'dashed', 'dotted', 'dash-dot',
               'dash-dot-dot', 'dotted-fine', 'dashed-fine', 'dash-dot-fine',
@@ -93,7 +94,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             self.dict_toset(ax, props)
         return axes, axcolors
     
-    def arrange_curve(self, plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formetting_opt):
+    def arrange_curve(self, plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formatting_opt):
         # Set colors according to axes
         obj = self.doc.resolveFullWidgetPath(plotpath)
 
@@ -133,15 +134,16 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             return False
 
         # Set the unused style component to default
-        uvar, um_var, udefvar = defvars[unused_formetting_opt]
+        uvar, um_var, udefvar = defvars[unused_formatting_opt]
         props[uvar] = udefvar
         setattr(smp, um_var, udefvar)
 
-        # Get output value
-        smps = tree['sample']
-        idx = 0
-        if smp in smps:
-            idx = smps.index(smp)
+        # Secondary style value
+        ax_datasets = tree['axis'][yax.path]
+        if y in ax_datasets:
+            idx = ax_datasets.index(y)
+        else:
+            idx = 0
         if m_var == 'm_marker':
             outvar = veusz.utils.MarkerCodes[idx]
         elif m_var == 'm_style':
@@ -185,8 +187,8 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             raise plugins.ToolsPluginException(
                 'You must choose different markers for Datasets and Samples.')
         
-        unused_formetting_opt = set(defvars.keys()) - set([fields['sample'], fields['dataset']])
-        unused_formetting_opt = list(unused_formetting_opt)[0]
+        unused_formatting_opt = set(defvars.keys()) - set([fields['sample'], fields['dataset']])
+        unused_formatting_opt = list(unused_formatting_opt)[0]
 
         # Search for the graph widget
         gobj = self.doc.resolveFullWidgetPath(fields['currentwidget'])
@@ -207,7 +209,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         var, m_var, defvar = defvars[fields['sample']]
         LR, LG, LB = colorLevels(len(smps))
         for plotpath in tree['plot']:
-            self.arrange_curve(plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formetting_opt)
+            self.arrange_curve(plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formatting_opt)
             
         self.apply_ops()
 
