@@ -21,10 +21,10 @@ class Template(unittest.TestCase):
 
 		expected_output = "any text should be changed with any other changed text"
 
-		substitutions_has = {"$TO_CHANGE1$": "should be changed with",
+		substitutions_hash = {"$TO_CHANGE1$": "should be changed with",
 				     "{{{TO_CHANGE2}}}": "changed"}
 
-		self.assertEqual(expected_output, template.convert(template_text, substitutions_has))
+		self.assertEqual(expected_output, template.convert(template_text, substitutions_hash))
 
 
 if __name__ == "__main__":

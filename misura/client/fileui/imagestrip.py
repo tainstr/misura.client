@@ -38,11 +38,32 @@ class ImageStrip(QtGui.QWidget):
         self.menu.addAction("Export Images", self.export_images)
 
     def export_images(self):
-        output_filename = QtGui.QFileDialog.getSaveFileName(self, 'Save Report', '', '*.html')
+        output_filename = QtGui.QFileDialog.getSaveFileName(self,
+                                                            'Save Report',
+                                                            '',
+                                                            '*.html')
         if not output_filename:
             return
 
-        output_html = htmlreport.create_images_report(self.decoder, self.decoder.proxy.conf.hsm.measure, self.doc.data['0:t'].data, self.doc.data.get('0:kiln/T').data)
+        instrument_name = self.decoder.datapath.split('/')[1]
+        sample_name = self.decoder.datapath.split('/')[2]
+
+        instrument = getattr(self.decoder.proxy.conf, instrument_name)
+        sample = getattr(instrument, sample_name)
+
+        characteristic_shapes = {
+            'Sintering': sample['Sintering'],
+            'Softening': sample['Softening'],
+            'Sphere': sample['Sphere'],
+            'Halfphere': sample['HalfSphere'],
+            'Melting': sample['Melting'],
+            }
+
+        output_html = htmlreport.create_images_report(self.decoder,
+                                                      instrument.measure,
+                                                      self.doc.data['0:t'].data,
+                                                      self.doc.data.get('0:kiln/T').data,
+                                                      characteristic_shapes)
 
         with open(output_filename, 'w') as output_file:
             output_file.write(output_html)
