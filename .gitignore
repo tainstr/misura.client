@@ -67,3 +67,4 @@ docs/_build/
 
 # PyBuilder
 target/
+/misura/client/installer/misura4.tbz2
