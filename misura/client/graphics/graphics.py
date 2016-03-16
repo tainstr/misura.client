@@ -236,7 +236,8 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         model = view.model()
         wdg = self.mw.document.resolveFullWidgetPath(path)
         idx = model.getWidgetIndex(wdg)
-        view.setCurrentIndex(idx)
+        if idx:
+            view.setCurrentIndex(idx)
 
     def hs_navigator(self):
         """Hide/show the Misura Navigator for opened tests and files"""

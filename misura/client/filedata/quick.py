@@ -325,6 +325,8 @@ class QuickOps(object):
     def deleteData(self, node=False, remove_dataset=True, recursive=True):
         """Delete a dataset and all depending graphical widgets."""
         self.model().pause(0)
+        if not node:
+            return True
         node_path = node.path
         # Remove and exit if dataset was only in available_data
         if self.doc.available_data.has_key(node_path):
