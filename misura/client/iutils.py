@@ -10,6 +10,7 @@ import sys
 from misura.canon.logger import Log as logging
 from time import sleep
 import signal
+from collections import OrderedDict
 
 import parameters as params
 import network
@@ -260,7 +261,7 @@ def get_plotted_tree(base, m=False):
                       'axis':{axispath:[ds0,ds1,...]},
                       'sample':[smp0,smp1,...]}"""
     if m is False:
-        m = {'plot': {}, 'dataset': {}, 'axis': {}, 'sample': []}
+        m = {'plot': OrderedDict(), 'dataset': OrderedDict(), 'axis': OrderedDict(), 'sample': []}
     for wg in base.children:
         # Recurse until I find an xy object
         if wg.typename == 'page':
@@ -302,6 +303,12 @@ def get_plotted_tree(base, m=False):
                 continue
             if not m['axis'].has_key(wg.path):
                 m['axis'][wg.path] = []
+    # Persistent sorting
+    for k0 in m.keys():
+        if k0=='sample': 
+            continue
+        for k1 in m[k0].keys():
+            m[k0][k1] = sorted(m[k0][k1]) 
     return m
 
 def shorten(name, number_of_chars_to_show=30):

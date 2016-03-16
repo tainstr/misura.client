@@ -7,7 +7,8 @@ import veusz.utils
 from misura.client.iutils import get_plotted_tree
 from misura.client.colors import colorize, colorLevels
 import utils
-from matplotlib.axis import YAxis
+
+from PyQt4 import QtGui
 
 lineStyles = ['solid', 'dashed', 'dotted', 'dash-dot',
               'dash-dot-dot', 'dotted-fine', 'dashed-fine', 'dash-dot-fine',
@@ -18,7 +19,47 @@ defvars = {'Line Style': ('PlotLine/style', 'm_style', 'solid'),
            'Line Color': ('PlotLine/color', 'm_color', '#000000'),
            'Point Marker': ('marker', 'm_marker', 'none')
            }
+# http://stackoverflow.com/a/4382138/1645874
+kelly_colors = [
+    '#000000', # black
+    '#c10020', # vivid red
+    '#00538a', # strong blue
+    '#007d34', # vivid green
+    '#ff6800', # vivid orange
+    '#803e75', # strong purple
+    '#a6bdd7', # very light blue
+    
+    '#f6768e', # strong purplish pink
+    '#53377a', # strong violet
+    '#ff7a5c', # strong yellowish pink
+    
+    '#ff8e00', # vivid orange yellow
+    '#b32851', # strong purplish red
+    '#f4c800', # vivid greenish yellow
+    '#7f180d', # strong reddish brown
+    '#93aa00', # vivid yellowish green
+    '#593315', # deep yellowish brown
+    '#f13a13', # vivid reddish orange
+    '#232c16', # dark olive green
+    '#ffb300', # vivid yellow
+    
+    '#cea262', # grayish yellow
+    '#817066', # medium gray
+    ]
 
+def find_unused_color(used):
+    idx = 0
+    color = kelly_colors[idx]
+    while color in used:            
+        logging.debug('%s %s', 'color is used', color)
+        idx += 1
+        if idx>=len(kelly_colors):
+            logging.error('Exausted free colors!')
+            color = '#000000'
+        else:
+            color = kelly_colors[idx]
+    logging.debug('%s %s', 'found color', color)
+    return color
 
 class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
@@ -53,34 +94,29 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             ax = self.doc.resolveFullWidgetPath(axp)
             if not axp.startswith(graph) or ax.settings.direction != 'vertical':
                 axes.remove(axp)
-            axcolors[ax.name] = ax.settings.Line.color
-
+            # Normalize colors to their html #code
+            axcolors[ax.name] = str(QtGui.QColor(ax.settings.Line.color).name())
+            
+        # Total axes for repositioning
         if len(axes) > 1:
             tot = 1. / (len(axes) - 1)
         else:
             tot = 0
-
-        levels = len(axes)
-        LR, LG, LB = colorLevels(levels)
-        dcolor = 0  # color skipping delta
-        used = axcolors.viewvalues()  # already used colors
+        
         for idx, axpath in enumerate(axes):
             ax = self.doc.resolveFullWidgetPath(axpath)
+            other_ax_colors = axcolors.copy()
+            other_ax_colors.pop(ax.name)
+            used = other_ax_colors.values()
+            
             color = '#000000'
-            # Generate html color for this idx
             if self.fields['dataset'] == 'Line Color':
                 if hasattr(ax, 'm_auto'):
-                    color = ax.m_auto.get('Line/color', False)
-                    logging.debug('%s %s', 'm_auto', color)
-                else:
-                    color = colorize(idx + dcolor, LR, LG, LB)
-                    logging.debug('%s %s', 'found color', color)
-                    while color in used:
-                        logging.debug('%s %s', 'color is used', color)
-                        dcolor += 1
-                        levels += 1
-                        LR, LG, LB = colorLevels(levels)
-                        color = colorize(idx + dcolor, LR, LG, LB)
+                    color = axcolors[ax.name]
+                    logging.debug('%s %s', 'm_auto override', color)
+                elif len(axes)>1:
+                    # Generate html color for this idx
+                    color = find_unused_color(used)
 
             axcolors[ax.name] = color
             props = {'Line/color': color,
@@ -88,20 +124,29 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                      'TickLabels/color': color,
                      'MajorTicks/color': color,
                      'MinorTicks/color': color}
+
             # Reposition
             if self.fields['space']:
                 props['otherPosition'] = idx * tot
-            self.dict_toset(ax, props)
+
+            self.dict_toset(ax, props, preserve=True)
+
         return axes, axcolors
-    
+
     def arrange_curve(self, plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formatting_opt):
         # Set colors according to axes
+        print 'BBBBBBBBBBB', axcolors, axes
         obj = self.doc.resolveFullWidgetPath(plotpath)
-
-        plotted_curve = self.fields.get('plotted_curve', False)
-        current_curve = obj.settings['yData']
-
-        if not plotted_curve or plotted_curve in current_curve:
+        # Get y dataset
+        y = obj.settings['yData']
+        if not self.doc.data.has_key(y):
+            logging.error('No y dataset found - skipping invisible curve', plotpath, y)
+            return False
+        
+        # Flag passed by PlotPlugin to operate only on currently plotted curves exclusively
+        plotted_dataset_names = self.fields.get('plotted_dataset_names', False)
+        
+        if not plotted_dataset_names or y in plotted_dataset_names:
             color = axcolors[obj.settings.yAxis]
             props = {'PlotLine/color': color,
                      'MarkerFill/color': color,
@@ -114,7 +159,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         if yax is None:
             return False
         iax = axes.index(yax.path)
-        
+
         if self.fields['dataset'] == 'Point Marker':
             props['PlotLine/style'] = 'solid'
             props['marker'] = veusz.utils.MarkerCodes[iax]
@@ -122,72 +167,44 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             props['PlotLine/style'] = lineStyles[iax]
             props['marker'] = 'none'
         
-        # Get dataset for marker setting
-        y = obj.settings['yData']
-        if not self.doc.data.has_key(y):
-            self.dict_toset(obj, props)
-            return False
-        ds = self.doc.data[y]
-        smp = getattr(ds, 'm_smp', False)
-        if not smp:
-            self.dict_toset(obj, props)
-            return False
-
         # Set the unused style component to default
         uvar, um_var, udefvar = defvars[unused_formatting_opt]
         props[uvar] = udefvar
-        setattr(smp, um_var, udefvar)
 
         # Secondary style value
         ax_datasets = tree['axis'][yax.path]
         if y in ax_datasets:
             idx = ax_datasets.index(y)
         else:
-            idx = 0
+            idx = len(ax_datasets)
         if m_var == 'm_marker':
             outvar = veusz.utils.MarkerCodes[idx]
         elif m_var == 'm_style':
             outvar = lineStyles[idx]
         elif m_var == 'm_color':
+            #FIXME: remove this! should inherit somehow.
             outvar = colorize(idx, LR, LG, LB)
-
         props[var] = outvar
-        setattr(smp, m_var, outvar)
 
-        if smp.ref:
-            self.dict_toset(obj, props)
-            return False
-
-        refsmp = ds.linked.samples[0]
-        refvar = getattr(refsmp, m_var)
-        smpvar = getattr(smp, m_var)
-        # Recover the linestyle from the reference sample
-        if smp['idx'] == 0 and refvar not in ['none', False]:
-            setattr(smp, m_var, refvar)
-            props[var] = refvar
-            
-        # Set back the reference marker if it was not set and this is the
-        # first sample
-        if smp['idx'] == 0:
-            logging.debug(
-                '%s %s %s %s', 'Setting back reference marker', smp, refsmp, outvar)
-            setattr(refsmp, m_var, outvar)
-        self.dict_toset(obj, props)
+        self.dict_toset(obj, props, preserve = True)
         return True
-        
+
     def apply(self, cmd, fields):
         """Do the work of the plugin.
         cmd: veusz command line interface object (exporting commands)
         fields: dict mapping field names to values
         """
+        logging.debug('ArrangePlugin.apply')
         self.ops = []
+        self.cmd = cmd
         self.doc = cmd.document
         self.fields = fields
         if fields['sample'] == fields['dataset']:
             raise plugins.ToolsPluginException(
                 'You must choose different markers for Datasets and Samples.')
-        
-        unused_formatting_opt = set(defvars.keys()) - set([fields['sample'], fields['dataset']])
+
+        unused_formatting_opt = set(
+            defvars.keys()) - set([fields['sample'], fields['dataset']])
         unused_formatting_opt = list(unused_formatting_opt)[0]
 
         # Search for the graph widget
@@ -199,18 +216,17 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         graph = gobj.path
         tree = get_plotted_tree(gobj)
-        logging.debug('%s %s %s %s', 'Plotted axis', graph, tree['axis'], tree)
         smps = tree['sample']
-        
+
         # Ax Positioning
         axes, axcolors = self.arrange_axes(tree, graph)
-        
         # Set plot colors based on axis colors
         var, m_var, defvar = defvars[fields['sample']]
         LR, LG, LB = colorLevels(len(smps))
         for plotpath in tree['plot']:
-            self.arrange_curve(plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formatting_opt)
-            
+            self.arrange_curve(
+                plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formatting_opt)
+
         self.apply_ops()
 
 plugins.toolspluginregistry.append(ArrangePlugin)

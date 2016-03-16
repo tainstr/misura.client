@@ -68,9 +68,7 @@ def dataset_curve_name(ds, dsn):
     ax_label = bounded_name
     unit = ds.unit or getattr(getattr(ds, 'parent', False), 'unit', False)
     if unit:
-        logging.debug('%s %s %s', 'getting symbol for', unit, units.symbols)
         u = units.symbols.get(unit, unit)
-        logging.debug('%s %s %s', 'got symbol', unit, u)
         ax_label += ' ({{{}}})'.format(u)
     ax_name = 'ax:' + bounded_name.replace("/", ":")
     return curve_name, ax_name, ax_label
@@ -169,12 +167,12 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         ), {'ds': dsn, 'propagate': False, 'action': 'Invert', 'auto': False}))
         return True
 
-    def arrange(self, graphics_names, plotted_curve='no plotted curve'):
+    def arrange(self, graphics_names, plotted_dataset_names=False):
         arrange_fields = {'currentwidget': '/time/time',
                           'dataset': 'Line Color',
                           'sample': 'Line Style',
                           'space': True,
-                          'plotted_curve': plotted_curve}
+                          'plotted_dataset_names': plotted_dataset_names}
 
         for gname in graphics_names:
             arrange_fields['currentwidget'] = gname
@@ -253,7 +251,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         self.apply_ops('PlotDataset: Customize')
         if len(fields) > 0 and len(fields['y']) > 0:
-            self.arrange(gnames, fields['y'][0].split(':')[-1])
+            self.arrange(gnames, fields['y'])
 
         return cnames
 
@@ -309,6 +307,7 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
             if rp and rp.search(ds1):
                 vars.append(ds)
 
+        vars = sorted(vars)
         logging.debug('%s %s', "VARS", vars)
         xt = []
         xT = []
