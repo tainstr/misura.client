@@ -180,7 +180,6 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             setattr(smp, m_var, outvar)
 
             if smp.ref:
-                #				setattr(smp, m_var, outvar)
                 self.dict_toset(obj, props)
                 continue
 

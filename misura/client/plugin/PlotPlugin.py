@@ -22,12 +22,16 @@ power_axes = {'kiln/P': 'Power', 'kiln/kP': 'Power', 'kiln/kI': 'Power',
               'kiln/kD': 'Power', 'kiln/pC': 'Power', 'kiln/pD': 'Power',
               'kiln/T': 'Temperature', 'kiln/S': 'Temperature'}
 
-# FIXME: add also Misura4 names along camA/camB (which are Misura3)
+# TODO: This should be a configurable rule_ construct of ConfDb
 bounded_axes = {'odlt': {'camA': 'Dil', 'camB': 'Dil', 'const': 'pos'},
                 'odht': {'camA': 'Dil', 'camB': 'Dil', 'const': 'pos'},
                 'flex': {'camA': 'Flex', 'const': 'pos'},
                 'hsm': {},
-                'kiln': {}
+                'kiln': {},
+                'flash': {name: 'Diffusivity' for name in ('halftime', 'parker', 'koski', 
+                                                           'heckman', 'cowan5', 'cowan10',
+                                                           'clarkTaylor1', 'clarkTaylor2', 
+                                                           'clarkTaylor3', 'degiovanni')}
                 }
 
 for key in bounded_axes.keys():
@@ -47,7 +51,11 @@ def dataset_curve_name(ds, dsn):
         else:
             sampleName = ds.linked.instr.measure['name']
     dsname = getattr(ds, 'm_name', dsn).replace(
-        'summary/', '').replace("/", ":")
+        'summary/', '')
+    instrument_name = dsname.split('/')[0]
+    if ':' in instrument_name:
+        instrument_name = instrument_name.split(':')[1]
+    dsname = dsname.replace("/", ":")
     dsvar = getattr(ds, 'm_var', '')
     fileName = '' if ds.linked is None else os.path.basename(
         ds.linked.filename)
@@ -55,17 +63,16 @@ def dataset_curve_name(ds, dsn):
         curve_name = unicode(dsname + ' - ' + sampleName + ' - ' + fileName)
     else:
         curve_name = unicode(dsname + ' - ' + fileName)
-
-    ax_label = dsvar.split('_')[::-1]
-    ax_label = '_'.join(ax_label)
+    bounded_name = bounded_axes.get(instrument_name, {})
+    bounded_name = bounded_name.get(dsvar, dsvar)
+    ax_label = bounded_name
     unit = ds.unit or getattr(getattr(ds, 'parent', False), 'unit', False)
     if unit:
         logging.debug('%s %s %s', 'getting symbol for', unit, units.symbols)
         u = units.symbols.get(unit, unit)
         logging.debug('%s %s %s', 'got symbol', unit, u)
         ax_label += ' ({{{}}})'.format(u)
-    ax_name = 'ax:' + dsvar.replace("/", ":")
-    print 'dataset_curve_name',curve_name, ax_name, dsvar, ds.m_var
+    ax_name = 'ax:' + bounded_name.replace("/", ":")
     return curve_name, ax_name, ax_label
 
 
@@ -233,17 +240,6 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
             # Get the curve and axis name
             cname, ax_name, ax_lbl = dataset_curve_name(ds, y)
-            # Find if the curve should attach to a different ax
-            bax = False
-            if ds.linked:
-                ins = getattr(ds.linked, 'instrument', False)
-                if ins:
-                    bax = bounded_axes.get(ins, False)
-            if bax:
-                bax = bax.get(getattr(ds, 'm_var', False), False)
-            if bax:
-                ax_name = 'ax:' + bax
-                ax_lbl = bax
 
             gname = g.path
 
