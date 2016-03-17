@@ -432,7 +432,12 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         ds.m_conf = self.proxy.conf
         ds.unit = str(u) if u else u
         ds.old_unit = ds.unit
-
+        
+        if len(data) > 0 and col != 't':
+            self.assign_node_attributes(ds)
+        
+        self.assign_sample_to_dataset(ds)
+        
         # Automatic unit conversion
         if len(data) > 0 and col != 't':
             # Units conversion
@@ -445,11 +450,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             if leaf:
                 ds.tags.add(parent)
 
-        self.assign_sample_to_dataset(ds)
-
         self.assign_label(ds, col0)
-        if len(data) > 0 and col != 't':
-            self.assign_node_attributes(ds)
+
 
         return ds
     

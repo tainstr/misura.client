@@ -44,6 +44,7 @@ voididx = QtCore.QModelIndex()
 
 
 def get_item_icon(plotwg):
+    """Get line style icon or a merged line style + marker style icon"""
     style = plotwg.settings.get('PlotLine').get('style').val
     i = veusz.setting.LineStyle._linestyles.index(style)
     line_icon = controls.LineStyle._icons[i]
@@ -53,6 +54,7 @@ def get_item_icon(plotwg):
     i = veusz.utils.MarkerCodes.index(marker)
     marker_icon = controls.Marker._icons[i]
     
+    # Combine both icons
     combined = QtGui.QIcon()
     pix = QtGui.QPixmap(24, 16)
     pix.fill()
@@ -62,10 +64,9 @@ def get_item_icon(plotwg):
     painter.setRenderHint(QtGui.QPainter.Antialiasing)
     painter.drawPixmap(0, 8, line_pix)
     painter.drawPixmap(14, 0, marker_pix)
-    
     painter.end()
-    combined.addPixmap(pix)
     
+    combined.addPixmap(pix)
     return combined
 
 class DocumentModel(QtCore.QAbstractItemModel):
