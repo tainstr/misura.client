@@ -24,11 +24,28 @@ def create_images_report(decoder,
 
         if abs(last_temperature - int(image_temperature)) >= 1:
             image_data = byte_array_from(qimage)
-            all_images_data.append([image_data, image_count, image_temperature, csutil.from_seconds_to_hms(int(time))])
+            all_images_data.append([image_data,
+                                    image_count,
+                                    image_temperature,
+                                    csutil.from_seconds_to_hms(int(time))])
             last_temperature = image_temperature
             image_count += 1
 
-    images_table_html = html.table_from(all_images_data, 'png')
+
+    sintering_temp = to_int(characteristic_shapes['Sintering']['temp'])
+    softening_temp = to_int(characteristic_shapes['Softening']['temp'])
+    sphere_temp = to_int(characteristic_shapes['Sphere']['temp'])
+    half_sphere_temp = to_int(characteristic_shapes['Halfsphere']['temp'])
+    melting_temp = to_int(characteristic_shapes['Melting']['temp'])
+
+    images_table_html = html.table_from(all_images_data,
+                                        'png',
+                                        5,
+                                        sintering_temp,
+                                        softening_temp,
+                                        sphere_temp,
+                                        half_sphere_temp,
+                                        melting_temp)
 
     substitutions_hash = {"$LOGO$": base64_logo(),
                           "$code$": measure['uid'],
@@ -38,6 +55,10 @@ def create_images_report(decoder,
 
     return template.convert(images_template_text(), substitutions_hash)
 
+def to_int(float_or_none_string):
+    if float_or_none_string == 'None':
+        return None
+    return int(float_or_none_string)
 
 def byte_array_from(qimage):
     image_data = QtCore.QByteArray()

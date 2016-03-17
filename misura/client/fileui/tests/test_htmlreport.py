@@ -37,10 +37,21 @@ $IMAGES_TABLE$"
                                                         },
                                                         "any time data",
                                                         {123: 798},
-                                                        None )
+                                                        {'Sintering':
+                                                         {'temp': 'None'},
+                                                         'Softening':
+                                                         {'temp': 'None'},
+                                                         'Sphere':
+                                                         {'temp': 'None'},
+                                                         'Halfsphere':
+                                                         {'temp': 'None'},
+                                                         'Melting':
+                                                         {'temp': 'None'}
+                                                        })
 
 
         expected_images_html_table = "<table><tr><td><table>\
+<tr><td align='center'><b>&nbsp;</b></td></tr>\
 <tr><td>\
 <img src='data:image/png;base64,%s' alt=''>\
 </td></tr>\
