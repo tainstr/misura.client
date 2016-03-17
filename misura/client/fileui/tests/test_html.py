@@ -26,7 +26,7 @@ class Html(unittest.TestCase):
 	def test_table_with_one_image(self):
 		image_html = "<img src='data:image/gif;base64,YW55IGRhdGE=' alt=''>"
 		expected_html = "<table>\
-<tr><td><table><tr><td align='center'><b>&nbsp;</b></td></tr><tr><td>%s</td></tr><tr>\
+<tr><td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr><tr>\
 <td class='number'>56</td></tr><tr>\
 <td><div class='temperature'>4&deg;C</div><div class='time'>00:10</div></td></tr>\
 </table></td></tr></table>" % image_html
@@ -37,19 +37,19 @@ class Html(unittest.TestCase):
 		image_html = "<img src='data:image/gif;base64,YW55IGRhdGE=' alt=''>"
 
 		expected_html = "<table><tr>\
-<td><table><tr><td align='center'><b>&nbsp;</b></td></tr><tr><td>%s</td></tr>\
+<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
 <tr><td class='number'>1</td></tr><tr><td><div class='temperature'>10&deg;C</div><div class='time'>a time 1</div></td></tr></table></td>\
-<td><table><tr><td align='center'><b>&nbsp;</b></td></tr><tr><td>%s</td></tr>\
+<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
 <tr><td class='number'>2</td></tr><tr><td><div class='temperature'>20&deg;C</div><div class='time'>a time 2</div></td></tr></table></td>\
-<td><table><tr><td align='center'><b>&nbsp;</b></td></tr><tr><td>%s</td></tr>\
+<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
 <tr><td class='number'>3</td></tr><tr><td><div class='temperature'>30&deg;C</div><div class='time'>a time 3</div></td></tr></table></td>\
-<td><table><tr><td align='center'><b>&nbsp;</b></td></tr><tr><td>%s</td></tr>\
+<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
 <tr><td class='number'>4</td></tr><tr><td><div class='temperature'>40&deg;C</div><div class='time'>a time 4</div></td></tr></table></td>\
-<td><table><tr><td align='center'><b>&nbsp;</b></td></tr><tr><td>%s</td></tr>\
+<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
 <tr><td class='number'>5</td></tr><tr><td><div class='temperature'>50&deg;C</div><div class='time'>a time 5</div></td></tr></table></td>\
 </tr>\
 <tr>\
-<td><table><tr><td align='center'><b>&nbsp;</b></td></tr><tr><td>%s</td></tr>\
+<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
 <tr><td class='number'>6</td></tr><tr><td><div class='temperature'>60&deg;C</div><div class='time'>a time 6</div></td></tr></table></td>\
 </tr></table>" % (image_html, image_html, image_html, image_html, image_html, image_html)
 

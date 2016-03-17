@@ -51,7 +51,7 @@ $IMAGES_TABLE$"
 
 
         expected_images_html_table = "<table><tr><td><table>\
-<tr><td align='center'><b>&nbsp;</b></td></tr>\
+<tr><td align='center'><b><br/><br/></b></td></tr>\
 <tr><td>\
 <img src='data:image/png;base64,%s' alt=''>\
 </td></tr>\

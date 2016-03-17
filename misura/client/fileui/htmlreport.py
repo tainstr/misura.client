@@ -10,7 +10,10 @@ def create_images_report(decoder,
                          measure,
                          time_data,
                          temperature_data,
-                         characteristic_shapes):
+                         characteristic_shapes,
+                         jobs=lambda *x: None,
+                         job=lambda *x: None,
+                         done=lambda *x: None):
 
     total_number_of_images = len(decoder)
     all_images_data = []
@@ -45,13 +48,17 @@ def create_images_report(decoder,
                                         softening_temp,
                                         sphere_temp,
                                         half_sphere_temp,
-                                        melting_temp)
+                                        melting_temp,
+                                        jobs,
+                                        job)
 
     substitutions_hash = {"$LOGO$": base64_logo(),
                           "$code$": measure['uid'],
                           "$title$": measure['name'],
                           "$date$": measure['date'],
                           "$IMAGES_TABLE$": images_table_html }
+
+    done('Creating images report...')
 
     return template.convert(images_template_text(), substitutions_hash)
 

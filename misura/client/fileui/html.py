@@ -28,10 +28,15 @@ def table_from(images,
                softening_temp=None,
                sphere_temp=None,
                half_sphere_temp=None,
-               melting_temp=None):
+               melting_temp=None,
+               jobs=lambda *x: None,
+               job=lambda *x: None):
 
+        jobs(len(images), 'Creating images report...')
         html = "<table><tr>"
         for index, image in enumerate(images):
+                job(index, 'Creating images report...')
+
                 current_image_temperature = int(image[2])
                 label = {
                         sintering_temp: 'Sintering<br/><br/>',

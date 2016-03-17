@@ -8,6 +8,8 @@ from minimage import MiniImage
 from misura.client.fileui import htmlreport
 from misura.client.fileui import template
 from ...canon import csutil
+from ..filedata import job, jobs, done
+from ..widgets import RunMethod
 
 class ImageStrip(QtGui.QWidget):
 
@@ -59,14 +61,25 @@ class ImageStrip(QtGui.QWidget):
             'Melting': sample['Melting'],
             }
 
-        output_html = htmlreport.create_images_report(self.decoder,
-                                                      instrument.measure,
-                                                      self.doc.data['0:t'].data,
-                                                      self.doc.data.get('0:kiln/T').data,
-                                                      characteristic_shapes)
+        run = RunMethod(htmlreport.create_images_report,
+                        self.decoder,
+                        instrument.measure,
+                        self.doc.data['0:t'].data,
+                        self.doc.data.get('0:kiln/T').data,
+                        characteristic_shapes,
+                        jobs,
+                        job,
+                        done)
 
-        with open(output_filename, 'w') as output_file:
-            output_file.write(output_html)
+        run.step = 100
+        run.pid = 'Creating images report...'
+        self.save = lambda html: open(output_filename, 'w').write(html)
+
+        self.connect(run.notifier,
+                     QtCore.SIGNAL('done(PyQt_PyObject)'),
+                     self.save,
+                     QtCore.Qt.QueuedConnection)
+        QtCore.QThreadPool.globalInstance().start(run)
 
 
 

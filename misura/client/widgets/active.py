@@ -84,6 +84,7 @@ class RunMethod(QtCore.QRunnable):
         self.runnables.remove(self)
         registry.tasks.done(self.pid)
         self.notifier.emit(QtCore.SIGNAL('done()'))
+        self.notifier.emit(QtCore.SIGNAL('done(PyQt_PyObject)'), r)
 
 
 class Active(object):
@@ -202,7 +203,7 @@ class Active(object):
         out = self.remObj.set(self.handle,  val)
         logging.debug('%s %s %s %s', 'Active.set', self.handle, repr(val), out)
         self.get()
-        
+
     def set_raw(self, val):
         """Set value directly, without adapt2srv conversion"""
         self.remObj.set(self.handle, val)
@@ -287,7 +288,7 @@ class LabelUnit(QtGui.QLabel):
         #self.setMaximumWidth(30)
         self.setMinimumSize(0,0)
         self.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
-        
+
     def sizeHint(self):
         r = QtGui.QLabel.sizeHint(self)
         self.setMaximumWidth(r.width())
@@ -506,7 +507,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.set_label()
         self.lay.addWidget(self.bmenu)
 
-    
+
     def build_presets_menu(self):
         self.presets = {}
         self.presets_menu.clear()
@@ -521,7 +522,7 @@ class ActiveWidget(Active, QtGui.QWidget):
             p = functools.partial(self.set_raw, val)
             self.presets_menu.addAction(label, p)
             self.presets[preset] = (p, val)
-    
+
     def isVisible(self):
         try:
             return QtGui.QWidget.isVisible(self)
