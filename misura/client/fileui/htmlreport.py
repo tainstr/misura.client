@@ -112,6 +112,10 @@ def images_template_text():
                 font-weight: bold;
             }
 
+            td b {
+                color: blue;
+            }
+
             .temperature {
                 display: inline-block;
             }

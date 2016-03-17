@@ -32,18 +32,14 @@ def table_from(images,
 
         html = "<table><tr>"
         for index, image in enumerate(images):
-                label = '&nbsp;'
                 current_image_temperature = int(image[2])
-                if sintering_temp == current_image_temperature:
-                        label = 'Sintering'
-                if softening_temp == current_image_temperature:
-                        label = "Softening"
-                if sphere_temp == current_image_temperature:
-                        label = 'Sphere'
-                if half_sphere_temp == current_image_temperature:
-                        label = 'Half Sphere'
-                if melting_temp == current_image_temperature:
-                        label = 'Melting'
+                label = {
+                        sintering_temp: 'Sintering<br/><br/>',
+                        softening_temp: 'Softening<br/><br/>',
+                        sphere_temp: 'Sphere<br/><br/>',
+                        half_sphere_temp: 'Half Sphere<br/><br/>',
+                        melting_temp: 'Melting<br/><br/>'
+                }.get(current_image_temperature, '<br/><br/>')
 
                 html = html + "<td>%s</td>" % embed_with_labels(image[0],
                                                                 image[1],

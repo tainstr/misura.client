@@ -55,7 +55,7 @@ class ImageStrip(QtGui.QWidget):
             'Sintering': sample['Sintering'],
             'Softening': sample['Softening'],
             'Sphere': sample['Sphere'],
-            'Halfphere': sample['HalfSphere'],
+            'Halfsphere': sample['HalfSphere'],
             'Melting': sample['Melting'],
             }
 
