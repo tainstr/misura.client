@@ -48,7 +48,7 @@ def convert_datapoint_units(convert_func, dsname, doc):
     for wg in iter_widgets(doc.basewidget, 'datapoint', 1):
         if not wg:
             continue
-        curve = wg.settings.get('xy').findWidget()
+        curve = wg.parent
 
         if not curve:
             continue
