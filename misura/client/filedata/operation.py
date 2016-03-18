@@ -257,7 +257,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # Remember linked file configuration
         self.params.prefix = LF.prefix
         self.prefix = LF.prefix
-        jobs(3, 'Reading file')
+        jobs(3)
         # open the file
         fp = getattr(doc, 'proxy', False)
         logging.debug('%s %s %s %s', 'FILENAME', self.filename, type(fp), fp)
@@ -266,7 +266,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             self.proxy = getFileProxy(self.filename)
         else:
             self.proxy = fp
-        job(1, 'Reading file', 'Configuration')
+        job(1, label='Configuration')
         if not self.proxy.isopen():
             self.proxy.reopen()
         if self.proxy.conf is False:
@@ -485,11 +485,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         LF = self.LF
 
         # Set available curves on the LF
-        job(2, 'Reading file', 'Header')
+        jobs(2)
         available, autoload = self.get_available_autoload()
 
         # Emit the number of jobs
-        jobs(len(autoload))
+        jobs(len(autoload)+len(available))
 
         self.refsmp = self.create_samples()
 
@@ -504,6 +504,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         names = []
         for p, col0 in enumerate(['t'] + available):
             col = col0.replace('/summary/', '/')
+            job(p + 1, label=col)
             mcol = col
             if mcol.startswith(sep):
                 mcol = mcol[1:]
@@ -563,7 +564,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                     names.append(sub.m_name)
                     self.outdatasets[sub.m_name] = sub
             
-            job(p + 1)
+            
 
         # Detect ds which should be removed from availds because already
         # contained in imported names
@@ -573,7 +574,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             self._doc.available_data.pop(dup)
         logging.debug('%s', 'emitting done')
         done()
-        done('Reading file')
         logging.debug('%s %s', 'imported names:', names)
         self._doc.available_data.update(availds)
 
