@@ -52,7 +52,8 @@ class StorageSync(object):
             logging.debug(
                 '%s %s', 'Database path does not exist!', self.dbpath)
             return False
-        self.db = indexer.Indexer(self.dbpath)
+        self.maindb = indexer.Indexer(self.dbpath)
+        self.db = indexer.Indexer(self.dbpath +'.sync')
         return True
 
     @property
@@ -161,7 +162,7 @@ class StorageSync(object):
                 continue
             if self.has_uid(uid, 'sync_approve'):
                 continue
-            r = self.db.searchUID(uid, full=True)
+            r = self.maindb.searchUID(uid, full=True)
             if r and os.path.exists(r[0]):
                 continue
             self.add_record(record, 'sync_approve')
@@ -208,7 +209,7 @@ class StorageSync(object):
         d = '/' + os.path.join(*p)
         url = self.server.data_addr + d + '/' + fn
         r = self.transfer.download_url(url, outfile)
-        self.db.appendFile(outfile)
+        self.maindb.appendFile(outfile)
         return r
 
     def loop(self, server=False):
@@ -235,7 +236,7 @@ class SyncTable(QtGui.QTableView):
 
     def __init__(self, dbpath, table_name, parent=None):
         super(SyncTable, self).__init__(parent)
-        self.model_reference = SyncTableModel(indexer.Indexer(dbpath), table_name)
+        self.model_reference = SyncTableModel(indexer.Indexer(dbpath+'.sync'), table_name)
         self.setModel(self.model_reference)
         for i in (0, 6, 9, 11):
             self.hideColumn(i)
@@ -315,6 +316,8 @@ class SyncWidget(QtGui.QTabWidget):
         try:
             db = indexer.Indexer(dbpath)
             db.close()
+            db2 = indexer.Indexer(dbpath + '.sync')
+            db2.close()
         except:
             logging.info(
                 'Cannot set local db for storage sync \n%', format_exc())
