@@ -27,7 +27,11 @@ else:
 def export(sh, frame='/hsm/sample0/frame',
            roi='/hsm/sample0/roi',
            T='/kiln/T',
-           output='output.avi', framerate=50.0, fourcc=default_fourcc, prog=False):
+           output='output.avi',
+           framerate=50.0,
+           fourcc=default_fourcc,
+           prog=False,
+           acquisition_start_temperature=20):
     """Base video export function"""
     if cv is False:
         logging.debug('%s', 'No OpenCV library')
@@ -53,11 +57,18 @@ def export(sh, frame='/hsm/sample0/frame',
     out = cv.VideoWriter(output, fourcc, framerate, (wMax, hMax))
     ref = reference.get_node_reference(sh, frame)
     N = sh.len(frame)
-    if prog:
-        prog.setMaximum(N)
-    i = 0
+
+    index_acquisition_T = csutil.find_nearest_val(vT, acquisition_start_temperature, seed=0)
+    i = i0 = csutil.find_nearest_val(ref,
+                                tT[index_acquisition_T],
+                                seed=0,
+                                get=lambda i: ref[i][0])
     ti = 0
-    while i < N: 
+
+    if prog:
+        prog.setMaximum(N-i)
+
+    while i < N:
         # Get image
         t, img = ref[i]
 # 		print 'exporting {:.2f} {} {:.0f}'.format(100.*i/N,i,t)
@@ -71,8 +82,8 @@ def export(sh, frame='/hsm/sample0/frame',
             x -= x_translation
             y -= y_translation
             # Avoid black-white inversion
-            x = np.concatenate(([0,       0], x, [wMax,  wMax,    0])) 
-            y = np.concatenate(([hMax, y[0]], y, [y[-1], hMax, hMax])) 
+            x = np.concatenate(([0,       0], x, [wMax,  wMax,    0]))
+            y = np.concatenate(([hMax, y[0]], y, [y[-1], hMax, hMax]))
             p = np.array([x, y], np.int32).transpose()
             cv.fillPoly(im, [p], 0)
             im = np.dstack((im, im, im))
@@ -91,7 +102,7 @@ def export(sh, frame='/hsm/sample0/frame',
             if i > 1 and prog.value() == 0:
                 logging.debug('%s %s', 'Export cancelled at frame', i)
                 break
-            prog.setValue(i)
+            prog.setValue(i-i0)
 
     logging.debug('%s %s', 'releasing', output)
     out.release()
@@ -147,6 +158,12 @@ class VideoExporter(QtGui.QDialog):
         self.fps.setValue(50)
         self.lay.addRow(_("Framerate"), self.fps)
 
+        self.acquisition_start_temperature = QtGui.QSpinBox()
+        self.acquisition_start_temperature.setMinimum(1)
+        self.acquisition_start_temperature.setMaximum(1600)
+        self.acquisition_start_temperature.setValue(20)
+        self.lay.addRow(_("Start acquisition at temperature"), self.acquisition_start_temperature)
+
         self.out = QtGui.QLineEdit()
         self.out.setText(sh.get_path() + '.avi')
         self.lbl_out = QtGui.QPushButton(_("Output file"))
@@ -175,7 +192,8 @@ class VideoExporter(QtGui.QDialog):
         fps = self.fps.value()
         self.prog = prog
         export(self.sh, frame=src + '/' + ext, fourcc=fourcc,
-               output=out, framerate=fps, prog=prog)
+               output=out, framerate=fps, prog=prog,
+               acquisition_start_temperature=self.acquisition_start_temperature.value())
         self.done(0)
 
     def cancel(self):
