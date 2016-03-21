@@ -292,9 +292,10 @@ class QuickOps(object):
         ini = getattr(node.ds, 'm_initialDimension', False)
         if not ini:
             ini = 100.
+        xname = self.xnames(node)[0]
         logging.debug('%s %s %s', 'Invoking InitialDimensionPlugin', n, ini)
         from misura.client import plugin
-        p = plugin.InitialDimensionPlugin(ds=n, ini=ini)
+        p = plugin.InitialDimensionPlugin(ds=n, ini=ini, ds_x = xname)
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.InitialDimensionPlugin)
         self.mainwindow.showDialog(d)

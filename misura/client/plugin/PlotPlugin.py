@@ -4,7 +4,6 @@
 import veusz.plugins as plugins
 import veusz.document as document
 from ArrangePlugin import ArrangePlugin
-from InitialDimensionPlugin import InitialDimensionPlugin
 from time import time
 from misura.client import iutils
 from misura.client.iutils import get_plotted_tree

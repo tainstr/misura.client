@@ -27,6 +27,7 @@ class InitialDimensionPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                  ini=100.,
                  auto=False,
                  num=20,
+                 start = -1,
                  method='mean',
                  ds_x='',
                  suppress_messageboxes=False):
@@ -37,6 +38,8 @@ class InitialDimensionPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plugins.FieldFloat('ini', 'Initial dimension value', default=ini),
             plugins.FieldBool(
                 'auto', 'OR, automatic calculation based of fist points', default=auto),
+            plugins.FieldInt(
+                'start', 'Consider 100% at X=', default=start),
             plugins.FieldInt(
                 'num', 'Number of point to use in auto-calc', default=num),
             plugins.FieldCombo('method', 'Method for auto-calc',
@@ -68,21 +71,31 @@ class InitialDimensionPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         # Calculate automatic initial value
         ini = fields['ini']
         n = fields['num']
+        start = fields['start']
         if fields['auto']:
             if n > len(out) / 2:
                 raise plugins.DatasetPluginException(
                     'Too many points used for calculation: %i/%i' % (n, len(out)))
-            ini = out[:n]
+            x = interface.document.data.get(fields['ds_x'], False)
+            if x is not False:
+                x = numpy.array(x.data)
+            i = 0
+            # Cut from start T
+            if start!=-1 and x is not False:
+                diff = abs(x-start)
+                i = numpy.where(diff == min(diff))[0][0]
+                x = x[i:]
+            ini = out[i:i+n]
             if fields['method'] == 'mean':
                 ini = ini.mean()
             elif fields['method'] == 'linear-regression':
-                x = interface.document.data.get(fields['ds_x'], False)
-                if not x:
+                if x is False:
                     raise plugins.DatasetPluginException(
                         'Dataset not found' + fields['ds_x'])
-                x = numpy.array(x.data)
+                
                 (slope, const) = scipy.polyfit(x[:n], ini, 1)
                 ini = x[0] * slope + const
+                
         # Convert back to percent if needed
         ds1 = copy(ds)
         if percent:
