@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
+import os
+
 from misura.canon import dataimport
 
-import os
+
 from .. import _
 from .. import confwidget
 from .. import filedata
@@ -38,6 +40,9 @@ class DatabasesArea(QtGui.QMdiArea):
         urls = drop_event.mimeData().urls()
         for url in urls:
             url = url.toString().replace('file://','')
+            # on windows, remove also the first "/"
+            if os.name.lower()=='nt':
+                url = url[1:]
             self.convert.emit(url)
 
 
@@ -105,17 +110,20 @@ class MainWindow(QtGui.QMainWindow):
             self.open_file(path)
             return True
         self.converter = False
-        converter = dataimport.get_converter(path)
-        run = widgets.RunMethod(converter.convert, path, filedata.jobs, filedata.job, filedata.done)
+        self.converter = dataimport.get_converter(path)
+        run = widgets.RunMethod(self.converter.convert, path, filedata.jobs, filedata.job, filedata.done)
         run.step = 100        
-        run.pid = converter.pid
+        run.pid = self.converter.pid
         self.connect(run.notifier, QtCore.SIGNAL('done()'), self._open_converted, QtCore.Qt.QueuedConnection)
+        self.connect(run.notifier, QtCore.SIGNAL('failed(QString)'), self._failed_conversion, QtCore.Qt.QueuedConnection)
         QtCore.QThreadPool.globalInstance().start(run)
-        self.converter = converter
         return True
             
     def _open_converted(self):
         self.open_file(self.converter.outpath)
+        
+    def _failed_conversion(self, error):
+        QtGui.QMessageBox.warning(self, _("Failed conversion"), error)
 
     def open_file(self, path):
         path = unicode(path)

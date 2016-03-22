@@ -5,7 +5,7 @@ from time import time
 import collections
 import threading
 import math
-
+from traceback import format_exc
 from misura.canon.logger import Log as logging
 from misura.canon.csutil import lockme
 from .. import network
@@ -73,18 +73,25 @@ class RunMethod(QtCore.QRunnable):
         logging.debug(
             'RunMethod initialized %s %s %s', self.func, self.args, self.kwargs)
         self.runnables.append(self)
+        self.error = False
 
     def run(self):
         registry.tasks.jobs(self.step, self.pid)
         logging.debug(
             'RunMethod.run %s %s %s', self.func, self.args, self.kwargs)
         registry.tasks.job(1, self.pid, self.pid)
-        r = self.func(*self.args, **self.kwargs)
-        logging.debug('RunMethod.run result %s', r)
+        try:
+            r = self.func(*self.args, **self.kwargs)
+            logging.debug('RunMethod.run result %s', r)
+            self.notifier.emit(QtCore.SIGNAL('done()'))
+            self.notifier.emit(QtCore.SIGNAL('done(PyQt_PyObject)'), r)
+        except:
+            self.error = format_exc()
+            self.notifier.emit(QtCore.SIGNAL('failed()'))
+            self.notifier.emit(QtCore.SIGNAL('failed(QString)'), self.error)
+            registry.tasks.done(self.pid)
         self.runnables.remove(self)
-        registry.tasks.done(self.pid)
-        self.notifier.emit(QtCore.SIGNAL('done()'))
-        self.notifier.emit(QtCore.SIGNAL('done(PyQt_PyObject)'), r)
+
 
 
 class Active(object):
