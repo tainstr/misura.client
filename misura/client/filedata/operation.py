@@ -414,7 +414,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         u = 'None'
         if col == 't':
             u = 'second'
-        else:
+        elif len(data):
             u = self.proxy.get_node_attr(col, 'unit')
             if u in ['', 'None', None, False, 0]:
                 u = False
@@ -433,13 +433,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         ds.unit = str(u) if u else u
         ds.old_unit = ds.unit
         
+        # Read additional metadata
         if len(data) > 0 and col != 't':
+            logging.debug('Reading metadata',  col)
             self.assign_node_attributes(ds)
-        
-        self.assign_sample_to_dataset(ds)
-        
-        # Automatic unit conversion
-        if len(data) > 0 and col != 't':
+            self.assign_sample_to_dataset(ds)
             # Units conversion
             nu = self.rule_unit(col)
             if u and nu:
@@ -449,7 +447,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         for sub, parent, leaf in iterpath(pcol):
             if leaf:
                 ds.tags.add(parent)
-
+                
         self.assign_label(ds, col0)
 
 
@@ -457,6 +455,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
     
     def create_local_datasets(self, pcol, sub_time_sequence, time_sequence):
         """Create subordered time and temperature datasets"""
+        logging.debug('creating local datasets',  pcol)
         subcol = pcol+sep+'t'
         subvar = 't'
         subt = self.create_dataset(sub_time_sequence, subcol,
@@ -474,6 +473,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         subT = self.create_dataset(sub_temperature_sequence, subcol,
                                    subvar, subvar, subvar)
         return [subt, subT]
+    
     
     def doImport(self):
         """Import data.  Returns a list of datasets which were imported."""
@@ -517,11 +517,16 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 m_update = True
             else:
                 m_update = False
-
+            
             sub_time_sequence = False
-            attr = self.proxy.get_node_attr(col, 'attr')
-            if attr in ['', 'None', None, False, 0]:
+            if col == 't':
                 attr = []
+            else:
+                logging.debug('Getting attr', col)
+                obj,  name = self.proxy.conf.from_column(col)
+                attr = obj.gete(name)['attr']
+                if attr in ['', 'None', None, False, 0]:
+                    attr = []
 
             # Read data
             if not m_update:
@@ -533,12 +538,14 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             elif col == 't':
                 data = time_sequence
             elif 'Event' not in attr:
+                logging.debug('Loading data', col0)
                 data = interpolated(self.proxy, col0, time_sequence)
                 # Interpolation error
                 if data is False:
                     data = []
             else:
                 # Get raw data and time_sequence
+                logging.debug('Getting raw data', col)
                 data = read_data(self.proxy, col).transpose()
                 sub_time_sequence = data[0]
                 data = data[1]
@@ -563,9 +570,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 for sub in subds:
                     names.append(sub.m_name)
                     self.outdatasets[sub.m_name] = sub
-            
-            
-
+                    
         # Detect ds which should be removed from availds because already
         # contained in imported names
         avail_set = set(self._doc.available_data.keys())
