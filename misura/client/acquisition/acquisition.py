@@ -642,6 +642,7 @@ class MainWindow(QtGui.QMainWindow):
             fid = 'fixedDoc'
             doc = self.fixedDoc
             self._finishFileProxy(doc)
+            doc.reloadData()
             self._lock.release()
             return False
 
@@ -660,6 +661,8 @@ class MainWindow(QtGui.QMainWindow):
         logging.debug('%s', 'MainWindow.resetFileProxy: Restarting registry')
 
         registry.restart_updating_doc()
+        registry.toggle_run(True)
+        doc.up = True
 
         self.tasks.done('Waiting for data')
         self.tasks.hide()

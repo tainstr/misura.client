@@ -110,10 +110,15 @@ class Plot(VeuszPlot):
 
         self.plot.contextmenu.addAction('Reset', self.reset)
         self.plot.contextmenu.addAction('Update', self.update)
-        logging.debug('%s %s %s', 'Calling reload data on document',
-                      self.document, self.document.filename)
-        self.document.reloadData()
+
+        self.connect(self.document,
+                     QtCore.SIGNAL('reloaded()'),
+                     self.reload_data_callback)
+
+    def reload_data_callback(self):
         self.model.refresh()
+        self.default_plot()
+        self.idx_connect()
         self.emit(QtCore.SIGNAL('reset()'))
 
     def default_plot(self):
