@@ -89,7 +89,7 @@ class RunMethod(QtCore.QRunnable):
             self.error = format_exc()
             self.notifier.emit(QtCore.SIGNAL('failed()'))
             self.notifier.emit(QtCore.SIGNAL('failed(QString)'), self.error)
-            registry.tasks.done(self.pid)
+        registry.tasks.done(self.pid)
         self.runnables.remove(self)
 
 

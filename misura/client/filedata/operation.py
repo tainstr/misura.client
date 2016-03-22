@@ -156,7 +156,7 @@ def jobs(n, pid="File import"):
     # win exe
     #return
     t = tasks()
-    if t:
+    if t is not False:
         t.jobs(n, pid)
         
 
@@ -166,7 +166,7 @@ def job(n, pid="File import", label=''):
     # win exe
     #return
     t = tasks()
-    if t:
+    if t is not False:
         t.job(n, pid, label)
 
 
@@ -175,7 +175,7 @@ def done(pid="File import"):
     # win exe
     #return
     t = tasks()
-    if t:
+    if t is not False:
         t.done(pid)
 
 
