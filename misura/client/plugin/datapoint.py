@@ -19,6 +19,7 @@ from misura.client.plugin.RemoveGaps import remove_gaps_from
 from copy import copy
 from misura.client import _
 from misura.client.plugin.DataPointLabel import DataPointLabel
+from misura.client.plugin.DataPointLine import DataPointLine
 
 
 def searchWidgetName(widget, name):
@@ -142,7 +143,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         s.add(setting.WidgetChoice(
             'pt2ptLine', '',
             descr='Dispose this line as passing through this and second data point.',
-            widgettypes=('line',),
+            widgettypes=('datapointline',),
             usertext='Passing-through Line'),
             8)
 
@@ -203,7 +204,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         s.add(setting.WidgetChoice(
             'tangentLine', '',
             descr='Dispose this line as tangent to curve xy.',
-            widgettypes=('line',),
+            widgettypes=('datapointline',),
             usertext='Tangent Line',
             formatting=True),
             5)
@@ -217,7 +218,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         s.add(setting.WidgetChoice(
             'perpendicularLine', '',
             descr='Dispose this line as perpendicular to curve xy.',
-            widgettypes=('line',),
+            widgettypes=('datapointline',),
             usertext='Perpendicular Line',
             formatting=True),
             7)
@@ -284,7 +285,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             if s.showTangent:
                 name = 'tg_' + self.name
                 self.ops.append(
-                    document.OperationWidgetAdd(self.parent, 'line', name=name))
+                    document.OperationWidgetAdd(self, 'datapointline', name=name))
                 self.toset(self, 'tangentLine', name)
         # Destroy if not needed
         elif not s.showTangent:
@@ -297,7 +298,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             if s.showTangent:
                 name = 'pp_' + self.name
                 self.ops.append(
-                    document.OperationWidgetAdd(self.parent, 'line', name=name))
+                    document.OperationWidgetAdd(self, 'datapointline', name=name))
                 self.toset(self, 'perpendicularLine', name)
         # Destroy if not needed
         elif not s.showPerpendicular:
@@ -312,7 +313,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             if p2 is not None:
                 name = 'p2p_%s_%s' % (self.name, p2.name)
                 self.ops.append(
-                    document.OperationWidgetAdd(self.parent, 'line', name=name))
+                    document.OperationWidgetAdd(self, 'datapointline', name=name))
                 self.toset(self, 'pt2ptLine', name)
         # Destroy if not needed
         elif p2 is None:
@@ -655,8 +656,9 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         self.toset(pp, 'yPos2', pt2.settings.yPos[0])
 
     def updateOutputLabel(self):
+        """Call update() on any children defining it"""
         for label in self.children:
-            label.update()
+            getattr(label, 'update', lambda:1)()
 
 
     def updateControlItem(self, cgi):
