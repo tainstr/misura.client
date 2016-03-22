@@ -121,6 +121,7 @@ class LocalTasks(QtGui.QWidget):
         self.connect(self, QtCore.SIGNAL('sig_done0()'), 
                      self._done, conntype)
         logging.debug('%s', 'LocalTasks initialized')
+        self.log_messages = ''
 
     def __len__(self):
         return len(self.prog)
@@ -130,12 +131,13 @@ class LocalTasks(QtGui.QWidget):
             self.log.hide()
             self.mlay.removeWidget(self.log)
             return
+        self.log.setPlainText(self.log_messages)
         self.log.show()
 
     def msg(self, msg):
-        txt = self.log.toPlainText()
-        txt += msg + '\n'
-        self.log.setPlainText(txt)
+        self.log_messages += msg + '\n'
+        if self.log.isVisible():
+            self.log.append(msg)
 
     @lockme
     def _jobs(self, tot, pid='Operation'):
@@ -184,7 +186,7 @@ class LocalTasks(QtGui.QWidget):
         if step >= wg.pb.maximum() and step != 0:
             self._done(pid)
         
-        QtGui.qApp.processEvents()
+        #QtGui.qApp.processEvents()
         return True
 
     def job(self, step, pid='Operation', label=''):

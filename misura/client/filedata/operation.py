@@ -21,9 +21,10 @@ from .. import clientconf
 
 from .. import units
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 
 from misura.client import _
+
 
 sep = '/'
 
@@ -473,8 +474,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         subT = self.create_dataset(sub_temperature_sequence, subcol,
                                    subvar, subvar, subvar)
         return [subt, subT]
-    
-    
+
     def doImport(self):
         """Import data.  Returns a list of datasets which were imported."""
         # Linked file
