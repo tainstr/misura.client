@@ -99,19 +99,27 @@ class LocalTasks(QtGui.QWidget):
         self.lay.addWidget(self.bw)
 
         self.prog = {}
+        conntype = QtCore.Qt.UniqueConnection
+        self.connect(self, QtCore.SIGNAL('jobs(int)'), 
+            self._jobs, conntype)
+        
+        self.connect(self, QtCore.SIGNAL('jobs(int,QString)'),
+                     self._jobs, conntype)
 
-        self.connect(self, QtCore.SIGNAL('jobs(int)'), self._jobs)
-        self.connect(self, QtCore.SIGNAL('jobs(int,QString)'), self._jobs)
-
-        self.connect(
-            self, QtCore.SIGNAL('job(int,QString,QString)'), self._job)
-        self.connect(self, QtCore.SIGNAL('job(int,QString)'), self._job)
-        self.connect(self, QtCore.SIGNAL('job(int)'), self._job)
+        self.connect(self, QtCore.SIGNAL('job(int,QString,QString)'), 
+                     self._job, conntype)
+        
+        self.connect(self, QtCore.SIGNAL('job(int,QString)'),
+                     self._job, conntype)
+        
+        self.connect(self, QtCore.SIGNAL('job(int)'), 
+                     self._job, conntype)
 
         self.connect(self, QtCore.SIGNAL('sig_done(QString)'),
-                     self._done, QtCore.Qt.QueuedConnection)
-        self.connect(
-            self, QtCore.SIGNAL('sig_done0()'), self._done,  QtCore.Qt.QueuedConnection)
+                     self._done,conntype)
+        
+        self.connect(self, QtCore.SIGNAL('sig_done0()'), 
+                     self._done, conntype)
         logging.debug('%s', 'LocalTasks initialized')
 
     def __len__(self):
@@ -167,16 +175,17 @@ class LocalTasks(QtGui.QWidget):
         wg = self.prog.get(pid, False)
         if not wg:
             logging.debug('LocalTasks.job: no job defined! %s', pid)
-            return
+            return False
         if step < 0:
             step = wg.pb.value() + 1
-        print 'setting progress bar to',pid,step, wg.pb.value(), wg.pb.maximum()
         wg.pb.setValue(step)
         if label != '':
             self.msg(pid + ': ' + label)
-        if step == wg.pb.maximum() and step != 0:
+        if step >= wg.pb.maximum() and step != 0:
             self._done(pid)
+        
         QtGui.qApp.processEvents()
+        return True
 
     def job(self, step, pid='Operation', label=''):
         """Thread-safe call for _job()"""
@@ -234,9 +243,9 @@ class Tasks(QtGui.QTabWidget):
         self.sync = SyncWidget(parent=self)
         self.addTab(self.sync, _('Storage'))
 
-        self.tasks.ch.connect(self.hide_show)
-        self.progress.ch.connect(self.hide_show)
-        self.sync.ch.connect(self.hide_show)
+        self.tasks.ch.connect(self.hide_show, QtCore.Qt.QueuedConnection)
+        self.progress.ch.connect(self.hide_show, QtCore.Qt.QueuedConnection)
+        self.sync.ch.connect(self.hide_show, QtCore.Qt.QueuedConnection)
 
     def removeStorageAndRemoteTabs(self):
         self.removeTab(2)
@@ -267,6 +276,7 @@ class Tasks(QtGui.QTabWidget):
     def hide_show(self):
         """Decide if to automatically hide or show this window"""
         if self.update_active() or self.user_show:
+            self.tasks.show()
             self.show()
             self.show_signal.emit()
         else:
