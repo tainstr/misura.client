@@ -5,7 +5,6 @@ import os
 from misura.canon.logger import Log as logging
 
 from misura.client.tests import iutils_testing
-from misura import parameters as params
 from misura.canon.indexer import SharedFile
 from misura.client import video
 import shutil

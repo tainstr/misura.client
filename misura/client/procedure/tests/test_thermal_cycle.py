@@ -4,7 +4,6 @@
 import unittest
 from misura.client.tests import iutils_testing
 from misura.client.procedure import thermal_cycle
-from misura import kiln
 from PyQt4 import QtGui
 
 
@@ -12,6 +11,8 @@ class Designer(unittest.TestCase):
 
     @unittest.skipIf(__name__ != '__main__', "should be executed only manually")
     def test(self):
+        from misura import kiln
+
         k = kiln.Kiln()
         lim = k['rateLimit']
         lim+=[[50,15],[200,20]]

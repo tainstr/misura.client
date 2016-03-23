@@ -1,30 +1,31 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Verify conversion from Misura3 to misura files. Windows-only unittest!"""
-from misura.canon.logger import Log as logging
-import unittest
-import sys
-import pickle
-
-import numpy as np
-import tables
-from tables.nodes import filenode
-
-from misura.client import browser
-from misura.client.misura3 import convert
-from misura.client.conf import devtree
-from misura.canon import reference
-from misura.canon import indexer
-
-from misura.client import filedata
-
-from misura.client.tests import iutils_testing as iut
 
 
 def setUpModule():
     if sys.platform not in ['win32', 'win64']:
         raise unittest.SkipTest(
             'Misura3->misura conversion is available only in windows platforms.')
+
+    from misura.canon.logger import Log as logging
+    import unittest
+    import sys
+    import pickle
+
+    import numpy as np
+    import tables
+    from tables.nodes import filenode
+
+    from misura.client import browser
+    from misura.client.misura3 import convert
+    from misura.client.conf import devtree
+    from misura.canon import reference
+    from misura.canon import indexer
+
+    from misura.client import filedata
+
+    from misura.client.tests import iutils_testing as iut
 
 
 hsm_names = set(['0:t', '0:hsm/sample0/ang', '0:hsm/sample0/A', '0:hsm/sample0/h', '0:hsm/sample0/eqhw', '0:hsm/sample0/soft', '0:hsm/sample0/w',
@@ -35,7 +36,6 @@ dil_names = set(['0:t', '0:kiln/T', '0:horizontal/sample0/d', '0:kiln/S', '0:hor
                  '0:/horizontal/sample0/camB', '0:kiln/P', '0:horizontal/sample0/Mov'])
 flex_names = set(['0:t', '0:kiln/T', '0:flex/sample0/d',
                   '0:kiln/S', '0:flex/sample0/camA', '0:kiln/P', '0:flex/sample0/Mov'])
-
 
 class Convert(unittest.TestCase):
 
@@ -58,7 +58,7 @@ class Convert(unittest.TestCase):
         dec = filedata.DataDecoder()
         fp = indexer.SharedFile(op)
         dec.reset(proxy=fp, datapath='/hsm/sample0/frame')
-        dec.ext = 'ImageM3' 
+        dec.ext = 'ImageM3'
         t, img = dec.get_data(0)
         self.assertEqual(img.width(), 640)
         self.assertEqual(img.height(), 480)
@@ -103,7 +103,7 @@ class Convert(unittest.TestCase):
         self.assertEqual(fp.conf.hsm.measure['end']['time'], end[0])
         self.assertEqual(fp.conf.hsm.measure['end']['temp'], end[1])
         fp.close()
-        
+
     def check_curve(self, op):
         """Check thermal cycle curve format"""
         fp = indexer.SharedFile(op)

@@ -5,7 +5,6 @@ import unittest
 import os
 from misura.client.tests import iutils_testing
 
-from misura import server
 from misura.client.conf import devtree
 from misura.client import filedata
 
@@ -18,7 +17,7 @@ nativem4 = os.path.join(iutils_testing.data_dir, 'measure.h5')
 class RecursiveModel(unittest.TestCase):
 
     def test_recursiveModel(self):
-        s = server.BaseServer()
+        s = None#server.BaseServer()
         m = devtree.recursiveModel(s)
 
     def test_fileRecursiveModel(self):
@@ -33,7 +32,7 @@ class RecursiveModel(unittest.TestCase):
 class ServerModel(unittest.TestCase):
 
     def setUp(self):
-        self.s = server.BaseServer()
+        self.s = None#server.BaseServer()
         self.m = devtree.recursiveModel(self.s)
 
     def test_init(self):

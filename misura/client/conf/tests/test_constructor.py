@@ -5,7 +5,6 @@ import unittest
 import os
 from misura.client.conf import constructor
 from misura.client import filedata
-from misura.client.misura3 import convert
 from misura.client.tests import iutils_testing
 from misura.canon import option
 from PyQt4 import QtGui, QtCore
@@ -46,6 +45,7 @@ class TestConstructor(unittest.TestCase):
         iutils_testing.show(obj, __name__)
 
     def test_from_convert(self):
+        from misura.client.misura3 import convert
         configuration_proxy = option.ConfigurationProxy(
             desc=convert.tree_dict.copy())
         configuration_proxy.iterprint()
