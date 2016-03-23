@@ -27,7 +27,7 @@ class DataPoint(unittest.TestCase):
 
     def setUp(self):
         self.dp = datapoint.DataPoint(None)
-        self.assertEqual(self.dp.settings.search, 'None')
+        self.assertEqual(self.dp.settings.search, 'Nearest (Fixed X)')
         self.delta = None
 
     def search(self, start=None, expect=90, delta=None):
@@ -38,15 +38,15 @@ class DataPoint(unittest.TestCase):
         expect *= self.density
         if start is not None:
             start *= self.density
-            self.dp.i = start
-            self.dp.x = self.dp.xData[self.dp.i]
-            self.dp.y = self.dp.yData[self.dp.i]
+            self.dp.point_index = start
+            self.dp.x = self.dp.xData[self.dp.point_index]
+            self.dp.y = self.dp.yData[self.dp.point_index]
         logging.debug(
-            '%s %s %s %s', 'starting from', self.dp.i, self.dp.x, self.dp.y)
-        self.assertTrue(self.dp.critical_search())
+            '%s %s %s %s', 'starting from', self.dp.point_index, self.dp.x, self.dp.y)
+        self.assertTrue(self.dp.critical_search(self.dp.settings.search))
         logging.debug(
-            '%s %s %s %s', 'ending in', self.dp.i, self.dp.x, self.dp.y)
-        self.assertAlmostEqual(self.dp.i, expect, delta=delta)
+            '%s %s %s %s', 'ending in', self.dp.point_index, self.dp.x, self.dp.y)
+        self.assertAlmostEqual(self.dp.point_index, expect, delta=delta)
 
     def critical_search(self, delta=None):
         dp = self.dp
@@ -54,7 +54,7 @@ class DataPoint(unittest.TestCase):
         self.dp.settings.search = 'None'
         self.dp.xRange = self.dp.xData.max() - self.dp.xData.min()
         self.dp.yRange = self.dp.yData.max() - self.dp.yData.min()
-        self.assertFalse(dp.critical_search())
+        self.assertFalse(dp.critical_search(self.dp.settings.search))
 
         # Range is too small! Going towards the nearest maximum, but not
         # reaching

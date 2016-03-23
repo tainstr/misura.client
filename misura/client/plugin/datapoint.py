@@ -39,7 +39,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
     typename = 'datapoint'
     description = 'Data Point'
     allowusercreation = True
-
+    point_index = 0
+    
     @classmethod
     def allowedParentTypes(klass):
         """Get types of widgets this can be a child of."""
@@ -79,7 +80,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
     def removeGaps(self):
         gap_range = self.settings.setdict['remove_gaps_range'].val
         gaps_thershold = self.settings.setdict['remove_gaps_thershold'].val
-        start_index = int(round(self.i - gap_range / 2.0))
+        start_index = int(round(self.point_index - gap_range / 2.0))
         end_index = start_index + gap_range
         data = self.parent.settings.get('yData').getFloatArray(self.document)
         dataset_name = self.parent.settings.get('yData').val
@@ -369,7 +370,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         index = sorted_by_x_distance_indexs[np.nanargmin(y_distances_of_nearest_points)]
 
         return index, self.xData[index], self.yData[index]
-
+    
     def up_coord(self, oldx=None, oldy=None, xData=None, yData=None):
         """Place in the nearest point to the current x,y coord"""
         d = self.document
@@ -419,7 +420,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
         type_of_point = self.settings.search
 
-        self.i, self.x, self.y = {'Nearest (Fixed X)': self.distance_fixed_x}.get(
+        self.point_index, self.x, self.y = {'Nearest (Fixed X)': self.distance_fixed_x}.get(
             type_of_point, self.distance)(oldx, oldy)
 
         self.xMax = xMax
@@ -449,7 +450,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         iL = None
         iR = None
         if rg > 0:
-            i1 = self.i
+            i1 = self.point_index
             xmi = xm[i1]
             logging.debug('%s %s %s %s', 'searching', xmi, i1, rg)
             iL = csutil.find_nearest_val(xm, xmi - rg, seed=i1)
@@ -464,11 +465,11 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             if sl.start:
                 s = sl.start
             i += s
-            self.i = i
-            self.x = self.xData[self.i]
-            self.y = self.yData[self.i]
+            self.point_index = i
+            self.x = self.xData[self.point_index]
+            self.y = self.yData[self.point_index]
             logging.debug(
-                '%s %s %s %s %s', 'result', src, self.i, self.x, self.y)
+                '%s %s %s %s %s', 'result', src, self.point_index, self.x, self.y)
 
         if src in ('Maximum', 'Minimum'):
             # Compute x range
@@ -527,8 +528,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             return None
         # Select a sequence of points around datapoint. Translate to the dp is
         # the origin.
-        left = slice(max(self.i - n, 0), self.i)
-        right = slice(self.i + 1, min(self.i + n, self.N - 1))
+        left = slice(max(self.point_index - n, 0), self.point_index)
+        right = slice(self.point_index + 1, min(self.point_index + n, self.N - 1))
         vx = np.concatenate((self.xData[left], self.xData[right]))
         vy = np.concatenate((self.yData[left], self.yData[right]))
         vx -= self.x
