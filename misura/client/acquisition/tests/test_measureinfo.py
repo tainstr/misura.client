@@ -10,7 +10,7 @@ from misura.client.acquisition import measureinfo
 
 from misura.client import filedata
 
-assert False, 'Should not import from misura!'
+unittest.SkipTest('Should not import from misura!')
 from misura import instrument
 from misura import kiln, flex
 

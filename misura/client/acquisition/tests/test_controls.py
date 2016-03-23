@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Tests Archive"""
 import unittest
-assert False, 'Should not import utils_testing!'
+unittest.SkipTest('Should not import utils_testing!')
 from misura import utils_testing
 from misura.client.tests import iutils_testing
 

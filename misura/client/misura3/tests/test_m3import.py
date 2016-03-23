@@ -4,7 +4,11 @@
 from misura.canon.logger import Log as logging
 import unittest
 import sys
+if sys.platform not in ['win32', 'win64']:
+    unittest.SkipTest('Misura3->misura conversion is available only in windows platforms.')
+
 import pickle
+
 
 import numpy as np
 import tables
@@ -20,10 +24,6 @@ from misura.client import filedata
 
 from misura.client.tests import iutils_testing as iut
 
-def setUpModule():
-    if sys.platform not in ['win32', 'win64']:
-        raise unittest.SkipTest(
-            'Misura3->misura conversion is available only in windows platforms.')
 
 
 hsm_names = set(['0:t', '0:hsm/sample0/ang', '0:hsm/sample0/A', '0:hsm/sample0/h', '0:hsm/sample0/eqhw', '0:hsm/sample0/soft', '0:hsm/sample0/w',

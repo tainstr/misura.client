@@ -9,7 +9,7 @@ from test_controls import Parent
 
 from PyQt4 import QtGui, QtCore
 
-assert False, 'Should not import utils_testing!'
+unittest.SkipTest('Should not import utils_testing!')
 from misura import instrument
 from misura import server
 

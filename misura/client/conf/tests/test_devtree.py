@@ -8,35 +8,38 @@ from misura.client.tests import iutils_testing
 from misura.client.conf import devtree
 from misura.client import filedata
 
-from PyQt4 import QtGui, QtCore
 app = False
 
 nativem4 = os.path.join(iutils_testing.data_dir, 'measure.h5')
 
 
 class RecursiveModel(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        file_proxy = filedata.getFileProxy(nativem4)
+        file_proxy.load_conf()
+        file_proxy.close()
+        self.server = file_proxy.conf
 
     def test_recursiveModel(self):
-        s = None#server.BaseServer()
-        m = devtree.recursiveModel(s)
-
-    def test_fileRecursiveModel(self):
-        fp = filedata.getFileProxy(nativem4)
-        fp.load_conf()
-        m = devtree.recursiveModel(fp.conf)
-        fp.close()
+        m = devtree.recursiveModel(self.server)
 
 # TODO: test su fileproxy!
 
 
 class ServerModel(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        file_proxy = filedata.getFileProxy(nativem4)
+        file_proxy.load_conf()
+        file_proxy.close()
+        self.server = file_proxy.conf
 
     def setUp(self):
-        self.s = None#server.BaseServer()
-        self.m = devtree.recursiveModel(self.s)
+        self.m = devtree.recursiveModel(self.server)
 
     def test_init(self):
-        mod = devtree.ServerModel(self.s)
+        mod = devtree.ServerModel(self.server)
 
 
 if __name__ == "__main__":

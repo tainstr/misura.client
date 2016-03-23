@@ -6,7 +6,7 @@ from misura.client.acquisition import selector
 from PyQt4 import QtGui
 from misura.client.tests import iutils_testing
 
-assert False, 'Should not import server!'
+unittest.SkipTest('Should not import server!')
 from misura import server
 
 class Parent(QtGui.QWidget):

@@ -6,8 +6,6 @@ import os
 from misura.client.conf import constructor
 from misura.client import filedata
 from misura.client.tests import iutils_testing
-from misura.canon import option
-from PyQt4 import QtGui, QtCore
 
 nativem4 = os.path.join(iutils_testing.data_dir, 'test_video.h5')
 
@@ -44,16 +42,6 @@ class TestConstructor(unittest.TestCase):
         obj = constructor.Interface(file_proxy.conf, rem, rem.describe())
         iutils_testing.show(obj, __name__)
 
-    def test_from_convert(self):
-        from misura.client.misura3 import convert
-        configuration_proxy = option.ConfigurationProxy(
-            desc=convert.tree_dict.copy())
-        configuration_proxy.iterprint()
-        measure = configuration_proxy.hsm.measure
-        sec = constructor.orgSections(measure.describe())['Main']
-        obj = constructor.Section(configuration_proxy, measure, sec)
-
-        iutils_testing.show(obj, __name__)
 
 if __name__ == "__main__":
     unittest.main()

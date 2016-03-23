@@ -6,7 +6,7 @@ import unittest
 from misura.client.acquisition import acquisition
 from misura.canon import option
 
-assert False, 'Should not import server!'
+unittest.SkipTest('Should not import server!')
 from misura import server
 
 from misura.client.live import registry

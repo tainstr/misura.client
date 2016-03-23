@@ -6,9 +6,10 @@ import functools
 from misura.client.tests import iutils_testing
 
 from misura.client.beholder import picture
+
+unittest.SkipTest('Should not import beholder!')
 from misura.beholder import sim_camera
 
-from PyQt4 import QtGui
 
 
 class ViewerPicture(unittest.TestCase):
