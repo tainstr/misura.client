@@ -2,17 +2,16 @@
 # -*- coding: utf-8 -*-
 """Tests Archive"""
 import unittest
-import functools
 import os
 
 from misura.client.tests import iutils_testing
 
 from misura.client.acquisition import measureinfo
-from misura import instrument
+
 from misura.client import filedata
 
-from test_controls import Parent
-from misura.canon import option
+assert False, 'Should not import from misura!'
+from misura import instrument
 from misura import kiln, flex
 
 from PyQt4 import QtGui, QtCore

@@ -1,13 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from misura.canon.logger import Log as logging
 from threading import Lock
 from traceback import format_exc
 
+from misura.canon.logger import Log as logging
+from misura.canon.csutil import unlockme
+
 from .. import widgets, _
 from ..live import registry
-from misura.canon.csutil import unlockme
-from misura.client.acquisition.messages import StartedFinishedNotification
+
+from .messages import StartedFinishedNotification
 
 from PyQt4 import QtGui, QtCore
 qm = QtGui.QMessageBox

@@ -13,7 +13,6 @@ import veusz.plugins
 
 from misura.client.plugin import datapoint
 
-from PyQt4 import QtGui
 app = False
 
 logging.debug('%s %s', 'Importing', __name__)

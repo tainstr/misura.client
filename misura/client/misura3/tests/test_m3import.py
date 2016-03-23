@@ -1,31 +1,29 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Verify conversion from Misura3 to misura files. Windows-only unittest!"""
+from misura.canon.logger import Log as logging
+import unittest
+import sys
+import pickle
 
+import numpy as np
+import tables
+from tables.nodes import filenode
+
+from misura.client import browser
+from misura.client.misura3 import convert
+from misura.client.conf import devtree
+from misura.canon import reference
+from misura.canon import indexer
+
+from misura.client import filedata
+
+from misura.client.tests import iutils_testing as iut
 
 def setUpModule():
     if sys.platform not in ['win32', 'win64']:
         raise unittest.SkipTest(
             'Misura3->misura conversion is available only in windows platforms.')
-
-    from misura.canon.logger import Log as logging
-    import unittest
-    import sys
-    import pickle
-
-    import numpy as np
-    import tables
-    from tables.nodes import filenode
-
-    from misura.client import browser
-    from misura.client.misura3 import convert
-    from misura.client.conf import devtree
-    from misura.canon import reference
-    from misura.canon import indexer
-
-    from misura.client import filedata
-
-    from misura.client.tests import iutils_testing as iut
 
 
 hsm_names = set(['0:t', '0:hsm/sample0/ang', '0:hsm/sample0/A', '0:hsm/sample0/h', '0:hsm/sample0/eqhw', '0:hsm/sample0/soft', '0:hsm/sample0/w',

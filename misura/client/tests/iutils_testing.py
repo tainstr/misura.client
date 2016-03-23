@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import disable_print_and_logging
+#import disable_print_and_logging
 import os
 import sys
 from misura.canon.logger import Log

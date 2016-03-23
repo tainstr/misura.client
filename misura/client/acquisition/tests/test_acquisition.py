@@ -5,8 +5,9 @@ from misura.client.tests import iutils_testing
 import unittest
 from misura.client.acquisition import acquisition
 from misura.canon import option
+
+assert False, 'Should not import server!'
 from misura import server
-from PyQt4 import QtGui
 
 from misura.client.live import registry
 

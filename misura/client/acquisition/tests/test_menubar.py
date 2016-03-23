@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 """Tests Archive"""
 import unittest
-import functools
 
 from misura.client.acquisition import menubar
-from misura import instrument
-
 from test_controls import Parent
-from misura import server
+
 
 from PyQt4 import QtGui, QtCore
 
+assert False, 'Should not import utils_testing!'
+from misura import instrument
+from misura import server
 
 class Parent(QtGui.QWidget):
     fixedDoc = False

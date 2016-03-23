@@ -3,9 +3,11 @@
 """Tests Archive"""
 import unittest
 from misura.client.acquisition import selector
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from misura.client.tests import iutils_testing
 
+assert False, 'Should not import server!'
+from misura import server
 
 class Parent(QtGui.QWidget):
     ok = False
@@ -20,7 +22,7 @@ class InstrumentSelector(unittest.TestCase):
 
     def setUp(self):
         # Fire instantiate the full server with all defined instruments
-        self.server = None#server.MainServer()
+        self.server = server.MainServer()
         self.rem = self.server.instruments[0]
         self.rem.parent = lambda: self.server
         self.parent = Parent()
