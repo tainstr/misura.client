@@ -17,6 +17,9 @@ install:
   - conda create -q -n test-environment python=2.7 nose numpy scipy pytables pycrypto pyqt
   - git clone https://github.com/tainstr/misura.canon.git
   - export PYTHONPATH=$PYTHONPATH:$(pwd)/misura.canon
+  - git clone https://github.com/tainstr/veusz.git
+  - export VEUSZ_RESOURCE_DIR=$(pwd)/veusz
+  - export PYTHONPATH=$PYTHONPATH:$VEUSZ_RESOURCE_DIR
 script:
   - source activate test-environment
   - nosetests
