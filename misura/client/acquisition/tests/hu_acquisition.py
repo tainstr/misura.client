@@ -4,7 +4,7 @@
 from misura.canon.logger import Log as logging
 import unittest
 from misura.client.acquisition import MainWindow
-from misura import utils_testing as ut
+#from misura import utils_testing as ut
 from misura.client.tests import iutils_testing as iut
 from PyQt4 import QtGui
 
@@ -13,18 +13,18 @@ logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
     logging.debug('%s %s', 'setUpModule', __name__)
-    ut.parallel(1)
+    #ut.parallel(1)
 
 
 def tearDownModule():
-    ut.parallel(0)
+    #ut.parallel(0)
     logging.debug('%s %s', 'tearDownModule', __name__)
 
 
 class HuAcquisition(unittest.TestCase):
 
     def setUp(self):
-        self._root = ut.full_hsm()
+        self._root = None#ut.full_hsm()
         self.root = iut.FakeProxy(self._root)
 
     def tearDown(self):
@@ -41,7 +41,7 @@ class HuAcquisition(unittest.TestCase):
 
     @unittest.skip('')
     def test_serve(self):
-        p, main = ut.serve(self.root, 3880)
+        p, main = None, None#ut.serve(self.root, 3880)
         p.start()
         p.join()
 

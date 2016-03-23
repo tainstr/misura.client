@@ -4,7 +4,7 @@
 from misura.canon.logger import Log as logging
 import unittest
 import functools
-from misura import utils_testing as ut
+#from misura import utils_testing as ut
 from misura.client.tests import iutils_testing
 from misura.client.beholder import picture
 from misura.beholder import sim_camera
@@ -17,19 +17,19 @@ logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
     logging.debug('%s %s', 'setUpModule', __name__)
-    ut.parallel(True)
+    #ut.parallel(True)
 
 
 def tearDownModule():
     logging.debug('%s %s', 'tearDownModule', __name__)
     logging.debug('%s', 'Quitting app')
-    ut.parallel(False)
+    #ut.parallel(False)
 
 
 class HuViewerPicture(unittest.TestCase):
 
     def setUp(self):
-        self.server = ut.dummyServer(Hsm)
+        self.server = None#ut.dummyServer(Hsm)
         self.server.hsm.init_instrument()
         self.server.hsm.sample0.analyzer.autoroi['Hmargin'] = 25
         self.server.hsm.sample0.analyzer.autoroi['Vmargin'] = 25

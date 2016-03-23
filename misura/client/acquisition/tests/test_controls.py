@@ -6,7 +6,7 @@ import unittest
 import functools
 
 from misura.client.tests import iutils_testing
-from misura import utils_testing
+#from misura import utils_testing
 from misura.client.acquisition import controls
 from misura import instrument
 from PyQt4 import QtGui
@@ -38,7 +38,7 @@ class Parent(QtGui.QWidget):
 class Controls(unittest.TestCase):
 
     def setUp(self):
-        self.server = utils_testing.dummyServer()
+        self.server = None#utils_testing.dummyServer()
         self.remote_instrument = instrument.Instrument(self.server)
         self.remote_instrument.start_acquisition = lambda: self.server.set(
             'isRunning', True)
@@ -91,8 +91,8 @@ class Controls(unittest.TestCase):
 class HuControl(unittest.TestCase):
 
     def test_hu(self):
-        utils_testing.parallel(1)
-        self.server = utils_testing.dummyServer()
+        #utils_testing.parallel(1)
+        self.server = None#utils_testingdummyServer()
         self.rem = instrument.Instrument(self.server)
 # 		self.rem.start_acquisition=functools.partial(self.server.set,'isRunning',True)
         self.rem.parent = lambda: self.server
@@ -103,7 +103,7 @@ class HuControl(unittest.TestCase):
         mw.addToolBar(self.ctrl)
         mw.show()
         QtGui.qApp.exec_()
-        utils_testing.parallel(0)
+        #utils_testing.parallel(0)
 
 
 if __name__ == "__main__":

@@ -39,8 +39,8 @@ rem = None
 #                                                                              #
 #                                                                              #
 #
-if os.name != 'nt':
-    from misura import utils_testing
+#if os.name != 'nt':
+#    from misura import utils_testing
 #                                                                              #
 ##########################################################################
 

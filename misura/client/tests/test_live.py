@@ -6,7 +6,6 @@ logging.debug('%s', 'Importing ' + __name__)
 import unittest
 from misura.canon.logger import Log as logging
 from time import sleep
-from misura import utils_testing
 from misura.client.tests import iutils_testing
 from misura import server
 

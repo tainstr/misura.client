@@ -3,7 +3,7 @@
 """Tests camera ViewerDialog"""
 from misura.canon.logger import Log as logging
 import unittest
-from misura import utils_testing as ut
+#from misura import utils_testing as ut
 
 from misura import client
 from PyQt4 import QtGui
@@ -21,13 +21,13 @@ logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
     logging.debug('%s %s', 'setUpModule', __name__)
-    ut.parallel(True)
+    #ut.parallel(True)
 
 
 def tearDownModule():
     logging.debug('%s', 'Quitting app')
     logging.debug('%s %s', 'tearDownModule', __name__)
-    ut.parallel(False)
+    #ut.parallel(False)
 
 instr_class = Hsm
 template = 'Hsm:'
@@ -49,7 +49,7 @@ class ViewerDialog(unittest.TestCase):
             cls.template = template + str(cls.N)
 
     def setUp(self):
-        self.server = ut.dummyServer(instr_class)
+        self.server = None#ut.dummyServer(instr_class)
         instr = getattr(self.server, instr_name)
         instr['nSamples'] = self.N
         instr.sample0.analyzer.autoroi['Hmargin'] = 25

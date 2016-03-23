@@ -3,7 +3,6 @@
 """Tests Archive"""
 import unittest
 import functools
-from misura import utils_testing as ut
 
 from misura.client.acquisition import menubar
 from misura import instrument

@@ -3,7 +3,6 @@
 """Tests camera ViewerPicture"""
 import unittest
 import functools
-from misura import utils_testing
 from misura.client.tests import iutils_testing
 
 from misura.client.beholder import picture
@@ -15,7 +14,8 @@ from PyQt4 import QtGui
 class ViewerPicture(unittest.TestCase):
 
     def setUp(self):
-        self.server = utils_testing.dummyServer()
+        fix_me = None
+        self.server = fix_me
         self.rem = sim_camera.SimCamera(parent=self.server)
         self.rem.start_acquisition = functools.partial(
             self.server.set, 'isRunning', True)

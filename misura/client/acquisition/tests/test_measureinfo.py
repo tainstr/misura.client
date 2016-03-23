@@ -5,7 +5,6 @@ import unittest
 import functools
 import os
 
-from misura import utils_testing
 from misura.client.tests import iutils_testing
 
 from misura.client.acquisition import measureinfo

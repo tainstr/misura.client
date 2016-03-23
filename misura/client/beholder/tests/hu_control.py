@@ -3,7 +3,7 @@
 """Tests camera ViewerControl"""
 from misura.canon.logger import Log as logging
 import unittest
-from misura import utils_testing as ut
+#from misura import utils_testing as ut
 
 from misura.client.beholder import control
 from misura.beholder import sim_camera
@@ -21,12 +21,12 @@ logging.debug('%s %s', 'Importing', __name__)
 
 def setUpModule():
     logging.debug('%s %s', 'setUpModule', __name__)
-    ut.parallel(1)
+    #ut.parallel(1)
 
 
 def tearDownModule():
     logging.debug('%s', 'Quitting app')
-    ut.parallel(0)
+    #ut.parallel(0)
     logging.debug('%s %s', 'tearDownModule', __name__)
 
 
@@ -34,7 +34,7 @@ class ViewerControl(unittest.TestCase):
     N = 1
 
     def setUp(self):
-        self.root = ut.dummyServer(Hsm)
+        self.root = None#ut.dummyServer(Hsm)
         instr = self.root.hsm
         instr['nSamples'] = self.N
         self.rem = sim_camera.SimCamera(parent=self.root)
