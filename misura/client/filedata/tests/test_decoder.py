@@ -5,9 +5,7 @@ import unittest
 
 import os
 from misura.client.tests import iutils_testing
-from misura.client import browser, filedata, conf
-
-from PyQt4 import QtGui
+from misura.client import filedata
 
 temp_file = os.path.join(iutils_testing.data_dir, 'delete_me')
 
@@ -26,21 +24,18 @@ class DataDecoder(unittest.TestCase):
 
         self.assertEqual(decoder.ext, 'Profile')
 
-        self.assertFalse(os.path.exists('%s/0.npy' % decoder.tmpdir))
         r = decoder.get_data(0)
-        self.assertTrue(os.path.exists('%s/0.npy' % decoder.tmpdir))
+        self.assertIn('0', decoder.cached_profiles)
 
         self.assertFalse(os.path.exists(temp_file))
         r[1].save(temp_file, 'JPG')
         self.assertTrue(os.path.exists(temp_file))
-
-        self.assertFalse(os.path.exists('%s/1.npy' % decoder.tmpdir))
+        
         r = decoder.get_data(1)
-        self.assertTrue(os.path.exists('%s/1.npy' % decoder.tmpdir))
+        self.assertIn('1', decoder.cached_profiles)
 
-        self.assertFalse(os.path.exists('%s/2.npy' % decoder.tmpdir))
         r = decoder.get_data(2)
-        self.assertTrue(os.path.exists('%s/2.npy' % decoder.tmpdir))
+        self.assertIn('2', decoder.cached_profiles)
 
         fp.close()
 
