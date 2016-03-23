@@ -12,7 +12,6 @@ import numpy as np
 import veusz.document as document
 import veusz.plugins
 
-from PyQt4 import QtGui
 
 logging.debug('%s %s', 'Importing', __name__)
 
@@ -63,14 +62,15 @@ class TestCurveOperationPlugin(unittest.TestCase):
         yp = 100 * y / inidim
         
         out = self.do(x, y, percent=inidim)[0].data
-        self.assertTrue((out[:51] == np.zeros(51)).all())
+        print out
+        self.assertTrue(np.isnan(out[:51]).all())
         
         self.set_y_percent = True
         out = self.do(x, yp, percent=inidim)[0].data
-        self.assertTrue((out[:51] == np.zeros(51)).all())
+        self.assertTrue(np.isnan(out[:52]).all())
         delta = teor*10**-8
-        self.assertAlmostEqual(out[51:].std(), 0, delta = delta*10**-2)
-        self.assertAlmostEqual(out[51:].mean(), teor, delta = delta)
+        self.assertAlmostEqual(out[52:-1].std(), 0, delta = delta*10**-2)
+        self.assertAlmostEqual(out[52:-1].mean(), teor, delta = delta)
         
         
 
