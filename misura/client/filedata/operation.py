@@ -147,8 +147,6 @@ def interpolated(proxy, col, ztime_sequence):
 
 def tasks():
     r = getattr(live.registry, 'tasks', False)
-    if r is False:
-        print 'NO TASKS'
     return r
 
 
