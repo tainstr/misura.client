@@ -4,7 +4,6 @@
 from misura.client.tests import iutils_testing
 import unittest
 from misura.client.acquisition import acquisition
-from misura import beholder
 from misura.canon import option
 from misura import server
 from PyQt4 import QtGui
@@ -55,7 +54,7 @@ class MainWindow(unittest.TestCase):
     def test_addCamera(self):
         main_window = self.main_window
         main_window.setServer(self.server)
-        cam = beholder.SimCamera(self.server)
+        cam = None#beholder.SimCamera(self.server)
         main_window.addCamera(cam, 'camera')
 
         self.assertEqual(main_window.cameras[cam['fullpath']][0].remote, cam)
