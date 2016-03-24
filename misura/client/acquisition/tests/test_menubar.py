@@ -2,16 +2,14 @@
 # -*- coding: utf-8 -*-
 """Tests Archive"""
 import unittest
+from nose.plugins.skip import SkipTest
+
 
 from misura.client.acquisition import menubar
 from test_controls import Parent
 
 
 from PyQt4 import QtGui, QtCore
-
-unittest.SkipTest('Should not import utils_testing!')
-from misura import instrument
-from misura import server
 
 class Parent(QtGui.QWidget):
     fixedDoc = False
@@ -29,10 +27,13 @@ class Parent(QtGui.QWidget):
     def delayed_start(self):
         return True
 
-
+@SkipTest #Needs the server, so it should not be run automatically
 class MenuBar(unittest.TestCase):
 
     def setUp(self):
+        from misura import instrument
+        from misura import server
+
         self.root = server.MainServer()
         self.remote_instrument = self.root.instruments[0]
         self.remote_instrument.parent = lambda: self.root

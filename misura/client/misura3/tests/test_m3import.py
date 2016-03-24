@@ -15,7 +15,7 @@ import tables
 from tables.nodes import filenode
 
 from misura.client import browser
-from misura.client.misura3 import convert
+
 from misura.client.conf import devtree
 from misura.canon import reference
 from misura.canon import indexer
@@ -38,6 +38,8 @@ flex_names = set(['0:t', '0:kiln/T', '0:flex/sample0/d',
 class Convert(unittest.TestCase):
 
     """Verify conversion from Misura3 to Misura4 files. Windows-only!"""
+    def setUp(self):
+        from misura.client.misura3 import convert
 
     def check_logging(self, op):
         """Check length and content of log reference"""

@@ -2,21 +2,24 @@
 # -*- coding: utf-8 -*-
 """Tests Archive"""
 from misura.client.tests import iutils_testing
+from nose.plugins.skip import SkipTest
 import unittest
 from misura.client.acquisition import acquisition
 from misura.canon import option
 
-unittest.SkipTest('Should not import server!')
-from misura import server
+
 
 from misura.client.live import registry
 
 class Dummy(object):
     pass
 
+@SkipTest #Needs the server, so it should not be run automatically
 class MainWindow(unittest.TestCase):
 
     def setUp(self):
+        from misura import server
+
         self.server = server.MainServer()
         self.server_proxy = option.ConfigurationProxy(self.server.tree()[0])
         self.instr = self.server_proxy.flex

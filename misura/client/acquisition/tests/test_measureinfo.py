@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tests Archive"""
 import unittest
+from nose.plugins.skip import SkipTest
+
 import os
 
 from misura.client.tests import iutils_testing
@@ -10,16 +12,17 @@ from misura.client.acquisition import measureinfo
 
 from misura.client import filedata
 
-unittest.SkipTest('Should not import from misura!')
-from misura import instrument
-from misura import kiln, flex
+
 
 from PyQt4 import QtGui, QtCore
 
-
+@SkipTest #Needs the server, so it should not be run automatically
 class MeasureInfo(unittest.TestCase):
 
     def setUp(self):
+        from misura import instrument
+        from misura import kiln, flex
+
         file_proxy = filedata.getFileProxy(
             os.path.join(iutils_testing.data_dir, 'test_video.h5'))
         file_proxy.load_conf()

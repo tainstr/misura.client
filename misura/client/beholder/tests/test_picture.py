@@ -2,19 +2,19 @@
 # -*- coding: utf-8 -*-
 """Tests camera ViewerPicture"""
 import unittest
+from nose.plugins.skip import SkipTest
+
 import functools
 from misura.client.tests import iutils_testing
 
 from misura.client.beholder import picture
 
-unittest.SkipTest('Should not import beholder!')
-from misura.beholder import sim_camera
-
-
-
+@SkipTest #Needs the server, so it should not be run automatically
 class ViewerPicture(unittest.TestCase):
 
     def setUp(self):
+        from misura.beholder import sim_camera
+
         fix_me = None
         self.server = fix_me
         self.rem = sim_camera.SimCamera(parent=self.server)
