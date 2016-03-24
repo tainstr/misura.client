@@ -7,7 +7,6 @@ from nose.plugins.skip import SkipTest
 from misura.client.tests import iutils_testing
 
 from misura.client.acquisition import controls
-from misura import instrument
 from PyQt4 import QtGui
 
 
@@ -38,6 +37,7 @@ class Controls(unittest.TestCase):
 
     def setUp(self):
         from misura import utils_testing
+        from misura import instrument
         self.server = utils_testing.dummyServer()
         self.remote_instrument = instrument.Instrument(self.server)
         self.remote_instrument.start_acquisition = lambda: self.server.set(
