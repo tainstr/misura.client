@@ -15,8 +15,8 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
   - conda create -q -n test-environment python=2.7 nose numpy scipy pytables pycrypto pyqt pygments pil
-  - git clone https://github.com/tainstr/misura.canon.git
-  - export PYTHONPATH=$PYTHONPATH:$(pwd)/misura.canon
+  - git clone https://github.com/tainstr/misura.canon.git ../canon
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)/../misura.canon
   - git clone https://github.com/tainstr/veusz.git
   - export VEUSZ_RESOURCE_DIR=$(pwd)/veusz
   - export PYTHONPATH=$PYTHONPATH:$VEUSZ_RESOURCE_DIR
@@ -31,4 +31,3 @@ cache:
   - apt
   - directories:
     - $HOME/.cache/pip
-
