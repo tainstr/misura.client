@@ -22,6 +22,7 @@ class TestPlot(unittest.TestCase):
         self.nav.connect(
             self.p, QtCore.SIGNAL('hide_show(QString)'), self.nav.plot)
 
+    @unittest.skipIf(__name__ != '__main__', "should be executed only manually")
     def test(self):
         doc = filedata.MisuraDocument(nativem4)
         doc.reloadData()
