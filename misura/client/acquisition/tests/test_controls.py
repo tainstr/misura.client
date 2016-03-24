@@ -32,7 +32,7 @@ class Parent(QtGui.QWidget):
     measureDock = DummyDock()
     fixedDoc = False
 
-@SkipTest('Needs the server, so it should not be run automatically')
+@SkipTest #Needs the server, so it should not be run automatically
 class Controls(unittest.TestCase):
 
     def setUp(self):
