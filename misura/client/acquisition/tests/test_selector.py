@@ -6,9 +6,6 @@ from misura.client.acquisition import selector
 from PyQt4 import QtGui
 from misura.client.tests import iutils_testing
 
-unittest.SkipTest('Should not import server!')
-from misura import server
-
 class Parent(QtGui.QWidget):
     ok = False
     ins = False
@@ -17,10 +14,12 @@ class Parent(QtGui.QWidget):
 
     def setInstrument(self, ins): self.ins = ins
 
-
+unittest.SkipTest('Needs the server, so it should not be run automatically')
 class InstrumentSelector(unittest.TestCase):
 
     def setUp(self):
+        from misura import server
+
         # Fire instantiate the full server with all defined instruments
         self.server = server.MainServer()
         self.rem = self.server.instruments[0]
