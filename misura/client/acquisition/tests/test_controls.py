@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tests Archive"""
 import unittest
-unittest.SkipTest('Should not import utils_testing!')
-from misura import utils_testing
+from nose.plugins.skip import SkipTest
+
 from misura.client.tests import iutils_testing
 
 from misura.client.acquisition import controls
@@ -33,10 +33,11 @@ class Parent(QtGui.QWidget):
     measureDock = DummyDock()
     fixedDoc = False
 
-
+@SkipTest('Needs the server, so it should not be run automatically')
 class Controls(unittest.TestCase):
 
     def setUp(self):
+        from misura import utils_testing
         self.server = utils_testing.dummyServer()
         self.remote_instrument = instrument.Instrument(self.server)
         self.remote_instrument.start_acquisition = lambda: self.server.set(
