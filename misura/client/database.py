@@ -181,10 +181,12 @@ class DatabaseWidget(QtGui.QWidget):
         lay.addWidget(self.nameContains)
         self.doQuery = QtGui.QPushButton(_('Apply'), parent=self)
         lay.addWidget(self.doQuery)
+        
         self.connect(self.doQuery, QtCore.SIGNAL('clicked()'), self.query)
+        self.connect(self.nameContains, QtCore.SIGNAL('returnPressed()'), self.query)
 
         self.menu.addAction(_('Remove'), self.remove)
-        self.menu.addAction(_('Refresh'), self.up)
+        self.menu.addAction(_('Refresh'), self.refresh)
         self.menu.addAction(_('Rebuild'), self.rebuild)
         self.bar = QtGui.QProgressBar(self)
         self.lay.addWidget(self.bar)
@@ -194,6 +196,10 @@ class DatabaseWidget(QtGui.QWidget):
 
     def rebuild(self):
         self.remote.rebuild()
+        self.up()
+        
+    def refresh(self):
+        self.remote.refresh()
         self.up()
 
     def up(self):
@@ -224,7 +230,7 @@ class DatabaseWidget(QtGui.QWidget):
         # name_column =
 
 
-    def query(self):
+    def query(self, *a):
         d = self.qfilter.itemData(self.qfilter.currentIndex())
         d = str(d)
         val = str(self.nameContains.text())
@@ -244,9 +250,6 @@ class DatabaseWidget(QtGui.QWidget):
         isGraphics = self.parent() is None
         if isGraphics:
             self.close()
-
-
-
 
     def remove(self):
         fname, instr, file, uid = self.table.getName()
