@@ -107,14 +107,18 @@ class ThermalCyclePlot(VeuszPlot):
             self.hide()
             return False
         ThermalCyclePlot.importCurve(self.cmd, crv)
-        self.duration_in_minutes = crv[-1][0]/60
         self.fitSize()
         self.plot.actionForceUpdate()
         return True
 
     def set_progress(self, minutes):
-        axis_length = self.duration_in_minutes + self.duration_in_minutes * 0.1
-        percent = minutes / axis_length
+        r = self.document.resolveFullWidgetPath('/time/time/x')
+        r.computePlottedRange(force=True)
+        r = r.getPlottedRange()
+
+        # Calc relative position with respect to X axis
+        percent = (minutes - r[0]) / (r[1] - r[0])
+
 
         self.cmd.To('/time/time/bar')
         self.cmd.Set('xPos', [percent])
