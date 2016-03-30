@@ -40,7 +40,7 @@ def orgSections(prop_dict, configuration_level=5):
     prop_dict = prop_dict.copy()
     for handle in prop_dict.keys():
         prop = prop_dict[handle]
-        # Add the children key to any option (simplyfies further processing)
+        # Add the children key to any option (simplifies further processing)
         if not prop.has_key('children'):
             prop['children'] = []
             prop_dict[handle] = prop
@@ -110,22 +110,23 @@ class Section(QtGui.QWidget):
 
         self.setLayout(self.lay)
 
-    def hide_show(self, children):
+    def hide_show(self, children, button):
         """Hide or show option's children"""
         if children.isVisible():
             children.hide()
+            button.setText('+')
         else:
             children.show()
+            button.setText('-')
 
     def expandable_row(self, wg, children):
         more = QtGui.QPushButton("+")
         more.setMaximumWidth(50)
-        p = functools.partial(self.hide_show, children)
+        p = functools.partial(self.hide_show, children, more)
         self.p.append(p)
         self.connect(more, QtCore.SIGNAL('clicked()'), p)
         out = QtGui.QWidget()
         lay = QtGui.QHBoxLayout()
-#       lay.addWidget(QtGui.QLabel(_(wg.label)+': '))
         lay.addWidget(wg)
         lay.addWidget(more)
         out.setLayout(lay)
