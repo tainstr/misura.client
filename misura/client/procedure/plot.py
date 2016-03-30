@@ -112,13 +112,8 @@ class ThermalCyclePlot(VeuszPlot):
         return True
 
     def set_progress(self, minutes):
-        r = self.document.resolveFullWidgetPath('/time/time/x')
-        r.computePlottedRange(force=True)
-        r = r.getPlottedRange()
-
-        # Calc relative position with respect to X axis
+        r = self.get_range_of_axis('/time/time/x')
         percent = (minutes - r[0]) / (r[1] - r[0])
-
 
         self.cmd.To('/time/time/bar')
         self.cmd.Set('xPos', [percent])

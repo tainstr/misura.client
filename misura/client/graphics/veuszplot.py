@@ -405,3 +405,8 @@ class VeuszPlot(QtGui.QWidget):
         if editdataset is not None:
             dialog.selectDataset(editdataset)
         return dialog
+
+    def get_range_of_axis(self, full_axis_name):
+        r = self.document.resolveFullWidgetPath(full_axis_name)
+        r.computePlottedRange(force=True)
+        return r.getPlottedRange()
