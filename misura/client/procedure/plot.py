@@ -57,14 +57,29 @@ class ThermalCyclePlot(VeuszPlot):
         cmd.Set(R + '/PlotLine/color', 'blue')
         cmd.Set(R + '/MarkerFill/color', 'blue')
 
+        cmd.To(graph)
+        cmd.Add('line', name='bar')
+        cmd.To('bar')
+        cmd.Set('mode', 'length-angle')
+        cmd.Set('positioning', 'relative')
+        cmd.Set('angle', 270.)
+        cmd.Set('length', 1.)
+        cmd.Set('xPos', 0.)
+        cmd.Set('yPos', 0.)
+        cmd.Set('clip', True)
+        cmd.Set('Line/color', 'red')
+        cmd.Set('Line/width', '2pt')
+
     def __init__(self, parent=None):
         VeuszPlot.__init__(self, parent=parent)
         self.set_doc()
         ThermalCyclePlot.setup(self.cmd)
         self.plot.setPageNumber(2)
 
+
     @classmethod
-    def importCurve(cls, cmd, crv, graph='/time/time', xT='x', yT='y', xR='x1', yR='y1'):
+    def importCurve(cls, cmd, crv, graph='/time/time',
+                    xT='x', yT='y', xR='x1', yR='y1'):
         cmd.To(graph)
         trs = array(crv).transpose()
         x = trs[0].transpose() / 60.
@@ -86,12 +101,20 @@ class ThermalCyclePlot(VeuszPlot):
             cmd.Set('/time/time/tc/marker', 'none')
             cmd.Set('/time/time/tc1/marker', 'none')
 
+
     def setCurve(self, crv):
         if len(crv) == 0:
             self.hide()
             return False
         ThermalCyclePlot.importCurve(self.cmd, crv)
+        self.duration_in_minutes = crv[-1][0]/60
         self.fitSize()
         self.plot.actionForceUpdate()
         return True
-    
+
+    def set_progress(self, minutes):
+        axis_length = self.duration_in_minutes + self.duration_in_minutes * 0.1
+        percent = minutes / axis_length
+
+        self.cmd.To('/time/time/bar')
+        self.cmd.Set('xPos', [percent])
