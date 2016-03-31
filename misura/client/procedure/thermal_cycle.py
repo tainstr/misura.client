@@ -97,6 +97,17 @@ class ThermalCycleDesigner(QtGui.QSplitter):
                 veusz.utils.action.getIcon('m4.steps'), _('Steps'), self.steps_template)
             self.addButtons()
 
+            if self.remote.has_key('segmentProgress'):
+                self.progress = widgets.ActiveObject(self.remote.parent,
+                                                     self.remote,
+                                                     self.remote.gete('segmentProgress'),
+                                                     parent=self)
+            self.progress.register()
+            self.connect(self.progress,
+                         QtCore.SIGNAL('changed'),
+                         self.progress_changed)
+
+
         self.plot = ThermalCyclePlot()
         self.connect(self.model, QtCore.SIGNAL(
             "dataChanged(QModelIndex,QModelIndex)"), self.replot)
@@ -119,6 +130,18 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.main_layout.addWidget(self.thermal_cycle_optionsWidget)
         self.main_layout.addWidget(self.plot)
 
+    def progress_changed(self, current_segment_progress):
+        all_segments = self.remote['segments']
+        current_segment_position = self.remote['segmentPos'] - 1
+        current_segment = all_segments[current_segment_position]
+        time = 0
+
+        if current_segment_position > 0:
+            time += all_segments[current_segment_position-1][-1][0]
+
+        time += (current_segment[-1][0] - time) * current_segment_progress / 100.
+
+        self.plot.set_progress(time / 60)
     def set_mode_of_cell(self, index_model):
         if index_model.column() != row.colTEMP:
             self.model.update_mode_of_row_with_mode_of_column(
