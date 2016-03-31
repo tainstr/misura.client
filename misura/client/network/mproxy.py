@@ -3,10 +3,10 @@
 from misura.canon.logger import Log as logging
 import xmlrpclib
 from xmlrpclib import ServerProxy, ProtocolError
-from time import time
+from time import time,  sleep
 import urllib
 import httplib
-from traceback import format_exc
+from traceback import format_exc,  print_exc
 import threading
 from misura.canon.csutil import lockme
 from misura.canon.option import common_proxy
@@ -268,6 +268,19 @@ class MisuraProxy(object):
         oldname = self._to_root()
         # Restore object path's
         self._toMethodName(oldname)
+        
+    def _wait(self,  timeout=120):
+        """Wait for connection"""
+        t0 = time()
+        while time()-t0 < timeout:
+            try:
+                self.connect()
+                self['name']
+                break
+            except:
+                print_exc()
+                sleep(1)
+            
 
     @property
     def root(self):
