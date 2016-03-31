@@ -23,21 +23,22 @@ class PendingTasks(QtGui.QWidget):
         self.lay = QtGui.QVBoxLayout(self)
         self.setLayout(self.lay)
         self.setWindowTitle(_('Remote Pending Tasks'))
+        self._lock = threading.Lock()
 
     def __len__(self):
         if self.progress is False:
             return 0
         r = len(self.progress.prog)
         return r
-
-    def set_server(self, server):
-        if not server:
-            return False
-        self.server = server.copy()
-        self.server.connect()
-        server = self.server
-        # Clean the layout
-        if self.progress:
+    
+    def clear_layout(self):
+        # Remove all items
+        i = 0
+        while self.lay.takeAt(0):
+            print 'REMOVING LAYOUT',i
+            i+=1
+            continue
+        if self.progress is not False:
             try:
                 self.progress.hide()
                 self.progress.unregister()
@@ -45,7 +46,16 @@ class PendingTasks(QtGui.QWidget):
                 logging.debug(
                     'While removing old progress... \n%s', format_exc())
             finally:
-                self.progress = False
+                self.progress = False        
+    
+    @lockme
+    def set_server(self, server):
+        if not server:
+            return False
+        self.server = server.copy()
+        self.server.connect()
+        server = self.server
+        self.clear_layout()
         from ..widgets import RoleProgress
         prop = server.gete('progress')
         self.progress = RoleProgress(server, server, prop, parent=self)
@@ -172,6 +182,7 @@ class LocalTasks(QtGui.QWidget):
         """Thread-safe call for _jobs()"""
         self.emit(QtCore.SIGNAL('jobs(int,QString)'), tot, pid)
 
+    @lockme
     def _job(self, step, pid='Operation', label=''):
         """Progress job `pid` to `step`, and display `label`. A negative step causes the bar to progress by 1."""
         wg = self.prog.get(pid, False)
@@ -184,6 +195,7 @@ class LocalTasks(QtGui.QWidget):
         if label != '':
             self.msg(pid + ': ' + label)
         if step >= wg.pb.maximum() and step != 0:
+            self._lock.release()
             self._done(pid)
         
         #QtGui.qApp.processEvents()
@@ -233,16 +245,16 @@ class Tasks(QtGui.QTabWidget):
 
     def __init__(self):
         QtGui.QTabWidget.__init__(self)
-
+        self._lock = threading.Lock()
         self.setWindowTitle(_('Pending Tasks'))
 
-        self.progress = PendingTasks(parent=self)
+        self.progress = PendingTasks()
         self.addTab(self.progress, _('Remote'))
 
-        self.tasks = LocalTasks(parent=self)
+        self.tasks = LocalTasks()
         self.addTab(self.tasks, _('Local'))
 
-        self.sync = SyncWidget(parent=self)
+        self.sync = SyncWidget()
         self.addTab(self.sync, _('Storage'))
 
         self.tasks.ch.connect(self.hide_show, QtCore.Qt.QueuedConnection)
@@ -253,6 +265,7 @@ class Tasks(QtGui.QTabWidget):
         self.removeTab(2)
         self.removeTab(0)
 
+    @lockme
     def set_server(self, server):
         server = server.copy()
         server.connect()
@@ -278,7 +291,7 @@ class Tasks(QtGui.QTabWidget):
     def hide_show(self):
         """Decide if to automatically hide or show this window"""
         if self.update_active() or self.user_show:
-            self.tasks.show()
+            #self.tasks.show()
             self.show()
             self.show_signal.emit()
         else:

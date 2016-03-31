@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Designer per il ciclo termico."""
+from traceback import format_exc
+
 from misura.canon.logger import Log as logging
 from .. import _
 from .. import widgets
@@ -200,9 +202,12 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 
     def enable(self, enabled):
         self.table.enable(enabled)
-        self.buttonBar.setEnabled(enabled)
-        self.fileMenu.setEnabled(enabled)
-        self.editMenu.setEnabled(enabled)
+        try:
+            self.buttonBar.setEnabled(enabled)
+            self.fileMenu.setEnabled(enabled)
+            self.editMenu.setEnabled(enabled)
+        except:
+            logging.debug(format_exc())
 
     def replot(self, *args):
         crv = self.model.curve(events=False)
