@@ -47,6 +47,16 @@ def last_point_time(curve):
 def last_point_temperature(curve):
     return curve[-1][1]
 
+def get_progress_time_for(current_segment_progress, kiln):
+        all_segments = kiln['segments']
+        current_segment_position = kiln['segmentPos'] - 1
+        current_segment = all_segments[current_segment_position]
+        time = 0
+
+        if current_segment_position > 0:
+            time += all_segments[current_segment_position-1][-1][0]
+
+        return time + (current_segment[-1][0] - time) * current_segment_progress / 100. / 60.
 
 class ThermalCycleDesigner(QtGui.QSplitter):
 
@@ -131,17 +141,11 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.main_layout.addWidget(self.plot)
 
     def progress_changed(self, current_segment_progress):
-        all_segments = self.remote['segments']
-        current_segment_position = self.remote['segmentPos'] - 1
-        current_segment = all_segments[current_segment_position]
-        time = 0
+        self.plot.set_progress(get_progress_time_for(current_segment_progress,
+                                                     self.remote))
 
-        if current_segment_position > 0:
-            time += all_segments[current_segment_position-1][-1][0]
 
-        time += (current_segment[-1][0] - time) * current_segment_progress / 100.
 
-        self.plot.set_progress(time / 60)
     def set_mode_of_cell(self, index_model):
         if index_model.column() != row.colTEMP:
             self.model.update_mode_of_row_with_mode_of_column(
