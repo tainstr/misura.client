@@ -97,12 +97,12 @@ class ThermalCycleDesigner(QtGui.QSplitter):
                 veusz.utils.action.getIcon('m4.steps'), _('Steps'), self.steps_template)
             self.addButtons()
 
-            if self.remote.has_key('segmentProgress'):
-                self.progress = widgets.ActiveObject(self.remote.parent,
-                                                     self.remote,
-                                                     self.remote.gete('segmentProgress'),
-                                                     parent=self)
+            self.progress = widgets.ActiveObject(self.remote.parent,
+                                                 self.remote,
+                                                 self.remote.gete('segmentProgress'),
+                                                 parent=self)
             self.progress.register()
+
             self.connect(self.progress,
                          QtCore.SIGNAL('changed'),
                          self.progress_changed)
