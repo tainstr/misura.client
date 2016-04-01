@@ -64,6 +64,9 @@ class DelayedStart(QtGui.QDialog):
         self.done(0)
 
     def update(self):
+        # Exit when acquisition starts
+        if self.server['isRunning']:
+            self.done(0)
         dt = '--:--:--'
         self.ins = getattr(self.server, self.server['lastInstrument'])
         if self.eng.current:
