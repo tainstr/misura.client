@@ -17,7 +17,7 @@ LAST_BUILD_STATUS_FILE=$INSTALLER_DIR/last_build_status
 touch $LAST_BUILD_STATUS_FILE
 
 if [ -a $BUILD_IN_PROGRSS_FILE ]; then
-	echo "Build already in progrss."
+	echo "Build already in progress."
 	exit 0
 fi
 

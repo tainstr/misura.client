@@ -6,6 +6,7 @@ import sys
 from misura.client.parameters import pathClient
 from veusz import utils as vutils
 
+import cv2
 
 console = True
 debug = False

@@ -5,6 +5,9 @@ import os.path
 from misura.client.parameters import pathClient
 from veusz import utils as vutils
 
+# Check cv is installed
+import cv2 
+
 console= False
 debug = False
 cli=pathClient+'\\'
