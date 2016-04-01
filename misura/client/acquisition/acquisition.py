@@ -118,8 +118,8 @@ class MainWindow(QtGui.QMainWindow):
         self.tray_icon = QtGui.QSystemTrayIcon(self)
         self.connect(self.tray_icon, QtCore.SIGNAL('messageClicked()'), self.focus_logging)
         self.setWindowIcon(QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
-
-        if confdb['autoConnect'] and len(confdb.recent_server) > 0:
+        print self.fixedDoc, confdb['autoConnect'], len(confdb.recent_server)
+        if not self.fixedDoc and confdb['autoConnect'] and len(confdb.recent_server) > 0:
             self.set_addr(confdb.recent_server[-1][0])
 
     def notify(self,msg):
