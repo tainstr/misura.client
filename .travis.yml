@@ -33,4 +33,4 @@ cache:
   - directories:
     - $HOME/.cache/pip
 after_success:
-  - coveralls
+  - coveralls --verbose
