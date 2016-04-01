@@ -291,7 +291,6 @@ class Tasks(QtGui.QTabWidget):
     def hide_show(self):
         """Decide if to automatically hide or show this window"""
         if self.update_active() or self.user_show:
-            #self.tasks.show()
             self.show()
             self.show_signal.emit()
         else:
