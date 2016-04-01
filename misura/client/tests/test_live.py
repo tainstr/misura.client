@@ -5,7 +5,6 @@ logging.debug('%s', 'Importing ' + __name__)
 
 import unittest
 from misura.canon.logger import Log as logging
-from time import sleep
 from misura.client.tests import iutils_testing
 
 
@@ -15,16 +14,16 @@ from misura.canon import option
 
 @unittest.skip("Shouldn't need server classes!")
 class KidRegistry(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        from misura import server
-        cls.root = option.ConfigurationProxy(server.BaseServer().tree()[0])
-        registry.obj = cls.root
         iutils_testing.enableSignalDebugging()
-
+        
     def setUp(self):
         registry.clear()
+        from misura import server
+        self.root = option.ConfigurationProxy(server.BaseServer().tree()[0])
+        registry.obj = self.root
+        
 
     def test_clear(self):
         w = widgets.Active(self.root, self.root, self.root.gete('name'))

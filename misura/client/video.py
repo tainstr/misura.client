@@ -16,7 +16,7 @@ import platform
 from PyQt4 import QtGui
 from misura.client import _
 
-if 'Linux' in platform.platform():
+if 'Linux' in platform.platform() and cv:
     default_fourcc = cv.VideoWriter_fourcc('M', '4', 'S', '2')
 else:
     default_fourcc = -1
