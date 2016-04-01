@@ -119,6 +119,10 @@ class ThermalCycleDesigner(QtGui.QSplitter):
                          QtCore.SIGNAL('changed'),
                          self.progress_changed)
 
+            self.connect(self.table,
+                         QtCore.SIGNAL('pressed(QModelIndex)'),
+                         self.synchronize_progress_bar_to_table)
+
 
         self.plot = ThermalCyclePlot()
         self.connect(self.model, QtCore.SIGNAL(
@@ -146,7 +150,11 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.plot.set_progress(get_progress_time_for(current_segment_progress,
                                                      self.remote))
 
-
+    def synchronize_progress_bar_to_table(self, *ignored):
+        index = self.table.currentIndex()
+        progress_time = index.sibling(index.row(), 0).data()
+        progress_time = progress_time or 0
+        self.plot.set_progress(progress_time)
 
     def set_mode_of_cell(self, index_model):
         if index_model.column() != row.colTEMP:
@@ -213,6 +221,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         crv = self.model.curve(events=False)
         logging.debug('%s %s', 'replotting', crv)
         self.plot.setCurve(crv)
+        self.synchronize_progress_bar_to_table()
 
     def addButtons(self):
         # General buttons:

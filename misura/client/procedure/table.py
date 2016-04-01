@@ -29,7 +29,10 @@ class ThermalCurveTable(QtGui.QTableView):
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
-            self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
+            self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'),
+            self.showMenu)
+
+
         if is_live:
             self.menu = QtGui.QMenu(self)
             m = self.menu
@@ -44,6 +47,8 @@ class ThermalCurveTable(QtGui.QTableView):
             m.addAction(_('Remove current row'), self.delRow)
             m.addSeparator()
             # self.curveModel.mode_ramp(0)
+
+
 
     def enable(self, enabled):
         self.menu.setEnabled(enabled)
@@ -173,4 +178,3 @@ class ThermalCurveTable(QtGui.QTableView):
         if crow <= 1:
             crow = 1
         self.model().removeRows(crow)
-
