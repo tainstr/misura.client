@@ -5,7 +5,8 @@ from misura.canon.logger import Log as logging
 import unittest
 import sys
 if sys.platform not in ['win32', 'win64']:
-    unittest.SkipTest('Misura3->misura conversion is available only in windows platforms.')
+    raise unittest.SkipTest('Misura3->misura conversion is available only in windows platforms.')
+from misura.client.misura3 import convert
 
 import pickle
 
@@ -38,9 +39,6 @@ flex_names = set(['0:t', '0:kiln/T', '0:flex/sample0/d',
 class Convert(unittest.TestCase):
 
     """Verify conversion from Misura3 to Misura4 files. Windows-only!"""
-    def setUp(self):
-        from misura.client.misura3 import convert
-
     def check_logging(self, op):
         """Check length and content of log reference"""
         t = tables.openFile(op, mode='r')
@@ -113,8 +111,6 @@ class Convert(unittest.TestCase):
         self.assertEqual(len(curve[0]), 2)
         fp.close()
 
-
-#	@unittest.skip('')
     def test_0_data(self):
         """Conversion of data and configuration"""
         converter = convert.Converter(iut.db3_path)

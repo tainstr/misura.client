@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests Archive"""
 import unittest
-from nose.plugins.skip import SkipTest
 
 from misura.client.tests import iutils_testing
 
@@ -32,7 +31,7 @@ class Parent(QtGui.QWidget):
     measureDock = DummyDock()
     fixedDoc = False
 
-@SkipTest #Needs the server, so it should not be run automatically
+@unittest.skip("Needs the server, so it should not be run automatically")
 class Controls(unittest.TestCase):
 
     def setUp(self):

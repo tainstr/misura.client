@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests Archive"""
 import unittest
-from nose.plugins.skip import SkipTest
 
 import os
 
@@ -16,7 +15,7 @@ from misura.client import filedata
 
 from PyQt4 import QtGui, QtCore
 
-@SkipTest #Needs the server, so it should not be run automatically
+@unittest.skip("Needs the server, so it should not be run automatically")
 class MeasureInfo(unittest.TestCase):
 
     def setUp(self):

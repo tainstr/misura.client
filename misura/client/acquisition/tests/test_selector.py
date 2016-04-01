@@ -14,7 +14,7 @@ class Parent(QtGui.QWidget):
 
     def setInstrument(self, ins): self.ins = ins
 
-unittest.SkipTest('Needs the server, so it should not be run automatically')
+@unittest.skip('Needs the server, so it should not be run automatically')
 class InstrumentSelector(unittest.TestCase):
 
     def setUp(self):

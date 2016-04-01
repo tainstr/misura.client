@@ -3,7 +3,6 @@
 """Testing fileui.minimage module."""
 
 import unittest
-from nose.plugins.skip import SkipTest
 import os
 from misura.client import filedata
 from misura.client import fileui
@@ -13,7 +12,7 @@ from veusz import widgets  # needed for document creation!
 from PyQt4 import QtGui
 
 
-@SkipTest #there's a problem in travis when you try to write files in a test...
+@unittest.skip("there's a problem in travis when you try to write files in a test...")
 class MiniImage(unittest.TestCase):
 
     def tearDown(self):

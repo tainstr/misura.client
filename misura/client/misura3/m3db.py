@@ -1,15 +1,22 @@
 #!/usr/bin/python2.6
 # -*- coding: utf-8 -*-
-from misura.canon.logger import Log as logging
-pyodbc = False
-import pyodbc
-import datetime
-from time import sleep
-import numpy
 import platform
 import os
 from traceback import print_exc
-from misura.canon import bitmap
+import datetime
+from time import sleep
+
+
+pyodbc = False
+try:
+    import pyodbc
+except:
+    print_exc()
+    print 'Misura3 import is not available. Install pyodbc.'
+
+import numpy
+
+from misura.canon.logger import Log as logging
 from misura.canon.option import ao
 
 

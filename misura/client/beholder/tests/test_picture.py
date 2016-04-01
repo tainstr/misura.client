@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 """Tests camera ViewerPicture"""
 import unittest
-from nose.plugins.skip import SkipTest
 
 import functools
 from misura.client.tests import iutils_testing
 
 from misura.client.beholder import picture
 
-@SkipTest #Needs the server, so it should not be run automatically
+@unittest.skip("Needs the server, so it should not be run automatically")
 class ViewerPicture(unittest.TestCase):
 
     def setUp(self):

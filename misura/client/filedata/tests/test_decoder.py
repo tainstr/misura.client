@@ -10,7 +10,7 @@ from misura.client import filedata
 
 temp_file = os.path.join(iutils_testing.data_dir, 'delete_me')
 
-@SkipTest #there's a problem in travis when you try to write files in a test...
+@unittest.skip("there's a problem in travis when you try to write files in a test...")
 class DataDecoder(unittest.TestCase):
 
     def tearDown(self):

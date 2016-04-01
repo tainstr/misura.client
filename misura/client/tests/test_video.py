@@ -10,7 +10,11 @@ from misura.client import video
 import shutil
 from PyQt4 import QtGui
 
+#def setUpModule():
+#    if video.cv is False:
+#        raise BaseException("OpenCV is not available.") 
 
+@unittest.skipIf(video.cv is False, "OpenCV is not available")
 class Video(unittest.TestCase):
 
     def setUp(self):

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests Archive"""
 from misura.client.tests import iutils_testing
-from nose.plugins.skip import SkipTest
 import unittest
 from misura.client.acquisition import acquisition
 from misura.canon import option
@@ -14,7 +13,7 @@ from misura.client.live import registry
 class Dummy(object):
     pass
 
-@SkipTest #Needs the server, so it should not be run automatically
+@unittest.skip("Needs the server, so it should not be run automatically")
 class MainWindow(unittest.TestCase):
 
     def setUp(self):

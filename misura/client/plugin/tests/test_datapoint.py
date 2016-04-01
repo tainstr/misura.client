@@ -15,7 +15,7 @@ from misura.client.plugin import datapoint
 
 app = False
 
-@SkipTest #don't know how to make this work...
+@unittest.skip("don't know how to make this work...")
 class DataPoint(unittest.TestCase):
 
     """Tests the CurveOperationPlugin."""

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Testing CalibrationFactorPlugin."""
 import unittest
-from nose.plugins.skip import SkipTest
 import os
 import veusz.document as document
 from misura.client import filedata
@@ -17,7 +16,7 @@ class CalibrationFactorPlugin(unittest.TestCase):
 
     """Tests the CalibrationFactorPlugin"""
 
-    @SkipTest # WAITING FOR A CALIBRATION TEST FILE!!!
+    @unittest.skip("WAITING FOR A CALIBRATION TEST FILE!!!")
     def test(self):
         # Simulate an import
         imp = filedata.OperationMisuraImport(
