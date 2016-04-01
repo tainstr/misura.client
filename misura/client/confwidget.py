@@ -113,7 +113,6 @@ class RecentInterface(object):
         setattr(self.conf, 'recent_' + self.category, [])
         self.conf.save()
         self.conf.emit(QtCore.SIGNAL('rem()'))
-        
 
     def new(self, *a):
         if self.category in ['server']:
@@ -135,7 +134,7 @@ class RecentInterface(object):
             file_filter+= '{} ({});;'.format(_(converter.name),converter.file_pattern)
             print 'adding filter', file_filter
         path = QtGui.QFileDialog.getOpenFileName(
-            self, _("Data import"), 
+            self, _("Data import"),
             d,
             file_filter)
         self.emit(QtCore.SIGNAL('convert(QString)'), path)

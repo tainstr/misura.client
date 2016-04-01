@@ -35,6 +35,9 @@ ao(default_desc, 'hserver', **
    {'name': 'Recent Servers', 'current': 5, 'max': 20, 'min': 0, 'type': 'Integer'})
 ao(default_desc, 'saveLogin', **
    {'name': 'Save User/Password by Default', 'current': True, 'type': 'Boolean'})
+ao(default_desc, 'autoConnect', **
+   {'name': 'Auto-connect to last server used',
+    'current': True, 'type': 'Boolean'})
 ao(default_desc, 'hdatabase', **
    {'name': 'Recent Database Files', 'current': 10, 'max': 100, 'min': 1, 'type': 'Integer'})
 ao(default_desc, 'hfile', **{'name': 'Recent Test Files',
@@ -245,7 +248,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             self.desc = self.store.desc
             self.store.write_table(cursor, "conf")
 
-        # Load recent files in memory
+        # Load recent items in memory
         for name in recent_tables:
             name = 'recent_' + name
             cursor.execute("select * from " + name)

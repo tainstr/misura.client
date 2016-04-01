@@ -119,6 +119,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.tray_icon, QtCore.SIGNAL('messageClicked()'), self.focus_logging)
         self.setWindowIcon(QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
 
+        if confdb['autoConnect'] and len(confdb.recent_server) > 0:
+            self.set_addr(confdb.recent_server[-1][0])
+
     def notify(self,msg):
         self.tray_icon.show()
         self.tray_icon.showMessage('Misura Server', msg, msecs=2000)
