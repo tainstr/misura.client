@@ -32,3 +32,5 @@ cache:
   - apt
   - directories:
     - $HOME/.cache/pip
+after_success:
+  - coveralls
