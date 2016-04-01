@@ -20,17 +20,17 @@ install:
   - git clone https://github.com/tainstr/veusz.git ../veusz
   - export VEUSZ_RESOURCE_DIR=$(pwd)/../veusz
   - export PYTHONPATH=$PYTHONPATH:$VEUSZ_RESOURCE_DIR
+  - source activate test-environment
+  - pip install python-coveralls
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
 script:
-  - source activate test-environment
-  - pip install python-coveralls
   - nosetests -vv --with-coverage --cover-package=misura
 cache:
   - apt
   - directories:
     - $HOME/.cache/pip
 after_success:
-  - coveralls --verbose
+  - coveralls
