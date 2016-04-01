@@ -26,7 +26,7 @@ before_script:
   - sleep 3
 script:
   - source activate test-environment
-  - sudo pip install python-coveralls
+  - pip install python-coveralls
   - nosetests -vv --with-coverage --cover-package=misura
 cache:
   - apt
