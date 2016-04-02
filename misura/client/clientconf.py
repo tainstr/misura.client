@@ -16,6 +16,7 @@ from ..canon.indexer import Indexer
 import units
 
 import parameters as params
+from . import _
 
 default_misuradb_path = os.path.expanduser("~/MisuraData/misuradb")
 
