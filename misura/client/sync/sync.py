@@ -66,7 +66,6 @@ class StorageSync(object):
             return False
         if server:
             self.set_server(server)
-
         return True
 
     def has_uid(self, uid, tname):

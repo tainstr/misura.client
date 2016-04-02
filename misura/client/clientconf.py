@@ -163,7 +163,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if not path:
             return None
         # Ensure missing if new
-        if os.path.exists(path) and new:
+        if new and os.path.exists(path):
             os.remove(path)
         # Load/create
         self.known_uids = {}
@@ -205,7 +205,50 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self._rule_style = False
         self._rule_dataset = False
         self._rule_unit = False
-
+        
+    def load_configuration(self, cursor):
+        # Configuration table
+        conf_table_exists = cursor.execute(
+            "select 1 from sqlite_master where type='table' and name='conf'").fetchone()
+        if conf_table_exists:
+            stored_desc = self.store.read_table(cursor, 'conf')
+            desc = default_desc.copy()
+            desc.update(stored_desc)
+            self.desc = self.migrate_desc(desc)
+            logging.debug('%s %s', 'Loaded configuration', self.desc)
+        else:
+            logging.debug('%s', 'Recreating client configuration')
+            QtGui.QMessageBox.warning(None, 
+                            _('Misura Configuration not found'), 
+                            _('Configuration file is missing or damaged. Resetting to defaults.'))
+            for key, val in default_desc.iteritems():
+                self.store.desc[key] = option.Option(**val)
+            self.desc = self.store.desc
+            self.store.write_table(cursor, "conf")
+            
+    def load_recent_tables(self, cursor):
+        # Chron tables
+        cursor.execute(
+            "create table if not exists recent_server (i integer, address text, user text, password text)")
+        cursor.execute(
+            "create table if not exists recent_database (i integer, path text)")
+        cursor.execute(
+            "create table if not exists recent_file (i integer, path text, name text)")
+        cursor.execute(
+            "create table if not exists recent_m3database (i integer, path text)")
+        
+        # Load recent items in memory
+        for name in recent_tables:
+            name = 'recent_' + name
+            cursor.execute("select * from " + name)
+            r = cursor.fetchall()
+            r = list(set(r))
+            # Sort by key
+            r = sorted(r, key=lambda e: e[0])
+            # Pop key
+            r = [list(e[1:]) for e in r]
+            setattr(self, name, r)
+            
     def load(self, path=False):
         """Load an existent client configuration database, or create a new one."""
         logging.debug('LOAD %s', path)
@@ -219,46 +262,11 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             self.path, detect_types=sqlite3.PARSE_DECLTYPES)
         self.conn.text_factory = unicode
         cursor = self.conn.cursor()
+        
+        self.load_configuration(cursor)
+        
+        self.load_recent_tables(cursor)
 
-        # Chron tables
-        cursor.execute(
-            "create table if not exists recent_server (i integer, address text, user text, password text)")
-        cursor.execute(
-            "create table if not exists recent_database (i integer, path text)")
-        cursor.execute(
-            "create table if not exists recent_file (i integer, path text, name text)")
-        cursor.execute(
-            "create table if not exists recent_m3database (i integer, path text)")
-
-        # Configuration table
-        isconf = cursor.execute(
-            "select 1 from sqlite_master where type='table' and name='conf'").fetchone()
-        if isconf:
-            desc = default_desc.copy()
-            try:
-                desc.update(self.store.read_table(cursor, 'conf'))
-            except:
-                logging.debug(format_exc())
-            self.desc = self.migrate_desc(desc)
-            logging.debug('%s %s', 'Loaded configuration', self.desc)
-        else:
-            logging.debug('%s', 'Recreating client configuration')
-            for key, val in default_desc.iteritems():
-                self.store.desc[key] = option.Option(**val)
-            self.desc = self.store.desc
-            self.store.write_table(cursor, "conf")
-
-        # Load recent items in memory
-        for name in recent_tables:
-            name = 'recent_' + name
-            cursor.execute("select * from " + name)
-            r = cursor.fetchall()
-            r = list(set(r))
-            # Sort by key
-            r = sorted(r, key=lambda e: e[0])
-            # Pop key
-            r = [list(e[1:]) for e in r]
-            setattr(self, name, r)
         cursor.close()
         self.conn.commit()
         self.emit(QtCore.SIGNAL('load()'))
