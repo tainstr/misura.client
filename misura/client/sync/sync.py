@@ -13,7 +13,7 @@ from ...canon import indexer
 from ..network import TransferThread, remote_dbdir
 from .sync_table_model import SyncTableModel
 
-from PyQt4 import QtCore, QtGui, QtSql
+from PyQt4 import QtCore, QtGui
 
 record_length = len(indexer.indexer.testColumn)
 

@@ -4,6 +4,7 @@
 import os
 import urllib2
 import urllib
+from time import sleep
 
 from misura.canon.logger import Log as logging
 from PyQt4 import QtCore
@@ -189,10 +190,10 @@ class TransferThread(QtCore.QThread):
         # Remove other reservations and close file
         while not server.storage.test.free(uid) and not self.aborted:
             self.dlWaiting.emit(url, outfile, itr)
-#             sleep(1)
             if itr >= self.retry:
                 break
             logging.debug('%s %s', 'Waiting for uid reservation', uid)
+            sleep(1)
             itr += 1
         if self.aborted:
             logging.debug('%s %s', 'Aborted waiting for uid reservation', uid)
