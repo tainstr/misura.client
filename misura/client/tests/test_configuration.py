@@ -19,7 +19,7 @@ class Conf(unittest.TestCase):
 
     def test_create(self):
         file_name = temporary_filename()
-        client_configuration = clientconf.ConfDb(file_name, new=True)
+        client_configuration = clientconf.ConfDb(file_name)
 
         k0 = set(clientconf.default_desc.keys())
         k1 = set(client_configuration.desc.keys())
@@ -28,7 +28,7 @@ class Conf(unittest.TestCase):
     def test_save(self):
         file_name = temporary_filename()
 
-        client_configuration = clientconf.ConfDb(path=file_name, new=True)
+        client_configuration = clientconf.ConfDb(path=file_name)
         client_configuration['lang'] = 'en'
         client_configuration.save()
 
@@ -40,7 +40,7 @@ class Conf(unittest.TestCase):
     def test_mem(self):
         p = temporary_filename()
 
-        cf = clientconf.ConfDb(p, new=True)
+        cf = clientconf.ConfDb(p)
         cf.mem('file', 'name1', 'path1')
         cf.mem_file('name2', 'path2')
         self.assertEqual(
@@ -56,7 +56,7 @@ class Conf(unittest.TestCase):
 
     def test_unicode(self):
         f = tempfile.NamedTemporaryFile(delete=False)
-        cf = clientconf.ConfDb(f.name, new=True)
+        cf = clientconf.ConfDb(f.name)
         f.close()
         cf.mem_file(u'Vallourec - 126F3 80\xb0C/min 3x3',
                     '/home/daniele/tmp/gr/Vallourec - 126F3 80Cmin 3x3_00612S.h5')

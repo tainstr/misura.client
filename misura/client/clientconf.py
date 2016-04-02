@@ -7,7 +7,7 @@ import sqlite3
 import re
 from traceback import format_exc, print_exc
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 
 from ..canon import option
 from ..canon import csutil
@@ -156,16 +156,13 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     path = ''
     index = False
 
-    def __init__(self, path=False, new=False):
+    def __init__(self, path=False):
         QtCore.QObject.__init__(self)
         option.ConfigurationProxy.__init__(self)
         self.store = option.SqlStore()
         self.nosave_server = []
         if not path:
             return None
-        # Ensure missing if new
-        if new and os.path.exists(path):
-            os.remove(path)
         # Load/create
         self.known_uids = {}
         self.load(path)
@@ -219,9 +216,6 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             logging.debug('%s %s', 'Loaded configuration', self.desc)
         else:
             logging.debug('%s', 'Recreating client configuration')
-            QtGui.QMessageBox.warning(None, 
-                            _('Misura Configuration not found'), 
-                            _('Configuration file is missing or damaged. Resetting to defaults.'))
             for key, val in default_desc.iteritems():
                 self.store.desc[key] = option.Option(**val)
             self.desc = self.store.desc

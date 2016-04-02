@@ -30,21 +30,6 @@ db3_path = '\\\\ess-server\\Company\\Database Misura\\2015\\Misura3-2015.mdb'
 data_dir = os.path.join(client_test_dir, 'data')
 rem = None
 
-#FIXME: client should not import utils_testing, which is a server facility. ####
-#                                                                              #
-# for now, we do this only to have a simple way to create a temporary shared   #
-# memory. Anyway the client should not be aware of the existence of shared     #
-# memory.                                                                      #
-# WE WILL REMOVE THIS AS SOON AS WE HAVE A GREEN AND FULL TESTS SUITE          #
-#                                                                              #
-#                                                                              #
-#
-#if os.name != 'nt':
-#    from misura import utils_testing
-#                                                                              #
-##########################################################################
-
-
 app = QtGui.QApplication([])
 
 win = sys.platform.startswith('win')

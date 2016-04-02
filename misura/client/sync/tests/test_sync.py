@@ -29,7 +29,9 @@ local_dbpath = os.path.join(local_dbdir, 'local_db.sqlite')
 
 
 test_confdb = os.path.join(path, 'conf_db.sqlite')
-cdb = ConfDb(test_confdb, new=True)
+if os.path.exists(test_confdb):
+    os.remove(test_confdb)
+cdb = ConfDb(test_confdb)
 cdb['database'] = test_confdb
 # Monkey-patch confdb object in sync module, which was originally imported
 # from clientconf.
