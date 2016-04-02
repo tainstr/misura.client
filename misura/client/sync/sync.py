@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 """Database synchronization service and widget"""
 import os
-import logging
+
 from traceback import format_exc
+
+from misura.canon.logger import Log as logging
 
 from .. import _
 from ..clientconf import confdb
@@ -23,6 +25,8 @@ class StorageSync(object):
     """Max UID collect request"""
     server = False
     serial = False
+    start = 0
+    tot = 0
 
     def __init__(self, transfer=False):
         self.transfer = transfer
@@ -53,7 +57,7 @@ class StorageSync(object):
                 '%s %s', 'Database path does not exist!', self.dbpath)
             return False
         self.maindb = indexer.Indexer(self.dbpath)
-        self.db = indexer.Indexer(self.dbpath +'.sync')
+        self.db = indexer.Indexer(self.dbpath + '.sync')
         return True
 
     @property
@@ -134,6 +138,25 @@ class StorageSync(object):
             record = record[:record_length]
         self.add_record(record, 'sync_exclude')
         return True
+    
+    def delete_record(self, record):
+        """Permanently remove data file corresponding to `record` from remote server"""
+        uid = record[indexer.indexer.col_uid]
+        r = self.server.storage.remove_uid(uid)
+        logging.debug('Remove file result', uid, r)
+        if self.has_uid(uid, 'sync_queue'):
+            logging.debug('%s %s', 'Record was queued. Enabling.', record)
+            self.rem_uid(uid, 'sync_queue')
+
+        if self.has_uid(uid, 'sync_approve'):
+            self.rem_uid(uid, 'sync_approve')
+
+        if self.has_uid(uid, 'sync_error'):
+            self.rem_uid(uid, 'sync_error')
+
+        if self.has_uid(uid, 'sync_exclude'):
+            self.rem_uid(uid, 'sync_exclude')
+          
 
     def collect(self, server=False):
         """Scan through a chunk of rows and check if they exist in local archive."""
@@ -233,10 +256,12 @@ class SyncTable(QtGui.QTableView):
     length = 0
     queueRecord = QtCore.pyqtSignal(object)
     excludeRecord = QtCore.pyqtSignal(object)
+    deleteRecord = QtCore.pyqtSignal(object)
 
     def __init__(self, dbpath, table_name, parent=None):
         super(SyncTable, self).__init__(parent)
-        self.model_reference = SyncTableModel(indexer.Indexer(dbpath+'.sync'), table_name)
+        self.model_reference = SyncTableModel(
+            indexer.Indexer(dbpath + '.sync'), table_name)
         self.setModel(self.model_reference)
         for i in (0, 6, 9, 11):
             self.hideColumn(i)
@@ -248,13 +273,16 @@ class SyncTable(QtGui.QTableView):
         if table_name.endswith('_approve'):
             self.menu.addAction(_('Download'), self.enqueue)
             self.menu.addAction(_('Ignore'), self.exclude)
+            self.menu.addAction(_('Delete'), self.delete)
         elif table_name.endswith('_queue'):
             self.menu.addAction(_('Ignore'), self.exclude)
         elif table_name.endswith('_exclude'):
             self.menu.addAction(_('Download'), self.enqueue)
+            self.menu.addAction(_('Delete'), self.delete)
         elif table_name.endswith('_error'):
             self.menu.addAction(_('Retry'), self.enqueue)
             self.menu.addAction(_('Ignore'), self.exclude)
+            self.menu.addAction(_('Delete'), self.delete)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
 
@@ -296,6 +324,25 @@ class SyncTable(QtGui.QTableView):
         for record in self.iter_selected():
             self.excludeRecord.emit(record)
         self.model().select()
+
+    def delete(self):
+        """Delete selected records from remote server"""
+        records = []
+        for record in self.iter_selected():
+            records.append(record)
+        n = min(len(records), 10)
+        N = len(records)
+        msg = '\n'.join([r[3] for r in records[:n]])
+        msg = _("You are going to delete {} files, including:").format(N) + '\n' + msg
+        ok = QtGui.QMessageBox.question(self, 
+                        _("Permanently delete test data?"), msg,
+                        QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+        if ok != QtGui.QMessageBox.Ok:
+            logging.debug('Delete aborted')
+            return
+        for record in records:
+            self.deleteRecord.emit(record)
+            self.model().select()
 
 
 class SyncWidget(QtGui.QTabWidget):
@@ -339,6 +386,7 @@ class SyncWidget(QtGui.QTabWidget):
         self.addTab(obj, title)
         obj.queueRecord.connect(self.storage_sync.queue_record)
         obj.excludeRecord.connect(self.storage_sync.exclude_record)
+        obj.deleteRecord.connect(self.storage_sync.delete_record)
         return obj
 
     def set_server(self, server):

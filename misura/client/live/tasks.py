@@ -35,7 +35,6 @@ class PendingTasks(QtGui.QWidget):
         # Remove all items
         i = 0
         while self.lay.takeAt(0):
-            print 'REMOVING LAYOUT',i
             i+=1
             continue
         if self.progress is not False:
