@@ -121,15 +121,21 @@ def initApp(name='misura', org="Expert System Solutions", domain="expertsystemso
     if client:
         initClient()
 
+app_closed = False
 
 def closeApp():
-    """Operazioni di pulizia prima della chiusura"""
-    # Save configuration
+    """Connected to quit and last window closed signals."""
+    # Avoid closing multiple times if multiple signals are sent!
+    global app_closed
+    if app_closed:
+        return
+    app_closed = True
     logging.debug('Closing App')
+    # Save configuration
     confdb.save()
     closeRegistry()
     network.manager.scan = False
-    sleep(1)
+    sleep(0.1)
     network.manager.terminate()
     network.closeConnection()
 
