@@ -168,7 +168,7 @@ class TransferThread(QtCore.QThread):
         self.dlFinished.emit(url, outfile)
         return True
 
-    def download_uid(self, server, uid, outfile, retry=20):
+    def download_uid(self, server, uid, outfile=False, retry=20):
         """Download test `uid` from `server` storage."""
         url, loc = dataurl(server, uid)
         self.url = url
@@ -210,7 +210,7 @@ class TransferThread(QtCore.QThread):
         self.download_url(url, outfile)
         # Free uid for remote opening and next download
         server.storage.test.free(uid)
-        return True
+        return outfile
 
     def upload(self, url, localfile, post):
         """

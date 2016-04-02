@@ -60,13 +60,6 @@ class StorageSync(object):
         self.db = indexer.Indexer(self.dbpath + '.sync')
         return True
 
-    @property
-    def dbdir(self):
-        dbdir = os.path.join(os.path.dirname(self.dbpath), self.serial)
-        if not os.path.exists(dbdir):
-            os.makedirs(dbdir)
-        return dbdir
-
     def prepare(self, dbpath=False, server=False):
         """Open database and prepare operations"""
         if not self.set_dbpath(dbpath):
@@ -222,18 +215,11 @@ class StorageSync(object):
 
     def download_record(self, record):
         """Start the chunked download of a record"""
-        logging.debug('%s %s %s', 'download_record', record, self.remote_dbdir)
-        remote_path = record[0]
-        p = remote_path.replace(self.remote_dbdir, '').split('/')
-        print 'record path', p
-        fn = p.pop(-1)
-        print 'record filename', fn
-        outfile = os.path.join(self.dbdir, fn)
-        d = '/' + os.path.join(*p)
-        url = self.server.data_addr + d + '/' + fn
-        r = self.transfer.download_url(url, outfile)
-        self.maindb.appendFile(outfile)
-        return r
+        uid = record[indexer.indexer.col_uid]
+        logging.debug('download_record', record)
+        self.transfer.dbpath = self.dbpath
+        outfile = self.transfer.download_uid(self.server, uid)
+        return outfile
 
     def loop(self, server=False):
         """Inner synchronization loop.
