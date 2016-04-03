@@ -9,9 +9,10 @@ from misura.canon.logger import Log as logging
 
 from .. import _
 from ..clientconf import confdb
-from ...canon import indexer
+from misura.canon import indexer
 from ..network import TransferThread, remote_dbdir
 from .sync_table_model import SyncTableModel
+from .. import database
 
 from PyQt4 import QtCore, QtGui
 
@@ -287,47 +288,24 @@ class SyncTable(QtGui.QTableView):
             self.length = n
         return n
 
-    def iter_selected(self):
-        """Iterate over selected rows returning their corresponding sql record"""
-        column_count = self.model().columnCount()
-        for row in self.selectionModel().selectedRows():
-            r = []
-            row = row.row()
-            for i in range(column_count):
-                idx = self.model().index(row, i)
-                r.append(self.model().data(idx))
-            yield r
 
     def enqueue(self):
         """Promote selection to sync_queue table"""
-        for record in self.iter_selected():
+        for record in database.iter_selected(self):
             self.queueRecord.emit(record)
         self.model().select()
 
     def exclude(self):
         """Move selection to sync_exclude table"""
-        for record in self.iter_selected():
+        for record in database.iter_selected(self):
             self.excludeRecord.emit(record)
         self.model().select()
 
     def delete(self):
         """Delete selected records from remote server"""
-        records = []
-        for record in self.iter_selected():
-            records.append(record)
-        n = min(len(records), 10)
-        N = len(records)
-        msg = '\n'.join([r[3] for r in records[:n]])
-        msg = _("You are going to delete {} files, including:").format(N) + '\n' + msg
-        ok = QtGui.QMessageBox.question(self, 
-                        _("Permanently delete test data?"), msg,
-                        QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
-        if ok != QtGui.QMessageBox.Ok:
-            logging.debug('Delete aborted')
-            return
-        for record in records:
+        for record in database.get_delete_selection(self):
             self.deleteRecord.emit(record)
-            self.model().select()
+        self.model().select()
 
 
 class SyncWidget(QtGui.QTabWidget):

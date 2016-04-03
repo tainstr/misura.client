@@ -7,8 +7,7 @@ import datetime
 import functools
 from misura.client import _
 from misura.canon import csutil, indexer
-from misura.client.clientconf import settings
-from misura.client.connection import addrConnection
+
 
 file_column = 0
 serial_column = 1
@@ -72,8 +71,12 @@ class DatabaseModel(QtCore.QAbstractTableModel):
             flags = flags | QtCore.Qt.ItemIsEditable
 
         return QtCore.Qt.ItemFlags(flags)
+    
+    def select(self):
+        self.up()
 
     def up(self, conditions={}):
+        """TODO: rename to select()""" 
         if not self.remote:
             return
         self.tests = self.remote.query(conditions)
@@ -102,6 +105,7 @@ class DatabaseHeader(QtGui.QHeaderView):
 
     def show_menu(self, pt):
         QtGui.qApp.processEvents()
+        self.menu.clear()
         for i, h in enumerate(self.model().sheader):
             act = self.menu.addAction(h, functools.partial(self.switch, i))
             act.setCheckable(True)
@@ -114,6 +118,33 @@ class DatabaseHeader(QtGui.QHeaderView):
         else:
             self.hideSection(i)
 
+def iter_selected(table_view):
+    """Iterate over selected rows returning their corresponding sql record"""
+    column_count = table_view.model().columnCount()
+    for row in table_view.selectionModel().selectedRows():
+        r = []
+        row = row.row()
+        for i in range(column_count):
+            idx = table_view.model().index(row, i)
+            r.append(table_view.model().data(idx))
+        yield r
+        
+def get_delete_selection(table_view):
+    records = []
+    for record in iter_selected(table_view):
+        records.append(record)
+    n = min(len(records), 10)
+    N = len(records)
+    msg = '\n'.join([r[3] for r in records[:n]])
+    msg = _("You are going to delete {} files, including:").format(N) + '\n' + msg
+    ok = QtGui.QMessageBox.question(table_view, 
+                    _("Permanently delete test data?"), msg,
+                    QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel, 
+                    QtGui.QMessageBox.Cancel)
+    if ok != QtGui.QMessageBox.Ok:
+        logging.debug('Delete aborted')
+        return []
+    return records
 
 class DatabaseTable(QtGui.QTableView):
 
@@ -130,6 +161,17 @@ class DatabaseTable(QtGui.QTableView):
         self.connect(
             self, QtCore.SIGNAL('doubleClicked(QModelIndex)'), self.select)
         self.setHorizontalHeader(DatabaseHeader(parent=self))
+        
+        self.menu = QtGui.QMenu(self)
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.connect(
+            self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
+        
+        self.menu.addAction(_('View folder'), self.view_folder)
+        self.menu.addAction(_('Delete'), self.delete)
+        
+    def showMenu(self, pt):
+        self.menu.popup(self.mapToGlobal(pt))
 
     def select(self, idx):
         self.emit(QtCore.SIGNAL('selected()'))
@@ -146,6 +188,17 @@ class DatabaseTable(QtGui.QTableView):
         row = model.tests[idx.row()]
         # name,index,file
         return row[ncol], row[icol], row[fcol], row[fuid]
+
+    def view_folder(self):
+        record  = iter_selected(self).next()   
+        url = 'file://' + os.path.dirname(record[0])
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
+        
+    def delete(self):
+        """Delete selected records from remote server"""
+        for record in get_delete_selection(self):
+            self.remote.remove_uid(record[2])
+        self.model().select()
 
 
 class DatabaseWidget(QtGui.QWidget):
@@ -184,8 +237,7 @@ class DatabaseWidget(QtGui.QWidget):
         
         self.connect(self.doQuery, QtCore.SIGNAL('clicked()'), self.query)
         self.connect(self.nameContains, QtCore.SIGNAL('returnPressed()'), self.query)
-
-        self.menu.addAction(_('Remove'), self.remove)
+        
         self.menu.addAction(_('Refresh'), self.refresh)
         self.menu.addAction(_('Rebuild'), self.rebuild)
         self.bar = QtGui.QProgressBar(self)
@@ -251,11 +303,6 @@ class DatabaseWidget(QtGui.QWidget):
         if isGraphics:
             self.close()
 
-    def remove(self):
-        fname, instr, file, uid = self.table.getName()
-        self.remote.remove(uid)
-        self.up()
-
 
 class UploadThread(QtCore.QThread):
 
@@ -292,6 +339,7 @@ def getDatabaseWidget(path, new=False):
 
 
 def getRemoteDatabaseWidget(path):
+    from .connection import addrConnection
     obj = addrConnection(path)
     if not obj:
         logging.debug('%s', 'Connection FAILED')
