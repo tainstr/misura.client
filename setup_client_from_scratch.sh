@@ -5,6 +5,41 @@ set -e
 LOGGED_USER=`whoami`
 TARGET_DIR=/opt/misura4
 BASH_RC=~/.bashrc
+PROFILE_RC=~/.profile
+DESKTOP=`xdg-user-dir DESKTOP`
+
+function update_bashrc {
+
+	echo Updating $1
+	LINE="export VEUSZ_RESOURCE_DIR=\"$TARGET_DIR/veusz\""
+	grep -q -F "$LINE" $1 || echo $LINE >> $1
+	LINE="export PYTHONPATH=\$PYTHONPATH:$TARGET_DIR/veusz"
+	grep -q -F "$LINE" $1 || echo $LINE >> $1
+	LINE="source \"$TARGET_DIR/misura.canon/misura/canon/canondefine.sh\""
+	grep -q -F "$LINE" $1 || echo $LINE >> $1
+	LINE="source \"$TARGET_DIR/misura.client/misura/client/clientdefine.sh\""
+	grep -q -F "$LINE" $1 || echo $LINE >> $1
+}
+
+update_bashrc "$BASH_RC"
+update_bashrc "$PROFILE_RC"
+
+
+function create_icon {
+echo Creating desktop icon for $1
+echo "[Desktop Entry]
+Type=Application
+Exec=bash -c \"source /home/misura/.profile; python /opt/misura4/misura.client/misura/client/bin/$1.py\"
+Terminal=false
+Name=$1" > "$DESKTOP/$1.desktop"
+chmod +x "$DESKTOP/$1.desktop"
+}
+
+create_icon acquisition
+create_icon browser
+create_icon graphics
+
+echo "INSTALLING..."
 
 sudo apt-get -y update
 sudo apt-get -y upgrade
@@ -31,24 +66,12 @@ git clone https://bitbucket.org/tainstr/misura.canon.git
 git clone https://github.com/tainstr/veusz.git
 echo "done cloning."
 
-echo Updating .bashrc
-TARGET_DIR=/opt/misura4
-LINE="export VEUSZ_RESOURCE_DIR=\"$TARGET_DIR/veusz\""
-grep -q -F "$LINE" $BASH_RC || echo $LINE >> $BASH_RC
-LINE="export PYTHONPATH=\$PYTHONPATH:$TARGET_DIR/veusz"
-grep -q -F "$LINE" $BASH_RC || echo $LINE >> $BASH_RC
-LINE="source \"$TARGET_DIR/misura.canon/misura/canon/canondefine.sh\""
-grep -q -F "$LINE" $BASH_RC || echo $LINE >> $BASH_RC
-LINE="source \"$TARGET_DIR/misura.client/misura/client/clientdefine.sh\""
-grep -q -F "$LINE" $BASH_RC || echo $LINE >> $BASH_RC
-
-
-source $BASH_RC
 
 echo "Building Veusz helpers"
 cd $TARGET_DIR/veusz
 python setup.py build_ext --inplace
 
+source $BASH_RC
+
+
 echo "Misura Client Setup complete"
-echo "To launch the client"
-echo "maq, mbr, mgr"
