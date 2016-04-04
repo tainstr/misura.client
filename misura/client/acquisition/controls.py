@@ -9,7 +9,7 @@ from misura.canon.csutil import unlockme
 from .. import widgets, _
 from ..live import registry
 
-from .messages import StartedFinishedNotification
+from .messages import StartedFinishedNotification, validate_start_acquisition
 
 from PyQt4 import QtGui, QtCore
 qm = QtGui.QMessageBox
@@ -286,15 +286,9 @@ class Controls(QtGui.QToolBar):
 
     def validate(self):
         """Show a confirmation dialog immediately before starting a new test"""
-        # TODO: generalize
-        if self.remote['devpath'] in ['horizontal', 'vertical', 'flex']:
-            val, st = QtGui.QInputDialog.getDouble(self, _("Confirm initial sample dimension"),
-                                                   _("Initial dimension (micron)"),
-                                                   self.remote.sample0['initialDimension'])
-            if not st:
-                return False
-            self.remote.sample0['initialDimension'] = val
-        return True
+        return validate_start_acquisition(self.remote, parent=self)
+
+
 
 
 class MotionControls(QtGui.QToolBar):

@@ -6,6 +6,7 @@ import sys
 from .. import widgets
 from PyQt4 import QtGui, QtCore
 
+from .messages import validate_start_acquisition
 
 class DelayedStart(QtGui.QDialog):
 
@@ -17,6 +18,7 @@ class DelayedStart(QtGui.QDialog):
         self.setWindowTitle('Delayed Test Start')
         self.lay = QtGui.QVBoxLayout()
         self.eng = widgets.aBoolean(server, server, server.gete('delayStart'))
+        self.engaged = self.eng.current
         self.wg = widgets.aDelay(server, server, server.gete('delay'))
         h = time() + 3600
         if self.wg.current < h and not self.eng.current:
@@ -25,7 +27,7 @@ class DelayedStart(QtGui.QDialog):
         self.lay.addWidget(self.eng)
         self.wg.lay.insertWidget(0, self.wg.label_widget)
         self.lay.addWidget(self.wg)
-
+        
         self.run = QtGui.QLabel(
             'Target instrument: ' + server['lastInstrument'].capitalize())
         self.lay.addWidget(self.run)
@@ -70,6 +72,11 @@ class DelayedStart(QtGui.QDialog):
         dt = '--:--:--'
         self.ins = getattr(self.server, self.server['lastInstrument'])
         if self.eng.current:
+            if not self.engaged:
+                r = validate_start_acquisition(self.ins, parent=self)
+                if not r:
+                    self.eng.set(False)
+                    return False
             dt = self.wg.current + self.wg.delta - time()
             dt = QtCore.QTime().addSecs(dt)
             dt = dt.toString('hh:mm:ss')
@@ -78,5 +85,6 @@ class DelayedStart(QtGui.QDialog):
         else:
             self.wg.twg.setReadOnly(False)
             self.quit.setEnabled(False)
+        self.engaged = self.eng.current
         self.eta.setText('Remaining time: {}'.format(dt))
         self.op.setText('Operator: ' + self.ins.measure['operator'])
