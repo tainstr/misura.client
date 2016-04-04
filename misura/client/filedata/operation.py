@@ -579,8 +579,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         done()
         logging.debug('%s %s', 'imported names:', names)
         self._doc.available_data.update(availds)
-
-        LF.params.rule_load = '\n'.join(map(lambda name: "/" + name + "$",
-                                            names_set)).replace('0:', '')
+        
+        # Update linked file parameters
+        hdf_names = filter(lambda name: name.startswith(self.prefix), names_set)
+        hdf_names = map(lambda name: ("/" + name.lstrip(self.prefix) + "$"), hdf_names)
+        LF.params.rule_load = '\n'.join(hdf_names)
 
         return names
+    

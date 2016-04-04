@@ -5,7 +5,6 @@ import os
 from misura.canon.logger import Log as logging
 import veusz.dataimport.base as base
 from misura.canon import option
-from proxy import getFileProxy
 import collections
 
 

@@ -9,9 +9,8 @@ from PyQt4.QtCore import Qt
 from PyQt4 import QtGui, QtCore
 
 import functools
-from . import MisuraDocument, ImportParamsMisura, OperationMisuraImport
+from . import MisuraDocument, OperationMisuraImport
 from entry import DatasetEntry
-from .. import clientconf
 from proxy import getFileProxy
 import axis_selection
 import numpy as np
