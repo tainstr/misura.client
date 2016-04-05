@@ -236,7 +236,7 @@ class LiveLog(QtGui.QTextEdit):
         QtGui.QTextEdit.__init__(self, parent)
         self.setReadOnly(True)
         self.setLineWrapMode(self.NoWrap)
-        self.nlog = 0
+        self.current_buf = []
         self.label = _('Log')
         self.menu = QtGui.QMenu(self)
         self.menu.addAction('Update now', self.slotUpdate)
@@ -255,11 +255,13 @@ class LiveLog(QtGui.QTextEdit):
             logging.debug('No registry')
             return
         buf = registry.log_buf
-        if len(buf) <= self.nlog:
+
+        if buf == self.current_buf:
             logging.debug('No new log')
             return
+
         txt = ''
-        for line in buf[self.nlog:]:
+        for line in buf:
             if type(line) != type([]):
                 continue
             if len(line) < 2:
@@ -277,11 +279,12 @@ class LiveLog(QtGui.QTextEdit):
             self.moveCursor(QtGui.QTextCursor.End)
             self.moveCursor(QtGui.QTextCursor.StartOfLine)
             self.ensureCursorVisible()
-        self.nlog = len(buf)
+
+        self.current_buf = buf[:]
 
     def update(self):
         logging.debug('LiveLog.update')
         registry.updateLog()
-        
+
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))
