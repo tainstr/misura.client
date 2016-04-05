@@ -124,7 +124,8 @@ class aNumber(ActiveWidget):
             elif self.parent():
                 self.parent().setFocus()
 
-        self.set(target)
+        if self.set(target) != target:
+            self.update()
 
     def sliderPush(self, target=None):
         if target == None:
@@ -136,7 +137,9 @@ class aNumber(ActiveWidget):
             target = int(target)
         if self.slider:
             self.slider.set_paused(False)
-        self.set(target)
+
+        if self.set(target) != target:
+            self.update()
 
     def setZoom(self, val):
         """Enable/disable zooming"""

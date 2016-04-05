@@ -208,8 +208,8 @@ class Active(object):
             logging.debug('Not setting',self.handle, repr(val))
             return True
         out = self.remObj.set(self.handle,  val)
-        logging.debug('%s %s %s %s', 'Active.set', self.handle, repr(val), out)
-        self.get()
+        logging.debug('Active.set', self.handle, repr(val), out, self.current)
+        return self.get()
 
     def set_raw(self, val):
         """Set value directly, without adapt2srv conversion"""
@@ -588,12 +588,6 @@ class ActiveWidget(Active, QtGui.QWidget):
     def emitHelp(self):
         self.emit(QtCore.SIGNAL('help'), 0)
         Active.emitHelp(self)
-
-    def emitChanged(self):
-        """Il valore corrente si è modificato sul server"""
-        # aggiorno anche gli attributi
-        Active.emitChanged(self)
-        self.emit(QtCore.SIGNAL('changed'), self.current)
 
     def emitError(self, msg):
         Active.emitError(self, msg)
