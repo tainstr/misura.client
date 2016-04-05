@@ -141,7 +141,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         cf = {'graph': graph, 'xT': 'reportxT',
               'yT': 'reportyT', 'xR': 'reportxR', 'yR': 'reportyR'}
         # TODO: convert into a plugin, creating a subplot!
-        ThermalCyclePlot.setup(command_interface, **cf)
+        ThermalCyclePlot.setup(command_interface, with_progress=False, **cf)
         tc = clean_curve(tc, events=False)
         ThermalCyclePlot.importCurve(command_interface, tc, **cf)
         cf = {'Label/font': 'Bitstream Vera Sans', 'Label/size': '6pt',

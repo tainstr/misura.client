@@ -17,7 +17,8 @@ class ThermalCyclePlot(VeuszPlot):
     def setup(cls, cmd, graph='/time/time',
               T='tc', R='tc1',
               xT='x', yT='y', aT='y',
-              xR='x1', yR='y1', aR='y1'):
+              xR='x1', yR='y1', aR='y1',
+              with_progress=True):
         """Setup a ThermalCyclePlot on `graph` destination"""
         cmd.SetData(xT, [])
         cmd.SetData(yT, [])
@@ -57,18 +58,19 @@ class ThermalCyclePlot(VeuszPlot):
         cmd.Set(R + '/PlotLine/color', 'blue')
         cmd.Set(R + '/MarkerFill/color', 'blue')
 
-        cmd.To(graph)
-        cmd.Add('line', name='bar')
-        cmd.To('bar')
-        cmd.Set('mode', 'length-angle')
-        cmd.Set('positioning', 'relative')
-        cmd.Set('angle', 270.)
-        cmd.Set('length', 1.)
-        cmd.Set('xPos', 0.)
-        cmd.Set('yPos', 0.)
-        cmd.Set('clip', True)
-        cmd.Set('Line/color', 'red')
-        cmd.Set('Line/width', '2pt')
+        if with_progress:
+            cmd.To(graph)
+            cmd.Add('line', name='bar')
+            cmd.To('bar')
+            cmd.Set('mode', 'length-angle')
+            cmd.Set('positioning', 'relative')
+            cmd.Set('angle', 270.)
+            cmd.Set('length', 1.)
+            cmd.Set('xPos', 0.)
+            cmd.Set('yPos', 0.)
+            cmd.Set('clip', True)
+            cmd.Set('Line/color', 'red')
+            cmd.Set('Line/width', '2pt')
 
     def __init__(self, parent=None):
         VeuszPlot.__init__(self, parent=parent)
