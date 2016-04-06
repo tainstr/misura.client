@@ -49,6 +49,9 @@ class MeasureInfo(QtGui.QTabWidget):
         self.results.set_doc(doc)
 
     def tabChanged(self):
+        # Do not check tc if local
+        if not getattr(self.remote,'addr'):
+            return 
         currentTab = self.currentWidget()
         if not currentTab == self.thermalCycleView:
             if self.fromthermalCycleView:
