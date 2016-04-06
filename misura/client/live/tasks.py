@@ -13,7 +13,7 @@ from misura.client.sync import SyncWidget
 from PyQt4 import QtGui, QtCore
 
 
-class PendingTasks(QtGui.QWidget):
+class RemoteTasks(QtGui.QWidget):
     server = False
     progress = False
     ch = QtCore.pyqtSignal()
@@ -131,7 +131,7 @@ class LocalTasks(QtGui.QWidget):
                      self._done, conntype)
         logging.debug('%s', 'LocalTasks initialized')
         self.log_messages = ''
-
+        
     def __len__(self):
         return len(self.prog)
 
@@ -196,8 +196,6 @@ class LocalTasks(QtGui.QWidget):
         if step >= wg.pb.maximum() and step != 0:
             self._lock.release()
             self._done(pid)
-        
-        #QtGui.qApp.processEvents()
         return True
 
     def job(self, step, pid='Operation', label=''):
@@ -217,7 +215,7 @@ class LocalTasks(QtGui.QWidget):
         self.mlay.removeWidget(wg)
         del wg
         self.msg('Completed task: ' + str(pid))
-        logging.debug('%s %s', 'LocalTasks.done', self.prog)
+        logging.debug('LocalTasks.done', self.prog)
         self.ch.emit()
         return True
 
@@ -247,7 +245,7 @@ class Tasks(QtGui.QTabWidget):
         self._lock = threading.Lock()
         self.setWindowTitle(_('Pending Tasks'))
 
-        self.progress = PendingTasks()
+        self.progress = RemoteTasks()
         self.addTab(self.progress, _('Remote'))
 
         self.tasks = LocalTasks()
@@ -261,8 +259,9 @@ class Tasks(QtGui.QTabWidget):
         self.sync.ch.connect(self.hide_show, QtCore.Qt.QueuedConnection)
 
     def removeStorageAndRemoteTabs(self):
-        self.removeTab(2)
-        self.removeTab(0)
+        if self.count()==3:
+            self.removeTab(2)
+            self.removeTab(0)
 
     @lockme
     def set_server(self, server):
@@ -270,6 +269,7 @@ class Tasks(QtGui.QTabWidget):
         server.connect()
         self.progress.set_server(server)
         self.sync.set_server(server)
+        
 
     def update_active(self):
         """Switch the active tab"""
@@ -279,7 +279,6 @@ class Tasks(QtGui.QTabWidget):
         if len(self.progress):
             self.setCurrentIndex(0)
         elif len(self.tasks):
-            print 'switch tab to local tasks', self.tasks.prog
             self.setCurrentIndex(1)
         elif len(self.sync) and not browser_mode:
             self.setCurrentIndex(2)
@@ -298,7 +297,7 @@ class Tasks(QtGui.QTabWidget):
 
     def hideEvent(self, e):
         self.user_show = False
-        return QtGui.QWidget.hideEvent(self, e)
+        return QtGui.QTabWidget.hideEvent(self, e)
 
     def closeEvent(self, e):
         self.user_show = False

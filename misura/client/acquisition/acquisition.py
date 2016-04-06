@@ -668,7 +668,8 @@ class MainWindow(QtGui.QMainWindow):
         doc.up = True
 
         self.tasks.done('Waiting for data')
-        self.tasks.hide()
+        if not self.fixedDoc:
+            self.tasks.hide()
 
     ###########
     # ## Start/Stop utilities
