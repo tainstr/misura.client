@@ -135,7 +135,6 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
     def arrange_curve(self, plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formatting_opt):
         # Set colors according to axes
-        print 'BBBBBBBBBBB', axcolors, axes
         obj = self.doc.resolveFullWidgetPath(plotpath)
         # Get y dataset
         y = obj.settings['yData']

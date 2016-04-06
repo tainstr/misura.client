@@ -30,6 +30,7 @@ from ..database import getDatabaseWidget, getRemoteDatabaseWidget
 import veuszplot
 from ..confwidget import RecentMenu, ClientConf
 from .. import iutils
+from ..live import Tasks
 
 setting.transient_settings['unsafe_mode'] = True
 
@@ -292,7 +293,8 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         """Import misura data from HDF file"""
         # lookup filename
         filename = unicode(filename)
-        print 'importing misura with defaults'
+        logging.debug('importing misura with defaults', filename)
+        Tasks.instance().removeStorageAndRemoteTabs()
         dsnames = self.mw.cmd.ImportMisura(filename, **options)
         self.openedFiles.refresh_model()
         return dsnames
