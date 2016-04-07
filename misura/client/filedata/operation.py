@@ -93,6 +93,7 @@ def read_data(proxy, col):
     data0 = np.array(proxy.col(col, (0, None)))
     # FIXME: now superfluous?
     data = data0.view(np.float64).reshape((len(data0), 2))
+    data = data[np.isfinite(data[:,1])]
     return data
 
 
