@@ -19,7 +19,7 @@ flavour_column = 6
 name_column = 7
 elapsed_column = 8
 number_of_samples_column = 9
-comment_cilumn = 10
+comment_column = 10
 verify_column = 11
 incremental_id_column = 12
 
@@ -54,7 +54,14 @@ class DatabaseModel(QtCore.QAbstractTableModel):
         uid = self.tests[index.row()][uid_column]
         name = self.tests[index.row()][name_column]
         file_name = self.tests[index.row()][file_column]
-        changed_lines = self.remote.change_name(value, uid, file_name)
+
+        update_functions = {
+            name_column: self.remote.change_name,
+            comment_column: self.remote.change_comment
+        }
+
+        changed_lines = update_functions[index.column()](value, uid, file_name)
+
         self.up()
         return changed_lines
 
@@ -67,16 +74,16 @@ class DatabaseModel(QtCore.QAbstractTableModel):
     def flags(self, index):
         flags = QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
 
-        if index.column() == name_column:
+        if index.column() == name_column or index.column() == comment_column:
             flags = flags | QtCore.Qt.ItemIsEditable
 
         return QtCore.Qt.ItemFlags(flags)
-    
+
     def select(self):
         self.up()
 
     def up(self, conditions={}):
-        """TODO: rename to select()""" 
+        """TODO: rename to select()"""
         if not self.remote:
             return
         self.tests = self.remote.query(conditions)
@@ -128,7 +135,7 @@ def iter_selected(table_view):
             idx = table_view.model().index(row, i)
             r.append(table_view.model().data(idx))
         yield r
-        
+
 def get_delete_selection(table_view):
     records = []
     for record in iter_selected(table_view):
@@ -137,9 +144,9 @@ def get_delete_selection(table_view):
     N = len(records)
     msg = '\n'.join([r[3] for r in records[:n]])
     msg = _("You are going to delete {} files, including:").format(N) + '\n' + msg
-    ok = QtGui.QMessageBox.question(table_view, 
+    ok = QtGui.QMessageBox.question(table_view,
                     _("Permanently delete test data?"), msg,
-                    QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel, 
+                    QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
                     QtGui.QMessageBox.Cancel)
     if ok != QtGui.QMessageBox.Ok:
         logging.debug('Delete aborted')
@@ -161,15 +168,15 @@ class DatabaseTable(QtGui.QTableView):
         self.connect(
             self, QtCore.SIGNAL('doubleClicked(QModelIndex)'), self.select)
         self.setHorizontalHeader(DatabaseHeader(parent=self))
-        
+
         self.menu = QtGui.QMenu(self)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
-        
+
         self.menu.addAction(_('View folder'), self.view_folder)
         self.menu.addAction(_('Delete'), self.delete)
-        
+
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))
 
@@ -190,10 +197,10 @@ class DatabaseTable(QtGui.QTableView):
         return row[ncol], row[icol], row[fcol], row[fuid]
 
     def view_folder(self):
-        record  = iter_selected(self).next()   
+        record  = iter_selected(self).next()
         url = 'file://' + os.path.dirname(record[0])
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
-        
+
     def delete(self):
         """Delete selected records from remote server"""
         for record in get_delete_selection(self):
@@ -234,10 +241,10 @@ class DatabaseWidget(QtGui.QWidget):
         lay.addWidget(self.nameContains)
         self.doQuery = QtGui.QPushButton(_('Apply'), parent=self)
         lay.addWidget(self.doQuery)
-        
+
         self.connect(self.doQuery, QtCore.SIGNAL('clicked()'), self.query)
         self.connect(self.nameContains, QtCore.SIGNAL('returnPressed()'), self.query)
-        
+
         self.menu.addAction(_('Refresh'), self.refresh)
         self.menu.addAction(_('Rebuild'), self.rebuild)
         self.bar = QtGui.QProgressBar(self)
@@ -249,7 +256,7 @@ class DatabaseWidget(QtGui.QWidget):
     def rebuild(self):
         self.remote.rebuild()
         self.up()
-        
+
     def refresh(self):
         self.remote.refresh()
         self.up()
