@@ -223,7 +223,7 @@ class KidRegistry(QtCore.QThread):
 
     @lockme
     def updateLog(self):
-        r = self.obj.get_log(self.log_time)
+        r = self.obj.search_log(self.log_time)
         if r is None:
             return False
         ltime, buf = r

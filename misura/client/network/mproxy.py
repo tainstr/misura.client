@@ -268,7 +268,7 @@ class MisuraProxy(object):
         oldname = self._to_root()
         # Restore object path's
         self._toMethodName(oldname)
-        
+
     def _wait(self,  timeout=120):
         """Wait for connection"""
         t0 = time()
@@ -280,7 +280,7 @@ class MisuraProxy(object):
             except:
                 print_exc()
                 sleep(1)
-            
+
 
     @property
     def root(self):
@@ -361,7 +361,7 @@ class MisuraProxy(object):
     def lastlog(self):
         """Retrieve log messages near the last remote procedure call"""
         t = self._ctime + self._dtime
-        r = self.remObj.get_log(t - 1, t + 1)
+        r = self.remObj.search_log(t - 1, t + 1)
         return r
 
     @reconnect
