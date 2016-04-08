@@ -69,10 +69,10 @@ class MeasureInfo(QtGui.QTabWidget):
             tbrowcurve.append(row[1])
             tbcurve.append(tbrowcurve)
         if not tbcurve == tbcurveremote:
-            r = QtGui.QMessageBox.warning(self, "Changes not saved",
-                                          "Changes to thermal cycle were not saved! Do you save it now?",
-                                          QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
-            if r == QtGui.QMessageBox.Yes:
+            r = QtGui.QMessageBox.warning(self, _("Changes not saved"),
+                                          _("Changes to thermal cycle were not saved! Save it now?"),
+                                          QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
+            if r == QtGui.QMessageBox.Ok:
                 self.thermalCycleView.apply()
 
     nsmp = 0

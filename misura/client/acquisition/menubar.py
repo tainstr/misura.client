@@ -4,9 +4,8 @@ from misura.canon.logger import Log as logging
 from .. import network, conf, _
 from ..clientconf import confdb
 from ..connection import LoginWindow, addrConnection
-from ..confwidget import ClientConf, RecentMenu
+from ..confwidget import RecentMenu
 from .. import parameters as params
-from ..live import registry
 from misura.client.helpmenu import HelpMenu
 
 from PyQt4 import QtGui, QtCore
@@ -77,7 +76,7 @@ class MenuBar(QtGui.QMenuBar):
         addr = str(addr)
         obj = addrConnection(addr)
         if not obj:
-            logging.debug('%s', 'MenuBar.setAddr: Failed!')
+            logging.debug('MenuBar.setAddr: Failed!')
             return
         network.setRemote(obj)
 
@@ -86,16 +85,29 @@ class MenuBar(QtGui.QMenuBar):
             return
         r = self.server.users.logout()
         confdb.logout(self.server.addr)
-        QtGui.QMessageBox.information(self, _('Logged out'),
-                                      'You have been logged out (%s): \n %r' % (network.manager.user, r))
+        msg = _('You have been logged out (%s): \n %r') % (self.server.user, r)
+        QtGui.QMessageBox.information(self, _('Logged out'),msg)
 
     def shutdown(self):
-        QtGui.QMessageBox.information(self, _('Shutting Down'),
-                                      'Server is shutting down:\n %r' % network.manager.remote.shutdown())
+        btn = QtGui.QMessageBox.warning(None, _('Confirm Shutdown'),
+                          _('Do you really want to shutdown the instrument operative system?'), 
+                          QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok, QtGui.QMessageBox.Cancel)
+        if btn != QtGui.QMessageBox.Ok:
+            logging.debug('Shutdown request aborted')
+            return False        
+        status, msg = self.server.support['halt']
+        if status!=0:
+            QtGui.QMessageBox.warning(self, _('Shutdown request failed'), 
+                                      _('Shutdown failed with the following error:\n {!r}').format((status, msg))
+                                      )
+            return False              
+        msg = _('Server is shutting down.\nPlease close any client window and shutdown power interruptor in 30 seconds.\nReply: \n %r') % msg
+        QtGui.QMessageBox.information(self, _('Shutting Down'), msg)
+        return True
 
     def restart(self):
-        QtGui.QMessageBox.information(self, _('Shutting Down'),
-                                      'Server is restarting:\n %r' % network.manager.remote.restart())
+        QtGui.QMessageBox.information(self, _('Restart Down'),
+                                      'Server is restarting:\n %r' % self.server.restart())
 
     def getConnection(self, srv):
         LoginWindow(srv.addr, srv.user, srv.password, parent=self).exec_()
@@ -116,15 +128,14 @@ class MenuBar(QtGui.QMenuBar):
             opt = 'eq_' + name
             if self.server.has_key(opt):
                 if not self.server[opt]:
-                    logging.debug(
-                        '%s %s %s', 'Disabled instrument', opt, self.server[opt])
+                    logging.debug('Disabled instrument', opt, self.server[opt])
                     continue
             elif not params.debug:
-                logging.debug('%s %s', 'Skipping unknown instrument', name)
+                logging.debug('Skipping unknown instrument', name)
                 continue
             obj = getattr(self.server, name, False)
             if not obj:
-                logging.debug('%s %s', 'missing handler', name)
+                logging.debug('missing handler', name)
                 continue
             f = functools.partial(self.parent().setInstrument, obj)
             act = self.instruments.addAction(
@@ -139,7 +150,7 @@ class MenuBar(QtGui.QMenuBar):
             self.actShutdown.setEnabled(True)
             self.actRestart.setEnabled(True)
             self.settings.setEnabled(True)
-        logging.debug('%s %s', 'lstInstruments', self.lstInstruments)
+        logging.debug('lstInstruments', self.lstInstruments)
 
     def get_window(self, key):
         d = self.windows.get(key, False)
@@ -172,9 +183,9 @@ class MenuBar(QtGui.QMenuBar):
         self.measure.clear()
         if not self.fixedDoc:
             self.measure.addAction(
-                'Initialize New Test', self.parent().init_instrument)
+                _('Initialize New Test'), self.parent().init_instrument)
             self.measure.addAction(
-                'Delayed start', self.parent().delayed_start)
+                _('Delayed start'), self.parent().delayed_start)
         # TODO: Share windows definitions with mainwin?
         self.windows['measureDock'] = parent.measureDock
         self.showMeasureDock = functools.partial(self.hideShow, 'measureDock')
@@ -232,12 +243,11 @@ class MenuBar(QtGui.QMenuBar):
             role, path = path
             lst = self.server.searchPath(path)
             if lst is False:
-                logging.debug(
-                    '%s %s %s', 'Undefined path for role', role, path)
+                logging.debug('Undefined path for role', role, path)
                 continue
             obj = self.server.toPath(lst)
             if obj is None:
-                logging.debug('%s', 'Path not found')
+                logging.debug('Path not found')
                 continue
             self.addDevConf(obj, role)
         self.appendGlobalConf()
@@ -271,7 +281,7 @@ class MenuBar(QtGui.QMenuBar):
                 continue
             if hasattr(conf, '_Method__name'):
                 continue
-            logging.debug('%s %s', 'Updating', conf)
+            logging.debug('Updating', conf)
             act.setChecked(conf.isVisible())
 
     def reload_data(self):
