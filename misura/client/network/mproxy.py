@@ -51,10 +51,9 @@ def remote_dbdir(server):
 
 def dataurl(server, uid):
     """Calc HTTPS/data url for test file `uid` on `server`"""
-    t = getattr(server.storage.test, uid)
-    if not t:
-        return False
-    p = t.get_path()
+    p = server.storage.searchUID(uid)
+    if not p:
+        raise BaseException('Error opening remote file with uid '+ uid)
     # Remove remote db path from file path
     dbdir = remote_dbdir(server)
     if p.startswith(dbdir):
