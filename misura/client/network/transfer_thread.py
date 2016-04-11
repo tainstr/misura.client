@@ -195,10 +195,10 @@ class TransferThread(QtCore.QThread):
             logging.debug('%s %s', 'Waiting for uid reservation', uid)
             sleep(1)
             itr += 1
-        if self.aborted:
-            logging.debug('%s %s', 'Aborted waiting for uid reservation', uid)
-            self.dlAborted.emit(url, outfile)
-            return False
+            if self.aborted:
+                logging.debug('%s %s', 'Aborted waiting for uid reservation', uid)
+                self.dlAborted.emit(url, outfile)
+                return False
         # Reserve again
         server.storage.test.reserve(uid)
         # Abort if not reserved

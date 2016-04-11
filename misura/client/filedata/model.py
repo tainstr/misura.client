@@ -112,10 +112,12 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
     def set_time(self, t):
         """Changes current values to requested time `t`"""
-        idx = find_nearest_val(self.doc.data['0:t'].data, t, seed=self.idx)
-        logging.debug('%s %s %s', 'Setting time t', t, idx)
-        self.set_idx(idx)
-        return True
+        if '0:t' in self.doc.data:
+            idx = find_nearest_val(self.doc.data['0:t'].data, t, seed=self.idx)
+            logging.debug('%s %s %s', 'Setting time t', t, idx)
+            self.set_idx(idx)
+            return True
+        return False
 
     paused = False
 
