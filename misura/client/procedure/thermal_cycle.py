@@ -50,15 +50,16 @@ def last_point_temperature(curve):
     return curve[-1][1]
 
 def get_progress_time_for(current_segment_progress, kiln):
-        all_segments = kiln['segments']
-        current_segment_position = kiln['segmentPos'] - 1
-        current_segment = all_segments[current_segment_position]
-        time = 0
+    all_segments = kiln['segments']
+    current_segment_position = kiln['segmentPos'] - 1
+    current_segment = all_segments[current_segment_position]
+    time = 0
 
-        if current_segment_position > 0:
-            time += all_segments[current_segment_position-1][-1][0]
+    if current_segment_position > 0:
+        time += all_segments[current_segment_position-1][-1][0]
 
-        return time + (current_segment[-1][0] - time) * current_segment_progress / 100. / 60.
+    result = (time + (current_segment[-1][0] - time) * current_segment_progress / 100.) / 60.
+    return result
 
 class ThermalCycleDesigner(QtGui.QSplitter):
 

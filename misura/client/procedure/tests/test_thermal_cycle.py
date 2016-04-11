@@ -95,12 +95,15 @@ class Designer(unittest.TestCase):
 
 
         kiln['segmentPos'] = 2
-        assert_equals(750.0 + (1365.0 - 750.0) * 0.4 / 100. / 60.,
+        assert_equals((750.0 + (1365.0 - 750.0) * 0.4 / 100.) / 60.,
                       thermal_cycle.get_progress_time_for(0.4, kiln))
 
         kiln['segmentPos'] = 3
-        assert_equals(1365.0 + (1965.0 - 1365.0) * 0.3 / 100. / 60.,
-                      thermal_cycle.get_progress_time_for(0.3, kiln))
+
+        expected = 1365.0 / 60. + (1965.0 - 1365.0) * 0.3 / 100. / 60.
+        actual = thermal_cycle.get_progress_time_for(0.3, kiln)
+        self.assertTrue(abs(expected - actual) < 0.1)
+
 
 
 
