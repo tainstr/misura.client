@@ -3,7 +3,7 @@
 from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 from ..procedure import thermal_cycle
-from .. import conf, widgets
+from .. import conf, widgets, _
 from ..live import registry
 import status
 
