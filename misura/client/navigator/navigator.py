@@ -9,10 +9,7 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 from .. import _
 import quick
-from .. import fileui
 from .. import filedata
-from .. import units
-from ..clientconf import confdb
 
 
 class StylesMenu(QtGui.QMenu):
@@ -187,9 +184,6 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if(len(self.selectedIndexes()) > 0):
             self.scrollTo(self.selectedIndexes()[0])
 
-
-
-
     ##############
     # BASE MENU
     #########
@@ -227,123 +221,20 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     # DATASET MENU
     #########
 
-    def add_load(self, node, menu):
-        """Add load/unload action"""
-        self.act_load = self.dataset_menu.addAction(_('Load'), self.load)
-        self.act_load.setCheckable(True)
-        is_loaded = True
-        if node.linked is None:
-            self.act_load.setVisible(False)
-        else:
-            is_loaded = len(node.ds) > 0
-            self.act_load.setChecked(is_loaded)
-        return is_loaded
+
     
     def is_plotted(self, node):
         plotpath = self.model().is_plotted(node.path)
         is_plotted = len(plotpath) > 0
         return is_plotted
 
-    def add_plotted(self, node, menu):
-        """Add plot/unplot action"""
-        self.act_plot = menu.addAction(_('Plot'), self.plot)
-        self.act_plot.setCheckable(True)
-        is_plotted = self.is_plotted(node)
-        self.act_plot.setChecked(is_plotted)
-        return is_plotted
-
-    def add_keep(self, node, menu):
-        temporary_disabled = True
-        return temporary_disabled
-        """Add on-file persistence action"""
-        self.act_keep = self.dataset_menu.addAction(
-            _('Saved on test file'), self.keep)
-        self.act_keep.setCheckable(True)
-        self.act_keep.setChecked(node.m_keep)
-
-    def add_save(self, node, menu):
-        self.dataset_menu.addAction(('Save on current version'), self.save_on_current_version)
 
 
-    def add_styles(self, node, menu):
-        """Styles sub menu"""
-        plotpath = self.model().is_plotted(node.path)
-        if not len(plotpath) > 0:
-            return
-        wg = self.doc.resolveFullWidgetPath(plotpath[0])
-        self.style_menu = menu.addMenu(_('Style'))
-        self.act_color = self.style_menu.addAction(
-            _('Colorize'), self.colorize)
-        self.act_color.setCheckable(True)
-
-        self.act_save_style = self.style_menu.addAction(
-            _('Save style'), self.save_style)
-        self.act_save_style.setCheckable(True)
-        self.act_delete_style = self.style_menu.addAction(
-            _('Delete style'), self.delete_style)
-        if len(wg.settings.Color.points):
-            self.act_color.setChecked(True)
-        if confdb.rule_style(node.path):
-            self.act_save_style.setChecked(True)
-
-    def add_rules(self, node, menu):
-        """Add loading rules sub menu"""
-        self.rule_menu = menu.addMenu(_('Rules'))
-        self.act_rule = []
-        self.func_rule = []
-
-        def gen(name, idx):
-            f = functools.partial(self.change_rule, act=1)
-            act = self.rule_menu.addAction(_(name), f)
-            act.setCheckable(True)
-            self.act_rule.append(act)
-            self.func_rule.append(f)
-
-        gen('Ignore', 1)
-        gen('Force', 2)
-        gen('Load', 3)
-        gen('Plot', 4)
-
-        # Find the highest matching rule
-        r = confdb.rule_dataset(node.path, latest=True)
-        if r:
-            r = r[0]
-        if r > 0:
-            self.act_rule[r - 1].setChecked(True)
 
     def update_dataset_menu(self, node):
-        istime = node.path == 't' or node.path.endswith(':t')
-        logging.debug('%s %s', 'update_dataset_menu', node.path)
         self.dataset_menu.clear()
-        if istime:
-            self.act_load = False
-            is_loaded = True
-        else:
-            is_loaded = self.add_load(node, self.dataset_menu)
-        if not is_loaded:
-            self.dataset_menu.addAction(_('Delete'), self.deleteData)
-            return self.dataset_menu
-
-        is_plotted = self.add_plotted(node, self.dataset_menu)
-
-        if istime:
-            self.act_percent = False
-        else:
-
-            self.add_styles(node, self.dataset_menu)
-            self.add_rules(node, self.dataset_menu)
-            
-        if istime:
-            self.act_keep = False
-        else:
-            self.add_keep(node, self.dataset_menu)
-            self.dataset_menu.addAction(_('Delete'), self.deleteData)
-
-        self.add_save(node, self.dataset_menu)
-        
         for domain in self.domains:
             domain.build_dataset_menu(self.dataset_menu, node)
-        
         return self.dataset_menu
 
     ##############
@@ -351,11 +242,6 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     #########
     def update_derived_menu(self, node):
         self.der_menu.clear()
-        self.add_plotted(node, self.der_menu)
-        # self.der_menu.addAction(_('Overwrite parent'), self.overwrite)
-        self.add_keep(node, self.der_menu)
-        self.der_menu.addAction(_('Delete'), self.deleteData)
-        
         for domain in self.domains:
             domain.build_derived_dataset_menu(self.der_menu, node)
         return self.der_menu

@@ -122,6 +122,17 @@ class NavigatorDomain(object):
     
     def dsnode(self, *a, **k):
         return self.navigator.dsnode(*a, **k)
+    
+    def plot(self, *a, **k):
+        return self.navigator.plot(*a, **k)
+    
+    def is_loaded(self, node):
+        return (node.ds is not False) and (len(node.ds) > 0)
+    
+    def is_plotted(self, node):
+        if not self.is_loaded(node):
+            return False
+        return self.model().is_plotted(node.path)
         
     def check_node(self, node):
         """Check if node pertain to this domain"""
@@ -167,7 +178,106 @@ class NavigatorDomain(object):
             return False
         return self.add_derived_dataset_menu(menu, node)  
     
-class MainNavigatorDomain(NavigatorDomain):
+class DataNavigatorDomain(NavigatorDomain):
+    @node
+    def change_rule(self, node=False, act=0):
+        """Change current rule"""
+        # TODO: change_rule
+        pass
+
+    def add_load(self, menu, node):
+        """Add load/unload action"""
+        self.act_load = menu.addAction(_('Load'), self.navigator.load)
+        self.act_load.setCheckable(True)
+        is_loaded = True
+        if node.linked is None:
+            self.act_load.setVisible(False)
+        else:
+            is_loaded = (node.ds is not False) and (len(node.ds) > 0)
+            self.act_load.setChecked(is_loaded)
+        return is_loaded
+    
+    @node
+    def keep(self, node=False):
+        """Inverts the 'keep' flag on the current dataset,
+        causing it to be saved (or not) on the next file commit."""
+        ds, node = self.dsnode(node)
+        cur = getattr(ds, 'm_keep', False)
+        ds.m_keep = not cur
+    
+    def add_keep(self, menu, node):
+        temporary_disabled = True
+        return temporary_disabled
+        """Add on-file persistence action"""
+        self.act_keep = menu.addAction(
+            _('Saved on test file'), self.keep)
+        self.act_keep.setCheckable(True)
+        self.act_keep.setChecked(node.m_keep)
+        
+    @node
+    def save_on_current_version(self, node=False):
+        proxy = getFileProxy(node.linked.filename)
+        prefix = node.linked.prefix
+        try:
+            proxy.save_data(node.ds.m_col, node.ds.data, self.model().doc.data[prefix + "t"].data)
+        except Exception as e:
+            message = "Impossible to save data.\n\n" + str(e)
+            QtGui.QMessageBox.warning(None,'Error', message)
+        proxy.close()
+    
+    def add_rules(self, menu, node):
+        """Add loading rules sub menu"""
+        menu = menu.addMenu(_('Rules'))
+        self.act_rule = []
+        self.func_rule = []
+
+        def gen(name, idx):
+            f = functools.partial(self.change_rule, act=1)
+            act = menu.addAction(_(name), f)
+            act.setCheckable(True)
+            self.act_rule.append(act)
+            self.func_rule.append(f)
+
+        gen('Ignore', 1)
+        gen('Force', 2)
+        gen('Load', 3)
+        gen('Plot', 4)
+
+        # Find the highest matching rule
+        r = confdb.rule_dataset(node.path, latest=True)
+        if r:
+            r = r[0]
+        if r > 0:
+            self.act_rule[r - 1].setChecked(True)
+        
+    def add_file_menu(self, menu, node):
+        return True
+        
+    def add_sample_menu(self, menu, node):
+        menu.addAction(_('Delete'), self.navigator.deleteChildren)
+        return True
+             
+    def add_dataset_menu(self, menu, node):
+        self.add_load(menu, node)
+        self.add_keep(menu, node)
+        menu.addAction(('Save on current version'), self.save_on_current_version)
+        self.add_rules(menu, node)
+        menu.addAction(_('Delete'), self.navigator.deleteData)
+        return True
+    
+    def add_derived_dataset_menu(self, menu, node):
+        self.add_keep(menu, node)
+        menu.addAction(_('Delete'), self.navigator.deleteData)
+        # menu.addAction(_('Overwrite parent'), self.navigator.overwrite)
+        
+from ..clientconf import confdb
+class PlottingNavigatorDomain(NavigatorDomain):
+    def check_node(self, node):
+        if not node.ds:
+            return False
+        is_loaded = len(node.ds) > 0
+        return is_loaded
+    
     @node
     def intercept(self, node=False):
         """Intercept all curves derived/pertaining to the current object"""
@@ -185,9 +295,64 @@ class MainNavigatorDomain(NavigatorDomain):
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.InterceptPlugin)
         self.mainwindow.showDialog(d)   
         
+    def add_plotted(self, menu, node, is_plotted=False):
+        """Add plot/unplot action"""
+        self.act_plot = menu.addAction(_('Plot'), self.plot)
+        self.act_plot.setCheckable(True)
+        self.act_plot.setChecked(is_plotted)
+    
+    @node
+    def colorize(self, node=False):
+        """Set/unset color markers."""
+        plotpath = self.model().is_plotted(node.path)
+        if not len(plotpath) > 0:
+            return False
+        x = self.xnames(node)[0]
+        from misura.client import plugin
+        p = plugin.ColorizePlugin(curve=plotpath[0], x=x)
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ColorizePlugin)
+        self.mainwindow.showDialog(d)
+        
+
+    @node
+    def save_style(self, node=False):
+        """Save current curve color, style, marker and axis ranges and scale."""
+        # TODO: save_style
+        pass
+
+    @node
+    def delete_style(self, node=False):
+        """Delete style rule."""
+        # TODO: delete_style
+        pass
+    
+    style_menu = False
+    def add_styles(self, menu, node):
+        """Styles sub menu"""
+        plotpath = self.model().is_plotted(node.path)
+        if not len(plotpath) > 0:
+            return
+        if not self.style_menu:
+            self.style_menu = menu.addMenu(_('Style'))
+        self.style_menu.clear()
+        
+        wg = self.doc.resolveFullWidgetPath(plotpath[0])
+        self.act_color = self.style_menu.addAction(
+            _('Colorize'), self.colorize)
+        self.act_color.setCheckable(True)
+
+        self.act_save_style = self.style_menu.addAction(
+            _('Save style'), self.save_style)
+        self.act_save_style.setCheckable(True)
+        self.act_delete_style = self.style_menu.addAction(
+            _('Delete style'), self.delete_style)
+        if len(wg.settings.Color.points):
+            self.act_color.setChecked(True)
+        if confdb.rule_style(node.path):
+            self.act_save_style.setChecked(True)
+        
     def add_file_menu(self, menu, node):
         menu.addAction(_('Intercept all curves'), self.intercept)
-        
         return True
         
     def add_sample_menu(self, menu, node):
@@ -196,9 +361,11 @@ class MainNavigatorDomain(NavigatorDomain):
         return True
              
     def add_dataset_menu(self, menu, node):
-        if not self.navigator.is_plotted(node):
-            return False
-        menu.addAction(_('Intercept this curve'), self.intercept)
+        is_plotted = self.navigator.is_plotted(node)
+        self.add_plotted(menu, node, is_plotted)
+        if is_plotted:
+            menu.addAction(_('Intercept this curve'), self.intercept)
+            self.add_styles(menu, node)
         return True
         
     add_derived_dataset_menu = add_dataset_menu
@@ -349,10 +516,7 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
         self.add_percentile(menu, node)
         self.add_unit(menu, node)
 
-    
-    
-    
-    
+      
 class MicroscopeSampleNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
         return 'hsm/sample' in node.path
@@ -433,7 +597,8 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
         return True
     
     def add_dataset_menu(self, menu, node):
-        menu.addAction(_('Show Characteristic Points'), self.showPoints)
+        if self.is_plotted(node):
+            menu.addAction(_('Show Characteristic Points'), self.showPoints)
         return True
     
 class DilatometerNavigatorDomain(NavigatorDomain):
@@ -505,10 +670,11 @@ class FlexSampleNavigatorDomain(NavigatorDomain):
         return True
     
 
-domains = [MainNavigatorDomain, MathNavigatorDomain, 
+domains = [PlottingNavigatorDomain, MathNavigatorDomain, 
            MicroscopeSampleNavigatorDomain, 
            HorizontalSampleNavigatorDomain, VerticalSampleNavigatorDomain, 
-           FlexSampleNavigatorDomain]
+           FlexSampleNavigatorDomain,
+           DataNavigatorDomain,]
 
 class QuickOps(object):
 
@@ -617,8 +783,48 @@ class QuickOps(object):
 
             return
         self._load(node)
+        
+    @node
+    def plot(self, node=False):
+        """Slot for plotting by temperature and time the currently selected entry"""
+        pt = self.model().is_plotted(node.path)
+        if pt:
+            logging.debug('%s %s', 'UNPLOTTING', node)
+            self.deleteData(node=node, remove_dataset=False, recursive=False)
+            return
+        # Load if no data
+        if len(node.data) == 0:
+            self.load(node)
+        yname = node.path
 
-        pass
+        from misura.client import plugin
+        # If standard page, plot both T,t
+        page = self.model().page
+        if page.startswith('/temperature/') or page.startswith('/time/'):
+            logging.debug('%s %s', 'Quick.plot', page)
+            # Get X temperature names
+            xnames = self.xnames(node, page='/temperature')
+            assert len(xnames) > 0
+            p = plugin.PlotDatasetPlugin()
+            p.apply(self.cmd, {
+                    'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': '/temperature/temp'})
+
+            # Get time datasets
+            xnames = self.xnames(node, page='/time')
+            assert len(xnames) > 0
+            p = plugin.PlotDatasetPlugin()
+            p.apply(self.cmd, {
+                    'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': '/time/time'})
+        else:
+            if page.startswith('/report'):
+                page = page + '/temp'
+            logging.debug('%s %s', 'Quick.plot on currentwidget', page)
+            xnames = self.xnames(node, page=page)
+            assert len(xnames) > 0
+            p = plugin.PlotDatasetPlugin()
+            p.apply(
+                self.cmd, {'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': page})
+        self.doc.setModified()
     
     @nodes
     def correct(self, nodes=[]):
@@ -634,6 +840,20 @@ class QuickOps(object):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
         self.mainwindow.showDialog(d)
+        
+    @nodes
+    def synchronize(self, nodes=[]):
+        from misura.client import plugin
+
+        reference_curve_full_path = self.widget_path_for(nodes[0])
+        translating_curve_full_path = self.widget_path_for(nodes[1])
+
+        sync_plugin = plugin.SynchroPlugin(
+            reference_curve_full_path, translating_curve_full_path)
+
+        dialog = PluginDialog(
+            self.mainwindow, self.doc, sync_plugin, plugin.SynchroPlugin)
+        self.mainwindow.showDialog(dialog)
 
     @node
     def thermalLegend(self, node=False):
@@ -731,20 +951,6 @@ class QuickOps(object):
         for n in nodes:
             self.deleteData(node=n)
 
-    @nodes
-    def synchronize(self, nodes=[]):
-        from misura.client import plugin
-
-        reference_curve_full_path = self.widget_path_for(nodes[0])
-        translating_curve_full_path = self.widget_path_for(nodes[1])
-
-        sync_plugin = plugin.SynchroPlugin(
-            reference_curve_full_path, translating_curve_full_path)
-
-        dialog = PluginDialog(
-            self.mainwindow, self.doc, sync_plugin, plugin.SynchroPlugin)
-        self.mainwindow.showDialog(dialog)
-
 
     def widget_path_for(self, node):
         result = '/'
@@ -776,47 +982,6 @@ class QuickOps(object):
             ds = node.ds
         return ds, node
 
-    @node
-    def plot(self, node=False):
-        """Slot for plotting by temperature and time the currently selected entry"""
-        pt = self.model().is_plotted(node.path)
-        if pt:
-            logging.debug('%s %s', 'UNPLOTTING', node)
-            self.deleteData(node=node, remove_dataset=False, recursive=False)
-            return
-        # Load if no data
-        if len(node.data) == 0:
-            self.load(node)
-        yname = node.path
-
-        from misura.client import plugin
-        # If standard page, plot both T,t
-        page = self.model().page
-        if page.startswith('/temperature/') or page.startswith('/time/'):
-            logging.debug('%s %s', 'Quick.plot', page)
-            # Get X temperature names
-            xnames = self.xnames(node, page='/temperature')
-            assert len(xnames) > 0
-            p = plugin.PlotDatasetPlugin()
-            p.apply(self.cmd, {
-                    'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': '/temperature/temp'})
-
-            # Get time datasets
-            xnames = self.xnames(node, page='/time')
-            assert len(xnames) > 0
-            p = plugin.PlotDatasetPlugin()
-            p.apply(self.cmd, {
-                    'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': '/time/time'})
-        else:
-            if page.startswith('/report'):
-                page = page + '/temp'
-            logging.debug('%s %s', 'Quick.plot on currentwidget', page)
-            xnames = self.xnames(node, page=page)
-            assert len(xnames) > 0
-            p = plugin.PlotDatasetPlugin()
-            p.apply(
-                self.cmd, {'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': page})
-        self.doc.setModified()
 
 
 
@@ -824,54 +989,7 @@ class QuickOps(object):
 
 
 
-    @node
-    def keep(self, node=False):
-        """Inverts the 'keep' flag on the current dataset,
-        causing it to be saved (or not) on the next file commit."""
-        ds, node = self.dsnode(node)
-        cur = getattr(ds, 'm_keep', False)
-        ds.m_keep = not cur
 
-    @node
-    def save_on_current_version(self, node=False):
-        proxy = getFileProxy(node.linked.filename)
-        prefix = node.linked.prefix
-        try:
-            proxy.save_data(node.ds.m_col, node.ds.data, self.model().doc.data[prefix + "t"].data)
-        except Exception as e:
-            message = "Impossible to save data.\n\n" + str(e)
-            QtGui.QMessageBox.warning(None,'Error', message)
-        proxy.close()
-
-    @node
-    def colorize(self, node=False):
-        """Set/unset color markers."""
-        plotpath = self.model().is_plotted(node.path)
-        if not len(plotpath) > 0:
-            return False
-        x = self.xnames(node)[0]
-        from misura.client import plugin
-        p = plugin.ColorizePlugin(curve=plotpath[0], x=x)
-        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ColorizePlugin)
-        self.mainwindow.showDialog(d)
-
-    @node
-    def save_style(self, node=False):
-        """Save current curve color, style, marker and axis ranges and scale."""
-        # TODO: save_style
-        pass
-
-    @node
-    def delete_style(self, node=False):
-        """Delete style rule."""
-        # TODO: delete_style
-        pass
-
-    @node
-    def change_rule(self, node=False, act=0):
-        """Change current rule"""
-        # TODO: change_rule
-        pass
 
     ####
     # Derived actions
