@@ -10,22 +10,7 @@ from .. import _
 import quick
 from .. import filedata
 
-
-class StylesMenu(QtGui.QMenu):
-
-    def __init__(self, doc, node):
-        QtGui.QMenu.__init__(self, _('Styles'))
-        self.doc = doc
-        self.node = node
-        self.addAction(_('Colorize'), self.colorize)
-
-
-
-    
-
 class Navigator(quick.QuickOps, QtGui.QTreeView):
-    
-    extension_classes = quick.domains[:]
 
     """List of currently opened misura Tests and reference to datasets names"""
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=filedata.dstats.loaded, cols=1):
@@ -43,7 +28,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.setIconSize(QtCore.QSize(24, 16))
         self.connect(self, QtCore.SIGNAL('clicked(QModelIndex)'), self.select)
         self.domains = []
-        for domain in self.extension_classes:
+        from misura.canon.dataimport import navigator_domains
+        for domain in navigator_domains:
             self.domains.append(domain(self))
         # Menu creation
         if menu:
