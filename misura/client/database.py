@@ -174,6 +174,8 @@ class DatabaseTable(QtGui.QTableView):
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
 
+        self.menu.addAction(_('Open selected tests'), lambda: self.select(None))
+
         self.menu.addAction(_('View folder'), self.view_folder)
         self.menu.addAction(_('Delete'), self.delete)
 
@@ -298,13 +300,11 @@ class DatabaseWidget(QtGui.QWidget):
         self.table.model().up({d: val})
 
     def do_selected(self):
-        fname, filename, file, uid = self.table.getName()
-        self.emit(QtCore.SIGNAL('selectedUid(QString)'), uid)
-        self.emit(QtCore.SIGNAL('selectedFile(QString)'), filename)
-        if self.remote.addr != 'LOCAL':
-            self.emit(
-                QtCore.SIGNAL('selectedRemoteUid(QString,QString)'), self.remote.addr, uid)
+        filename_column_index = self.table.model().header.index('file')
 
+        for row in iter_selected(self.table):
+            filename = row[filename_column_index]
+            self.emit(QtCore.SIGNAL('selectedFile(QString)'), filename)
 
         isGraphics = self.parent() is None
         if isGraphics:
