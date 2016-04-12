@@ -22,6 +22,8 @@ def showAbout():
     dialog = QtGui.QDialog()
     uic.loadUi(os.path.join(parameters.pathUi, 'about_misura.ui'), dialog)
     dialog.logo_label.setScaledContents(True)
+    dialog.label_client_version.setText('client: ' + client_version)
+    dialog.label_canon_version.setText('canon: ' + canon_version)
 
     dialog.logo_label.setPixmap(QtGui.QPixmap(os.path.join(parameters.pathArt, 'logo.png')))
     dialog.setWindowIcon(QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
