@@ -9,10 +9,11 @@ from PyQt4.QtCore import Qt
 from PyQt4 import QtGui, QtCore
 
 import functools
-from . import MisuraDocument, OperationMisuraImport
-from entry import DatasetEntry
-from proxy import getFileProxy
-import axis_selection
+from ..filedata import MisuraDocument
+from ..filedata import OperationMisuraImport
+from ..filedata import DatasetEntry
+from ..filedata import getFileProxy
+from ..filedata import axis_selection
 import numpy as np
 
 ism = isinstance

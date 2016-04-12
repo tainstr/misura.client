@@ -9,5 +9,3 @@ from proxy import getFileProxy, RemoteFileProxy, getRemoteFile
 from decoder import DataDecoder
 from mdoc import MisuraDocument
 from player import FilePlayer
-import quick
-from quick import QuickOps

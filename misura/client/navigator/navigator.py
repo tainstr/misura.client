@@ -7,11 +7,12 @@ from misura.canon.logger import Log as logging
 import veusz.document as document
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
-from misura.client import _
-import filedata
-import fileui
-import units
-from clientconf import confdb
+from .. import _
+import quick
+from .. import fileui
+from .. import filedata
+from .. import units
+from ..clientconf import confdb
 
 
 class StylesMenu(QtGui.QMenu):
@@ -23,7 +24,7 @@ class StylesMenu(QtGui.QMenu):
         self.addAction(_('Colorize'), self.colorize)
 
 
-class Navigator(filedata.QuickOps, QtGui.QTreeView):
+class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     """List of currently opened misura Tests and reference to datasets names"""
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=filedata.dstats.loaded, cols=1):
