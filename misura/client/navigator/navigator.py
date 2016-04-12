@@ -24,7 +24,12 @@ class StylesMenu(QtGui.QMenu):
         self.addAction(_('Colorize'), self.colorize)
 
 
+
+    
+
 class Navigator(quick.QuickOps, QtGui.QTreeView):
+    
+    extension_classes = quick.domains[:]
 
     """List of currently opened misura Tests and reference to datasets names"""
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=filedata.dstats.loaded, cols=1):
@@ -41,8 +46,9 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.setUniformRowHeights(True)
         self.setIconSize(QtCore.QSize(24, 16))
         self.connect(self, QtCore.SIGNAL('clicked(QModelIndex)'), self.select)
-
-
+        self.domains = []
+        for domain in self.extension_classes:
+            self.domains.append(domain(self))
         # Menu creation
         if menu:
             self.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -54,15 +60,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             ######
             # File menu
             self.file_menu = QtGui.QMenu(self)
-            self.file_menu.addAction(_('Thermal Legend'), self.thermalLegend)
-            self.file_menu.addAction(_('Intercept all curves'), self.intercept)
-            self.file_menu.addAction(_('View'), self.viewFile)
-            self.file_menu.addAction(_('Reload'), self.reloadFile)
-            self.file_menu.addAction(_('Close'), self.closeFile)
-            # self.file_menu.addAction(
-            #     _('Commit data to test file'), self.commit)
-            self.file_menu.addAction(_('Update view'), self.refresh_model)
-            #  self.ver_menu = self.file_menu.addMenu('Load Version')
+
 
             ######
             # Group or No-selection menu
@@ -82,8 +80,6 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.act_del = self.base_menu.addAction(
                 _('Delete'), self.deleteChildren)
             self.base_menu.addAction(_('Update view'), self.update_view)
-
-
 
             ######
             # Sample menu
@@ -206,28 +202,16 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     #########
 
     def update_file_menu(self, node):
-        temporary_disabled = True
-        return temporary_disabled
+        self.file_menu.clear()
+        self.file_menu.addAction(_('Thermal Legend'), self.thermalLegend)
+        self.file_menu.addAction(_('View'), self.viewFile)
+        self.file_menu.addAction(_('Reload'), self.reloadFile)
+        self.file_menu.addAction(_('Close'), self.closeFile)
+        self.file_menu.addAction(_('Update view'), self.refresh_model)
+        for domain in self.domains:
+            domain.build_file_menu(self.file_menu, node)
+        
 
-    ###########################################################
-        if hasattr(self.ver_menu, 'proxy'):
-            self.ver_menu.proxy.close()
-
-        self.file_menu.removeAction(self.ver_menu.menuAction())
-        LF = node.linked
-        if not LF:
-            return False
-        # Open the file proxy for the menus
-        # TODO: restore versions. Reduce opening times and cache this data!
-        fp = filedata.getFileProxy(LF.filename)
-        fp.set_version(LF.params.version)
-        # Add the configuration versions menu
-        self.ver_menu = fileui.VersionMenu(fp)
-        self.file_menu.addMenu(self.ver_menu)
-        # Connect to the reload function
-        self.ver_func = functools.partial(self.load_version, LF)
-        self.connect(self.ver_menu, QtCore.SIGNAL('version()'), self.ver_func)
-        return True
 
     ##############
     # SAMPLE MENU
@@ -235,29 +219,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def update_sample_menu(self, node):
         self.sample_menu.clear()
-        self.sample_menu.addAction(_('Intercept all curves'), self.intercept)
-        if 'hsm/' in node.path:
-            self.sample_menu.addAction(
-                _('Show Characteristic Points'), self.showPoints)
-            # Check minimum conditions for surface tension plugin
-            j = 0
-            k = ['beta', 'r0', 'Vol']
-            for kj in k:
-                j += node.children.has_key(kj)
-            if j == len(k):
-                self.sample_menu.addAction(
-                    _('Surface tension'), self.surface_tension)
-            self.sample_menu.addAction(_('Report'), self.hsm_report)
-            self.sample_menu.addAction(_('Render video'), self.render)
-
-        if 'horizontal/' in node.path:
-            self.sample_menu.addAction(_('Report'), self.horizontal_report)
-        if 'vertical/' in node.path:
-            self.sample_menu.addAction(_('Report'), self.vertical_report)
-        if 'flex/' in node.path:
-            self.sample_menu.addAction(_('Report'), self.flex_report)
-
-        self.sample_menu.addAction(_('Delete'), self.deleteChildren)
+        for domain in self.domains:
+            domain.build_sample_menu(self.sample_menu, node)       
         return self.sample_menu
 
     ##############
@@ -275,24 +238,19 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             is_loaded = len(node.ds) > 0
             self.act_load.setChecked(is_loaded)
         return is_loaded
+    
+    def is_plotted(self, node):
+        plotpath = self.model().is_plotted(node.path)
+        is_plotted = len(plotpath) > 0
+        return is_plotted
 
     def add_plotted(self, node, menu):
         """Add plot/unplot action"""
         self.act_plot = menu.addAction(_('Plot'), self.plot)
         self.act_plot.setCheckable(True)
-        plotpath = self.model().is_plotted(node.path)
-        is_plotted = len(plotpath) > 0
+        is_plotted = self.is_plotted(node)
         self.act_plot.setChecked(is_plotted)
         return is_plotted
-
-    def add_percentile(self, node, menu):
-        """Add percentile conversion action"""
-        self.act_percent = menu.addAction(
-            _('Set Initial Dimension'), self.setInitialDimension)
-        self.act_percent = menu.addAction(
-            _('Percentile'), self.convertPercentile)
-        self.act_percent.setCheckable(True)
-        self.act_percent.setChecked(node.m_percent)
 
     def add_keep(self, node, menu):
         temporary_disabled = True
@@ -306,25 +264,6 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     def add_save(self, node, menu):
         self.dataset_menu.addAction(('Save on current version'), self.save_on_current_version)
 
-
-    def add_unit(self, node, menu):
-        """Add measurement unit conversion menu"""
-        self.units = {}
-        u = node.unit
-        if not u:
-            return
-        un = menu.addMenu(_('Units'))
-        kgroup, f, p = units.get_unit_info(u, units.from_base)
-        same = units.from_base.get(kgroup, {u: lambda v: v}).keys()
-        logging.debug('%s %s', kgroup, same)
-        for u1 in same:
-            p = functools.partial(self.set_unit, convert=u1)
-            act = un.addAction(_(u1), p)
-            act.setCheckable(True)
-            if u1 == u:
-                act.setChecked(True)
-            # Keep reference
-            self.units[u1] = (act, p)
 
     def add_styles(self, node, menu):
         """Styles sub menu"""
@@ -387,27 +326,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
         is_plotted = self.add_plotted(node, self.dataset_menu)
 
-        self.dataset_menu.addAction(_('Edit'), self.edit_dataset)
-        if is_plotted:
-            self.dataset_menu.addAction(
-                _('Intercept this curve'), self.intercept)
         if istime:
             self.act_percent = False
         else:
-            self.add_percentile(node, self.dataset_menu)
-            self.dataset_menu.addAction(_('Smoothing'), self.smooth)
-            self.dataset_menu.addAction(_('Derivatives'), self.derive)
-            if filedata.axis_selection.is_calibratable(node.path):
-                self.dataset_menu.addAction(_('Calibration'), self.calibration)
-            self.dataset_menu.addAction(
-                _('Linear Coefficient'), self.coefficient)
+
             self.add_styles(node, self.dataset_menu)
             self.add_rules(node, self.dataset_menu)
-
-
-        if '/hsm/sample' in node.path:
-            self.dataset_menu.addAction(
-                _('Characteristic points'), self.showPoints)
+            
         if istime:
             self.act_keep = False
         else:
@@ -415,8 +340,10 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.dataset_menu.addAction(_('Delete'), self.deleteData)
 
         self.add_save(node, self.dataset_menu)
-
-        self.add_unit(node, self.dataset_menu)
+        
+        for domain in self.domains:
+            domain.build_dataset_menu(self.dataset_menu, node)
+        
         return self.dataset_menu
 
     ##############
@@ -425,14 +352,12 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     def update_derived_menu(self, node):
         self.der_menu.clear()
         self.add_plotted(node, self.der_menu)
-        self.der_menu.addAction(_('Edit'), self.edit_dataset)
-        self.der_menu.addAction(_('Intercept this curve'), self.intercept)
-        self.der_menu.addAction(_('Smoothing'), self.smooth)
-        self.der_menu.addAction(_('Derivatives'), self.derive)
-        self.der_menu.addAction(_('Linear Coefficient'), self.coefficient)
         # self.der_menu.addAction(_('Overwrite parent'), self.overwrite)
         self.add_keep(node, self.der_menu)
         self.der_menu.addAction(_('Delete'), self.deleteData)
+        
+        for domain in self.domains:
+            domain.build_derived_dataset_menu(self.der_menu, node)
         return self.der_menu
 
     def showContextMenu(self, pt):

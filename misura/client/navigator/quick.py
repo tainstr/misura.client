@@ -9,6 +9,7 @@ from PyQt4.QtCore import Qt
 from PyQt4 import QtGui, QtCore
 
 import functools
+from .. import _
 from ..filedata import MisuraDocument
 from ..filedata import OperationMisuraImport
 from ..filedata import DatasetEntry
@@ -95,18 +96,78 @@ def nodes(func):
         return func(self, *a, **k)
     return node_wrapper
 
-
-class QuickOps(object):
-
-    """Quick interface for operations on datasets"""
-    _mainwindow = False
-
+class NavigatorDomain(object):
+    def __init__(self, navigator):
+        self.navigator = navigator
+        
+    @property
+    def model(self):
+        """Hack to allow nodes() decorator"""
+        return self.navigator.model
+    
+    @property
+    def currentIndex(self):
+        return self.navigator.currentIndex
+    
     @property
     def mainwindow(self):
-        if self._mainwindow is False:
-            return self
-        return self._mainwindow
-
+        return self.navigator.mainwindow
+    
+    @property
+    def doc(self):
+        return self.navigator.doc
+    
+    def xnames(self,*a,**k):
+        return self.navigator.xnames(*a,**k)
+    
+    def dsnode(self, *a, **k):
+        return self.navigator.dsnode(*a, **k)
+        
+    def check_node(self, node):
+        """Check if node pertain to this domain"""
+        return True
+    
+    def add_file_menu(self, menu, node):
+        return True
+    
+    def build_file_menu(self, menu, node):
+        if not self.check_node(node):
+            return False
+        return self.add_file_menu(menu, node)  
+    
+    def add_sample_menu(self, menu, node):
+        return True
+    
+    def build_sample_menu(self, menu, node):
+        if not self.check_node(node):
+            return False
+        return self.add_sample_menu(menu, node)  
+    
+    def add_group_menu(self, menu, node):
+        return True
+    
+    def build_group_menu(self, menu, node):
+        if not self.check_node(node):
+            return False
+        return self.add_group_menu(menu, node)  
+    
+    def add_dataset_menu(self, menu, node):
+        return True
+    
+    def build_dataset_menu(self, menu, node):
+        if not self.check_node(node):
+            return False
+        return self.add_dataset_menu(menu, node)  
+    
+    def add_derived_dataset_menu(self, menu, node):
+        return True
+    
+    def build_derived_dataset_menu(self, menu, node):
+        if not self.check_node(node):
+            return False
+        return self.add_derived_dataset_menu(menu, node)  
+    
+class MainNavigatorDomain(NavigatorDomain):
     @node
     def intercept(self, node=False):
         """Intercept all curves derived/pertaining to the current object"""
@@ -122,7 +183,343 @@ class QuickOps(object):
         xnames.append('')
         p = plugin.InterceptPlugin(target=dslist, axis='X', critical_x=xnames[0])
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.InterceptPlugin)
+        self.mainwindow.showDialog(d)   
+        
+    def add_file_menu(self, menu, node):
+        menu.addAction(_('Intercept all curves'), self.intercept)
+        
+        return True
+        
+    def add_sample_menu(self, menu, node):
+        menu.addAction(_('Intercept all curves'), self.intercept)
+        menu.addAction(_('Delete'), self.navigator.deleteChildren)
+        return True
+             
+    def add_dataset_menu(self, menu, node):
+        if not self.navigator.is_plotted(node):
+            return False
+        menu.addAction(_('Intercept this curve'), self.intercept)
+        return True
+        
+    add_derived_dataset_menu = add_dataset_menu
+    
+    
+class MathNavigatorDomain(NavigatorDomain):
+    def check_node(self, node):
+        if not node.ds:
+            return False
+        istime = node.path == 't' or node.path.endswith(':t')
+        is_loaded = len(node.ds) > 0
+        return (not istime) and is_loaded
+    
+    @node
+    def edit_dataset(self, node=False):
+        """Slot for opening the dataset edit window on the currently selected entry"""
+        ds, y = self.dsnode(node)
+        name = node.path
+        logging.debug('%s %s', 'name', name)
+        dialog = self.mainwindow.slotDataEdit(name)
+        if ds is not y:
+            dialog.slotDatasetEdit()
+
+    @node
+    def smooth(self, node=False):
+        """Call the SmoothDatasetPlugin on the current node"""
+        ds, node = self.dsnode(node)
+        w = max(5, len(ds.data) / 50)
+        from misura.client import plugin
+        p = plugin.SmoothDatasetPlugin(
+            ds_in=node.path, ds_out=node.m_name + '/sm', window=int(w))
+        d = PluginDialog(
+            self.mainwindow, self.doc, p, plugin.SmoothDatasetPlugin)
         self.mainwindow.showDialog(d)
+
+    @node
+    def coefficient(self, node=False):
+        """Call the CoefficientPlugin on the current node"""
+        ds, node = self.dsnode(node)
+        w = max(5, len(ds.data) / 50)
+        ds_x = self.xnames(node, '/temperature')[0]
+        ini = getattr(ds, 'm_initialDimension', 0)
+        if getattr(ds, 'm_percent', False):
+            ini = 0. # No conversion if already percent
+        from misura.client import plugin
+        p = plugin.CoefficientPlugin(
+            ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '/cf', smooth=w, percent=ini)
+        d = PluginDialog(
+            self.mainwindow, self.doc, p, plugin.CoefficientPlugin)
+        self.mainwindow.showDialog(d)
+
+    @node
+    def derive(self, node=False):
+        """Call the DeriveDatasetPlugin on the current node"""
+        ds, node = self.dsnode(node)
+        w = max(5, len(ds.data) / 50)
+
+        ds_x = self.xnames(node, "/time")[0]  # in current page
+
+        from misura.client import plugin
+        p = plugin.DeriveDatasetPlugin(
+            ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '/d', smooth=w)
+        d = PluginDialog(
+            self.mainwindow, self.doc, p, plugin.DeriveDatasetPlugin)
+        self.mainwindow.showDialog(d)
+        
+        
+    def add_dataset_menu(self, menu, node):
+        menu.addAction(_('Edit'), self.edit_dataset)
+        menu.addAction(_('Smoothing'), self.smooth)
+        menu.addAction(_('Derivatives'), self.derive)
+        menu.addAction(_('Linear Coefficient'), self.coefficient)
+        
+        
+class MeasurementUnitsNavigatorDomain(NavigatorDomain):
+    def check_node(self, node):
+        if not node.ds:
+            return False
+        return len(node.ds) > 0
+
+    @node
+    def setInitialDimension(self, node=False):
+        """Invoke the initial dimension plugin on the current entry"""
+        logging.debug('%s %s %s', 'Searching dataset name', node, node.path)
+        n = self.doc.datasetName(node.ds)
+        ini = getattr(node.ds, 'm_initialDimension', False)
+        if not ini:
+            ini = 100.
+        xname = self.xnames(node)[0]
+        logging.debug('%s %s %s', 'Invoking InitialDimensionPlugin', n, ini)
+        from misura.client import plugin
+        p = plugin.InitialDimensionPlugin(ds=n, ini=ini, ds_x = xname)
+        d = PluginDialog(
+            self.mainwindow, self.doc, p, plugin.InitialDimensionPlugin)
+        self.mainwindow.showDialog(d)
+
+    @node
+    def convertPercentile(self, node=False):
+        """Invoke the percentile plugin on the current entry"""
+        n = self.doc.datasetName(node.ds)
+        from misura.client import plugin
+        p = plugin.PercentilePlugin(ds=n, propagate=True)
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.PercentilePlugin)
+        self.mainwindow.showDialog(d)
+
+    @node
+    def set_unit(self, node=False, convert=False):
+        logging.debug('%s %s %s %s', 'set_unit:', node, node.unit, convert)
+        if node.unit == convert or not convert or not node.unit:
+            logging.debug('%s', 'set_unit: Nothing to do')
+            return
+        n = self.doc.datasetName(node.ds)
+        from misura.client import plugin
+        p = plugin.UnitsConverterTool(ds=n, convert=convert, propagate=True)
+        d = PluginDialog(
+            self.mainwindow, self.doc, p, plugin.UnitsConverterTool)
+        self.mainwindow.showDialog(d)
+    
+    def add_percentile(self, menu, node):
+        """Add percentile conversion action"""
+        self.act_percent = menu.addAction(
+            _('Set Initial Dimension'), self.setInitialDimension)
+        self.act_percent = menu.addAction(
+            _('Percentile'), self.convertPercentile)
+        self.act_percent.setCheckable(True)
+        self.act_percent.setChecked(node.m_percent)
+        
+    def add_unit(self, menu, node):
+        """Add measurement unit conversion menu"""
+        self.units = {}
+        u = node.unit
+        if not u:
+            return
+        un = menu.addMenu(_('Units'))
+        kgroup, f, p = units.get_unit_info(u, units.from_base)
+        same = units.from_base.get(kgroup, {u: lambda v: v}).keys()
+        logging.debug('%s %s', kgroup, same)
+        for u1 in same:
+            p = functools.partial(self.set_unit, convert=u1)
+            act = un.addAction(_(u1), p)
+            act.setCheckable(True)
+            if u1 == u:
+                act.setChecked(True)
+            # Keep reference
+            self.units[u1] = (act, p)
+        
+    def add_dataset_menu(self, menu, node):
+        self.add_percentile(menu, node)
+        self.add_unit(menu, node)
+
+    
+    
+    
+    
+class MicroscopeSampleNavigatorDomain(NavigatorDomain):
+    def check_node(self, node):
+        return 'hsm/sample' in node.path
+    
+    @node
+    def showPoints(self, node=False):
+        """Show characteristic points"""
+        from misura.client import plugin
+        p = plugin.ShapesPlugin(sample=node)
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ShapesPlugin)
+        self.mainwindow.showDialog(d)
+
+    @node
+    def hsm_report(self, node=False):
+        """Execute HsmReportPlugin on `node`"""
+        from misura.client import plugin
+        p = plugin.ReportPlugin(node, 'report_hsm.vsz', 'Vol')
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
+        self.mainwindow.showDialog(d)   
+        
+    @node
+    def render(self, node=False):
+        """Render video from `node`"""
+        from misura.client import video
+        sh = getFileProxy(node.linked.filename)
+        pt = '/' + \
+            node.path.replace(node.linked.prefix, '').replace('summary', '')
+        v = video.VideoExporter(sh, pt)
+        v.exec_()
+        sh.close()
+
+    @nodes
+    def surface_tension(self, nodes):
+        """Call the SurfaceTensionPlugin.
+        - 1 node selected: interpret as a sample and directly use its beta,r0,Vol,T datasets
+        - 2 nodes selected: interpret as 2 samples and search the node having beta,r0 children; use dil/T from the other
+        - 4 nodes selected: interpret as separate beta, r0, Vol, T datasets and try to assign based on their name
+        - 5 nodes selected: interpret as separate (beta, r0, T) + (dil, T) datasets and try to assign based on their name and path
+        """
+        if len(nodes) > 1:
+            logging.debug('%s', 'Not implemented')
+            return False
+        smp = nodes[0].children
+        dbeta, nbeta = self.dsnode(smp['beta'])
+        beta = nbeta.path
+        dR0, nR0 = self.dsnode(smp['r0'])
+        R0 = nR0.path
+        ddil, ndil = self.dsnode(smp['Vol'])
+        dil = ndil.path
+        T = nbeta.linked.prefix + 'kiln/T'
+        out = nbeta.linked.prefix + 'gamma'
+        if not self.doc.data.has_key(T):
+            T = ''
+        # Load empty datasets
+        if len(dbeta) == 0:
+            self._load(nbeta)
+        if len(dR0) == 0:
+            self._load(nR0)
+        if len(ddil) == 0:
+            self._load(ndil)
+        from misura.client import plugin
+        cls = plugin.SurfaceTensionPlugin
+        p = cls(beta=beta, R0=R0, T=T,
+                dil=dil, dilT=T, ds_out=out, temperature_dataset=self.doc.data[T].data)
+        d = PluginDialog(self.mainwindow, self.doc, p, cls)
+        self.mainwindow.showDialog(d)
+            
+    def add_sample_menu(self, menu, node):
+        j = 0
+        k = ['beta', 'r0', 'Vol']
+        for kj in k:
+            j += node.children.has_key(kj)
+        if j == len(k):
+            menu.addAction(_('Surface tension'), self.surface_tension)
+        menu.addAction(_('Show Characteristic Points'), self.showPoints)
+        menu.addAction(_('Report'), self.hsm_report)
+        menu.addAction(_('Render video'), self.render)
+        return True
+    
+    def add_dataset_menu(self, menu, node):
+        menu.addAction(_('Show Characteristic Points'), self.showPoints)
+        return True
+    
+class DilatometerNavigatorDomain(NavigatorDomain):
+    @node
+    def calibration(self, node=False):
+        """Call the CalibrationFactorPlugin on the current node"""
+        ds, node = self.dsnode(node)
+
+        T = self.xnames(node, "/temperature")[0]  # in current page
+
+        from misura.client import plugin
+        p = plugin.CalibrationFactorPlugin(d=node.path, T=T)
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.CalibrationFactorPlugin)
+        self.mainwindow.showDialog(d)    
+        
+    def add_dataset_menu(self, menu, node):
+        if not axis_selection.is_calibratable(node.path):
+            return False
+        menu.addAction(_('Calibration'), self.calibration)
+        return True
+    
+class HorizontalSampleNavigatorDomain(DilatometerNavigatorDomain):
+    
+    def check_node(self, node):
+        return 'horizontal/sample' in node.path
+    
+    @node
+    def report(self, node=False):
+        """Execute HorzizontalReportPlugin on `node`"""
+        from misura.client import plugin
+        p = plugin.ReportPlugin(node, 'report_horizontal.vsz', 'd')
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
+        self.mainwindow.showDialog(d)
+    
+    def add_sample_menu(self, menu, node): 
+        menu.addAction(_('Report'), self.report)
+        return True
+ 
+class VerticalSampleNavigatorDomain(DilatometerNavigatorDomain):
+    
+    def check_node(self, node):
+        return 'vertical/sample' in node.path
+    
+    @node
+    def report(self, node=False):
+        """Execute VerticalReportPlugin on `node`"""
+        from misura.client import plugin
+        p = plugin.ReportPlugin(node, 'report_vertical.vsz', 'd')
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
+        self.mainwindow.showDialog(d)
+    
+    def add_sample_menu(self, menu, node): 
+        menu.addAction(_('Report'), self.report)
+        return True
+        
+class FlexSampleNavigatorDomain(NavigatorDomain):
+    def check_node(self, node):
+        return 'flex/sample' in node.path
+    @node
+    def report(self, node=False):
+        """Execute FlexReportPlugin on `node`"""
+        from misura.client import plugin
+        p = plugin.ReportPlugin(node, 'report_flex.vsz', 'd')
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
+        self.mainwindow.showDialog(d)
+    
+    def add_sample_menu(self, menu, node): 
+        menu.addAction(_('Report'), self.report)
+        return True
+    
+
+domains = [MainNavigatorDomain, MathNavigatorDomain, 
+           MicroscopeSampleNavigatorDomain, 
+           HorizontalSampleNavigatorDomain, VerticalSampleNavigatorDomain, 
+           FlexSampleNavigatorDomain]
+
+class QuickOps(object):
+
+    """Quick interface for operations on datasets"""
+    _mainwindow = False
+
+    @property
+    def mainwindow(self):
+        if self._mainwindow is False:
+            return self
+        return self._mainwindow
 
     ###
     # File actions
@@ -189,58 +586,6 @@ class QuickOps(object):
                 continue
             self.deleteData(sub)
 #
-
-    @node
-    def showPoints(self, node=False):
-        """Show characteristic points"""
-        from misura.client import plugin
-        p = plugin.ShapesPlugin(sample=node)
-        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ShapesPlugin)
-        self.mainwindow.showDialog(d)
-
-    @node
-    def hsm_report(self, node=False):
-        """Execute HsmReportPlugin on `node`"""
-        from misura.client import plugin
-        p = plugin.ReportPlugin(node, 'report_hsm.vsz', 'Vol')
-        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
-        self.mainwindow.showDialog(d)
-
-    @node
-    def horizontal_report(self, node=False):
-        """Execute HorzizontalReportPlugin on `node`"""
-        from misura.client import plugin
-        p = plugin.ReportPlugin(node, 'report_horizontal.vsz', 'd')
-        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
-        self.mainwindow.showDialog(d)
-
-    @node
-    def vertical_report(self, node=False):
-        """Execute VerticalReportPlugin on `node`"""
-        from misura.client import plugin
-        p = plugin.ReportPlugin(node, 'report_vertical.vsz', 'd')
-        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
-        self.mainwindow.showDialog(d)
-
-    @node
-    def flex_report(self, node=False):
-        """Execute FlexReportPlugin on `node`"""
-        from misura.client import plugin
-        p = plugin.ReportPlugin(node, 'report_flex.vsz', 'd')
-        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
-        self.mainwindow.showDialog(d)
-
-    @node
-    def render(self, node=False):
-        """Render video from `node`"""
-        from misura.client import video
-        sh = getFileProxy(node.linked.filename)
-        pt = '/' + \
-            node.path.replace(node.linked.prefix, '').replace('summary', '')
-        v = video.VideoExporter(sh, pt)
-        v.exec_()
-        sh.close()
-
     ###
     # Dataset actions
     ###
@@ -274,6 +619,21 @@ class QuickOps(object):
         self._load(node)
 
         pass
+    
+    @nodes
+    def correct(self, nodes=[]):
+        """Call the CurveOperationPlugin on the current nodes"""
+        ds0, node0 = self.dsnode(nodes[0])
+        T0 = node0.linked.prefix + 'kiln/T'
+        ds1, node1 = self.dsnode(nodes[1])
+        T1 = node1.linked.prefix + 'kiln/T'
+        from misura.client import plugin
+        p = plugin.CurveOperationPlugin(
+            ax=T0, ay=node0.path, bx=T1, by=node1.path)
+        # TODO: TC comparison?
+        d = PluginDialog(
+            self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
+        self.mainwindow.showDialog(d)
 
     @node
     def thermalLegend(self, node=False):
@@ -284,43 +644,6 @@ class QuickOps(object):
             self.mainwindow, self.doc, p, plugin.ThermalCyclePlugin)
         self.mainwindow.showDialog(d)
 
-    @node
-    def setInitialDimension(self, node=False):
-        """Invoke the initial dimension plugin on the current entry"""
-        logging.debug('%s %s %s', 'Searching dataset name', node, node.path)
-        n = self.doc.datasetName(node.ds)
-        ini = getattr(node.ds, 'm_initialDimension', False)
-        if not ini:
-            ini = 100.
-        xname = self.xnames(node)[0]
-        logging.debug('%s %s %s', 'Invoking InitialDimensionPlugin', n, ini)
-        from misura.client import plugin
-        p = plugin.InitialDimensionPlugin(ds=n, ini=ini, ds_x = xname)
-        d = PluginDialog(
-            self.mainwindow, self.doc, p, plugin.InitialDimensionPlugin)
-        self.mainwindow.showDialog(d)
-
-    @node
-    def convertPercentile(self, node=False):
-        """Invoke the percentile plugin on the current entry"""
-        n = self.doc.datasetName(node.ds)
-        from misura.client import plugin
-        p = plugin.PercentilePlugin(ds=n, propagate=True)
-        d = PluginDialog(self.mainwindow, self.doc, p, plugin.PercentilePlugin)
-        self.mainwindow.showDialog(d)
-
-    @node
-    def set_unit(self, node=False, convert=False):
-        logging.debug('%s %s %s %s', 'set_unit:', node, node.unit, convert)
-        if node.unit == convert or not convert or not node.unit:
-            logging.debug('%s', 'set_unit: Nothing to do')
-            return
-        n = self.doc.datasetName(node.ds)
-        from misura.client import plugin
-        p = plugin.UnitsConverterTool(ds=n, convert=convert, propagate=True)
-        d = PluginDialog(
-            self.mainwindow, self.doc, p, plugin.UnitsConverterTool)
-        self.mainwindow.showDialog(d)
 
     @node
     def deleteData(self, node=False, remove_dataset=True, recursive=True):
@@ -495,121 +818,11 @@ class QuickOps(object):
                 self.cmd, {'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': page})
         self.doc.setModified()
 
-    @node
-    def edit_dataset(self, node=False):
-        """Slot for opening the dataset edit window on the currently selected entry"""
-        ds, y = self.dsnode(node)
-        name = node.path
-        logging.debug('%s %s', 'name', name)
-        dialog = self.mainwindow.slotDataEdit(name)
-        if ds is not y:
-            dialog.slotDatasetEdit()
 
-    @node
-    def smooth(self, node=False):
-        """Call the SmoothDatasetPlugin on the current node"""
-        ds, node = self.dsnode(node)
-        w = max(5, len(ds.data) / 50)
-        from misura.client import plugin
-        p = plugin.SmoothDatasetPlugin(
-            ds_in=node.path, ds_out=node.m_name + '/sm', window=int(w))
-        d = PluginDialog(
-            self.mainwindow, self.doc, p, plugin.SmoothDatasetPlugin)
-        self.mainwindow.showDialog(d)
 
-    @node
-    def coefficient(self, node=False):
-        """Call the CoefficientPlugin on the current node"""
-        ds, node = self.dsnode(node)
-        w = max(5, len(ds.data) / 50)
-        ds_x = self.xnames(node, '/temperature')[0]
-        ini = getattr(ds, 'm_initialDimension', 0)
-        if getattr(ds, 'm_percent', False):
-            ini = 0. # No conversion if already percent
-        from misura.client import plugin
-        p = plugin.CoefficientPlugin(
-            ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '/cf', smooth=w, percent=ini)
-        d = PluginDialog(
-            self.mainwindow, self.doc, p, plugin.CoefficientPlugin)
-        self.mainwindow.showDialog(d)
 
-    @node
-    def derive(self, node=False):
-        """Call the DeriveDatasetPlugin on the current node"""
-        ds, node = self.dsnode(node)
-        w = max(5, len(ds.data) / 50)
 
-        ds_x = self.xnames(node, "/time")[0]  # in current page
 
-        from misura.client import plugin
-        p = plugin.DeriveDatasetPlugin(
-            ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '/d', smooth=w)
-        d = PluginDialog(
-            self.mainwindow, self.doc, p, plugin.DeriveDatasetPlugin)
-        self.mainwindow.showDialog(d)
-
-    @node
-    def calibration(self, node=False):
-        """Call the CalibrationFactorPlugin on the current node"""
-        ds, node = self.dsnode(node)
-
-        T = self.xnames(node, "/temperature")[0]  # in current page
-
-        from misura.client import plugin
-        p = plugin.CalibrationFactorPlugin(d=node.path, T=T)
-        d = PluginDialog(self.mainwindow, self.doc, p, plugin.CalibrationFactorPlugin)
-        self.mainwindow.showDialog(d)
-
-    @nodes
-    def correct(self, nodes=[]):
-        """Call the CurveOperationPlugin on the current nodes"""
-        ds0, node0 = self.dsnode(nodes[0])
-        T0 = node0.linked.prefix + 'kiln/T'
-        ds1, node1 = self.dsnode(nodes[1])
-        T1 = node1.linked.prefix + 'kiln/T'
-        from misura.client import plugin
-        p = plugin.CurveOperationPlugin(
-            ax=T0, ay=node0.path, bx=T1, by=node1.path)
-        # TODO: TC comparison?
-        d = PluginDialog(
-            self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
-        self.mainwindow.showDialog(d)
-
-    @nodes
-    def surface_tension(self, nodes):
-        """Call the SurfaceTensionPlugin.
-        - 1 node selected: interpret as a sample and directly use its beta,r0,Vol,T datasets
-        - 2 nodes selected: interpret as 2 samples and search the node having beta,r0 children; use dil/T from the other
-        - 4 nodes selected: interpret as separate beta, r0, Vol, T datasets and try to assign based on their name
-        - 5 nodes selected: interpret as separate (beta, r0, T) + (dil, T) datasets and try to assign based on their name and path
-        """
-        if len(nodes) > 1:
-            logging.debug('%s', 'Not implemented')
-            return False
-        smp = nodes[0].children
-        dbeta, nbeta = self.dsnode(smp['beta'])
-        beta = nbeta.path
-        dR0, nR0 = self.dsnode(smp['r0'])
-        R0 = nR0.path
-        ddil, ndil = self.dsnode(smp['Vol'])
-        dil = ndil.path
-        T = nbeta.linked.prefix + 'kiln/T'
-        out = nbeta.linked.prefix + 'gamma'
-        if not self.doc.data.has_key(T):
-            T = ''
-        # Load empty datasets
-        if len(dbeta) == 0:
-            self._load(nbeta)
-        if len(dR0) == 0:
-            self._load(nR0)
-        if len(ddil) == 0:
-            self._load(ndil)
-        from misura.client import plugin
-        cls = plugin.SurfaceTensionPlugin
-        p = cls(beta=beta, R0=R0, T=T,
-                dil=dil, dilT=T, ds_out=out, temperature_dataset=self.doc.data[T].data)
-        d = PluginDialog(self.mainwindow, self.doc, p, cls)
-        self.mainwindow.showDialog(d)
 
     @node
     def keep(self, node=False):
