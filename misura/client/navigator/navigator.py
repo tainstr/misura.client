@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tree visualization of opened misura Files in a document."""
-import functools
 from misura.canon.logger import Log as logging
 
 import veusz.document as document
@@ -93,9 +92,6 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             ####
             # Binary
             self.bin_menu = QtGui.QMenu(self)
-            self.bin_menu.addAction(_('Correct'), self.correct)
-            self.bin_menu.addAction(_('Delete selection'), self.deleteDatas)
-            self.bin_menu.addAction(_('Synchronize'), self.synchronize)
 
         else:
             self.connect(
@@ -184,52 +180,20 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if(len(self.selectedIndexes()) > 0):
             self.scrollTo(self.selectedIndexes()[0])
 
-    ##############
-    # BASE MENU
-    #########
-
     def update_base_menu(self, node=False):
         self.act_del.setEnabled(bool(node))
 
-    ##############
-    # FILE MENU
-    #########
-
     def update_file_menu(self, node):
         self.file_menu.clear()
-        self.file_menu.addAction(_('Thermal Legend'), self.thermalLegend)
-        self.file_menu.addAction(_('View'), self.viewFile)
-        self.file_menu.addAction(_('Reload'), self.reloadFile)
-        self.file_menu.addAction(_('Close'), self.closeFile)
         self.file_menu.addAction(_('Update view'), self.refresh_model)
         for domain in self.domains:
             domain.build_file_menu(self.file_menu, node)
         
-
-
-    ##############
-    # SAMPLE MENU
-    #########
-
     def update_sample_menu(self, node):
         self.sample_menu.clear()
         for domain in self.domains:
             domain.build_sample_menu(self.sample_menu, node)       
         return self.sample_menu
-
-    ##############
-    # DATASET MENU
-    #########
-
-
-    
-    def is_plotted(self, node):
-        plotpath = self.model().is_plotted(node.path)
-        is_plotted = len(plotpath) > 0
-        return is_plotted
-
-
-
 
     def update_dataset_menu(self, node):
         self.dataset_menu.clear()
@@ -237,23 +201,29 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             domain.build_dataset_menu(self.dataset_menu, node)
         return self.dataset_menu
 
-    ##############
-    # DERIVED MENU
-    #########
     def update_derived_menu(self, node):
         self.der_menu.clear()
         for domain in self.domains:
             domain.build_derived_dataset_menu(self.der_menu, node)
         return self.der_menu
+    
+    def update_multiary_menu(self, selection):
+        self.bin_menu.clear()
+        for domain in self.domains:
+            domain.build_multiary_menu(self.bin_menu, selection)   
 
     def showContextMenu(self, pt):
         sel = self.selectedIndexes()
         n = len(sel)
         node = self.model().data(self.currentIndex(), role=Qt.UserRole)
         logging.debug('%s %s', 'showContextMenu', node)
+
         if node is None or not node.parent:
             self.update_base_menu()
             menu = self.base_menu
+        elif n>1:
+            self.update_multiary_menu(sel)
+            menu = self.bin_menu 
         elif node.ds is False:
             # Identify a "summary" node
             if not node.parent.parent:
@@ -267,15 +237,10 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 menu = self.base_menu
         # The DatasetEntry refers to a plugin
         elif hasattr(node.ds, 'getPluginData'):
-            if n == 2:
-                menu = self.bin_menu
-            else:
-                menu = self.update_derived_menu(node)
+            menu = self.update_derived_menu(node)
         # The DatasetEntry refers to a standard dataset
         elif n == 1:
             menu = self.update_dataset_menu(node)
-        elif n == 2:
-            menu = self.bin_menu
         # No active selection
         else:
             menu = self.base_menu

@@ -105,9 +105,11 @@ class NavigatorDomain(object):
         """Hack to allow nodes() decorator"""
         return self.navigator.model
     
-    @property
-    def currentIndex(self):
-        return self.navigator.currentIndex
+    def currentIndex(self, *a, **k):
+        return self.navigator.currentIndex(*a, **k)
+    
+    def selectedIndexes(self, *a, **k):
+        return self.navigator.selectedIndexes(*a, **k)
     
     @property
     def mainwindow(self):
@@ -132,10 +134,14 @@ class NavigatorDomain(object):
     def is_plotted(self, node):
         if not self.is_loaded(node):
             return False
-        return self.model().is_plotted(node.path)
+        return len(self.model().is_plotted(node.path)) > 0
         
     def check_node(self, node):
         """Check if node pertain to this domain"""
+        return True
+    
+    def check_nodes(self, nodes):
+        """Check if multiple nodes selection pertain to this domain"""
         return True
     
     def add_file_menu(self, menu, node):
@@ -178,12 +184,70 @@ class NavigatorDomain(object):
             return False
         return self.add_derived_dataset_menu(menu, node)  
     
+    def add_multiary_menu(self, menu, nodes):
+        return True
+    
+    def build_multiary_menu(self, menu, nodes):
+        if not self.check_nodes(node):
+            return False
+        return self.add_multiary_menu(menu, nodes)
+    
 class DataNavigatorDomain(NavigatorDomain):
+        
     @node
     def change_rule(self, node=False, act=0):
-        """Change current rule"""
+        """Change current loading rule"""
         # TODO: change_rule
         pass
+
+    @node
+    def viewFile(self, node=False):
+        if not node.linked:
+            return False
+        doc = MisuraDocument(node.linked.filename)
+        from misura.client import browser
+        browser.TestWindow(doc).show()
+
+    @node
+    def closeFile(self, node=False):
+        # FIXME: model no longer have a "tests" structure.
+        lk = node.linked
+        if not lk:
+            logging.debug('%s %s', 'Node does not have linked file', node.path)
+            return False
+        for ds in self.doc.data.values():
+            if ds.linked == lk:
+                self.navigator.deleteData(ds)
+
+        self.model().refresh(True)
+
+    @node
+    def reloadFile(self, node=False):
+        logging.debug('%s', 'RELOADING')
+        if not node.linked:
+            return False
+        logging.debug('%s', node.linked.reloadLinks(self.doc))
+
+
+    def load_version(self, LF, version):
+        # FIXME: VERSIONING!
+        logging.debug('%s', 'LOAD VERSION')
+        LF.params.version = version
+        LF.reloadLinks(self.doc)
+
+        fl = self.model().files
+        logging.debug('%s %s', 'got linked files', self.model().files[:])
+
+    @node
+    def commit(self, node=False):
+        """Write datasets to linked file. """
+        name, st = QtGui.QInputDialog.getText(
+            self, "Version Name", "Choose a name for the data version you are saving:")
+        if not st:
+            logging.debug('%s', 'Aborted')
+            return
+        logging.debug('%s %s', 'Committing data to', node.filename)
+        node.commit(unicode(name))
 
     def add_load(self, menu, node):
         """Add load/unload action"""
@@ -224,6 +288,16 @@ class DataNavigatorDomain(NavigatorDomain):
             message = "Impossible to save data.\n\n" + str(e)
             QtGui.QMessageBox.warning(None,'Error', message)
         proxy.close()
+        
+    @node
+    def overwrite(self, node=False):
+        """Overwrite the parent dataset with a derived one."""
+        ds, node = self.dsnode()
+        from misura.client import plugin
+        p = plugin.OverwritePlugin(
+            a=node.parent.path, b=node.path, delete=True)
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.OverwritePlugin)
+        self.mainwindow.showDialog(d)
     
     def add_rules(self, menu, node):
         """Add loading rules sub menu"""
@@ -251,6 +325,9 @@ class DataNavigatorDomain(NavigatorDomain):
             self.act_rule[r - 1].setChecked(True)
         
     def add_file_menu(self, menu, node):
+        menu.addAction(_('View'), self.viewFile)
+        menu.addAction(_('Reload'), self.reloadFile)
+        menu.addAction(_('Close'), self.closeFile)
         return True
         
     def add_sample_menu(self, menu, node):
@@ -268,7 +345,10 @@ class DataNavigatorDomain(NavigatorDomain):
     def add_derived_dataset_menu(self, menu, node):
         self.add_keep(menu, node)
         menu.addAction(_('Delete'), self.navigator.deleteData)
-        # menu.addAction(_('Overwrite parent'), self.navigator.overwrite)
+        # menu.addAction(_('Overwrite parent'), self.overwrite)
+        
+    def add_multiary_menu(self, menu, nodes):
+        menu.addAction(_('Delete selection'), self.navigator.deleteDatas)
         
 from ..clientconf import confdb
 class PlottingNavigatorDomain(NavigatorDomain):
@@ -277,6 +357,15 @@ class PlottingNavigatorDomain(NavigatorDomain):
             return False
         is_loaded = len(node.ds) > 0
         return is_loaded
+    
+    @node
+    def thermalLegend(self, node=False):
+        """Write thermal cycle onto a text label"""
+        from misura.client import plugin
+        p = plugin.ThermalCyclePlugin(test=node)
+        d = PluginDialog(
+            self.mainwindow, self.doc, p, plugin.ThermalCyclePlugin)
+        self.mainwindow.showDialog(d)
     
     @node
     def intercept(self, node=False):
@@ -351,7 +440,8 @@ class PlottingNavigatorDomain(NavigatorDomain):
         if confdb.rule_style(node.path):
             self.act_save_style.setChecked(True)
         
-    def add_file_menu(self, menu, node):
+    def build_file_menu(self, menu, node):
+        menu.addAction(_('Thermal Legend'), self.thermalLegend)
         menu.addAction(_('Intercept all curves'), self.intercept)
         return True
         
@@ -361,7 +451,7 @@ class PlottingNavigatorDomain(NavigatorDomain):
         return True
              
     def add_dataset_menu(self, menu, node):
-        is_plotted = self.navigator.is_plotted(node)
+        is_plotted = self.is_plotted(node) >0 
         self.add_plotted(menu, node, is_plotted)
         if is_plotted:
             menu.addAction(_('Intercept this curve'), self.intercept)
@@ -370,6 +460,23 @@ class PlottingNavigatorDomain(NavigatorDomain):
         
     add_derived_dataset_menu = add_dataset_menu
     
+    
+    @nodes
+    def synchronize(self, nodes=[]):
+        from misura.client import plugin
+
+        reference_curve_full_path = self.navigator.widget_path_for(nodes[0])
+        translating_curve_full_path = self.navigator.widget_path_for(nodes[1])
+
+        sync_plugin = plugin.SynchroPlugin(
+            reference_curve_full_path, translating_curve_full_path)
+
+        dialog = PluginDialog(
+            self.mainwindow, self.doc, sync_plugin, plugin.SynchroPlugin)
+        self.mainwindow.showDialog(dialog)
+
+    def add_multiary_menu(self, menu, nodes):
+        menu.addAction(_('Synchronize curves'), self.synchronize)
     
 class MathNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
@@ -438,6 +545,24 @@ class MathNavigatorDomain(NavigatorDomain):
         menu.addAction(_('Smoothing'), self.smooth)
         menu.addAction(_('Derivatives'), self.derive)
         menu.addAction(_('Linear Coefficient'), self.coefficient)
+        
+    @nodes
+    def correct(self, nodes=[]):
+        """Call the CurveOperationPlugin on the current nodes"""
+        ds0, node0 = self.dsnode(nodes[0])
+        T0 = node0.linked.prefix + 'kiln/T'
+        ds1, node1 = self.dsnode(nodes[1])
+        T1 = node1.linked.prefix + 'kiln/T'
+        from misura.client import plugin
+        p = plugin.CurveOperationPlugin(
+            ax=T0, ay=node0.path, bx=T1, by=node1.path)
+        # TODO: TC comparison?
+        d = PluginDialog(
+            self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
+        self.mainwindow.showDialog(d)
+        
+    def add_multiary_menu(self, menu, nodes):
+        menu.addAction(_('Correct'), self.correct)
         
         
 class MeasurementUnitsNavigatorDomain(NavigatorDomain):
@@ -680,6 +805,10 @@ class QuickOps(object):
 
     """Quick interface for operations on datasets"""
     _mainwindow = False
+    
+
+
+    
 
     @property
     def mainwindow(self):
@@ -687,62 +816,7 @@ class QuickOps(object):
             return self
         return self._mainwindow
 
-    ###
-    # File actions
-    ###
-    @node
-    def viewFile(self, node=False):
-        if not node.linked:
-            return False
-        doc = MisuraDocument(node.linked.filename)
-        from misura.client import browser
-        browser.TestWindow(doc).show()
 
-    @node
-    def closeFile(self, node=False):
-        # FIXME: model no longer have a "tests" structure.
-        lk = node.linked
-        if not lk:
-            logging.debug('%s %s', 'Node does not have linked file', node.path)
-            return False
-        for ds in self.doc.data.values():
-            if ds.linked == lk:
-                self.deleteData(ds)
-
-        self.model().refresh(True)
-
-    @node
-    def reloadFile(self, node=False):
-        logging.debug('%s', 'RELOADING')
-        if not node.linked:
-            return False
-        logging.debug('%s', node.linked.reloadLinks(self.doc))
-
-
-    def load_version(self, LF, version):
-        # FIXME: VERSIONING!
-        logging.debug('%s', 'LOAD VERSION')
-        LF.params.version = version
-        LF.reloadLinks(self.doc)
-
-        fl = self.model().files
-        logging.debug('%s %s', 'got linked files', self.model().files[:])
-
-    @node
-    def commit(self, node=False):
-        """Write datasets to linked file. """
-        name, st = QtGui.QInputDialog.getText(
-            self, "Version Name", "Choose a name for the data version you are saving:")
-        if not st:
-            logging.debug('%s', 'Aborted')
-            return
-        logging.debug('%s %s', 'Committing data to', node.filename)
-        node.commit(unicode(name))
-
-
-    ###
-    # Sample actions
-    ###
     @node
     def deleteChildren(self, node=False):
         """Delete all children of node."""
@@ -752,9 +826,6 @@ class QuickOps(object):
                 continue
             self.deleteData(sub)
 #
-    ###
-    # Dataset actions
-    ###
     def _load(self, node):
         """Load or reload a dataset"""
         op = OperationMisuraImport.from_dataset_in_file(
@@ -825,45 +896,6 @@ class QuickOps(object):
             p.apply(
                 self.cmd, {'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': page})
         self.doc.setModified()
-    
-    @nodes
-    def correct(self, nodes=[]):
-        """Call the CurveOperationPlugin on the current nodes"""
-        ds0, node0 = self.dsnode(nodes[0])
-        T0 = node0.linked.prefix + 'kiln/T'
-        ds1, node1 = self.dsnode(nodes[1])
-        T1 = node1.linked.prefix + 'kiln/T'
-        from misura.client import plugin
-        p = plugin.CurveOperationPlugin(
-            ax=T0, ay=node0.path, bx=T1, by=node1.path)
-        # TODO: TC comparison?
-        d = PluginDialog(
-            self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
-        self.mainwindow.showDialog(d)
-        
-    @nodes
-    def synchronize(self, nodes=[]):
-        from misura.client import plugin
-
-        reference_curve_full_path = self.widget_path_for(nodes[0])
-        translating_curve_full_path = self.widget_path_for(nodes[1])
-
-        sync_plugin = plugin.SynchroPlugin(
-            reference_curve_full_path, translating_curve_full_path)
-
-        dialog = PluginDialog(
-            self.mainwindow, self.doc, sync_plugin, plugin.SynchroPlugin)
-        self.mainwindow.showDialog(dialog)
-
-    @node
-    def thermalLegend(self, node=False):
-        """Write thermal cycle onto a text label"""
-        from misura.client import plugin
-        p = plugin.ThermalCyclePlugin(test=node)
-        d = PluginDialog(
-            self.mainwindow, self.doc, p, plugin.ThermalCyclePlugin)
-        self.mainwindow.showDialog(d)
-
 
     @node
     def deleteData(self, node=False, remove_dataset=True, recursive=True):
@@ -983,22 +1015,3 @@ class QuickOps(object):
         return ds, node
 
 
-
-
-
-
-
-
-
-
-    ####
-    # Derived actions
-    @node
-    def overwrite(self, node=False):
-        """Overwrite the parent dataset with a derived one."""
-        ds, node = self.dsnode()
-        from misura.client import plugin
-        p = plugin.OverwritePlugin(
-            a=node.parent.path, b=node.path, delete=True)
-        d = PluginDialog(self.mainwindow, self.doc, p, plugin.OverwritePlugin)
-        self.mainwindow.showDialog(d)
