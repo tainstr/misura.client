@@ -93,7 +93,7 @@ def read_data(proxy, col):
     data0 = np.array(proxy.col(col, (0, None)))
     # FIXME: now superfluous?
     data = data0.view(np.float64).reshape((len(data0), 2))
-    data = data[np.isfinite(data[:,1])]
+    data = data[np.isfinite(data[:, 1])]
     return data
 
 
@@ -154,17 +154,16 @@ def tasks():
 def jobs(n, pid="File import"):
     # FIXME: causes random crashes while opening microscope tests in compiled
     # win exe
-    #return
+    # return
     t = tasks()
     if t is not False:
         t.jobs(n, pid)
-        
 
 
 def job(n, pid="File import", label=''):
     # FIXME: causes random crashes while opening microscope tests in compiled
     # win exe
-    #return
+    # return
     t = tasks()
     if t is not False:
         t.job(n, pid, label)
@@ -173,7 +172,7 @@ def job(n, pid="File import", label=''):
 def done(pid="File import"):
     # FIXME: causes random crashes while opening microscope tests in compiled
     # win exe
-    #return
+    # return
     t = tasks()
     if t is not False:
         t.done(pid)
@@ -327,12 +326,18 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                     exc = True
             # Force loading?
             if self.rule_load and self.rule_load.search(h) is not None:
-                autoload.append(h)
+                if h.endswith('/T'):
+                    autoload.insert(0, h)
+                    header.remove(h)
+                    header.insert(0, h)
+                else:
+                    autoload.append(h)
                 exc = False
             # Really exclude (no load, no placeholder)
             if exc:
                 header.remove(h)
                 excluded.append(h)
+
         logging.debug('%s %s', 'got autoload', autoload)
         logging.debug('%s %s', 'got excluded', len(excluded))
         logging.debug('%s %s', 'got header clean', len(header))
@@ -397,7 +402,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             ds.m_label = _(opt["name"])
             if opt.has_key('csunit'):
                 ds.old_unit = opt["csunit"]
-            
 
     def assign_node_attributes(self, ds):
         """Try to read column metadata from node attrs"""
@@ -432,7 +436,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         ds.m_conf = self.proxy.conf
         ds.unit = str(u) if u else u
         ds.old_unit = ds.unit
-        
+
         # Read additional metadata
         if len(data) > 0 and col != 't':
             logging.debug('Reading metadata',  col)
@@ -447,28 +451,30 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         for sub, parent, leaf in iterpath(pcol):
             if leaf:
                 ds.tags.add(parent)
-                
+
         self.assign_label(ds, col0)
 
-
         return ds
-    
+
     def create_local_datasets(self, pcol, sub_time_sequence, time_sequence):
         """Create subordered time and temperature datasets"""
         logging.debug('creating local datasets',  pcol)
-        subcol = pcol+sep+'t'
+        subcol = pcol + sep + 't'
         subvar = 't'
         subt = self.create_dataset(sub_time_sequence, subcol,
-                                            subvar, subvar, subvar)
-        T = self.prefix+'kiln/T'
-        # Search in doc and in current outdatasets (kiln/T should be the first dataset imported!)
+                                   subvar, subvar, subvar)
+        T = self.prefix + 'kiln/T'
+        # Search in doc and in current outdatasets (kiln/T should be the first
+        # dataset imported!)
         T = self._doc.data.get(T, self.outdatasets.get(T, False))
-        # No main temperature dataset found: cannot build subordered T 
+        # No main temperature dataset found: cannot build subordered T
         if T is False:
+            print logging.error('No temperature dataset found for local dataset', pcol)
             return [subt]
-        temperature_function = InterpolatedUnivariateSpline(time_sequence, T.data, k=1)
+        temperature_function = InterpolatedUnivariateSpline(
+            time_sequence, T.data, k=1)
         sub_temperature_sequence = temperature_function(sub_time_sequence)
-        subcol = pcol+sep+'T'
+        subcol = pcol + sep + 'T'
         subvar = 'T'
         subT = self.create_dataset(sub_temperature_sequence, subcol,
                                    subvar, subvar, subvar)
@@ -488,7 +494,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         available, autoload = self.get_available_autoload()
 
         # Emit the number of jobs
-        jobs(len(autoload)+len(available))
+        jobs(len(autoload) + len(available))
 
         self.refsmp = self.create_samples()
 
@@ -516,7 +522,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 m_update = True
             else:
                 m_update = False
-            
+
             sub_time_sequence = False
             if col == 't':
                 attr = []
@@ -562,14 +568,15 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 self.outdatasets[pcol] = ds
             else:
                 availds[pcol] = ds
-                
+
             # Create sub-time dataset
             if sub_time_sequence is not False:
-                subds = self.create_local_datasets(pcol, sub_time_sequence, time_sequence)
+                subds = self.create_local_datasets(
+                    pcol, sub_time_sequence, time_sequence)
                 for sub in subds:
                     names.append(sub.m_name)
                     self.outdatasets[sub.m_name] = sub
-                    
+
         # Detect ds which should be removed from availds because already
         # contained in imported names
         avail_set = set(self._doc.available_data.keys())
@@ -580,11 +587,12 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         done()
         logging.debug('%s %s', 'imported names:', names)
         self._doc.available_data.update(availds)
-        
+
         # Update linked file parameters
-        hdf_names = filter(lambda name: name.startswith(self.prefix), names_set)
-        hdf_names = map(lambda name: ("/" + name.lstrip(self.prefix) + "$"), hdf_names)
+        hdf_names = filter(
+            lambda name: name.startswith(self.prefix), names_set)
+        hdf_names = map(
+            lambda name: ("/" + name.lstrip(self.prefix) + "$"), hdf_names)
         LF.params.rule_load = '\n'.join(hdf_names)
 
         return names
-    

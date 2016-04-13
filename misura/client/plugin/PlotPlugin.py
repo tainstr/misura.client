@@ -12,7 +12,7 @@ from misura.canon.logger import Log as logging
 import utils
 import PercentilePlugin
 from .. import units
-from misura.client.filedata import axis_selection
+from .. import axis_selection
 
 default_curves = ['T', 'P', 'S', 'h', 'Vol', 'd', 'err']
 an_default_curves = ['T', 'Vol', 'd', 'Dil',  'Sint', 'Flex']
@@ -267,11 +267,12 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
     # text to appear in dialog box
     description_full = 'Default plot for Misura datasets'
 
-    def __init__(self):
+    def __init__(self, dsn = [], rule_plot = 'rule_plot'):
         """Make list of fields."""
 
         self.fields = [
             plugins.FieldDatasetMulti("dsn", 'Dataset names'),
+            plugins.FieldText("rule_plot", 'Autoplot rule', default = rule_plot)
         ]
 
     def apply(self, cmd, fields):
@@ -283,7 +284,8 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
         vars = []
         timeds = False
         all_temperatures = []
-        rp = confdb['rule_plot'].replace('\n', '|')
+        autoplot_rule = fields.get('rule_plot', 'rule_plot')
+        rp = confdb[autoplot_rule].replace('\n', '|')
         if len(rp) > 0:
             rp = re.compile(rp)
         else:

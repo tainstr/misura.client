@@ -273,9 +273,9 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
             self.liveImport(f, options=self.imd.options)
         self.imd.close()
 
-    def defaultPlot(self, dsn):
+    def defaultPlot(self, dsn, rule_plot = 'rule_plot'):
         p = plugin.DefaultPlotPlugin()
-        p.apply(self.mw.cmd, {'dsn': dsn})
+        p.apply(self.mw.cmd, {'dsn': dsn, 'rule_plot':rule_plot})
 
     def liveImport(self, filename, options={}):
         """Import misura data and do the default plotting"""
@@ -334,7 +334,7 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
         self.mw.document.suspendUpdates()
         dsn = self.open_file(filename)
         p = plugin.DefaultPlotPlugin()
-        p.apply(self.mw.cmd, {'dsn': dsn})
+        p.apply(self.mw.cmd, {'dsn': dsn, 'rule_plot': 'rule_plot'})
         self.mw.document.enableUpdates()
         self.mw.plot.actionForceUpdate()
         self.mw.m4.openedFiles.refresh_model()
