@@ -13,6 +13,7 @@ from ..canon import option
 from ..canon import csutil
 from ..canon.option import ao
 from ..canon.indexer import Indexer
+from ..canon.plugin import additional_client_configurations
 import units
 
 import parameters as params
@@ -103,6 +104,11 @@ ao(default_desc, 'rule_style', 'Table', rule_style, 'Formatting')
 ao(default_desc, 'm3', 'Section', 'Data import', 'Data import')
 ao(default_desc, 'm3_enable', 'Boolean', True, 'Enable Misura 3 database interface')
 ao(default_desc, 'm3_plugins', 'TextArea', '', 'Import plugins by name')
+
+    
+
+
+
 recent_tables = 'server,database,file,m3database'.split(',')
 
 
@@ -156,7 +162,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     conn = False
     path = ''
     index = False
-
+    
     def __init__(self, path=False):
         QtCore.QObject.__init__(self)
         option.ConfigurationProxy.__init__(self)
@@ -519,9 +525,18 @@ def data_import(confdb):
         plug = plug.replace('\n','')
         print 'PLugging: ', plug
         try:
-		    importlib.import_module(plug)
+            importlib.import_module(plug)
         except:
             print_exc()
+    # Add client configurations defined in 3rd parties
+    print 'updating clientconf',additional_client_configurations
+    for handle, coded_opt in additional_client_configurations.iteritems():
+        if handle not in confdb.desc:
+            confdb.desc[handle] = coded_opt
+        else:                 
+            saved_opt = option.Option(**coded_opt)
+            saved_opt.migrate_from(coded_opt)
+            confdb.desc[handle] = saved_opt
 
 settings = QtCore.QSettings(
     QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope, 'Expert System Solutions', 'Misura 4')
