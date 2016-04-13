@@ -1,13 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import functools
+
 from PyQt4 import QtGui, QtCore
+
+from misura.canon.logger import Log as logging
+from misura.canon.plugin import dataimport
+
 from . import _
 from . import iutils
 from .clientconf import confdb, settings
-import functools
-import os
-from misura.canon.logger import Log as logging
-from misura.canon import dataimport
+
+
 
 
 class Path(QtGui.QWidget):
@@ -130,7 +134,7 @@ class RecentInterface(object):
     def data_import(self, *a):
         d= self.conf.last_directory(self.category)
         file_filter = ''
-        for converter in dataimport.registry:
+        for converter in dataimport.data_importers:
             file_filter+= '{} ({});;'.format(_(converter.name),converter.file_pattern)
             print 'adding filter', file_filter
         path = QtGui.QFileDialog.getOpenFileName(
@@ -163,7 +167,7 @@ class RecentMenu(RecentInterface, QtGui.QMenu):
         self.addSeparator()
         self.addAction(_("Clear list"), self.clear_recent)
         self.addAction(_("Open") + '...', self.new)
-        if self.name == 'file' and len(dataimport.registry) > 0:
+        if self.name == 'file' and len(dataimport.data_importers) > 0:
             self.addAction(_("Import") + '...', self.data_import)
         if self.category == 'server':
             self.addAction(_('Disconnect'), self.server_disconnect)
@@ -208,7 +212,7 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         self.connect(self.add_button, QtCore.SIGNAL('clicked()'), self.new)
         self.lay.addWidget(self.add_button)
 
-        if category == 'file' and len(dataimport.registry) > 0:
+        if category == 'file' and len(dataimport.data_importers) > 0:
             self.import_button = QtGui.QPushButton(
                 _('Import') + '...', parent=self)
             self.connect(

@@ -4,8 +4,8 @@ from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 import os
 
-from misura.canon import dataimport
 from misura.client import configure_logger
+from misura.canon.plugin import dataimport
 
 from .. import _
 from .. import confwidget

@@ -1,16 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tree visualization of opened misura Files in a document."""
+import functools
+
 from misura.canon.logger import Log as logging
-from misura.canon.dataimport import navigator_domains
+from misura.canon.plugin import navigator_domains, NavigatorDomain
 
 from veusz.dialogs.plugin import PluginDialog
 
-from veusz import document
-from PyQt4.QtCore import Qt
 from PyQt4 import QtGui
 
-import functools
+
 from .. import _
 from ..filedata import MisuraDocument
 from ..filedata import DatasetEntry
@@ -21,102 +21,6 @@ ism = isinstance
 
 from .quick import node, nodes
 
-
-class NavigatorDomain(object):
-    def __init__(self, navigator):
-        self.navigator = navigator
-        
-    @property
-    def model(self):
-        """Hack to allow nodes() decorator"""
-        return self.navigator.model
-    
-    def currentIndex(self, *a, **k):
-        return self.navigator.currentIndex(*a, **k)
-    
-    def selectedIndexes(self, *a, **k):
-        return self.navigator.selectedIndexes(*a, **k)
-    
-    @property
-    def mainwindow(self):
-        return self.navigator.mainwindow
-    
-    @property
-    def doc(self):
-        return self.navigator.doc
-    
-    def xnames(self,*a,**k):
-        return self.navigator.xnames(*a,**k)
-    
-    def dsnode(self, *a, **k):
-        return self.navigator.dsnode(*a, **k)
-    
-    def plot(self, *a, **k):
-        return self.navigator.plot(*a, **k)
-    
-    def is_loaded(self, node):
-        return (node.ds is not False) and (len(node.ds) > 0)
-    
-    def is_plotted(self, node):
-        if not self.is_loaded(node):
-            return False
-        return len(self.model().is_plotted(node.path)) > 0
-        
-    def check_node(self, node):
-        """Check if node pertain to this domain"""
-        return True
-    
-    def check_nodes(self, nodes):
-        """Check if multiple nodes selection pertain to this domain"""
-        return True
-    
-    def add_file_menu(self, menu, node):
-        return True
-    
-    def build_file_menu(self, menu, node):
-        if not self.check_node(node):
-            return False
-        return self.add_file_menu(menu, node)  
-    
-    def add_sample_menu(self, menu, node):
-        return True
-    
-    def build_sample_menu(self, menu, node):
-        if not self.check_node(node):
-            return False
-        return self.add_sample_menu(menu, node)  
-    
-    def add_group_menu(self, menu, node):
-        return True
-    
-    def build_group_menu(self, menu, node):
-        if not self.check_node(node):
-            return False
-        return self.add_group_menu(menu, node)  
-    
-    def add_dataset_menu(self, menu, node):
-        return True
-    
-    def build_dataset_menu(self, menu, node):
-        if not self.check_node(node):
-            return False
-        return self.add_dataset_menu(menu, node)  
-    
-    def add_derived_dataset_menu(self, menu, node):
-        return True
-    
-    def build_derived_dataset_menu(self, menu, node):
-        if not self.check_node(node):
-            return False
-        return self.add_derived_dataset_menu(menu, node)  
-    
-    def add_multiary_menu(self, menu, nodes):
-        return True
-    
-    def build_multiary_menu(self, menu, nodes):
-        if not self.check_nodes(node):
-            return False
-        return self.add_multiary_menu(menu, nodes)
     
 class DataNavigatorDomain(NavigatorDomain):
         
@@ -261,6 +165,7 @@ class DataNavigatorDomain(NavigatorDomain):
         return True
              
     def add_dataset_menu(self, menu, node):
+        menu.addSeparator()
         self.add_load(menu, node)
         self.add_keep(menu, node)
         menu.addAction(('Save on current version'), self.save_on_current_version)
@@ -377,6 +282,7 @@ class PlottingNavigatorDomain(NavigatorDomain):
         return True
              
     def add_dataset_menu(self, menu, node):
+        menu.addSeparator()
         is_plotted = self.is_plotted(node) >0 
         self.add_plotted(menu, node, is_plotted)
         if is_plotted:
@@ -467,6 +373,7 @@ class MathNavigatorDomain(NavigatorDomain):
         
         
     def add_dataset_menu(self, menu, node):
+        menu.addSeparator()
         menu.addAction(_('Edit'), self.edit_dataset)
         menu.addAction(_('Smoothing'), self.smooth)
         menu.addAction(_('Derivatives'), self.derive)

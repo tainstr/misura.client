@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Tree visualization of opened misura Files in a document."""
 from misura.canon.logger import Log as logging
-from misura.canon.dataimport import navigator_domains
+from misura.canon.plugin import navigator_domains, NavigatorDomain
 from veusz.dialogs.plugin import PluginDialog
 
 
@@ -11,7 +11,6 @@ from ..filedata import getFileProxy
 from ..filedata import axis_selection
 
 from .quick import node, nodes
-from .domains import NavigatorDomain 
 
 ism = isinstance
 

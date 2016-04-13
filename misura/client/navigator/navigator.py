@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Tree visualization of opened misura Files in a document."""
 from misura.canon.logger import Log as logging
+from misura.canon.plugin import navigator_domains
 
 import veusz.document as document
 from PyQt4 import QtGui, QtCore
@@ -28,7 +29,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.setIconSize(QtCore.QSize(24, 16))
         self.connect(self, QtCore.SIGNAL('clicked(QModelIndex)'), self.select)
         self.domains = []
-        from misura.canon.dataimport import navigator_domains
+        
         for domain in navigator_domains:
             self.domains.append(domain(self))
         # Menu creation
@@ -38,46 +39,14 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 'customContextMenuRequested(QPoint)'), self.showContextMenu)
 
             self.connect(self, QtCore.SIGNAL('doubleClicked(QModelIndex)'),self.double_clicked)
-
-            ######
-            # File menu
-            self.file_menu = QtGui.QMenu(self)
-
-
-            ######
-            # Group or No-selection menu
             self.base_menu = QtGui.QMenu(self)
-
-            self.acts_status = []
-            for i, s in enumerate(filedata.dstats):
-                name = filedata.dstats._fields[i]
-                act = self.base_menu.addAction(
-                    _(name.capitalize()), self.set_status)
-                act1 = self.file_menu.addAction(act)
-                act.setCheckable(True)
-                if s == status:
-                    act.setChecked(True)
-                self.acts_status.append(act)
-
-            self.act_del = self.base_menu.addAction(
-                _('Delete'), self.deleteChildren)
-            self.base_menu.addAction(_('Update view'), self.update_view)
-
-            ######
-            # Sample menu
+            self.add_status_actions(self.base_menu)
+            self.file_menu = QtGui.QMenu(self)
+            self.group_menu = QtGui.QMenu(self)
             self.sample_menu = QtGui.QMenu(self)
-
-            ######
-            # Dataset menu
             self.dataset_menu = QtGui.QMenu(self)
-
-            ######
-            # Derived dataset menu
             self.der_menu = QtGui.QMenu(self)
-
-            ####
-            # Binary
-            self.bin_menu = QtGui.QMenu(self)
+            self.multi_menu = QtGui.QMenu(self)
 
         else:
             self.connect(
@@ -105,7 +74,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     def set_doc(self, doc):
         self.doc = doc
         self.cmd = document.CommandInterface(self.doc)
-        self.setWindowTitle(_('Opened misura Tests'))
+        self.setWindowTitle(_('Opened Misura Tests'))
         self.mod = self.doc.model
         self.mod.ncols = self.ncols
         self.setModel(self.mod)
@@ -165,15 +134,50 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
         if(len(self.selectedIndexes()) > 0):
             self.scrollTo(self.selectedIndexes()[0])
-
+            
+    def add_status_actions(self, menu):
+        self.acts_status = []
+        for i, s in enumerate(filedata.dstats):
+            name = filedata.dstats._fields[i]
+            act = menu.addAction(
+                _(name.capitalize()), self.set_status)
+            act.setCheckable(True)
+            if s == self.status:
+                act.setChecked(True)
+            self.acts_status.append(act)
+        
+        #FIXME: should be in a domain
+        self.act_del = menu.addAction(
+            _('Delete'), self.deleteChildren)
+        self.acts_status.append(self.act_del)
+        act = menu.addAction(_('Update view'), self.update_view)
+        self.acts_status.append(act)
+        
     def update_base_menu(self, node=False):
+        self.base_menu.clear()
+        for domain in self.domains:
+            domain.build_base_menu(self.base_menu, node)
+        self.base_menu.addSeparator()
+        for act in self.acts_status:
+            self.base_menu.addAction(act)  
+        
+    def update_group_menu(self, node=False):
+        self.group_menu.clear()
         self.act_del.setEnabled(bool(node))
+        for domain in self.domains:
+            domain.build_group_menu(self.group_menu, node)
+        self.group_menu.addSeparator()
+        for act in self.acts_status:
+            self.group_menu.addAction(act)
 
     def update_file_menu(self, node):
         self.file_menu.clear()
         self.file_menu.addAction(_('Update view'), self.refresh_model)
         for domain in self.domains:
             domain.build_file_menu(self.file_menu, node)
+        self.file_menu.addSeparator()
+        for act in self.acts_status:
+            self.file_menu.addAction(act)
         
     def update_sample_menu(self, node):
         self.sample_menu.clear()
@@ -194,9 +198,9 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return self.der_menu
     
     def update_multiary_menu(self, selection):
-        self.bin_menu.clear()
+        self.multi_menu.clear()
         for domain in self.domains:
-            domain.build_multiary_menu(self.bin_menu, selection)   
+            domain.build_multiary_menu(self.multi_menu, selection)   
 
     def showContextMenu(self, pt):
         sel = self.selectedIndexes()
@@ -209,7 +213,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             menu = self.base_menu
         elif n>1:
             self.update_multiary_menu(sel)
-            menu = self.bin_menu 
+            menu = self.multi_menu 
         elif node.ds is False:
             # Identify a "summary" node
             if not node.parent.parent:
@@ -219,8 +223,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             elif node.name().startswith('sample'):
                 menu = self.update_sample_menu(node)
             else:
-                self.update_base_menu(node)
-                menu = self.base_menu
+                self.update_group_menu(node)
+                menu = self.group_menu
         # The DatasetEntry refers to a plugin
         elif hasattr(node.ds, 'getPluginData'):
             menu = self.update_derived_menu(node)
@@ -229,6 +233,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             menu = self.update_dataset_menu(node)
         # No active selection
         else:
+            self.update_base_menu(node)
             menu = self.base_menu
 
         # menu.popup(self.mapToGlobal(pt))

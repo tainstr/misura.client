@@ -15,8 +15,9 @@ import veusz.document as document
 import veusz.setting as setting
 from veusz import veusz_main
 
-from misura.canon import dataimport
+from misura.canon.plugin import dataimport
 from misura.client import helpmenu, configure_logger
+
 
 from .. import _
 from .. import misura3
