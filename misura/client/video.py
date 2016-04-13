@@ -38,14 +38,14 @@ def export(sh, frame='/hsm/sample0/frame',
         return False
     if T:
         nT = sh.col(T, raw=True)
-        tT = nT['t']
-        vT = nT['v']
+        tT = nT.cols.t
+        vT = nT.cols.v
 
     roi = sh.col(roi, raw=True)
-    x = roi['x']
-    y = roi['y']
-    w = roi['w']
-    h = roi['h']
+    x = roi.cols.x
+    y = roi.cols.y
+    w = roi.cols.w
+    h = roi.cols.h
     # Translate to 0
     x_translation = min(x)
     y_translation = min(y)
