@@ -314,7 +314,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             str(row) + str(lst) + str(self.status)
         child = lst[row]
         # Update entries dictionary ???
-        self.doc.ent[id(child)] = child
+        self.doc.ent[child.path] = child
         idx = self.createIndex(row, column, child.model_path)
         return idx
 

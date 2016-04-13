@@ -226,20 +226,11 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             logging.debug(
                 '%s %s %s %s', 'plotting value:', y, 'data:', doc.data[y])
             ds = doc.data[y]
-            dsx = doc.data[x]
             # If the ds is recursively derived, substitute it by its entry
             if not hasattr(ds, 'm_smp'):
                 logging.debug('%s %s', 'Retrieving ent', y)
-                # warning: can change size during iter!
-                for eid, entry in doc.ent.items():
-                    if entry.path == y:
-                        logging.debug(
-                            '%s %s %s %s', 'Found entry', entry, entry.parents, entry.path)
-                        ds = entry
-                        break
-                    logging.debug(
-                        '%s %s %s %s', 'Skipping', eid, entry.path, entry.name)
-
+                ds = doc.ent.get(y, False)
+            
             # Get the curve and axis name
             cname, ax_name, ax_lbl = dataset_curve_name(ds, y)
 

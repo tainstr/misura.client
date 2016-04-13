@@ -131,7 +131,7 @@ class NodeEntry(object):
         if doc is not False:
             if not hasattr(doc, 'ent'):
                 doc.ent = {}
-            doc.ent[id(self)] = self
+            doc.ent[self.path] = self
 
     def name(self):
         return self._name
