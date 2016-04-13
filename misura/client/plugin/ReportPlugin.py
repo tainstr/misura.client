@@ -19,7 +19,13 @@ from report_plugin_utils import wr, render_meta
 
 
 class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
-
+    menu = ('Misura','Create Sample Report')
+    # unique name for plugin
+    name = 'Misura Report'
+    # name to appear on status tool bar
+    description_short = 'Create Report for Misura sample'
+    # text to appear in dialog box
+    description_full = 'Create a Report page for a Misura sample'    
     def __init__(self, sample=None, template_file_name='default.vsz', measure_to_plot='d'):
         """Make list of fields."""
         self.fields = [
