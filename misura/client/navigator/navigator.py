@@ -150,27 +150,26 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 print 'set action as unchecked', name, s, self.status
             self.acts_status.append(act)
         
-        #FIXME: should be in a domain
-        self.act_del = menu.addAction(
-            _('Delete'), self.deleteChildren)
+        self.act_del = menu.addAction(_('Delete'), self.deleteChildren)
         self.acts_status.append(self.act_del)
         act = menu.addAction(_('Update view'), self.update_view)
         self.acts_status.append(act)
+        return True
         
     def update_base_menu(self, node=False):
         self.base_menu.clear()
         for domain in self.domains:
-            print 'adding domain', domain
             domain.build_base_menu(self.base_menu, node)
         self.add_status_actions(self.base_menu)
+        self.act_del.setEnabled(bool(node))
         return self.base_menu
         
     def update_group_menu(self, node=False):
         self.group_menu.clear()
-        self.act_del.setEnabled(bool(node))
         for domain in self.domains:
             domain.build_group_menu(self.group_menu, node)
         self.add_status_actions(self.group_menu)
+        self.act_del.setEnabled(bool(node))
         return self.group_menu
 
     def update_file_menu(self, node):
@@ -179,6 +178,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         for domain in self.domains:
             domain.build_file_menu(self.file_menu, node)
         self.add_status_actions(self.file_menu)
+        self.act_del.setEnabled(bool(node))
         return self.file_menu
         
     def update_sample_menu(self, node):
@@ -223,8 +223,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             elif node.name().startswith('sample'):
                 menu = self.update_sample_menu(node)
             else:
-                self.update_group_menu(node)
-                menu = self.group_menu
+                menu = self.update_group_menu(node)
         # The DatasetEntry refers to a plugin
         elif hasattr(node.ds, 'getPluginData'):
             menu = self.update_derived_menu(node)
