@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Tree visualization of opened misura Files in a document."""
+
 from misura.canon.logger import Log as logging
-from misura.canon.plugin import navigator_domains, NavigatorDomain
+from misura.canon.plugin import navigator_domains, NavigatorDomain, node, nodes
 from veusz.dialogs.plugin import PluginDialog
 
 
@@ -10,13 +10,14 @@ from .. import _
 from ..filedata import getFileProxy
 from ..filedata import axis_selection
 
-from .quick import node, nodes
 
 ism = isinstance
 
       
 class MicroscopeSampleNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
+        if not node:
+            return False
         return 'hsm/sample' in node.path
     
     @node
@@ -121,6 +122,8 @@ class DilatometerNavigatorDomain(NavigatorDomain):
 class HorizontalSampleNavigatorDomain(DilatometerNavigatorDomain):
     
     def check_node(self, node):
+        if not node:
+            return False
         return 'horizontal/sample' in node.path
     
     @node
@@ -138,6 +141,8 @@ class HorizontalSampleNavigatorDomain(DilatometerNavigatorDomain):
 class VerticalSampleNavigatorDomain(DilatometerNavigatorDomain):
     
     def check_node(self, node):
+        if not node:
+            return False
         return 'vertical/sample' in node.path
     
     @node
@@ -154,6 +159,8 @@ class VerticalSampleNavigatorDomain(DilatometerNavigatorDomain):
         
 class FlexSampleNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
+        if not node:
+            return False
         return 'flex/sample' in node.path
     @node
     def report(self, node=False):

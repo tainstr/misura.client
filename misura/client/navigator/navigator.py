@@ -14,7 +14,7 @@ from .. import filedata
 class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     """List of currently opened misura Tests and reference to datasets names"""
-    def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=filedata.dstats.loaded, cols=1):
+    def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=set([filedata.dstats.loaded]), cols=1):
         QtGui.QTreeView.__init__(self, parent)
         self.status = status
         self.ncols = cols
@@ -136,14 +136,18 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.scrollTo(self.selectedIndexes()[0])
             
     def add_status_actions(self, menu):
+        menu.addSeparator()
         self.acts_status = []
         for i, s in enumerate(filedata.dstats):
             name = filedata.dstats._fields[i]
             act = menu.addAction(
                 _(name.capitalize()), self.set_status)
             act.setCheckable(True)
-            if s == self.status:
+            if s in self.status:
+                print 'set action as checked', name, s, self.status
                 act.setChecked(True)
+            else:
+                print 'set action as unchecked', name, s, self.status
             self.acts_status.append(act)
         
         #FIXME: should be in a domain
@@ -156,28 +160,26 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     def update_base_menu(self, node=False):
         self.base_menu.clear()
         for domain in self.domains:
+            print 'adding domain', domain
             domain.build_base_menu(self.base_menu, node)
-        self.base_menu.addSeparator()
-        for act in self.acts_status:
-            self.base_menu.addAction(act)  
+        self.add_status_actions(self.base_menu)
+        return self.base_menu
         
     def update_group_menu(self, node=False):
         self.group_menu.clear()
         self.act_del.setEnabled(bool(node))
         for domain in self.domains:
             domain.build_group_menu(self.group_menu, node)
-        self.group_menu.addSeparator()
-        for act in self.acts_status:
-            self.group_menu.addAction(act)
+        self.add_status_actions(self.group_menu)
+        return self.group_menu
 
     def update_file_menu(self, node):
         self.file_menu.clear()
         self.file_menu.addAction(_('Update view'), self.refresh_model)
         for domain in self.domains:
             domain.build_file_menu(self.file_menu, node)
-        self.file_menu.addSeparator()
-        for act in self.acts_status:
-            self.file_menu.addAction(act)
+        self.add_status_actions(self.file_menu)
+        return self.file_menu
         
     def update_sample_menu(self, node):
         self.sample_menu.clear()
@@ -201,6 +203,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.multi_menu.clear()
         for domain in self.domains:
             domain.build_multiary_menu(self.multi_menu, selection)   
+        return self.multi_menu
 
     def showContextMenu(self, pt):
         sel = self.selectedIndexes()
@@ -209,16 +212,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         logging.debug('%s %s', 'showContextMenu', node)
 
         if node is None or not node.parent:
-            self.update_base_menu()
-            menu = self.base_menu
+            menu = self.update_base_menu()
         elif n>1:
-            self.update_multiary_menu(sel)
-            menu = self.multi_menu 
+            menu = self.update_multiary_menu(sel)
         elif node.ds is False:
             # Identify a "summary" node
             if not node.parent.parent:
-                self.update_file_menu(node)
-                menu = self.file_menu
+                menu = self.update_file_menu(node)
             # Identify a "sampleN" node
             elif node.name().startswith('sample'):
                 menu = self.update_sample_menu(node)
@@ -233,8 +233,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             menu = self.update_dataset_menu(node)
         # No active selection
         else:
-            self.update_base_menu(node)
-            menu = self.base_menu
+            menu = self.update_base_menu(node)
 
         # menu.popup(self.mapToGlobal(pt))
         # Synchronous call to menu, otherise selection is lost on live update

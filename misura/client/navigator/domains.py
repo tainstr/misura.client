@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Tree visualization of opened misura Files in a document."""
+
 import functools
 
 from misura.canon.logger import Log as logging
-from misura.canon.plugin import navigator_domains, NavigatorDomain
+from misura.canon.plugin import navigator_domains, NavigatorDomain, node, nodes
 
 from veusz.dialogs.plugin import PluginDialog
 
@@ -18,8 +18,6 @@ from ..filedata import getFileProxy
 
 ism = isinstance
 
-
-from .quick import node, nodes
 
     
 class DataNavigatorDomain(NavigatorDomain):
@@ -184,6 +182,8 @@ class DataNavigatorDomain(NavigatorDomain):
 from ..clientconf import confdb
 class PlottingNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
+        if not node: 
+            return False
         if not node.ds:
             return False
         is_loaded = len(node.ds) > 0
@@ -312,6 +312,8 @@ class PlottingNavigatorDomain(NavigatorDomain):
     
 class MathNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
+        if not node:
+            return False
         if not node.ds:
             return False
         istime = node.path == 't' or node.path.endswith(':t')
@@ -400,6 +402,8 @@ class MathNavigatorDomain(NavigatorDomain):
         
 class MeasurementUnitsNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
+        if not node:
+            return False
         if not node.ds:
             return False
         return len(node.ds) > 0
