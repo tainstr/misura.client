@@ -37,3 +37,15 @@ from ViscosityPlugin import ViscosityPlugin, viscosity_calc
 
 
 from SurfaceTensionPlugin import SurfaceTensionPlugin
+
+# install 3rd-party plugins
+import veusz.plugins as plugins
+from misura.canon.plugin import veusz_toolsplugins
+for plugin_extension in veusz_toolsplugins.itervalues():
+    print 'Adding veusz_plugin', plugin_extension
+    plugins.toolspluginregistry.append(plugin_extension)
+    
+from misura.canon.plugin import veusz_datasetplugins
+for plugin_extension in veusz_datasetplugins.itervalues():
+    print 'Adding veusz_plugin', plugin_extension
+    plugins.datasetpluginregistry.append(plugin_extension)
