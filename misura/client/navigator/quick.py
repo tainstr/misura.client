@@ -16,7 +16,7 @@ from ..filedata import MisuraDocument
 from ..filedata import OperationMisuraImport
 from ..filedata import DatasetEntry
 from ..filedata import getFileProxy
-from ..filedata import axis_selection
+from .. import axis_selection
 import numpy as np
 
 ism = isinstance

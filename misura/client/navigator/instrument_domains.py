@@ -8,7 +8,7 @@ from veusz.dialogs.plugin import PluginDialog
 
 from .. import _
 from ..filedata import getFileProxy
-from ..filedata import axis_selection
+from .. import axis_selection
 
 
 ism = isinstance

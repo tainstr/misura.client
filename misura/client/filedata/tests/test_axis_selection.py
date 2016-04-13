@@ -3,7 +3,7 @@
 """Tests DataDecoder"""
 import unittest
 
-from misura.client.filedata import axis_selection
+from misura.client import axis_selection
 
 
 class AxisSelection(unittest.TestCase):
