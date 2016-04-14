@@ -9,11 +9,11 @@ from traceback import format_exc, print_exc
 
 from PyQt4 import QtCore
 
-from ..canon import option
-from ..canon import csutil
-from ..canon.option import ao
-from ..canon.indexer import Indexer
-from ..canon.plugin import clientconf_update_functions
+from misura.canon import option
+from misura.canon import csutil
+from misura.canon.option import ao
+from misura.canon.indexer import Indexer
+from misura.canon.plugin import clientconf_update_functions
 import units
 
 import parameters as params

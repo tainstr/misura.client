@@ -9,7 +9,7 @@ except:
     logging.debug('%s', 'OpenCV is not available. Video Export is disabled.')
     cv = False
 
-from ..canon import csutil, reference
+from misura.canon import csutil, reference
 
 import platform
 
