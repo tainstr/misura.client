@@ -35,17 +35,32 @@ from ArrangePlugin import ArrangePlugin
 from ReportPlugin import ReportPlugin
 from ViscosityPlugin import ViscosityPlugin, viscosity_calc
 
-
 from SurfaceTensionPlugin import SurfaceTensionPlugin
 
-# install 3rd-party plugins
+
+
+
+
+
+# Install 3rd-party plugins
 import veusz.plugins as plugins
 from misura.canon.plugin import veusz_toolsplugins
-for plugin_extension in veusz_toolsplugins.itervalues():
-    print 'Adding veusz_plugin', plugin_extension
-    plugins.toolspluginregistry.append(plugin_extension)
-    
 from misura.canon.plugin import veusz_datasetplugins
+
+def create_veusz_plugin_class(plugin_extension, veusz_plugin_class):
+    """Create a new class which inherits also from veusz_plugin_class"""
+    return type(plugin_extension.__name__ + 'Plugin', 
+                            (plugin_extension, veusz_plugin_class), 
+                            {'plugins_module': lambda *a: plugins})
+    
+for plugin_extension in veusz_toolsplugins.itervalues():
+    print 'Adding veusz_toolsplugin', plugin_extension
+    new_plugin_class = create_veusz_plugin_class(plugin_extension, plugins.ToolsPlugin)
+    plugins.toolspluginregistry.append(new_plugin_class)
+    
+
 for plugin_extension in veusz_datasetplugins.itervalues():
-    print 'Adding veusz_plugin', plugin_extension
+    print 'Adding veusz_datasetplugins', plugin_extension
+    new_plugin_class = create_veusz_plugin_class(plugin_extension, plugins.DatasetPlugin)
     plugins.datasetpluginregistry.append(plugin_extension)
+    
