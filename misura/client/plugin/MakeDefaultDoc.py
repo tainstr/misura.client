@@ -11,58 +11,87 @@ import utils
 
 class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
 
-    def __init__(self):
+    def __init__(self, page='', title=False, time=True, temp=True):
         """Make list of fields."""
 
-        self.fields = [veusz.plugins.FieldBool("title", descr="Make title label", default=False)
-                       ]
-
-    def apply(self, cmd, fields={'title': False}):
-        self.ops = []
-        doc = cmd.document
-        self.doc = doc
-        self.doc.wipe()
-        self.ops.append(
-            (document.OperationWidgetAdd(doc.basewidget, 'page', name='temperature')))
-        self.ops.append(
-            (document.OperationWidgetAdd(doc.basewidget, 'page', name='time')))
-        self.apply_ops(descr='MakeDefaultPlot: Pages')
-        temp = doc.basewidget.getChild('temperature')
-        time = doc.basewidget.getChild('time')
-        self.ops.append(
-            (document.OperationWidgetAdd(temp, 'graph', name='temp')))
-        self.ops.append(
-            (document.OperationWidgetAdd(time, 'graph', name='time')))
-        self.apply_ops(descr='MakeDefaultPlot: Graphs')
-        gtemp = temp.getChild('temp')
-        gtime = time.getChild('time')
-
-        if fields['title']:
-            self.ops.append(
-                (document.OperationWidgetAdd(time, 'label', name='title')))
-            self.ops.append(
-                (document.OperationWidgetAdd(temp, 'label', name='title')))
-            self.apply_ops(descr='MakeDefaultPlot: Labels')
-
-        self.dict_toset(doc.basewidget, {'width': '20cm', 'height': '20cm'})
-        labels = ['Time (s)', u'Temperature (°C)']
-        for i, g in enumerate([gtime, gtemp]):
-            y = g.getChild('y')
-            if y is not None:
-                self.ops.append(document.OperationWidgetDelete(y))
-            props = {'rightMargin': '1.5cm', 'leftMargin': '1.5cm',
-                     'bottomMargin': '1.5cm', 'topMargin': '1.5cm'}
-            self.dict_toset(g, props)
-            self.toset(g.getChild('x'), 'label', labels[i])
-            if not fields['title']:
-                logging.debug('%s', 'Skipping title creation')
-                continue
-            self.toset(g, 'topMargin', '1.5cm')
+        self.fields = [
+            veusz.plugins.FieldText(
+                "page", descr="Base page name", default=page),
+            veusz.plugins.FieldBool(
+                "title", descr="Make title label", default=title),
+            veusz.plugins.FieldBool(
+                "time", descr="Create time page", default=time),
+           veusz.plugins.FieldBool(
+                "temp", descr="Create temperature page", default=temp)
+        ]
+        
+    def adjust_graph(self, g, label):
+        y = g.getChild('y')
+        if y is not None:
+            self.ops.append(document.OperationWidgetDelete(y))
+        props = {'rightMargin': '1.5cm', 'leftMargin': '1.5cm',
+                 'bottomMargin': '1.5cm', 'topMargin': '1.5cm'}
+        self.dict_toset(g, props)
+        self.toset(g.getChild('x'), 'label', label)
+        self.toset(g, 'topMargin', '1.5cm')
+        if self.fields.get('title', False):
             props = {'xPos': 0.1, 'yPos': 0.96, 'label': 'Title'}
             self.dict_toset(g.parent.getChild('title'), props)
-        self.apply_ops('MakeDefaultDoc: Custom')
+        
+    def create_page_temperature(self, page):
+        self.ops.append(
+                            (document.OperationWidgetAdd(self.doc.basewidget, 'page', name=page))) 
+        self.apply_ops(descr='MakeDefaultPlot: Page '+page)
+        wg = self.doc.basewidget.getChild(page)
+        self.ops.append(
+            (document.OperationWidgetAdd(wg, 'graph', name='temp')))
+        self.apply_ops(descr='MakeDefaultPlot: Graph Temperature')
+        if self.fields.get('title', False):
+            self.ops.append(
+                (document.OperationWidgetAdd(wg, 'label', name='title')))
+        graph = wg.getChild('temp')
+        self.adjust_graph(graph, u'Temperature (°C)')
+        
+    def create_page_time(self, page):      
+        self.ops.append(
+            (document.OperationWidgetAdd(self.doc.basewidget, 'page', name=page)))
+        self.apply_ops(descr='MakeDefaultPlot: Page '+page)
+        wg = self.doc.basewidget.getChild(page)
+        self.ops.append(
+            (document.OperationWidgetAdd(wg, 'graph', name='time')))
+        self.apply_ops(descr='MakeDefaultPlot: Graph Time')
+        if self.fields.get('title', False):
+            self.ops.append(
+                (document.OperationWidgetAdd(wg, 'label', name='title')))
+        graph = wg.getChild('time')
+        self.adjust_graph(graph, 'Time (s)')
+        
+        
+    def apply(self, cmd, fields):
+        self.ops = []
+        self.fields = fields
+        doc = cmd.document
+        self.doc = doc
+        # If no target page is specified, must wipe the doc
+        page_T = 'temperature'
+        page_t = 'time'
+        base_page = fields.get('page','')
+        if not base_page:
+            self.doc.wipe()
+        else:
+            page_T = base_page + '_T'
+            page_t = base_page + '_t' 
+        
+        self.dict_toset(doc.basewidget, {'width': '20cm', 'height': '20cm'})
+        
+        if fields.get('temp', True):
+            self.create_page_temperature(page_T)
+        if fields.get('time', True):
+            self.create_page_time(page_t)  
+        
         self.add_versions_to_file()
-
+        self.apply_ops('MakeDefaultDoc: Done')
+        return True
 
     def add_versions_to_file(self):
         command_interface = document.CommandInterface(self.doc)

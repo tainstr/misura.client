@@ -5,11 +5,15 @@ from misura.canon.logger import Log as logging
 from misura.canon.plugin import navigator_domains
 
 import veusz.document as document
+import veusz.plugins
+import veusz.dialogs
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 from .. import _
 import quick
 from .. import filedata
+from .. import plugin
+from ..clientconf import confdb
 
 class Navigator(quick.QuickOps, QtGui.QTreeView):
 
@@ -60,6 +64,12 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.plot(n)
         else:
             print 'Not a valid node', n
+            
+    # 3rd party domains utilities
+    veusz_plugins_module = veusz.plugins
+    veusz_PluginDialog = veusz.dialogs.plugin.PluginDialog
+    misura_plugin_module = plugin
+    misura_confdb = confdb
 
 
     def set_idx(self, n):

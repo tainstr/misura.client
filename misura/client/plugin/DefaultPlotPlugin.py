@@ -4,13 +4,15 @@
 import re
 
 import veusz.plugins as plugins
+from veusz import document
 from misura.client import iutils
 from misura.canon.logger import Log as logging
 from .. import axis_selection
 from PlotPlugin import PlotDatasetPlugin
+from MakeDefaultDoc import MakeDefaultDoc
+from . import utils
 
-
-class DefaultPlotPlugin(plugins.ToolsPlugin):
+class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
     """Default Plot from a list of Misura datasets."""
     # a tuple of strings building up menu to place plugin on
@@ -26,7 +28,7 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
         """Make list of fields."""
 
         self.fields = [
-            plugins.FieldDatasetMulti("dsn", 'Dataset names'),
+            plugins.FieldDatasetMulti("dsn", 'Dataset names', default = dsn),
             plugins.FieldText("rule", 'Plotting rule', default=rule),
             plugins.FieldTextMulti("graphs", 'Target graphs', default=graphs),
         ]
@@ -64,9 +66,33 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
                 x.append(ds_temperature)
                 y.append(ds)  
         return x, y      
+    
+    def create_graph(self, graph):
+        """Create page and graph if missing"""
+        try:
+            self.doc.resolveFullWidgetPath(graph)
+            print 'GRAPH OK', graph
+            return False
+        except:
+            pass
+        print 'GRAPH MISSING', graph
+        page = graph.split('/')[1][:-2]
+        print 'MakeDefaultPlot', page
+        istime = graph.endswith('/time')
+        istemp = graph.endswith('/temp')
+        self.ops.append(
+            document.OperationToolsPlugin(MakeDefaultDoc(), 
+                {'title': False, 'page': page,
+                 'time': istime , 
+                 'temp': istemp})
+            )
+        self.apply_ops()
+        print 'Done create_graph', graph
+        return True
           
     def plot_on_graph(self, names, graph):
         print 'plot_on_graph', graph, len(names)
+        self.create_graph(graph)
         if graph.endswith('/temp'):
             x, y = self.get_temperature_datasets(names, graph)
         elif graph.endswith('/time'):
@@ -74,7 +100,7 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
         
         result = PlotDatasetPlugin().apply(
             self.cmd, {'x': x, 'y': y, 'currentwidget': graph})
-        
+        print 'Done plot_on_graph', graph
         return result
         
     def apply(self, cmd, fields):
@@ -92,6 +118,7 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
             rp = re.compile(rp)
         else:
             rp = False
+            
         for ds in dsn:
             ds1 = ds
             if ':' in ds1:
@@ -100,9 +127,13 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
             logging.debug('%s %s %s', 'Checking', ds, var)
             if rp and rp.search(ds1):
                 names.append(ds)
+                
+        if not len(names):
+            print 'NOTHING TO PLOT', names, fields['rule'], dsn, rp
+            return False
 
         names = sorted(names)
-        logging.debug('%s %s', "VARS", vars)
+        logging.debug('%s %s', "VARS", names)
         
         result={}
         graphs = fields.get('graphs',['/time/time', '/temperature/temp'])
