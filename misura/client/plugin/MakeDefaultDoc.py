@@ -11,13 +11,13 @@ import utils
 
 class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
 
-    def __init__(self, page='', title=False, time=True, temp=True):
+    def __init__(self, page='', title='', time=True, temp=True):
         """Make list of fields."""
 
         self.fields = [
             veusz.plugins.FieldText(
                 "page", descr="Base page name", default=page),
-            veusz.plugins.FieldBool(
+            veusz.plugins.FieldText(
                 "title", descr="Make title label", default=title),
             veusz.plugins.FieldBool(
                 "time", descr="Create time page", default=time),
@@ -35,7 +35,7 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         self.toset(g.getChild('x'), 'label', label)
         self.toset(g, 'topMargin', '1.5cm')
         if self.fields.get('title', False):
-            props = {'xPos': 0.1, 'yPos': 0.96, 'label': 'Title'}
+            props = {'xPos': 0.1, 'yPos': 0.96, 'label': self.fields['title']}
             self.dict_toset(g.parent.getChild('title'), props)
         
     def create_page_temperature(self, page):
@@ -108,7 +108,7 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
                                     client_version.__vsz_file_format_version__)
 
 
-def makeDefaultDoc(cmd, title=False):
+def makeDefaultDoc(cmd, title=''):
     """Make default temperature/time pages"""
     p = MakeDefaultDoc()
     p.apply(cmd, {'title': title})

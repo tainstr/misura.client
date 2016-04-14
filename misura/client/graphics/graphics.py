@@ -396,7 +396,7 @@ class Graphics(MainWindow):
 
     def setupDefaultDoc(self):
         """Make default temperature/time pages"""
-        plugin.makeDefaultDoc(self.cmd, title=True)
+        plugin.makeDefaultDoc(self.cmd, title='Title')
         self.loadDefaultStylesheet()
         self.loadDefaultCustomDefinitions()
 

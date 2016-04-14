@@ -230,7 +230,18 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                                rule_unit=clientconf.confdb['rule_unit'])
         op = OperationMisuraImport(p)
         return op
-
+    
+    @classmethod
+    def from_rule(cls, rule, linked_filename, uid=''):
+        """Create an import operation from a `dataset_name` contained in `linked_filename`"""
+        p = ImportParamsMisura(filename=linked_filename,
+                               uid=uid,
+                               rule_exc=' *',
+                               rule_load=rule,
+                               rule_unit=clientconf.confdb['rule_unit'])
+        op = OperationMisuraImport(p)
+        return op
+    
     def do(self, document):
         """Override do() in order to get a reference to the document!"""
         self._doc = document

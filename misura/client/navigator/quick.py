@@ -50,7 +50,13 @@ class QuickOps(object):
         op = OperationMisuraImport.from_dataset_in_file(
             node.path, node.linked.filename)
         self.doc.applyOperation(op)
-
+        
+    @node
+    def load_rule(self, node, rule):
+        op = OperationMisuraImport.from_rule(
+            rule, node.linked.filename)
+        self.doc.applyOperation(op)
+        
     @node
     def load(self, node=False):
         logging.debug('%s %s', 'load', node)

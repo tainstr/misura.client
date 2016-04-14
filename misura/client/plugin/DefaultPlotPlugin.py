@@ -24,13 +24,14 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     # text to appear in dialog box
     description_full = 'Default plot for Misura datasets'
 
-    def __init__(self, dsn=[], rule='', graphs = ['/time/time', '/temperature/temp']):
+    def __init__(self, dsn=[], rule='', graphs = ['/time/time', '/temperature/temp'], title=''):
         """Make list of fields."""
 
         self.fields = [
             plugins.FieldDatasetMulti("dsn", 'Dataset names', default = dsn),
             plugins.FieldText("rule", 'Plotting rule', default=rule),
             plugins.FieldTextMulti("graphs", 'Target graphs', default=graphs),
+            plugins.FieldText("title", 'Plot title', default=''),
         ]
         
     def get_time_datasets(self, names, graph):
@@ -82,7 +83,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         istemp = graph.endswith('/temp')
         self.ops.append(
             document.OperationToolsPlugin(MakeDefaultDoc(), 
-                {'title': False, 'page': page,
+                {'title': self.fields.get('title', ''), 'page': page,
                  'time': istime , 
                  'temp': istemp})
             )
@@ -110,7 +111,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         """
         self.cmd = cmd
         self.doc = cmd.document
-        
+        self.fields = fields
         dsn = fields['dsn']
         names = []
         rp = fields['rule'].replace('\n', '|')
