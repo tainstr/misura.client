@@ -94,14 +94,13 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         smp = conf.toPath(smpp)
         logging.debug('%s %s', 'config', smp)
 
-        filter_shape = standard_filtering_predicates[fields['characteristic_shape_standard']]
-        for shape, opt in smp.describe().iteritems():
-            if opt['type'] != 'Meta':
-                continue
+        all_items = smp.describe().iteritems()
+        sample_shapes = filter(lambda item: item[1]['type'] == 'Meta', all_items)
 
-            if not filter_shape(shape):
-                continue
+        required_shapes_filter = standard_filtering_predicates[fields['characteristic_shape_standard']]
+        required_sample_shapes = filter(lambda item: required_shapes_filter(item[0]), sample_shapes)
 
+        for shape, opt in required_sample_shapes:
             txt = str(fields['text']).replace('$shape$', remove_prefix(shape))
             pt = opt['current']
             t = pt['time']
