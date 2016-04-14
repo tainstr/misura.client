@@ -49,6 +49,7 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         if self.fields.get('title', False):
             self.ops.append(
                 (document.OperationWidgetAdd(wg, 'label', name='title')))
+            self.apply_ops(descr='MakeDefaultPlot: Temperature Title')
         graph = wg.getChild('temp')
         self.adjust_graph(graph, u'Temperature (°C)')
         
@@ -63,6 +64,7 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         if self.fields.get('title', False):
             self.ops.append(
                 (document.OperationWidgetAdd(wg, 'label', name='title')))
+            self.apply_ops(descr='MakeDefaultPlot: Time Title')
         graph = wg.getChild('time')
         self.adjust_graph(graph, 'Time (s)')
         
