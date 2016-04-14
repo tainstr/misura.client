@@ -236,6 +236,10 @@ class SummaryView(QtGui.QTableView):
 
     def update(self):
         self.model().update()
+        
+    def showEvent(self, event):
+        self.update()
+        return super(SummaryView, self).showEvent(event)
 
     def set_idx(self, idx=-1):
         if idx < 0:
