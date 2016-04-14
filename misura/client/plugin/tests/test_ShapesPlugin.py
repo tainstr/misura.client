@@ -17,7 +17,9 @@ class ShapesPlugin(unittest.TestCase):
 
     def do(self, doc, target):
         fields = {'sample': target, 'temp': True, 'time': True, 'text':
-                  '$shape$\\\\%(xlabel)s=%(x)i', 'currentwidget': '/temperature/temp'}
+                  '$shape$\\\\%(xlabel)s=%(x)i',
+                  'currentwidget': '/temperature/temp',
+                  'characteristic_shape_standard': 'Misura4'}
         shapesPlugin = plugin.ShapesPlugin()
         shapesPlugin.apply(self.cmd, fields)
 
