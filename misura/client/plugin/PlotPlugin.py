@@ -251,7 +251,6 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         return cnames
 
 
-from ..clientconf import confdb
 import re
 
 

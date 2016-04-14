@@ -14,7 +14,8 @@ from ZoomAxesPlugin import ZoomAxesPlugin
 from InterceptPlugin import InterceptPlugin
 from DeriveDatasetPlugin import DeriveDatasetPlugin
 from CurveOperationPlugin import CurveOperationPlugin
-from PlotPlugin import PlotDatasetPlugin, DefaultPlotPlugin
+from PlotPlugin import PlotDatasetPlugin
+from DefaultPlotPlugin import DefaultPlotPlugin
 from SmoothDatasetPlugin import SmoothDatasetPlugin
 from CoefficientPlugin import CoefficientPlugin
 from SynchroPlugin import SynchroPlugin
