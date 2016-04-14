@@ -280,10 +280,9 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
         cmd: veusz command line interface object (exporting commands)
         fields: dict mapping field names to values
         """
+        self.doc = cmd.document
         dsn = fields['dsn']
         vars = []
-        timeds = False
-        all_temperatures = []
         autoplot_rule = fields.get('rule_plot', 'rule_plot')
         rp = confdb[autoplot_rule].replace('\n', '|')
         if len(rp) > 0:
@@ -296,14 +295,9 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
                 ds1 = ds1.split(':')[1]
             var = iutils.namingConvention(ds1)[0]
             logging.debug('%s %s %s', 'Checking', ds, var)
-            if var == 't':
-                timeds = ds
-            elif re.search('.*/T$', ds1):
-                all_temperatures.append(ds)
-
             if rp and rp.search(ds1):
                 vars.append(ds)
-
+                
         vars = sorted(vars)
         logging.debug('%s %s', "VARS", vars)
         xt = []
@@ -311,32 +305,28 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
         yt = []
         yT = []
         for ds in vars:
+            prefix = ''
+            if ':' in ds:
+                prefix, ds1 = ds.split(':')
+                prefix+=':'
+            timeds = axis_selection.get_best_x_for(ds, prefix, self.doc.data, '/time/time')
             if timeds:
-                xt.append(timeds)
                 yt.append(ds)
+                xt.append(timeds)
+            else:
+                print 'NO TIMEDS FOUND FOR', ds
 
             if not axis_selection.is_temperature(ds):
-                yT.append(ds)
-
-                ds_temperature = self.find_my_temp(ds, all_temperatures)
+                ds_temperature = axis_selection.get_best_x_for(ds, prefix, self.doc.data, '/temperature/temp')
                 if ds_temperature:
                     xT.append(ds_temperature)
-                else:
-                    xT.append(axis_selection.kiln_temperature_for(ds))
-
+                    yT.append(ds)
+        
         result = PlotDatasetPlugin().apply(
             cmd, {'x': xt, 'y': yt, 'currentwidget': '/time/time'})
         result.update(PlotDatasetPlugin().apply(
             cmd, {'x': xT, 'y': yT, 'currentwidget': '/temperature/temp'}))
         return result
-
-    def find_my_temp(self, dataset_name, temperatures):
-        path = "/".join(dataset_name.split("/")[0:-1])
-        sample_temperatures = [t for t in temperatures if re.search(path, t)]
-        if len(sample_temperatures) > 0:
-            return sample_temperatures[0]
-
-        return False
 
 # INTENTIONALLY NOT PUBLISHED
 # plugins.toolspluginregistry.append(PlotDatasetPlugin)

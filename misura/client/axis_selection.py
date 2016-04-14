@@ -14,6 +14,7 @@ def get_best_x_for(y_path, prefix, data, page):
     # Possible nearby  datasets: 
     subordered_x = get_suborderd_x(y_path, name=target)
     neighbor_x = get_neighbor_x(y_path, name=target)
+    print 'get_best_x_for', y_path, prefix, target, subordered_x, neighbor_x
     # Subordered has precedence
     if subordered_x in data:
         xname = subordered_x
