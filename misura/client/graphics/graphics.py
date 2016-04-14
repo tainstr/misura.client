@@ -16,7 +16,7 @@ import veusz.setting as setting
 from veusz import veusz_main
 
 from misura.canon import dataimport
-from misura.client import helpmenu
+from misura.client import helpmenu, configure_logger
 
 from .. import _
 from .. import misura3
@@ -363,6 +363,7 @@ class Graphics(MainWindow):
         return
 
     def __init__(self, *a):
+        configure_logger('graphics.log')
         iutils.loadIcons()
         logging.debug('%s', 'Load Icons OK')
         self._document = MisuraDocument()

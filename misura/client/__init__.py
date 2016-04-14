@@ -9,7 +9,7 @@ for name in API_NAMES:
 from parameters import determine_path
 
 from PyQt4 import QtCore
-import network
+import network, os
 
 
 def _(text, disambiguation=None, context='misura'):
@@ -40,24 +40,24 @@ def from_argv():
     return default(host=r['-h'], port=r['-p'], user=r['-u'], password=r['-w'])
 
 
-def configure_logger():
+def configure_logger(log_file_name):
     import os
     import logging
     import logging.handlers
     from misura.client.clientconf import confdb
     from misura.client.units import Converter
 
-    logdir = os.path.dirname(confdb['logfile'])
+    logdir = confdb['logdir']
     if not os.path.exists(logdir):
         os.makedirs(logdir)
+
     logsize = Converter.convert('kilobyte', 'byte', confdb['logsize'])
+    log_file = os.path.join(confdb['logdir'], log_file_name)
     rotating_file_handler = logging.handlers.RotatingFileHandler(
-        confdb['logfile'], maxBytes=logsize, backupCount=confdb['lognumber'])
+        log_file, maxBytes=logsize, backupCount=confdb['lognumber'])
     rotating_file_handler.setFormatter(
         logging.Formatter("%(levelname)s: %(asctime)s %(message)s"))
     logging.getLogger().addHandler(rotating_file_handler)
     level = confdb['loglevel']
 #     level = 0
     logging.getLogger().setLevel(level)
-
-configure_logger()

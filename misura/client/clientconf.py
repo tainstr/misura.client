@@ -46,14 +46,15 @@ ao(default_desc, 'hfile', **{'name': 'Recent Test Files',
 ao(default_desc, 'hm3database', **
    {'name': 'Recent Misura3 Databases', 'current': 10, 'max': 100, 'min': 1, 'type': 'Integer'})
 
-ao(default_desc, 'logfile', **{'name': 'Log files directory', 'current':
-                               os.path.expanduser("~/MisuraData/misura.log"), 'type': 'FilePath'})
+ao(default_desc, 'logdir', **{'name': 'Log files directory',
+                              'current': os.path.expanduser("~/MisuraData/log"),
+                              'type': 'FilePath'})
 ao(default_desc, 'loglevel', **{'name': 'Logging Level', 'current': 30,
-                                'max': 50, 'min': -1, 'step': 10, 'type': 'Integer', 'parent': 'logfile'})
+                                'max': 50, 'min': -1, 'step': 10, 'type': 'Integer', 'parent': 'logdir'})
 ao(default_desc, 'logsize', **{'name': 'Size of each log file', 'current':
-                               2048, 'min': 0, 'unit': 'kilobyte', 'type': 'Integer', 'parent': 'logfile'})
+                               2048, 'min': 0, 'unit': 'kilobyte', 'type': 'Integer', 'parent': 'logdir'})
 ao(default_desc, 'lognumber', **{'name': 'Max number of logfiles to be kept',
-                                 'current': 50, 'min': 0, 'type': 'Integer', 'parent': 'logfile'})
+                                 'current': 50, 'min': 0, 'type': 'Integer', 'parent': 'logdir'})
 
 
 u = [[k, v] for k, v in units.user_defaults.iteritems()]
@@ -203,7 +204,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self._rule_style = False
         self._rule_dataset = False
         self._rule_unit = False
-        
+
     def load_configuration(self, cursor):
         # Configuration table
         conf_table_exists = cursor.execute(
@@ -220,7 +221,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                 self.store.desc[key] = option.Option(**val)
             self.desc = self.store.desc
             self.store.write_table(cursor, "conf")
-            
+
     def load_recent_tables(self, cursor):
         # Chron tables
         cursor.execute(
@@ -231,7 +232,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             "create table if not exists recent_file (i integer, path text, name text)")
         cursor.execute(
             "create table if not exists recent_m3database (i integer, path text)")
-        
+
         # Load recent items in memory
         for name in recent_tables:
             name = 'recent_' + name
@@ -243,7 +244,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             # Pop key
             r = [list(e[1:]) for e in r]
             setattr(self, name, r)
-            
+
     def load(self, path=False):
         """Load an existent client configuration database, or create a new one."""
         logging.debug('LOAD %s', path)
@@ -257,9 +258,9 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             self.path, detect_types=sqlite3.PARSE_DECLTYPES)
         self.conn.text_factory = unicode
         cursor = self.conn.cursor()
-        
+
         self.load_configuration(cursor)
-        
+
         self.load_recent_tables(cursor)
 
         cursor.close()

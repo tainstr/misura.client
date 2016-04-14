@@ -9,6 +9,7 @@ import tables
 
 from misura.canon.logger import Log as logging
 from misura.canon import csutil
+from misura.client import configure_logger
 
 from .. import _
 from ..live import registry
@@ -62,7 +63,7 @@ def check_time_delta(server):
     if pre:
         logging.debug('Time delta already set: %s', server['timeDelta'])
     btn = QtGui.QMessageBox.warning(None, _('Hardware clock error'),
-                      _('Instrument time is different from your current time (delta: {}s).\n Apply difference and restart?').format(delta), 
+                      _('Instrument time is different from your current time (delta: {}s).\n Apply difference and restart?').format(delta),
                       QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
     if btn != QtGui.QMessageBox.Ok:
         logging.debug('Delta correction aborted')
@@ -99,6 +100,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self, doc=False, parent=None):
         super(MainWindow, self).__init__(parent)
+        configure_logger('acquisition.log')
         self._lock = threading.Lock()
         self.saved_set = set()
         self.cameras = {}

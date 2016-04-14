@@ -5,7 +5,7 @@ from PyQt4 import QtGui, QtCore
 import os
 
 from misura.canon import dataimport
-
+from misura.client import configure_logger
 
 from .. import _
 from .. import confwidget
@@ -30,7 +30,7 @@ class DatabasesArea(QtGui.QMdiArea):
     def __init__(self, parent=None):
         super(DatabasesArea, self).__init__(parent)
         self.setAcceptDrops(True)
-        
+
     def dragEnterEvent(self, event):
         logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
         if event.mimeData().hasUrls():
@@ -52,6 +52,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
         super(QtGui.QMainWindow, self).__init__(parent)
+        configure_logger('browser.log')
         self.tab = QtGui.QTabWidget()
         self.setAcceptDrops(True)
         self.area = DatabasesArea(self)
@@ -74,7 +75,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.myMenuBar.recentFile, QtCore.SIGNAL(
             'convert(QString)'), self.convert_file)
-        
+
         self.area.convert.connect(self.convert_file)
 
         self.connect(self.myMenuBar.recentDatabase, QtCore.SIGNAL(
@@ -112,16 +113,16 @@ class MainWindow(QtGui.QMainWindow):
         self.converter = False
         self.converter = dataimport.get_converter(path)
         run = widgets.RunMethod(self.converter.convert, path, filedata.jobs, filedata.job, filedata.done)
-        run.step = 100        
+        run.step = 100
         run.pid = self.converter.pid
         self.connect(run.notifier, QtCore.SIGNAL('done()'), self._open_converted, QtCore.Qt.QueuedConnection)
         self.connect(run.notifier, QtCore.SIGNAL('failed(QString)'), self._failed_conversion, QtCore.Qt.QueuedConnection)
         QtCore.QThreadPool.globalInstance().start(run)
         return True
-            
+
     def _open_converted(self):
         self.open_file(self.converter.outpath)
-        
+
     def _failed_conversion(self, error):
         QtGui.QMessageBox.warning(self, _("Failed conversion"), error)
 
