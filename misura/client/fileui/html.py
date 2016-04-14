@@ -30,13 +30,14 @@ def table_from(images,
 
         jobs(len(images), 'Creating images report...')
         html = "<table><tr>"
+        labels = {}
+        for key in characteristic_temperatures.keys():
+                labels[characteristic_temperatures[key]] = key + '<br/><br/'
+
         for index, image in enumerate(images):
                 job(index, 'Creating images report...')
 
                 current_image_temperature = int(image[2])
-                labels = {}
-                for key in characteristic_temperatures.keys():
-                        labels[characteristic_temperatures[key]] = key + '<br/><br/'
 
                 label = labels.get(current_image_temperature, '<br/><br/>')
 
