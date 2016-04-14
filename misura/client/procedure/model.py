@@ -16,7 +16,6 @@ def clean_curve(dat, events=True):
     # Event-based time correction
     time_correction = 0
     for index_row, ent in enumerate(dat):
-        print 'EVENT', index_row, ent
         t, T = ent[:2]
         if None in ent:
             logging.debug('%s %s', 'Skipping row', index_row)

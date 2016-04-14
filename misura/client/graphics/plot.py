@@ -7,7 +7,9 @@ from misura.canon import csutil
 from veuszplot import VeuszPlot
 from PyQt4 import QtGui, QtCore
 
-from .. import iutils, _
+from misura.canon.plugin import default_plot_plugins
+
+from veusz import plugins
 
 qt4 = QtGui
 
@@ -17,6 +19,17 @@ MIN = -10**5
 
 hidden_curves = ['iA', 'iB', 'iC', 'iD', 'xmass', 'ymass']
 
+
+def get_default_plot_plugin_class(instrument_name):
+    plugin_class = plugin.DefaultPlotPlugin
+    plugin_name = default_plot_plugins.get(instrument_name, False)
+    if plugin_name:
+        for cls in plugins.toolspluginregistry:
+            if cls.__name__ == plugin_name:
+                plugin_class = cls
+                break
+    print 'defaultPlot', plugin_class
+    return plugin_class
 
 class Plot(VeuszPlot):
     doc = False
@@ -122,13 +135,18 @@ class Plot(VeuszPlot):
         self.emit(QtCore.SIGNAL('reset()'))
 
     def default_plot(self):
+        dataset_names = self.document.data.keys()
+        if len(dataset_names)==0:
+            return False
         logging.debug(
-            '%s %s', 'APPLY DEFAULT PLOT PLUGIN', self.document.data.keys())
-        p = plugin.DefaultPlotPlugin()
+            '%s %s', 'APPLY DEFAULT PLOT PLUGIN', dataset_names)
+        instrument_name = self.document.data.values()[0].linked.instrument
+        plugin_class = get_default_plot_plugin_class(instrument_name)
+        p = plugin_class()
         r = p.apply(self.cmd, {'dsn': self.document.data.keys()})
         self.curveNames.update(r)
         self.visibleCurves += r.keys()
-        # FIXME: propagate to tree
+        return True
 
     def byTime(self):
         self.plot.setPageNumber(1)

@@ -16,7 +16,7 @@ import veusz.setting as setting
 from veusz import veusz_main
 
 from misura.canon.logger import Log as logging
-from misura.canon.plugin import dataimport, default_plot_plugins, load_rules
+from misura.canon.plugin import dataimport, load_rules
 
 from .. import helpmenu, configure_logger
 
@@ -34,8 +34,10 @@ import veuszplot
 from ..confwidget import RecentMenu, ClientConf
 from .. import iutils
 from ..live import Tasks
+from . import plot
 
 setting.transient_settings['unsafe_mode'] = True
+
 
 class CustomInterface(object):
 
@@ -60,16 +62,9 @@ class CustomInterface(object):
         tb.setObjectName(self.name + 'Toolbar')
         self.mw.addToolBar(QtCore.Qt.TopToolBarArea, tb)
         veusz.utils.addToolbarActions(tb, actions, tuple(actions.keys()))
-        
-    def defaultPlot(self, dataset_names, instrument_name, rule_plot = 'rule_plot'):
-        plugin_class = plugin.DefaultPlotPlugin
-        plugin_name = default_plot_plugins.get(instrument_name, False)
-        if plugin_name:
-            for cls in plugins.toolspluginregistry:
-                if cls.__name__ == plugin_name:
-                    plugin_class = cls
-                    break
-        print 'defaultPlot', plugin_class
+
+    def defaultPlot(self, dataset_names, instrument_name, rule_plot='rule_plot'):
+        plugin_class = plot.get_default_plot_plugin_class(instrument_name)
         p = plugin_class()
         result = p.apply(self.mw.cmd, {'dsn': dataset_names})
         print 'apply', result, dataset_names
@@ -77,6 +72,7 @@ class CustomInterface(object):
         self.mw.plot.actionForceUpdate()
         self.mw.m4.openedFiles.refresh_model()
         return result
+
 
 def misura_import(self, filename, **options):
     """Import misura data from HDF file"""
@@ -87,18 +83,20 @@ def misura_import(self, filename, **options):
     for rule in load_rules:
         if not confdb.has_key(rule):
             continue
-        defaults['rule_load']+= '\n' + confdb[rule]
+        defaults['rule_load'] += '\n' + confdb[rule]
     for k, v in defaults.iteritems():
-        if options.has_key(k): continue
+        if options.has_key(k):
+            continue
         options[k] = v
     # lookup filename
     filename = unicode(filename)
     realfilename = self.findFileOnImportPath(filename)
     logging.debug('%s %s %s', 'open_file:', filename, realfilename)
     print 'misura_import with params', options
-    p = filedata.ImportParamsMisura(filename=realfilename, version=-1, **options)
+    p = filedata.ImportParamsMisura(
+        filename=realfilename, version=-1, **options)
     op = filedata.OperationMisuraImport(p)
-    
+
     self.document.applyOperation(op)
     confdb.mem_file(realfilename, op.measurename)
     dsnames = op.outdatasets
@@ -112,6 +110,7 @@ safe.append(imp)
 document.CommandInterface.safe_commands = safe
 document.CommandInterface.ImportMisura = misura_import
 
+
 def set_data_val(self, dsname, column, row, val):
     """Set dataset `dsname` to `val` in range `row`. row can be a slice in case val is array."""
     op = document.OperationDatasetSetVal(dsname, column, row, val)
@@ -124,11 +123,12 @@ safe.append(imp)
 document.CommandInterface.safe_commands = safe
 document.CommandInterface.SetDataVal = set_data_val
 
+
 def set_data_attr(self, dsname, attrname, val):
     """Set dataset attribute `attrname` to `val`"""
     ds = self.document.data[dsname]
     setattr(ds, attrname, val)
-    print 'setting attr',dsname,attrname,val
+    print 'setting attr', dsname, attrname, val
     op = document.OperationDatasetSet(dsname, ds)
     self.document.applyOperation(op)
 
@@ -138,6 +138,7 @@ safe = list(document.CommandInterface.safe_commands)
 safe.append(imp)
 document.CommandInterface.safe_commands = safe
 document.CommandInterface.SetDataAttr = set_data_attr
+
 
 class MisuraInterface(CustomInterface, QtCore.QObject):
 
@@ -181,25 +182,26 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
 #        ACTIONS
         a = veusz.utils.makeAction
         self.actions = {
-#                        'm4.connect':
-#                            a(self, 'Connect to a misura server', 'Connect',
-#                          self.recentServer.new, icon='m4.connect'),
-                        'm4.open':
-                        a(self, 'Open Local Test File', 'Open File',
-                          self.recentFile.new, icon='m4.open'),
-                        'm4.nav':
-                        a(self, 'Navigator', 'Opened Tests Navigator',
-                          self.hs_navigator, icon='m4.open'),
-                        'm4.conf':
-                        a(self, 'Preferences', 'Preferences',
-                          self.open_conf, icon='m4.conf'),
+            #                        'm4.connect':
+            #                            a(self, 'Connect to a misura server', 'Connect',
+            # self.recentServer.new, icon='m4.connect'),
+            'm4.open':
+            a(self, 'Open Local Test File', 'Open File',
+              self.recentFile.new, icon='m4.open'),
+            'm4.nav':
+            a(self, 'Navigator', 'Opened Tests Navigator',
+              self.hs_navigator, icon='m4.open'),
+            'm4.conf':
+            a(self, 'Preferences', 'Preferences',
+              self.open_conf, icon='m4.conf'),
 
-                        }
+        }
 
         def slotfn(klass):
             return lambda: self.mw.treeedit.slotMakeWidgetButton(klass)
-        #TODO: Find better place for those!
-        for widgettype in []:#  ('datapoint', 'intercept', 'synaxis', 'imagereference'):
+        # TODO: Find better place for those!
+        # ('datapoint', 'intercept', 'synaxis', 'imagereference'):
+        for widgettype in []:
             wc = document.thefactory.getWidgetClass(widgettype)
             slot = slotfn(wc)
             self.mw.treeedit.addslots[wc] = slot
@@ -220,11 +222,11 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
                                                      _('Displays information about Misura'),
                                                      _('About Misura'),
                                                      helpmenu.showAbout)
-        about_misura_action.setIcon(QtGui.QIcon(os.path.join(params.pathArt, 'about.png')))
+        about_misura_action.setIcon(
+            QtGui.QIcon(os.path.join(params.pathArt, 'about.png')))
 
         self.mw.menuBar().actions()[-1].menu().addAction(about_misura_action)
 
-    
     def open_conf(self):
         self.cc = ClientConf()
         self.cc.show()
@@ -240,13 +242,12 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         if self.openedFiles.model().page.startswith(page.path):
             logging.debug('Not updating page %s', page.path)
             return
-        logging.debug('MisuraInterface.update_page %s %s', self.openedFiles.model().page, page.path)
+        logging.debug(
+            'MisuraInterface.update_page %s %s', self.openedFiles.model().page, page.path)
         self.openedFiles.model().set_page(page.path)
         logging.debug('%s', 'done model.set_page')
         self.connect(
             self.mw.plot, QtCore.SIGNAL("sigUpdatePage"), self.update_page)
-
-
 
     def nav_select(self, path):
         """Collect selection signals from the navigators and route them to the widgets tree"""
@@ -291,6 +292,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
 
     def liveImport(self, filename, options={}):
         """Import misura data and do the default plotting"""
+        print 'liveImport', filename
         self.mw.document.suspendUpdates()
         dataset_names, instrument_name = self.open_file(filename, **options)
         self.defaultPlot(dataset_names, instrument_name)
@@ -305,7 +307,8 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         filename = unicode(filename)
         logging.debug('importing misura with defaults', filename)
         Tasks.instance().removeStorageAndRemoteTabs()
-        dsnames, instrument_name = self.mw.cmd.ImportMisura(filename, **options)
+        dsnames, instrument_name = self.mw.cmd.ImportMisura(
+            filename, **options)
         self.openedFiles.refresh_model()
         return dsnames, instrument_name
 
@@ -324,6 +327,7 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
         self.menu.addMenu(self.recentDatabase)
 
     m3db = False
+
     def open_database(self, path):
         if self.m3db:
             self.m3db.hide()
@@ -344,15 +348,13 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
         dataset_names, instrument_name = self.open_file(filename)
         self.defaultPlot(dataset_names, instrument_name)
 
-
     def open_file(self, filename, **options):
         """Import misura data from HDF file"""
         # lookup filename
         filename = unicode(filename)
-        dsnames, instrument_name = self.mw.cmd.ImportMisura(filename, **options)
+        dsnames, instrument_name = self.mw.cmd.ImportMisura(
+            filename, **options)
         return dsnames, instrument_name
-
-
 
 
 class Graphics(MainWindow):
@@ -386,7 +388,8 @@ class Graphics(MainWindow):
         self.m3 = Misura3Interface(self)
         self.datadock.hide()
 
-        self.plot.doPick = lambda mouse_position: plugin.InterceptPlugin.clicked_curve(mouse_position, self)
+        self.plot.doPick = lambda mouse_position: plugin.InterceptPlugin.clicked_curve(
+            mouse_position, self)
         self.setWindowIcon(veusz.utils.getIcon('m4.icon'))
 
     def setupDefaultDoc(self):
@@ -396,7 +399,8 @@ class Graphics(MainWindow):
         self.loadDefaultCustomDefinitions()
 
     def updateTitlebar(self):
-        filename = 'Untitled' if self.filename == '' else os.path.basename(self.filename)
+        filename = 'Untitled' if self.filename == '' else os.path.basename(
+            self.filename)
         self.setWindowTitle(_('%s - Misura') % filename)
 
 

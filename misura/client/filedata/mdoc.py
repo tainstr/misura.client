@@ -1,12 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
-from misura.canon.logger import Log as logging
 from time import sleep
-from PyQt4 import QtCore
 import threading
 
+from PyQt4 import QtCore
+
 import veusz.document as document
+
+from misura.canon.logger import Log as logging
+from misura.canon.plugin import load_rules
 
 from operation import OperationMisuraImport, ImportParamsMisura
 from proxy import getFileProxy
@@ -88,14 +91,17 @@ class MisuraDocument(document.Document):
             self.reloading = False
             return []
         logging.debug('%s %s', 'Reloading Data', self.filename)
-
+        rule_load = confdb['rule_load'] + '\n' + confdb['rule_plot']
+        for rule in load_rules:
+            if not confdb.has_key(rule):
+                continue
+            rule_load += '\n' + confdb[rule]
         op = OperationMisuraImport(
             ImportParamsMisura(filename=self.filename,
                                time_interval=self.interval,
                                rule_exc=confdb['rule_exc'],
                                rule_inc=confdb['rule_inc'],
-                               rule_load=confdb[
-                                   'rule_load'] + '\n' + confdb['rule_plot'],
+                               rule_load=rule_load,
                                rule_unit=confdb['rule_unit'])
         )
         logging.debug('%s', 'apply operation')
