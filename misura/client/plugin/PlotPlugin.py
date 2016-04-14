@@ -27,9 +27,9 @@ bounded_axes = {'odlt': {'camA': 'Dil', 'camB': 'Dil', 'const': 'pos'},
                 'flex': {'camA': 'Flex', 'const': 'pos'},
                 'hsm': {},
                 'kiln': {},
-                'flash': {name: 'Diffusivity' for name in ('halftime', 'parker', 'koski', 
+                'flash': {name: 'Diffusivity' for name in ('halftime', 'parker', 'koski',
                                                            'heckman', 'cowan5', 'cowan10',
-                                                           'clarkTaylor1', 'clarkTaylor2', 
+                                                           'clarkTaylor1', 'clarkTaylor2',
                                                            'clarkTaylor3', 'degiovanni')}
                 }
 
@@ -119,7 +119,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         obj = gobj.getChild(name)
         n = len(doc.data[yData].data)
-        thin = int(max(1, n/100))
+        thin = int(max(1, n / 100))
         if n > 10:
             self.toset(obj, 'marker', u'none')
         else:
@@ -230,7 +230,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             if not hasattr(ds, 'm_smp'):
                 logging.debug('%s %s', 'Retrieving ent', y)
                 ds = doc.ent.get(y, False)
-            
+
             # Get the curve and axis name
             cname, ax_name, ax_lbl = dataset_curve_name(ds, y)
 
@@ -267,12 +267,12 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
     # text to appear in dialog box
     description_full = 'Default plot for Misura datasets'
 
-    def __init__(self, dsn = [], rule_plot = 'rule_plot'):
+    def __init__(self, dsn=[], rule=''):
         """Make list of fields."""
 
         self.fields = [
             plugins.FieldDatasetMulti("dsn", 'Dataset names'),
-            plugins.FieldText("rule_plot", 'Autoplot rule', default = rule_plot)
+            plugins.FieldText("rule", 'Plotting rule', default=rule)
         ]
 
     def apply(self, cmd, fields):
@@ -283,8 +283,7 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
         self.doc = cmd.document
         dsn = fields['dsn']
         vars = []
-        autoplot_rule = fields.get('rule_plot', 'rule_plot')
-        rp = confdb[autoplot_rule].replace('\n', '|')
+        rp = fields['rule'].replace('\n', '|')
         if len(rp) > 0:
             rp = re.compile(rp)
         else:
@@ -297,7 +296,7 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
             logging.debug('%s %s %s', 'Checking', ds, var)
             if rp and rp.search(ds1):
                 vars.append(ds)
-                
+
         vars = sorted(vars)
         logging.debug('%s %s', "VARS", vars)
         xt = []
@@ -308,8 +307,9 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
             prefix = ''
             if ':' in ds:
                 prefix, ds1 = ds.split(':')
-                prefix+=':'
-            timeds = axis_selection.get_best_x_for(ds, prefix, self.doc.data, '/time/time')
+                prefix += ':'
+            timeds = axis_selection.get_best_x_for(
+                ds, prefix, self.doc.data, '/time/time')
             if timeds:
                 yt.append(ds)
                 xt.append(timeds)
@@ -317,11 +317,12 @@ class DefaultPlotPlugin(plugins.ToolsPlugin):
                 print 'NO TIMEDS FOUND FOR', ds
 
             if not axis_selection.is_temperature(ds):
-                ds_temperature = axis_selection.get_best_x_for(ds, prefix, self.doc.data, '/temperature/temp')
+                ds_temperature = axis_selection.get_best_x_for(
+                    ds, prefix, self.doc.data, '/temperature/temp')
                 if ds_temperature:
                     xT.append(ds_temperature)
                     yT.append(ds)
-        
+
         result = PlotDatasetPlugin().apply(
             cmd, {'x': xt, 'y': yt, 'currentwidget': '/time/time'})
         result.update(PlotDatasetPlugin().apply(

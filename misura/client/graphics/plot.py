@@ -2,12 +2,16 @@
 # -*- coding: utf-8 -*-
 """Simple plotting for browser and live acquisition."""
 from misura.canon.logger import Log as logging
-from misura.client import plugin
 from misura.canon import csutil
+from misura.canon.plugin import default_plot_plugins, default_plot_rules
+
+from .. import plugin
+from ..clientconf import confdb
+
 from veuszplot import VeuszPlot
 from PyQt4 import QtGui, QtCore
 
-from misura.canon.plugin import default_plot_plugins
+
 
 from veusz import plugins
 
@@ -29,7 +33,9 @@ def get_default_plot_plugin_class(instrument_name):
                 plugin_class = cls
                 break
     print 'defaultPlot', plugin_class
-    return plugin_class
+    plot_rule_name = default_plot_rules.get(instrument_name, 'rule_plot')
+    return plugin_class, plot_rule_name
+
 
 class Plot(VeuszPlot):
     doc = False
@@ -141,9 +147,10 @@ class Plot(VeuszPlot):
         logging.debug(
             '%s %s', 'APPLY DEFAULT PLOT PLUGIN', dataset_names)
         instrument_name = self.document.data.values()[0].linked.instrument
-        plugin_class = get_default_plot_plugin_class(instrument_name)
+        plugin_class, plot_rule_name = get_default_plot_plugin_class(instrument_name)
+        print 'default_plot', plugin_class, plot_rule_name
         p = plugin_class()
-        r = p.apply(self.cmd, {'dsn': self.document.data.keys()})
+        r = p.apply(self.cmd, {'dsn': self.document.data.keys(), 'rule': confdb[plot_rule_name]})
         self.curveNames.update(r)
         self.visibleCurves += r.keys()
         return True

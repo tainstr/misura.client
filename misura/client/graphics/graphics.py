@@ -63,10 +63,12 @@ class CustomInterface(object):
         self.mw.addToolBar(QtCore.Qt.TopToolBarArea, tb)
         veusz.utils.addToolbarActions(tb, actions, tuple(actions.keys()))
 
-    def defaultPlot(self, dataset_names, instrument_name, rule_plot='rule_plot'):
-        plugin_class = plot.get_default_plot_plugin_class(instrument_name)
+    def defaultPlot(self, dataset_names, instrument_name):
+        plugin_class, plot_rule_name = plot.get_default_plot_plugin_class(instrument_name)
+        print 'defaultPlot', plugin_class, plot_rule_name
         p = plugin_class()
-        result = p.apply(self.mw.cmd, {'dsn': dataset_names})
+        result = p.apply(self.mw.cmd, {'dsn': dataset_names, 
+                                       'rule': confdb[plot_rule_name]})
         print 'apply', result, dataset_names
         self.mw.document.enableUpdates()
         self.mw.plot.actionForceUpdate()
