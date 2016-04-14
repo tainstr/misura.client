@@ -12,6 +12,21 @@ import utils
 # TODO: Estendere a tutte le opzioni di tipo Meta.
 m4shapes = ['Sintering', 'Softening', 'Sphere', 'HalfSphere', 'Melting']
 
+standards = {'Misura4': '', 'Misura3': 'm3_', 'CEN/TS': 'cen_'}
+
+standard_filtering_predicates = {
+    'Misura4': lambda shape_name: not '_' in shape_name,
+    'Misura3': lambda shape_name: shape_name.startswith('m3_'),
+    'CEN/TS': lambda shape_name: shape_name.startswith('cen_'),
+}
+
+def remove_prefix(shape_name):
+    prefix = shape_name.split('_')[0]
+
+    if prefix == shape_name:
+        return shape_name
+
+    return shape_name.replace('_', '').replace(prefix, '')
 
 class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
@@ -31,7 +46,11 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.fields = [
             FieldMisuraNavigator(
                 "sample", descr="Target sample:", depth='sample', default=sample),
-            plugins.FieldText('text', 'Label text', default=text)
+            plugins.FieldText('text', 'Label text', default=text),
+            plugins.FieldCombo('characteristic_shape_standard',
+                               descr='Standard',
+                               default='Misura4',
+                               items=standards.keys())
         ]
 
     def apply(self, cmd, fields):
@@ -74,10 +93,16 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         logging.debug('%s %s %s', 'Found sample path', smpp, p)
         smp = conf.toPath(smpp)
         logging.debug('%s %s', 'config', smp)
+
+        filter_shape = standard_filtering_predicates[fields['characteristic_shape_standard']]
         for shape, opt in smp.describe().iteritems():
             if opt['type'] != 'Meta':
                 continue
-            txt = str(fields['text']).replace('$shape$', shape)
+
+            if not filter_shape(shape):
+                continue
+
+            txt = str(fields['text']).replace('$shape$', remove_prefix(shape))
             pt = opt['current']
             t = pt['time']
             T = pt['temp']
