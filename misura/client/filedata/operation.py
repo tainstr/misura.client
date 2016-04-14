@@ -188,6 +188,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
     rule_load = False
     _rule_load = False
     rule_unit = False
+    instrument = False
 
     def __init__(self, params):
         """Create an import operation on the filename. Update defines if keep old data or completely wipe it."""
@@ -278,6 +279,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         LF.conf = conf
         instr = conf['runningInstrument']
         LF.instrument = instr
+        self.instrument = instr
         self.instrobj = getattr(conf, instr)
         LF.instr = self.instrobj
         # get the prefix from the test title

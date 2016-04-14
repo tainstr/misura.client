@@ -3,22 +3,24 @@
 """Applicazione di grafica basata su Veusz"""
 # Librerie generali
 import os
-from misura.canon.logger import Log as logging
+
 import sip
 sip.setapi('QString', 2)
 from PyQt4 import QtGui, QtCore
+
 # Veusz libraries
 import veusz.utils
 from veusz.windows.mainwindow import MainWindow
 import veusz.document as document
-
 import veusz.setting as setting
 from veusz import veusz_main
 
-from misura.canon.plugin import dataimport
-from misura.client import helpmenu, configure_logger
+from misura.canon.logger import Log as logging
+from misura.canon.plugin import dataimport, default_plot_plugins, load_rules
 
+from .. import helpmenu, configure_logger
 
+from ..filedata import MisuraDocument
 from .. import _
 from .. import misura3
 from .. import filedata
@@ -34,9 +36,6 @@ from .. import iutils
 from ..live import Tasks
 
 setting.transient_settings['unsafe_mode'] = True
-
-
-
 
 class CustomInterface(object):
 
@@ -61,7 +60,23 @@ class CustomInterface(object):
         tb.setObjectName(self.name + 'Toolbar')
         self.mw.addToolBar(QtCore.Qt.TopToolBarArea, tb)
         veusz.utils.addToolbarActions(tb, actions, tuple(actions.keys()))
-
+        
+    def defaultPlot(self, dataset_names, instrument_name, rule_plot = 'rule_plot'):
+        plugin_class = plugin.DefaultPlotPlugin
+        plugin_name = default_plot_plugins.get(instrument_name, False)
+        if plugin_name:
+            for cls in plugins.toolspluginregistry:
+                if cls.__name__ == plugin_name:
+                    plugin_class = cls
+                    break
+        print 'defaultPlot', plugin_class
+        p = plugin_class()
+        result = p.apply(self.mw.cmd, {'dsn': dataset_names})
+        print 'apply', result, dataset_names
+        self.mw.document.enableUpdates()
+        self.mw.plot.actionForceUpdate()
+        self.mw.m4.openedFiles.refresh_model()
+        return result
 
 def misura_import(self, filename, **options):
     """Import misura data from HDF file"""
@@ -69,6 +84,10 @@ def misura_import(self, filename, **options):
                 'rule_inc': confdb['rule_inc'],
                 'rule_load': confdb['rule_load'] + '\n' + confdb['rule_plot'],
                 'rule_unit': confdb['rule_unit']}
+    for rule in load_rules:
+        if not confdb.has_key(rule):
+            continue
+        defaults['rule_load']+= '\n' + confdb[rule]
     for k, v in defaults.iteritems():
         if options.has_key(k): continue
         options[k] = v
@@ -79,12 +98,12 @@ def misura_import(self, filename, **options):
     print 'misura_import with params', options
     p = filedata.ImportParamsMisura(filename=realfilename, version=-1, **options)
     op = filedata.OperationMisuraImport(p)
-
+    
     self.document.applyOperation(op)
     confdb.mem_file(realfilename, op.measurename)
     dsnames = op.outdatasets
     logging.debug('Imported datasets %s' % (' '.join(dsnames), ))
-    return dsnames
+    return dsnames, op.instrument
 
 # Add the ImportMisura command to the CommandInterface class
 imp = 'ImportMisura'
@@ -205,10 +224,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
 
         self.mw.menuBar().actions()[-1].menu().addAction(about_misura_action)
 
-
-
-
-
+    
     def open_conf(self):
         self.cc = ClientConf()
         self.cc.show()
@@ -273,18 +289,11 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
             self.liveImport(f, options=self.imd.options)
         self.imd.close()
 
-    def defaultPlot(self, dsn, rule_plot = 'rule_plot'):
-        p = plugin.DefaultPlotPlugin()
-        p.apply(self.mw.cmd, {'dsn': dsn, 'rule_plot':rule_plot})
-
     def liveImport(self, filename, options={}):
         """Import misura data and do the default plotting"""
         self.mw.document.suspendUpdates()
-        dsn = self.open_file(filename, **options)
-        self.defaultPlot(dsn)
-        self.mw.document.enableUpdates()
-        self.mw.plot.actionForceUpdate()
-        self.openedFiles.refresh_model()
+        dataset_names, instrument_name = self.open_file(filename, **options)
+        self.defaultPlot(dataset_names, instrument_name)
 
     def convert_file(self, path):
         outpath = dataimport.convert_file(path)
@@ -296,9 +305,9 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         filename = unicode(filename)
         logging.debug('importing misura with defaults', filename)
         Tasks.instance().removeStorageAndRemoteTabs()
-        dsnames = self.mw.cmd.ImportMisura(filename, **options)
+        dsnames, instrument_name = self.mw.cmd.ImportMisura(filename, **options)
         self.openedFiles.refresh_model()
-        return dsnames
+        return dsnames, instrument_name
 
 
 class Misura3Interface(CustomInterface, QtCore.QObject):
@@ -332,22 +341,18 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
     def liveImport(self, filename):
         """Import and plot default datasets. Called upon user request"""
         self.mw.document.suspendUpdates()
-        dsn = self.open_file(filename)
-        p = plugin.DefaultPlotPlugin()
-        p.apply(self.mw.cmd, {'dsn': dsn, 'rule_plot': 'rule_plot'})
-        self.mw.document.enableUpdates()
-        self.mw.plot.actionForceUpdate()
-        self.mw.m4.openedFiles.refresh_model()
+        dataset_names, instrument_name = self.open_file(filename)
+        self.defaultPlot(dataset_names, instrument_name)
+
 
     def open_file(self, filename, **options):
         """Import misura data from HDF file"""
         # lookup filename
         filename = unicode(filename)
-        dsnames = self.mw.cmd.ImportMisura(filename, **options)
-        return dsnames
+        dsnames, instrument_name = self.mw.cmd.ImportMisura(filename, **options)
+        return dsnames, instrument_name
 
 
-from misura.client.filedata import MisuraDocument
 
 
 class Graphics(MainWindow):
