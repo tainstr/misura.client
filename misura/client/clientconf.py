@@ -13,7 +13,7 @@ from ..canon import option
 from ..canon import csutil
 from ..canon.option import ao
 from ..canon.indexer import Indexer
-from ..canon.plugin import additional_client_configurations
+from ..canon.plugin import clientconf_update_functions
 import units
 
 import parameters as params
@@ -529,14 +529,9 @@ def data_import(confdb):
         except:
             print_exc()
     # Add client configurations defined in 3rd parties
-    print 'updating clientconf',additional_client_configurations
-    for handle, coded_opt in additional_client_configurations.iteritems():
-        if handle not in confdb.desc:
-            confdb.desc[handle] = coded_opt
-        else:                 
-            saved_opt = option.Option(**coded_opt)
-            saved_opt.migrate_from(coded_opt)
-            confdb.desc[handle] = saved_opt
+    print 'updating clientconf', clientconf_update_functions
+    for update_func in clientconf_update_functions:
+        update_func(confdb)
 
 settings = QtCore.QSettings(
     QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope, 'Expert System Solutions', 'Misura 4')
