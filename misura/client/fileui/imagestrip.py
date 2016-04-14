@@ -11,6 +11,33 @@ from ...canon import csutil
 from ..filedata import job, jobs, done
 from ..widgets import RunMethod
 
+standards = ('Misura4', 'Misura3', 'CEN/TS')
+
+def get_shapes(sample, standard):
+    all_shapes = {
+        'Misura4': {
+            'Sintering': sample['Sintering'],
+            'Softening': sample['Softening'],
+            'Sphere': sample['Sphere'],
+            'Halfsphere': sample['HalfSphere'],
+            'Melting': sample['Melting'],
+        },
+        'Misura3': {
+            'Sintering': sample['m3_Sintering'],
+            'Softening': sample['m3_Softening'],
+            'Sphere': sample['m3_Sphere'],
+            'Halfsphere': sample['m3_HalfSphere'],
+            'Melting': sample['m3_Melting'],
+        },
+        'CEN/TS': {
+            'Sintering': sample['cen_Sintering'],
+            'Deformation': sample['cen_Deformation'],
+            'Emisphere': sample['cen_Emisphere'],
+            'Flow': sample['cen_Flow'],
+        }
+    }
+    return all_shapes[standard]
+
 class ImageStrip(QtGui.QWidget):
 
     """Image strip"""
@@ -40,6 +67,13 @@ class ImageStrip(QtGui.QWidget):
         self.menu.addAction("Export Images", self.export_images)
 
     def export_images(self):
+        standard, ok = QtGui.QInputDialog.getItem(self,
+                                                  'Choose standard to show',
+                                                  'Standard',
+                                                  standards)
+        if not ok:
+            return
+
         output_filename = QtGui.QFileDialog.getSaveFileName(self,
                                                             'Save Report',
                                                             '',
@@ -53,19 +87,16 @@ class ImageStrip(QtGui.QWidget):
         instrument = getattr(self.decoder.proxy.conf, instrument_name)
         sample = getattr(instrument, sample_name)
 
-        characteristic_shapes = {
-            'Sintering': sample['Sintering'],
-            'Softening': sample['Softening'],
-            'Sphere': sample['Sphere'],
-            'Halfsphere': sample['HalfSphere'],
-            'Melting': sample['Melting'],
-            }
+        characteristic_shapes = get_shapes(sample, standard)
 
-        output_html = htmlreport.create_images_report(self.decoder,
-                                        instrument.measure,
-                                        self.doc.data['0:t'].data,
-                                        self.doc.data.get('0:kiln/T').data,
-                                        characteristic_shapes)
+        output_html = htmlreport.create_images_report(
+            self.decoder,
+            instrument.measure,
+            self.doc.data['0:t'].data,
+            self.doc.data.get('0:kiln/T').data,
+            characteristic_shapes,
+            standard=standard
+        )
 
 
         with open(output_filename, 'w') as output_file:

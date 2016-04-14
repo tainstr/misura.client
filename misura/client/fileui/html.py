@@ -24,11 +24,7 @@ def embed_with_labels(data,
 def table_from(images,
                type='gif',
                images_per_line=5,
-               sintering_temp=None,
-               softening_temp=None,
-               sphere_temp=None,
-               half_sphere_temp=None,
-               melting_temp=None,
+               characteristic_temperatures={},
                jobs=lambda *x: None,
                job=lambda *x: None):
 
@@ -38,13 +34,11 @@ def table_from(images,
                 job(index, 'Creating images report...')
 
                 current_image_temperature = int(image[2])
-                label = {
-                        sintering_temp: 'Sintering<br/><br/>',
-                        softening_temp: 'Softening<br/><br/>',
-                        sphere_temp: 'Sphere<br/><br/>',
-                        half_sphere_temp: 'Half Sphere<br/><br/>',
-                        melting_temp: 'Melting<br/><br/>'
-                }.get(current_image_temperature, '<br/><br/>')
+                labels = {}
+                for key in characteristic_temperatures.keys():
+                        labels[characteristic_temperatures[key]] = key + '<br/><br/'
+
+                label = labels.get(current_image_temperature, '<br/><br/>')
 
                 html = html + "<td>%s</td>" % embed_with_labels(image[0],
                                                                 image[1],

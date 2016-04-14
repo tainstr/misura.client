@@ -11,6 +11,7 @@ def create_images_report(decoder,
                          time_data,
                          temperature_data,
                          characteristic_shapes,
+                         standard='Misura4',
                          jobs=lambda *x: None,
                          job=lambda *x: None,
                          done=lambda *x: None):
@@ -34,21 +35,15 @@ def create_images_report(decoder,
             last_temperature = image_temperature
             image_count += 1
 
+    characteristic_temperatures = {}
 
-    sintering_temp = to_int(characteristic_shapes['Sintering']['temp'])
-    softening_temp = to_int(characteristic_shapes['Softening']['temp'])
-    sphere_temp = to_int(characteristic_shapes['Sphere']['temp'])
-    half_sphere_temp = to_int(characteristic_shapes['Halfsphere']['temp'])
-    melting_temp = to_int(characteristic_shapes['Melting']['temp'])
+    for shape in characteristic_shapes.keys():
+        characteristic_temperatures[shape] = to_int(characteristic_shapes[shape]['temp'])
 
     images_table_html = html.table_from(all_images_data,
                                         'png',
                                         5,
-                                        sintering_temp,
-                                        softening_temp,
-                                        sphere_temp,
-                                        half_sphere_temp,
-                                        melting_temp,
+                                        characteristic_temperatures,
                                         jobs,
                                         job)
 
