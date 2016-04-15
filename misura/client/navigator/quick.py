@@ -4,18 +4,8 @@
 from misura.canon.logger import Log as logging
 from misura.canon.plugin.domains import node, nodes
 
-from veusz.dialogs.plugin import PluginDialog
-from veusz import document
-
-from PyQt4.QtCore import Qt
-from PyQt4 import QtGui, QtCore
-
-import functools
-from .. import _
-from ..filedata import MisuraDocument
 from ..filedata import OperationMisuraImport
 from ..filedata import DatasetEntry
-from ..filedata import getFileProxy
 from .. import axis_selection
 import numpy as np
 
@@ -34,7 +24,16 @@ class QuickOps(object):
         if self._mainwindow is False:
             return self
         return self._mainwindow
-
+    
+    def get_page_number_from_path(self, page_name):
+        # Search current page
+        page_num = -1
+        for wg in self.doc.basewidget.children:
+            page_num += 1
+            if wg.name == page_name:
+                return page_num
+        return -1
+            
 
     @node
     def deleteChildren(self, node=False):
