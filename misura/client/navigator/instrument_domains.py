@@ -173,7 +173,7 @@ class FlexSampleNavigatorDomain(NavigatorDomain):
     def add_sample_menu(self, menu, node): 
         menu.addAction(_('Report'), self.report)
         return True
-    
-navigator_domains.update((MicroscopeSampleNavigatorDomain, 
-           HorizontalSampleNavigatorDomain, VerticalSampleNavigatorDomain, 
-           FlexSampleNavigatorDomain,))
+     
+navigator_domains += [MicroscopeSampleNavigatorDomain,
+            HorizontalSampleNavigatorDomain, VerticalSampleNavigatorDomain,  
+            FlexSampleNavigatorDomain]

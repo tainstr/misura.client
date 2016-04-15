@@ -6,6 +6,7 @@ import functools
 from misura.canon.logger import Log as logging
 from misura.canon.plugin import navigator_domains, NavigatorDomain, node, nodes
 
+from .. import conf
 from veusz.dialogs.plugin import PluginDialog
 
 from PyQt4 import QtGui
@@ -21,6 +22,10 @@ ism = isinstance
 
     
 class DataNavigatorDomain(NavigatorDomain):
+    
+    def __init__(self, *a, **k):
+        super(DataNavigatorDomain, self).__init__(*a, **k)
+        self.configuration_windows = {}
         
     @node
     def change_rule(self, node=False, act=0):
@@ -151,14 +156,37 @@ class DataNavigatorDomain(NavigatorDomain):
             r = r[0]
         if r > 0:
             self.act_rule[r - 1].setChecked(True)
+            
+    
+    @node
+    def configure(self, node):
+        """Show node configuration panel"""
+        path = node.path.split(':')[-1]
+        configuration_proxy = node.linked.conf
+        if '/' in path:
+            configuration_proxy = configuration_proxy.toPath(path)
+        
+        win = conf.TreePanel(configuration_proxy, select=configuration_proxy)
+        win.setWindowTitle('Configuration tree from: %s' % configuration_proxy['name'])
+        win.show()
+        self.configuration_windows[path] = win
+        
+    def add_configuration(self, menu, node):
+        if node.linked and hasattr(node.linked, 'conf'):
+            menu.addAction(_('Configure'), self.configure)       
         
     def add_file_menu(self, menu, node):
         menu.addAction(_('View'), self.viewFile)
         menu.addAction(_('Reload'), self.reloadFile)
         menu.addAction(_('Close'), self.closeFile)
+        self.add_configuration(menu, node)
         return True
+    
+    def add_group_menu(self, menu, node):
+        self.add_configuration(menu, node)
         
     def add_sample_menu(self, menu, node):
+        self.add_configuration(menu, node)
         menu.addAction(_('Delete'), self.navigator.deleteChildren)
         return True
              
@@ -174,6 +202,7 @@ class DataNavigatorDomain(NavigatorDomain):
     def add_derived_dataset_menu(self, menu, node):
         self.add_keep(menu, node)
         menu.addAction(_('Delete'), self.navigator.deleteData)
+        
         # menu.addAction(_('Overwrite parent'), self.overwrite)
         
     def add_multiary_menu(self, menu, nodes):
@@ -479,4 +508,4 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
         self.add_unit(menu, node)
         
         
-navigator_domains.update((PlottingNavigatorDomain, MathNavigatorDomain, DataNavigatorDomain,))
+navigator_domains += PlottingNavigatorDomain, MathNavigatorDomain, DataNavigatorDomain

@@ -33,9 +33,12 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.setIconSize(QtCore.QSize(24, 16))
         self.connect(self, QtCore.SIGNAL('clicked(QModelIndex)'), self.select)
         self.domains = []
-        
+        done = set([])
         for domain in navigator_domains:
+            if domain in done:
+                continue
             self.domains.append(domain(self))
+            done.add(domain)
         # Menu creation
         if menu:
             self.setContextMenuPolicy(Qt.CustomContextMenu)
