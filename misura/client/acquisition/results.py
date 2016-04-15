@@ -35,4 +35,4 @@ class Results(QtGui.QTabWidget):
         self.addTab(self.plot.treeedit, 'Objects')
         self.addTab(self.console, 'Console')
 
-        self.navigator.resizeColumnToContents(0)
+        #self.navigator.resizeColumnToContents(0)

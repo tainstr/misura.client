@@ -96,6 +96,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.set_status()
         self.doc.signalModified.connect(self.refresh_model)
+        if self.ncols>1:
+            self.setColumnWidth(0, 400)
 
     def update_view(self):
         self.model().refresh(True)
