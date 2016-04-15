@@ -6,7 +6,6 @@ from misura.canon.logger import Log as logging
 
 from .. import iutils, _
 import re
-from misura.client import widgets
 from misura.client.clientconf import settings
 # TODO: these functions should be generalized and applied also by the
 # navigator. THey should also present data in hierarchy (not plain).
@@ -21,12 +20,21 @@ class SummaryModel(QtCore.QAbstractTableModel):
 
     def __init__(self, *a, **k):
         QtCore.QAbstractTableModel.__init__(self, *a, **k)
+        self.auto_load = True
 
     def set_doc(self, doc):
         self.doc = doc
         self._loaded = []
         self._rowCount = 0
         self.update()
+
+    def set_loaded(self, loaded):
+        if set(loaded) != set(self._loaded):
+            self._loaded = loaded
+            self.emit(QtCore.SIGNAL('headerDataChanged(int,int,int)'),
+                      QtCore.Qt.Horizontal, 0, len(loaded))
+            return True
+        return False
 
     @property
     def model(self):
@@ -41,26 +49,25 @@ class SummaryModel(QtCore.QAbstractTableModel):
         self.update()
 
     def update(self):
+        r = False
         # New rows length
         start = self._rowCount
         end = len(self.doc.data.get('0:t', []))
         # New header (lists all loaded columns/non-zero)
-        ldd = []
-        for k, ds in self.doc.data.iteritems():
-            if len(ds) > 0:
-                ldd.append(k)
-        r = False
+        if self.auto_load:
+            ldd = []
+            for k, ds in self.doc.data.iteritems():
+                if len(ds) > 0:
+                    ldd.append(k)
+            r = self.set_loaded(ldd)
+        # Update length
         if start != end:
-            self.emit(QtCore.SIGNAL(
-                'rowsInserted(QModelIndex,int,int)'), self.index(0, 0), start, end)
+            self.emit(QtCore.SIGNAL('rowsInserted(QModelIndex,int,int)'),
+                      self.index(0, 0), start, end)
             r = True
-        if set(ldd) != set(self._loaded):
-            self._loaded = ldd
-            self.emit(QtCore.SIGNAL('headerDataChanged(int,int,int)'),
-                      QtCore.Qt.Horizontal, 0, len(ldd))
-            r = True
-        if r and not self.model.paused:
+        if r:
             self.emit(QtCore.SIGNAL('modelReset()'))
+        return r
 
     def columnCount(self, parent):
         return len(self._loaded)
@@ -92,9 +99,9 @@ class SummaryModel(QtCore.QAbstractTableModel):
     def rowCount(self, parent):
         if not self.doc:
             return 0
-        if not self.doc.data.has_key('0:t'):
+        if not self.doc.data.has_key(self._loaded[0]):
             return 0
-        self._rowCount = len(self.doc.data['0:t'].data)
+        self._rowCount = len(self.doc.data[self._loaded[0]].data)
         return self._rowCount
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
@@ -236,7 +243,7 @@ class SummaryView(QtGui.QTableView):
 
     def update(self):
         self.model().update()
-        
+
     def showEvent(self, event):
         self.update()
         return super(SummaryView, self).showEvent(event)

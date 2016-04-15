@@ -26,6 +26,7 @@ class DataNavigatorDomain(NavigatorDomain):
     def __init__(self, *a, **k):
         super(DataNavigatorDomain, self).__init__(*a, **k)
         self.configuration_windows = {}
+        self.data_tables = {}
         
     @node
     def change_rule(self, node=False, act=0):
@@ -169,6 +170,7 @@ class DataNavigatorDomain(NavigatorDomain):
         win = conf.TreePanel(configuration_proxy, select=configuration_proxy)
         win.setWindowTitle('Configuration tree from: %s' % configuration_proxy['name'])
         win.show()
+        # Keep a reference for Qt
         self.configuration_windows[path] = win
         
     def add_configuration(self, menu, node):
@@ -180,6 +182,12 @@ class DataNavigatorDomain(NavigatorDomain):
         menu.addAction(_('Reload'), self.reloadFile)
         menu.addAction(_('Close'), self.closeFile)
         self.add_configuration(menu, node)
+        if len(self.data_tables):
+            tab_menu = menu.addMenu('Tables')
+            for tab_name, tab_window in self.data_tables.iteritems():
+                if len(tab_name)>30:
+                    tab_name = tab_name[:30] + '...'
+                tab_menu.addAction(tab_name, tab_window.show)
         return True
     
     def add_group_menu(self, menu, node):
@@ -202,10 +210,29 @@ class DataNavigatorDomain(NavigatorDomain):
     def add_derived_dataset_menu(self, menu, node):
         self.add_keep(menu, node)
         menu.addAction(_('Delete'), self.navigator.deleteData)
-        
         # menu.addAction(_('Overwrite parent'), self.overwrite)
         
+    def create_table(self, header):
+        from misura.client.fileui import SummaryView
+        tab = SummaryView(self.navigator)
+        tab.set_doc(self.doc)
+        tab.model().auto_load = False
+        tab.model().set_loaded(header)
+        tab.show()
+        tab_name = ' '.join(header)
+        # Keep a reference for Qt
+        self.data_tables[tab_name] = tab
+             
+    @nodes
+    def get_table_header(self, nodes):
+        header = [node.path for node in nodes]
+        header = filter(lambda path: path in self.doc.data, header)  
+        return header      
+        
     def add_multiary_menu(self, menu, nodes):
+        header = self.get_table_header()
+        if len(header):
+            menu.addAction(_('Table from selection'), functools.partial(self.create_table, header))
         menu.addAction(_('Delete selection'), self.navigator.deleteDatas)
         
 from ..clientconf import confdb
