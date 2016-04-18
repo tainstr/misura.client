@@ -28,7 +28,7 @@ class TestWindow(acquisition.MainWindow):
 # 			d=self.doc.decoders['/dat/'+pic.role]
 # 			pic.setFrameProcessor(d)
 
-        self.graphWin.show()
+        self.graphWin.showMaximized()
 # 		self.summaryPlot.default_plot()
         self.removeToolBar(self.controls)
         self.connect(self.play, QtCore.SIGNAL('set_idx(int)'), self.set_idx)
