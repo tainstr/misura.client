@@ -6,7 +6,7 @@ import functools
 from misura.canon.logger import Log as logging
 from misura.canon.plugin import navigator_domains, NavigatorDomain, node, nodes
 
-from .. import conf
+from .. import conf, units
 from veusz.dialogs.plugin import PluginDialog
 
 from PyQt4 import QtGui
@@ -16,8 +16,6 @@ from .. import _
 from ..filedata import MisuraDocument
 from ..filedata import DatasetEntry
 from ..filedata import getFileProxy
-
-ism = isinstance
 
 
     
@@ -366,6 +364,9 @@ class PlottingNavigatorDomain(NavigatorDomain):
     def add_multiary_menu(self, menu, nodes):
         menu.addAction(_('Synchronize curves'), self.synchronize)
     
+    
+    
+    
 class MathNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
         if not node:
@@ -455,7 +456,8 @@ class MathNavigatorDomain(NavigatorDomain):
     def add_multiary_menu(self, menu, nodes):
         menu.addAction(_('Correct'), self.correct)
         
-        
+
+    
 class MeasurementUnitsNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
         if not node:
@@ -531,8 +533,9 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
             self.units[u1] = (act, p)
         
     def add_dataset_menu(self, menu, node):
+        menu.addSeparator()
         self.add_percentile(menu, node)
         self.add_unit(menu, node)
         
         
-navigator_domains += PlottingNavigatorDomain, MathNavigatorDomain, DataNavigatorDomain
+navigator_domains += PlottingNavigatorDomain, MathNavigatorDomain, MeasurementUnitsNavigatorDomain, DataNavigatorDomain
