@@ -41,6 +41,7 @@ echo "Done."
 echo "Let's start..."
 touch $BUILD_IN_PROGRSS_FILE
 
+rm -rf "$CANON_LINK"
 ln -s "$CANON_DIR" "$CANON_LINK"
 
 mkdir "$DISTRIBUTION_DIR"
