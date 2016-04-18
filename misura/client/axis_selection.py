@@ -11,7 +11,7 @@ def get_best_x_for(y_path, prefix, data, page_or_graph):
     else:
         target = 'T'
         xname = prefix + 'kiln/T'
-    # Possible nearby  datasets: 
+    # Possible nearby  datasets:
     subordered_x = get_suborderd_x(y_path, name=target)
     neighbor_x = get_neighbor_x(y_path, name=target)
     print 'get_best_x_for', page_or_graph, y_path, prefix, target, subordered_x, neighbor_x
