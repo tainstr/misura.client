@@ -217,8 +217,9 @@ class MainWindow(QtGui.QMainWindow):
         if not server:
             network.manager.remote.connect()
             self.server = network.manager.remote
-        if not check_time_delta(self.server):
-            return False
+        if not self.fixedDoc:
+            if not check_time_delta(self.server):
+                return False
         registry.toggle_run(True)
         self.serverDock.hide()
         self.myMenuBar.close()
@@ -235,12 +236,14 @@ class MainWindow(QtGui.QMainWindow):
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.logDock)
 
         self.setMenuBar(self.myMenuBar)
-
-        self.rem('instrumentDock')
-        self.instrumentDock = QtGui.QDockWidget(self.centralWidget())
-        self.instrumentSelector = InstrumentSelector(self, self.setInstrument)
-        self.instrumentDock.setWidget(self.instrumentSelector)
-        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.instrumentDock)
+        if not self.fixedDoc:
+            self.rem('instrumentDock')
+            self.instrumentDock = QtGui.QDockWidget(self.centralWidget())
+            self.instrumentSelector = InstrumentSelector(self, self.setInstrument)
+            self.instrumentDock.setWidget(self.instrumentSelector)
+            self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.instrumentDock)
+        else:
+            self.instrumentDock = QtGui.QWidget()
         logging.debug('%s', self.server.describe())
         ri = self.server['runningInstrument']  # currently running
         li = ri
