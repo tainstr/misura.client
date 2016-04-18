@@ -99,7 +99,7 @@ class ViewerPicture(QtGui.QGraphicsView):
 #       self.sampleProcessor=False
         if self.calibrationTool:
             self.calibrationTool.close()
-            
+
     _oldproc = None
     def setFrameProcessor(self, fp=False):
         """Create or set the thread receiving frames from the remote camera"""
@@ -345,6 +345,9 @@ class ViewerPicture(QtGui.QGraphicsView):
         """Re-init samples, resetting regions of interest."""
         r=self.remote.init_samples()
 
+    def instrument_is_flex(self):
+        return self.server['lastInstrument'] == 'flex'
+
     def add_motion_actions(self, menu):
         """Create menu actions for motion control"""
         cpos = {'x': 'bottom', 'y': 'left'}
@@ -371,7 +374,7 @@ class ViewerPicture(QtGui.QGraphicsView):
             act = widgets.MotorSliderAction(self.server, obj, submenu)
             submenu.addAction(act)
             align=enc['align']
-            if name in ('x', 'y'):
+            if name  == 'y' or (name == 'x' and not self.instrument_is_flex()):
                 slider = widgets.MotorSlider(
                     self.server, obj, parent=self.parent)
                 slider.spinbox.hide()
@@ -487,7 +490,7 @@ class ViewerPicture(QtGui.QGraphicsView):
 
     def updateImage(self, *args):
         self.updateFrame(*args, img=True)
-    
+
     _unzoomed = False
     def updateFrame(self, i, x, y, w, h, data, img=False):
         """Called when a new frame is available from processor"""
@@ -511,7 +514,7 @@ class ViewerPicture(QtGui.QGraphicsView):
         if self._oldproc is None and not self._unzoomed:
             self.unzoom()
             self._unzoomed = True
-        
+
 
     def reconnectSample(self):
         """Remove and regenerate all samples."""
