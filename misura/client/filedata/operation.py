@@ -230,7 +230,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                                rule_unit=clientconf.confdb['rule_unit'])
         op = OperationMisuraImport(p)
         return op
-    
+
     @classmethod
     def from_rule(cls, rule, linked_filename, uid=''):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
@@ -241,7 +241,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                                rule_unit=clientconf.confdb['rule_unit'])
         op = OperationMisuraImport(p)
         return op
-    
+
     def do(self, document):
         """Override do() in order to get a reference to the document!"""
         self._doc = document
@@ -323,7 +323,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         return time_sequence
 
     def get_available_autoload(self):
-        """Return the list of available node names and the list of nodes which should 
+        """Return the list of available node names and the list of nodes which should
         be loaded during this import operation."""
         # Will list only Array-type descending from /summary
         header = self.proxy.header(['Array'], '/summary')
@@ -383,7 +383,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
     def assign_sample_to_dataset(self, ds):
         """Find out the sample index to which this dataset refers"""
         col = ds.m_col
-        var, idx = iutils.namingConvention(col)
+        obj, var = self.LF.conf.from_column(col)
         if '/sample' in col:
             parts = col.split(sep)
             for q in parts:
@@ -392,10 +392,10 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             i = int(q[6:]) + 1
             smp = self.LF.samples[i]
             logging.debug(
-                '%s %s %s %s %s %s', 'Assigning sample', i, 'to curve', col, smp, smp.ref)
+                'Assigning sample', i, 'to curve', col, smp, smp.ref, var)
             ds.m_smp = smp
             # Retrieve initial dimension from sample
-            if var == 'd' and smp.conf.has_key('initialDimension'):
+            if var == 'd':
                 ds.m_initialDimension = smp.conf['initialDimension']
 
         if ds.m_smp is False:

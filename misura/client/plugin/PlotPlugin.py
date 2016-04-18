@@ -165,8 +165,15 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             return False
         # A conversion should happen
         logging.debug('%s %s %s', 'CONVERTING', cvt, pc)
-        self.ops.append(document.OperationToolsPlugin(PercentilePlugin.PercentilePlugin(
-        ), {'ds': dsn, 'propagate': False, 'action': 'Invert', 'auto': False}))
+        self.ops.append(document.OperationToolsPlugin(
+            PercentilePlugin.PercentilePlugin(),
+            {
+                'ds': dsn,
+                'propagate': False,
+                'action': 'Invert',
+                'auto': False
+            })
+        )
         return True
 
     def arrange(self, graphics_names, plotted_dataset_names=False):
