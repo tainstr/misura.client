@@ -53,8 +53,17 @@ class TestOperationMisuraImport(unittest.TestCase):
         # no load: ds present but empty
         self.assertIn('0:hsm/sample0/e', doc.available_data)
         self.assertNotIn('0:hsm/sample0/e', doc.data)
+
+        hidden_data = set([
+            '0:hsm/sample0/iC',
+            '0:hsm/sample0/iB',
+            '0:hsm/sample0/iA',
+            '0:hsm/sample0/iD'
+        ])
+
         self.assertSetEqual(
-            set(m4names) - set(imp.outnames) - set(doc.available_data.keys()), set([]))
+            set(m4names) - set(imp.outnames) - set(doc.available_data.keys()),
+            hidden_data)
         self.check_doc(doc, nativem4)
         # Test single dataset name import
         imp = filedata.OperationMisuraImport.from_dataset_in_file(
