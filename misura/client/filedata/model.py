@@ -133,8 +133,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
     page = '/temperature/temp'
 
     def set_page(self, page):
-        if self.paused:
-            return False
         if page.startswith('/temperature'):
             page = '/temperature/temp'
         elif page.startswith('/time'):
@@ -167,6 +165,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         new_tree = NodeEntry()
         new_tree.set_doc(self.doc)
         self.tree = new_tree
+        self._plots = False
         self._lock.release()
 
         self.emit(QtCore.SIGNAL('endResetModel()'))

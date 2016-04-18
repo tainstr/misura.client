@@ -100,7 +100,11 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.setColumnWidth(0, 400)
 
     def update_view(self):
+        n = self.mainwindow.plot.getPageNumber()
+        page = self.doc.basewidget.getPage(n)
         self.model().refresh(True)
+        self.model().set_page(page.path)
+        
         self.ensure_sync_of_view_and_model()
 
     def refresh_model(self, ismodified=True):
