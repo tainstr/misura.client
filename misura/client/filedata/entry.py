@@ -117,6 +117,7 @@ class NodeEntry(object):
     """Hierarchy splitter symbol"""
     _linked = False
     """Linked file for first-level nodes"""
+    status_filter = (None, False)
 
     def __init__(self, doc=False, name='', parent=False, path=False, model_path=False, splt=sep):
         self.splt = splt
@@ -132,6 +133,7 @@ class NodeEntry(object):
             if not hasattr(doc, 'ent'):
                 doc.ent = {}
             doc.ent[self.path] = self
+        
 
     def name(self):
         return self._name
@@ -343,6 +345,10 @@ class NodeEntry(object):
         # Build an iterable
         if isinstance(st, int):
             st = set([st])
+        key = '.'.join([str(i) for i in sorted(list(st))])
+        # Check filter cache
+        if key == self.status_filter[0]:
+            return self.status_filter[1]
         m = min(st)
         for child in self.children.itervalues():
             if isinstance(child, DatasetEntry):
@@ -356,6 +362,7 @@ class NodeEntry(object):
                         '%s %s %s %s', 'rec skip', child, child.status, st)
             if depth > 0 or depth < 0:  # depth=0 will block!
                 r += child.recursive_status(st, depth=depth - 1)
+        self.status_filter = (key, r)
         return r
 
     def set_doc(self, doc, default_status=0):
