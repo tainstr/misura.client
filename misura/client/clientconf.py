@@ -67,7 +67,11 @@ ao(default_desc, 'rule', 'Section', 'Dataset Rules', 'Dataset Rules')
 rule_exc = r'''^(/summary/)?beholder/
 ^(/summary/)?hydra/
 /analyzer/
-/autoroi/'''
+/autoroi/
+/iA$
+/iB$
+/iC$
+/iD$'''
 ao(default_desc, 'rule_exc', 'TextArea', rule_exc, 'Ignore datasets')
 
 rule_inc = ''
@@ -105,7 +109,7 @@ ao(default_desc, 'm3', 'Section', 'Data import', 'Data import')
 ao(default_desc, 'm3_enable', 'Boolean', True, 'Enable Misura 3 database interface')
 ao(default_desc, 'm3_plugins', 'TextArea', '', 'Import plugins by name')
 
-    
+
 
 
 
@@ -162,7 +166,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     conn = False
     path = ''
     index = False
-    
+
     def __init__(self, path=False):
         QtCore.QObject.__init__(self)
         option.ConfigurationProxy.__init__(self)
