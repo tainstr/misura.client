@@ -16,6 +16,7 @@ voididx = QtCore.QModelIndex()
 
 class SummaryModel(QtCore.QAbstractTableModel):
     _rowCount = 0
+    _columnCount = 0
     _loaded = []
 
     def __init__(self, *a, **k):
@@ -26,13 +27,15 @@ class SummaryModel(QtCore.QAbstractTableModel):
         self.doc = doc
         self._loaded = []
         self._rowCount = 0
+        self._columnCount = 0
         self.update()
 
     def set_loaded(self, loaded):
         if set(loaded) != set(self._loaded):
             self._loaded = loaded
-            self.emit(QtCore.SIGNAL('headerDataChanged(int,int,int)'),
-                      QtCore.Qt.Horizontal, 0, len(loaded))
+            #self.emit(QtCore.SIGNAL('headerDataChanged(int,int,int)'),
+            #         QtCore.Qt.Horizontal, 0, len(loaded))
+            self.emit(QtCore.SIGNAL('modelReset()'))
             return True
         return False
 
@@ -52,25 +55,23 @@ class SummaryModel(QtCore.QAbstractTableModel):
         r = False
         # New rows length
         start = self._rowCount
-        end = len(self.doc.data.get('0:t', []))
+        end = self.rowCount(QtCore.QModelIndex())
         # New header (lists all loaded columns/non-zero)
         if self.auto_load:
             ldd = []
             for k, ds in self.doc.data.iteritems():
                 if len(ds) > 0:
                     ldd.append(k)
-            r = self.set_loaded(ldd)
+            self.set_loaded(ldd)
         # Update length
         if start != end:
             self.emit(QtCore.SIGNAL('rowsInserted(QModelIndex,int,int)'),
                       self.index(0, 0), start, end)
-            r = True
-        if r:
-            self.emit(QtCore.SIGNAL('modelReset()'))
         return r
 
     def columnCount(self, parent):
-        return len(self._loaded)
+        self._columnCount = len(self._loaded)
+        return self._columnCount
 
     def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
         if orientation != QtCore.Qt.Horizontal:
@@ -99,9 +100,11 @@ class SummaryModel(QtCore.QAbstractTableModel):
     def rowCount(self, parent):
         if not self.doc:
             return 0
+        if len(self._loaded) == 0:
+            return 0
         if not self.doc.data.has_key(self._loaded[0]):
             return 0
-        self._rowCount = len(self.doc.data[self._loaded[0]].data)
+        self._rowCount = max([len(self.doc.data[k].data) for k in self._loaded])
         return self._rowCount
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
