@@ -4,6 +4,7 @@
 from misura.canon.logger import Log as logging
 import functools
 import os
+import collections
 
 from misura.canon import option
 from misura.canon.option import sorter, prop_sorter
@@ -13,6 +14,7 @@ from .. import widgets
 from ..configuration_check import recursive_configuration_check, render_wiring
 
 from PyQt4 import QtGui, QtCore, QtSvg
+
 
 def desc2html(desc):
     """Crea una rappresentazione HTML del dizionario di descrizione."""
@@ -42,7 +44,7 @@ def orgSections(prop_dict, configuration_level=5):
         prop = prop_dict[handle]
         # Add the children key to any option (simplifies further processing)
         if not prop.has_key('children'):
-            prop['children'] = []
+            prop['children'] = collections.OrderedDict()
             prop_dict[handle] = prop
         parent = prop.get('parent', False)
         if parent is False:
@@ -54,9 +56,9 @@ def orgSections(prop_dict, configuration_level=5):
             continue
         # Create the children list on the parent option
         if not parentopt.has_key('children'):
-            parentopt['children'] = []
+            parentopt['children'] = collections.OrderedDict()
         # Append the child to the parent
-        parentopt['children'].append(prop)
+        parentopt['children'][handle] = prop 
         # Delete the child from the main dictionary
         del prop_dict[handle]
         # Update the parent on the main dictionary
@@ -66,7 +68,10 @@ def orgSections(prop_dict, configuration_level=5):
     for handle in prop_dict.keys():
         prop = prop_dict[handle]
         children = prop['children']
-        children.sort(option.prop_sorter)
+        sorted_keys = sorted(children.values(), option.prop_sorter)
+        sorted_keys = [prop['handle'] for prop in sorted_keys]
+        children = collections.OrderedDict(
+            (k, children[k]) for k in sorted_keys)
         prop['children'] = children
         prop_dict[handle] = prop
 
@@ -150,11 +155,11 @@ class Section(QtGui.QWidget):
         # Add the parent option plus the expansion button
         self.lay.addRow(wg.label_widget, self.expandable_row(wg, children))
 
-        for child in prop['children']:
+        for handle, child in prop['children'].iteritems():
             wg = widgets.build(self.server, self.remObj, child, parent=self)
             if wg is False:
                 continue
-            self.widgetsMap[child['handle']] = wg
+            self.widgetsMap[handle] = wg
             children_lay.addRow(wg.label_widget, wg)
 
         self.lay.addRow(children)
@@ -264,14 +269,15 @@ class Interface(QtGui.QTabWidget):
         self.desc = self.remObj.describe()
         widgets.info_dialog(desc2html(self.desc), 'Details for Object: %s' % self.desc.get(
             'name', {'current': 'Object'})['current'], parent=self)
-        
+
     def presets_table(self):
         self.desc = self.remObj.describe()
         output = recursive_configuration_check(self.remObj)
         widgets.info_dialog(output, 'Presets Comparison, %s' % self.desc.get(
             'name', {'current': 'Object'})['current'], parent=self)
-        
+
     _wiring = False
+
     def wiring_graph(self):
         if self._wiring:
             self._wiring.hide()
@@ -279,10 +285,10 @@ class Interface(QtGui.QTabWidget):
             self._wiring = False
         # Temp file
         svg_filename = render_wiring(self.remObj.wiring())
-        
+
         # Scene
         scene = QtGui.QGraphicsScene()
-        view =QtGui.QGraphicsView()
+        view = QtGui.QGraphicsView()
         view.setScene(scene)
         svg = QtSvg.QGraphicsSvgItem(svg_filename)
         scene.addItem(svg)
@@ -291,8 +297,8 @@ class Interface(QtGui.QTabWidget):
         lay = QtGui.QVBoxLayout()
         wg.setLayout(lay)
         lay.addWidget(view)
-        wg.show()    
-        self._wiring=wg
+        wg.show()
+        self._wiring = wg
         # Cleanup
         os.remove(svg_filename)
 
