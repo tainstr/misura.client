@@ -51,7 +51,7 @@ def viscosity_calc(temperatures, known_temperatures, known_viscosities):
     canc=np.where(temperatures < T0+1)[0]
     print 'Cancelling',T0, min(temperatures), max(temperatures), canc, temperatures
     if len(canc):
-        output[canc] = 0
+        output[canc] = np.nan
     return output
 
 
@@ -66,8 +66,7 @@ class ViscosityPlugin(plugins.DatasetPlugin):
     description_short = 'Viscosity'
 
     # string goes in dialog box
-    description_full = ('Viscosity VFT'
-                        'Viscosity VFT')
+    description_full = ('Viscosity extrapolation according to Vogel-Fulcher-Tamman (VFT) equation')
 
     def __init__(self, ds_in='', T1=0, V1=0, T2=0, V2=0, T3=0, V3=0, ds_out=''):
         """Define input fields for plugin."""

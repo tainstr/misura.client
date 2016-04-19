@@ -438,6 +438,8 @@ class MathNavigatorDomain(NavigatorDomain):
         menu.addAction(_('Derivatives'), self.derive)
         menu.addAction(_('Linear Coefficient'), self.coefficient)
         
+    add_derived_dataset_menu = add_dataset_menu
+        
     @nodes
     def correct(self, nodes=[]):
         """Call the CurveOperationPlugin on the current nodes"""

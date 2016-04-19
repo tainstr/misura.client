@@ -46,6 +46,16 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
         v = video.VideoExporter(sh, pt)
         v.exec_()
         sh.close()
+        
+    @node
+    def viscosity(self, node=False):
+        """Execute ViscosityPlugin on `node`"""
+        from misura.client import plugin
+        # Get nearest T dataset
+        T=self.xnames(node, page='/temperature')[0]
+        p = plugin.ViscosityPlugin(ds_in=T, ds_out=node.path+'/viscosity')
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.ViscosityPlugin)
+        self.mainwindow.showDialog(d)
 
     @nodes
     def surface_tension(self, nodes):
@@ -71,11 +81,11 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
             T = ''
         # Load empty datasets
         if len(dbeta) == 0:
-            self._load(nbeta)
+            self.navigator._load(nbeta)
         if len(dR0) == 0:
-            self._load(nR0)
+            self.navigator._load(nR0)
         if len(ddil) == 0:
-            self._load(ndil)
+            self.navigator._load(ndil)
         from misura.client import plugin
         cls = plugin.SurfaceTensionPlugin
         p = cls(beta=beta, R0=R0, T=T,
@@ -90,6 +100,7 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
             j += node.children.has_key(kj)
         if j == len(k):
             menu.addAction(_('Surface tension'), self.surface_tension)
+        menu.addAction(_('Viscosity'), self.viscosity)
         menu.addAction(_('Show Characteristic Points'), self.showPoints)
         menu.addAction(_('Report'), self.hsm_report)
         menu.addAction(_('Render video'), self.render)
