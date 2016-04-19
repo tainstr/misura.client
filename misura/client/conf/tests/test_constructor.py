@@ -39,7 +39,8 @@ class TestConstructor(unittest.TestCase):
         p = ConfigurationProxy()
         p.add_option('a', 'String', '')
         p.add_option('b', 'String', '', parent='a')
-        p.add_option('sec_c', 'String', '')
+        p.add_option('c', 'String', '', parent='b')
+        p.add_option('sec_d', 'String', '')
         obj = constructor.Interface(p, p, p.describe())
         iutils_testing.show(obj, __name__)
 

@@ -36,12 +36,28 @@ def desc2html(desc):
     return t
 
 
+def sort_children(prop_dict):
+    for handle in prop_dict.keys():
+        prop = prop_dict[handle]
+        children = prop['children']
+        sorted_keys = sorted(children.values(), option.prop_sorter)
+        sorted_keys = [p['handle'] for p in sorted_keys]
+        children = collections.OrderedDict(
+            (k, children[k]) for k in sorted_keys)
+        children = sort_children(children)
+        prop['children'] = children
+        prop_dict[handle] = prop
+    return prop_dict
+            
+
 def orgSections(prop_dict, configuration_level=5):
     """Riordina le chiavi a seconda delle sezioni cui appartengono."""
     # Move children options into their parent's "children" key
     prop_dict = prop_dict.copy()
     for handle in prop_dict.keys():
-        prop = prop_dict[handle]
+        prop = prop_dict.get(handle, False)
+        if prop is False:
+            continue
         # Add the children key to any option (simplifies further processing)
         if not prop.has_key('children'):
             prop['children'] = collections.OrderedDict()
@@ -65,16 +81,9 @@ def orgSections(prop_dict, configuration_level=5):
         prop_dict[parent] = parentopt
 
     # Sorting
-    for handle in prop_dict.keys():
-        prop = prop_dict[handle]
-        children = prop['children']
-        sorted_keys = sorted(children.values(), option.prop_sorter)
-        sorted_keys = [prop['handle'] for prop in sorted_keys]
-        children = collections.OrderedDict(
-            (k, children[k]) for k in sorted_keys)
-        prop['children'] = children
-        prop_dict[handle] = prop
-
+    print 'prop_dict', prop_dict
+    prop_dict = sort_children(prop_dict)
+    print 'sorted prop_dict', prop_dict
     # Sectioning
     sections = {'Main': []}
     for handle, prop in prop_dict.iteritems():
@@ -93,6 +102,7 @@ def orgSections(prop_dict, configuration_level=5):
         if not sections.has_key(spl[0]):
             sections[spl[0]] = []
         sections[spl[0]].append(prop)
+    print 'sections',sections
     return sections
 
 
@@ -136,34 +146,36 @@ class Section(QtGui.QWidget):
         lay.addWidget(more)
         out.setLayout(lay)
         return out
-
-    def build(self, prop):
-        wg = widgets.build(self.server, self.remObj, prop, parent=self)
-        if wg is False:
+    
+    def add_children(self, parent_layout, prop):
+        parent_widget = widgets.build(self.server, self.remObj, prop, parent=self)
+        if parent_widget is False:
             return False
-        self.widgetsMap[prop['handle']] = wg
-        r = self.lay.rowCount()
+        self.widgetsMap[prop['handle']] = parent_widget
+        # No children: just add the option and return
         if len(prop.get('children', [])) == 0:
-            r += 1
-            self.lay.addRow(wg.label_widget, wg)
+            parent_layout.addRow(parent_widget.label_widget, parent_widget)
             return True
-
+        print 'add_children', prop['handle'], prop['children'].keys(), prop
         # Widget hosting the children form
         children = QtGui.QWidget()
         children_lay = QtGui.QFormLayout()
         children.setLayout(children_lay)
         # Add the parent option plus the expansion button
-        self.lay.addRow(wg.label_widget, self.expandable_row(wg, children))
+        parent_layout.addRow(parent_widget.label_widget, 
+                             self.expandable_row(parent_widget, children))
 
         for handle, child in prop['children'].iteritems():
-            wg = widgets.build(self.server, self.remObj, child, parent=self)
-            if wg is False:
+            if handle == prop['handle']:
+                logging.error('Option parenthood loop detected', handle, prop['children'].keys())
                 continue
-            self.widgetsMap[handle] = wg
-            children_lay.addRow(wg.label_widget, wg)
+            self.add_children(children_lay, child)
 
-        self.lay.addRow(children)
+        parent_layout.addRow(children)
         children.hide()
+        
+    def build(self, prop):
+        self.add_children(self.lay, prop)
         return True
 
 
