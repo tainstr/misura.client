@@ -50,3 +50,10 @@ class InstrumentSelector(QtGui.QWidget):
             button = QtGui.QPushButton(title, self)
             self.lay.addWidget(button)
             self.connect(button, QtCore.SIGNAL('pressed()'), f)
+
+            presets = filter(lambda preset: preset not in ['default', 'factory_default'], obj.listPresets())
+            for preset in presets:
+                button = QtGui.QPushButton(' '.join(preset.split('_')), self)
+                self.lay.addWidget(button)
+                f = functools.partial(self.setInstrument, preset=preset, remote=obj)
+                self.connect(button, QtCore.SIGNAL('pressed()'), f)

@@ -317,24 +317,24 @@ class MainWindow(QtGui.QMainWindow):
             self.dataTable, subWinFlags)
         self.tableWin.hide()
 
-    def _init_instrument(self, soft=False):
+    def _init_instrument(self, soft=False, name='default'):
         """Called in a different thread. Need to recreate connection."""
         r = self.remote.copy()
         r.connect()
-        result = r.init_instrument(soft)
+        result = r.init_instrument(soft, name)
 
 
-    def init_instrument(self, soft=False):
+    def init_instrument(self, soft=False, name='default'):
         # TODO: this scheme could be automated via a decorator: @thread
         logging.debug('%s', 'Calling init_instrument in QThreadPool')
-        r = widgets.RunMethod(self._init_instrument, soft)
+        r = widgets.RunMethod(self._init_instrument, soft, name)
         r.pid = 'Instrument initialization '
         QtCore.QThreadPool.globalInstance().start(r)
         logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance(
         ).activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
 
 
-    def setInstrument(self, remote=False, server=False):
+    def setInstrument(self, remote=False, server=False, preset='default'):
         if server is not False:
             self.setServer(server)
         if remote is False:
@@ -373,7 +373,7 @@ class MainWindow(QtGui.QMainWindow):
                 QtGui.qApp.processEvents()
                 # Async call of init_instrument
                 # soft: only if not already initialized
-                self.init_instrument(soft=True)
+                self.init_instrument(soft=True, name=preset)
                 logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance(
                 ).activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
                 logging.debug('setInstrument deferred post initialization')
