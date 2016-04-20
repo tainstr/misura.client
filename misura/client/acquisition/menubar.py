@@ -90,17 +90,17 @@ class MenuBar(QtGui.QMenuBar):
 
     def shutdown(self):
         btn = QtGui.QMessageBox.warning(None, _('Confirm Shutdown'),
-                          _('Do you really want to shutdown the instrument operative system?'), 
+                          _('Do you really want to shutdown the instrument operative system?'),
                           QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok, QtGui.QMessageBox.Cancel)
         if btn != QtGui.QMessageBox.Ok:
             logging.debug('Shutdown request aborted')
-            return False        
+            return False
         status, msg = self.server.support['halt']
         if status!=0:
-            QtGui.QMessageBox.warning(self, _('Shutdown request failed'), 
+            QtGui.QMessageBox.warning(self, _('Shutdown request failed'),
                                       _('Shutdown failed with the following error:\n {!r}').format((status, msg))
                                       )
-            return False              
+            return False
         msg = _('Server is shutting down.\nPlease close any client window and shutdown power interruptor in 30 seconds.\nReply: \n %r') % msg
         QtGui.QMessageBox.information(self, _('Shutting Down'), msg)
         return True
@@ -137,10 +137,16 @@ class MenuBar(QtGui.QMenuBar):
             if not obj:
                 logging.debug('missing handler', name)
                 continue
-            f = functools.partial(self.parent().setInstrument, obj)
-            act = self.instruments.addAction(
-                '%s (%s)' % (title, obj['comment']), f)
+            f = functools.partial(self.parent().setInstrument, obj, preset=name)
+            act = self.instruments.addAction('%s (%s)' % (title, obj['comment']), f)
             self.func.append(f)
+
+            presets = filter(lambda preset: preset not in ['default', 'factory_default'], obj.listPresets())
+            for preset in presets:
+                f = functools.partial(self.parent().setInstrument, preset=preset, remote=obj)
+                act = self.instruments.addAction('%s (%s)' % (' '.join(preset.split('_')), obj['comment']), f)
+                self.func.append(f)
+
             self.lstInstruments.append((act, title))
         self.appendGlobalConf()
         # Enable menu and menu items after server connection
