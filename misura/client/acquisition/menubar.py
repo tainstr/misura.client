@@ -140,14 +140,17 @@ class MenuBar(QtGui.QMenuBar):
             f = functools.partial(self.parent().setInstrument, obj, preset=name)
             act = self.instruments.addAction('%s (%s)' % (title, obj['comment']), f)
             self.func.append(f)
+            self.lstInstruments.append((act, title))
 
             presets = filter(lambda preset: preset not in ['default', 'factory_default'], obj.listPresets())
             for preset in presets:
                 f = functools.partial(self.parent().setInstrument, preset=preset, remote=obj)
-                act = self.instruments.addAction('%s (%s)' % (' '.join(preset.split('_')), obj['comment']), f)
+                title = ' '.join(preset.split('_'))
+                act = self.instruments.addAction('%s (%s)' % (title, obj['comment']), f)
                 self.func.append(f)
+                self.lstInstruments.append((act, title))
 
-            self.lstInstruments.append((act, title))
+
         self.appendGlobalConf()
         # Enable menu and menu items after server connection
         if self.fixedDoc is False:
