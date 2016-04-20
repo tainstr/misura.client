@@ -255,7 +255,7 @@ class PlottingNavigatorDomain(NavigatorDomain):
     @node
     def intercept(self, node=False):
         """Intercept all curves derived/pertaining to the current object"""
-        if ism(node, DatasetEntry):
+        if isinstance(node, DatasetEntry):
             dslist = [node.path]
         elif hasattr(node, 'datasets'):
             # FIXME: needs paths
