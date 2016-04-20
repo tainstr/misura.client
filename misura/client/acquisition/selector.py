@@ -45,7 +45,7 @@ class InstrumentSelector(QtGui.QWidget):
             if obj is False:
                 logging.debug('%s %s', 'Instrument not found', name)
                 continue
-            f = functools.partial(self.setInstrument, obj)
+            f = functools.partial(self.setInstrument, obj, preset=name)
             self.func.append(f)
             button = QtGui.QPushButton(title, self)
             self.lay.addWidget(button)
