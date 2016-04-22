@@ -59,9 +59,10 @@ def orgSections(prop_dict, configuration_level=5):
         if prop is False:
             continue
         # Add the children key to any option (simplifies further processing)
-        if not prop.has_key('children'):
+        if not prop.has_key('children') or isinstance(prop['children'],list):
             prop['children'] = collections.OrderedDict()
             prop_dict[handle] = prop
+        
         parent = prop.get('parent', False)
         if parent is False:
             continue
@@ -71,7 +72,7 @@ def orgSections(prop_dict, configuration_level=5):
                 '%s %s %s', 'Non-existent parent for ', handle, prop['parent'])
             continue
         # Create the children list on the parent option
-        if not parentopt.has_key('children'):
+        if not parentopt.has_key('children') or isinstance(parentopt['children'], list):
             parentopt['children'] = collections.OrderedDict()
         # Append the child to the parent
         parentopt['children'][handle] = prop 
