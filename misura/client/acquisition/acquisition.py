@@ -254,7 +254,7 @@ class MainWindow(QtGui.QMainWindow):
             ri = li
         if ri not in ['None', '']:
             remote = getattr(self.server, ri)
-            self.setInstrument(remote)
+            self.updateInstrumentInterface(remote)
         if self.fixedDoc:
             return True
         # Automatically pop-up delayed start dialog
@@ -330,17 +330,22 @@ class MainWindow(QtGui.QMainWindow):
         r = widgets.RunMethod(self._init_instrument, soft, name)
         r.pid = 'Instrument initialization '
         QtCore.QThreadPool.globalInstance().start(r)
-        logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance(
-        ).activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
+        logging.debug('%s %s %s',
+                      'active threads:',
+                      QtCore.QThreadPool.globalInstance().activeThreadCount(),
+                      QtCore.QThreadPool.globalInstance().maxThreadCount())
 
 
-    def setInstrument(self, remote=False, server=False, preset='default'):
+    def updateInstrumentInterface(self, remote=False, server=False, preset='default'):
+        self.tasks.done('Waiting for server')
+
         if server is not False:
             self.setServer(server)
         if remote is False:
             remote = self.remote
         else:
             self.remote = remote
+
         self._blockResetFileProxy = True
         self.instrumentDock.hide()
         name = self.remote['devpath']
@@ -361,24 +366,7 @@ class MainWindow(QtGui.QMainWindow):
             win.deleteLater()
         self.cameras = {}
         QtGui.qApp.processEvents()
-        # Send init_instrument
-        if not self.fixedDoc and not self.server['isRunning'] and self.name != self.server['lastInstrument']:
-            logging.debug('Init instrument')
-            if self.remote['initInstrument'] != 0:
-                logging.debug('Still waiting for initInstrument flag to be 0')
-                self.reset_instrument_timer.singleShot(1000, self.setInstrument)
-                return False
-            if self.remote.init_instrument is not None:
-                self.tasks.job(0, pid, 'Initializing instrument')
-                QtGui.qApp.processEvents()
-                # Async call of init_instrument
-                # soft: only if not already initialized
-                self.init_instrument(soft=True, name=preset)
-                logging.debug('%s %s %s', 'active threads:', QtCore.QThreadPool.globalInstance(
-                ).activeThreadCount(), QtCore.QThreadPool.globalInstance().maxThreadCount())
-                logging.debug('setInstrument deferred post initialization')
-                self.reset_instrument_timer.singleShot(1000, self.setInstrument)
-                return False
+
         self.tasks.job(1, pid, 'Preparing menus')
         self.myMenuBar.close()
         self.myMenuBar = MenuBar(server=self.server, parent=self)
@@ -423,8 +411,6 @@ class MainWindow(QtGui.QMainWindow):
         self.add_table()
 
         # Update Menu
-        self.tasks.job(-1, pid, 'Filling menus')
-        logging.debug('%s %s', 'MENUBAR SET INSTRUMENT', remote)
         self.myMenuBar.setInstrument(remote, server=self.server)
         self.myMenuBar.show()
 
@@ -473,6 +459,30 @@ class MainWindow(QtGui.QMainWindow):
                     obj1, QtCore.SIGNAL('hide_show_col(QString,int)'), p)
         self.tasks.done(pid)
         return True
+
+    def setInstrument(self, remote=False, server=False, preset='default', selfcalled=False):
+        if self.fixedDoc:
+            return False
+
+        if server is not False:
+            self.setServer(server)
+        if remote is False:
+            remote = self.remote
+        else:
+            self.remote = remote
+
+        if self.server['isRunning']:
+            return False
+
+        self.init_instrument(soft=True, name=preset)
+        self.tasks.jobs(-1, 'Waiting for server')
+        self.reset_instrument_timer.singleShot(
+            2000,
+            lambda: self.updateInstrumentInterface(remote,
+                                                   server,
+                                                   preset)
+        )
+
 
     def addCamera(self, obj, role='', analyzer='hsm'):
         pic = beholder.ViewerControl(obj, self.server, parent=self)

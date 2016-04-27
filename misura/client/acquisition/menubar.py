@@ -138,7 +138,7 @@ class MenuBar(QtGui.QMenuBar):
                 logging.debug('missing handler', name)
                 continue
             f = functools.partial(self.parent().setInstrument, obj, preset=name)
-            act = self.instruments.addAction('%s (%s)' % (title, obj['comment']), f)
+            act = self.instruments.addAction('%s' % (title,), f)
             self.func.append(f)
             self.lstInstruments.append((act, title))
 
@@ -146,7 +146,7 @@ class MenuBar(QtGui.QMenuBar):
             for preset in presets:
                 f = functools.partial(self.parent().setInstrument, preset=preset, remote=obj)
                 title = ' '.join(preset.split('_'))
-                act = self.instruments.addAction('%s (%s)' % (title, obj['comment']), f)
+                act = self.instruments.addAction('%s' % (title,), f)
                 self.func.append(f)
                 self.lstInstruments.append((act, title))
 
@@ -177,18 +177,20 @@ class MenuBar(QtGui.QMenuBar):
         else:
             d.show()
 
-    def setInstrument(self, remote, server=False):
+    def setInstrument(self, remote, server):
         self.setServer(server)
         self.remote = remote
         self.lstActions = []
+        preset = self.remote['preset']
         parent = self.parent()
         name = self.remote['devpath']
+        name_from_preset = ' '.join(preset.split('_'))
+
         for act, aname in self.lstInstruments:
-            if aname == name:
-                act.setCheckable(True)
+            act.setCheckable(True)
+            if aname == name and preset in ['default', 'factory_default'] or aname == name_from_preset:
                 act.setChecked(True)
-                break
-        # MEASURE Menu
+
         self.measure.clear()
         if not self.fixedDoc:
             self.measure.addAction(
