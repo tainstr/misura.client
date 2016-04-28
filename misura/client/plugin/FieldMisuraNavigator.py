@@ -43,3 +43,5 @@ class FieldMisuraNavigator(plugins.Field):
         idx = nav.currentIndex()
         node = nav.model().data(idx, role=QtCore.Qt.UserRole)
         return node
+
+plugins.FieldMisuraNavigator = FieldMisuraNavigator

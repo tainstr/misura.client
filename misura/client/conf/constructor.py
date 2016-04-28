@@ -184,9 +184,11 @@ class Interface(QtGui.QTabWidget):
 
     """Interfaccia grafica ad un dizionario di configurazione."""
 
-    def __init__(self, server, remObj, prop_dict=False, parent=None, context='Option'):
+    def __init__(self, server, remObj=False, prop_dict=False, parent=None, context='Option'):
         QtGui.QTabWidget.__init__(self, parent)
         self.server = server
+        if remObj is False:
+            remObj = server
         self.remObj = remObj
         if not prop_dict:
             self.remObj.connect()

@@ -40,7 +40,9 @@ from SurfaceTensionPlugin import SurfaceTensionPlugin
 
 
 
-
+# FIELDS
+from FieldConfigurationProxy import FieldConfigurationProxy
+from FieldMisuraNavigator import FieldMisuraNavigator
 
 
 # Install 3rd-party plugins
