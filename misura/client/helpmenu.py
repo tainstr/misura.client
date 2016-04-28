@@ -46,7 +46,7 @@ class HelpMenu():
         self.cc.show()
 
     def showDocSite(self):
-        url = 'http://misura.readthedocs.org'
+        url = 'http://misura.readthedocs.io'
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
 
     def showTasks(self):

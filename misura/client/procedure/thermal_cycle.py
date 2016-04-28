@@ -135,7 +135,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         thermal_cycle_options = {}
         for opt in (
             'onKilnStopped', 'kilnBeforeStart', 'kilnAfterEnd', 'duration',
-                    'coolingBelowTemp', 'coolingAfterTime'):
+                    'coolingBelowTemp', 'coolingAfterTime', 'postDeformation'):
             if not active_instrument.measure.has_key(opt):
                 logging.debug('Measure has no option %s', opt)
                 continue
