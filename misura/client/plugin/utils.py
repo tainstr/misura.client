@@ -1,9 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Utilities for veusz-baset plugins"""
+import numpy as np
+
 import veusz.plugins as plugins
 import veusz.document as document
-import numpy as np
+
+from .. import _
 
 def iter_widgets(base, typename, direction = 0):
     """Yields all widgets of type `typename` starting from `base` widget.
@@ -120,7 +123,9 @@ class OperationWrapper(object):
     name = 'OperationWrapper'
     _ops = False
     preserve = None
-
+    translate = [_]
+    plugins_module = plugins
+    document_module = document
     @property
     def ops(self):
         if not self._ops:

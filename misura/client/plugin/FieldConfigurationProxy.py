@@ -3,12 +3,13 @@
 """Tools and plugins for Veusz, providing Misura Thermal Analysis functionality"""
 import veusz.plugins as plugins
 from PyQt4 import QtGui
-from ..conf import Interface
+from .. import conf
 
 class FieldConfigurationProxy(plugins.Field):
-
-    """Misura Navigator to select"""
-
+    """Misura Field showing a configuration Interface"""
+    
+    conf_module = conf
+    
     def __init__(self, name, descr=None, default=None):
         """name: name of field
         descr: description to show to user
@@ -18,7 +19,7 @@ class FieldConfigurationProxy(plugins.Field):
 
     def makeControl(self, doc, currentwidget):
         label = QtGui.QLabel(self.descr)
-        control = Interface(self.proxy)
+        control = conf.Interface(self.proxy)
         return (label, control)
 
     def getControlResults(self, cntrls):

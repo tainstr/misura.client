@@ -5,7 +5,7 @@ import re
 
 def get_best_x_for(y_path, prefix, data, page_or_graph):
     # Default x datasets:
-    if page_or_graph.startswith('/time') or page_or_graph.endswith('/time'):
+    if page_or_graph.startswith('/time') or page_or_graph.endswith('/time') or page_or_graph.endswith('_t'):
         target = 't'
         xname = prefix + 't'
     else:

@@ -320,7 +320,7 @@ class Interface(QtGui.QTabWidget):
 
 class InterfaceDialog(QtGui.QDialog):
 
-    def __init__(self, server, remObj, prop_dict=False, parent=None):
+    def __init__(self, server, remObj=False, prop_dict=False, parent=None):
         QtGui.QDialog.__init__(self, parent=parent)
         self.interface = Interface(server, remObj, prop_dict, self)
         lay = QtGui.QVBoxLayout()
