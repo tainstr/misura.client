@@ -27,6 +27,7 @@ class FieldMisuraNavigator(plugins.Field):
         otm = doc.model
         c.setModel(otm)
         c.expandAll()
+        c.hideColumn(1)
 
         # Do the predefined selection
         obj = self.default

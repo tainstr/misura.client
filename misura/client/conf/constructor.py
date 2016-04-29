@@ -82,9 +82,7 @@ def orgSections(prop_dict, configuration_level=5):
         prop_dict[parent] = parentopt
 
     # Sorting
-    print 'prop_dict', prop_dict
     prop_dict = sort_children(prop_dict)
-    print 'sorted prop_dict', prop_dict
     # Sectioning
     sections = {'Main': []}
     for handle, prop in prop_dict.iteritems():
@@ -103,7 +101,6 @@ def orgSections(prop_dict, configuration_level=5):
         if not sections.has_key(spl[0]):
             sections[spl[0]] = []
         sections[spl[0]].append(prop)
-    print 'sections',sections
     return sections
 
 
@@ -157,7 +154,6 @@ class Section(QtGui.QWidget):
         if len(prop.get('children', [])) == 0:
             parent_layout.addRow(parent_widget.label_widget, parent_widget)
             return True
-        print 'add_children', prop['handle'], prop['children'].keys(), prop
         # Widget hosting the children form
         children = QtGui.QWidget()
         children_lay = QtGui.QFormLayout()
