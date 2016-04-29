@@ -98,7 +98,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return registry.tasks
 
-    @property
     def instrument_pid(self):
         return 'Instrument: ' + self.name
 
@@ -349,6 +348,8 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.remote = remote
 
+        self.clean_interface(remote)
+
         self.controls = Controls(self.remote, parent=self)
         logging.debug('%s', 'Created controls')
         self.controls.stopped_nosave.connect(self.stopped_nosave)
@@ -358,7 +359,7 @@ class MainWindow(QtGui.QMainWindow):
         self.addToolBar(self.controls)
         self.toolbars.append(self.controls)
         logging.debug('%s', 'Done controls')
-        pid = self.instrument_pid
+        pid = self.instrument_pid()
         self.tasks.job(-1, pid, 'Status panel')
 
         self.logDock.hide()
@@ -427,9 +428,6 @@ class MainWindow(QtGui.QMainWindow):
         return True
 
     def updateInstrumentInterface_when_instrument_is_ready(self, remote):
-        if self.fixedDoc:
-            return False
-
         if remote is False:
             remote = self.remote
         else:
@@ -461,7 +459,7 @@ class MainWindow(QtGui.QMainWindow):
         title = _('Misura Acquisition: %s (%s)') %  (name, self.remote['comment'])
         self.setWindowTitle(title)
         self.tray_icon.setToolTip(title)
-        pid = self.instrument_pid
+        pid = self.instrument_pid()
         self.tasks.jobs(11, pid)
         QtGui.qApp.processEvents()
         # Close cameras
