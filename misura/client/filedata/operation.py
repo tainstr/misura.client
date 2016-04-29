@@ -203,18 +203,18 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         self.rule_exc = False
         if len(params.rule_exc) > 0:
             r = params.rule_exc.replace('\n', '|')
-            logging.debug('%s %s', 'Exclude rule', r)
+            logging.debug('Exclude rule', r)
             self.rule_exc = re.compile(r)
         self.rule_inc = False
         if len(params.rule_inc) > 0:
             r = params.rule_inc.replace('\n', '|')
-            logging.debug('%s %s', 'Include rule', r)
+            logging.debug('Include rule', r)
             self.rule_inc = re.compile(r)
         self.rule_load = False
         if len(params.rule_load) > 0:
             r = params.rule_load.replace('\n', '|')
             self._rule_load = r
-            logging.debug('%s %s', 'Load rule', r)
+            logging.debug('Load rule', r)
             self.rule_load = re.compile(r)
         self.rule_unit = clientconf.RulesTable(params.rule_unit)
 

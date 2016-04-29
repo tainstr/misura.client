@@ -1,12 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Utilities for veusz-baset plugins"""
+from copy import copy
+import re
 import numpy as np
+
 
 import veusz.plugins as plugins
 import veusz.document as document
 
 from .. import _
+from misura.canon.logger import Log as logging
 
 def iter_widgets(base, typename, direction = 0):
     """Yields all widgets of type `typename` starting from `base` widget.
@@ -204,3 +208,48 @@ class OperationWrapper(object):
             ds.m_update = up
             n += 1
         return n
+    
+    def _(self, *a, **k):
+        return _(*a, **k)
+    
+    def get_node_configuration(self, node, rule=False):
+        p = node.path
+        if rule:
+            regex = re.compile(rule.replace('\n', '|'))
+            if not regex.search(p):
+                raise self.plugins_module.ToolsPluginException(
+                        self._('The target does not conform to rule {}:\n {}').format(rule, p))
+        if not node.linked:
+            raise self.plugins_module.ToolsPluginException(
+                self._('The selected node does not seem to have an associated configuration') + p)
+        path = p.split(':')[-1]
+
+        configuration_proxy = node.linked.conf
+        if '/' in path:
+            configuration_proxy = configuration_proxy.toPath(path) 
+
+        ui = self.plugins_module.FieldConfigurationProxy.conf_module.InterfaceDialog(
+            configuration_proxy)
+        ui.setWindowTitle(self._('Review settings for ') + p)
+        r = ui.exec_()
+        if not r:
+            logging.info('Plugin execution aborted', r)
+            return False
+        return configuration_proxy
+    
+    def set_new_dataset(self, original_dataset, data, name, label, path):
+        """Create a new dataset by copying `original_dataset` and overwriting with `data`"""
+        old_unit = getattr(original_dataset, 'old_unit', 'volt')
+        new_dataset = copy(original_dataset)
+        new_dataset.tags = set([])
+        new_dataset.data = self.plugins_module.numpyCopyOrNone(data)
+        new_dataset.m_var = name
+        new_dataset.m_pos = 2
+        new_dataset.m_name = new_dataset.m_var
+        new_dataset.m_col = new_dataset.m_var
+        new_dataset.old_unit = old_unit
+        new_dataset.unit = 'volt'
+        new_dataset.m_percent = False
+        new_dataset.m_label = self._(label)
+        self.ops.append(
+            self.document_module.OperationDatasetSet(path, new_dataset))
