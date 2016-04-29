@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import functools
-from time import time
+from time import time, sleep
 import threading
 from traceback import format_exc
 import os
@@ -97,6 +97,11 @@ class MainWindow(QtGui.QMainWindow):
                 registry.progress.set_server(self.server)
 
         return registry.tasks
+
+    @property
+    def instrument_pid(self):
+        return 'Instrument: ' + self.name
+
 
     def __init__(self, doc=False, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -246,15 +251,14 @@ class MainWindow(QtGui.QMainWindow):
             self.instrumentDock = QtGui.QWidget()
         logging.debug('%s', self.server.describe())
         ri = self.server['runningInstrument']  # currently running
-        li = ri
         # compatibility with old tests
-        if self.server.has_key('lastInstrument'):
-            li = self.server['lastInstrument']  # configured, ready, finished
         if ri in ['None', '']:
-            ri = li
+            ri = self.server['lastInstrument']  # configured, ready, finished
+
         if ri not in ['None', '']:
             remote = getattr(self.server, ri)
-            self.updateInstrumentInterface(remote)
+            self.updateInstrumentInterface_when_instrument_is_ready(remote)
+
         if self.fixedDoc:
             return True
         # Automatically pop-up delayed start dialog
@@ -336,54 +340,15 @@ class MainWindow(QtGui.QMainWindow):
                       QtCore.QThreadPool.globalInstance().maxThreadCount())
 
 
-    def updateInstrumentInterface(self, remote=False, server=False, preset='default'):
+    def updateInstrumentInterface(self, remote=False):
+        name = remote['devpath']
         self.tasks.done('Waiting for server')
 
-        if server is not False:
-            self.setServer(server)
         if remote is False:
             remote = self.remote
         else:
             self.remote = remote
 
-        self._blockResetFileProxy = True
-        self.instrumentDock.hide()
-        name = self.remote['devpath']
-        self.name = name
-        logging.debug('Setting remote %s %s %s', remote, self.remote, name)
-        title = _('Misura Acquisition: %s (%s)') %  (name, self.remote['comment'])
-        self.setWindowTitle(title)
-        self.tray_icon.setToolTip(title)
-        pid = 'Instrument: ' + self.name
-        self.tasks.jobs(11, pid)
-        QtGui.qApp.processEvents()
-        # Close cameras
-        for p, (pic, win) in self.cameras.iteritems():
-            logging.debug('deleting cameras %s %s %s', p, pic, win)
-            pic.close()
-            win.hide()
-            win.close()
-            win.deleteLater()
-        self.cameras = {}
-        QtGui.qApp.processEvents()
-
-        self.tasks.job(1, pid, 'Preparing menus')
-        self.myMenuBar.close()
-        self.myMenuBar = MenuBar(server=self.server, parent=self)
-        self.setMenuWidget(self.myMenuBar)
-        logging.debug('%s', 'Done menubar')
-
-
-        # Remove any remaining subwindow
-        self.centralWidget().closeAllSubWindows()
-
-        self.tasks.job(1, pid, 'Controls')
-        for tb in self.toolbars:
-            self.removeToolBar(tb)
-            tb.close()
-            del tb
-        self.toolbars = []
-        logging.debug('%s', 'Cleaned toolbars')
         self.controls = Controls(self.remote, parent=self)
         logging.debug('%s', 'Created controls')
         self.controls.stopped_nosave.connect(self.stopped_nosave)
@@ -393,6 +358,7 @@ class MainWindow(QtGui.QMainWindow):
         self.addToolBar(self.controls)
         self.toolbars.append(self.controls)
         logging.debug('%s', 'Done controls')
+        pid = self.instrument_pid
         self.tasks.job(-1, pid, 'Status panel')
 
         self.logDock.hide()
@@ -460,7 +426,73 @@ class MainWindow(QtGui.QMainWindow):
         self.tasks.done(pid)
         return True
 
-    def setInstrument(self, remote=False, server=False, preset='default', selfcalled=False):
+    def updateInstrumentInterface_when_instrument_is_ready(self, remote):
+        if self.fixedDoc:
+            return False
+
+        if remote is False:
+            remote = self.remote
+        else:
+            self.remote = remote
+
+        if self.server['isRunning']:
+            return False
+
+        self.clean_interface(remote)
+
+        self.tasks.jobs(-1, 'Waiting for server')
+        if self.remote['initInstrument'] != 0:
+            self.reset_instrument_timer.singleShot(
+                1000,
+                lambda: self.updateInstrumentInterface_when_instrument_is_ready(
+                    remote)
+            )
+            return False
+
+        self.updateInstrumentInterface(remote)
+        return True
+
+    def clean_interface(self, remote=False):
+        self._blockResetFileProxy = True
+        self.instrumentDock.hide()
+        name = self.remote['devpath']
+        self.name = name
+        logging.debug('Setting remote %s %s %s', remote, self.remote, name)
+        title = _('Misura Acquisition: %s (%s)') %  (name, self.remote['comment'])
+        self.setWindowTitle(title)
+        self.tray_icon.setToolTip(title)
+        pid = self.instrument_pid
+        self.tasks.jobs(11, pid)
+        QtGui.qApp.processEvents()
+        # Close cameras
+        for p, (pic, win) in self.cameras.iteritems():
+            logging.debug('deleting cameras %s %s %s', p, pic, win)
+            pic.close()
+            win.hide()
+            win.close()
+            win.deleteLater()
+        self.cameras = {}
+        QtGui.qApp.processEvents()
+
+        self.tasks.job(1, pid, 'Preparing menus')
+        self.myMenuBar.close()
+        self.myMenuBar = MenuBar(server=self.server, parent=self)
+        self.setMenuWidget(self.myMenuBar)
+        logging.debug('%s', 'Done menubar')
+
+
+        # Remove any remaining subwindow
+        self.centralWidget().closeAllSubWindows()
+
+        self.tasks.job(1, pid, 'Controls')
+        for tb in self.toolbars:
+            self.removeToolBar(tb)
+            tb.close()
+            del tb
+        self.toolbars = []
+        logging.debug('%s', 'Cleaned toolbars')
+
+    def setInstrument(self, remote=False, server=False, preset='default'):
         if self.fixedDoc:
             return False
 
@@ -474,14 +506,12 @@ class MainWindow(QtGui.QMainWindow):
         if self.server['isRunning']:
             return False
 
+        self.clean_interface(remote)
+
         self.init_instrument(soft=True, name=preset)
-        self.tasks.jobs(-1, 'Waiting for server')
-        self.reset_instrument_timer.singleShot(
-            2000,
-            lambda: self.updateInstrumentInterface(remote,
-                                                   server,
-                                                   preset)
-        )
+        sleep(0.5)
+        self.updateInstrumentInterface_when_instrument_is_ready(remote)
+
 
 
     def addCamera(self, obj, role='', analyzer='hsm'):
