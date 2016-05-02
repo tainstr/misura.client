@@ -62,12 +62,19 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.set_doc(doc)
 
     def double_clicked(self, index):
-        n = self.model().data(index, role=Qt.UserRole)
-        if isinstance(n, filedata.DatasetEntry) :
-            self.plot(n)
+        node = self.model().data(index, role=Qt.UserRole)
+        for domain in self.domains:
+            r = domain.double_clicked(node)
+            if r:
+                logging.debug('double_clicked', node.path, domain)
+                return True
+        
+        if isinstance(node, filedata.DatasetEntry) :
+            self.plot(node)
         else:
-            print 'Not a valid node', n
-            
+            logging.error('Not a valid node', node)
+            return False
+        return True
     # 3rd party domains utilities
     veusz_plugins_module = veusz.plugins
     veusz_PluginDialog = veusz.dialogs.plugin.PluginDialog
