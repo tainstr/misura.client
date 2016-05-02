@@ -214,12 +214,20 @@ class Interface(QtGui.QTabWidget):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
+        
+    def show_section(self, name):
+        sections = self.sectionsMap.keys()
+        if name not in sections:
+            logging.warning('No section named', name)
+        i = sections.index(name)
+        self.setCurrentIndex(i)
+        
 
     def redraw(self, foo=0):
         self.close()
         wg = Section(
             self.server, self.remObj, self.sections['Main'], parent=self)
-        self.sectionsMap = {'Main': wg}
+        self.sectionsMap = collections.OrderedDict({'Main': wg})
         area = QtGui.QScrollArea(self)
         area.setWidget(wg)
         area.setWidgetResizable(True)

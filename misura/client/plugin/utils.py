@@ -227,19 +227,22 @@ class OperationWrapper(object):
         configuration_proxy = node.linked.conf
         if '/' in path:
             configuration_proxy = configuration_proxy.toPath(path) 
-
+        return configuration_proxy
+    
+    def show_node_configuration(self, configuration_proxy, section='Main'):
         ui = self.plugins_module.FieldConfigurationProxy.conf_module.InterfaceDialog(
             configuration_proxy)
-        ui.setWindowTitle(self._('Review settings for ') + p)
+        ui.setWindowTitle(self._('Review settings for ') + configuration_proxy['fullpath'])
+        ui.interface.show_section(section)
         r = ui.exec_()
         if not r:
             logging.info('Plugin execution aborted', r)
             return False
-        return configuration_proxy
+        return True
     
-    def set_new_dataset(self, original_dataset, data, name, label, path):
+    def set_new_dataset(self, original_dataset, data, name, label, path, unit='volt'):
         """Create a new dataset by copying `original_dataset` and overwriting with `data`"""
-        old_unit = getattr(original_dataset, 'old_unit', 'volt')
+        old_unit = getattr(original_dataset, 'old_unit', unit)
         new_dataset = copy(original_dataset)
         new_dataset.tags = set([])
         new_dataset.data = self.plugins_module.numpyCopyOrNone(data)
@@ -248,7 +251,7 @@ class OperationWrapper(object):
         new_dataset.m_name = new_dataset.m_var
         new_dataset.m_col = new_dataset.m_var
         new_dataset.old_unit = old_unit
-        new_dataset.unit = 'volt'
+        new_dataset.unit = unit
         new_dataset.m_percent = False
         new_dataset.m_label = self._(label)
         self.ops.append(
