@@ -187,8 +187,8 @@ class MenuBar(QtGui.QMenuBar):
         name_from_preset = ' '.join(preset.split('_'))
 
         for act, aname in self.lstInstruments:
-            act.setCheckable(True)
             if aname == name and preset in ['default', 'factory_default'] or aname == name_from_preset:
+                act.setCheckable(True)
                 act.setChecked(True)
 
         self.measure.clear()

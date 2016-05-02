@@ -433,9 +433,6 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.remote = remote
 
-        if self.server['isRunning']:
-            return False
-
         self.clean_interface(remote)
 
         self.tasks.jobs(-1, 'Waiting for server')
