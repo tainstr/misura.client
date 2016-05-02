@@ -237,7 +237,7 @@ class Active(object):
 
     @lockme
     def get(self, *args):
-        self._call_function_then_emitchanged_and_checkflags(
+        return self._call_function_then_emitchanged_and_checkflags(
             self.remObj.get, *args)
 
     @lockme

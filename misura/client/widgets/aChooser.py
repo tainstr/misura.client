@@ -78,3 +78,18 @@ class aChooser(ActiveWidget):
         idx = self.adapt2gui(self.current)
         self.combo.setCurrentIndex(self.adapt2gui(self.current))
         self.combo.blockSignals(False)
+
+
+class async_aChooser(aChooser):
+    def __init__(self, server, path, prop, parent=None):
+        aChooser.__init__(self, server, path,  prop, parent)
+
+    def set(self, val, *foo):
+        """Set a new value `val` to server. Convert val into server units."""
+        val = self.adapt2srv(val)
+        if val == self.current:
+            logging.debug('Not setting',self.handle, repr(val))
+            return True
+
+        QtCore.QTimer.singleShot(0, lambda: self.remObj.set(self.handle, val))
+        return self.get()

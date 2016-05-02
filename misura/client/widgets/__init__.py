@@ -9,7 +9,7 @@ from .. import _
 from active import Active, ActiveObject, ActiveWidget, info_dialog, RunMethod
 from aBoolean import aBoolean,  aBooleanAction
 from aButton import aButton
-from aChooser import aChooser
+from aChooser import aChooser, async_aChooser
 from aDict import aDict
 from aMeta import aMeta
 from aMaterial import aMaterial
@@ -53,7 +53,10 @@ def build(server, remObj, prop, parent=None):
         elif T == 'Boolean':
             obj = aBoolean(*arg)
         elif T in ['Chooser', 'Menu', 'FileList']:
-            obj = aChooser(*arg)
+            if prop['handle'] == 'motorStatus':
+                obj = async_aChooser(*arg)
+            else:
+                obj = aChooser(*arg)
         elif T == 'Preset':
             obj = PresetManager(remObj, parent=parent)
         elif T in ['Integer', 'Float']:
