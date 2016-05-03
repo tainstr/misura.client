@@ -19,9 +19,12 @@ from .. import parameters
 from . import menubar
 from . import testwindow
 
+from traceback import print_exc
+
 try:
     from .. import misura3
 except:
+    print_exc()
     misura3 = False
 
 

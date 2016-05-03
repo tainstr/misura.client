@@ -30,23 +30,9 @@ HeatingCyclePoint = {
     'chk': tables.BoolCol(pos=3)
 }
 
-base_dict = {}
-ao(base_dict, 'name', 'String', 'Name', name='Name')
-ao(base_dict, 'mro', 'List', name='mro', attr=['Hidden'])
-ao(base_dict, 'comment', 'String', '')
-ao(base_dict, 'dev', 'String', attr=['Hidden'])
-ao(base_dict, 'devpath', 'String', attr=['Hidden'])
-ao(base_dict, 'fullpath', 'String', attr=['Hidden'])
-ao(base_dict, 'zerotime', 'Float', name='Start time', attr=['Hidden'])
-ao(base_dict, 'initInstrument', 'Progress', attr=['Hidden'])
+base_dict = dataimport.base_dict()
 
-measure_dict = deepcopy(base_dict)
-measure_dict['name']['current'] = 'Measure'
-ao(measure_dict, 'nSamples', 'Integer', 1, attr=['Hidden'])
-ao(measure_dict, 'id', 'String', 'Misura3 ID')
-ao(measure_dict, 'uid', 'String', 'Unique ID')
-ao(measure_dict, 'date', 'Date', '00:00:00 01/01/2000', name='Test date')
-ao(measure_dict, 'elapsed', 'Float', name='Test duration', unit='second')
+measure_dict = dataimport.measure_dict()
 ao(measure_dict, 'maxT', 'Meta', name='Maximum temperature')
 ao(measure_dict, 'end', 'Meta', name='End of test')
 ao(measure_dict, 'maxHeatingRate', 'Meta', name='Max heating rate')
@@ -92,7 +78,7 @@ mi.Value(-rate/60)
 mi.Point(idx=w)
 """, 'Maximum Cooling Rate', parent='maxCoolingRate')
 
-smp_dict = deepcopy(base_dict)
+smp_dict = dataimport.base_dict()
 smp_dict['name']['current'] = 'Sample'
 ao(smp_dict, 'idx', 'Integer', attr=['Hidden'])
 ao(smp_dict, 'ii', 'Integer', attr=['Hidden'])
@@ -197,28 +183,16 @@ mi.Value(ratio[i])""", parent='Melting')
 ao(hsm_smp_dict, 'param_melt', 'Float', 0.333,
    'Ratio h/w for Melting', parent='Melting')
 
-
-
-
-kiln_dict = deepcopy(base_dict)
+kiln_dict = dataimport.kiln_dict()
 kiln_dict['name']['current'] = 'Kiln'
 ao(kiln_dict, 'Regulation_Kp', 'Float', 0, 'Proportional Factor')
 ao(kiln_dict, 'Regulation_Ki', 'Float', 0, 'Integral Factor')
 ao(kiln_dict, 'Regulation_Kd', 'Float', 0, 'Derivative Factor')
-ao(kiln_dict, 'curve', 'Hidden', [[0, 0]], 'Heating curve')
-ao(kiln_dict, 'thermalCycle', 'ThermalCycle', 'default')
-ao(kiln_dict, 'T', 'Float', 0, 'Temperature', unit='celsius')
-ao(kiln_dict, 'P', 'Float', 0, 'Power', unit='percent')
-ao(kiln_dict, 'S', 'Float', 0, 'Setpoint', unit='celsius')
 
-instr_dict = deepcopy(base_dict)
-ao(instr_dict, 'nSamples', 'Integer', 1, attr=['Hidden'])
+instr_dict = dataimport.instr_dict()
 ao(instr_dict, 'camera', 'Role', ['camerapath', 'default'])
-ao(instr_dict, 'devices', 'List', attr=['Hidden'])
-ao(instr_dict, 'initTest', 'Progress', attr=['Hidden'])
-ao(instr_dict, 'closingTest', 'Progress', attr=['Hidden'])
 
-camera_dict = deepcopy(instr_dict)
+camera_dict = dataimport.instr_dict()
 camera_dict['name']['current'] = 'camera'
 camera_dict['devpath']['current'] = 'camerapath'
 camera_dict['dev']['current'] = 'camera'
@@ -230,18 +204,12 @@ ao(camera_dict, 'Analysis_instrument', 'String', 'hsm', attr=['Hidden'])
 ao(camera_dict, 'Analysis_Simulation', 'Boolean', True, attr=['Hidden'])
 
 
-anl_dict = deepcopy(base_dict)
+anl_dict = dataimport.base_dict()
 ao(anl_dict, 'blackWhite', 'Boolean', True, attr=['Hidden'])
 ao(anl_dict, 'adaptiveThreshold', 'Boolean', False, attr=['Hidden'])
 ao(anl_dict, 'autoregion', 'Boolean', False, attr=['Hidden'])
 
-server_dict = deepcopy(base_dict)
-server_dict['name']['current'] = 'server'
-ao(server_dict, 'name', 'String', 'server')
-ao(server_dict, 'isRunning', 'Boolean', False)
-ao(server_dict, 'runningInstrument', 'String')
-ao(server_dict, 'lastInstrument', 'String')
-ao(server_dict, 'log', 'Log')
+server_dict = dataimport.server_dict()
 
 empty = {'self': deepcopy(camera_dict)}
 
@@ -263,7 +231,7 @@ instr_tree = {'self': instr_dict,
 # Main tree
 tree_dict = {'self': server_dict,
              'kiln': {'self': kiln_dict},
-             'beholder': {'self': deepcopy(base_dict),
+             'beholder': {'self': deepcopy(dataimport.base_dict()),
                           'idx0': {'self': camera_dict}
                           }
 
@@ -426,6 +394,7 @@ class Converter(dataimport.Converter):
         zerotime = mktime(tdate0.timetuple())
         tdate = tdate0.strftime("%H:%M:%S, %d/%m/%Y")
         logging.debug('%s %s', self.test[m3db.fprv.Data].strftime("%H:%M:%S, %d/%m/%Y"))
+        instrobj.measure['zerotime'] = zerotime
         instrobj.measure['name'] = self.test[m3db.fprv.Desc_Prova]
         instrobj.measure['comment'] = self.test[m3db.fprv.Note]
         instrobj.measure['date'] = tdate
