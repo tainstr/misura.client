@@ -8,7 +8,7 @@ from veusz import utils as vutils
 # Check cv is installed
 import cv2 
 
-console= False
+console = False
 debug = False
 cli=pathClient+'\\'
 bin=cli+'bin\\'
@@ -18,7 +18,9 @@ vzd=res+'..\\'
 
 rthooks=[cli+'\\installer\\rthook_pyqt4.py']
 # Hidden imports
-him=['misura.canon','misura.canon.csutil','misura.client','cv2','scipy.special._ufuncs_cxx','astropy'  ]
+him=['misura.canon','misura.canon.csutil','misura.client','cv2','scipy.special._ufuncs_cxx',
+'astropy', 'scipy.odr' ,'scipy.odr.odrpack','veusz.helpers.qtloops' ,'veusz.helpers.qtmml', 
+'veusz.helpers.recordpaint', 'veusz.helpers._nc_cntr' ]
 # Excluded imports
 exim=['Tkinter']
 Analyses=[]
