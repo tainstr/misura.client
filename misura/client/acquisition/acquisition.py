@@ -294,14 +294,6 @@ class MainWindow(QtGui.QMainWindow):
 
     def add_graph(self):
         # PLOT window
-        w = getattr(self, 'summaryPlot', False)
-        g = getattr(self, 'graphWin', False)
-        if w:
-            w.close()
-            del w
-        if g:
-            self.graphWin.deleteLater()
-            del self.graphWin
         self.summaryPlot = graphics.Plot()
         self.graphWin = self.centralWidget().addSubWindow(
             self.summaryPlot, subWinFlags)
@@ -309,12 +301,6 @@ class MainWindow(QtGui.QMainWindow):
         self.graphWin.hide()
 
     def add_table(self):
-            # Data Table (tabular view) window
-        w = getattr(self, 'dataTable', False)
-        if w:
-            w.close()
-            del w
-            self.tableWin.deleteLater()
         self.dataTable = fileui.SummaryView(parent=self)
         self.tableWin = self.centralWidget().addSubWindow(
             self.dataTable, subWinFlags)
