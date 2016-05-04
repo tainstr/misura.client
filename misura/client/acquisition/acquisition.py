@@ -33,6 +33,7 @@ from .results import Results
 from .. import graphics
 from ..database import UploadThread
 from ..filedata import RemoteFileProxy
+from . import windows
 
 from PyQt4 import QtGui, QtCore
 
@@ -411,7 +412,12 @@ class MainWindow(QtGui.QMainWindow):
                 p = functools.partial(obj2.hide_show, emit=False)
                 self.connect(
                     obj1, QtCore.SIGNAL('hide_show_col(QString,int)'), p)
-        self.centralWidget().tileSubWindows()
+
+        self.reset_instrument_timer.singleShot(
+                500,
+                lambda: windows.arrange(self.centralWidget(), self.name)
+            )
+
         self.tasks.done(pid)
         return True
 

@@ -7,6 +7,7 @@ from ..connection import LoginWindow, addrConnection
 from ..confwidget import RecentMenu
 from .. import parameters as params
 from misura.client.helpmenu import HelpMenu
+from . import windows
 
 from PyQt4 import QtGui, QtCore
 import functools
@@ -176,6 +177,8 @@ class MenuBar(QtGui.QMenuBar):
             d.hide()
         else:
             d.show()
+
+        windows.arrange(self.parent().centralWidget(), self.parent().name)
 
     def setInstrument(self, remote, server):
         self.setServer(server)
