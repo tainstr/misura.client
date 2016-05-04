@@ -3,7 +3,7 @@
 """Tree visualization of opened misura Files in a document."""
 from misura.canon.logger import Log as logging
 from misura.canon.plugin import navigator_domains
-
+from misura.canon.plugin.domains import node, nodes
 import veusz.document as document
 import veusz.plugins
 import veusz.dialogs
@@ -12,11 +12,12 @@ from PyQt4.QtCore import Qt
 from .. import _
 import quick
 from .. import filedata
+from .. import live
 from .. import plugin
 from ..clientconf import confdb
 
 class Navigator(quick.QuickOps, QtGui.QTreeView):
-
+    previous_selection = False
     """List of currently opened misura Tests and reference to datasets names"""
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=set([filedata.dstats.loaded]), cols=1):
         QtGui.QTreeView.__init__(self, parent)
@@ -27,11 +28,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.setDragDropMode(QtGui.QAbstractItemView.DragOnly)
         self.setDragEnabled(True)
         self.setAlternatingRowColors(True)
+        self.setExpandsOnDoubleClick(False)
         self.setSelectionBehavior(QtGui.QTreeView.SelectItems)
         self.setSelectionMode(QtGui.QTreeView.ExtendedSelection)
         self.setUniformRowHeights(True)
         self.setIconSize(QtCore.QSize(24, 16))
         self.connect(self, QtCore.SIGNAL('clicked(QModelIndex)'), self.select)
+        self.connect(self, QtCore.SIGNAL('updateView()'), self.update_view, QtCore.Qt.QueuedConnection)
         self.domains = []
         done = set([])
         for domain in navigator_domains:
@@ -63,17 +66,21 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def double_clicked(self, index):
         node = self.model().data(index, role=Qt.UserRole)
+        self.previous_selection = node.path
         for domain in self.domains:
             r = domain.double_clicked(node)
             if r:
                 logging.debug('double_clicked', node.path, domain)
+                self.restore_selection()
                 return True
         
         if isinstance(node, filedata.DatasetEntry) :
             self.plot(node)
         else:
             logging.error('Not a valid node', node)
+            self.restore_selection()
             return False
+        self.restore_selection()
         return True
     # 3rd party domains utilities
     veusz_plugins_module = veusz.plugins
@@ -92,13 +99,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return self.model().hide_show(*a, **k)
 
     def set_doc(self, doc):
+        self.previous_selection = False
         self.doc = doc
         self.cmd = document.CommandInterface(self.doc)
         self.setWindowTitle(_('Opened Misura Tests'))
         self.mod = self.doc.model
         self.mod.ncols = self.ncols
         self.setModel(self.mod)
-        # self.mod.modelReset.connect(self.restore_selection)
         self.expandAll()
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.set_status()
@@ -107,26 +114,51 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.setColumnWidth(0, 400)
 
     def update_view(self):
+        if not self.previous_selection:
+            self.previous_selection = self.current_node_path
         n = self.mainwindow.plot.getPageNumber()
         page = self.doc.basewidget.getPage(n)
         self.model().refresh(True)
         self.model().set_page(page.path)
-        
         self.ensure_sync_of_view_and_model()
 
     def refresh_model(self, ismodified=True):
+        if not self.previous_selection:
+            self.previous_selection = self.current_node_path
         if ismodified:
             if self.model().refresh(False):
                 self.ensure_sync_of_view_and_model()
-
-
-
+    
     def ensure_sync_of_view_and_model(self):
-        self.collapseAll()
-        self.expandAll()
+        if not self.previous_selection:
+            self.collapseAll()
+            self.expandAll()
+            return 
         self.restore_selection()
+        
+    @property
+    def current_node_path(self):
+        node = self.model().data(self.currentIndex(), role=QtCore.Qt.UserRole)
+        if node:
+            return node.path
+        return False
+        
+    def restore_selection(self):
+        """Restore previous selection after a model reset."""
+        if not self.previous_selection:
+            return
+        node = self.model().tree.traverse(self.previous_selection)
+        self.previous_selection = False
+        if not node:
+            return
+        jdx = self.model().index_path(node)
+        self.selectionModel().setCurrentIndex(
+                    jdx[-1], QtGui.QItemSelectionModel.Select)
+        self.scrollTo(jdx[-1])
+        self.setExpanded(jdx[-1], True)
 
     def set_status(self):
+        self.previous_selection = self.current_node_path
         final = set()
         for i, s in enumerate(filedata.dstats):
             act = self.acts_status[i]
@@ -138,8 +170,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.status = final
         self.model().status = final
         logging.debug('%s %s', 'STATUS SET TO', final)
-        self.collapseAll()
-        self.expandAll()
+        self.ensure_sync_of_view_and_model()
 
     def select(self, idx):
         if not idx.isValid():
@@ -155,11 +186,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.mainwindow.treeedit.selectWidget(wg)
         self.emit(QtCore.SIGNAL('select(QString)'), plotpath[0])
 
-    def restore_selection(self):
-        """Restore previous selection after a model reset."""
 
-        if(len(self.selectedIndexes()) > 0):
-            self.scrollTo(self.selectedIndexes()[0])
             
     def add_status_actions(self, menu):
         menu.addSeparator()
@@ -232,6 +259,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return self.multi_menu
 
     def showContextMenu(self, pt):
+        self.previous_selection = self.current_node_path
         sel = self.selectedIndexes()
         n = len(sel)
         node = self.model().data(self.currentIndex(), role=Qt.UserRole)
@@ -265,3 +293,4 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.model().pause(1)
         menu.exec_(self.mapToGlobal(pt))
         self.model().pause(0)
+        self.update_view()
