@@ -128,6 +128,7 @@ class MainWindow(QtGui.QMainWindow):
         print self.fixedDoc, confdb['autoConnect'], len(confdb.recent_server)
         if not self.fixedDoc and confdb['autoConnect'] and len(confdb.recent_server) > 0:
             self.set_addr(confdb.recent_server[-1][0])
+        self.showMaximized()
 
     def notify(self,msg):
         self.tray_icon.show()
@@ -410,6 +411,7 @@ class MainWindow(QtGui.QMainWindow):
                 p = functools.partial(obj2.hide_show, emit=False)
                 self.connect(
                     obj1, QtCore.SIGNAL('hide_show_col(QString,int)'), p)
+        self.centralWidget().tileSubWindows()
         self.tasks.done(pid)
         return True
 
