@@ -53,8 +53,9 @@ def build(server, remObj, prop, parent=None):
         elif T == 'Boolean':
             obj = aBoolean(*arg)
         elif T in ['Chooser', 'Menu', 'FileList']:
-            choosers = { 'motorStatus': async_aChooser(*arg) }
-            obj = choosers.get(prop['handle'], aChooser(*arg))
+            choosers = { 'motorStatus': async_aChooser }
+            chooser = choosers.get(prop['handle'], aChooser)
+            obj = chooser(*arg)
         elif T == 'Preset':
             obj = PresetManager(remObj, parent=parent)
         elif T in ['Integer', 'Float']:
