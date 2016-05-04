@@ -130,6 +130,17 @@ class OperationWrapper(object):
     translate = [_]
     plugins_module = plugins
     document_module = document
+    
+    @property
+    def registry(self):
+        from .. import live
+        return live.registry
+    
+    @property
+    def tasks(self):
+        r = getattr(self.registry, 'tasks', False)
+        return r
+    
     @property
     def ops(self):
         if not self._ops:

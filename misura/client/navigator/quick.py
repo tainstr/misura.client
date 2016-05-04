@@ -46,15 +46,11 @@ class QuickOps(object):
 #
     def _load(self, node):
         """Load or reload a dataset"""
-        op = OperationMisuraImport.from_dataset_in_file(
-            node.path, node.linked.filename)
-        self.doc.applyOperation(op)
+        self.doc._load(node.path, node.linked.filename)
         
     @node
     def load_rule(self, node, rule):
-        op = OperationMisuraImport.from_rule(
-            rule, node.linked.filename)
-        self.doc.applyOperation(op)
+        self.doc.load_rule(node.linked.filename, rule)
         
     @node
     def load(self, node=False):

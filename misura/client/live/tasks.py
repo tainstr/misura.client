@@ -112,7 +112,7 @@ class LocalTasks(QtGui.QWidget):
         self.connect(self, QtCore.SIGNAL('jobs(int)'), 
             self._jobs, conntype)
         
-        self.connect(self, QtCore.SIGNAL('jobs(int,QString)'),
+        self.connect(self, QtCore.SIGNAL('jobs(int,QString,PyQt_PyObject)'),
                      self._jobs, conntype)
 
         self.connect(self, QtCore.SIGNAL('job(int,QString,QString)'), 
@@ -149,7 +149,7 @@ class LocalTasks(QtGui.QWidget):
             self.log.append(msg)
 
     @lockme
-    def _jobs(self, tot, pid='Operation'):
+    def _jobs(self, tot, pid='Operation', abort = lambda *a, **k: 0):
         """Initialize a new progress bar for job `pid` having total steps `tot`."""
         wg = self.prog.get(pid)
         if wg:
@@ -164,8 +164,9 @@ class LocalTasks(QtGui.QWidget):
         lbl = QtGui.QLabel(pid, parent=wg)
         btn = QtGui.QPushButton('X', parent=wg)
         wg._func_close = functools.partial(self.done, pid)
+        wg._func_abort = abort # keep a reference
         btn.connect(btn, QtCore.SIGNAL('clicked()'), wg._func_close)
-
+        btn.connect(btn, QtCore.SIGNAL('clicked()'), abort)
         lay = QtGui.QHBoxLayout()
         lay.addWidget(lbl)
         lay.addWidget(pb)
@@ -177,9 +178,9 @@ class LocalTasks(QtGui.QWidget):
         if not self.isVisible():
             self.ch.emit()
 
-    def jobs(self, tot, pid='Operation'):
+    def jobs(self, tot, pid='Operation', abort=lambda *a, **k: 0):
         """Thread-safe call for _jobs()"""
-        self.emit(QtCore.SIGNAL('jobs(int,QString)'), tot, pid)
+        self.emit(QtCore.SIGNAL('jobs(int,QString,PyQt_PyObject)'), tot, pid, abort)
 
     @lockme
     def _job(self, step, pid='Operation', label=''):
