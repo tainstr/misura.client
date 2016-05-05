@@ -37,7 +37,9 @@ def arrange_dilatometer(parent_widget):
 
     sizes = {
         'Camera (Left)': [0, 0, subwindows_width, subwindows_heigth],
-        'Camera (Right)': [subwindows_width, 0, subwindows_width, subwindows_heigth]
+        'Camera (Right)': [subwindows_width, 0, subwindows_width, subwindows_heigth],
+        'Camera (Height)': [0, 0, subwindows_width, subwindows_heigth],
+        'Camera (Base)': [subwindows_width, 0, subwindows_width, subwindows_heigth],
     }
 
     for win in visible_windows:
