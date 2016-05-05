@@ -19,8 +19,12 @@ def arrange_default(parent_widget):
 
 def arrange_dilatometer(parent_widget):
     visible_windows = visible_windows_of(parent_widget)
+    number_of_visible_windows = len(visible_windows)
+    has_cameras = reduce(lambda  acc, cur: acc or 'Camera' in cur.windowTitle(),
+                         visible_windows,
+                         False)
 
-    if len(visible_windows) > 3:
+    if number_of_visible_windows  > 3 or not has_cameras:
         arrange_default(parent_widget)
         return
 
