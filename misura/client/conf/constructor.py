@@ -186,6 +186,32 @@ class Interface(QtGui.QTabWidget):
         if remObj is False:
             remObj = server
         self.remObj = remObj
+
+        
+        self.rebuild(prop_dict)
+        self._newly_created = True
+        self.menu = QtGui.QMenu(self)
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.connect(
+            self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
+        
+    def show_section(self, name):
+        sections = self.sectionsMap.keys()
+        if name not in sections:
+            logging.warning('No section named', name)
+        i = sections.index(name)
+        self.setCurrentIndex(i)
+        
+    def showEvent(self, event):
+        print 'SHOWEVENT'
+        if self._newly_created:
+            self._newly_created = False
+        else:
+            self.rebuild()
+        
+    def rebuild(self, prop_dict = False):
+        """Rebuild the full widget"""
+        self.clear()
         if not prop_dict:
             self.remObj.connect()
             prop_dict = self.remObj.describe()
@@ -193,7 +219,7 @@ class Interface(QtGui.QTabWidget):
             logging.critical(
                 'Impossible to get object description %s', self.remObj._Method__name)
             return
-        self.sections = orgSections(prop_dict, remObj._readLevel)
+        self.sections = orgSections(prop_dict, self.remObj._readLevel)
         self.prop_dict = prop_dict
         self.name = ''
         if prop_dict.has_key('name'):
@@ -209,18 +235,6 @@ class Interface(QtGui.QTabWidget):
                 QtGui.QKeySequence(_('Ctrl+S')), self)
             self.connect(self.scSave, QtCore.SIGNAL('activated()'), self.sectionsMap[
                          'Main'].widgetsMap['preset'].save_current)
-
-        self.menu = QtGui.QMenu(self)
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.connect(
-            self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
-        
-    def show_section(self, name):
-        sections = self.sectionsMap.keys()
-        if name not in sections:
-            logging.warning('No section named', name)
-        i = sections.index(name)
-        self.setCurrentIndex(i)
         
 
     def redraw(self, foo=0):

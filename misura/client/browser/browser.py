@@ -19,7 +19,7 @@ from .. import parameters
 from . import menubar
 from . import testwindow
 
-from traceback import print_exc
+from traceback import print_exc, format_exc
 
 try:
     from .. import misura3
@@ -135,6 +135,7 @@ class MainWindow(QtGui.QMainWindow):
         try:
             doc = filedata.MisuraDocument(path)
         except Exception as error:
+            logging.error(format_exc())
             self.myMenuBar.recentFile.conf.rem_file(path)
             QtGui.QMessageBox.warning(self, 'Error', str(error))
             return False
