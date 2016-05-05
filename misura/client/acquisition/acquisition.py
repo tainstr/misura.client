@@ -751,6 +751,7 @@ class MainWindow(QtGui.QMainWindow):
             return False
 
         # Start download thread
+        self.server.storage.refresh()
         sy = TransferThread(outfile=False, uid=uid, server=self.server, dbpath=dbpath)
         sy.set_tasks(self.tasks)
         sy.start()
