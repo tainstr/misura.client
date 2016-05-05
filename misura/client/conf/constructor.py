@@ -5,6 +5,7 @@ from misura.canon.logger import Log as logging
 import functools
 import os
 import collections
+from copy import deepcopy
 
 from misura.canon import option
 from misura.canon.option import sorter, prop_sorter
@@ -186,10 +187,9 @@ class Interface(QtGui.QTabWidget):
         if remObj is False:
             remObj = server
         self.remObj = remObj
-
-        
+        self.prop_dict = {}
+        self.prop_keys = []
         self.rebuild(prop_dict)
-        self._newly_created = True
         self.menu = QtGui.QMenu(self)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
@@ -204,23 +204,27 @@ class Interface(QtGui.QTabWidget):
         
     def showEvent(self, event):
         print 'SHOWEVENT'
-        if self._newly_created:
-            self._newly_created = False
-        else:
-            self.rebuild()
+        self.rebuild()
         
     def rebuild(self, prop_dict = False):
         """Rebuild the full widget"""
-        self.clear()
         if not prop_dict:
             self.remObj.connect()
+            k = set(self.prop_keys)
+            rk = set(self.remObj.keys())
+            d = k.symmetric_difference(rk)
+            if len(d) == 0:
+                logging.debug('Interface.rebuild not needed: options are equal.')
+                return 
             prop_dict = self.remObj.describe()
         if not prop_dict:
             logging.critical(
                 'Impossible to get object description %s', self.remObj._Method__name)
             return
+        self.clear()
         self.sections = orgSections(prop_dict, self.remObj._readLevel)
         self.prop_dict = prop_dict
+        self.prop_keys = self.prop_dict.keys()
         self.name = ''
         if prop_dict.has_key('name'):
             self.name = prop_dict['name']['current']
@@ -284,6 +288,7 @@ class Interface(QtGui.QTabWidget):
         for i in range(self.count()):
             logging.debug('%s', 'remove tab')
             self.removeTab(self.currentIndex())
+        self.clear()
 
     def update(self):
         """Cause all widgets to re-register for an update"""

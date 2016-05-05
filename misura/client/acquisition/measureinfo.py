@@ -78,11 +78,11 @@ class MeasureInfo(QtGui.QTabWidget):
     nsmp = 0
 
     def refreshSamples(self, *foo):
+        print 'REFRESH SAMPLES'
         #		nsmp=self.remote.measure['nSamples']
         nsmp = self.nobj.current
         if self.nsmp == nsmp:
-            logging.debug(
-                '%s %s %s', 'NO CHANGE in samples number', self.nsmp, nsmp)
+            logging.debug('NO CHANGE in samples number', self.nsmp, nsmp)
             return False
         self.nsmp = nsmp
         self.clear()
@@ -96,12 +96,11 @@ class MeasureInfo(QtGui.QTabWidget):
             self.statusView = False
         self.addTab(self.measureView, 'Measure')
         self.addTab(self.thermalCycleView, 'Thermal Cycle')
-        logging.debug(
-            '%s %s', 'REFRESH SAMPLES', self.remote.measure['nSamples'])
+        logging.debug('REFRESH SAMPLES', self.remote.measure['nSamples'])
         for i in range(self.nsmp):
             sample = getattr(self.remote, 'sample' + str(i), False)
             if not sample:
-                logging.debug('%s %s', 'Missing sample object nr.', i)
+                logging.debug('Missing sample object nr.', i)
                 continue
             self.addTab(conf.Interface(
                 self.remote.parent(), sample, sample.describe(), self), 'Sample' + str(i))

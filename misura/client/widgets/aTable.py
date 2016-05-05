@@ -41,7 +41,6 @@ class aTablePointDelegate(QtGui.QItemDelegate):
         mod = index.model()
         col = index.column()
         colType = mod.header[col][1]
-        logging.debug('%s', colType)
         if colType in ['Float', 'Integer']:
             val = mod.data(index)
             print 'setting editor data',val
@@ -63,7 +62,6 @@ class aTablePointDelegate(QtGui.QItemDelegate):
     def setModelData(self, editor, model, index):
         col = index.column()
         colType = model.header[col][1]
-        logging.debug('%s', colType)
         if colType in ['Float', 'Integer']:
             val = editor.text()
             val = editor.valueFromText(val)
@@ -114,7 +112,6 @@ class aTableModel(QtCore.QAbstractTableModel):
         if orientation != QtCore.Qt.Horizontal:
             return
         if role == QtCore.Qt.DisplayRole:
-            logging.debug('%s', self.header)
             return self.header[section][0]
 
     def up(self):
