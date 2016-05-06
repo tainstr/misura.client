@@ -181,6 +181,9 @@ class MenuBar(QtGui.QMenuBar):
         else:
             d.show()
 
+        self.arrange_windows()
+
+    def arrange_windows(self):
         windows.arrange(self.parent().centralWidget(), self.parent().name)
 
     def setInstrument(self, remote, server):
@@ -206,6 +209,10 @@ class MenuBar(QtGui.QMenuBar):
         # TODO: Share windows definitions with mainwin?
         self.windows['measureDock'] = parent.measureDock
         self.showMeasureDock = functools.partial(self.hideShow, 'measureDock')
+        act = self.view_menu.addAction(_('Arrange Windows'), self.arrange_windows)
+        act.setChecked(False)
+        act.setCheckable(False)
+
         act = self.view_menu.addAction(
             _('Test Configuration'), self.showMeasureDock)
         self.lstActions.append((act, 'measureDock'))
