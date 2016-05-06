@@ -35,6 +35,9 @@ class MenuBar(QtGui.QMenuBar):
         self.settings = self.addMenu(_('Settings'))
         self.connect(
             self.settings, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
+        self.view_menu = self.addMenu(_('View'))
+        self.connect(
+            self.view_menu, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
         if self.fixedDoc is False:
             self.measure.setEnabled(False)
             self.settings.setEnabled(False)
@@ -203,29 +206,29 @@ class MenuBar(QtGui.QMenuBar):
         # TODO: Share windows definitions with mainwin?
         self.windows['measureDock'] = parent.measureDock
         self.showMeasureDock = functools.partial(self.hideShow, 'measureDock')
-        act = self.measure.addAction(
+        act = self.view_menu.addAction(
             _('Test Configuration'), self.showMeasureDock)
         self.lstActions.append((act, 'measureDock'))
 
         self.windows['snapshotsDock'] = parent.snapshotsDock
         self.showSnapshotsStrip = functools.partial(
             self.hideShow, 'snapshotsDock')
-        act = self.measure.addAction(_('Storyboard'), self.showSnapshotsStrip)
+        act = self.view_menu.addAction(_('Storyboard'), self.showSnapshotsStrip)
         self.lstActions.append((act, 'snapshotsDock'))
 
         self.windows['graphWin'] = parent.graphWin
         self.showGraph = functools.partial(self.hideShow, 'graphWin')
-        act = self.measure.addAction(_('Data Plot'), self.showGraph)
+        act = self.view_menu.addAction(_('Data Plot'), self.showGraph)
         self.lstActions.append((act, 'graphWin'))
 
         self.windows['tableWin'] = parent.tableWin
         self.showTable = functools.partial(self.hideShow, 'tableWin')
-        act = self.measure.addAction(_('Data Table'), self.showTable)
+        act = self.view_menu.addAction(_('Data Table'), self.showTable)
         self.lstActions.append((act, 'tableWin'))
 
         self.windows['logDock'] = parent.logDock
         self.showLogWindow = functools.partial(self.hideShow, 'logDock')
-        act = self.measure.addAction(_('Log Window'), self.showLogWindow)
+        act = self.view_menu.addAction(_('Log Window'), self.showLogWindow)
         self.lstActions.append((act, 'logDock'))
 
         self.measure.addAction(_('Reload data'), self.reload_data)
