@@ -48,7 +48,32 @@ def arrange_dilatometer(parent_widget):
         win.setGeometry(*size)
 
 def arrange_flex(parent_widget):
-    parent_widget.tileSubWindows()
+    visible_windows = visible_windows_of(parent_widget)
+    number_of_visible_windows = len(visible_windows)
+    has_cameras = reduce(lambda  acc, cur: acc or 'Camera' in cur.windowTitle(),
+                         visible_windows,
+                         False)
+
+    if number_of_visible_windows  > 3 or not has_cameras:
+        arrange_default(parent_widget)
+        return
+
+    parent_geometry = parent_widget.geometry()
+    width = parent_geometry.width()
+    heigth = parent_geometry.height()
+
+    subwindows_width = width / 2
+    subwindows_heigth = heigth / 2
+
+    sizes = {
+        'left': [subwindows_width, 0, subwindows_width, subwindows_heigth],
+        'right': [subwindows_width, subwindows_heigth, subwindows_width, subwindows_heigth],
+        'flex': [0, 0, subwindows_width, heigth],
+    }
+
+    for win in visible_windows:
+        size = sizes[key_from_window_title(win.windowTitle())]
+        win.setGeometry(*size)
 
 def arrange_hsm(parent_widget):
     parent_widget.tileSubWindows()
@@ -61,7 +86,7 @@ def visible_windows_of(widget):
     return [win for win in widget.subWindowList() if win.isVisible()]
 
 def key_from_window_title(title):
-    for key in ['left', 'right', 'height', 'base']:
+    for key in ['left', 'right', 'height', 'base', 'flex']:
         if key in title.lower():
             return key
 
