@@ -516,7 +516,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     def last_directory(self, category):
         """Return most recently used directory for files in `category`"""
         tab = getattr(self, 'recent_' + category)
-        logging.debug('%s %s %s', 'new: tab', category, tab)
+        logging.debug('new: tab', category, tab)
         d = ''
         if len(tab) > 0:
             d = os.path.dirname(tab[-1][0])

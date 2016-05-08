@@ -233,12 +233,9 @@ class OperationWrapper(object):
         if not node.linked:
             raise self.plugins_module.ToolsPluginException(
                 self._('The selected node does not seem to have an associated configuration') + p)
-        path = p.split(':')[-1]
+            
+        return node.get_configuration()
 
-        configuration_proxy = node.linked.conf
-        if '/' in path:
-            configuration_proxy = configuration_proxy.toPath(path) 
-        return configuration_proxy
     
     def show_node_configuration(self, configuration_proxy, section='Main'):
         ui = self.plugins_module.FieldConfigurationProxy.conf_module.InterfaceDialog(

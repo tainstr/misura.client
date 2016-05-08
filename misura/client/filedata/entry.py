@@ -273,6 +273,13 @@ class NodeEntry(object):
     @linked.setter
     def linked(self, LF):
         self._linked = LF
+        
+    def get_configuration(self):
+        path = self.path.split(':')[-1]
+        configuration_proxy = self.linked.conf
+        if '/' in path:
+            configuration_proxy = configuration_proxy.toPath(path) 
+        return configuration_proxy
 
     # ROOT ENTRY METHODS
 
