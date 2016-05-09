@@ -115,6 +115,7 @@ class MainWindow(QtGui.QMainWindow):
             return True
         self.converter = False
         self.converter = dataimport.get_converter(path)
+        self.converter.confdb = confdb
         run = widgets.RunMethod(self.converter.convert, path, filedata.jobs, filedata.job, filedata.done)
         run.step = 100
         run.pid = self.converter.pid
