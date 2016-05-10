@@ -235,13 +235,17 @@ class OperationWrapper(object):
                 self._('The selected node does not seem to have an associated configuration') + p)
             
         return node.get_configuration()
-
     
-    def show_node_configuration(self, configuration_proxy, section='Main'):
+    def node_configuration_dialog(self, configuration_proxy, section='Main'):
         ui = self.plugins_module.FieldConfigurationProxy.conf_module.InterfaceDialog(
             configuration_proxy)
         ui.setWindowTitle(self._('Review settings for ') + configuration_proxy['fullpath'])
         ui.interface.show_section(section)
+        return ui  
+
+    
+    def show_node_configuration(self, configuration_proxy, section='Main'):
+        ui = self.node_configuration_dialog(configuration_proxy, section)
         r = ui.exec_()
         if not r:
             logging.info('Plugin execution aborted', r)
