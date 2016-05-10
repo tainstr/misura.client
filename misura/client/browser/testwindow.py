@@ -37,7 +37,7 @@ class TestWindow(acquisition.MainWindow):
 
         registry.taskswg.removeStorageAndRemoteTabs()
 
-
+    vtoolbar = False
 # 	@profile
     def load_version(self, v=-1):
         logging.debug('%s %s', "SETTING VERSION", v)
@@ -62,7 +62,14 @@ class TestWindow(acquisition.MainWindow):
         self.menuPlot = fileui.SavePlotMenu(self.fixedDoc)
         self.myMenuBar.measure.addMenu(self.menuPlot)
         self.menuVersions.versionChanged.connect(self.load_version)
+        
+        if self.vtoolbar:
+            self.vtoobar.hide()
+        self.vtoolbar = self.summaryPlot.plot.createToolbar(self)
+        self.vtoolbar.addAction(' Undo ',self.doc.undoOperation)
+        self.vtoolbar.show()
         self.graphWin.show()
+        
 
     def closeEvent(self, ev):
         should_not_close_application = True

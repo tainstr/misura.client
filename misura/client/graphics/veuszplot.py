@@ -357,8 +357,8 @@ class VeuszPlot(QtGui.QWidget):
             self.plot.slotViewZoom11()
         w = self.plot.width()
         h = self.plot.height()
-        if self.plot.viewtoolbar.isVisible():
-            h -= (self.plot.viewtoolbar.height() + 30)
+#         if self.plot.viewtoolbar.isVisible():
+#             h -= (self.plot.viewtoolbar.height() + 30)
         w = 1. * w / self.plot.dpi[0] - .2
         h = 1. * h / self.plot.dpi[1] - .2
         self.cmd.To('/')
