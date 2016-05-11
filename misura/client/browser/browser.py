@@ -30,6 +30,7 @@ except:
 
 class DatabasesArea(QtGui.QMdiArea):
     convert = QtCore.pyqtSignal(str)
+
     def __init__(self, parent=None):
         super(DatabasesArea, self).__init__(parent)
         self.setAcceptDrops(True)
@@ -42,9 +43,9 @@ class DatabasesArea(QtGui.QMdiArea):
     def dropEvent(self, drop_event):
         urls = drop_event.mimeData().urls()
         for url in urls:
-            url = url.toString().replace('file://','')
+            url = url.toString().replace('file://', '')
             # on windows, remove also the first "/"
-            if os.name.lower()=='nt':
+            if os.name.lower() == 'nt':
                 url = url[1:]
             self.convert.emit(url)
 
@@ -104,7 +105,8 @@ class MainWindow(QtGui.QMainWindow):
                                      QtCore.Qt.WindowTitleHint |
                                      QtCore.Qt.WindowMinMaxButtonsHint)
 
-        self.setWindowIcon(QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
+        self.setWindowIcon(
+            QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
 
     def closeEvent(self, event):
         iutils.app.quit()
@@ -116,13 +118,49 @@ class MainWindow(QtGui.QMainWindow):
         self.converter = False
         self.converter = dataimport.get_converter(path)
         self.converter.confdb = confdb
-        run = widgets.RunMethod(self.converter.convert, path, filedata.jobs, filedata.job, filedata.done)
+        # Check overwrite
+        outpath = self.converter.get_outpath(path)
+        if outpath is False:
+            return False
+        ok = 1
+        if os.path.exists(outpath):
+            ok = self.confirm_overwrite(outpath)
+            if not ok:
+                logging.debug('Overwrite cancelled')
+                return False
+        if ok == 2:
+            
+            dname = os.path.dirname(outpath)
+            fname = os.path.basename(outpath)[:-3]
+            i = 1
+            while  os.path.exists(outpath):
+                outpath = os.path.join(dname, fname + str(i) + '.h5')
+                logging.debug('Renamed to', outpath)
+                i += 1
+        self.converter.outpath = outpath
+        # Go
+        run = widgets.RunMethod(self.converter.convert, path,
+                                filedata.jobs, filedata.job, filedata.done)
         run.step = 100
         run.pid = self.converter.pid
-        self.connect(run.notifier, QtCore.SIGNAL('done()'), self._open_converted, QtCore.Qt.QueuedConnection)
-        self.connect(run.notifier, QtCore.SIGNAL('failed(QString)'), self._failed_conversion, QtCore.Qt.QueuedConnection)
+        self.connect(run.notifier, QtCore.SIGNAL(
+            'done()'), self._open_converted, QtCore.Qt.QueuedConnection)
+        self.connect(run.notifier, QtCore.SIGNAL(
+            'failed(QString)'), self._failed_conversion, QtCore.Qt.QueuedConnection)
         QtCore.QThreadPool.globalInstance().start(run)
         return True
+
+    def confirm_overwrite(self, path):
+        msg = QtGui.QMessageBox(QtGui.QMessageBox.Warning, _('Overwrite destination file?'),
+                                _('Destination file will be overwritten:\n{}'.format(path)),
+                                parent=self)
+        ow = msg.addButton(_('Overwrite'), 1)
+        re = msg.addButton(_('Rename'), 2)
+        ex = msg.addButton(_('Cancel'), 0)
+        v = {ow: 1, re: 2, ex: 0}
+        msg.exec_()
+        ret = v[msg.clickedButton()]
+        return ret
 
     def _open_converted(self):
         self.open_file(self.converter.outpath)
