@@ -340,7 +340,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self.controls = Controls(self.remote, parent=self)
         logging.debug('%s', 'Created controls')
-        self.controls.stopped_nosave.connect(self.stopped_nosave)
         self.controls.stopped.connect(self.stopped)
         self.controls.started.connect(self.resetFileProxy)
         self.controls.mute = bool(self.fixedDoc)
@@ -719,16 +718,6 @@ class MainWindow(QtGui.QMainWindow):
             return False
         self.delayed = DelayedStart(self.server)
         self.delayed.show()
-
-    def stopped_nosave(self):
-        """Reset the instrument, completely discarding acquired data and remote file proxy"""
-        logging.debug('%s', "STOPPED_NOSAVE")
-        # TODO: reset ops should be performed server-side
-        self.remote.measure['uid'] = ''
-        if self.doc:
-            self.doc.close()
-        self.set_doc(False)
-        self.resetFileProxy(retry=10)
 
     def stopped(self):
         """Offer option to download the remote file"""

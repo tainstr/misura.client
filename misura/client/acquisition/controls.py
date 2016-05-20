@@ -29,7 +29,6 @@ class Controls(QtGui.QToolBar):
     """Multithreading lock"""
     started = QtCore.pyqtSignal()
     stopped = QtCore.pyqtSignal()
-    stopped_nosave = QtCore.pyqtSignal()
     closingTest_kid = False
     stop_mode = True
     stop_message = ''
@@ -60,7 +59,6 @@ class Controls(QtGui.QToolBar):
         self.updateActions()
         logging.debug('%s', 'Controls end init')
         self.stopped.connect(self.hide_prog)
-        self.stopped_nosave.connect(self.hide_prog)
         self.started.connect(self.hide_prog)
         self.connect(self, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
         self.connect(
@@ -99,16 +97,10 @@ class Controls(QtGui.QToolBar):
                 logging.error('Remote isRunning still!')
                 return
             endStatus = self.remote.measure['endStatus']
-            if self.stop_mode:
-                self.stopped.emit()
-                self.emit(QtCore.SIGNAL('warning(QString,QString)'),
-                          _('Measurement stopped and saved'),
-                          _('Current measurement was stopped and its data has been saved. \n') + endStatus)
-            else:
-                self.stopped_nosave.emit()
-                self.emit(QtCore.SIGNAL('warning(QString,QString)'),
-                          _('Measurement data discarded!'),
-                          _('Current measurement was stopped and its data has been deleted. \n') + endStatus)
+            self.stopped.emit()
+            self.emit(QtCore.SIGNAL('warning(QString,QString)'),
+                      _('Measurement stopped and saved'),
+                      _('Current measurement was stopped and its data has been saved. \n') + endStatus)
             self.ended_set.add(uid)
             self.isRunning = False
 
@@ -227,15 +219,14 @@ class Controls(QtGui.QToolBar):
         self.show_prog(_("Starting new test"))
         return True
 
-    def _stop(self, mode):
+    def _stop(self):
         self.paused = True
         rem = self.remote.copy()
         rem.connect()
         try:
-            self.stop_message = rem.stop_acquisition(mode)
+            self.stop_message = rem.stop_acquisition(True)
         except:
             self.stop_message = format_exc()
-        self.stop_mode = mode
         self.paused = False
 
     def stop(self):
@@ -247,23 +238,19 @@ class Controls(QtGui.QToolBar):
                 _('Already stopped'), _('No acquisition is running. Nothing to do.'))
             return
         if not self.mute:
-            btn = qm.question(self, _('Save the test'),  _('Do you want to save this measurement?'),
-                              qm.Save | qm.Discard | qm.Abort, qm.Save)
-            if btn == qm.Abort:
-                qm.information(self, _('Nothing done.'),  _(
-                    'Action aborted. The measurement maybe still running.'))
+            btn = qm.question(self, _('Warning'),
+                              _('Do you want to stop this measurement?'),
+                              qm.No | qm.Yes, qm.No)
+            if btn == qm.No:
+                qm.information(self,
+                               _('Nothing done.'),
+                               _('Action aborted. The measurement maybe still running.'))
                 return False
-        else:
-            btn = qm.Discard
 
         self.show_prog("Stopping current test")
 
         self.isRunning = False
-        if btn == qm.Discard:
-            self.stopped_nosave.emit()
-            self._async(self._stop, False)
-        else:
-            self._async(self._stop, True)
+        self._async(self._stop)
 
     def stop_kiln(self):
         """Stop thermal cycle without interrupting the acquisition"""

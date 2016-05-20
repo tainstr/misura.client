@@ -82,7 +82,7 @@ class Controls(unittest.TestCase):
 
     def test_stop(self):
         self.test_start()
-        self.ctrl._stop(False)
+        self.ctrl._stop()
         self.assertFalse(self.server['isRunning'])
 
 
