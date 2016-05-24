@@ -32,7 +32,7 @@ from_base = {'length': {'micron': lambda v: v,
              # temperature
              'temperature': {'celsius': lambda v: v, 'kelvin': lambda v: v + 273.15, 'fahrenheit': lambda v: 32 + (9 * v / 5.)},
              # time
-             'time': {'second': lambda v: v, 'minute': lambda v: v / 60., 'hour': lambda v: v / 3600., 'day': lambda v: v / 86400.},
+             'time': {'millisecond': lambda v: v*1000. , 'second': lambda v: v, 'minute': lambda v: v / 60., 'hour': lambda v: v / 3600., 'day': lambda v: v / 86400.},
              'part': {'percent': lambda v: v, 'permille': lambda v: v * 10., 'permyriad': lambda v: v * 100.,
                       'ppm': lambda v: v * 10000., 'ppb': lambda v: v * (1.E7), 'ppt': lambda v: v * (1.E10)},
              'frequency': {'hertz': lambda v: v, 'kilohertz': lambda v: v / 1000.},
@@ -67,7 +67,7 @@ derivatives = {'length': {'micron': 1,
            'volume': {'micron^3': lambda v: v, 'nanometer^3': lambda v: v * 1E9, 'millimeter^3': lambda v: v * 1E-9},
            'angle': {'degree': 1, 'radian': pi / 180.},  # angle
            'temperature': {'celsius': 1, 'kelvin': 1, 'fahrenheit': 9 / 5.},
-           'time': {'second': 1, 'minute': 1 / 60., 'hour': 1 / 3600., 'day': 1 / 86400.},
+           'time': {'millisecond': 1000., 'second': 1., 'minute': 1 / 60., 'hour': 1 / 3600., 'day': 1 / 86400.},
            'part': {'percent': 1, 'permille': 10., 'permyriad': 100.,  # parts
                     'ppm': 10000., 'ppb': 1.E7, 'ppt': 1.E10},
            'frequency': {'hertz': 1, 'kilohertz': 1 / 1000.},  # freq
@@ -109,7 +109,7 @@ to_base = {'length': {'micron': lambda v: v,
            # temperature
            'temperature': {'celsius': lambda v: v, 'kelvin': lambda v: v - 273.15, 'fahrenheit': lambda v: 5 * (v - 32) / 9},
            # time
-           'time': {'second': lambda v: v, 'minute': lambda v: v * 60., 'hour': lambda v: v * 3600., 'day': lambda v: v * 86400.},
+           'time': {'millisecond': lambda v: v/1000., 'second': lambda v: v, 'minute': lambda v: v * 60., 'hour': lambda v: v * 3600., 'day': lambda v: v * 86400.},
            'part': {'percent': lambda v: v, 'permille': lambda v: v / 10., 'permyriad': lambda v: v / 100.,  # parts
                     'ppm': lambda v: v / 10000., 'ppb': lambda v: 1. * v / (10 ** 7), 'ppt': lambda v: 1. * v / 10 ** 10},  # freq
            'frequency': {'hertz': lambda v: v, 'kilohertz': lambda v: v * 1000.},
@@ -143,7 +143,7 @@ symbols = {'micron': '{\mu}m', 	'nanometer': 'nm', 	'millimeter': 'mm',
            'millimeter^3': '{mm^3}', 'millimeter^2': '{mm^2}',
            'degree': '{\deg}', 	'radian': 'rad',
            'celsius': '{\deg}C', 'kelvin': '{\deg}K', 	'fahrenheit': '{\deg}F',
-           'second': 's', 'minute': 'min', 'hour': 'hr', 'day': 'd',
+           'second': 's', 'minute': 'min', 'hour': 'hr', 'day': 'd', 'millisecond': 'ms',
            'percent': '%', 'permille': '{\\textperthousand}',
            'hertz': 'Hz', 'kilohertz': 'kHz',
            'byte': 'B',

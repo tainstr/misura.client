@@ -275,6 +275,8 @@ class NodeEntry(object):
         self._linked = LF
         
     def get_configuration(self):
+        if not self.linked:
+            return False
         path = self.path.split(':')[-1]
         configuration_proxy = self.linked.conf
         if '/' in path:
