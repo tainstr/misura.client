@@ -189,7 +189,7 @@ class ViewerPicture(QtGui.QGraphicsView):
     def unzoom(self):
         """Remove user zoom"""
         # Get current zooming factor
-        s = self.transform().m11()
+        s = self.transform().m11() or 1
         self.unscale(1. / s)
         self.fitInView(self.plane.boundingRect(), QtCore.Qt.KeepAspectRatio)
 
