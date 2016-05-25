@@ -311,10 +311,10 @@ def get_plotted_tree(base, m=False):
                 m['axis'][wg.path] = []
     # Persistent sorting
     for k0 in m.keys():
-        if k0=='sample': 
+        if k0=='sample':
             continue
         for k1 in m[k0].keys():
-            m[k0][k1] = sorted(m[k0][k1]) 
+            m[k0][k1] = sorted(m[k0][k1])
     return m
 
 def shorten(name, number_of_chars_to_show=30):
@@ -340,3 +340,11 @@ def loadIcons():
         if not os.path.exists(n):
             continue
         veusz.utils.action._iconcache[key] = QtGui.QIcon(n)
+
+
+def with_waiting_mouse_cursor(function_to_call):
+    QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
+    try:
+        function_to_call()
+    finally:
+        QtGui.QApplication.restoreOverrideCursor()

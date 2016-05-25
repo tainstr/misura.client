@@ -5,8 +5,9 @@ import functools
 
 from misura.canon.logger import Log as logging
 from misura.canon.plugin import navigator_domains, NavigatorDomain, node, nodes
+from misura.canon.indexer import SharedFile
 
-from .. import conf, units
+from .. import conf, units, iutils
 from veusz.dialogs.plugin import PluginDialog
 
 from PyQt4 import QtGui
@@ -18,14 +19,14 @@ from ..filedata import DatasetEntry
 from ..filedata import getFileProxy
 
 
-    
+
 class DataNavigatorDomain(NavigatorDomain):
-    
+
     def __init__(self, *a, **k):
         super(DataNavigatorDomain, self).__init__(*a, **k)
         self.configuration_windows = {}
         self.data_tables = {}
-        
+
     @node
     def change_rule(self, node=False, act=0):
         """Change current loading rule"""
@@ -60,6 +61,16 @@ class DataNavigatorDomain(NavigatorDomain):
             return False
         logging.debug('%s', node.linked.reloadLinks(self.doc))
 
+    @node
+    def recalculate_metadata(self, node=False):
+        iutils.with_waiting_mouse_cursor(lambda: self._recalculate_metadata(node))
+        QtGui.QMessageBox.information(None,'Info', 'Metadata recalculated')
+
+    def _recalculate_metadata(self, node):
+        shared_file = SharedFile(node.linked.filename)
+        shared_file.conf = node.get_configuration().root
+        shared_file.run_scripts()
+
 
     def load_version(self, LF, version):
         # FIXME: VERSIONING!
@@ -92,7 +103,7 @@ class DataNavigatorDomain(NavigatorDomain):
             is_loaded = (node.ds is not False) and (len(node.ds) > 0)
             self.act_load.setChecked(is_loaded)
         return is_loaded
-    
+
     @node
     def keep(self, node=False):
         """Inverts the 'keep' flag on the current dataset,
@@ -100,7 +111,7 @@ class DataNavigatorDomain(NavigatorDomain):
         ds, node = self.dsnode(node)
         cur = getattr(ds, 'm_keep', False)
         ds.m_keep = not cur
-    
+
     def add_keep(self, menu, node):
         temporary_disabled = True
         return temporary_disabled
@@ -109,7 +120,7 @@ class DataNavigatorDomain(NavigatorDomain):
             _('Saved on test file'), self.keep)
         self.act_keep.setCheckable(True)
         self.act_keep.setChecked(node.m_keep)
-        
+
     @node
     def save_on_current_version(self, node=False):
         proxy = getFileProxy(node.linked.filename)
@@ -120,7 +131,7 @@ class DataNavigatorDomain(NavigatorDomain):
             message = "Impossible to save data.\n\n" + str(e)
             QtGui.QMessageBox.warning(None,'Error', message)
         proxy.close()
-        
+
     @node
     def overwrite(self, node=False):
         """Overwrite the parent dataset with a derived one."""
@@ -130,7 +141,7 @@ class DataNavigatorDomain(NavigatorDomain):
             a=node.parent.path, b=node.path, delete=True)
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.OverwritePlugin)
         self.mainwindow.showDialog(d)
-    
+
     def add_rules(self, menu, node):
         """Add loading rules sub menu"""
         menu = menu.addMenu(_('Rules'))
@@ -155,8 +166,8 @@ class DataNavigatorDomain(NavigatorDomain):
             r = r[0]
         if r > 0:
             self.act_rule[r - 1].setChecked(True)
-            
-    
+
+
     @node
     def configure(self, node):
         """Show node configuration panel"""
@@ -164,20 +175,21 @@ class DataNavigatorDomain(NavigatorDomain):
         configuration_proxy = node.linked.conf
         if '/' in path:
             configuration_proxy = configuration_proxy.toPath(path)
-        
+
         win = conf.TreePanel(configuration_proxy, select=configuration_proxy)
         win.setWindowTitle('Configuration tree from: %s' % configuration_proxy['name'])
         win.show()
         # Keep a reference for Qt
         self.configuration_windows[path] = win
-        
+
     def add_configuration(self, menu, node):
         if node.linked and hasattr(node.linked, 'conf'):
-            menu.addAction(_('Configure'), self.configure)       
-        
+            menu.addAction(_('Configure'), self.configure)
+
     def add_file_menu(self, menu, node):
         menu.addAction(_('View'), self.viewFile)
         menu.addAction(_('Reload'), self.reloadFile)
+        menu.addAction(_('Recalculate metadata'), self.recalculate_metadata)
         menu.addAction(_('Close'), self.closeFile)
         self.add_configuration(menu, node)
         if len(self.data_tables):
@@ -187,15 +199,15 @@ class DataNavigatorDomain(NavigatorDomain):
                     tab_name = tab_name[:30] + '...'
                 tab_menu.addAction(tab_name, tab_window.show)
         return True
-    
+
     def add_group_menu(self, menu, node):
         self.add_configuration(menu, node)
-        
+
     def add_sample_menu(self, menu, node):
         self.add_configuration(menu, node)
         menu.addAction(_('Delete'), self.navigator.deleteChildren)
         return True
-             
+
     def add_dataset_menu(self, menu, node):
         menu.addSeparator()
         self.add_load(menu, node)
@@ -204,12 +216,12 @@ class DataNavigatorDomain(NavigatorDomain):
         self.add_rules(menu, node)
         menu.addAction(_('Delete'), self.navigator.deleteData)
         return True
-    
+
     def add_derived_dataset_menu(self, menu, node):
         self.add_keep(menu, node)
         menu.addAction(_('Delete'), self.navigator.deleteData)
         # menu.addAction(_('Overwrite parent'), self.overwrite)
-        
+
     def create_table(self, header):
         from misura.client.fileui import SummaryView
         tab = SummaryView(self.navigator)
@@ -220,29 +232,29 @@ class DataNavigatorDomain(NavigatorDomain):
         tab_name = ' '.join(header)
         # Keep a reference for Qt
         self.data_tables[tab_name] = tab
-             
+
     @nodes
     def get_table_header(self, nodes):
         header = [node.path for node in nodes]
-        header = filter(lambda path: path in self.doc.data, header)  
-        return header      
-        
+        header = filter(lambda path: path in self.doc.data, header)
+        return header
+
     def add_multiary_menu(self, menu, nodes):
         header = self.get_table_header()
         if len(header):
             menu.addAction(_('Table from selection'), functools.partial(self.create_table, header))
         menu.addAction(_('Delete selection'), self.navigator.deleteDatas)
-        
+
 from ..clientconf import confdb
 class PlottingNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
-        if not node: 
+        if not node:
             return False
         if not node.ds:
             return False
         is_loaded = len(node.ds) > 0
         return is_loaded
-    
+
     @node
     def thermalLegend(self, node=False):
         """Write thermal cycle onto a text label"""
@@ -251,7 +263,7 @@ class PlottingNavigatorDomain(NavigatorDomain):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.ThermalCyclePlugin)
         self.mainwindow.showDialog(d)
-    
+
     @node
     def intercept(self, node=False):
         """Intercept all curves derived/pertaining to the current object"""
@@ -267,14 +279,14 @@ class PlottingNavigatorDomain(NavigatorDomain):
         xnames.append('')
         p = plugin.InterceptPlugin(target=dslist, axis='X', critical_x=xnames[0])
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.InterceptPlugin)
-        self.mainwindow.showDialog(d)   
-        
+        self.mainwindow.showDialog(d)
+
     def add_plotted(self, menu, node, is_plotted=False):
         """Add plot/unplot action"""
         self.act_plot = menu.addAction(_('Plot'), self.plot)
         self.act_plot.setCheckable(True)
         self.act_plot.setChecked(is_plotted)
-    
+
     @node
     def colorize(self, node=False):
         """Set/unset color markers."""
@@ -286,7 +298,7 @@ class PlottingNavigatorDomain(NavigatorDomain):
         p = plugin.ColorizePlugin(curve=plotpath[0], x=x)
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.ColorizePlugin)
         self.mainwindow.showDialog(d)
-        
+
 
     @node
     def save_style(self, node=False):
@@ -297,9 +309,9 @@ class PlottingNavigatorDomain(NavigatorDomain):
     @node
     def delete_style(self, node=False):
         """Delete style rule."""
-        # TODO: delete_style
+       # TODO: delete_style
         pass
-    
+
     style_menu = False
     def add_styles(self, menu, node):
         """Styles sub menu"""
@@ -309,7 +321,7 @@ class PlottingNavigatorDomain(NavigatorDomain):
         if not self.style_menu:
             self.style_menu = menu.addMenu(_('Style'))
         self.style_menu.clear()
-        
+
         wg = self.doc.resolveFullWidgetPath(plotpath[0])
         self.act_color = self.style_menu.addAction(
             _('Colorize'), self.colorize)
@@ -324,29 +336,29 @@ class PlottingNavigatorDomain(NavigatorDomain):
             self.act_color.setChecked(True)
         if confdb.rule_style(node.path):
             self.act_save_style.setChecked(True)
-        
+
     def build_file_menu(self, menu, node):
         menu.addAction(_('Thermal Legend'), self.thermalLegend)
         menu.addAction(_('Intercept all curves'), self.intercept)
         return True
-        
+
     def add_sample_menu(self, menu, node):
         menu.addAction(_('Intercept all curves'), self.intercept)
         menu.addAction(_('Delete'), self.navigator.deleteChildren)
         return True
-             
+
     def add_dataset_menu(self, menu, node):
         menu.addSeparator()
-        is_plotted = self.is_plotted(node) >0 
+        is_plotted = self.is_plotted(node) >0
         self.add_plotted(menu, node, is_plotted)
         if is_plotted:
             menu.addAction(_('Intercept this curve'), self.intercept)
             self.add_styles(menu, node)
         return True
-        
+
     add_derived_dataset_menu = add_dataset_menu
-    
-    
+
+
     @nodes
     def synchronize(self, nodes=[]):
         from misura.client import plugin
@@ -363,10 +375,10 @@ class PlottingNavigatorDomain(NavigatorDomain):
 
     def add_multiary_menu(self, menu, nodes):
         menu.addAction(_('Synchronize curves'), self.synchronize)
-    
-    
-    
-    
+
+
+
+
 class MathNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
         if not node:
@@ -376,7 +388,7 @@ class MathNavigatorDomain(NavigatorDomain):
         istime = node.path == 't' or node.path.endswith(':t')
         is_loaded = len(node.ds) > 0
         return (not istime) and is_loaded
-    
+
     @node
     def edit_dataset(self, node=False):
         """Slot for opening the dataset edit window on the currently selected entry"""
@@ -429,17 +441,17 @@ class MathNavigatorDomain(NavigatorDomain):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.DeriveDatasetPlugin)
         self.mainwindow.showDialog(d)
-        
-        
+
+
     def add_dataset_menu(self, menu, node):
         menu.addSeparator()
         menu.addAction(_('Edit'), self.edit_dataset)
         menu.addAction(_('Smoothing'), self.smooth)
         menu.addAction(_('Derivatives'), self.derive)
         menu.addAction(_('Linear Coefficient'), self.coefficient)
-        
+
     add_derived_dataset_menu = add_dataset_menu
-        
+
     @nodes
     def correct(self, nodes=[]):
         """Call the CurveOperationPlugin on the current nodes"""
@@ -454,12 +466,12 @@ class MathNavigatorDomain(NavigatorDomain):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
         self.mainwindow.showDialog(d)
-        
+
     def add_multiary_menu(self, menu, nodes):
         menu.addAction(_('Correct'), self.correct)
-        
 
-    
+
+
 class MeasurementUnitsNavigatorDomain(NavigatorDomain):
     def check_node(self, node):
         if not node:
@@ -505,7 +517,7 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.UnitsConverterTool)
         self.mainwindow.showDialog(d)
-    
+
     def add_percentile(self, menu, node):
         """Add percentile conversion action"""
         self.act_percent = menu.addAction(
@@ -514,7 +526,7 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
             _('Percentile'), self.convertPercentile)
         self.act_percent.setCheckable(True)
         self.act_percent.setChecked(node.m_percent)
-        
+
     def add_unit(self, menu, node):
         """Add measurement unit conversion menu"""
         self.units = {}
@@ -533,11 +545,11 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
                 act.setChecked(True)
             # Keep reference
             self.units[u1] = (act, p)
-        
+
     def add_dataset_menu(self, menu, node):
         menu.addSeparator()
         self.add_percentile(menu, node)
         self.add_unit(menu, node)
-        
-        
+
+
 navigator_domains += PlottingNavigatorDomain, MathNavigatorDomain, MeasurementUnitsNavigatorDomain, DataNavigatorDomain
