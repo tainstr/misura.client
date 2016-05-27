@@ -5,6 +5,7 @@ from misura.canon.logger import Log as logging
 from veusz import document
 from compiler.ast import flatten
 import collections
+import re
 
 sep = '/'
 # Statuses
@@ -83,7 +84,7 @@ class AllDocDataAccessor(object):
         return self.get(k)
 
     def items(self):
-        return [(k,self.get(k)) for k in self.keys()]
+        return [(k, self.get(k)) for k in self.keys()]
 
     def keys(self):
         k = self.data.keys() + self.available_data.keys()
@@ -108,7 +109,7 @@ class NodeEntry(object):
     """Node base name"""
     _path = False  # auto calc
     """Node full path or dataset key in doc.data"""
-    _model_path =False
+    _model_path = False
     parent = False
     """Parent node"""
     parents = []
@@ -117,7 +118,7 @@ class NodeEntry(object):
     """Hierarchy splitter symbol"""
     _linked = False
     """Linked file for first-level nodes"""
-    status_filter = (None, False)
+    status_cache = (None, False)
 
     def __init__(self, doc=False, name='', parent=False, path=False, model_path=False, splt=sep):
         self.splt = splt
@@ -133,7 +134,6 @@ class NodeEntry(object):
             if not hasattr(doc, 'ent'):
                 doc.ent = {}
             doc.ent[self.path] = self
-        
 
     def name(self):
         return self._name
@@ -273,18 +273,17 @@ class NodeEntry(object):
     @linked.setter
     def linked(self, LF):
         self._linked = LF
-        
+
     def get_configuration(self):
         if not self.linked:
             return False
         path = self.path.split(':')[-1]
         configuration_proxy = self.linked.conf
         if '/' in path:
-            configuration_proxy = configuration_proxy.toPath(path) 
+            configuration_proxy = configuration_proxy.toPath(path)
         return configuration_proxy
 
     # ROOT ENTRY METHODS
-
 
     def insert(self, path, status=1):
         """Insert a pure node"""
@@ -314,7 +313,7 @@ class NodeEntry(object):
             new = item.get(sub, False)
             if not new:
                 # Existing dataset
-                if parent and self.alldoc.get(parent+'/'+sub,False):
+                if parent and self.alldoc.get(parent + '/' + sub, False):
                     new = DatasetEntry(doc=self.doc, name=sub, parent=item)
                 else:
                     new = NodeEntry(doc=self.doc, name=sub, parent=item)
@@ -329,20 +328,9 @@ class NodeEntry(object):
         self._children.pop(k)
         return True
 
-    @property
-    def available(self):
-        return self.recursive_status(dstats.available, cls=DatasetEntry)
-
-    @property
-    def hidden(self):
-        return self.recursive_status(dstats.hidden, cls=DatasetEntry)
-
-    @property
-    def visible(self):
-        return self.recursive_status(dstats.visible, cls=DatasetEntry)
-
-    def recursive_status(self, st=1, depth=-1, cls=False):
+    def recursive_status(self, st=1, depth=-1, exclude_rule='\w+/\w+/t$|\w+/\w+/T$', cls=False):
         """Recursively list children with status in `st`. `st` can be an iterable (ideally a set()), an integer or a status name.
+        `exclude`: regular expression to filter node names
         `depth`<0: infinite recursion
         `depth`==0: only direct children
         `cls` restrict results pertaining to this node class
@@ -354,12 +342,17 @@ class NodeEntry(object):
         # Build an iterable
         if isinstance(st, int):
             st = set([st])
-        key = '.'.join([str(i) for i in sorted(list(st))])
+        key = '.'.join([str(i) for i in sorted(list(st))]) 
+        key += '::' + exclude_rule
         # Check filter cache
-        if key == self.status_filter[0]:
-            return self.status_filter[1]
+        if key == self.status_cache[0]:
+            return self.status_cache[1]
+        exclude = re.compile(exclude_rule)
         m = min(st)
         for child in self.children.itervalues():
+            #TODO: an include_rule should enable an excluded parent to appear anyway
+            if exclude.search(child.model_path):
+                continue
             if isinstance(child, DatasetEntry):
                 if child.status not in st:
                     continue
@@ -371,7 +364,7 @@ class NodeEntry(object):
                         '%s %s %s %s', 'rec skip', child, child.status, st)
             if depth > 0 or depth < 0:  # depth=0 will block!
                 r += child.recursive_status(st, depth=depth - 1)
-        self.status_filter = (key, r)
+        self.status_cache = (key, r)
         return r
 
     def set_doc(self, doc, default_status=0):
@@ -407,8 +400,6 @@ class NodeEntry(object):
             self.insert(dn, status)
 
 
-
-
 class DatasetEntry(NodeEntry):
 
     """A wrapper object to represent a dataset by name and document,
@@ -439,11 +430,12 @@ class DatasetEntry(NodeEntry):
                 continue
             involved = flatten(ds.pluginmanager.fields.values())
             if self.path in involved:
-                sub = name.replace('/','-').replace(':','_')
-                model_path = self.model_path+'/'+sub
+                sub = name.replace('/', '-').replace(':', '_')
+                model_path = self.model_path + '/' + sub
                 entry = self._children.get(sub, False)
                 if entry is False:
-                    entry = DatasetEntry(doc=self.doc, name=sub, path=name, model_path=model_path, parent=self)
+                    entry = DatasetEntry(
+                        doc=self.doc, name=sub, path=name, model_path=model_path, parent=self)
         return self._children
 
     @property
@@ -472,7 +464,7 @@ class DatasetEntry(NodeEntry):
         vars = []
         for p in self.parents:
             ds = self.alldoc[p]
-            if p==self.path:
+            if p == self.path:
                 continue
             if hasattr(ds, 'm_var'):
                 vars.append(ds.m_var)
@@ -495,9 +487,9 @@ class DatasetEntry(NodeEntry):
 
         vars = ','.join(self.vars)
         if pm.plugin.name == 'Coefficient':
-            v = 'Coeff(%i,%s\degC) ' % (pm.fields['start'],vars)
+            v = 'Coeff(%i,%s\degC) ' % (pm.fields['start'], vars)
         elif pm.plugin.name == 'Derive':
-            v = 'Der(%i\deg,%s)' % (pm.fields['order'],vars)
+            v = 'Der(%i\deg,%s)' % (pm.fields['order'], vars)
         else:
             v = getattr(ds, 'm_var', vars)
         return v
