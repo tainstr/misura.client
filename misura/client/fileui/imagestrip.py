@@ -2,14 +2,9 @@
 # -*- coding: utf-8 -*-
 import os
 from misura.canon.logger import Log as logging
-from row import RowView
 from PyQt4 import QtGui, QtCore
 from minimage import MiniImage
 from misura.client.fileui import htmlreport
-from misura.client.fileui import template
-from ...canon import csutil
-from ..filedata import job, jobs, done
-from ..widgets import RunMethod
 
 standards = ('Misura4', 'Misura3', 'CEN/TS')
 

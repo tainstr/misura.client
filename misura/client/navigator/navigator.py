@@ -64,39 +64,12 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if doc:
             self.set_doc(doc)
 
-    def double_clicked(self, index):
-        node = self.model().data(index, role=Qt.UserRole)
-        self.previous_selection = node.path
-        for domain in self.domains:
-            r = domain.double_clicked(node)
-            if r:
-                logging.debug('double_clicked', node.path, domain)
-                self.restore_selection()
-                return True
-        
-        if isinstance(node, filedata.DatasetEntry) :
-            self.plot(node)
-        else:
-            logging.error('Not a valid node', node)
-            self.restore_selection()
-            return False
-        self.restore_selection()
-        return True
     # 3rd party domains utilities
     veusz_plugins_module = veusz.plugins
     veusz_PluginDialog = veusz.dialogs.plugin.PluginDialog
     misura_plugin_module = plugin
     misura_confdb = confdb
 
-
-    def set_idx(self, n):
-        return self.model().set_idx(n)
-
-    def set_time(self, t):
-        return self.model().set_time(t)
-
-    def hide_show(self, *a, **k):
-        return self.model().hide_show(*a, **k)
 
     def set_doc(self, doc):
         self.previous_selection = False
@@ -112,6 +85,17 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.doc.signalModified.connect(self.refresh_model)
         if self.ncols>1:
             self.setColumnWidth(0, 400)
+            
+    
+    def set_idx(self, n):
+        return self.model().set_idx(n)
+
+    def set_time(self, t):
+        return self.model().set_time(t)
+
+    def hide_show(self, *a, **k):
+        return self.model().hide_show(*a, **k)
+            
 
     def update_view(self):
         if not self.previous_selection:
@@ -186,7 +170,24 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.mainwindow.treeedit.selectWidget(wg)
         self.emit(QtCore.SIGNAL('select(QString)'), plotpath[0])
 
-
+    def double_clicked(self, index):
+        node = self.model().data(index, role=Qt.UserRole)
+        self.previous_selection = node.path
+        for domain in self.domains:
+            r = domain.double_clicked(node)
+            if r:
+                logging.debug('double_clicked', node.path, domain)
+                self.restore_selection()
+                return True
+        
+        if isinstance(node, filedata.DatasetEntry) :
+            self.plot(node)
+        else:
+            logging.error('Not a valid node', node)
+            self.restore_selection()
+            return False
+        self.restore_selection()
+        return True
             
     def add_status_actions(self, menu):
         menu.addSeparator()

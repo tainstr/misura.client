@@ -92,8 +92,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
         self.counter = 0
 
-
-
     idx = 0
 
     def set_idx(self, t):
@@ -389,44 +387,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             return QtCore.Qt.ItemIsDragEnabled | f
         return f
 
-    #######################################
-    # FROM HIERARCHY
-    # TODO: adapt or move to QuickOps
-    def hide(self, name):
-        item = self.tree.traverse(name)
-        if item.status == dstats.hidden:
-            return False
-        item.status = 0
-        return True
-
-    def show(self, name):
-        item = self.tree.traverse(name)
-        if item.status == dstats.visible:
-            return False
-        item.status = 1
-        return True
-
-    def load(self, name):
-        item = self.traverse(name)
-        if item.status > dstats.available:
-            return False
-        item.status = 0
-        return True
-
-    def hide_show(self, col, do=None, emit=True):
-        logging.debug('%s %s %s %s', 'RowView.hide_show', col, do, emit)
-        col = str(col)
-        if do == None:
-            item = self.tree.traverse(col)
-            do = item.status > 0
-        if do:
-            self.show(col)
-        else:
-            self.hide(col)
-        if emit:
-            self.emit(QtCore.SIGNAL('hide_show_col(QString,int)'), col, do)
-        self.model().refresh()
-
+    
     ############
     # Menu creation utilities
 

@@ -308,7 +308,7 @@ class ImageDialog(QtGui.QDialog):
         self.setLayout(self.lay)
         self.mini = mini
         self.lay.addWidget(self.mini)
-        # Problem: fixed sync!
+        # FIXME: sync problem!
 #         self.meta=RowView(parent=self)
 #         self.meta.set_doc(mini.doc)
 #         self.meta.model().refresh()
