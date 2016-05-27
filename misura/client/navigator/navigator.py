@@ -83,6 +83,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.set_status()
         self.doc.signalModified.connect(self.refresh_model)
+        self.mod.sigPageChanged.connect(self.ensure_sync_of_view_and_model)
         if self.ncols>1:
             self.setColumnWidth(0, 400)
             
@@ -96,14 +97,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     def hide_show(self, *a, **k):
         return self.model().hide_show(*a, **k)
             
-
     def update_view(self):
         if not self.previous_selection:
             self.previous_selection = self.current_node_path
         n = self.mainwindow.plot.getPageNumber()
         page = self.doc.basewidget.getPage(n)
-        self.model().refresh(True)
         self.model().set_page(page.path)
+        self.model().refresh(True)
         self.ensure_sync_of_view_and_model()
 
     def refresh_model(self, ismodified=True):
@@ -112,12 +112,10 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if ismodified:
             if self.model().refresh(False):
                 self.ensure_sync_of_view_and_model()
+        self.ensure_sync_of_view_and_model()
     
     def ensure_sync_of_view_and_model(self):
-        if not self.previous_selection:
-            self.collapseAll()
-            self.expandAll()
-            return 
+        self.collapseAll()
         self.restore_selection()
         
     @property
@@ -126,20 +124,36 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if node:
             return node.path
         return False
+    
+    def expand_node_path(self, node, select=False):
+        jdx = self.model().index_path(node)
+        self.setExpanded(jdx[-1], True)
+        if select:
+            # Select also
+            self.selectionModel().setCurrentIndex(
+                    jdx[-1], QtGui.QItemSelectionModel.Select)
+        # Qt bug: without scrollTo, expansion is not effective!!!
+        self.scrollTo(jdx[-1])        
+        return jdx        
+    
+    def expand_plotted_nodes(self):
+        for node in self.model().list_plotted():
+            self.expand_node_path(node, select=False)  
         
     def restore_selection(self):
         """Restore previous selection after a model reset."""
+        self.expand_plotted_nodes()
+        
         if not self.previous_selection:
             return
+        
         node = self.model().tree.traverse(self.previous_selection)
         self.previous_selection = False
         if not node:
-            return
-        jdx = self.model().index_path(node)
-        self.selectionModel().setCurrentIndex(
-                    jdx[-1], QtGui.QItemSelectionModel.Select)
-        self.scrollTo(jdx[-1])
-        self.setExpanded(jdx[-1], True)
+            return 
+        self.expand_node_path(node, select=True)
+
+        
 
     def set_status(self):
         self.previous_selection = self.current_node_path
@@ -160,10 +174,10 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if not idx.isValid():
             return
         node = self.model().data(idx, role=Qt.UserRole)
-        logging.debug('%s %s', 'select', node)
         self.emit(QtCore.SIGNAL('select()'))
         plotpath = self.model().is_plotted(node.path)
-        logging.debug('%s %s %s', 'Select: plotted on', node.path, plotpath)
+        self.previous_selection = node.path
+        logging.debug('Select: plotted on', node.path, plotpath)
         if len(plotpath) == 0:
             return
         wg = self.doc.resolveFullWidgetPath(plotpath[0])

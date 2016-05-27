@@ -49,30 +49,32 @@ def get_item_icon(plotwg):
     i = veusz.setting.LineStyle._linestyles.index(style)
     line_icon = controls.LineStyle._icons[i]
     marker = plotwg.settings.get('marker').val
-    if marker is False or str(marker)=='none':
+    if marker is False or str(marker) == 'none':
         return line_icon
     i = veusz.utils.MarkerCodes.index(marker)
     marker_icon = controls.Marker._icons[i]
-    
+
     # Combine both icons
     combined = QtGui.QIcon()
     pix = QtGui.QPixmap(24, 16)
     pix.fill()
-    marker_pix = marker_icon.pixmap(10,10)
+    marker_pix = marker_icon.pixmap(10, 10)
     line_pix = line_icon.pixmap(24, 8)
     painter = QtGui.QPainter(pix)
     painter.setRenderHint(QtGui.QPainter.Antialiasing)
     painter.drawPixmap(0, 8, line_pix)
     painter.drawPixmap(14, 0, marker_pix)
     painter.end()
-    
+
     combined.addPixmap(pix)
     return combined
+
 
 class DocumentModel(QtCore.QAbstractItemModel):
     changeset = 0
     _plots = False
-    
+    sigPageChanged = QtCore.pyqtSignal()
+
     def __init__(self, doc, status=dstats, refresh=True, cols=2):
         QtCore.QAbstractItemModel.__init__(self)
         self.keys = set()
@@ -118,7 +120,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         return False
 
     paused = False
-    
+
     @lockme
     def pause(self, do=True):
         logging.debug('%s %s', 'Set paused', do)
@@ -127,7 +129,8 @@ class DocumentModel(QtCore.QAbstractItemModel):
             self.disconnect(
                 self.doc, QtCore.SIGNAL("signalModified"), self.refresh)
         else:
-            self.connect(self.doc, QtCore.SIGNAL("signalModified"), self.refresh)
+            self.connect(
+                self.doc, QtCore.SIGNAL("signalModified"), self.refresh)
 
     page = '/temperature/temp'
 
@@ -137,7 +140,8 @@ class DocumentModel(QtCore.QAbstractItemModel):
         elif page.startswith('/time'):
             page = '/time/time'
         self.page = page
-        self.emit(QtCore.SIGNAL('modelReset()'))
+        self.modelReset.emit()
+        self.sigPageChanged.emit()
         return True
 
     @property
@@ -156,7 +160,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             elif self.keys == set(self.doc.data.keys()) and self.available_keys == set(self.doc.available_data.keys()):
                 logging.debug('model.refresh(): NOTHING CHANGED')
                 return False
-        
+
         logging.debug('%s %s', 'REFRESHING MODEL', self.paused)
         self.paused = True
         self.doc.suspendUpdates()
@@ -178,6 +182,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         return True
 
     def is_plotted(self, key, page=False):
+        """Determine if `key` dataset name is currently plotted in `page` (or current page)"""
         plots = self.plots['dataset'].get(key, [])
         out = []
         if not page:
@@ -187,16 +192,30 @@ class DocumentModel(QtCore.QAbstractItemModel):
                 out.append(p)
         return out
 
+    def list_plotted(self, page=False):
+        """Lists all plotted datasets in `page` (or current page)"""
+        if not page:
+            page = self.page
+        plotted = []
+        for plot_path, datasets in self.plots['plot'].iteritems():
+            if not plot_path.startswith(page):
+                continue
+            plotted += datasets
+        nodes = [self.tree.traverse(path) for path in set(plotted)]
+        return nodes
+
     def nodeFromIndex(self, index):
         if index.isValid():
             node = self.tree.traverse(str(index.internalPointer()))
             if not node:
-                print '######### nodeFromIndex',index.internalPointer()
+                print '######### nodeFromIndex', index.internalPointer()
             return node
 
         else:
             # print 'nodeFromIndex
-            # print 'invalid ', index.row(),index.column(),index.internalPointer(), " <-----------------"
+            # print 'invalid ',
+            # index.row(),index.column(),index.internalPointer(), "
+            # <-----------------"
             return self.tree
 
     @lockme
@@ -218,8 +237,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
                 return _('Dataset')
             # TODO!
             return _('Value')
-        
-        
+
     def decorate(self, ent, role):
         """Find text color and icon decorations for dataset ds"""
         if not ent.ds:
@@ -246,7 +264,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
         if role == Qt.FontRole:
             current_font = QtGui.QFont()
             current_font.setBold(len(ent.data) > 0 and 0 in self.status)
-
 
             return current_font
         return void
@@ -361,7 +378,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         for obj in n:
             # Find position in siblings
             i = obj.parent.recursive_status(self.status, depth=0).index(obj)
-            jdx.append(self.createIndex(i,0,obj.model_path))
+            jdx.append(self.createIndex(i, 0, obj.model_path))
         logging.debug('%s %s', 'index_path', jdx)
         return jdx
 
@@ -387,7 +404,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
             return QtCore.Qt.ItemIsDragEnabled | f
         return f
 
-    
     ############
     # Menu creation utilities
 

@@ -68,3 +68,4 @@ docs/_build/
 # PyBuilder
 target/
 /misura/client/installer/misura4.tbz2
+/misura/client/bin/tmp_veusz_render.jpg
