@@ -74,32 +74,19 @@ class StorageSync(unittest.TestCase):
         row[:3] = ['file' + i, self.srv['eq_sn'], 'uid' + i]
         return row
 
-    def check_queue(self, uid, queued=True):
-        """Check if the queue/exclude status for `uid` corresponds to `queued`"""
-        has = ['sync_queue', 'sync_exclude']
-        if not queued:
-            has.reverse()
-        self.assertTrue(self.sync.has_uid(uid, has[0]))
-        self.assertFalse(self.sync.has_uid(uid, has[1]))
-
-    def test_queue(self):
-        """Test queue/exclude mechanism"""
-        self.sync.prepare()
-        rec = self.rec(0)
-        uid = rec[2]
-        # Add record and check
-        self.sync.add_record(rec, 'sync_exclude')
-        self.check_queue(uid, False)
-
-        self.assertFalse(self.sync.exclude_record(rec))
-        self.assertTrue(self.sync.queue_record(rec))
-
-        self.check_queue(uid, True)
 
     def test_collect(self):
-        r = self.sync.collect()
+        class FakeModel:
+            def select(self):
+                pass
+        class FakeTransfer:
+            def download_uid(*args):
+                pass
+
+        r = self.sync.collect(FakeModel())
         print 'collect', r
-        r = self.sync.download()
+        self.sync.transfer = FakeTransfer()
+        r = self.sync.download_record(['a record', 'with', 'uid'])
         print 'download', r
 
     # TODO: these would need an https service
