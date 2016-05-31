@@ -283,7 +283,6 @@ class KidRegistry(QtCore.QThread):
         self.obj._reg = self
 
         self.update_doc()
-        self.taskswg.sync.loop(self.obj)
 
         r = True
         if not self.updateLog():

@@ -86,9 +86,7 @@ class StorageSync(object):
         self.db.execute("INSERT INTO {} VALUES ({})".format(tname, v), record)
         logging.debug('added record %s %s', tname, record)
 
-    def queue_record(self, record):
-        """Approve `record` for download."""
-        # Check if previously approved (exit) or already excluded (remove!)
+    def download_record(self, record):
         uid = record[2]
         if self.has_uid(uid, 'sync_approve'):
             self.rem_uid(uid, 'sync_approve')
@@ -101,13 +99,13 @@ class StorageSync(object):
             logging.debug('%s %s', 'Retrying: ', record)
             self.rem_uid(uid, 'sync_error')
 
-        if self.has_uid(uid, 'sync_queue'):
-            logging.debug('%s %s', 'Record already queued', record)
-            return False
-
         if len(record) > record_length:
             record = record[:record_length]
-        self.add_record(record, 'sync_queue')
+
+        uid = record[indexer.indexer.col_uid]
+        self.transfer.dbpath = self.dbpath
+        self.transfer.download_uid(self.server, uid)
+
         return True
 
     def exclude_record(self, record):
@@ -131,7 +129,7 @@ class StorageSync(object):
             record = record[:record_length]
         self.add_record(record, 'sync_exclude')
         return True
-    
+
     def delete_record(self, record):
         """Permanently remove data file corresponding to `record` from remote server"""
         uid = record[indexer.indexer.col_uid]
@@ -149,42 +147,25 @@ class StorageSync(object):
 
         if self.has_uid(uid, 'sync_exclude'):
             self.rem_uid(uid, 'sync_exclude')
-          
+
 
     def collect(self, server=False):
-        """Scan through a chunk of rows and check if they exist in local archive."""
-        # Restart from zero
         if not server:
             server = self.server
-        if self.start == self.tot:
-            self.tot = self.server.storage.get_len()
-            self.start = -60
-        # skip next iterations
-        if self.start < 0:
-            self.start += 1
-            return 0
-        end = self.start + self.chunk
-        if end >= self.tot:
-            end = self.tot
-        lst = server.storage.list_tests(self.start, self.start + 25)[::-1]
-        i = 0
-        for record in lst:
-            uid = record[2]
-            if self.has_uid(uid, 'sync_queue'):
-                continue
-            if self.has_uid(uid, 'sync_exclude'):
-                continue
-            if self.has_uid(uid, 'sync_error'):
-                continue
-            if self.has_uid(uid, 'sync_approve'):
-                continue
-            r = self.maindb.searchUID(uid, full=True)
-            if r and os.path.exists(r[0]):
-                continue
-            self.add_record(record, 'sync_approve')
-            i += 1
-        self.start = end
-        return i
+        all_tests = server.storage.list_tests()[::-1]
+
+        not_processed_tests = [
+            test for test in all_tests
+            if not self.has_uid(test[2], 'sync_queue')
+            and not self.has_uid(test[2], 'sync_exclude')
+            and not self.has_uid(test[2], 'sync_error')
+            and not self.has_uid(test[2], 'sync_approve')
+        ]
+
+        map(lambda record: self.add_record(record, 'sync_approve'),
+            not_processed_tests)
+
+        return len(not_processed_tests)
 
     def __len__(self):
         """Returns the length of the approval queue"""
@@ -192,55 +173,14 @@ class StorageSync(object):
             return 0
         return self.db.tab_len('sync_approve')
 
-    def download(self):
-        """Search for the next file to download"""
-        record = self.db.execute_fetchone(
-            "SELECT * from sync_queue where serial='{}'".format(self.serial))
-        if not record:
-            # Nothing to download
-            return False
-# 		record=record[0]
-        r = False
-        error = 'Unknown error'
-        try:
-            r = self.download_record(record)
-        except:
-            error = format_exc()
-        if not r:
-            logging.info('Failed test file download %s: \n%s', record, error)
-            error = list(record) + [error]
-            self.add_record(error, 'sync_error')
-        self.rem_uid(record[2], 'sync_queue')
-        return r
 
-    def download_record(self, record):
-        """Start the chunked download of a record"""
-        uid = record[indexer.indexer.col_uid]
-        logging.debug('download_record', record)
-        self.transfer.dbpath = self.dbpath
-        outfile = self.transfer.download_uid(self.server, uid)
-        return outfile
-
-    def loop(self, server=False):
-        """Inner synchronization loop.
-        If called from a different thread, can pass optional `server`
-        in order to avoid multithreading reconnection issues."""
-        if not server:
-            server = self.server
-        if server['isRunning']:
-            return 0
-        n = self.collect(server)
-        # Download next file
-        if not server['isRunning']:
-            self.download()
-        return n
 
 
 class SyncTable(QtGui.QTableView):
 
     """Table showing queued sync files, allowing the user to interact with them"""
     length = 0
-    queueRecord = QtCore.pyqtSignal(object)
+    downloadRecord = QtCore.pyqtSignal(object)
     excludeRecord = QtCore.pyqtSignal(object)
     deleteRecord = QtCore.pyqtSignal(object)
 
@@ -257,16 +197,16 @@ class SyncTable(QtGui.QTableView):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.menu = QtGui.QMenu(self)
         if table_name.endswith('_approve'):
-            self.menu.addAction(_('Download'), self.enqueue)
+            self.menu.addAction(_('Download'), self.download)
             self.menu.addAction(_('Ignore'), self.exclude)
             self.menu.addAction(_('Delete'), self.delete)
         elif table_name.endswith('_queue'):
             self.menu.addAction(_('Ignore'), self.exclude)
         elif table_name.endswith('_exclude'):
-            self.menu.addAction(_('Download'), self.enqueue)
+            self.menu.addAction(_('Download'), self.download)
             self.menu.addAction(_('Delete'), self.delete)
         elif table_name.endswith('_error'):
-            self.menu.addAction(_('Retry'), self.enqueue)
+            self.menu.addAction(_('Retry'), self.download)
             self.menu.addAction(_('Ignore'), self.exclude)
             self.menu.addAction(_('Delete'), self.delete)
         self.connect(
@@ -289,10 +229,9 @@ class SyncTable(QtGui.QTableView):
         return n
 
 
-    def enqueue(self):
-        """Promote selection to sync_queue table"""
+    def download(self):
         for record in database.iter_selected(self):
-            self.queueRecord.emit(record)
+            self.downloadRecord.emit(record)
         self.model().select()
 
     def exclude(self):
@@ -334,8 +273,10 @@ class SyncWidget(QtGui.QTabWidget):
             return
         self.dbpath = dbpath
 
-        self.tab_approve = self.add_sync_table(
-            'sync_approve', _('Waiting approval'))
+        approve_sync_table = self.tab_approve = self.add_sync_table('sync_approve',
+                                                                    _('Waiting approval'))
+        approve_sync_table.menu.addAction(_('Check'), self.storage_sync.collect)
+
 
         self.tab_queue = self.add_sync_table('sync_queue', _('Download queue'))
 
@@ -347,7 +288,7 @@ class SyncWidget(QtGui.QTabWidget):
         """Create a new SyncTable, add corresponding tab and connects relevant signals"""
         obj = SyncTable(self.dbpath, table_name, parent=self)
         self.addTab(obj, title)
-        obj.queueRecord.connect(self.storage_sync.queue_record)
+        obj.downloadRecord.connect(self.storage_sync.download_record)
         obj.excludeRecord.connect(self.storage_sync.exclude_record)
         obj.deleteRecord.connect(self.storage_sync.delete_record)
         return obj
