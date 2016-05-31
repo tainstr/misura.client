@@ -29,6 +29,8 @@ class StorageSync(object):
     start = 0
     tot = 0
 
+    collectedNewTests = QtCore.pyqtSignal(object)
+
     def __init__(self, transfer=False):
         self.transfer = transfer
         """Object implementing a download_url(url,outfile) method"""
@@ -149,7 +151,7 @@ class StorageSync(object):
             self.rem_uid(uid, 'sync_exclude')
 
 
-    def collect(self, server=False):
+    def collect(self, model, server=False):
         if not server:
             server = self.server
         all_tests = server.storage.list_tests()[::-1]
@@ -165,6 +167,7 @@ class StorageSync(object):
         map(lambda record: self.add_record(record, 'sync_approve'),
             not_processed_tests)
 
+        model.select()
         return len(not_processed_tests)
 
     def __len__(self):
@@ -209,8 +212,8 @@ class SyncTable(QtGui.QTableView):
             self.menu.addAction(_('Retry'), self.download)
             self.menu.addAction(_('Ignore'), self.exclude)
             self.menu.addAction(_('Delete'), self.delete)
-        self.connect(
-            self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
+        self.connect(self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'),
+                     self.showMenu)
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))
@@ -275,17 +278,13 @@ class SyncWidget(QtGui.QTabWidget):
 
         approve_sync_table = self.tab_approve = self.add_sync_table('sync_approve',
                                                                     _('Waiting approval'))
-        approve_sync_table.menu.addAction(_('Check'), self.storage_sync.collect)
-
-
-        self.tab_queue = self.add_sync_table('sync_queue', _('Download queue'))
+        approve_sync_table.menu.addAction(_('Check'), lambda: self.storage_sync.collect(approve_sync_table.model()))
 
         self.tab_error = self.add_sync_table('sync_error', _('Errors'))
-
         self.tab_exclude = self.add_sync_table('sync_exclude', _('Ignored'))
 
+
     def add_sync_table(self, table_name, title):
-        """Create a new SyncTable, add corresponding tab and connects relevant signals"""
         obj = SyncTable(self.dbpath, table_name, parent=self)
         self.addTab(obj, title)
         obj.downloadRecord.connect(self.storage_sync.download_record)
@@ -299,22 +298,8 @@ class SyncWidget(QtGui.QTabWidget):
         self.storage_sync.prepare(self.dbpath, server)
         serial = "serial='{}'".format(server['eq_sn'])
         self.tab_approve.model().setFilter(serial)
-        self.tab_queue.model().setFilter(serial)
         self.tab_error.model().setFilter(serial)
         self.tab_exclude.model().setFilter(serial)
-
-    def loop(self, server=False):
-        """Do one collect/download loop.
-        Optionally pass `server` if calling from a different thread."""
-        if not self.dbpath:
-            return False
-        self.storage_sync.set_dbpath(self.dbpath)
-        if not self.storage_sync.server:
-            logging.debug('No server set')
-            return False
-        n = self.storage_sync.loop(server)
-        if n:
-            self.ch.emit()
 
     def __len__(self):
         """Returns the length of the approval queue"""
