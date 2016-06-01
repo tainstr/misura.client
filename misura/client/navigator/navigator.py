@@ -86,8 +86,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.mod.sigPageChanged.connect(self.ensure_sync_of_view_and_model)
         if self.ncols>1:
             self.setColumnWidth(0, 400)
-            
-    
+
+
     def set_idx(self, n):
         return self.model().set_idx(n)
 
@@ -96,7 +96,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def hide_show(self, *a, **k):
         return self.model().hide_show(*a, **k)
-            
+
     def update_view(self):
         if not self.previous_selection:
             self.previous_selection = self.current_node_path
@@ -113,18 +113,18 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             if self.model().refresh(False):
                 self.ensure_sync_of_view_and_model()
         self.ensure_sync_of_view_and_model()
-    
+
     def ensure_sync_of_view_and_model(self):
         self.collapseAll()
         self.restore_selection()
-        
+
     @property
     def current_node_path(self):
         node = self.model().data(self.currentIndex(), role=QtCore.Qt.UserRole)
         if node:
             return node.path
         return False
-    
+
     def expand_node_path(self, node, select=False):
         jdx = self.model().index_path(node)
         self.setExpanded(jdx[-1], True)
@@ -133,27 +133,27 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.selectionModel().setCurrentIndex(
                     jdx[-1], QtGui.QItemSelectionModel.Select)
         # Qt bug: without scrollTo, expansion is not effective!!!
-        self.scrollTo(jdx[-1])        
-        return jdx        
-    
+        self.scrollTo(jdx[-1])
+        return jdx
+
     def expand_plotted_nodes(self):
         for node in self.model().list_plotted():
-            self.expand_node_path(node, select=False)  
-        
+            self.expand_node_path(node, select=False)
+
     def restore_selection(self):
         """Restore previous selection after a model reset."""
         self.expand_plotted_nodes()
-        
+
         if not self.previous_selection:
             return
-        
+
         node = self.model().tree.traverse(self.previous_selection)
         self.previous_selection = False
         if not node:
-            return 
+            return
         self.expand_node_path(node, select=True)
 
-        
+
 
     def set_status(self):
         self.previous_selection = self.current_node_path
@@ -193,7 +193,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 logging.debug('double_clicked', node.path, domain)
                 self.restore_selection()
                 return True
-        
+
         if isinstance(node, filedata.DatasetEntry) :
             self.plot(node)
         else:
@@ -202,7 +202,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             return False
         self.restore_selection()
         return True
-            
+
     def add_status_actions(self, menu):
         menu.addSeparator()
         self.acts_status = []
@@ -217,13 +217,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             else:
                 print 'set action as unchecked', name, s, self.status
             self.acts_status.append(act)
-        
+
         self.act_del = menu.addAction(_('Delete'), self.deleteChildren)
         self.acts_status.append(self.act_del)
         act = menu.addAction(_('Update view'), self.update_view)
         self.acts_status.append(act)
         return True
-        
+
     def update_base_menu(self, node=False):
         self.base_menu.clear()
         for domain in self.domains:
@@ -231,7 +231,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.add_status_actions(self.base_menu)
         self.act_del.setEnabled(bool(node))
         return self.base_menu
-        
+
     def update_group_menu(self, node=False):
         self.group_menu.clear()
         for domain in self.domains:
@@ -248,11 +248,11 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.add_status_actions(self.file_menu)
         self.act_del.setEnabled(bool(node))
         return self.file_menu
-        
+
     def update_sample_menu(self, node):
         self.sample_menu.clear()
         for domain in self.domains:
-            domain.build_sample_menu(self.sample_menu, node)       
+            domain.build_sample_menu(self.sample_menu, node)
         return self.sample_menu
 
     def update_dataset_menu(self, node):
@@ -266,11 +266,11 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         for domain in self.domains:
             domain.build_derived_dataset_menu(self.der_menu, node)
         return self.der_menu
-    
+
     def update_multiary_menu(self, selection):
         self.multi_menu.clear()
         for domain in self.domains:
-            domain.build_multiary_menu(self.multi_menu, selection)   
+            domain.build_multiary_menu(self.multi_menu, selection)
         return self.multi_menu
 
     def showContextMenu(self, pt):
@@ -308,4 +308,3 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.model().pause(1)
         menu.exec_(self.mapToGlobal(pt))
         self.model().pause(0)
-        self.update_view()
