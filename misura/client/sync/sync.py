@@ -149,7 +149,7 @@ class StorageSync(object):
             self.rem_uid(uid, 'sync_exclude')
 
 
-    def collect(self, model, server=False):
+    def collect(self, server=False):
         if not server:
             server = self.server
         all_tests = server.storage.list_tests()
@@ -173,7 +173,6 @@ class StorageSync(object):
         map(lambda record: self.add_record(record, 'sync_approve'),
             not_processed_tests)
 
-        model.select()
         return len(not_processed_tests)
 
     def __len__(self):
@@ -284,7 +283,12 @@ class SyncWidget(QtGui.QTabWidget):
 
         approve_sync_table = self.tab_approve = self.add_sync_table('sync_approve',
                                                                     _('Waiting approval'))
-        approve_sync_table.menu.addAction(_('Check'), lambda: self.storage_sync.collect(approve_sync_table.model()))
+
+        def check_for_new_downloads():
+            self.storage_sync.collect()
+            approve_sync_table.model().select()
+
+        approve_sync_table.menu.addAction(_('Check'), check_for_new_downloads)
 
         self.tab_error = self.add_sync_table('sync_error', _('Errors'))
         self.tab_exclude = self.add_sync_table('sync_exclude', _('Ignored'))

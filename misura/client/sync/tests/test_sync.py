@@ -76,14 +76,11 @@ class StorageSync(unittest.TestCase):
 
 
     def test_collect(self):
-        class FakeModel:
-            def select(self):
-                pass
         class FakeTransfer:
             def download_uid(*args):
                 pass
 
-        r = self.sync.collect(FakeModel())
+        r = self.sync.collect()
         print 'collect', r
         self.sync.transfer = FakeTransfer()
         r = self.sync.download_record(['a record', 'with', 'uid'])
