@@ -29,8 +29,6 @@ class StorageSync(object):
     start = 0
     tot = 0
 
-    collectedNewTests = QtCore.pyqtSignal(object)
-
     def __init__(self, transfer=False):
         self.transfer = transfer
         """Object implementing a download_url(url,outfile) method"""
@@ -154,10 +152,18 @@ class StorageSync(object):
     def collect(self, model, server=False):
         if not server:
             server = self.server
-        all_tests = server.storage.list_tests()[::-1]
+        all_tests = server.storage.list_tests()
+
+        def already_downloaded(uid):
+            r = self.maindb.searchUID(uid, full=True)
+            return r and os.path.exists(r[0])
+
+        not_downloaded_tests = [
+            test for test in all_tests if not already_downloaded(test[2])
+        ]
 
         not_processed_tests = [
-            test for test in all_tests
+            test for test in not_downloaded_tests
             if not self.has_uid(test[2], 'sync_queue')
             and not self.has_uid(test[2], 'sync_exclude')
             and not self.has_uid(test[2], 'sync_error')
