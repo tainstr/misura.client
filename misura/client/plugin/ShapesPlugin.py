@@ -44,8 +44,10 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         """Make list of fields."""
         #\\\\%(xlabel)s=%(x)i
         self.fields = [
-            FieldMisuraNavigator(
-                "sample", descr="Target sample:", depth='sample', default=sample),
+            FieldMisuraNavigator("sample",
+                                 descr="Target sample:",
+                                 depth='sample',
+                                 default=sample),
             plugins.FieldText('text', 'Label text', default=text),
             plugins.FieldCombo('characteristic_shape_standard',
                                descr='Standard',
@@ -101,10 +103,11 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         required_sample_shapes = filter(lambda item: required_shapes_filter(item[0]), sample_shapes)
 
         for shape, opt in required_sample_shapes:
-            txt = str(fields['text']).replace('$shape$', remove_prefix(shape))
             pt = opt['current']
             t = pt['time']
             T = pt['temp']
+            shape_name = str(fields['text']).replace('$shape$', remove_prefix(shape))
+            txt = u'%s - %s °C' % (shape_name, pt['temp'])
             if t in [0, None, 'None'] or T in [0, None, 'None']:
                 logging.debug('%s %s', 'Shape not found:', shape)
                 continue
