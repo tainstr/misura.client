@@ -291,7 +291,7 @@ class SyncWidget(QtGui.QTabWidget):
             self.storage_sync.collect()
             approve_sync_table.model().select()
 
-        approve_sync_table.menu.addAction(_('Check'), check_for_new_downloads)
+        approve_sync_table.menu.addAction(_('Check for new downloads'), check_for_new_downloads)
 
         self.tab_error = self.add_sync_table('sync_error', _('Errors'))
         self.tab_exclude = self.add_sync_table('sync_exclude', _('Ignored'))
