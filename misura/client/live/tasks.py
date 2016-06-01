@@ -30,7 +30,7 @@ class RemoteTasks(QtGui.QWidget):
             return 0
         r = len(self.progress.prog)
         return r
-    
+
     def clear_layout(self):
         # Remove all items
         i = 0
@@ -45,8 +45,8 @@ class RemoteTasks(QtGui.QWidget):
                 logging.debug(
                     'While removing old progress... \n%s', format_exc())
             finally:
-                self.progress = False        
-    
+                self.progress = False
+
     @lockme
     def set_server(self, server):
         if not server:
@@ -109,29 +109,29 @@ class LocalTasks(QtGui.QWidget):
 
         self.prog = {}
         conntype = QtCore.Qt.UniqueConnection
-        self.connect(self, QtCore.SIGNAL('jobs(int)'), 
+        self.connect(self, QtCore.SIGNAL('jobs(int)'),
             self._jobs, conntype)
-        
+
         self.connect(self, QtCore.SIGNAL('jobs(int,QString,PyQt_PyObject)'),
                      self._jobs, conntype)
 
-        self.connect(self, QtCore.SIGNAL('job(int,QString,QString)'), 
+        self.connect(self, QtCore.SIGNAL('job(int,QString,QString)'),
                      self._job, conntype)
-        
+
         self.connect(self, QtCore.SIGNAL('job(int,QString)'),
                      self._job, conntype)
-        
-        self.connect(self, QtCore.SIGNAL('job(int)'), 
+
+        self.connect(self, QtCore.SIGNAL('job(int)'),
                      self._job, conntype)
 
         self.connect(self, QtCore.SIGNAL('sig_done(QString)'),
                      self._done,conntype)
-        
-        self.connect(self, QtCore.SIGNAL('sig_done0()'), 
+
+        self.connect(self, QtCore.SIGNAL('sig_done0()'),
                      self._done, conntype)
         logging.debug('%s', 'LocalTasks initialized')
         self.log_messages = ''
-        
+
     def __len__(self):
         return len(self.prog)
 
@@ -252,7 +252,7 @@ class Tasks(QtGui.QTabWidget):
         self.tasks = LocalTasks()
         self.addTab(self.tasks, _('Local'))
 
-        self.sync = SyncWidget()
+        self.sync = SyncWidget(self)
         self.addTab(self.sync, _('Storage'))
 
         self.tasks.ch.connect(self.hide_show, QtCore.Qt.QueuedConnection)
@@ -270,7 +270,7 @@ class Tasks(QtGui.QTabWidget):
         server.connect()
         self.progress.set_server(server)
         self.sync.set_server(server)
-        
+
 
     def update_active(self):
         """Switch the active tab"""

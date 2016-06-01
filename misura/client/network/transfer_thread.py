@@ -152,7 +152,6 @@ class TransferThread(QtCore.QThread):
                     break
                 fp.write(chunk)
                 done += len(chunk)
-#                 logging.debug('%s %s %s', 'DONE', done, dim)
                 self.dlDone.emit(done)
         # Remove if aborted
         if self.aborted:

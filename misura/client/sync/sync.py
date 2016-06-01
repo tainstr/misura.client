@@ -104,7 +104,9 @@ class StorageSync(object):
 
         uid = record[indexer.indexer.col_uid]
         self.transfer.dbpath = self.dbpath
-        self.transfer.download_uid(self.server, uid)
+        self.transfer.uid = uid
+        self.transfer.server = self.server
+        self.transfer.start()
 
         return True
 
@@ -267,6 +269,7 @@ class SyncWidget(QtGui.QTabWidget):
         # Set local tasks manager
         if parent:
             self.transfer.set_tasks(parent.tasks)
+
         self.storage_sync = StorageSync(self.transfer)
         dbpath = confdb['database']
         # Create if missing
