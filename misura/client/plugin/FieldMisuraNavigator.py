@@ -20,6 +20,9 @@ class FieldMisuraNavigator(plugins.Field):
         self.depth = depth
         self.cols = cols
         self.default = default
+        self.model = None
+        self.view = None
+        self.selection = None
 
     def makeControl(self, doc, currentwidget):
         l = QtGui.QLabel(self.descr)
@@ -33,11 +36,18 @@ class FieldMisuraNavigator(plugins.Field):
         obj = self.default
         if obj is None:
             return (l, c)
-
-        jdx = otm.index_path(obj)
-        c.selectionModel().setCurrentIndex(
-                    jdx[-1], QtGui.QItemSelectionModel.Select)
+        
+        self.selection = otm.index_path(obj)[-1]
+        self.model = otm
+        self.view = c
+        self.model.modelReset.connect(self.restore_selection)
+        self.restore_selection()
         return (l, c)
+    
+    def restore_selection(self):
+        self.view.selectionModel().setCurrentIndex(
+                    self.selection, QtGui.QItemSelectionModel.Select)
+        self.view.scrollTo(self.selection)
 
     def getControlResults(self, cntrls):
         nav = cntrls[1]

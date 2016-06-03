@@ -308,3 +308,4 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.model().pause(1)
         menu.exec_(self.mapToGlobal(pt))
         self.model().pause(0)
+        self.update_view()
