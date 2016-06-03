@@ -29,21 +29,20 @@ class FieldMisuraNavigator(plugins.Field):
         c = QtGui.QTreeView()
         otm = doc.model
         c.setModel(otm)
-        c.expandAll()
         c.hideColumn(1)
 
         # Do the predefined selection
         obj = self.default
         if obj is None:
             return (l, c)
-        
+
         self.selection = otm.index_path(obj)[-1]
         self.model = otm
         self.view = c
         self.model.modelReset.connect(self.restore_selection)
         self.restore_selection()
         return (l, c)
-    
+
     def restore_selection(self):
         self.view.selectionModel().setCurrentIndex(
                     self.selection, QtGui.QItemSelectionModel.Select)
