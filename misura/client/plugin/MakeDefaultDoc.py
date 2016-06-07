@@ -24,7 +24,7 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
            veusz.plugins.FieldBool(
                 "temp", descr="Create temperature page", default=temp)
         ]
-        
+
     def adjust_graph(self, g, label):
         y = g.getChild('y')
         if y is not None:
@@ -37,10 +37,10 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         if self.fields.get('title', False):
             props = {'xPos': 0.1, 'yPos': 0.96, 'label': self.fields['title']}
             self.dict_toset(g.parent.getChild('title'), props)
-        
+
     def create_page_temperature(self, page):
         self.ops.append(
-                            (document.OperationWidgetAdd(self.doc.basewidget, 'page', name=page))) 
+                            (document.OperationWidgetAdd(self.doc.basewidget, 'page', name=page)))
         self.apply_ops(descr='MakeDefaultPlot: Page '+page)
         wg = self.doc.basewidget.getChild(page)
         self.ops.append(
@@ -52,8 +52,8 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
             self.apply_ops(descr='MakeDefaultPlot: Temperature Title')
         graph = wg.getChild('temp')
         self.adjust_graph(graph, u'Temperature (°C)')
-        
-    def create_page_time(self, page):      
+
+    def create_page_time(self, page):
         self.ops.append(
             (document.OperationWidgetAdd(self.doc.basewidget, 'page', name=page)))
         self.apply_ops(descr='MakeDefaultPlot: Page '+page)
@@ -67,8 +67,8 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
             self.apply_ops(descr='MakeDefaultPlot: Time Title')
         graph = wg.getChild('time')
         self.adjust_graph(graph, 'Time (s)')
-        
-        
+
+
     def apply(self, cmd, fields):
         self.ops = []
         self.fields = fields
@@ -79,21 +79,27 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         page_t = 'time'
         base_page = fields.get('page','')
         if not base_page:
-            self.doc.wipe()
+            self.wipe_doc_preserving_filename()
+
         else:
             page_T = base_page + '_T'
-            page_t = base_page + '_t' 
-        
+            page_t = base_page + '_t'
+
         self.dict_toset(doc.basewidget, {'width': '20cm', 'height': '20cm'})
-        
+
         if fields.get('temp', True):
             self.create_page_temperature(page_T)
         if fields.get('time', True):
-            self.create_page_time(page_t)  
-        
+            self.create_page_time(page_t)
+
         self.add_versions_to_file()
         self.apply_ops('MakeDefaultDoc: Done')
         return True
+
+    def wipe_doc_preserving_filename(self):
+        name = self.doc.filename
+        self.doc.wipe()
+        self.doc.filename = name
 
     def add_versions_to_file(self):
         command_interface = document.CommandInterface(self.doc)
