@@ -132,9 +132,8 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         um = res * self.inidim / 100
         factor = s_slope / z_slope
         micron = u'\u03bcm'
-        msg = _('Calibration factor: {} \nCoefficient: {:E}\nStandard deviation: \n    {} %\n    {} {}').format(
-            factor, z_slope, res, um, micron)
-#		logging.debug('%s', msg)
+        msg = _('Calibration factor: {} \nStandard deviation: \n    {} %\n    {} {}').format(
+            factor, res, um, micron)
         self.msg = msg
         self.slope, self.const = slope, const
         self.fld, self.ds, self.T, self.d, self.sT, self.sd = fields, ds, T, d, sT, sd
