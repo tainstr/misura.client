@@ -11,27 +11,34 @@ standards = ('Misura4', 'Misura3', 'CEN/TS')
 def get_shapes(sample, standard):
     all_shapes = {
         'Misura4': {
-            'Sintering': sample['Sintering'],
-            'Softening': sample['Softening'],
-            'Sphere': sample['Sphere'],
-            'Halfsphere': sample['HalfSphere'],
-            'Melting': sample['Melting'],
+            'Sintering': 'Sintering',
+            'Softening': 'Softening',
+            'Sphere': 'Sphere',
+            'Halfsphere': 'HalfSphere',
+            'Melting': 'Melting',
         },
         'Misura3': {
-            'Sintering': sample['m3_Sintering'],
-            'Softening': sample['m3_Softening'],
-            'Sphere': sample['m3_Sphere'],
-            'Halfsphere': sample['m3_HalfSphere'],
-            'Melting': sample['m3_Melting'],
+            'Sintering': 'm3_Sintering',
+            'Softening': 'm3_Softening',
+            'Sphere': 'm3_Sphere',
+            'Halfsphere': 'm3_HalfSphere',
+            'Melting': 'm3_Melting',
         },
         'CEN/TS': {
-            'Sintering': sample['cen_Sintering'],
-            'Deformation': sample['cen_Deformation'],
-            'Emisphere': sample['cen_Emisphere'],
-            'Flow': sample['cen_Flow'],
+            'Sintering': 'cen_Sintering',
+            'Deformation': 'cen_Deformation',
+            'Emisphere': 'cen_Emisphere',
+            'Flow': 'cen_Flow',
         }
     }
-    return all_shapes[standard]
+    void = {'time':'None', 'temp':'None', 'value':'None'}
+    ret = {}
+    for shape_key, sample_key in all_shapes[standard].iteritems():
+        if sample.has_key(sample_key):
+            ret[shape_key] = sample[sample_key]
+        else:
+            ret[shape_key] = void.copy()
+    return ret
 
 class ImageStrip(QtGui.QWidget):
 
