@@ -70,6 +70,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     misura_plugin_module = plugin
     misura_confdb = confdb
 
+    def selectedIndexesPublic(self, *a, **k):
+        return self.selectedIndexes()
 
     def set_doc(self, doc):
         self.previous_selection = False
