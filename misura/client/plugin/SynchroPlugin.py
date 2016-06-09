@@ -20,6 +20,13 @@ def translate_values(dataset, dataset_name, delta, doc):
     doc.applyOperation(op)
     return True
 
+def check_consistency(reference_curve, translating_curve):
+    if reference_curve.parent != translating_curve.parent:
+        raise plugins.ToolsPluginException(
+            'The selected curves must belong to the same graph.')
+    if reference_curve.settings.yAxis != translating_curve.settings.yAxis or reference_curve.settings.xAxis != translating_curve.settings.xAxis:
+        raise plugins.ToolsPluginException(
+            'The selected curves must share the same x, y axes.')
 
 class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
@@ -57,12 +64,8 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.doc = doc
         reference_curve = doc.resolveFullWidgetPath(fields['ref'])
         translating_curve = doc.resolveFullWidgetPath(fields['trans'])
-        if reference_curve.parent != translating_curve.parent:
-            raise plugins.ToolsPluginException(
-                'The selected curves must belong to the same graph.')
-        if reference_curve.settings.yAxis != translating_curve.settings.yAxis or reference_curve.settings.xAxis != translating_curve.settings.xAxis:
-            raise plugins.ToolsPluginException(
-                'The selected curves must share the same x, y axes.')
+
+        check_consistency(reference_curve, translating_curve)
 
         # TODO: selezionare l'asse anziché due curve.
         # Altrimenti, altre curve riferentesi all'asse originario verrebbero
