@@ -85,19 +85,12 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         d = yval_tr - yval_ref
 
         msg = 'curve' if fields['mode'] == 'Translation Mode' else 'Y axis'
-        QtGui.QMessageBox.information(
-            None, 'Synchronization Output', 'Translating the %s by %E.' % (msg, d))
+        QtGui.QMessageBox.information(None,
+                                      'Synchronization Output',
+                                      'Translating the %s by %E.' % (msg, d))
 
         if fields['mode'] == 'Translate Values':
-            new = yds.data - d
-            # Create a copy of the dataset
-            ydsn = copy.copy(yds)
-            # Change copy's values
-            ydsn.data = new
-            # Set original dataset to copied one
-            op = document.OperationDatasetSet(yds_name, ydsn)
-            doc.applyOperation(op)
-            return True
+            return self.translate_values(yds, yds_name, d, doc)
 
         # Create a new Y axis
         ypath = cmd.CloneWidget(
@@ -120,5 +113,12 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.apply_ops()
         return True
 
+    def translate_values(self, dataset, dataset_name, delta, doc):
+        translated_data = dataset.data - delta
+        translated_dataset = copy.copy(dataset)
+        translated_dataset.data = translated_data
+        op = document.OperationDatasetSet(dataset_name, translated_dataset)
+        doc.applyOperation(op)
+        return True
 
 plugins.toolspluginregistry.append(SynchroPlugin)
