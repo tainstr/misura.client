@@ -12,6 +12,14 @@ def get_nearest_index(data, value):
     dst = np.abs(data - value)
     return np.where(dst == dst.min())[0][0]
 
+def translate_values(dataset, dataset_name, delta, doc):
+    translated_data = dataset.data - delta
+    translated_dataset = copy.copy(dataset)
+    translated_dataset.data = translated_data
+    op = document.OperationDatasetSet(dataset_name, translated_dataset)
+    doc.applyOperation(op)
+    return True
+
 class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
     """Translate curves so that they equal a reference curve at a known x-point"""
@@ -83,10 +91,10 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                                       'Translating the %s by %E.' % (msg, delta))
 
         if fields['mode'] == 'Translate Values':
-            translate = lambda: self.translate_values(translating_dataset,
-                                                      translating_dataset_name,
-                                                      delta,
-                                                      doc)
+            translate = lambda: translate_values(translating_dataset,
+                                                 translating_dataset_name,
+                                                 delta,
+                                                 doc)
         else:
             translate = lambda: self.translate_axis(cmd,
                                                     reference_curve.parent.getChild(reference_curve.settings.yAxis),
@@ -119,12 +127,6 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.apply_ops()
         return True
 
-    def translate_values(self, dataset, dataset_name, delta, doc):
-        translated_data = dataset.data - delta
-        translated_dataset = copy.copy(dataset)
-        translated_dataset.data = translated_data
-        op = document.OperationDatasetSet(dataset_name, translated_dataset)
-        doc.applyOperation(op)
-        return True
+
 
 plugins.toolspluginregistry.append(SynchroPlugin)
