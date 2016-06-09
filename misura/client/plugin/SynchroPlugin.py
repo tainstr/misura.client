@@ -61,19 +61,18 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         dst = np.abs(xref - fields['x'])
         i = np.where(dst == dst.min())[0][0]
         # Get the corresponding Y value on the ref Y-array
-        yref = doc.data[reference_curve.settings.yData].data
-        yval_ref = yref[i]
         # Search the nearest X value on trans X-array
         xtr = doc.data[translating_curve.settings.xData].data
         dst = np.abs(xtr - fields['x'])
         i = np.where(dst == dst.min())[0][0]
         # Get the corresponding Y value on the trans Y-array
-        yds_name = translating_curve.settings.yData
-        yds = doc.data[yds_name]
-        ytr = yds.data
-        yval_tr = ytr[i]
+        translating_dataset_name = translating_curve.settings.yData
+        translating_dataset = doc.data[translating_dataset_name]
 
-        delta = yval_tr - yval_ref
+        reference_dataset_name = reference_curve.settings.yData
+        reference_dataset = doc.data[reference_dataset_name]
+
+        delta = translating_dataset.data[i] - reference_dataset.data[i]
 
         msg = 'curve' if fields['mode'] == 'Translation Mode' else 'Y axis'
         QtGui.QMessageBox.information(None,
@@ -81,7 +80,10 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                                       'Translating the %s by %E.' % (msg, delta))
 
         if fields['mode'] == 'Translate Values':
-            translate = lambda: self.translate_values(yds, yds_name, delta, doc)
+            translate = lambda: self.translate_values(translating_dataset,
+                                                      translating_dataset_name,
+                                                      delta,
+                                                      doc)
         else:
             translate = lambda: self.translate_axis(cmd,
                                                     reference_curve.parent.getChild(reference_curve.settings.yAxis),
