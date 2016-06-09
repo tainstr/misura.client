@@ -92,9 +92,13 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         if fields['mode'] == 'Translate Values':
             return self.translate_values(yds, yds_name, d, doc)
 
+        return self.translate_axis(cmd, yax, trans, d, doc)
+
+    def translate_axis(self, cmd, yax, trans, d, doc):
         # Create a new Y axis
-        ypath = cmd.CloneWidget(
-            yax.path, trans.parent.path, newname='Trans_' + yax.name)
+        ypath = cmd.CloneWidget(yax.path,
+                                trans.parent.path,
+                                newname='Trans_' + yax.name)
         trax = doc.resolveFullWidgetPath(ypath)
         self.toset(trax, 'label', 'Trans: ' + yax.settings.label)
         self.toset(trax, 'Line/transparency', 30)
