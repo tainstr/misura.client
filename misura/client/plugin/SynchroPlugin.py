@@ -43,12 +43,12 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.ops = []
         doc = cmd.document
         self.doc = doc
-        ref = doc.resolveFullWidgetPath(fields['ref'])
-        trans = doc.resolveFullWidgetPath(fields['trans'])
-        if ref.parent != trans.parent:
+        reference_curve = doc.resolveFullWidgetPath(fields['ref'])
+        translating_curve = doc.resolveFullWidgetPath(fields['trans'])
+        if reference_curve.parent != translating_curve.parent:
             raise plugins.ToolsPluginException(
                 'The selected curves must belong to the same graph.')
-        if ref.settings.yAxis != trans.settings.yAxis or ref.settings.xAxis != trans.settings.xAxis:
+        if reference_curve.settings.yAxis != translating_curve.settings.yAxis or reference_curve.settings.xAxis != translating_curve.settings.xAxis:
             raise plugins.ToolsPluginException(
                 'The selected curves must share the same x, y axes.')
 
@@ -56,43 +56,38 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         # Altrimenti, altre curve riferentesi all'asse originario verrebbero
         # sfalsate quando le sue dimensioni si aggiornano!
 
-        xax = ref.parent.getChild(ref.settings.xAxis)
-        yax = ref.parent.getChild(ref.settings.yAxis)
-
-        # X Arrays
-        xref = doc.data[ref.settings.xData].data
-        xtr = doc.data[trans.settings.xData].data
-
-        # Y Arrays
-        yref = doc.data[ref.settings.yData].data
-        # Keep Y Dataset for translation update
-        yds_name = trans.settings.yData
-        yds = doc.data[yds_name]
-        ytr = yds.data
-
         # Search the nearest X value on ref X-array
+        xref = doc.data[reference_curve.settings.xData].data
         dst = np.abs(xref - fields['x'])
         i = np.where(dst == dst.min())[0][0]
         # Get the corresponding Y value on the ref Y-array
+        yref = doc.data[reference_curve.settings.yData].data
         yval_ref = yref[i]
         # Search the nearest X value on trans X-array
+        xtr = doc.data[translating_curve.settings.xData].data
         dst = np.abs(xtr - fields['x'])
         i = np.where(dst == dst.min())[0][0]
         # Get the corresponding Y value on the trans Y-array
+        yds_name = translating_curve.settings.yData
+        yds = doc.data[yds_name]
+        ytr = yds.data
         yval_tr = ytr[i]
 
-        # Delta
-        d = yval_tr - yval_ref
+        delta = yval_tr - yval_ref
 
         msg = 'curve' if fields['mode'] == 'Translation Mode' else 'Y axis'
         QtGui.QMessageBox.information(None,
                                       'Synchronization Output',
-                                      'Translating the %s by %E.' % (msg, d))
+                                      'Translating the %s by %E.' % (msg, delta))
 
         if fields['mode'] == 'Translate Values':
-            translate = lambda: self.translate_values(yds, yds_name, d, doc)
+            translate = lambda: self.translate_values(yds, yds_name, delta, doc)
         else:
-            translate = lambda: self.translate_axis(cmd, yax, trans, d, doc)
+            translate = lambda: self.translate_axis(cmd,
+                                                    reference_curve.parent.getChild(reference_curve.settings.yAxis),
+                                                    translating_curve,
+                                                    delta,
+                                                    doc)
 
         return translate()
 
