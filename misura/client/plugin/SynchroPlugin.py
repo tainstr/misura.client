@@ -90,9 +90,11 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                                       'Translating the %s by %E.' % (msg, d))
 
         if fields['mode'] == 'Translate Values':
-            return self.translate_values(yds, yds_name, d, doc)
+            translate = lambda: self.translate_values(yds, yds_name, d, doc)
+        else:
+            translate = lambda: self.translate_axis(cmd, yax, trans, d, doc)
 
-        return self.translate_axis(cmd, yax, trans, d, doc)
+        return translate()
 
     def translate_axis(self, cmd, dataset, translating_curve, delta, doc):
         # Create a new Y axis
