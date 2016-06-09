@@ -90,12 +90,12 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         delta = translating_dataset.data[translating_curve_nearest_value_index] - reference_dataset.data[reference_curve_nearest_value_index]
 
         message = {
-            'Translate Values': "Translating curve by %E." % (delta,),
-            'Translate Axes': "Translating Y axis by %E." % (delta,)
+            'Translate Values': "Translating curve by %E %s.",
+            'Translate Axes': "Translating Y axis by %E %s."
         }
         QtGui.QMessageBox.information(None,
                                       'Synchronization Output',
-                                      message[fields['mode']])
+                                      message[fields['mode']] % (delta, translating_dataset.unit))
 
         translate = {
             'Translate Values': lambda: translate_values(
