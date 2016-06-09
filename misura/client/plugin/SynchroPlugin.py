@@ -8,6 +8,9 @@ from PyQt4 import QtGui, QtCore
 import copy
 import utils
 
+def get_nearest_index(data, value):
+    dst = np.abs(data - value)
+    return np.where(dst == dst.min())[0][0]
 
 class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
@@ -56,13 +59,16 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         # Altrimenti, altre curve riferentesi all'asse originario verrebbero
         # sfalsate quando le sue dimensioni si aggiornano!
 
-        reference_curve_data = doc.data[reference_curve.settings.xData].data
-        dst = np.abs(reference_curve_data - fields['x'])
-        reference_curve_nearset_value_index = np.where(dst == dst.min())[0][0]
 
-        xtr = doc.data[translating_curve.settings.xData].data
-        dst = np.abs(xtr - fields['x'])
-        translating_curve_nearest_value_index = np.where(dst == dst.min())[0][0]
+        reference_curve_nearest_value_index = get_nearest_index(
+            doc.data[reference_curve.settings.xData].data,
+            fields['x']
+        )
+
+        translating_curve_nearest_value_index = get_nearest_index(
+            doc.data[translating_curve.settings.xData].data,
+            fields['x']
+        )
 
         translating_dataset_name = translating_curve.settings.yData
         translating_dataset = doc.data[translating_dataset_name]
@@ -70,7 +76,7 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         reference_dataset_name = reference_curve.settings.yData
         reference_dataset = doc.data[reference_dataset_name]
 
-        delta = translating_dataset.data[translating_curve_nearest_value_index] - reference_dataset.data[reference_curve_nearset_value_index]
+        delta = translating_dataset.data[translating_curve_nearest_value_index] - reference_dataset.data[reference_curve_nearest_value_index]
 
         msg = 'curve' if fields['mode'] == 'Translation Mode' else 'Y axis'
         QtGui.QMessageBox.information(None,
