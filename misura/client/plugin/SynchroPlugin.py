@@ -94,25 +94,25 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         return self.translate_axis(cmd, yax, trans, d, doc)
 
-    def translate_axis(self, cmd, yax, trans, d, doc):
+    def translate_axis(self, cmd, dataset, translating_curve, delta, doc):
         # Create a new Y axis
-        ypath = cmd.CloneWidget(yax.path,
-                                trans.parent.path,
-                                newname='Trans_' + yax.name)
-        trax = doc.resolveFullWidgetPath(ypath)
-        self.toset(trax, 'label', 'Trans: ' + yax.settings.label)
-        self.toset(trax, 'Line/transparency', 30)
-        self.toset(trax, 'MajorTicks/transparency', 30)
-        self.toset(trax, 'MinorTicks/transparency', 30)
-        self.toset(trax, 'Label/italic', True)
+        ypath = cmd.CloneWidget(dataset.path,
+                                translating_curve.parent.path,
+                                newname='Trans_' + dataset.name)
+        new_y_axis = doc.resolveFullWidgetPath(ypath)
+        self.toset(new_y_axis, 'label', 'Trans: ' + dataset.settings.label)
+        self.toset(new_y_axis, 'Line/transparency', 30)
+        self.toset(new_y_axis, 'MajorTicks/transparency', 30)
+        self.toset(new_y_axis, 'MinorTicks/transparency', 30)
+        self.toset(new_y_axis, 'Label/italic', True)
 
-        newmax, newmin = yax.getPlottedRange()
+        newmax, newmin = dataset.getPlottedRange()
         # Remove Auto ranges from reference axis
-        self.toset(yax, 'max', float(newmax))
-        self.toset(yax, 'min', float(newmin))
-        self.toset(trax, 'max', float(newmax + d))
-        self.toset(trax, 'min', float(newmin + d))
-        self.toset(trans, 'yAxis', trax.name)
+        self.toset(dataset, 'max', float(newmax))
+        self.toset(dataset, 'min', float(newmin))
+        self.toset(new_y_axis, 'max', float(newmax + delta))
+        self.toset(new_y_axis, 'min', float(newmin + delta))
+        self.toset(translating_curve, 'yAxis', new_y_axis.name)
 
         self.apply_ops()
         return True
