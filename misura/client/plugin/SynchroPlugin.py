@@ -121,7 +121,7 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.toset(new_y_axis, 'MinorTicks/transparency', 30)
         self.toset(new_y_axis, 'Label/italic', True)
 
-        newmax, newmin = dataset.getPlottedRange()
+        newmin, newmax = dataset.getPlottedRange()
         # Remove Auto ranges from reference axis
         self.toset(dataset, 'max', float(newmax))
         self.toset(dataset, 'min', float(newmin))
