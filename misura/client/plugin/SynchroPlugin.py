@@ -20,6 +20,7 @@ def translate_values(dataset, dataset_name, delta, doc):
     doc.applyOperation(op)
     return True
 
+
 class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
     """Translate curves so that they equal a reference curve at a known x-point"""
@@ -90,19 +91,23 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                                       'Synchronization Output',
                                       'Translating the %s by %E.' % (msg, delta))
 
-        if fields['mode'] == 'Translate Values':
-            translate = lambda: translate_values(translating_dataset,
-                                                 translating_dataset_name,
-                                                 delta,
-                                                 doc)
-        else:
-            translate = lambda: self.translate_axis(cmd,
-                                                    reference_curve.parent.getChild(reference_curve.settings.yAxis),
-                                                    translating_curve,
-                                                    delta,
-                                                    doc)
+        translate = {
+            'Translate Values': lambda: translate_values(
+                translating_dataset,
+                translating_dataset_name,
+                delta,
+                doc
+            ),
+            'Translate Axes': lambda: self.translate_axis(
+                cmd,
+                reference_curve.parent.getChild(reference_curve.settings.yAxis),
+                translating_curve,
+                delta,
+                doc
+            )
+        }
 
-        return translate()
+        return translate[fields['mode']]()
 
     def translate_axis(self, cmd, dataset, translating_curve, delta, doc):
         # Create a new Y axis
