@@ -32,7 +32,7 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 "ref", descr="Reference curve:", widgettypes=set(['xy']), default=reference_curve_full_path),
             plugins.FieldWidget(
                 "trans", descr="Translating curve:", widgettypes=set(['xy']), default=translating_curve_full_path),
-            plugins.FieldFloat("x", descr="Matching X Value", default=0.),
+            plugins.FieldFloat("matching_x_value", descr="Matching X Value", default=0.),
             #			plugins.FieldDatasetMulti('dslist','')
             plugins.FieldCombo("mode", descr="Translation Mode:", items=[
                                'Translate Values', 'Translate Axes'], default="Translate Values")
@@ -62,19 +62,18 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         reference_curve_nearest_value_index = get_nearest_index(
             doc.data[reference_curve.settings.xData].data,
-            fields['x']
+            fields['matching_x_value']
         )
 
         translating_curve_nearest_value_index = get_nearest_index(
             doc.data[translating_curve.settings.xData].data,
-            fields['x']
+            fields['matching_x_value']
         )
 
         translating_dataset_name = translating_curve.settings.yData
         translating_dataset = doc.data[translating_dataset_name]
 
-        reference_dataset_name = reference_curve.settings.yData
-        reference_dataset = doc.data[reference_dataset_name]
+        reference_dataset = doc.data[reference_curve.settings.yData]
 
         delta = translating_dataset.data[translating_curve_nearest_value_index] - reference_dataset.data[reference_curve_nearest_value_index]
 
