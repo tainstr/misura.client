@@ -32,7 +32,7 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plugins.FieldFloat("x", descr="Matching X Value", default=0.),
             #			plugins.FieldDatasetMulti('dslist','')
             plugins.FieldCombo("mode", descr="Translation Mode:", items=[
-                               'Translate Values', 'Translate Axes'], default="Translate Axes")
+                               'Translate Values', 'Translate Axes'], default="Translate Values")
         ]
 
     def apply(self, cmd, fields):
