@@ -56,23 +56,21 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         # Altrimenti, altre curve riferentesi all'asse originario verrebbero
         # sfalsate quando le sue dimensioni si aggiornano!
 
-        # Search the nearest X value on ref X-array
-        xref = doc.data[reference_curve.settings.xData].data
-        dst = np.abs(xref - fields['x'])
-        i = np.where(dst == dst.min())[0][0]
-        # Get the corresponding Y value on the ref Y-array
-        # Search the nearest X value on trans X-array
+        reference_curve_data = doc.data[reference_curve.settings.xData].data
+        dst = np.abs(reference_curve_data - fields['x'])
+        reference_curve_nearset_value_index = np.where(dst == dst.min())[0][0]
+
         xtr = doc.data[translating_curve.settings.xData].data
         dst = np.abs(xtr - fields['x'])
-        i = np.where(dst == dst.min())[0][0]
-        # Get the corresponding Y value on the trans Y-array
+        translating_curve_nearest_value_index = np.where(dst == dst.min())[0][0]
+
         translating_dataset_name = translating_curve.settings.yData
         translating_dataset = doc.data[translating_dataset_name]
 
         reference_dataset_name = reference_curve.settings.yData
         reference_dataset = doc.data[reference_dataset_name]
 
-        delta = translating_dataset.data[i] - reference_dataset.data[i]
+        delta = translating_dataset.data[translating_curve_nearest_value_index] - reference_dataset.data[reference_curve_nearset_value_index]
 
         msg = 'curve' if fields['mode'] == 'Translation Mode' else 'Y axis'
         QtGui.QMessageBox.information(None,
