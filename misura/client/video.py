@@ -36,6 +36,8 @@ def export(sh, frame='/hsm/sample0/frame',
     if cv is False:
         logging.debug('%s', 'No OpenCV library')
         return False
+    if not output.lower().endswith('.avi'):
+        output += '.avi'
     if T:
         nT = sh.col(T, raw=True)
         tT = nT.cols.t
