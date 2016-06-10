@@ -24,8 +24,10 @@ def check_consistency(reference_curve, translating_curve):
             'The selected curves must share the same x, y axes.')
 
 def add_label_to(curve, message, label_name, doc, toset):
-    doc.applyOperation(document.OperationWidgetAdd(curve,
-                                                   'curvelabel', name=label_name))
+    if not curve.hasChild(label_name):
+        doc.applyOperation(document.OperationWidgetAdd(curve,
+                                                       'curvelabel', name=label_name))
+
     label = curve.getChild(label_name)
     toset(label, 'label', message)
     toset(label, 'xPos', 0.1)
