@@ -140,7 +140,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def expand_plotted_nodes(self):
         for node in self.model().list_plotted():
-            self.expand_node_path(node, select=False)
+            if node:
+                self.expand_node_path(node, select=False)
 
     def restore_selection(self):
         """Restore previous selection after a model reset."""
