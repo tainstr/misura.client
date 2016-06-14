@@ -25,7 +25,6 @@ else:
 
 
 def export(sh, frame='/hsm/sample0/frame',
-           roi='/hsm/sample0/roi',
            T='/kiln/T',
            output='output.avi',
            framerate=50.0,
@@ -42,7 +41,9 @@ def export(sh, frame='/hsm/sample0/frame',
         nT = sh.col(T, raw=True)
         tT = nT.cols.t
         vT = nT.cols.v
-
+    roi = frame.split('/')[:-1]
+    roi.append('roi')
+    roi = '/'.join(roi)
     roi = sh.col(roi, raw=True)
     x = roi.cols.x
     y = roi.cols.y
@@ -53,6 +54,7 @@ def export(sh, frame='/hsm/sample0/frame',
     y_translation = min(y)
     x -= x_translation
     y -= y_translation
+    print 'translations', x_translation, y_translation
     # Max dimension (video resolution)
     wMax = int(max(x + w))
     hMax = int(max(y + h))
@@ -66,7 +68,6 @@ def export(sh, frame='/hsm/sample0/frame',
                                 seed=0,
                                 get=lambda i: ref[i][0])
     ti = 0
-
     if prog:
         prog.setMaximum(N-i)
 
@@ -88,6 +89,13 @@ def export(sh, frame='/hsm/sample0/frame',
             y = np.concatenate(([hMax, y[0]], y, [y[-1], hMax, hMax]))
             p = np.array([x, y], np.int32).transpose()
             cv.fillPoly(im, [p], 0)
+            m = im.mean() 
+            if m==255 or m==0:
+                print 'invalid frame',p
+                import pylab
+                pylab.plot(x,y)
+                pylab.show()
+                break
             im = np.dstack((im, im, im))
         else:
             logging.debug('%s', 'Unsupported reference')
@@ -162,7 +170,7 @@ class VideoExporter(QtGui.QDialog):
 
         self.acquisition_start_temperature = QtGui.QSpinBox()
         self.acquisition_start_temperature.setMinimum(1)
-        self.acquisition_start_temperature.setMaximum(1600)
+        self.acquisition_start_temperature.setMaximum(2000)
         self.acquisition_start_temperature.setValue(20)
         self.lay.addRow(_("Start acquisition at temperature"), self.acquisition_start_temperature)
 
