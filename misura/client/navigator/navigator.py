@@ -114,7 +114,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if ismodified:
             if self.model().refresh(False):
                 self.ensure_sync_of_view_and_model()
-        self.ensure_sync_of_view_and_model()
+        if self.doc.auto_changeset+2!=self.doc.changeset:
+            self.ensure_sync_of_view_and_model()
 
     def ensure_sync_of_view_and_model(self):
         self.collapseAll()

@@ -155,7 +155,8 @@ class MisuraDocument(document.Document):
                 v = a[idx]
             meta[col] = v
         return meta
-
+    
+    auto_changeset = 0
     @lockme
     def update(self, proxy=False):
         if not self.up:
@@ -216,7 +217,8 @@ class MisuraDocument(document.Document):
             dsnames = self.reloadData()
             self._lock.acquire(False)
             return dsnames
-
+        # Avoid firing individual updates
+        self.suspendUpdates()
         for col in self.data.keys():
             ds = self.data[col]
             if len(ds.data) == 0:
@@ -245,5 +247,8 @@ class MisuraDocument(document.Document):
             N = len(ds.data)
             ds.insertRows(N, 1, {'data': updata})
             k.append(col)
+        # Restore firing updates
+        self.auto_changeset = self.changeset
+        self.enableUpdates()
         self.emit(QtCore.SIGNAL('updated()'))
         return k
