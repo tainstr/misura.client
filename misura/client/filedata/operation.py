@@ -178,6 +178,104 @@ def done(pid="File import"):
         t.done(pid)
 
 
+def assign_sample_to_dataset(ds, linked_file, reference_sample):
+    """Find out the sample index to which this dataset refers"""
+    col = ds.m_col
+    obj, var = linked_file.conf.from_column(col)
+    if '/sample' in col:
+        parts = col.split(sep)
+        for q in parts:
+            if q.startswith('sample'):
+                break
+        i = int(q[6:]) + 1
+        smp = linked_file.samples[i]
+        logging.debug(
+            'Assigning sample', i, 'to curve', col, smp, smp.ref, var)
+        ds.m_smp = smp
+        # Retrieve initial dimension from sample
+        if var == 'd':
+            ds.m_initialDimension = smp.conf['initialDimension']
+
+    if ds.m_smp is False:
+        ds.m_smp = reference_sample
+        return False
+    return True
+
+def assign_label(ds, col0):
+    """Assigns an m_label to the dataset"""
+    if col0 == 't':
+        ds.m_label = _("Time")
+    elif col0 == 'T':
+        ds.m_label = _("Temperature")
+    else:
+        ds_object, ds_name = ds.m_conf.from_column(col0)
+        opt = ds_object.gete(ds_name)
+        ds.m_label = _(opt["name"])
+        if opt.has_key('csunit'):
+            ds.old_unit = opt["csunit"]
+
+def assign_node_attributes(proxy, ds):
+    """Try to read column metadata from node attrs"""
+    for meta in ['percent', 'initialDimension']:
+        val = 0
+        if proxy.has_node_attr(ds.m_col, meta):
+            val = proxy.get_node_attr(ds.m_col, meta)
+            if type(val) == type([]):
+                val = 0
+        setattr(ds, 'm_' + meta, val)
+        
+def dataset_measurement_unit(pure_dataset_name, fileproxy, data, m_var):
+    # Get meas. unit
+    u = 'None'
+    if pure_dataset_name == 't':
+        u = 'second'
+    elif len(data):
+        u = fileproxy.get_node_attr(pure_dataset_name, 'unit')
+        if u in ['', 'None', None, False, 0]:
+            u = False
+        # Correct missing celsius indication
+        if not u and m_var == 'T':
+            u = 'celsius'    
+    return u
+
+def create_dataset(fileproxy, data, prefixed_dataset_name, pure_dataset_name, hdf_dataset_name, variable_name, 
+                   m_update=True, p=0, 
+                   linked_file=False, reference_sample=False, rule_unit=lambda *a: False):
+    #TODO: cleaun-up all this proliferation of *_dataset_names!!!
+    # Get meas. unit
+    u = dataset_measurement_unit(pure_dataset_name, fileproxy, data, variable_name)
+    logging.debug('%s', 'building the dataset')
+    ds = MisuraDataset(data=data, linked=linked_file)
+    ds.m_name = prefixed_dataset_name
+    ds.m_pos = p
+    ds.m_smp = reference_sample
+    ds.m_var = variable_name
+    ds.m_col = pure_dataset_name
+    ds.m_update = m_update
+    ds.m_conf = fileproxy.conf
+    ds.unit = str(u) if u else u
+    ds.old_unit = ds.unit
+
+    # Read additional metadata
+    if len(data) > 0 and pure_dataset_name != 't':
+        logging.debug('Reading metadata',  pure_dataset_name)
+        assign_node_attributes(fileproxy, ds)
+        assign_sample_to_dataset(ds, linked_file, reference_sample)
+        # Units conversion
+        nu = rule_unit(prefixed_dataset_name)
+        if u and nu:
+            ds = units.convert(ds, nu[0])
+
+    # Add the hierarchy tags
+    for sub, parent, leaf in iterpath(pure_dataset_name):
+        if leaf:
+            ds.tags.add(parent)
+
+    assign_label(ds, hdf_dataset_name)
+
+    return ds
+
+
 class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
     """Import misura HDF File format. This operation is also a QObject so it can send signals to other objects."""
@@ -380,102 +478,17 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             '%s %s %s %s', 'build', idx + 1, 'samples', self.LF.samples)
         return refsmp
 
-    def assign_sample_to_dataset(self, ds):
-        """Find out the sample index to which this dataset refers"""
-        col = ds.m_col
-        obj, var = self.LF.conf.from_column(col)
-        if '/sample' in col:
-            parts = col.split(sep)
-            for q in parts:
-                if q.startswith('sample'):
-                    break
-            i = int(q[6:]) + 1
-            smp = self.LF.samples[i]
-            logging.debug(
-                'Assigning sample', i, 'to curve', col, smp, smp.ref, var)
-            ds.m_smp = smp
-            # Retrieve initial dimension from sample
-            if var == 'd':
-                ds.m_initialDimension = smp.conf['initialDimension']
 
-        if ds.m_smp is False:
-            ds.m_smp = self.refsmp
-            return False
-        return True
-
-    def assign_label(self, ds, col0):
-        """Assigns an m_label to the dataset"""
-        if col0 == 't':
-            ds.m_label = _("Time")
-        elif col0 == 'T':
-            ds.m_label = _("Temperature")
-        else:
-            ds_object, ds_name = ds.m_conf.from_column(col0)
-            opt = ds_object.gete(ds_name)
-            ds.m_label = _(opt["name"])
-            if opt.has_key('csunit'):
-                ds.old_unit = opt["csunit"]
-
-    def assign_node_attributes(self, ds):
-        """Try to read column metadata from node attrs"""
-        for meta in ['percent', 'initialDimension']:
-            val = 0
-            if self.proxy.has_node_attr(ds.m_col, meta):
-                val = self.proxy.get_node_attr(ds.m_col, meta)
-                if type(val) == type([]):
-                    val = 0
-            setattr(ds, 'm_' + meta, val)
-
-    def create_dataset(self, data, pcol, col, col0, m_var, m_update=True, p=0):
-        # Get meas. unit
-        u = 'None'
-        if col == 't':
-            u = 'second'
-        elif len(data):
-            u = self.proxy.get_node_attr(col, 'unit')
-            if u in ['', 'None', None, False, 0]:
-                u = False
-            # Correct missing celsius indication
-            if not u and m_var == 'T':
-                u = 'celsius'
-        logging.debug('%s', 'building the dataset')
-        ds = MisuraDataset(data=data, linked=self.LF)
-        ds.m_name = pcol
-        ds.m_pos = p
-        ds.m_smp = self.refsmp
-        ds.m_var = m_var
-        ds.m_col = col
-        ds.m_update = m_update
-        ds.m_conf = self.proxy.conf
-        ds.unit = str(u) if u else u
-        ds.old_unit = ds.unit
-
-        # Read additional metadata
-        if len(data) > 0 and col != 't':
-            logging.debug('Reading metadata',  col)
-            self.assign_node_attributes(ds)
-            self.assign_sample_to_dataset(ds)
-            # Units conversion
-            nu = self.rule_unit(col)
-            if u and nu:
-                ds = units.convert(ds, nu[0])
-
-        # Add the hierarchy tags
-        for sub, parent, leaf in iterpath(pcol):
-            if leaf:
-                ds.tags.add(parent)
-
-        self.assign_label(ds, col0)
-
-        return ds
 
     def create_local_datasets(self, pcol, sub_time_sequence, time_sequence):
         """Create subordered time and temperature datasets"""
         logging.debug('creating local datasets',  pcol)
         subcol = pcol + sep + 't'
         subvar = 't'
-        subt = self.create_dataset(sub_time_sequence, subcol,
-                                   subvar, subvar, subvar)
+        subt = create_dataset(self.proxy, sub_time_sequence, subcol,
+                                   subvar, subvar, subvar, 
+                                   linked_file=self.LF, reference_sample=self.refsmp,
+                                   rule_unit=self.rule_unit)
         T = self.prefix + 'kiln/T'
         # Search in doc and in current outdatasets (kiln/T should be the first
         # dataset imported!)
@@ -489,8 +502,10 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         sub_temperature_sequence = temperature_function(sub_time_sequence)
         subcol = pcol + sep + 'T'
         subvar = 'T'
-        subT = self.create_dataset(sub_temperature_sequence, subcol,
-                                   subvar, subvar, subvar)
+        subT = create_dataset(self.proxy, sub_temperature_sequence, subcol,
+                                   subvar, subvar, subvar, 
+                                   linked_file=self.LF, reference_sample=self.refsmp,
+                                   rule_unit=self.rule_unit)
         return [subt, subT]
 
     def doImport(self):
@@ -569,8 +584,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 data = data[1]
 
             # Create the dataset
-            ds = self.create_dataset(
-                data, pcol, col, col0, m_var, m_update, p)
+            ds = create_dataset(self.proxy, 
+                data, pcol, col, col0, m_var, m_update, p,
+                linked_file=self.LF, reference_sample=self.refsmp, rule_unit=self.rule_unit,)
             if ds is False:
                 continue
 
