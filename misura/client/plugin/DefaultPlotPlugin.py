@@ -5,7 +5,7 @@ import re
 
 import veusz.plugins as plugins
 from veusz import document
-from misura.client import iutils
+from misura.canon.option import namingConvention
 from misura.canon.logger import Log as logging
 from .. import axis_selection
 from PlotPlugin import PlotDatasetPlugin
@@ -124,7 +124,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             ds1 = ds
             if ':' in ds1:
                 ds1 = ds1.split(':')[1]
-            var = iutils.namingConvention(ds1)[0]
+            var = namingConvention(ds1)[0]
             logging.debug('%s %s %s', 'Checking', ds, var)
             if rp and rp.search(ds1):
                 names.append(ds)

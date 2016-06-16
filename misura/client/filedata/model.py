@@ -13,7 +13,7 @@ from entry import DatasetEntry
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 import functools
-from misura.client.iutils import namingConvention
+from misura.canon.option import namingConvention
 from misura.canon.csutil import find_nearest_val
 from entry import iterpath, NodeEntry, dstats
 

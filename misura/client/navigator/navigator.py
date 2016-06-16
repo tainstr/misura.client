@@ -64,12 +64,6 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if doc:
             self.set_doc(doc)
 
-    # 3rd party domains utilities
-    veusz_plugins_module = veusz.plugins
-    veusz_PluginDialog = veusz.dialogs.plugin.PluginDialog
-    misura_plugin_module = plugin
-    misura_confdb = confdb
-
     def selectedIndexesPublic(self, *a, **k):
         return self.selectedIndexes()
 

@@ -523,11 +523,11 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         return d
 
 import importlib
-def data_import(confdb):
+def activate_plugins(confdb):
     plugins = confdb['m3_plugins'].splitlines()
     for plug in plugins:
         plug = plug.replace('\n','')
-        print 'PLugging: ', plug
+        print 'Plugging: ', plug
         try:
             importlib.import_module(plug)
         except:
@@ -547,4 +547,4 @@ elif os.path.exists(cf):
     params.pathConf = cf
     confdb = ConfDb(path=cf)
 settings.setValue('/Configuration', confdb.path)
-data_import(confdb)
+#activate_plugins(confdb)

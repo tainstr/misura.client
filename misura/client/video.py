@@ -61,7 +61,7 @@ def export(sh, frame='/hsm/sample0/frame',
     out = cv.VideoWriter(output, fourcc, framerate, (wMax, hMax))
     ref = reference.get_node_reference(sh, frame)
     N = sh.len(frame)
-
+    
     index_acquisition_T = csutil.find_nearest_val(vT, acquisition_start_temperature, seed=0)
     i = i0 = csutil.find_nearest_val(ref,
                                 tT[index_acquisition_T],

@@ -53,7 +53,7 @@ def add_datasets_to_doc(datasets, doc, original_dataset=False):
     ops = []
     #TODO: find a way to reliably detect the original_dataset for multi-test docs!
     if not original_dataset:
-        original_dataset = doc.data['0:kiln/T']
+        original_dataset = doc.data['0:t']
     for (pure_dataset_name, (data, variable_name, label)) in datasets.iteritems():
         op = new_dataset_operation(original_dataset, data, variable_name, label, pure_dataset_name, unit=unit)
         ops.append(op)
@@ -93,6 +93,9 @@ def table_to_datasets(proxy, opt, doc):
     base_path = proxy['fullpath']+opt['handle']
     datasets = {}
     tab = np.array(tab[1:]).transpose()
+    if len(tab) == 0:
+        print 'Skip empty table'
+        return False
     
     value_idxes = range(len(tab))
     if timecol_idx in value_idxes:
@@ -101,7 +104,7 @@ def table_to_datasets(proxy, opt, doc):
         value_idxes.remove(Tcol_idx)
         
     if len(value_idxes)==0:
-        print 'No value columns found in table', header
+        print 'No value columns found in table', len(tab), tab, value_idxes, header
         return False
     
     def add_tT(path):

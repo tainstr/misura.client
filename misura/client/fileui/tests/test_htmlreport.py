@@ -18,7 +18,14 @@ class FakeDecoder():
 
 
 class HtmlReport(unittest.TestCase):
+    def setUp(self):
+        self.old_find_nearest_val = csutil.find_nearest_val
+        
+    def tearDown(self):
+        csutil.find_nearest_val = self.old_find_nearest_val
+        
     def test_integration(self):
+        
         csutil.find_nearest_val = lambda data, time: 123
         htmlreport.byte_array_from = lambda qimag: '789'
         base64_789_string = base64.b64encode('789')
