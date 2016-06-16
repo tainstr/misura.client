@@ -115,14 +115,14 @@ def table_to_datasets(proxy, opt, doc):
     
     if len(value_idxes)==1:
         idx = value_idxes[0]
-        datasets[base_path] = (tab[idx], column_names[idx], opt['name'])
+        datasets[base_path] = (tab[idx], opt['handle'], opt['name'])
         add_tT(base_path)
     else:
         for idx in value_idxes:
             name = column_names[idx]
             sub_path = base_path+'/'+ name
             datasets[sub_path] = (tab[idx], name, opt['name']+' - '+name)
-            add_tT(sub_path)
+        add_tT(base_path)
             
     add_datasets_to_doc(datasets, doc)
     return True

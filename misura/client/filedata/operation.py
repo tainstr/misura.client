@@ -557,10 +557,13 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             sub_time_sequence = False
             if col == 't':
                 attr = []
+                type = 'Float'
             else:
                 logging.debug('Getting attr', col)
                 obj,  name = self.proxy.conf.from_column(col)
-                attr = obj.gete(name)['attr']
+                opt = obj.gete(name)
+                attr = opt['attr']
+                type = opt['type']
                 if attr in ['', 'None', None, False, 0]:
                     attr = []
 
@@ -573,7 +576,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 data = []
             elif col == 't':
                 data = time_sequence
-            elif 'Event' not in attr:
+            elif 'Event' not in attr and type!='Table':
                 logging.debug('Loading data', col0)
                 data = interpolated(self.proxy, col0, time_sequence)
                 # Interpolation error

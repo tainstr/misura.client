@@ -379,7 +379,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             # Find position in siblings
             i = obj.parent.recursive_status(self.status, depth=0).index(obj)
             jdx.append(self.createIndex(i, 0, obj.model_path))
-        logging.debug('%s %s', 'index_path', jdx)
+        #logging.debug('index_path', jdx)
         return jdx
 
     #####

@@ -60,7 +60,7 @@ class Item(object):
         node = self
         idx = []
         for name in path:
-            logging.debug('%s %s %s', 'index_path searching', name, node.names)
+            #logging.debug('index_path searching', name, node.names)
             if name not in node.names:
                 logging.debug(
                     '%s %s %s %s', 'NAME NOT FOUND', name, node.name, node.names)
@@ -68,7 +68,7 @@ class Item(object):
             i = node.names.index(name)
             node = node.children[i]
             idx.append(i)
-            logging.debug('%s %s %s %s', 'index_path', name, i, node)
+            #logging.debug('index_path', name, i, node)
         return idx, node
 
 
