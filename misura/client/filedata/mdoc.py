@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
-from time import sleep
 import threading
 
 from PyQt4 import QtCore

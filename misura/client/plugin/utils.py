@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Utilities for veusz-baset plugins"""
-from copy import copy
 import re
 import numpy as np
 
@@ -11,6 +10,7 @@ import veusz.document as document
 
 from .. import _
 from misura.canon.logger import Log as logging
+from ..filedata.generate_datasets import new_dataset_operation
 
 def iter_widgets(base, typename, direction = 0):
     """Yields all widgets of type `typename` starting from `base` widget.
@@ -254,17 +254,6 @@ class OperationWrapper(object):
     
     def set_new_dataset(self, original_dataset, data, name, label, path, unit='volt'):
         """Create a new dataset by copying `original_dataset` and overwriting with `data`"""
-        old_unit = getattr(original_dataset, 'old_unit', unit)
-        new_dataset = copy(original_dataset)
-        new_dataset.tags = set([])
-        new_dataset.data = self.plugins_module.numpyCopyOrNone(data)
-        new_dataset.m_var = name
-        new_dataset.m_pos = 2
-        new_dataset.m_name = new_dataset.m_var
-        new_dataset.m_col = new_dataset.m_var
-        new_dataset.old_unit = old_unit
-        new_dataset.unit = unit
-        new_dataset.m_percent = False
-        new_dataset.m_label = self._(label)
-        self.ops.append(
-            self.document_module.OperationDatasetSet(path, new_dataset))
+        op = new_dataset_operation(original_dataset, data, name, label, path, unit=unit)
+        self.ops.append(op)
+        

@@ -238,7 +238,10 @@ def dataset_measurement_unit(pure_dataset_name, fileproxy, data, m_var):
             u = 'celsius'    
     return u
 
-def create_dataset(fileproxy, data, prefixed_dataset_name, pure_dataset_name, hdf_dataset_name, variable_name, 
+def create_dataset(fileproxy, data, prefixed_dataset_name, 
+                   pure_dataset_name, 
+                   hdf_dataset_name=False, 
+                   variable_name=False, 
                    m_update=True, p=0, 
                    linked_file=False, reference_sample=False, rule_unit=lambda *a: False):
     #TODO: cleaun-up all this proliferation of *_dataset_names!!!
@@ -270,8 +273,8 @@ def create_dataset(fileproxy, data, prefixed_dataset_name, pure_dataset_name, hd
     for sub, parent, leaf in iterpath(pure_dataset_name):
         if leaf:
             ds.tags.add(parent)
-
-    assign_label(ds, hdf_dataset_name)
+    if hdf_dataset_name:
+        assign_label(ds, hdf_dataset_name)
 
     return ds
 
