@@ -107,7 +107,12 @@ class GenerateDatasets(unittest.TestCase):
         proxy = make_conf_proxy()
         gd.generate_datasets(proxy, self.doc)
         self.check_generated(proxy)
-        
+        self.cleanup()
+        gd.generate_datasets(proxy, self.doc, '^ok$')
+        self.check_generated(proxy)
+        self.cleanup()        
+        gd.generate_datasets(proxy, self.doc, '_float$')
+        self.assertNotIn('0:ok', self.doc.data)    
         
         
 

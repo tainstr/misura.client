@@ -3,6 +3,7 @@
 """Automated option->dataset generation utilities"""
 import numpy as np
 from copy import copy
+import re
 
 import veusz.plugins as plugins
 import veusz.document as document
@@ -127,16 +128,20 @@ def table_to_datasets(proxy, opt, doc):
     add_datasets_to_doc(datasets, doc)
     return True
 
-def generate_datasets(proxy, doc):
+def generate_datasets(proxy, doc, rule=False):
     """Generate all datasets from proxy's options"""
+    if rule:
+        rule = re.compile(rule)
     for key, opt in proxy.describe().iteritems():
+        if rule and not rule.search(key):
+            continue
         if opt['type'] == 'Table':
             table_to_datasets(proxy, opt, doc)
 
 
-def recurse_generate_datasets(base_proxy, doc):
+def recurse_generate_datasets(base_proxy, doc, rule=False):
     """Generates all datasets for proxy and recursively downward 
     to the portion of tree stemming from proxy."""
-    generate_datasets(base_proxy, doc)
+    generate_datasets(base_proxy, doc, rule=rule)
     for proxy in base_proxy.devices:
-        recurse_generate_datasets(proxy, doc)
+        recurse_generate_datasets(proxy, doc, rule=rule)
