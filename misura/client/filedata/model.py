@@ -142,7 +142,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
         if page != self.page:
             self.page = page
             self.sigPageChanged.emit()
-        self.modelReset.emit() 
         return True
 
     @property
@@ -161,7 +160,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             elif self.keys == set(self.doc.data.keys()) and self.available_keys == set(self.doc.available_data.keys()):
                 logging.debug('model.refresh(): NOTHING CHANGED')
                 return False
-
+        
         logging.debug('%s %s', 'REFRESHING MODEL', self.paused)
         self.paused = True
         self.doc.suspendUpdates()

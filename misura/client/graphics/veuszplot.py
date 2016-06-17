@@ -27,6 +27,7 @@ def _(text, disambiguation=None, context='PlotWindow'):
     """Translate text."""
     return qt4.QCoreApplication.translate(context, text, disambiguation)
 
+
 def with_busy_cursor(function_to_decorate):
     def wrapper(*a, **k):
         qt4.QApplication.setOverrideCursor(qt4.QCursor(qt4.Qt.WaitCursor))
@@ -51,7 +52,6 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
     def moveToLastPage(self):
         number_of_pages = self.document.getNumberPages()
         self.setPageNumber(number_of_pages - 1)
-
 
     def contextMenuEvent(self, event):
         """Show context menu."""
@@ -201,9 +201,6 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
 
             self.doExport(filename, validextns, chosenextns)
 
-
-
-
     @with_busy_cursor
     def doExport(self, filename, validextns, chosenextns):
         ext = os.path.splitext(filename)[1][1:]
@@ -232,12 +229,14 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         page = self.document.basewidget.getPage(n)
         if page is None:
             logging.debug('%s %s', 'NO PAGE FOUND', n)
-            return
-        if self.document.model.page == page.path:
-            logging.debug('Not update_page %s', page.path)
-            return
-        logging.debug('VeuszPlot.update_page %s %s', self.document.model.page, page.path)
-        self.document.model.set_page(page.path)
+        else:
+            self.docchangeset = -100 # force plot update for page resizing
+            self.document.model.set_page(page.path)
+
+    def setPageNumber(self, page):
+        r = plotwindow.PlotWindow.setPageNumber(self, page)
+        self.update_page()
+        return r
 
 
 class VeuszPlot(QtGui.QWidget):
@@ -320,8 +319,11 @@ class VeuszPlot(QtGui.QWidget):
         self.plot.sigWidgetClicked.connect(self.treeedit.selectWidget)
         self.treeedit.widgetsSelected.connect(self.plot.selectedWidgets)
         self.treeedit.sigPageChanged.connect(self.plot.setPageNumber)
-        self.document.model.sigPageChanged.connect(self.fitSize)
-        
+        self.document.model.sigPageChanged.connect(self.sync_page)
+
+    def sync_page(self, page=-1):
+        self.plot.update_page()
+        self.fitSize()
 
     def pauseUpdate(self):
         self.updatePolicy = setting.settingdb['plot_updatepolicy']
@@ -373,7 +375,7 @@ class VeuszPlot(QtGui.QWidget):
         g = page.path
         if g == '/time' or g.endswith('_t'):
             g += '/time'
-        elif g == '/temperature'  or g.endswith('_T'):
+        elif g == '/temperature' or g.endswith('_T'):
             g += '/temp'
         if h < 2 or w < 4:
             self.cmd.Set(g + '/leftMargin', '0.1cm')
@@ -386,7 +388,7 @@ class VeuszPlot(QtGui.QWidget):
                 pass
             self.emit(QtCore.SIGNAL('smallPlot()'))
         else:
-            print 'settings for',g
+            print 'settings for', g
             self.cmd.Set(g + '/leftMargin', '1.5cm')
             self.cmd.Set(g + '/bottomMargin', '1.1cm')
             self.cmd.Set(g + '/rightMargin', '1.4cm')
