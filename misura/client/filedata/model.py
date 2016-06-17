@@ -139,9 +139,10 @@ class DocumentModel(QtCore.QAbstractItemModel):
             page = '/temperature/temp'
         elif page.startswith('/time'):
             page = '/time/time'
-        self.page = page
-        self.modelReset.emit()
-        self.sigPageChanged.emit()
+        if page != self.page:
+            self.page = page
+            self.sigPageChanged.emit()
+        self.modelReset.emit() 
         return True
 
     @property
@@ -188,7 +189,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         if not page:
             page = self.page
         for p in plots:
-            if p.startswith(page):
+            if p.startswith(page+'/'):
                 out.append(p)
         return out
 
@@ -198,7 +199,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             page = self.page
         plotted = []
         for plot_path, datasets in self.plots['plot'].iteritems():
-            if not plot_path.startswith(page):
+            if not plot_path.startswith(page+'/'):
                 continue
             plotted += datasets
         nodes = [self.tree.traverse(path) for path in set(plotted)]
@@ -210,12 +211,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             if not node:
                 print '######### nodeFromIndex', index.internalPointer()
             return node
-
         else:
-            # print 'nodeFromIndex
-            # print 'invalid ',
-            # index.row(),index.column(),index.internalPointer(), "
-            # <-----------------"
             return self.tree
 
     @lockme
@@ -242,30 +238,27 @@ class DocumentModel(QtCore.QAbstractItemModel):
         """Find text color and icon decorations for dataset ds"""
         if not ent.ds:
             return void
+        
+        if role == Qt.FontRole:
+            current_font = QtGui.QFont()
+            current_font.setBold(len(ent.data) > 0 and 0 in self.status)
+            return current_font
+        
         plotpath = self.is_plotted(ent.path)
         if len(plotpath) == 0:
             plotwg = False
         else:
-            plotwg = self.doc.resolveFullWidgetPath(plotpath[0])
-
+            plotwg = self.doc.resolveFullWidgetPath(plotpath[0])          
+        if plotwg is False:
+            return void
+        
         if role == Qt.DecorationRole:
-            # No plots
-            if plotwg is False:
-                return void
             return get_item_icon(plotwg)
         if role == Qt.ForegroundRole:
-            if plotwg is False:
-                return void
             # Retrieve plot line color
             xy = plotwg.settings.get('PlotLine').get('color').color()
 #				print ' ForegroundRole' ,node.m_var,xy.value()
             return QtGui.QBrush(xy)
-
-        if role == Qt.FontRole:
-            current_font = QtGui.QFont()
-            current_font.setBold(len(ent.data) > 0 and 0 in self.status)
-
-            return current_font
         return void
 
     @lockme

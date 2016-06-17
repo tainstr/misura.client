@@ -233,7 +233,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         if page is None:
             logging.debug('%s %s', 'NO PAGE FOUND', n)
             return
-        if self.document.model.page.startswith(page.path):
+        if self.document.model.page == page.path:
             logging.debug('Not update_page %s', page.path)
             return
         logging.debug('VeuszPlot.update_page %s %s', self.document.model.page, page.path)
@@ -320,6 +320,8 @@ class VeuszPlot(QtGui.QWidget):
         self.plot.sigWidgetClicked.connect(self.treeedit.selectWidget)
         self.treeedit.widgetsSelected.connect(self.plot.selectedWidgets)
         self.treeedit.sigPageChanged.connect(self.plot.setPageNumber)
+        self.document.model.sigPageChanged.connect(self.fitSize)
+        
 
     def pauseUpdate(self):
         self.updatePolicy = setting.settingdb['plot_updatepolicy']
@@ -368,11 +370,11 @@ class VeuszPlot(QtGui.QWidget):
         logging.debug('%s %s %s', 'fitSize', w, h)
         # If the plot dimension is not sufficient, hide the axes.
         page = self.document.basewidget.getPage(self.plot.getPageNumber())
-        g = page.name
-        if g == 'time':
-            g = '/time/time'
-        elif g == 'temperature':
-            g = '/temperature/temp'
+        g = page.path
+        if g == '/time' or g.endswith('_t'):
+            g += '/time'
+        elif g == '/temperature'  or g.endswith('_T'):
+            g += '/temp'
         if h < 2 or w < 4:
             self.cmd.Set(g + '/leftMargin', '0.1cm')
             self.cmd.Set(g + '/bottomMargin', '0.1cm')
@@ -384,6 +386,7 @@ class VeuszPlot(QtGui.QWidget):
                 pass
             self.emit(QtCore.SIGNAL('smallPlot()'))
         else:
+            print 'settings for',g
             self.cmd.Set(g + '/leftMargin', '1.5cm')
             self.cmd.Set(g + '/bottomMargin', '1.1cm')
             self.cmd.Set(g + '/rightMargin', '1.4cm')
