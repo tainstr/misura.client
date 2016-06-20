@@ -44,6 +44,7 @@ class SyncTableModel(QtCore.QAbstractTableModel):
         cmd = "SELECT * from {}".format(self.table_name)
         if self.where:
             cmd += ' WHERE {}'.format(self.where)
+        cmd += ' ORDER BY zerotime DESC'
         self._data = self.database.execute_fetchall(cmd)
         self._header_data = map(lambda row: row[1], self.database.execute_fetchall("pragma table_info({})".format(self.table_name)))
         QtCore.QAbstractTableModel.reset(self)

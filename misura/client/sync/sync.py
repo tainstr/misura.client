@@ -155,7 +155,10 @@ class StorageSync(object):
         if not server:
             server = self.server
         all_tests = server.storage.list_tests()
-
+        if all_tests is None:
+            logging.error('Impossible to retrieve remote storage list.')
+            return 0
+        
         def already_downloaded(uid):
             r = self.maindb.searchUID(uid, full=True)
             return r and os.path.exists(r[0])

@@ -8,7 +8,7 @@ from time import sleep
 
 from misura.canon.logger import Log as logging
 from PyQt4 import QtCore
-from ...canon import indexer
+from ...canon import indexer, csutil
 from mproxy import urlauth, dataurl
 
 
@@ -135,6 +135,7 @@ class TransferThread(QtCore.QThread):
         self.aborted = False
         self.prefix = 'Download: '
         self.url = url
+        outfile = csutil.incremental_filename(outfile)
         self.outfile = outfile
         url = self.prepare_opener(url)
         self.dlStarted.emit(url, outfile)
@@ -142,6 +143,12 @@ class TransferThread(QtCore.QThread):
         req = urllib2.urlopen(url)
         dim = int(req.info().getheaders('Content-Length')[0])
         self.dlSize.emit(dim)
+        # Determine a unique filename
+        
+        if os.path.exists(outfile):
+            
+            logging.info('Renaming output file to unique name')
+            
         # FIXME: maximum recursion depth on big files or chunks too little
         done = 0
         with open(outfile, 'wb') as fp:
