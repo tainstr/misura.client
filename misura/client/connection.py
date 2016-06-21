@@ -231,7 +231,7 @@ from datetime import datetime
 
 
 class LiveLog(QtGui.QTextEdit):
-    _max_character_length = 1e6
+    _max_character_length = 1e7
     def __init__(self, parent=None):
         QtGui.QTextEdit.__init__(self, parent)
         self.setReadOnly(True)
@@ -248,6 +248,7 @@ class LiveLog(QtGui.QTextEdit):
                 'log()'), self.slotUpdate, QtCore.Qt.QueuedConnection)
         self.slotUpdate()
         self.setFont(QtGui.QFont('TypeWriter',  7, 50, False))
+        self.total_text_length = 0
 
     def slotUpdate(self):
         logging.debug('LiveLog.slotUpdate')
@@ -272,13 +273,14 @@ class LiveLog(QtGui.QTextEdit):
             txt += '[%s!%-2i] %s\n' % (st, p,  fmsg)
         txt = txt.rstrip('\n')
         self.append(txt)
-        txt = self.toPlainText()
-        if len(txt) > self._max_character_length:
+        self.total_text_length += len(txt)
+
+        if self.total_text_length > self._max_character_length:
+            txt = self.toPlainText()
             txt = txt[-3000:]
             self.setPlainText(txt)
             self.moveCursor(QtGui.QTextCursor.End)
-            self.moveCursor(QtGui.QTextCursor.StartOfLine)
-            self.ensureCursorVisible()
+            self.total_text_length = len(txt)
 
         self.current_buf = buf[:]
 
