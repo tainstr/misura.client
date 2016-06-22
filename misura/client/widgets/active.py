@@ -74,23 +74,29 @@ class RunMethod(QtCore.QRunnable):
             'RunMethod initialized %s %s %s', self.func, self.args, self.kwargs)
         self.runnables.append(self)
         self.error = False
+        self.running = False
+        self.done = False
 
     def run(self):
+        self.running = True
         registry.tasks.jobs(self.step, self.pid)
         logging.debug(
-            'RunMethod.run %s %s %s', self.func, self.args, self.kwargs)
+            'RunMethod.run', self.func, self.args, self.kwargs)
         registry.tasks.job(1, self.pid, self.pid)
         try:
             r = self.func(*self.args, **self.kwargs)
-            logging.debug('RunMethod.run result %s', r)
+            logging.debug('RunMethod.run result', r)
             self.notifier.emit(QtCore.SIGNAL('done()'))
             self.notifier.emit(QtCore.SIGNAL('done(PyQt_PyObject)'), r)
         except:
             self.error = format_exc()
+            logging.debug('RunMethod.run error', self.error)
             self.notifier.emit(QtCore.SIGNAL('failed()'))
             self.notifier.emit(QtCore.SIGNAL('failed(QString)'), self.error)
         registry.tasks.done(self.pid)
         self.runnables.remove(self)
+        self.done = True
+        self.running = False
 
 
 
