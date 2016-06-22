@@ -34,13 +34,15 @@ def searchWidgetName(widget, name):
         widget = widget.parent
     return None
 
+def remove_out_of_bound_indexes(indexes, max_index):
+    return [index for index in indexes if index < max_index]
 
 class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
     typename = 'datapoint'
     description = 'Data Point'
     allowusercreation = True
     point_index = 0
-    
+
     @classmethod
     def allowedParentTypes(klass):
         """Get types of widgets this can be a child of."""
@@ -365,12 +367,16 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         y = np.nan_to_num(y)
 
         x_distances = np.abs(self.xData - x)
-        sorted_by_x_distance_indexs = x_distances.argsort()[:10]
+
+
+
+        sorted_by_x_distance_indexs = remove_out_of_bound_indexes(x_distances.argsort()[:10], len(self.yData))
+
         y_distances_of_nearest_points = np.abs(self.yData[sorted_by_x_distance_indexs] - y)
         index = sorted_by_x_distance_indexs[np.nanargmin(y_distances_of_nearest_points)]
 
         return index, self.xData[index], self.yData[index]
-    
+
     def up_coord(self, oldx=None, oldy=None, xData=None, yData=None):
         """Place in the nearest point to the current x,y coord"""
         d = self.document
