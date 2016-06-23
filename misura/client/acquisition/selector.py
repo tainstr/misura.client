@@ -38,17 +38,14 @@ class InstrumentSelector(QtGui.QWidget):
         for (title, name) in inlist:
             if title.lower() == 'kiln' and server._writeLevel < 4:
                 continue
-            opt = 'eq_' + name
-            if server.has_key(opt):
-                if not server[opt]:
-                    logging.debug('%s %s', opt, server[opt])
+            instrument_enabled_option = 'eq_' + name
+            if server.has_key(instrument_enabled_option):
+                instrument_enabled = server[instrument_enabled_option]
+                if not instrument_enabled:
+                    logging.debug('Instrument ' + name + ' disabled')
                     continue
-            elif params.debug:
-                logging.debug(
-                    '%s %s %s', 'Enabling unknown instrument...', title, name)
             else:
-                logging.debug(
-                    '%s %s %s', 'Ignoring unknown instrument', title, name)
+                logging.debug('Ignoring unknown instrument', title, name)
                 continue
             obj = getattr(server, name, False)
             if obj is False:
