@@ -6,13 +6,13 @@ import functools
 from .. import parameters as params
 import os
 
-def add_button(parent, layout, icon_path, text):
+def add_button(parent, layout, icon_path, text, size, row, column, rowspan=1, columnspan=1):
     button = QtGui.QToolButton(parent)
     button.setIcon(QtGui.QIcon(icon_path))
     button.setText(text)
-    button.setIconSize(QtCore.QSize(200,200))
+    button.setIconSize(QtCore.QSize(size, size))
     button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-    layout.addWidget(button)
+    layout.addWidget(button, row, column, rowspan, columnspan, QtCore.Qt.AlignTop)
     return button
 
 class InstrumentSelector(QtGui.QWidget):
@@ -21,6 +21,7 @@ class InstrumentSelector(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.lay = QtGui.QHBoxLayout(self)
         self.setLayout(self.lay)
+        self.instrument_layouts = {}
         self.setInstrument = setInstrument
         self.redraw()
 
@@ -56,16 +57,32 @@ class InstrumentSelector(QtGui.QWidget):
                 continue
             f = functools.partial(self.setInstrument, obj, preset=name)
             self.func.append(f)
-            button = add_button(self, self.lay, os.path.join(params.pathArt, title + '.png'), title)
+            current_instrument_layout = QtGui.QGridLayout()
+            self.instrument_layouts[title] = current_instrument_layout
+            self.lay.addLayout(current_instrument_layout)
+
+            button = add_button(self,
+                                current_instrument_layout,
+                                os.path.join(params.pathArt, title + '.png'),
+                                title,
+                                200,
+                                0,
+                                0,
+                                1,
+                                -1)
             self.connect(button, QtCore.SIGNAL('pressed()'), f)
 
-            presets = filter(lambda preset: preset not in ['default', 'factory_default'], obj.listPresets())
-            for preset in presets:
+            presets = filter(lambda preset: preset not in ['default', 'factory_default'],
+                             obj.listPresets())
+            for current_column, preset in enumerate(presets):
                 button = add_button(self,
-                                    self.lay,
+                                    current_instrument_layout,
                                     os.path.join(params.pathArt,
                                                  preset.split('_')[-1] + '.png'),
-                                    ' '.join(preset.split('_')))
+                                    ' '.join(preset.split('_')[:-1]),
+                                    50,
+                                    1,
+                                    current_column)
 
                 f = functools.partial(self.setInstrument, preset=preset, remote=obj)
                 self.connect(button, QtCore.SIGNAL('pressed()'), f)
