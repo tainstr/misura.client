@@ -21,7 +21,6 @@ class InstrumentSelector(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.lay = QtGui.QHBoxLayout(self)
         self.setLayout(self.lay)
-        self.instrument_layouts = {}
         self.setInstrument = setInstrument
         self.redraw()
 
@@ -58,7 +57,6 @@ class InstrumentSelector(QtGui.QWidget):
             f = functools.partial(self.setInstrument, obj, preset=name)
             self.func.append(f)
             current_instrument_layout = QtGui.QGridLayout()
-            self.instrument_layouts[title] = current_instrument_layout
             self.lay.addLayout(current_instrument_layout)
 
             button = add_button(self,
