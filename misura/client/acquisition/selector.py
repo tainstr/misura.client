@@ -6,6 +6,14 @@ import functools
 from .. import parameters as params
 import os
 
+def add_button(parent, layout, icon_path, text):
+    button = QtGui.QToolButton(parent)
+    button.setIcon(QtGui.QIcon(icon_path))
+    button.setText(text)
+    button.setIconSize(QtCore.QSize(200,200))
+    button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+    layout.addWidget(button)
+    return button
 
 class InstrumentSelector(QtGui.QWidget):
 
@@ -48,22 +56,16 @@ class InstrumentSelector(QtGui.QWidget):
                 continue
             f = functools.partial(self.setInstrument, obj, preset=name)
             self.func.append(f)
-            button = QtGui.QToolButton(self)
-            button.setIcon(QtGui.QIcon(os.path.join(params.pathArt, title + '.png')))
-            button.setText(title)
-            button.setIconSize(QtCore.QSize(200,200))
-            button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-            self.lay.addWidget(button)
+            button = add_button(self, self.lay, os.path.join(params.pathArt, title + '.png'), title)
             self.connect(button, QtCore.SIGNAL('pressed()'), f)
 
             presets = filter(lambda preset: preset not in ['default', 'factory_default'], obj.listPresets())
             for preset in presets:
-                button = QtGui.QToolButton(self)
-                button.setIcon(QtGui.QIcon(os.path.join(params.pathArt, preset.split('_')[-1] + '.png')))
-                button.setText(' '.join(preset.split('_')))
-                button.setIconSize(QtCore.QSize(200,200))
-                button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+                button = add_button(self,
+                                    self.lay,
+                                    os.path.join(params.pathArt,
+                                                 preset.split('_')[-1] + '.png'),
+                                    ' '.join(preset.split('_')))
 
-                self.lay.addWidget(button)
                 f = functools.partial(self.setInstrument, preset=preset, remote=obj)
                 self.connect(button, QtCore.SIGNAL('pressed()'), f)
