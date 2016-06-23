@@ -25,7 +25,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
     # name to appear on status tool bar
     description_short = 'Create Report for Misura sample'
     # text to appear in dialog box
-    description_full = 'Create a Report page for a Misura sample'    
+    description_full = 'Create a Report page for a Misura sample'
     def __init__(self, sample=None, template_file_name='default.vsz', measure_to_plot='d'):
         """Make list of fields."""
         self.fields = [
@@ -68,7 +68,6 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         sample = getattr(instr, smp_name)
 
         d = os.path.join(params.pathArt, fields['template_file_name'])
-        # TODO: replace report path
         tpl = open(d, 'rb').read()
         command_interpreter.run(tpl)
 
@@ -122,11 +121,11 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
                     msg += 'None\\\\'
                     self.toset(page.getChild('lbl_' + sh), 'label', sh + ', ?')
                     continue
-                cf = {'dataset': smp_path + '/profile',
-                      'filename': test.params.filename,
-                      'target': pt['time']}
-                self.dict_toset(page.getChild(sh), cf)
-                T = '{}{{\\deg}}C'.format(int(pt['temp']))
+                image_reference = {'dataset': smp_path + '/profile',
+                                   'filename': test.params.filename,
+                                   'target': pt['time']}
+                self.dict_toset(page.getChild(sh), image_reference)
+                T = '%.2f{{\\deg}}C' % pt['temp']
                 self.toset(page.getChild('lbl_' + sh), 'label', sh + ', ' + T)
                 msg += T + '\\\\'
             self.toset(page.getChild('shapes'), 'label', msg)
@@ -135,7 +134,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
                                                        'filename': test.params.filename, 'target': 0})
             T = doc.data[test.prefix + 'kiln/T'].data[0]
             self.toset(page.getChild('lbl_initial'), 'label',
-                       'Initial, {}{{\\deg}}C'.format(int(T)))
+                       'Initial, %.2f{{\\deg}}C' % T)
 
             self.toset(page.getChild('standard'), 'label', wr(
                 'Standard', sample['preset'], 50))
@@ -146,7 +145,6 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         graph = report_path + '/tc'
         cf = {'graph': graph, 'xT': 'reportxT',
               'yT': 'reportyT', 'xR': 'reportxR', 'yR': 'reportyR'}
-        # TODO: convert into a plugin, creating a subplot!
         ThermalCyclePlot.setup(command_interface, with_progress=False, **cf)
         tc = clean_curve(tc, events=False)
         ThermalCyclePlot.importCurve(command_interface, tc, **cf)
