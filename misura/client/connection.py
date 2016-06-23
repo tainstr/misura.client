@@ -234,6 +234,7 @@ class LiveLog(QtGui.QTextEdit):
     _max_character_length = 1e7
     def __init__(self, parent=None):
         QtGui.QTextEdit.__init__(self, parent)
+        self.total_text_length = 0
         self.setReadOnly(True)
         self.setLineWrapMode(self.NoWrap)
         self.current_buf = []
@@ -248,7 +249,7 @@ class LiveLog(QtGui.QTextEdit):
                 'log()'), self.slotUpdate, QtCore.Qt.QueuedConnection)
         self.slotUpdate()
         self.setFont(QtGui.QFont('TypeWriter',  7, 50, False))
-        self.total_text_length = 0
+
 
     def slotUpdate(self):
         logging.debug('LiveLog.slotUpdate')

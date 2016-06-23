@@ -4,6 +4,7 @@ from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 import functools
 from .. import parameters as params
+import os
 
 
 class InstrumentSelector(QtGui.QWidget):
@@ -47,13 +48,22 @@ class InstrumentSelector(QtGui.QWidget):
                 continue
             f = functools.partial(self.setInstrument, obj, preset=name)
             self.func.append(f)
-            button = QtGui.QPushButton(title, self)
+            button = QtGui.QToolButton(self)
+            button.setIcon(QtGui.QIcon(os.path.join(params.pathArt, title + '.png')))
+            button.setText(title)
+            button.setIconSize(QtCore.QSize(200,200))
+            button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
             self.lay.addWidget(button)
             self.connect(button, QtCore.SIGNAL('pressed()'), f)
 
             presets = filter(lambda preset: preset not in ['default', 'factory_default'], obj.listPresets())
             for preset in presets:
-                button = QtGui.QPushButton(' '.join(preset.split('_')), self)
+                button = QtGui.QToolButton(self)
+                button.setIcon(QtGui.QIcon(os.path.join(params.pathArt, preset.split('_')[-1] + '.png')))
+                button.setText(' '.join(preset.split('_')))
+                button.setIconSize(QtCore.QSize(200,200))
+                button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+
                 self.lay.addWidget(button)
                 f = functools.partial(self.setInstrument, preset=preset, remote=obj)
                 self.connect(button, QtCore.SIGNAL('pressed()'), f)
