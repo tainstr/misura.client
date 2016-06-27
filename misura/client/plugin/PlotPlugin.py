@@ -25,10 +25,6 @@ bounded_axes = {'odlt': {'camA': 'Dil', 'camB': 'Dil', 'const': 'pos'},
                 'flex': {'camA': 'Flex', 'const': 'pos'},
                 'hsm': {},
                 'kiln': {},
-                'flash': {name: 'Diffusivity' for name in ('halftime', 'parker', 'koski',
-                                                           'heckman', 'cowan5', 'cowan10',
-                                                           'clarkTaylor1', 'clarkTaylor2',
-                                                           'clarkTaylor3', 'degiovanni')}
                 }
 
 for key in bounded_axes.keys():
@@ -41,7 +37,7 @@ def dataset_curve_name(ds, dsn):
     """Generation of unambiguous and traceable curve and axis names"""
     sampleName = ''
     if getattr(ds, 'm_smp', False):
-        if ds.linked.instr['devpath'] != 'hsm':
+        if len(ds.linked.instr.children) <= 2:
             sampleName = ''
         elif ds.m_smp.has_key('name'):
             sampleName = ds.m_smp['name']

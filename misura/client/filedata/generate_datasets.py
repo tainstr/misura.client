@@ -25,7 +25,6 @@ def new_dataset_operation(original_dataset, data, name, label, path, unit='volt'
     new_dataset.data = plugins.numpyCopyOrNone(data)
     new_dataset.m_var = name
     new_dataset.m_pos = 2
-    new_dataset.m_name = new_dataset.m_var
     new_dataset.m_col = new_dataset.m_var
     new_dataset.old_unit = old_unit
     new_dataset.unit = unit
@@ -34,6 +33,7 @@ def new_dataset_operation(original_dataset, data, name, label, path, unit='volt'
     prefix = original_dataset.linked.prefix
     if not path.startswith(prefix):
         path = prefix+path.lstrip('/')
+    new_dataset.m_name = path
     return document.OperationDatasetSet(path, new_dataset)
 
 def search_column_name(column_names_list, possible_names):
