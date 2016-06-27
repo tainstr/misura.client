@@ -19,6 +19,7 @@ from ..clientconf import confdb
 class Navigator(quick.QuickOps, QtGui.QTreeView):
     previous_selection = False
     """List of currently opened misura Tests and reference to datasets names"""
+    tasks = None
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=set([filedata.dstats.loaded]), cols=1):
         QtGui.QTreeView.__init__(self, parent)
         self.status = status
@@ -63,6 +64,10 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.refresh_model)
         if doc:
             self.set_doc(doc)
+        
+    @property
+    def tasks(self):
+        return live.registry.tasks
 
     def selectedIndexesPublic(self, *a, **k):
         return self.selectedIndexes()
