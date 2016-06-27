@@ -35,28 +35,36 @@ def add_label_to(curve, message, label_name, doc, toset):
 
 class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
-    """Translate curves so that they equal a reference curve at a known x-point"""
-    # a tuple of strings building up menu to place plugin on
     menu = ('Misura', 'Synchronize two curves')
-    # unique name for plugin
     name = 'Synchro'
-    # name to appear on status tool bar
     description_short = 'Synchronize'
-    # text to appear in dialog box
     description_full = 'Synchronize two or more curves so they equals to a reference curve at the requested x-point.'
 
-    def __init__(self, reference_curve_full_path='/', translating_curve_full_path='/'):
-        """Make list of fields."""
+    def __init__(self,
+                 reference_curve_full_path='/',
+                 translating_curve_1_full_path='/',
+                 translating_curve_2_full_path=None):
 
         self.fields = [
-            plugins.FieldWidget(
-                "ref", descr="Reference curve:", widgettypes=set(['xy']), default=reference_curve_full_path),
-            plugins.FieldWidget(
-                "trans", descr="Translating curve:", widgettypes=set(['xy']), default=translating_curve_full_path),
-            plugins.FieldFloat("matching_x_value", descr="Matching X Value", default=0.),
-            #			plugins.FieldDatasetMulti('dslist','')
-            plugins.FieldCombo("mode", descr="Translation Mode:", items=[
-                               'Translate Values', 'Translate Axes'], default="Translate Values")
+            plugins.FieldWidget("reference_curve",
+                                descr="Reference curve:",
+                                widgettypes=set(['xy']),
+                                default=reference_curve_full_path),
+            plugins.FieldWidget("translating_curve_1",
+                                descr="Translating curve 1:",
+                                widgettypes=set(['xy']),
+                                default=translating_curve_1_full_path),
+            plugins.FieldWidget("translating_curve_2",
+                                descr="Translating curve 2:",
+                                widgettypes=set(['xy']),
+                                default=translating_curve_2_full_path),
+            plugins.FieldFloat("matching_x_value",
+                               descr="Matching X Value",
+                               default=0.),
+            plugins.FieldCombo("mode",
+                               descr="Translation Mode:",
+                               items=['Translate Values', 'Translate Axes'],
+                               default="Translate Values")
         ]
 
     def apply(self, cmd, fields):
@@ -67,15 +75,10 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.ops = []
         doc = cmd.document
         self.doc = doc
-        reference_curve = doc.resolveFullWidgetPath(fields['ref'])
-        translating_curve = doc.resolveFullWidgetPath(fields['trans'])
+        reference_curve = doc.resolveFullWidgetPath(fields['reference_curve'])
+        translating_curve_1 = doc.resolveFullWidgetPath(fields['translating_curve_1'])
 
-        check_consistency(reference_curve, translating_curve)
-
-        # TODO: selezionare l'asse anziché due curve.
-        # Altrimenti, altre curve riferentesi all'asse originario verrebbero
-        # sfalsate quando le sue dimensioni si aggiornano!
-
+        check_consistency(reference_curve, translating_curve_1)
 
         reference_curve_nearest_value_index = get_nearest_index(
             doc.data[reference_curve.settings.xData].data,
@@ -83,11 +86,11 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         )
 
         translating_curve_nearest_value_index = get_nearest_index(
-            doc.data[translating_curve.settings.xData].data,
+            doc.data[translating_curve_1.settings.xData].data,
             fields['matching_x_value']
         )
 
-        translating_dataset_name = translating_curve.settings.yData
+        translating_dataset_name = translating_curve_1.settings.yData
         translating_dataset = doc.data[translating_dataset_name]
 
         reference_dataset = doc.data[reference_curve.settings.yData]
@@ -110,7 +113,7 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             'Translate Axes': lambda: self.translate_axis(
                 cmd,
                 reference_curve.parent.getChild(reference_curve.settings.yAxis),
-                translating_curve,
+                translating_curve_1,
                 delta,
                 doc,
                 message
@@ -118,7 +121,7 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         }[fields['mode']]
 
         label_name = 'sync_info_' + translating_dataset_name.replace('/', ':')
-        add_label_to(translating_curve, message, label_name, doc, self.toset)
+        add_label_to(translating_curve_1, message, label_name, doc, self.toset)
 
         return translate()
 

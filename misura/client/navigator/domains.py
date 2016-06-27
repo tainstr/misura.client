@@ -364,13 +364,19 @@ class PlottingNavigatorDomain(NavigatorDomain):
         from misura.client import plugin
 
         reference_curve_full_path = self.navigator.widget_path_for(nodes[0])
-        translating_curve_full_path = self.navigator.widget_path_for(nodes[1])
+        translating_curve_1_full_path = self.navigator.widget_path_for(nodes[1])
+        translating_curve_2_full_path = None
+        if len(nodes) > 2:
+            translating_curve_2_full_path = self.navigator.widget_path_for(nodes[2])
 
-        sync_plugin = plugin.SynchroPlugin(
-            reference_curve_full_path, translating_curve_full_path)
+        sync_plugin = plugin.SynchroPlugin(reference_curve_full_path,
+                                           translating_curve_1_full_path,
+                                           translating_curve_2_full_path)
 
-        dialog = PluginDialog(
-            self.mainwindow, self.doc, sync_plugin, plugin.SynchroPlugin)
+        dialog = PluginDialog(self.mainwindow,
+                              self.doc,
+                              sync_plugin,
+                              plugin.SynchroPlugin)
         self.mainwindow.showDialog(dialog)
 
     def add_multiary_menu(self, menu, nodes):
