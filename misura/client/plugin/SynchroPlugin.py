@@ -54,10 +54,15 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                                 descr="Translating curve 1:",
                                 widgettypes=set(['xy']),
                                 default=translating_curve_1_full_path),
-            plugins.FieldWidget("translating_curve_2",
-                                descr="Translating curve 2:",
-                                widgettypes=set(['xy']),
-                                default=translating_curve_2_full_path),
+            ]
+
+        if translating_curve_2_full_path:
+            self.fields.append(plugins.FieldWidget("translating_curve_2",
+                                                   descr="Translating curve 2:",
+                                                   widgettypes=set(['xy']),
+                                                   default=translating_curve_2_full_path))
+
+        self.fields = self.fields + [
             plugins.FieldFloat("matching_x_value",
                                descr="Matching X Value",
                                default=0.),
@@ -79,19 +84,22 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         translating_curve_1 = doc.resolveFullWidgetPath(fields['translating_curve_1'])
         check_consistency(reference_curve, translating_curve_1)
 
-        self.synchronize_curves(reference_curve,
-                                translating_curve_1,
-                                fields,
-                                doc)
+        message = self.synchronize_curves(reference_curve,
+                                          translating_curve_1,
+                                          fields,
+                                          doc)
 
-        translating_curve_2 = doc.resolveFullWidgetPath(fields['translating_curve_2'])
-        if translating_curve_2:
+        if fields.has_key('translating_curve_2'):
+            translating_curve_2 = doc.resolveFullWidgetPath(fields['translating_curve_2'])
             check_consistency(reference_curve, translating_curve_2)
-            self.synchronize_curves(reference_curve,
-                                translating_curve_2,
-                                fields,
-                                doc)
+            message = message + '\\\\' + self.synchronize_curves(reference_curve,
+                                                                 translating_curve_2,
+                                                                 fields,
+                                                                 doc)
 
+        label_name = 'sync_info_' + reference_curve.settings.yData.replace('/', ':')
+        add_label_to(reference_curve, message, label_name, doc, self.toset)
+        self.apply_ops()
 
     def synchronize_curves(self, reference_curve, translating_curve, fields, doc):
         reference_curve_nearest_value_index = get_nearest_index(
@@ -121,25 +129,25 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 translating_dataset,
                 translating_dataset_name,
                 delta,
-                doc,
-                message
+                doc
             ),
             'Translate Axes': lambda: self.translate_axis(
                 cmd,
                 reference_curve.parent.getChild(reference_curve.settings.yAxis),
                 translating_curve,
                 delta,
-                doc,
-                message
+                doc
             )
         }[fields['mode']]
 
-        label_name = 'sync_info_' + translating_dataset_name.replace('/', ':')
-        add_label_to(translating_curve, message, label_name, doc, self.toset)
+        translate()
 
-        return translate()
+        return message
 
-    def translate_axis(self, cmd, dataset, translating_curve, delta, doc, message):
+
+
+
+    def translate_axis(self, cmd, dataset, translating_curve, delta, doc):
         # Create a new Y axis
         ypath = cmd.CloneWidget(dataset.path,
                                 translating_curve.parent.path,
@@ -159,10 +167,9 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.toset(new_y_axis, 'min', float(newmin + delta))
         self.toset(translating_curve, 'yAxis', new_y_axis.name)
 
-        self.apply_ops()
         return True
 
-    def translate_values(self, dataset, dataset_name, delta, doc, message):
+    def translate_values(self, dataset, dataset_name, delta, doc):
         translated_data = dataset.data - delta
         translated_dataset = copy.copy(dataset)
         translated_dataset.data = translated_data
