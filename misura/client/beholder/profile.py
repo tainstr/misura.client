@@ -6,6 +6,14 @@ import numpy
 from overlay import Overlay
 from PyQt4 import QtGui, QtCore
 
+def create_profile(rx, ry, rw, rh, xpt, ypt):
+    lst = list(QtCore.QPointF(ix, ypt[i]) for i, ix in enumerate(xpt))
+    lst.append(QtCore.QPointF(rx + rw, ry + rh))
+    lst.append(QtCore.QPointF(rx, ry + rh))
+    lst.append(QtCore.QPointF(xpt[0], ypt[0]))
+
+    return lst
+
 
 class Profile(Overlay):
 
@@ -13,7 +21,7 @@ class Profile(Overlay):
 
     def __init__(self, parentItem, Z=2):
         Overlay.__init__(self, parentItem, Z=Z)
-        self.opt = set(['profile', 'roi', 'xmass', 'ymass', 'crop'])
+        self.opt = set(['profile', 'roi', 'crop'])
         self.path = QtGui.QGraphicsPathItem(parent=self)
         self.path.setPen(self.pen)
         self.color.setAlpha(80)
@@ -47,12 +55,10 @@ class Profile(Overlay):
         self.xpt = numpy.array(x)  # +rx
         self.ypt = numpy.array(y)  # +ry
         # Convert x,y, vectors into a QPointF list
-        lst = list(QtCore.QPointF(ix, self.ypt[i])
-                   for i, ix in enumerate(self.xpt))
+
         # Append bottom ROI points in order to close the polygon
-        lst.append(QtCore.QPointF(rx + rw, ry + rh))
-        lst.append(QtCore.QPointF(rx, ry + rh))
-        lst.append(QtCore.QPointF(self.xpt[0], self.ypt[0]))
+        lst = create_profile(rx, ry, rw, rh, self.xpt, self.ypt)
+
         # Create a QPainterPath and add a QPolygonF
         qpath = QtGui.QPainterPath()
         qpath.addPolygon(QtGui.QPolygonF(lst))
