@@ -99,6 +99,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return self.model().hide_show(*a, **k)
 
     def update_view(self):
+        if len(self.doc.suspendupdates)>0:
+            return
         if not self.previous_selection:
             self.previous_selection = self.current_node_path
         n = self.mainwindow.plot.getPageNumber()

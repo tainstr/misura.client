@@ -6,7 +6,7 @@ from misura.client import graphics
 from misura.client.clientconf import confdb, activate_plugins
 import veusz.utils.vzdbus as vzdbus
 import veusz.utils.vzsamp as vzsamp
-
+import multiprocessing
 
 def run():
     activate_plugins(confdb)
@@ -22,4 +22,5 @@ def run():
 # 	csutil.stop_profiler(mw)
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     run()

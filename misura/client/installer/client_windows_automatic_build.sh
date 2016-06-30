@@ -62,7 +62,8 @@ cp -r "$DISTRIBUTION_DIR/acquisition/"* $OUTPUT_MISURA4_DIR
 
 # hack to make svg icons work also on Windows Vista
 cp C:/Python27/Lib/site-packages/PyQt4/plugins/imageformats/qsvg4.dll "$OUTPUT_MISURA4_DIR/qt4_plugins/imageformats/"
-
+# hack in case of Anaconda python distribution
+cp C:/Anaconda2/Library/bin/mkl_* "$OUTPUT_MISURA4_DIR/"
 rm -f $BUILD_IN_PROGRSS_FILE
 echo "OK" > $LAST_BUILD_STATUS_FILE
 

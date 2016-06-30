@@ -3,9 +3,10 @@
 import sys
 from misura.canon.logger import Log as logging
 from misura.client import acquisition, from_argv, iutils
-
+import multiprocessing
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     iutils.initApp()
     o = iutils.getOpts()
     logging.debug('%s %s', 'Passed options', o)

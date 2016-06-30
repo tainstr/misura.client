@@ -4,9 +4,10 @@ import sys
 from misura.canon.logger import Log as logging
 from misura.client import iutils, conf
 from misura.client.clientconf import confdb
-
+import multiprocessing
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     logging.debug('%s', 'initApp')
     iutils.initApp()
     logging.debug('%s %s', 'done initApp', confdb.recent_server)

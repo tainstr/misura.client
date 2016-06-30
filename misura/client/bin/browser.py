@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 import sys
 from misura.client import iutils, browser, live
+import multiprocessing
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     iutils.initApp()
     live.registry.toggle_run(False)
     app = iutils.app
