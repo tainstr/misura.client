@@ -6,7 +6,7 @@ import numpy
 from overlay import Overlay
 from PyQt4 import QtGui, QtCore
 
-def create_profile(rx, ry, rw, rh, xpt, ypt):
+def create_profile_points_for_hsm(rx, ry, rw, rh, xpt, ypt):
     lst = list(QtCore.QPointF(ix, ypt[i]) for i, ix in enumerate(xpt))
     lst.append(QtCore.QPointF(rx + rw, ry + rh))
     lst.append(QtCore.QPointF(rx, ry + rh))
@@ -14,18 +14,25 @@ def create_profile(rx, ry, rw, rh, xpt, ypt):
 
     return lst
 
+def create_profile_points_generic(rx, ry, rw, rh, xpt, ypt):
+    lst = list(QtCore.QPointF(ix, ypt[i]) for i, ix in enumerate(xpt))
+
+    return lst
 
 class Profile(Overlay):
 
     """Draw a sequence of points corresponding to option type 'Profile'."""
 
-    def __init__(self, parentItem, Z=2):
+    def __init__(self, parentItem, is_hsm, Z=2):
         Overlay.__init__(self, parentItem, Z=Z)
         self.opt = set(['profile', 'roi', 'crop'])
         self.path = QtGui.QGraphicsPathItem(parent=self)
         self.path.setPen(self.pen)
         self.color.setAlpha(80)
         self.path.setBrush(QtGui.QBrush(self.color))
+        self.create_profile_points = create_profile_points_generic
+        if is_hsm:
+            self.create_profile_points = create_profile_points_for_hsm
 
     def unscale(self, factor):
         Overlay.unscale(self, factor)
@@ -54,14 +61,11 @@ class Profile(Overlay):
         rx, ry, rw, rh = self.current['roi']
         self.xpt = numpy.array(x)  # +rx
         self.ypt = numpy.array(y)  # +ry
-        # Convert x,y, vectors into a QPointF list
-
-        # Append bottom ROI points in order to close the polygon
-        lst = create_profile(rx, ry, rw, rh, self.xpt, self.ypt)
+        profile_points = self.create_profile_points(rx, ry, rw, rh, self.xpt, self.ypt)
 
         # Create a QPainterPath and add a QPolygonF
         qpath = QtGui.QPainterPath()
-        qpath.addPolygon(QtGui.QPolygonF(lst))
+        qpath.addPolygon(QtGui.QPolygonF(profile_points))
         qpath.setFillRule(QtCore.Qt.WindingFill)
         # Add the path to the scene
         self.path.setPath(qpath)

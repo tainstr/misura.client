@@ -89,7 +89,6 @@ class SamplePix(QtGui.QGraphicsPixmapItem):
         self.label.add(opt)
         self.parentItem().opt_changed = True
 
-
 class SamplePicture(QtGui.QGraphicsItem):
 
     """Graphical item representing a Sample, including its image and all overlays describing geometry data"""
@@ -111,7 +110,8 @@ class SamplePicture(QtGui.QGraphicsItem):
         # BoxRegion must have same parent as self (sensorplane)
         self.roi = region.BoxRegion(parentItem, self.smp, Z=n)
         self.overlays.append(self.roi)
-        self.profile = profile.Profile(parentItem)
+
+        self.profile = profile.Profile(parentItem, 'hsm' in smp['fullpath'])
         self.overlays.append(self.profile)
 
         # TODO: distinguish instrument overlays based on mro!
