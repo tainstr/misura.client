@@ -11,6 +11,9 @@ import shape
 from overlay import Overlay
 
 
+def is_hsm_sample(sample):
+    return 'hsm' in sample['fullpath']
+
 class MetaItem(QtGui.QGraphicsSimpleTextItem):
 
     def contextMenuEvent(self, event):
@@ -106,12 +109,13 @@ class SamplePicture(QtGui.QGraphicsItem):
         self.pixItem.show()
         self.overlays = []
 
+
         # General
         # BoxRegion must have same parent as self (sensorplane)
         self.roi = region.BoxRegion(parentItem, self.smp, Z=n)
         self.overlays.append(self.roi)
 
-        self.profile = profile.Profile(parentItem, 'hsm' in smp['fullpath'])
+        self.profile = profile.Profile(parentItem, is_hsm_sample(smp))
         self.overlays.append(self.profile)
 
         # TODO: distinguish instrument overlays based on mro!

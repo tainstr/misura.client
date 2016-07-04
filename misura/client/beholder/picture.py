@@ -9,7 +9,7 @@ import functools
 from .. import conf
 from ..live import FrameProcessor, SampleProcessor
 from motionplane import SensorPlane
-from sample_picture import SamplePicture
+from sample_picture import SamplePicture, is_hsm_sample
 import calibration
 from time import sleep
 
@@ -295,33 +295,44 @@ class ViewerPicture(QtGui.QGraphicsView):
 
         # General view entries
         self.roiAct = self.amenu.addAction('View Regions',
-                                           functools.partial(self.over_by_name, 'roi'))
+                                           functools.partial(self.over_by_name,
+                                                             'roi'))
         self.roiAct.setCheckable(True)
 
         roiResetAct = self.amenu.addAction('Reset Regions', self.reset_regions)
         roiResetAct.setCheckable(False)
 
         self.profileAct = self.amenu.addAction(_('Profile'),
-                                               functools.partial(self.over_by_name, 'profile'))
+                                               functools.partial(self.over_by_name,
+                                                                 'profile'))
         self.profileAct.setCheckable(True)
 
         self.labelAct = self.amenu.addAction(_('Values Label'),
-                                             functools.partial(self.over_by_name, 'label'))
+                                             functools.partial(self.over_by_name,
+                                                               'label'))
         self.labelAct.setCheckable(True)
 
         self.pointsAct = self.amenu.addAction(_('Points'),
-                                              functools.partial(self.over_by_name, 'points'))
+                                              functools.partial(self.over_by_name,
+                                                                'points'))
 
         # Shape entries
-        self.pointsAct.setCheckable(True)
+        if is_hsm_sample(self.remote):
+            self.pointsAct.setCheckable(True)
 
-        self.baseHeightAct = self.amenu.addAction(_('Base and Height'),
-                                                  functools.partial(self.over_by_name, 'baseHeight'))
-        self.baseHeightAct.setCheckable(True)
+            self.baseHeightAct = self.amenu.addAction(_('Base and Height'),
+                                                      functools.partial(self.over_by_name,
+                                                                        'baseHeight'))
+            self.baseHeightAct.setCheckable(True)
 
-        self.circleAct = self.amenu.addAction(_('Circle Fitting'),
-                                              functools.partial(self.over_by_name, 'circle'))
-        self.circleAct.setCheckable(True)
+            self.circleAct = self.amenu.addAction(_('Circle Fitting'),
+                                                  functools.partial(self.over_by_name,
+                                                                    'circle'))
+            self.circleAct.setCheckable(True)
+        else:
+            self.amenu.addAction(_('Border regression'),
+                                 functools.partial(self.over_by_name,
+                                                   'borderRegression'))
 
         # Border entries
         # TODO: Border overlays
