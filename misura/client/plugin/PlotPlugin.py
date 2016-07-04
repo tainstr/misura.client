@@ -37,7 +37,7 @@ def dataset_curve_name(ds, dsn):
     """Generation of unambiguous and traceable curve and axis names"""
     sampleName = ''
     if getattr(ds, 'm_smp', False):
-        if len(ds.linked.instr.children) <= 2:
+        if len(ds.linked.instr.list()) <= 2:
             sampleName = ''
         elif ds.m_smp.has_key('name'):
             sampleName = ds.m_smp['name']
