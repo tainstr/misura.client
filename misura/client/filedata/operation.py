@@ -247,7 +247,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     #TODO: cleaun-up all this proliferation of *_dataset_names!!!
     # Get meas. unit
     u = dataset_measurement_unit(pure_dataset_name, fileproxy, data, variable_name)
-    logging.debug('%s', 'building the dataset')
+    logging.debug('building the dataset', pure_dataset_name)
     ds = MisuraDataset(data=data, linked=linked_file)
     ds.m_name = prefixed_dataset_name
     ds.m_pos = p
@@ -265,9 +265,10 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
         assign_node_attributes(fileproxy, ds)
         assign_sample_to_dataset(ds, linked_file, reference_sample)
         # Units conversion
-        nu = rule_unit(prefixed_dataset_name)
+        nu = rule_unit(hdf_dataset_name)
         if u and nu:
             ds = units.convert(ds, nu[0])
+            logging.debug('New dataset unit', ds.unit, ds.old_unit)
 
     # Add the hierarchy tags
     for sub, parent, leaf in iterpath(pure_dataset_name):

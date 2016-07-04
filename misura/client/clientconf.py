@@ -132,6 +132,7 @@ class RulesTable(object):
     def set_table(self, tab):
         self.rules = []
         self.rows = []
+        self.tab = tab
         for row in tab:
             if len(row) <= 1:
                 logging.debug('skipping malformed rule', row)

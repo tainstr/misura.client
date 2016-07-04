@@ -296,8 +296,12 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         """Import misura data and do the default plotting"""
         print 'liveImport', filename
         self.mw.document.suspendUpdates()
-        dataset_names, instrument_name = self.open_file(filename, **options)
-        self.defaultPlot(dataset_names, instrument_name)
+        try:
+            dataset_names, instrument_name = self.open_file(filename, **options)
+            self.defaultPlot(dataset_names, instrument_name)
+        finally:
+            if len(self.mw.document.suspendupdates)>0:
+                self.mw.document.enableUpdates()
 
     def convert_file(self, path):
         outpath = dataimport.convert_file(path)

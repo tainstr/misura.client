@@ -224,8 +224,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         for i, x in enumerate(valid_x):
             y = valid_y[i]
-            logging.debug(
-                '%s %s %s %s', 'plotting value:', y, 'data:', doc.data[y])
+            logging.debug('plotting value:', y, 'data:', doc.data[y])
             ds = doc.data[y]
             # If the ds is recursively derived, substitute it by its entry
             if not hasattr(ds, 'm_smp'):
