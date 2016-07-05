@@ -83,9 +83,9 @@ def simpleConnection(addr, user='', password='', save=True):
         obj._error = 'Unknown Error'
         logging.debug(format_exc())
         return False, obj
-    # TODO: prendere serial e name ed emetterli!
+    
     manager.emit(QtCore.SIGNAL(
-        'connected(QString,QString,QString,bool)'), addr, user, password, save)
+        'connected(QString,QString,QString,QString,QString,QString,bool)'), addr, user, password, obj['eq_mac'], obj['eq_serial'], obj['name'], save)
     return True, obj
 
 

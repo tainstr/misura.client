@@ -54,7 +54,7 @@ class LoginWindow(QtGui.QDialog):
         self.setLayout(self.lay)
         self.addr = addr
         self.userLbl = QtGui.QLabel(_('User Name') + ':')
-        self.pwdLbl = QtGui.QLabel(_('Password:') + ':')
+        self.pwdLbl = QtGui.QLabel(_('Password') + ':')
         self.user = QtGui.QLineEdit(user)
         self.password = QtGui.QLineEdit(password)
         self.ckSave = QtGui.QCheckBox(_('Save login'), self)
