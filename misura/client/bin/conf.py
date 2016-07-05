@@ -10,7 +10,7 @@ if __name__ == '__main__':
     multiprocessing.freeze_support()
     logging.debug('%s', 'initApp')
     iutils.initApp()
-    logging.debug('%s %s', 'done initApp', confdb.recent_server)
+    logging.debug('%s %s', 'done initApp', confdb['recent_server'])
     o = iutils.getOpts()
     logging.debug('%s %s', 'Passed options', o)
     fp = o['-o']

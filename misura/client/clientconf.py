@@ -110,7 +110,10 @@ ao(default_desc, 'm3_enable', 'Boolean', True, 'Enable Misura 3 database interfa
 ao(default_desc, 'm3_plugins', 'TextArea', '', 'Import plugins by name')
 
 
-
+ao(default_desc, 'recent_server', 'Table', attr=['Hidden'], current=[[('Address', 'String'),('User', 'String'), ('Password','String'), ('MAC', 'String'),('Serial', 'String'), ('Name', 'String')], ])
+ao(default_desc, 'recent_database', 'Table', attr=['Hidden'], current=[[('Path', 'String'),('Name','String')], ])
+ao(default_desc, 'recent_file', 'Table', attr=['Hidden'], current=[[('Path', 'String'),('Name','String')], ])
+ao(default_desc, 'recent_m3database', 'Table', attr=['Hidden'], current=[[('Path', 'String'),('Name','String')], ])
 
 
 recent_tables = 'server,database,file,m3database'.split(',')
@@ -172,7 +175,6 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         QtCore.QObject.__init__(self)
         option.ConfigurationProxy.__init__(self)
         self.store = option.SqlStore()
-        self.nosave_server = []
         if not path:
             return None
         # Load/create
@@ -232,34 +234,10 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                 self.store.desc[key] = option.Option(**val)
             self.desc = self.store.desc
             self.store.write_table(cursor, "conf")
-
-    def load_recent_tables(self, cursor):
-        # Chron tables
-        cursor.execute(
-            "create table if not exists recent_server (i integer, address text, user text, password text)")
-        cursor.execute(
-            "create table if not exists recent_database (i integer, path text)")
-        cursor.execute(
-            "create table if not exists recent_file (i integer, path text, name text)")
-        cursor.execute(
-            "create table if not exists recent_m3database (i integer, path text)")
-
-        # Load recent items in memory
-        for name in recent_tables:
-            name = 'recent_' + name
-            cursor.execute("select * from " + name)
-            r = cursor.fetchall()
-            r = list(set(r))
-            # Sort by key
-            r = sorted(r, key=lambda e: e[0])
-            # Pop key
-            r = [list(e[1:]) for e in r]
-            setattr(self, name, r)
-
+            
     def load(self, path=False):
         """Load an existent client configuration database, or create a new one."""
         logging.debug('LOAD %s', path)
-        self.nosave_server = []
         self.index = False
         self.close()
         if path:
@@ -271,12 +249,20 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         cursor = self.conn.cursor()
 
         self.load_configuration(cursor)
-
-        self.load_recent_tables(cursor)
-
         cursor.close()
+        
         self.conn.commit()
+        
+        # Forget recent tables defined with old headers
+        for tname in recent_tables:
+            tname = 'recent_'+tname
+            if self[tname][0]!=default_desc[tname]['current'][0]:
+                self[tname] = default_desc[tname]['current']
+        
         self.emit(QtCore.SIGNAL('load()'))
+        
+        
+        
         self.reset_rules()
         self.create_index()
 
@@ -309,19 +295,6 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             logging.debug('Default database not found: "%s"', path)
             return False
 
-    def get_table(self, name):
-        """Return table `name` as list"""
-        cursor = self.conn.cursor()
-        cursor.execute("select * from " + name)
-        r = cursor.fetchall()
-        r = list(set(r))
-        # Sort by key
-        r = sorted(r, key=lambda e: e[0])
-        # Pop key
-        r = [list(e[1:]) for e in r]
-        cursor.close()
-        return r
-
     def clean_rules(self):
         for rule in ['rule_load', 'rule_exc', 'rule_inc']:
             self[rule] = self[rule].strip()
@@ -332,26 +305,6 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         cursor = self.conn.cursor()
         self.clean_rules()
         self.store.write_table(cursor, 'conf', desc=self.desc)
-        for name in recent_tables:
-            tname = "recent_" + name
-            tab = getattr(self, tname, [])
-            nosave = getattr(self, 'nosave_' + name, [])
-            if nosave is None:
-                nosave = []
-            logging.debug("save: %s %s %s", tname, tab, nosave)
-            cursor.execute("delete from " + tname)
-            if len(tab) == 0:
-                continue
-            # Prepare the query
-            q = '?,' * len(tab[0])
-            q += '?'
-            cmd = "insert into " + tname + " values (" + q + ")"
-            # insert table rows
-            for i, row in enumerate(tab):
-                if row[0] in nosave:
-                    continue
-                row = [i] + row
-                cursor.execute(cmd, row)
         cursor.close()
         self.conn.commit()
         self.reset_rules()
@@ -359,22 +312,22 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
 
     def mem(self, name, *arg):
         """Memoize a recent datum"""
-        logging.debug("mem %s %s", name, arg)
+        logging.debug("mem ", name, arg)
         tname = tabname(name)
-        tab = getattr(self, tname)
+        tab = self[tname]
         # Avoid saving duplicate values
         arg = list(unicode(a) for a in arg)
+        # Adjust headers
+        if len(arg)<len(tab[0]):
+            arg += [''] * (len(tab[0])-len(arg))
+        # Update order
         if arg in tab:
             tab.remove(arg)
-            tab.append(arg)
-
-            return False
-
         tab.append(arg)
-
+        
         lim = self.desc['h' + name]['current']
-        if len(tab) > lim:
-            tab.pop(0)
+        if len(tab)-1 > lim:
+            tab.pop(1) # preserve header
         setattr(self, tname, tab)
         self.emit(QtCore.SIGNAL('mem()'))
         self.save()
@@ -384,13 +337,14 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         """Forget a recent datum"""
         key = str(key)
         tname = tabname(name)
-        tab = getattr(self, tname)
-        v = [r[0] for r in tab]
+        tab = self[tname]
+        # Keys list
+        v = [r[0] for r in tab[1:]]
         if key not in v:
             return False
         i = v.index(key)
-        tab.pop(i)
-        setattr(self, tname, tab)
+        tab.pop(i+1) # preserve the header
+        self[tname] = tab
         self.emit(QtCore.SIGNAL('rem()'))
         self.save()
         return True
@@ -405,58 +359,57 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     def rem_file(self, path):
         self.rem('file', path)
 
-    def mem_database(self, path):
-        self.mem('database', path)
+    def mem_database(self, path, name=''):
+        self.mem('database', path, name)
 
     def rem_database(self, path):
         self.rem('database', path)
 
-    def mem_m3database(self, path):
-        self.mem('m3database', path)
+    def mem_m3database(self, path, name=''):
+        self.mem('m3database', path, name)
 
     def rem_m3database(self, path):
         self.rem('m3database', path)
 
     def found_server(self, addr):
         addr = str(addr)
-        v = [r[0] for r in self.recent_server]
+        v = [r[0] for r in self['recent_server'][1:]]
         # Check if the found server was already saved with its own user and
         # password
         if addr in v:
-            return
+            return False
         # Otherwise, save it with empty user and password
         self.mem('server', addr, '', '')
+        return True
 
     def logout(self, addr):
         addr = str(addr)
-        v = [r[0] for r in self.recent_server]
+        v = [r[0] for r in self['recent_server'][1:]]
         if addr not in v:
             return False
-
+        # Change order so that it becomes the most recent
         i = v.index(addr)
-        self.recent_server.pop(i)
-        self.recent_server.append((addr, '', ''))
+        entry = self['recent_server'][i+1]
+        # TODO: this looses password!!!
+        self.rem('server', addr)
+        self.mem('server', *entry)
         return True
 
     # TODO: accettare serial e name e altro...
-    def mem_server(self, addr, user='', password='', save=True):
+    def mem_server(self, addr, user='', password='', mac='', name='', save=True):
         # Remove entries with empty user/password
-        addr, user, password = str(addr), str(user), str(password)
-        if user != '':
-            v = [r[0] for r in self.recent_server]
-            if addr in v:
-                i = v.index(addr)
-                self.recent_server.pop(i)
+        addr, user, password, mac, name = str(addr), str(user), str(password), str(mac), str(name)
         if not save:
-            self.nosave_server.append(addr)
-        return self.mem('server', addr, user, password)
+            user = ''
+            password = ''
+        return self.mem('server', addr, user, password, mac, name)
 
     def rem_server(self, addr):
         self.rem('server', addr)
 
     def getUserPassword(self, addr):
         """Returns username and passwords used to login"""
-        for entry in self.recent_server:
+        for entry in self['recent_server'][1:]:
             if entry[0] == addr:
                 return entry[1], entry[2]
         return '', ''
@@ -481,10 +434,10 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         else:
             dbPath = False
         file_path = False
-        recent = self.recent_database[:]
+        recent = self['recent_database'][1:]
         # Add also implicit m3 databases
         if self['m3_enable']:
-            for r in self.recent_m3database:
+            for r in self['recent_m3database'][1:]:
                 path = r[0]
                 path = os.path.dirname(path)
                 path = os.path.join(path, 'm4', 'database.sqlite')
@@ -516,10 +469,11 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
 
     def last_directory(self, category):
         """Return most recently used directory for files in `category`"""
-        tab = getattr(self, 'recent_' + category)
+        tab = self['recent_' + category][1:]
         logging.debug('new: tab', category, tab)
         d = ''
         if len(tab) > 0:
+            print tab
             d = os.path.dirname(tab[-1][0])
         return d
 

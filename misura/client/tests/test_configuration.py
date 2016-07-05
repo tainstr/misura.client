@@ -44,15 +44,15 @@ class Conf(unittest.TestCase):
         cf.mem('file', 'name1', 'path1')
         cf.mem_file('name2', 'path2')
         self.assertEqual(
-            cf.recent_file, [['name1', 'path1'], ['name2', 'path2']])
+            cf['recent_file'][1:], [['name1', 'path1'], ['name2', 'path2']])
         for i in range(10):
             cf.mem_file(str(i), str(i))
-        self.assertEqual(cf.recent_file[7], ['5', '5'])
+        self.assertEqual(cf['recent_file'][8], ['5', '5'])
         cf.save()
-        o = cf.recent_file[:]
+        o = cf['recent_file']
         cf = clientconf.ConfDb(p)
 
-        self.assertEqual(cf.recent_file, o)
+        self.assertEqual(cf['recent_file'], o)
 
     def test_unicode(self):
         f = tempfile.NamedTemporaryFile(delete=False)

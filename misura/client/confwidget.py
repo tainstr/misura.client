@@ -96,10 +96,10 @@ class RecentInterface(object):
         self.sig_convert = QtCore.SIGNAL('convert(QString)')
 
     def getNameSigList(self):
-        tab = getattr(self.conf, 'recent_' + self.category)
-        logging.debug('%s %s %s', 'getNameSigList', self.category, tab)
+        tab = self.conf['recent_' + self.category]
+        logging.debug('getNameSigList', self.category, tab)
         nsl = []
-        for i, row in enumerate(reversed(tab)):
+        for i, row in enumerate(reversed(tab[1:])):
             sig = row[0]
             name = row[0]
             if self.category == 'file':
@@ -114,7 +114,8 @@ class RecentInterface(object):
 
     def clear_recent(self):
         logging.debug('ConfWidget: Clearing recent entries')
-        setattr(self.conf, 'recent_' + self.category, [])
+        tname = 'recent_' + self.category
+        self.conf[tname] = self.conf[tname][0] 
         self.conf.save()
         self.conf.emit(QtCore.SIGNAL('rem()'))
 
@@ -239,9 +240,9 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
             item = self.list.currentItem()
         if not item:
             return
-
+        
         self.emit(self.sig_select, item.data(QtCore.Qt.UserRole))
-
+        
 
 class Greeter(QtGui.QWidget):
 
