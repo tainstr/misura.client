@@ -26,6 +26,7 @@ class DataNavigatorDomain(NavigatorDomain):
         super(DataNavigatorDomain, self).__init__(*a, **k)
         self.configuration_windows = {}
         self.data_tables = {}
+        self.test_windows = {}
 
     @node
     def change_rule(self, node=False, act=0):
@@ -37,9 +38,15 @@ class DataNavigatorDomain(NavigatorDomain):
     def viewFile(self, node=False):
         if not node.linked:
             return False
+        win = self.test_windows.get(node.linked.filename, False)
+        if win:
+            win.show()
+            return
         doc = MisuraDocument(node.linked.filename)
         from misura.client import browser
-        browser.TestWindow(doc).show()
+        win = browser.TestWindow(doc)
+        win.show()
+        self.test_windows[node.linked.filename] = win
 
     @node
     def closeFile(self, node=False):
