@@ -163,14 +163,18 @@ class MainWindow(QtGui.QMainWindow):
 
     def set_addr(self, addr):
         logging.debug('MainWindow.set_addr %s', addr)
-        user, password = confdb.getUserPassword(addr)
+        entry = confdb.get_from_key('recent_server', addr)
+        user = entry[1]
+        password = entry[2]
+        mac = entry[3]
+         
         self.login_window = connection.LoginWindow(
-            addr, user, password, globalconn=False)
+            addr, user=user, password=password, mac=mac, globalconn=False)
         self.login_window.login_failed.connect(
             self.retry_login, QtCore.Qt.QueuedConnection)
         self.login_window.login_succeeded.connect(
             self.succeed_login, QtCore.Qt.QueuedConnection)
-        r = widgets.RunMethod(self.login_window.tryLogin, user, password, addr)
+        r = widgets.RunMethod(self.login_window.tryLogin, user, password, mac=mac)
         r.pid = 'Connecting to ' + addr
         QtCore.QThreadPool.globalInstance().start(r)
 

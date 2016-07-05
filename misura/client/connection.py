@@ -9,21 +9,15 @@ from live import registry
 import socket
 
 from misura.canon.logger import Log as logging
+from network import wake_on_lan
 
 
-def getConnection(srv):
-    lw = LoginWindow(srv.addr, srv.user, srv.password)
-    login = lw.tryLogin(srv.user, srv.password)
-    if not login:
-        lw.exec_()
-
-
-def addrConnection(addr, user=False, password=False):
+def addrConnection(addr, user=False, password=False, mac=False):
     if False in [user, password]:
         user, password = confdb.getUserPassword(addr)
     lw = LoginWindow(addr, user, password, globalconn=False)
     try:
-        login = lw.tryLogin(user, password)
+        login = lw.tryLogin(user, password, mac)
     except socket.errno.ECONNREFUSED:
         print 'Connection refused'
         raise
@@ -42,17 +36,19 @@ class Inc(object):
         return self.n
 
 
+fail = _('Login Failed.')
 class LoginWindow(QtGui.QDialog):
     obj = False
     login_failed = QtCore.pyqtSignal()
     login_succeeded = QtCore.pyqtSignal()
 
-    def __init__(self, addr, user='username', password='password', globalconn=True, parent=None, context='Local'):
+    def __init__(self, addr, user='username', password='password', mac='', globalconn=True, parent=None, context='Local'):
         QtGui.QDialog.__init__(self, parent)
         self.setWindowTitle('Login Required')
         self.lay = QtGui.QGridLayout(self)
         self.setLayout(self.lay)
         self.addr = addr
+        self.mac = mac
         self.userLbl = QtGui.QLabel(_('User Name') + ':')
         self.pwdLbl = QtGui.QLabel(_('Password') + ':')
         self.user = QtGui.QLineEdit(user)
@@ -79,28 +75,43 @@ class LoginWindow(QtGui.QDialog):
         else:
             self.fConnect = network.simpleConnection
         self.user.setFocus()
+        self.login_failed.connect(self.wake)
 
-    def tryLogin(self, user='', password='', ignore=False):
+    def tryLogin(self, user='', password='', mac=False, ignore=False):
         if user == '':
             user = str(self.user.text())
         if password == '':
             password = str(self.password.text())
+        if mac:
+            self.mac = mac
         save = bool(self.ckSave.checkState())
         st, self.obj = self.fConnect(self.addr, user, password, save)
+        self.ignore = ignore
         if st:
             self.login_succeeded.emit()
             self.done(0)
             return self.obj
         else:
-            self.login_failed.emit()
-        if not ignore:
             self.obj = False
-            msg = 'Error'
-            if self.obj is not None:
-                msg = self.obj._error
-            QtGui.QMessageBox.warning(self, 'Login Failed', msg)
-
+            self.msg = 'Connection Error'
+            if self.obj:
+                self.msg = self.obj._error
+            self.login_failed.emit()
         return False
+    
+    def wake(self):
+        if self.ignore:
+            return
+        if self.mac:
+            btn = QtGui.QMessageBox.question(None, fail,
+                                             fail +
+                                             _('Would you like to wake the instrument? \nMAC:{}\nFailure:\n{}').format(
+                                                 self.mac, self.msg),
+                                             QtGui.QMessageBox.Ok | QtGui.QMessageBox.Abort)
+            if btn == QtGui.QMessageBox.Ok:
+                wake_on_lan(self.mac)
+        else:
+            btn = QtGui.QMessageBox.warning(None, fail, fail + '\n' + self.msg)
 
 # TODO: migliorare stile e gestire con confdb anziché con lista in
 # network.manager.
@@ -232,6 +243,7 @@ from datetime import datetime
 
 class LiveLog(QtGui.QTextEdit):
     _max_character_length = 1e7
+
     def __init__(self, parent=None):
         QtGui.QTextEdit.__init__(self, parent)
         self.total_text_length = 0
@@ -249,7 +261,6 @@ class LiveLog(QtGui.QTextEdit):
                 'log()'), self.slotUpdate, QtCore.Qt.QueuedConnection)
         self.slotUpdate()
         self.setFont(QtGui.QFont('TypeWriter',  7, 50, False))
-
 
     def slotUpdate(self):
         logging.debug('LiveLog.slotUpdate')

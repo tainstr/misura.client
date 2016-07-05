@@ -407,12 +407,12 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     def rem_server(self, addr):
         self.rem('server', addr)
 
-    def getUserPassword(self, addr):
+    def get_from_key(self, table_name, key):
         """Returns username and passwords used to login"""
-        for entry in self['recent_server'][1:]:
-            if entry[0] == addr:
-                return entry[1], entry[2]
-        return '', ''
+        for entry in self[table_name][1:]:
+            if entry[0] == key:
+                return entry
+        return ['']*len(self[table_name][0])
 
     def resolve_uid(self, uid):
         """Search file path corresponding to uid across default database and recent databases"""

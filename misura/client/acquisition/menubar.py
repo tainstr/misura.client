@@ -114,7 +114,7 @@ class MenuBar(QtGui.QMenuBar):
                                       'Server is restarting:\n %r' % self.server.restart())
 
     def getConnection(self, srv):
-        LoginWindow(srv.addr, srv.user, srv.password, parent=self).exec_()
+        LoginWindow(srv.addr, srv.user, srv.password, srv.mac, parent=self).exec_()
 
     def setServer(self, server=False):
         self.instruments.clear()

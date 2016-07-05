@@ -20,9 +20,9 @@ def _(text, disambiguation=None, context='misura'):
 # CONNECTION SHORTCUTS
 
 
-def default(host='localhost', port=3880, user='admin', password='admin'):
+def default(host='localhost', port=3880, user='admin', password='admin', mac=''):
     addr = 'https://{}:{}/RPC'.format(host, port)
-    network.getConnection(addr, user, password, smart=True)
+    network.getConnection(addr, user, password, mac=mac, smart=True)
     return network.manager.remote
 
 

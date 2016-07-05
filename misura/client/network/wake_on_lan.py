@@ -16,7 +16,7 @@ def wake_on_lan(macaddress):
     # Pad the synchronization stream.
     data = ''.join(['FFFFFFFFFFFF', macaddress * 18])
     send_data = '' 
-
+    
     # Split up the hex values and pack.
     for i in range(0, len(data), 2):
         send_data = ''.join([send_data,
@@ -26,6 +26,7 @@ def wake_on_lan(macaddress):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     sock.sendto(send_data, ('<broadcast>', 7))
+    print 'Wake on LAN packet:', data
     
 
 if __name__ == '__main__':

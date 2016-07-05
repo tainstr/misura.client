@@ -180,7 +180,7 @@ class MisuraProxy(object):
     """Local names which must not be accessed remotely"""
     sep = '/'
 
-    def __init__(self, addr='', user='', password='', proxy=False, reg=False):
+    def __init__(self, addr='', user='', password='', mac='', proxy=False, reg=False):
         self._lock = threading.Lock()
         # Copy existing object
         if proxy:
@@ -188,6 +188,7 @@ class MisuraProxy(object):
         # Create new connection
         else:
             self._reg = reg
+            self.mac = mac
             self.addr = addr
             self.user = user
             self.password = password
@@ -303,6 +304,7 @@ class MisuraProxy(object):
         self.user = obj.user
         self.password = obj.password
         self.addr = obj.addr
+        self.mac = obj.mac
         self._reg = obj._reg
         self._Method__name = obj.remObj._Method__name
         self._parent = obj.parent()

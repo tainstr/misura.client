@@ -15,6 +15,7 @@ import Cookie
 
 from misura.canon.logger import Log as logging
 from mproxy import MisuraProxy, reconnect, urlauth, dataurl, remote_dbdir
+from wake_on_lan import wake_on_lan
 
 import sip
 API_NAMES = ["QDate", "QDateTime", "QString",
@@ -41,7 +42,7 @@ ess.serial = 'ESimulServ'
 manager = NetworkManager()
 
 
-def simpleConnection(addr, user='', password='', save=True):
+def simpleConnection(addr, user='', password='', mac='', save=True):
     addr = str(addr)
     logging.debug('%s %s %s %s', 'simpleConnection', addr, user, password)
     if '@' in addr:
@@ -58,7 +59,7 @@ def simpleConnection(addr, user='', password='', save=True):
     logging.debug('%s %s %s %s', 'simpleConnection2', addr, user, password)
 
     try:
-        obj = MisuraProxy(addr, user=user, password=password)
+        obj = MisuraProxy(addr, user=user, password=password, mac=mac)
     except:
         logging.debug('FAILED simpleConnection at instantiation')
         logging.debug(format_exc())
@@ -89,17 +90,17 @@ def simpleConnection(addr, user='', password='', save=True):
     return True, obj
 
 
-def getConnection(addr, user='', password='', save=True, smart=False):
+def getConnection(addr, user='', password='', mac='', save=True, smart=False):
     """Connects to a remote address"""
     global manager
-    st, obj = simpleConnection(addr, user, password, save)
+    st, obj = simpleConnection(addr, user, password, mac, save)
     setRemote(obj)
     if not st:
         logging.debug('%s', 'Connection failed')
         return st, obj
     manager.remote.remObj.send_log(
         "Client connection: " + repr(platform.uname()))
-    logging.debug('%s %s', 'Connected to', addr)
+    logging.debug('Connected to', addr)
     manager.connected = True
     manager.emit(QtCore.SIGNAL('connected()'))
     manager.remote._smartnaming = smart
