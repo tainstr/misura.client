@@ -162,8 +162,8 @@ class MainWindow(QtGui.QMainWindow):
             w.deleteLater()
 
     def set_addr(self, addr):
-        logging.debug('MainWindow.set_addr %s', addr)
         entry = confdb.get_from_key('recent_server', addr)
+        logging.debug('MainWindow.set_addr', addr, entry)
         user = entry[1]
         password = entry[2]
         mac = entry[3]

@@ -44,7 +44,7 @@ manager = NetworkManager()
 
 def simpleConnection(addr, user='', password='', mac='', save=True):
     addr = str(addr)
-    logging.debug('%s %s %s %s', 'simpleConnection', addr, user, password)
+    logging.debug('simpleConnection', addr, user, password, mac, save)
     if '@' in addr:
         usrpass, addr = addr.replace('https://', '').split('@')
         addr = addr.lower().replace('/rpc', '')
@@ -56,7 +56,7 @@ def simpleConnection(addr, user='', password='', mac='', save=True):
         addr = 'https://' + addr
     if not addr.endswith('/RPC'):
         addr += '/RPC'
-    logging.debug('%s %s %s %s', 'simpleConnection2', addr, user, password)
+    logging.debug('simpleConnection2', addr, user, password, mac)
 
     try:
         obj = MisuraProxy(addr, user=user, password=password, mac=mac)

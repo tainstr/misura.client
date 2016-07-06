@@ -376,6 +376,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         v = [r[0] for r in self['recent_server'][1:]]
         # Check if the found server was already saved with its own user and
         # password
+        print 'found_server', addr, r
         if addr in v:
             return False
         # Otherwise, save it with empty user and password
@@ -402,6 +403,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if not save:
             user = ''
             password = ''
+        logging.debug('mem_server', addr, user, password, mac, name)
         return self.mem('server', addr, user, password, mac, name)
 
     def rem_server(self, addr):

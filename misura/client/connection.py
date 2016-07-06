@@ -75,7 +75,6 @@ class LoginWindow(QtGui.QDialog):
         else:
             self.fConnect = network.simpleConnection
         self.user.setFocus()
-        self.login_failed.connect(self.wake)
 
     def tryLogin(self, user='', password='', mac=False, ignore=False):
         if user == '':
@@ -84,9 +83,13 @@ class LoginWindow(QtGui.QDialog):
             password = str(self.password.text())
         if mac:
             self.mac = mac
+        print 'WAKE ON LAN?', repr(self.mac)
+        if self.mac:
+            wake_on_lan(self.mac)
         save = bool(self.ckSave.checkState())
-        st, self.obj = self.fConnect(self.addr, user, password, save)
+        st, self.obj = self.fConnect(self.addr, user, password, self.mac, save)
         self.ignore = ignore
+        
         if st:
             self.login_succeeded.emit()
             self.done(0)
@@ -98,20 +101,6 @@ class LoginWindow(QtGui.QDialog):
                 self.msg = self.obj._error
             self.login_failed.emit()
         return False
-    
-    def wake(self):
-        if self.ignore:
-            return
-        if self.mac:
-            btn = QtGui.QMessageBox.question(None, fail,
-                                             fail +
-                                             _('Would you like to wake the instrument? \nMAC:{}\nFailure:\n{}').format(
-                                                 self.mac, self.msg),
-                                             QtGui.QMessageBox.Ok | QtGui.QMessageBox.Abort)
-            if btn == QtGui.QMessageBox.Ok:
-                wake_on_lan(self.mac)
-        else:
-            btn = QtGui.QMessageBox.warning(None, fail, fail + '\n' + self.msg)
 
 # TODO: migliorare stile e gestire con confdb anziché con lista in
 # network.manager.
