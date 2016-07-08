@@ -159,6 +159,8 @@ class ImageReference(utils.OperationWrapper, veusz.widgets.ImageFile):
                         rect.width(), irect.height() * xr)
 
             # finally draw image
+            rect.setWidth(rect.width() - 1)
+            rect.setLeft(rect.left() + 1)
             painter.drawImage(rect, image, irect)
 
 
