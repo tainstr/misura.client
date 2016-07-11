@@ -7,11 +7,13 @@ from misura.client import widgets, _
 import overlay
 import functools
 from .. import conf
+from .. import parameters
 from ..live import FrameProcessor, SampleProcessor
 from motionplane import SensorPlane
 from sample_picture import SamplePicture, is_hsm_sample
 import calibration
 from time import sleep
+import os
 
 
 class ViewerPicture(QtGui.QGraphicsView):
@@ -291,7 +293,8 @@ class ViewerPicture(QtGui.QGraphicsView):
         #########
         # Analysis menu
         #########
-        self.amenu = self.menu.addMenu(_('Analysis'))
+        self.amenu = self.menu.addMenu(QtGui.QIcon(os.path.join(parameters.pathArt, 'morphometrics.svg')),
+                                       _('Morphometrics'))
 
         # General view entries
         self.roiAct = self.amenu.addAction('View Regions',
