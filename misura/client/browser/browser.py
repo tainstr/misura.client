@@ -129,7 +129,7 @@ class MainWindow(QtGui.QMainWindow):
                 logging.debug('Overwrite cancelled')
                 return False
         if ok == 2:
-            
+
             dname = os.path.dirname(outpath)
             fname = os.path.basename(outpath)[:-3]
             i = 1
@@ -180,8 +180,10 @@ class MainWindow(QtGui.QMainWindow):
             return False
 
         tw = testwindow.TestWindow(doc)
+        instrument = doc.proxy.conf['runningInstrument']
         cw = self.centralWidget()
-        win = cw.addTab(tw, tw.title)
+        icon = QtGui.QIcon(os.path.join(parameters.pathArt, 'small_' + instrument + '.svg'))
+        win = cw.addTab(tw, icon, tw.title)
         confdb.mem_file(path, tw.remote.measure['name'])
         cw.setCurrentIndex(cw.count() - 1)
 
