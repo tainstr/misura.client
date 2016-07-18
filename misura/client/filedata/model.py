@@ -20,7 +20,8 @@ from entry import iterpath, NodeEntry, dstats
 from misura.client.iutils import get_plotted_tree
 from misura.canon.csutil import lockme
 import threading
-
+import os
+from .. import parameters
 
 def ism(obj, cls):
     return getattr(obj, 'mtype', False) == cls.mtype
@@ -43,8 +44,13 @@ void = None
 voididx = QtCore.QModelIndex()
 
 
-def get_item_icon(plotwg):
+def get_item_icon(plotwg, node):
     """Get line style icon or a merged line style + marker style icon"""
+    is_test_node = node.parent and not node.parent.parent
+    if is_test_node:
+        instrument = node.linked.instrument
+        return QtGui.QIcon(os.path.join(parameters.pathArt, 'small_' + instrument + '.svg'))
+
     style = plotwg.settings.get('PlotLine').get('style').val
     i = veusz.setting.LineStyle._linestyles.index(style)
     line_icon = controls.LineStyle._icons[i]
@@ -160,7 +166,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             elif self.keys == set(self.doc.data.keys()) and self.available_keys == set(self.doc.available_data.keys()):
                 logging.debug('model.refresh(): NOTHING CHANGED')
                 return False
-        
+
         logging.debug('%s %s', 'REFRESHING MODEL', self.paused)
         self.paused = True
         self.doc.suspendUpdates()
@@ -235,24 +241,23 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
     def decorate(self, ent, role):
         """Find text color and icon decorations for dataset ds"""
-        if not ent.ds:
-            return void
-        
         if role == Qt.FontRole:
             current_font = QtGui.QFont()
             current_font.setBold(len(ent.data) > 0 and 0 in self.status)
             return current_font
-        
+
         plotpath = self.is_plotted(ent.path)
         if len(plotpath) == 0:
             plotwg = False
         else:
-            plotwg = self.doc.resolveFullWidgetPath(plotpath[0])          
+            plotwg = self.doc.resolveFullWidgetPath(plotpath[0])
+
+        if role == Qt.DecorationRole:
+            return get_item_icon(plotwg, ent)
+
         if plotwg is False:
             return void
-        
-        if role == Qt.DecorationRole:
-            return get_item_icon(plotwg)
+
         if role == Qt.ForegroundRole:
             # Retrieve plot line color
             xy = plotwg.settings.get('PlotLine').get('color').color()
@@ -273,7 +278,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         if role == Qt.UserRole:
             return node
         if col == 0:
-            if role in [Qt.ForegroundRole, Qt.DecorationRole, Qt.FontRole]:
+            if role in [Qt.ForegroundRole, Qt.FontRole, Qt.DecorationRole]:
                 return self.decorate(node, role)
             if isinstance(node, DatasetEntry):
                 if role == Qt.DisplayRole:
