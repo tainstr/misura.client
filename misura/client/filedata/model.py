@@ -51,6 +51,9 @@ def get_item_icon(plotwg, node):
         instrument = node.linked.instrument
         return QtGui.QIcon(os.path.join(parameters.pathArt, 'small_' + instrument + '.svg'))
 
+    if not plotwg:
+        return void
+
     style = plotwg.settings.get('PlotLine').get('style').val
     i = veusz.setting.LineStyle._linestyles.index(style)
     line_icon = controls.LineStyle._icons[i]
