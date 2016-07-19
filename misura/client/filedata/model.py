@@ -377,8 +377,10 @@ class DocumentModel(QtCore.QAbstractItemModel):
         jdx = []
         for obj in n:
             # Find position in siblings
-            i = obj.parent.recursive_status(self.status, depth=0).index(obj)
-            jdx.append(self.createIndex(i, 0, obj.model_path))
+            all_objs = obj.parent.recursive_status(self.status, depth=0)
+            if obj in all_objs:
+                i = all_objs.index(obj)
+                jdx.append(self.createIndex(i, 0, obj.model_path))
         #logging.debug('index_path', jdx)
         return jdx
 

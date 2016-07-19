@@ -64,7 +64,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.refresh_model)
         if doc:
             self.set_doc(doc)
-        
+
     @property
     def tasks(self):
         return live.registry.tasks
@@ -131,13 +131,14 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def expand_node_path(self, node, select=False):
         jdx = self.model().index_path(node)
-        self.setExpanded(jdx[-1], True)
-        if select:
-            # Select also
-            self.selectionModel().setCurrentIndex(
-                    jdx[-1], QtGui.QItemSelectionModel.Select)
-        # Qt bug: without scrollTo, expansion is not effective!!!
-        self.scrollTo(jdx[-1])
+        if len(jdx) > 0:
+            self.setExpanded(jdx[-1], True)
+            if select:
+                # Select also
+                self.selectionModel().setCurrentIndex(jdx[-1], QtGui.QItemSelectionModel.Select)
+            # Qt bug: without scrollTo, expansion is not effective!!!
+            self.scrollTo(jdx[-1])
+
         return jdx
 
     def expand_plotted_nodes(self):
