@@ -3,7 +3,6 @@ import struct
 #http://code.activestate.com/recipes/358449-wake-on-lan/
 def wake_on_lan(macaddress):
     """ Switches on remote computers using WOL. """
-
     # Check macaddress format and try to compensate.
     if len(macaddress) == 12:
         pass

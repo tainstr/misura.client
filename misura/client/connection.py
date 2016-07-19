@@ -85,7 +85,7 @@ class LoginWindow(QtGui.QDialog):
             self.mac = mac
         print 'WAKE ON LAN?', repr(self.mac)
         if self.mac:
-            wake_on_lan(self.mac)
+            map(wake_on_lan, self.mac.split('\n'))
         save = bool(self.ckSave.checkState())
         st, self.obj = self.fConnect(self.addr, user, password, self.mac, save)
         self.ignore = ignore
