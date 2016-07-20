@@ -59,6 +59,10 @@ class DataNavigatorDomain(NavigatorDomain):
             if ds.linked == lk:
                 self.navigator.deleteData(ds)
 
+        for key, ds in self.doc.available_data.items():
+            if ds.linked == lk:
+                del self.doc.available_data[key]
+
         self.model().refresh(True)
 
     @node
