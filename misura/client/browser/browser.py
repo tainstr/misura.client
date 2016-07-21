@@ -121,7 +121,6 @@ class MainWindow(QtGui.QMainWindow):
         print 'convert_file',path
         filedata.convert_file(self,path)
         
-
     def _open_converted(self):
         self.open_file(self.converter.outpath)
 

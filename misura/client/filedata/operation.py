@@ -42,7 +42,7 @@ def getUsedPrefixes(doc):
             continue
 #       print 'found linked file',lf.filename,lf.prefix
         p[lf.filename] = lf
-    logging.debug('%s %s %s', 'getUsedPrefixes', p, doc.data.keys())
+    logging.debug( 'getUsedPrefixes', p, doc.data.keys())
     return p
 
 
@@ -61,7 +61,7 @@ def get_linked(doc, params):
     params.prefix = prefix
     LF = linked.LinkedMisuraFile(params)
     LF.prefix = prefix
-    logging.debug('%s %s', 'get_linked', prefix)
+    logging.debug('get_linked', prefix)
     return LF
 
 
@@ -373,8 +373,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         jobs(3)
         # open the file
         fp = getattr(doc, 'proxy', False)
-        logging.debug('%s %s %s %s', 'FILENAME', self.filename, type(fp), fp)
-        print 'FILENAME', self.filename, type(fp), fp, self.uid
+        logging.debug('FILENAME', self.filename, type(fp), fp)
         if fp is False or not fp.isopen():
             self.proxy = getFileProxy(self.filename)
         else:
@@ -630,5 +629,5 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         hdf_names = map(
             lambda name: ("/" + name.lstrip(self.prefix) + "$"), hdf_names)
         LF.params.rule_load = '\n'.join(hdf_names)
-
+        self.imported_names = names
         return names

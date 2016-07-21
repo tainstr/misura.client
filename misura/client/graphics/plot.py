@@ -7,7 +7,7 @@ from misura.canon.plugin import default_plot_plugins, default_plot_rules
 
 from .. import plugin
 from ..clientconf import confdb
-
+from ..filedata import get_default_plot_plugin_class
 from veuszplot import VeuszPlot
 from PyQt4 import QtGui, QtCore
 
@@ -24,17 +24,7 @@ MIN = -10**5
 hidden_curves = ['iA', 'iB', 'iC', 'iD', 'xmass', 'ymass']
 
 
-def get_default_plot_plugin_class(instrument_name):
-    plugin_class = plugin.DefaultPlotPlugin
-    plugin_name = default_plot_plugins.get(instrument_name, False)
-    if plugin_name:
-        for cls in plugins.toolspluginregistry:
-            if cls.__name__ == plugin_name:
-                plugin_class = cls
-                break
-    print 'defaultPlot', plugin_class
-    plot_rule_name = default_plot_rules.get(instrument_name, 'rule_plot')
-    return plugin_class, plot_rule_name
+
 
 
 class Plot(VeuszPlot):

@@ -66,3 +66,18 @@ def convert_file(caller, path):
         'failed(QString)'), caller._failed_conversion, QtCore.Qt.QueuedConnection)
     QtCore.QThreadPool.globalInstance().start(run)
     return True
+
+from misura.canon.plugin import default_plot_plugins, default_plot_rules
+from .. import plugin
+
+def get_default_plot_plugin_class(instrument_name):
+    plugin_class = plugin.DefaultPlotPlugin
+    plugin_name = default_plot_plugins.get(instrument_name, False)
+    if plugin_name:
+        for cls in plugins.toolspluginregistry:
+            if cls.__name__ == plugin_name:
+                plugin_class = cls
+                break
+    print 'defaultPlot', plugin_class
+    plot_rule_name = default_plot_rules.get(instrument_name, 'rule_plot')
+    return plugin_class, plot_rule_name

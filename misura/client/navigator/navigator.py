@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Tree visualization of opened misura Files in a document."""
+import os
+
 from misura.canon.logger import Log as logging
 from misura.canon.plugin import navigator_domains
 from misura.canon.plugin.domains import node, nodes
@@ -16,10 +18,13 @@ from .. import live
 from .. import plugin
 from ..clientconf import confdb
 
+
 class Navigator(quick.QuickOps, QtGui.QTreeView):
     previous_selection = False
     """List of currently opened misura Tests and reference to datasets names"""
     tasks = None
+    convert = QtCore.pyqtSignal(str)
+    
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=set([filedata.dstats.loaded]), cols=1):
         QtGui.QTreeView.__init__(self, parent)
         self.status = status
@@ -28,6 +33,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.acts_status = []
         self.setDragDropMode(QtGui.QAbstractItemView.DragOnly)
         self.setDragEnabled(True)
+        self.setAcceptDrops(True)
         self.setAlternatingRowColors(True)
         self.setExpandsOnDoubleClick(False)
         self.setSelectionBehavior(QtGui.QTreeView.SelectItems)
@@ -64,6 +70,11 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.refresh_model)
         if doc:
             self.set_doc(doc)
+            
+        self.connect(self, QtCore.SIGNAL(
+            'select(QString)'), self.open_file)
+        self.convert.connect(self.convert_file)
+        
 
     @property
     def tasks(self):
@@ -87,6 +98,31 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.mod.sigPageChanged.connect(self.ensure_sync_of_view_and_model)
         if self.ncols>1:
             self.setColumnWidth(0, 400)
+            
+    def open_file(self, path):
+        print 'OPEN FILE', path
+        self.doc.proxy = False
+        op = filedata.OperationMisuraImport(
+            filedata.ImportParamsMisura(filename=path)
+        )
+        self.doc.applyOperation(op)
+        confdb.mem_file(path, op.measurename)
+        plugin_class, plot_rule_name = filedata.get_default_plot_plugin_class(op.instrument)
+        p = plugin_class()
+        result = p.apply(self._mainwindow.cmd, {'dsn': op.imported_names, 
+                                       'rule': confdb[plot_rule_name]})
+        
+        
+    def convert_file(self, path):
+        print 'CONVERT FILE', path
+        filedata.convert_file(self, path)
+        
+    def _open_converted(self):
+        self.open_file(self.converter.outpath)
+        
+    def _failed_conversion(self, error):
+        QtGui.QMessageBox.warning(self, _("Failed conversion"), error)
+    
 
 
     def set_idx(self, n):
@@ -94,6 +130,27 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def set_time(self, t):
         return self.model().set_time(t)
+
+    def dragEnterEvent(self, event):
+        logging.debug('dragEnterEvent', event.mimeData())
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+                        
+    def dragMoveEvent(self, event):
+        logging.debug('dragMoveEvent', event.mimeData())
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()        
+
+    def dropEvent(self, drop_event):
+        urls = drop_event.mimeData().urls()
+        logging.debug('dropEvent', urls)
+        drop_event.accept()
+        for url in urls:
+            url = url.toString().replace('file://', '')
+            # on windows, remove also the first "/"
+            if os.name.lower() == 'nt':
+                url = url[1:]
+            self.convert.emit(url)
 
     def hide_show(self, *a, **k):
         return self.model().hide_show(*a, **k)
