@@ -1,18 +1,18 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+
 from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 import os
 
 from misura.client import configure_logger
-from misura.canon.plugin import dataimport
+
 
 from .. import _
 from .. import confwidget
 from .. import filedata
+
 from ..clientconf import confdb
 from .. import iutils
-from .. import widgets
+
 from ..database import getDatabaseWidget, getRemoteDatabaseWidget
 from .. import parameters
 
@@ -28,6 +28,8 @@ except:
     misura3 = False
 
 
+
+
 class DatabasesArea(QtGui.QMdiArea):
     convert = QtCore.pyqtSignal(str)
 
@@ -36,12 +38,13 @@ class DatabasesArea(QtGui.QMdiArea):
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):
-        logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
+        logging.debug('dragEnterEvent', event.mimeData())
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
 
     def dropEvent(self, drop_event):
         urls = drop_event.mimeData().urls()
+        logging.debug('dropEvent', urls)
         for url in urls:
             url = url.toString().replace('file://', '')
             # on windows, remove also the first "/"
@@ -73,6 +76,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(
             self.tab, QtCore.SIGNAL('tabCloseRequested(int)'), self.close_tab)
+
+        self.connect(self, QtCore.SIGNAL(
+            'select(QString)'), self.open_file)
 
         self.connect(self.myMenuBar.recentFile, QtCore.SIGNAL(
             'select(QString)'), self.open_file)
@@ -110,57 +116,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def closeEvent(self, event):
         iutils.app.quit()
-
+        
     def convert_file(self, path):
-        if path.endswith('.h5'):
-            self.open_file(path)
-            return True
-        self.converter = False
-        self.converter = dataimport.get_converter(path)
-        self.converter.confdb = confdb
-        # Check overwrite
-        outpath = self.converter.get_outpath(path)
-        if outpath is False:
-            return False
-        ok = 1
-        if os.path.exists(outpath):
-            ok = self.confirm_overwrite(outpath)
-            if not ok:
-                logging.debug('Overwrite cancelled')
-                return False
-        if ok == 2:
-
-            dname = os.path.dirname(outpath)
-            fname = os.path.basename(outpath)[:-3]
-            i = 1
-            while  os.path.exists(outpath):
-                outpath = os.path.join(dname, fname + str(i) + '.h5')
-                logging.debug('Renamed to', outpath)
-                i += 1
-        self.converter.outpath = outpath
-        # Go
-        run = widgets.RunMethod(self.converter.convert, path,
-                                filedata.jobs, filedata.job, filedata.done)
-        run.step = 100
-        run.pid = self.converter.pid
-        self.connect(run.notifier, QtCore.SIGNAL(
-            'done()'), self._open_converted, QtCore.Qt.QueuedConnection)
-        self.connect(run.notifier, QtCore.SIGNAL(
-            'failed(QString)'), self._failed_conversion, QtCore.Qt.QueuedConnection)
-        QtCore.QThreadPool.globalInstance().start(run)
-        return True
-
-    def confirm_overwrite(self, path):
-        msg = QtGui.QMessageBox(QtGui.QMessageBox.Warning, _('Overwrite destination file?'),
-                                _('Destination file will be overwritten:\n{}'.format(path)),
-                                parent=self)
-        ow = msg.addButton(_('Overwrite'), 1)
-        re = msg.addButton(_('Rename'), 2)
-        ex = msg.addButton(_('Cancel'), 0)
-        v = {ow: 1, re: 2, ex: 0}
-        msg.exec_()
-        ret = v[msg.clickedButton()]
-        return ret
+        print 'convert_file',path
+        filedata.convert_file(self,path)
+        
 
     def _open_converted(self):
         self.open_file(self.converter.outpath)
