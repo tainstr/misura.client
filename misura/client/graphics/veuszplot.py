@@ -48,6 +48,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         self.sigUpdatePage.connect(self.update_page)
 
         registerImportCommand('MoveToLastPage', self.moveToLastPage)
+        self.actionSetTimeout(250, True)
 
     def moveToLastPage(self):
         number_of_pages = self.document.getNumberPages()
