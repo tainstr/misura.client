@@ -78,7 +78,7 @@ class MainWindow(QtGui.QMainWindow):
             self.tab, QtCore.SIGNAL('tabCloseRequested(int)'), self.close_tab)
 
         self.connect(self, QtCore.SIGNAL(
-            'select(QString)'), self.open_file)
+            'do_open(QString)'), self.open_file)
 
         self.connect(self.myMenuBar.recentFile, QtCore.SIGNAL(
             'select(QString)'), self.open_file)

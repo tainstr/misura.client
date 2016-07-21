@@ -4,7 +4,7 @@ import os
 
 from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
-
+from .. import _
 from ..clientconf import confdb
 from operation import jobs, job, done
 from .. import widgets
@@ -29,7 +29,7 @@ def convert_file(caller, path):
     - _failed_conversion
     """
     if path.endswith('.h5'):
-        caller.emit(QtCore.SIGNAL('select(QString)'), path)
+        caller.emit(QtCore.SIGNAL('do_open(QString)'), path)
         #caller.open_file(path)
         return True
     caller.converter = False

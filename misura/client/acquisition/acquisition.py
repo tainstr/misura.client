@@ -221,7 +221,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def setServer(self, server=False):
         self._blockResetFileProxy = True
-        logging.debug('%s %s', 'Setting server to', server)
+        logging.debug('Setting server to', server)
         self.server = server
         if not server:
             network.manager.remote.connect()
@@ -243,7 +243,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.logDock.setWidget(connection.LiveLog(self.logDock))
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.logDock)
-
+        
         self.setMenuBar(self.myMenuBar)
         if not self.fixedDoc:
             self.rem('instrumentDock')
@@ -253,7 +253,6 @@ class MainWindow(QtGui.QMainWindow):
             self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.instrumentDock)
         else:
             self.instrumentDock = QtGui.QWidget()
-        logging.debug('%s', self.server.describe())
         ri = self.server['runningInstrument']  # currently running
         # compatibility with old tests
         if ri in ['None', '']:

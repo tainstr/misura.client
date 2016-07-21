@@ -72,7 +72,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.set_doc(doc)
             
         self.connect(self, QtCore.SIGNAL(
-            'select(QString)'), self.open_file)
+            'do_open(QString)'), self.open_file)
         self.convert.connect(self.convert_file)
         
 
