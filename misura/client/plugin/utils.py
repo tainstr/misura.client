@@ -10,7 +10,7 @@ import veusz.document as document
 
 from .. import _
 from misura.canon.logger import Log as logging
-from ..filedata.generate_datasets import new_dataset_operation
+
 
 def iter_widgets(base, typename, direction = 0):
     """Yields all widgets of type `typename` starting from `base` widget.
@@ -254,6 +254,7 @@ class OperationWrapper(object):
     
     def set_new_dataset(self, original_dataset, data, name, label, path, unit='volt'):
         """Create a new dataset by copying `original_dataset` and overwriting with `data`"""
+        from ..filedata.generate_datasets import new_dataset_operation
         op = new_dataset_operation(original_dataset, data, name, label, path, unit=unit)
         self.ops.append(op)
         
