@@ -127,9 +127,13 @@ class MainWindow(QtGui.QMainWindow):
     def _failed_conversion(self, error):
         QtGui.QMessageBox.warning(self, _("Failed conversion"), error)
 
-    def open_file(self, path):
+    def open_file(self, path, tab_index=-1):
         path = unicode(path)
-        logging.debug('%s %s', 'Browser MainWindow.open_file', path)
+        logging.debug('%s %s', 'Browser MainWindow.open_file', path, tab_index)
+        if tab_index>0:
+            tab = self.tab.widget(tab_index)
+            tab.measureTab.results.navigator.open_file(path)
+            return
         try:
             doc = filedata.MisuraDocument(path)
         except Exception as error:
@@ -147,15 +151,17 @@ class MainWindow(QtGui.QMainWindow):
         cw.setCurrentIndex(cw.count() - 1)
 
     def open_database(self, path, new=False):
-        idb = getDatabaseWidget(path, new=new)
+        idb = getDatabaseWidget(path, new=new, browser=self)
         win = self.area.addSubWindow(idb)
         win.show()
         confdb.mem_database(path)
         self.connect(
             idb, QtCore.SIGNAL('selectedFile(QString)'), self.open_file)
+        self.connect(
+            idb, QtCore.SIGNAL('selectedFile(QString,int)'), self.open_file)
 
     def new_database(self, path):
-        self.open_database(path, new=True)
+        self.open_database(path, new=True, browser=self)
 
     def open_server(self, addr):
         idb = getRemoteDatabaseWidget(addr)
@@ -183,6 +189,10 @@ class MainWindow(QtGui.QMainWindow):
         confdb.mem_m3database(path)
         win = self.area.addSubWindow(m3db)
         win.show()
+        
+    def list_tabs(self):
+        return [self.tab.widget(i) for i in range(self.tab.count())]
+            
 
     def close_tab(self, idx):
         logging.debug('%s %s', 'Tab close requested', idx)

@@ -23,6 +23,7 @@ comment_column = 10
 verify_column = 11
 incremental_id_column = 12
 
+
 class DatabaseModel(QtCore.QAbstractTableModel):
 
     def __init__(self, remote=False, tests=[], header=[]):
@@ -125,6 +126,7 @@ class DatabaseHeader(QtGui.QHeaderView):
         else:
             self.hideSection(i)
 
+
 def iter_selected(table_view):
     """Iterate over selected rows returning their corresponding sql record"""
     column_count = table_view.model().columnCount()
@@ -136,6 +138,7 @@ def iter_selected(table_view):
             r.append(table_view.model().data(idx))
         yield r
 
+
 def get_delete_selection(table_view):
     records = []
     for record in iter_selected(table_view):
@@ -143,21 +146,24 @@ def get_delete_selection(table_view):
     n = min(len(records), 10)
     N = len(records)
     msg = '\n'.join([r[3] for r in records[:n]])
-    msg = _("You are going to delete {} files, including:").format(N) + '\n' + msg
+    msg = _("You are going to delete {} files, including:").format(
+        N) + '\n' + msg
     ok = QtGui.QMessageBox.question(table_view,
-                    _("Permanently delete test data?"), msg,
-                    QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-                    QtGui.QMessageBox.Cancel)
+                                    _("Permanently delete test data?"), msg,
+                                    QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
+                                    QtGui.QMessageBox.Cancel)
     if ok != QtGui.QMessageBox.Ok:
         logging.debug('Delete aborted')
         return []
     return records
 
-class DatabaseTable(QtGui.QTableView):
 
-    def __init__(self, remote=False, parent=None):
+class DatabaseTable(QtGui.QTableView):
+    menu_add_to = False
+    def __init__(self, remote=False, parent=None, browser=False):
         QtGui.QTableView.__init__(self, parent)
         self.remote = remote
+        self.browser = browser
         self.curveModel = DatabaseModel(remote)
         self.setModel(self.curveModel)
         self.selection = QtGui.QItemSelectionModel(self.model())
@@ -174,16 +180,32 @@ class DatabaseTable(QtGui.QTableView):
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
 
-        self.menu.addAction(_('Open selected tests'), lambda: self.select(None))
-
+        self.menu.addAction(
+            _('Open selected tests'), lambda: self.select(None))
+        
+        if self.browser:
+            self.menu_add_to = self.menu.addMenu(_('Add to...'))
+            
         self.menu.addAction(_('View folder'), self.view_folder)
         self.menu.addAction(_('Delete'), self.delete)
 
     def showMenu(self, pt):
+        if self.menu_add_to:
+            self.menu_add_to.clear()
+            for i,tab in enumerate(self.browser.list_tabs()[1:]):
+                open_function = lambda: self.add_to_tab(i+1)
+                self.menu_add_to.addAction(tab.title, open_function) 
         self.menu.popup(self.mapToGlobal(pt))
+        
+        
 
-    def select(self, idx):
+    def select(self, idx=-1):
         self.emit(QtCore.SIGNAL('selected()'))
+        
+    def add_to_tab(self, tab_index):
+        self.selected_tab_index = tab_index
+        self.select()
+        
 
     def getName(self):
         idx = self.currentIndex()
@@ -199,8 +221,9 @@ class DatabaseTable(QtGui.QTableView):
         return row[ncol], row[icol], row[fcol], row[fuid]
 
     def view_folder(self):
-        record  = iter_selected(self).next()
-        url = 'file://' + os.path.dirname(record[0])
+        record = iter_selected(self).next()
+        # url = 'file://' +
+        url = os.path.dirname(record[0])
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
 
     def delete(self):
@@ -212,7 +235,7 @@ class DatabaseTable(QtGui.QTableView):
 
 class DatabaseWidget(QtGui.QWidget):
 
-    def __init__(self, remote=False, parent=None):
+    def __init__(self, remote=False, parent=None, browser=False):
         QtGui.QWidget.__init__(self, parent)
         self.remote = remote
         loc = remote.addr
@@ -226,7 +249,7 @@ class DatabaseWidget(QtGui.QWidget):
         self.menu.setNativeMenuBar(False)
         self.lay.addWidget(self.menu)
 
-        self.table = DatabaseTable(self.remote, self)
+        self.table = DatabaseTable(self.remote, self, browser=browser)
         self.lay.addWidget(self.table)
         self.connect(self.table, QtCore.SIGNAL('selected()'), self.do_selected)
 
@@ -245,7 +268,8 @@ class DatabaseWidget(QtGui.QWidget):
         lay.addWidget(self.doQuery)
 
         self.connect(self.doQuery, QtCore.SIGNAL('clicked()'), self.query)
-        self.connect(self.nameContains, QtCore.SIGNAL('returnPressed()'), self.query)
+        self.connect(
+            self.nameContains, QtCore.SIGNAL('returnPressed()'), self.query)
 
         self.menu.addAction(_('Refresh'), self.refresh)
         self.menu.addAction(_('Rebuild'), self.rebuild)
@@ -253,7 +277,8 @@ class DatabaseWidget(QtGui.QWidget):
         self.lay.addWidget(self.bar)
         self.bar.hide()
 
-        self.resize(QtGui.QApplication.desktop().screen().rect().width() / 2, QtGui.QApplication.desktop().screen().rect().height() / 2)
+        self.resize(QtGui.QApplication.desktop().screen().rect().width(
+        ) / 2, QtGui.QApplication.desktop().screen().rect().height() / 2)
 
     def rebuild(self):
         self.remote.rebuild()
@@ -290,7 +315,6 @@ class DatabaseWidget(QtGui.QWidget):
         self.table.resizeColumnToContents(name_column)
         # name_column =
 
-
     def query(self, *a):
         d = self.qfilter.itemData(self.qfilter.currentIndex())
         d = str(d)
@@ -298,14 +322,20 @@ class DatabaseWidget(QtGui.QWidget):
         if '' in [val, d]:
             return self.up()
         self.table.model().up({d: val})
+        
+    def emit_selected(self, filename):
+        if self.table.selected_tab_index<0:
+            self.emit(QtCore.SIGNAL('selectedFile(QString)'), filename)
+        else:
+            self.emit(QtCore.SIGNAL('selectedFile(QString, int)'), filename, self.table.selected_tab_index)
 
-    def do_selected(self):
+    def do_selected(self, tab_index=-1):
         filename_column_index = self.table.model().header.index('file')
-
+        
         for row in iter_selected(self.table):
             filename = row[filename_column_index]
-            self.emit(QtCore.SIGNAL('selectedFile(QString)'), filename)
-
+            self.emit_selected(filename)
+        self.table.selected_tab_index = -1
         isGraphics = self.parent() is None
         if isGraphics:
             self.close()
@@ -335,12 +365,12 @@ class UploadThread(QtCore.QThread):
         self.emit(QtCore.SIGNAL('ok()'))
 
 
-def getDatabaseWidget(path, new=False):
+def getDatabaseWidget(path, new=False, browser=False):
     path = str(path)
     spy = indexer.Indexer(path, [os.path.dirname(path)])
     if new:
         spy.rebuild()
-    idb = DatabaseWidget(spy)
+    idb = DatabaseWidget(spy, browser=browser)
     idb.up()
     return idb
 

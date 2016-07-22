@@ -301,6 +301,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         self.linked = True
         self.filename = params.filename
         self.uid = params.uid
+        self.load_rules(params)
+        
+    def load_rules(self, params):
 
         self.rule_exc = False
         if len(params.rule_exc) > 0:
