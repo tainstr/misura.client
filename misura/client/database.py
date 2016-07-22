@@ -160,6 +160,7 @@ def get_delete_selection(table_view):
 
 class DatabaseTable(QtGui.QTableView):
     menu_add_to = False
+    selected_tab_index = -1
     def __init__(self, remote=False, parent=None, browser=False):
         QtGui.QTableView.__init__(self, parent)
         self.remote = remote
@@ -200,11 +201,12 @@ class DatabaseTable(QtGui.QTableView):
         
 
     def select(self, idx=-1):
+        self.selected_tab_index = -1
         self.emit(QtCore.SIGNAL('selected()'))
         
     def add_to_tab(self, tab_index):
         self.selected_tab_index = tab_index
-        self.select()
+        self.emit(QtCore.SIGNAL('selected()'))
         
 
     def getName(self):
