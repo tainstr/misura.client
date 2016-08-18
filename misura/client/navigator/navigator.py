@@ -162,6 +162,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def update_view(self):
         if len(self.doc.suspendupdates)>0:
+            logging.debug('Cannot update_view: suspendedupdates!')
             return
         if not self.previous_selection:
             self.previous_selection = self.current_node_path
@@ -310,7 +311,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def update_file_menu(self, node):
         self.file_menu.clear()
-        self.file_menu.addAction(_('Update view'), self.refresh_model)
+        self.file_menu.addAction(_('Update view'), self.update_view)
         for domain in self.domains:
             domain.build_file_menu(self.file_menu, node)
         self.add_status_actions(self.file_menu)

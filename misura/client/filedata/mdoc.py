@@ -66,9 +66,9 @@ class MisuraDocument(document.Document):
             d.reset(self.proxy, datapath=fold)
             self.decoders[fold] = d
             
-    def load_rule(self, filename, rule):
+    def load_rule(self, filename, rule, overwrite=True):
         op = OperationMisuraImport.from_rule(
-            rule, filename)
+            rule, filename, overwrite=overwrite)
         self.applyOperation(op)
         
     def _load(self, path, filename):

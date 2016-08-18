@@ -85,6 +85,7 @@ class ImportParamsMisura(base.ImportParamsBase):
         'rule_inc': clientconf.rule_inc,
         'rule_load': clientconf.rule_load,
         'rule_unit': clientconf.rule_unit,
+        'overwrite': True,
     })
 
 
@@ -337,13 +338,14 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         return op
 
     @classmethod
-    def from_rule(cls, rule, linked_filename, uid=''):
+    def from_rule(cls, rule, linked_filename, uid='', overwrite=True):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
         p = ImportParamsMisura(filename=linked_filename,
                                uid=uid,
                                rule_exc=' *',
                                rule_load=rule,
-                               rule_unit=clientconf.confdb['rule_unit'])
+                               rule_unit=clientconf.confdb['rule_unit'],
+                               overwrite=overwrite)
         op = OperationMisuraImport(p)
         return op
 
@@ -571,11 +573,12 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                     attr = []
 
             # Read data
-            if not m_update:
+            if not self.params.overwrite or not m_update:
                 # completely skip processing if dataset is already in document
                 if self._doc.data.has_key(pcol):
-                    return False
-                # data is not loaded anyway
+                    continue               
+            if not m_update:
+                # empty dataset is created
                 data = []
             elif col == 't':
                 data = time_sequence

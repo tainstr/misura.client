@@ -49,8 +49,8 @@ class QuickOps(object):
         self.doc._load(node.path, node.linked.filename)
         
     @node
-    def load_rule(self, node, rule):
-        self.doc.load_rule(node.linked.filename, rule)
+    def load_rule(self, node, rule, overwrite=True):
+        self.doc.load_rule(node.linked.filename, rule, overwrite=overwrite)
         
     @node
     def load(self, node=False):
