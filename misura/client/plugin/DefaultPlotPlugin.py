@@ -31,7 +31,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plugins.FieldDatasetMulti("dsn", 'Dataset names', default = dsn),
             plugins.FieldText("rule", 'Plotting rule', default=rule),
             plugins.FieldTextMulti("graphs", 'Target graphs', default=graphs),
-            plugins.FieldText("title", 'Plot title', default=''),
+            plugins.FieldText("title", 'Plot title', default=title),
         ]
         
     def get_time_datasets(self, names, graph):
@@ -67,7 +67,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 x.append(ds_temperature)
                 y.append(ds)  
         return x, y      
-    
+        
     def create_graph(self, graph):
         """Create page and graph if missing"""
         try:
@@ -77,18 +77,21 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         except:
             pass
         print 'GRAPH MISSING', graph
-        page = graph.split('/')[1][:-2]
-        print 'MakeDefaultPlot', page
-        istime = graph.endswith('/time')
-        istemp = graph.endswith('/temp')
+        vgraph = graph.split('/')
+        page = vgraph[1][:-2]
+        has_grid = vgraph[-2] == 'grid'
+        print 'MakeDefaultPlot', page, has_grid, graph
+        istime = graph.endswith('/time') or graph.endswith('_time')
+        istemp = graph.endswith('/temp') or graph.endswith('_temp')
         self.ops.append(
             document.OperationToolsPlugin(MakeDefaultDoc(), 
                 {'title': self.fields.get('title', ''), 'page': page,
                  'time': istime , 
-                 'temp': istemp})
+                 'temp': istemp,
+                 'grid': has_grid})
             )
         self.apply_ops()
-        print 'Done create_graph', graph
+        logging.debug('Done create_graph', graph)
         return True
           
     def plot_on_graph(self, names, graph):

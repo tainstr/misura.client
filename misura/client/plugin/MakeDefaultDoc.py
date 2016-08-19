@@ -11,7 +11,7 @@ import utils
 
 class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
 
-    def __init__(self, page='', title='', time=True, temp=True):
+    def __init__(self, page='', title='', time=True, temp=True, grid=False):
         """Make list of fields."""
 
         self.fields = [
@@ -22,7 +22,9 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
             veusz.plugins.FieldBool(
                 "time", descr="Create time page", default=time),
            veusz.plugins.FieldBool(
-                "temp", descr="Create temperature page", default=temp)
+                "temp", descr="Create temperature page", default=temp),
+           veusz.plugins.FieldBool(
+                "grid", descr="Host graphs in a grid", default=grid)
         ]
 
     def adjust_graph(self, g, label):
@@ -36,34 +38,40 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         self.toset(g, 'topMargin', '1.5cm')
         if self.fields.get('title', False):
             props = {'xPos': 0.1, 'yPos': 0.96, 'label': self.fields['title']}
-            self.dict_toset(g.parent.getChild('title'), props)
-
-    def create_page_temperature(self, page):
+            self.dict_toset(g.getChild('title'), props)
+    
+    def create_page_and_grid(self, page):
         self.ops.append(
                             (document.OperationWidgetAdd(self.doc.basewidget, 'page', name=page)))
         self.apply_ops(descr='MakeDefaultPlot: Page '+page)
         wg = self.doc.basewidget.getChild(page)
-        self.ops.append(
-            (document.OperationWidgetAdd(wg, 'graph', name='temp')))
+        if self.fields.get('grid', False):
+            self.ops.append(document.OperationWidgetAdd(wg, 'grid', name='grid'))
+            self.apply_ops(descr='MakeDefaultPlot: Grid')
+            wg = wg.getChild('grid')
+        else:
+            print 'NO GRID' 
+        return wg   
+
+    def create_page_temperature(self, page):
+        wg = self.create_page_and_grid(page)
+        self.ops.append(document.OperationWidgetAdd(wg, 'graph', name='temp'))
         self.apply_ops(descr='MakeDefaultPlot: Graph Temperature')
         if self.fields.get('title', False):
             self.ops.append(
-                (document.OperationWidgetAdd(wg, 'label', name='title')))
+                (document.OperationWidgetAdd(wg.getChild('temp'), 'label', name='title')))
             self.apply_ops(descr='MakeDefaultPlot: Temperature Title')
         graph = wg.getChild('temp')
         self.adjust_graph(graph, u'Temperature (°C)')
 
     def create_page_time(self, page):
-        self.ops.append(
-            (document.OperationWidgetAdd(self.doc.basewidget, 'page', name=page)))
-        self.apply_ops(descr='MakeDefaultPlot: Page '+page)
-        wg = self.doc.basewidget.getChild(page)
+        wg = self.create_page_and_grid(page)
         self.ops.append(
             (document.OperationWidgetAdd(wg, 'graph', name='time')))
         self.apply_ops(descr='MakeDefaultPlot: Graph Time')
         if self.fields.get('title', False):
             self.ops.append(
-                (document.OperationWidgetAdd(wg, 'label', name='title')))
+                (document.OperationWidgetAdd(wg.getChild('time'), 'label', name='title')))
             self.apply_ops(descr='MakeDefaultPlot: Time Title')
         graph = wg.getChild('time')
         self.adjust_graph(graph, 'Time (s)')
