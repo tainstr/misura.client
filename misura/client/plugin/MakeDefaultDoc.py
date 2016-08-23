@@ -36,9 +36,7 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         self.dict_toset(g, props)
         self.toset(g.getChild('x'), 'label', label)
         self.toset(g, 'topMargin', '1.5cm')
-        if self.fields.get('title', False):
-            props = {'xPos': 0.1, 'yPos': 0.96, 'label': self.fields['title']}
-            self.dict_toset(g.getChild('title'), props)
+
     
     def create_page_and_grid(self, page):
         self.ops.append(
@@ -51,17 +49,27 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
             wg = wg.getChild('grid')
         else:
             print 'NO GRID' 
-        return wg   
+        return wg 
+    
+    def make_title(self, graph):
+        if not self.fields.get('title', False):
+            return False
+        page_wg = graph.parent.parent
+        if not page_wg.hasChild('grid'):
+            page_wg = graph.parent
+        self.ops.append(
+                (document.OperationWidgetAdd(page_wg, 'label', name='title')))
+        self.apply_ops(descr='MakeDefaultPlot: Title')
+        props = {'xPos': 0.1, 'yPos': 0.96, 'label': self.fields['title']}
+        self.dict_toset(page_wg.getChild('title'), props)
+        return True
 
     def create_page_temperature(self, page):
         wg = self.create_page_and_grid(page)
         self.ops.append(document.OperationWidgetAdd(wg, 'graph', name='temp'))
         self.apply_ops(descr='MakeDefaultPlot: Graph Temperature')
-        if self.fields.get('title', False):
-            self.ops.append(
-                (document.OperationWidgetAdd(wg.getChild('temp'), 'label', name='title')))
-            self.apply_ops(descr='MakeDefaultPlot: Temperature Title')
         graph = wg.getChild('temp')
+        self.make_title(graph)
         self.adjust_graph(graph, u'Temperature (°C)')
 
     def create_page_time(self, page):
@@ -69,11 +77,8 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         self.ops.append(
             (document.OperationWidgetAdd(wg, 'graph', name='time')))
         self.apply_ops(descr='MakeDefaultPlot: Graph Time')
-        if self.fields.get('title', False):
-            self.ops.append(
-                (document.OperationWidgetAdd(wg.getChild('time'), 'label', name='title')))
-            self.apply_ops(descr='MakeDefaultPlot: Time Title')
         graph = wg.getChild('time')
+        self.make_title(graph)
         self.adjust_graph(graph, 'Time (s)')
 
 
