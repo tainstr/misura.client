@@ -58,7 +58,7 @@ class InstrumentSelector(QtGui.QWidget):
 
             button = add_button(self,
                                 current_instrument_layout,
-                                os.path.join(params.pathArt, title + '.png'),
+                                os.path.join(params.pathArt, title + '.svg'),
                                 title,
                                 200,
                                 0,

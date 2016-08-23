@@ -1,64 +1,18 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   id="svg2"
-   version="1.1"
-   inkscape:version="0.91 r13725"
-   width="1697.5"
-   height="1697.5"
-   viewBox="0 0 1697.5 1697.5"
-   sodipodi:docname="horizontal.svg">
-  <metadata
-     id="metadata8">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <defs
-     id="defs6" />
-  <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1920"
-     inkscape:window-height="1002"
-     id="namedview4"
-     showgrid="false"
-     inkscape:zoom="0.27805596"
-     inkscape:cx="1162.4868"
-     inkscape:cy="772.66034"
-     inkscape:window-x="0"
-     inkscape:window-y="54"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg2" />
-  <text
-     xml:space="preserve"
-     style="font-style:normal;font-weight:normal;font-size:625px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     x="169.03072"
-     y="1068.1302"
-     id="text3406"
-     sodipodi:linespacing="125%"><tspan
-       sodipodi:role="line"
-       id="tspan3408"
-       x="169.03072"
-       y="1068.1302">HDil</tspan></text>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.4, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="28.552px" height="28.549px" viewBox="0 0 28.552 28.549" enable-background="new 0 0 28.552 28.549" xml:space="preserve">
+<rect x="1.901" y="1.9" fill="#FFFFFF" width="25.816" height="25.814"/>
+<g>
+	<path fill="#009BDE" d="M9.676,14.275c0,1.336-1.084,2.42-2.419,2.42c-1.336,0-2.418-1.084-2.418-2.42
+		c0-1.334,1.082-2.42,2.418-2.42C8.592,11.855,9.676,12.941,9.676,14.275"/>
+	<path fill="#009BDE" d="M23.714,14.275c0,1.336-1.083,2.42-2.418,2.42c-1.336,0-2.419-1.084-2.419-2.42
+		c0-1.334,1.083-2.42,2.419-2.42C22.631,11.855,23.714,12.941,23.714,14.275"/>
+</g>
+<path fill="#1E335C" d="M26.65,26.65H1.901V1.9H26.65V26.65z M27.717,0.834H0.835v26.881h26.882V0.834z"/>
+<g>
+	<path fill="none" stroke="#1E335C" stroke-width="1.67" stroke-miterlimit="10" d="M26.65,26.65H1.901V1.9H26.65V26.65z
+		 M27.717,0.834H0.835v26.881h26.882V0.834z"/>
+</g>
 </svg>

@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import os 
+import functools
+
 from misura.canon.logger import Log as logging
 from .. import network, conf, _
 from ..clientconf import confdb
@@ -10,7 +13,7 @@ from misura.client.helpmenu import HelpMenu
 from . import windows
 
 from PyQt4 import QtGui, QtCore
-import functools
+
 
 
 class MenuBar(QtGui.QMenuBar):
@@ -142,7 +145,8 @@ class MenuBar(QtGui.QMenuBar):
                 logging.debug('missing handler', name)
                 continue
             f = functools.partial(self.parent().setInstrument, obj, preset=name)
-            act = self.instruments.addAction('%s' % (title,), f)
+            icon = QtGui.QIcon(os.path.join(params.pathArt, 'small_' + title + '.svg'))
+            act = self.instruments.addAction(icon, title.capitalize(), f)
             self.func.append(f)
             self.lstInstruments.append((act, title))
 
@@ -150,7 +154,8 @@ class MenuBar(QtGui.QMenuBar):
             for preset in presets:
                 f = functools.partial(self.parent().setInstrument, preset=preset, remote=obj)
                 title = ' '.join(preset.split('_'))
-                act = self.instruments.addAction('%s' % (title,), f)
+                icon = QtGui.QIcon(os.path.join(params.pathArt, 'small_' + title + '.svg'))
+                act = self.instruments.addAction(icon, title.capitalize(), f)
                 self.func.append(f)
                 self.lstInstruments.append((act, title))
 

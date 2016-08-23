@@ -396,7 +396,7 @@ class Graphics(MainWindow):
 
         self.plot.doPick = lambda mouse_position: plugin.InterceptPlugin.clicked_curve(
             mouse_position, self)
-        self.setWindowIcon(veusz.utils.getIcon('m4.icon'))
+        self.setWindowIcon(QtGui.QIcon(os.path.join(params.pathArt, 'graphics.svg')))
 
     def setupDefaultDoc(self):
         """Make default temperature/time pages"""

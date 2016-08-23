@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.4, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="135.644px" height="135.643px" viewBox="0 0 135.644 135.643" enable-background="new 0 0 135.644 135.643"
+	 xml:space="preserve">
+<path fill="#FFFFFF" stroke="#000000" stroke-miterlimit="10" d="M132.802,132.486h-25.815v-25.813h25.815V132.486z"/>
+<g>
+	<defs>
+		<rect id="SVGID_1_" width="135.645" height="135.643"/>
+	</defs>
+	<clipPath id="SVGID_2_">
+		<use xlink:href="#SVGID_1_"  overflow="visible"/>
+	</clipPath>
+	<path clip-path="url(#SVGID_2_)" fill="#009BDE" d="M121.779,122.873c0,1.337-1.082,2.417-2.419,2.417
+		c-1.335,0-2.418-1.08-2.418-2.417c0-1.336,1.083-2.418,2.418-2.418C120.697,120.455,121.779,121.537,121.779,122.873"/>
+</g>
+<path fill="#1E335C" d="M131.736,131.421h-24.75v-24.748h24.75V131.421z M132.802,105.606h-26.881v26.88h26.881V105.606z"/>
+<g>
+	<defs>
+		<rect id="SVGID_3_" width="135.645" height="135.643"/>
+	</defs>
+	<clipPath id="SVGID_4_">
+		<use xlink:href="#SVGID_3_"  overflow="visible"/>
+	</clipPath>
+	<path clip-path="url(#SVGID_4_)" fill="none" stroke="#1E335C" stroke-width="1.67" stroke-miterlimit="10" d="M131.736,131.421
+		h-24.75v-24.748h24.75V131.421z M132.802,105.606h-26.881v26.88h26.881V105.606z"/>
+</g>
+<path fill="#1E335C" d="M4.781,4.782h126.081v126.08H4.781V4.782z M0,135.643h135.643V0H0V135.643z"/>
+<g>
+	<defs>
+		<rect id="SVGID_5_" width="135.645" height="135.643"/>
+	</defs>
+	<clipPath id="SVGID_6_">
+		<use xlink:href="#SVGID_5_"  overflow="visible"/>
+	</clipPath>
+	<path clip-path="url(#SVGID_6_)" fill="none" stroke="#004987" stroke-width="7.492" stroke-miterlimit="10" d="M21.505,44.637
+		c0,24.859,20.715,44.969,46.317,44.969 M67.822,89.605c25.602,0,46.319-20.109,46.319-44.969"/>
+	<path clip-path="url(#SVGID_6_)" fill="#009BDE" d="M76.972,89.605c0,4.453-3.608,8.061-8.061,8.061
+		c-4.452,0-8.063-3.607-8.063-8.061c0-4.452,3.611-8.062,8.063-8.062C73.363,81.544,76.972,85.153,76.972,89.605"/>
+</g>
+</svg>

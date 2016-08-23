@@ -111,8 +111,8 @@ class MainWindow(QtGui.QMainWindow):
                                      QtCore.Qt.WindowTitleHint |
                                      QtCore.Qt.WindowMinMaxButtonsHint)
 
-        self.setWindowIcon(
-            QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
+        #self.setWindowIcon(
+        #    QtGui.QIcon(os.path.join(parameters.pathArt, 'browser.svg')))
 
     def closeEvent(self, event):
         iutils.app.quit()
