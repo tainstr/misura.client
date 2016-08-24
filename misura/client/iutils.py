@@ -250,7 +250,7 @@ def get_plotted_tree(base, m=False):
         m = {'plot': OrderedDict(), 'dataset': OrderedDict(), 'axis': OrderedDict(), 'sample': []}
     for wg in base.children:
         # Recurse until I find an xy object
-        if wg.typename == 'page':
+        if wg.typename in ('page', 'grid'):
             m = get_plotted_tree(wg, m)
         elif wg.typename == 'graph':
             m = get_plotted_tree(wg, m)

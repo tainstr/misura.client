@@ -112,9 +112,12 @@ class QuickOps(object):
             logging.debug('%s %s', 'Quick.plot on currentwidget', page)
             xnames = self.xnames(node, page=page)
             assert len(xnames) > 0
+            args = {'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': self.cmd.currentwidget.path}
+            if not self.cmd.currentwidget.path.startswith(page):
+                logging.debug('FORCING currentwidget to', page, 'was', self.cmd.currentwidget.path)
+                args['currentwidget'] = page
             p = plugin.PlotDatasetPlugin()
-            p.apply(
-                self.cmd, {'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': page})
+            p.apply(self.cmd, args)
         self.doc.setModified()
 
     @node

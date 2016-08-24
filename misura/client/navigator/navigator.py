@@ -159,6 +159,11 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def hide_show(self, *a, **k):
         return self.model().hide_show(*a, **k)
+    
+    def get_page(self):
+        n = self.mainwindow.plot.getPageNumber()
+        page = self.doc.basewidget.getPage(n)
+        return page
 
     def update_view(self):
         if len(self.doc.suspendupdates)>0:
@@ -166,8 +171,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             return
         if not self.previous_selection:
             self.previous_selection = self.current_node_path
-        n = self.mainwindow.plot.getPageNumber()
-        page = self.doc.basewidget.getPage(n)
+        page = self.get_page()
         self.model().set_page(page.path)
         self.model().refresh(True)
         self.ensure_sync_of_view_and_model()
@@ -254,6 +258,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.emit(QtCore.SIGNAL('select(QString)'), plotpath[0])
 
     def double_clicked(self, index):
+        self.sync_currentwidget()
         node = self.model().data(index, role=Qt.UserRole)
         self.previous_selection = node.path
         for domain in self.domains:
@@ -341,8 +346,19 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         for domain in self.domains:
             domain.build_multiary_menu(self.multi_menu, selection)
         return self.multi_menu
+    
+    def sync_currentwidget(self):
+        selected = self.mainwindow.plot.lastwidgetsselected
+        logging.debug('SELECTED widgets', [el.path for el in selected])
+        if len(selected):
+            self.cmd.currentwidget = selected[0]
+        else:
+            self.cmd.currentwidget = self.get_page()
+        return self.cmd.currentwidget
 
     def showContextMenu(self, pt):
+        # Refresh currentwidget in cmd interface
+        self.sync_currentwidget()
         self.previous_selection = self.current_node_path
         sel = self.selectedIndexes()
         n = len(sel)
