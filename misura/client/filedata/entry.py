@@ -279,7 +279,7 @@ class NodeEntry(object):
             return False
         path = self.path.split(':')[-1]
         configuration_proxy = self.linked.conf
-        if '/' in path:
+        if '/' in path and len(path)>1:
             configuration_proxy = configuration_proxy.toPath(path)
         return configuration_proxy
 

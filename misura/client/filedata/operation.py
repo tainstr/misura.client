@@ -62,6 +62,7 @@ def get_linked(doc, params):
     LF = linked.LinkedMisuraFile(params)
     LF.prefix = prefix
     logging.debug('get_linked', prefix)
+    LF.conf =  False
     return LF
 
 
@@ -388,12 +389,15 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             self.proxy.reopen()
         if self.proxy.conf is False:
             self.proxy.load_conf()
-
         # Load required version
         if self.params.version is not None:
             self.proxy.set_version(self.params.version)
-        conf = self.proxy.conf  # ConfigurationProxy
-        LF.conf = conf
+        # Redefine LF.conf if empty
+        if not LF.conf:
+            conf = self.proxy.conf  # ConfigurationProxy
+            LF.conf = conf
+        else:
+            conf = LF.conf
         instr = conf['runningInstrument']
         LF.instrument = instr
         self.instrument = instr
