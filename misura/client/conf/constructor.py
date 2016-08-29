@@ -217,6 +217,10 @@ class Interface(QtGui.QTabWidget):
                 logging.debug('Interface.rebuild not needed: options are equal.')
                 return 
             prop_dict = self.remObj.describe()
+            # If a prop_dict was set, just pick currently defined options
+            if len(k) and len(prop_dict):
+                visible = set(prop_dict.keys()).intersection(k)
+                prop_dict = {key:prop_dict[key] for key in visible}
         if not prop_dict:
             logging.critical(
                 'Impossible to get object description %s', self.remObj._Method__name)
