@@ -300,6 +300,7 @@ class ViewerPicture(QtGui.QGraphicsView):
         self.roiAct = self.amenu.addAction('View Regions',
                                            functools.partial(self.over_by_name,
                                                              'roi'))
+        
         self.roiAct.setCheckable(True)
 
         roiResetAct = self.amenu.addAction('Reset Regions', self.reset_regions)

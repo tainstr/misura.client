@@ -6,6 +6,7 @@ from overlay import Overlay
 from hook import HookPoint, HookRect
 from PyQt4 import QtGui, QtCore
 
+from grid import Grid
 
 class BoxRegion(Overlay):
 
@@ -27,6 +28,8 @@ class BoxRegion(Overlay):
         self.box.hook = self.move
         self.box.setPen(self.pen)
         self.box.setZValue(self.Z)
+        
+        self.grid = Grid(self, self.Z)
 
         # ROI Corners
         self.ptul = HookPoint(
@@ -54,7 +57,7 @@ class BoxRegion(Overlay):
 
     def cleanUp(self, *foo):
         s = self.parentItem().scene()
-        lst = self.box, self.ptul, self.ptbr
+        lst = self.box, self.ptul, self.ptbr, self.grid
         for item in lst:
             s.removeItem(item)
             del item
@@ -83,7 +86,7 @@ class BoxRegion(Overlay):
         """Sets server-side option according to visible rectangle."""
         r = self.box.rect()
         r = [self.box.x() + r.x(), self.box.y() + r.y(), r.width(), r.height()]
-        logging.debug('%s %s', 'setting rect', r)
+        logging.debug('setting rect', r)
         self.remObj[self._opt] = r
         self.syncPoints()
         self.get()
@@ -99,6 +102,7 @@ class BoxRegion(Overlay):
         d = self.ptbr.width() / f
         d2 = d / 2  # pt radius
         self.ptbr.setPos(r.x() + r.width() - d2, r.y() + r.height() - d2)
+        self.grid.set_length()
 
     def up(self):
         """Read and redraw server values."""
@@ -134,6 +138,7 @@ class BoxRegion(Overlay):
         w = rbr.x() + self.ptbr.x() + d2
         h = rbr.y() + self.ptbr.y() + d2
         self.box.setRect(QtCore.QRectF(x, y, w - x, h - y))
+        self.grid.set_length()
 
     def move(self):
         """Moving the whole region"""
@@ -144,4 +149,5 @@ class BoxRegion(Overlay):
         d2 = d / 2
         self.ptul.setPos(x - d2, y - d2)
         self.ptbr.setPos(x + w - d2, y + h - d2)
-        logging.debug('%s %s %s %s %s', 'move:', x, y, w, h)
+        logging.debug('move:', x, y, w, h)
+        self.grid.set_length()
