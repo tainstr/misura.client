@@ -40,7 +40,27 @@ def steps_template_to_thermal_cycle_curve(values):
 
         curve.append([ramp_end_time, ramp_end_remperature])
         curve.append([ramp_end_time + step_duration, ramp_end_remperature])
+    return curve
 
+def append_point(curve, point):
+    t0, T0 = curve[-1]
+    T1, rate = point
+    dt = 60.*(T1-T0)/rate
+    curve.append([t0+dt, T1])
+    return curve
+
+def fast_to_thermal_cycle_curve(target, limits, maxHeatingRate):
+    curve = [[0.0, 0]]
+    last_rate = maxHeatingRate
+    for T, rate in limits:
+        if rate>maxHeatingRate:
+            rate = maxHeatingRate
+        if T<target:
+            append_point(curve, [T, rate])
+            last_rate = rate
+        else:
+            append_point(curve, [target, rate])
+            break
     return curve
 
 def last_point_time(curve):
@@ -104,10 +124,18 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.editMenu.addAction('Remove current row', self.table.delRow)
             self.templatesMenu = menuBar.addMenu(_('Templates'))
 
-            self.templatesMenu.addAction(veusz.utils.action.getIcon(
-                'm4.single-ramp'), _('Single Ramp'), self.single_ramp_template)
             self.templatesMenu.addAction(
-                veusz.utils.action.getIcon('m4.steps'), _('Steps'), self.steps_template)
+                    veusz.utils.action.getIcon('m4.single-ramp'), 
+                    _('Single Ramp'), 
+                    self.single_ramp_template)
+            self.templatesMenu.addAction(
+                    veusz.utils.action.getIcon('m4.steps'), 
+                    _('Steps'), 
+                    self.steps_template)
+            self.templatesMenu.addAction(
+                    veusz.utils.action.getIcon('m4.single-ramp'), 
+                    _('Maximize speed'), 
+                    self.fast_template)
             self.addButtons()
 
             self.progress = widgets.ActiveObject(self.remote.parent,
@@ -208,6 +236,25 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.model.setCurve(new_curve)
             self.replot()
             self.apply()
+            
+    def fast_template(self):
+        """Reach target temperature at the maximum allowed speed"""
+        options = {}
+        option.ao(
+            options, 'target', 'Float', name=_("Target temperature"),
+                  unit='celsius', current=1600, min=0, max=1600, step=10)
+        configuration_proxy = option.ConfigurationProxy(
+            {'self': options})    
+        dialog = conf.InterfaceDialog(
+            configuration_proxy, configuration_proxy, options, parent=self.parent)
+        dialog.setWindowTitle(_('Reach at maximum speed template'))
+        if dialog.exec_():
+            new_curve = fast_to_thermal_cycle_curve(configuration_proxy['target'], 
+                                                         self.remote['rateLimit'][1:], 
+                                                         self.remote['maxHeatingRate'])
+            self.model.setCurve(new_curve)
+            self.replot()
+            self.apply()             
 
     def enable(self, enabled):
         self.table.enable(enabled)
