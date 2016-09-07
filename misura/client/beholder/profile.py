@@ -23,9 +23,10 @@ class Profile(Overlay):
 
     """Draw a sequence of points corresponding to option type 'Profile'."""
 
-    def __init__(self, parentItem, is_hsm, Z=2):
+    def __init__(self, parentItem, is_hsm, Z=2, profile_name='profile'):
         Overlay.__init__(self, parentItem, Z=Z)
-        self.opt = set(['profile', 'roi', 'crop'])
+        self.opt = set([profile_name, 'roi', 'crop'])
+        self.profile_name = profile_name
         self.path = QtGui.QGraphicsPathItem(parent=self)
         self.path.setPen(self.pen)
         self.color.setAlpha(80)
@@ -42,9 +43,9 @@ class Profile(Overlay):
         """Update profile view"""
         if self.moving:
             return False
-        if not self.current.has_key('profile'):
+        if not self.current.has_key(self.profile_name):
             return
-        prf = self.current['profile']
+        prf = self.current[self.profile_name]
         if len(prf) < 3:
             logging.debug('%s %s', "No profile", prf)
             return False

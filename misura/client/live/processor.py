@@ -149,6 +149,8 @@ class SampleProcessor(QtCore.QThread):
 #                   logging.debug('%s %s %s', 'Live update failed: multiget returned', r, self.opt)
                 if r.has_key('profile'):
                     r['profile'] = loads(r['profile'].data)
+                if r.has_key('filteredProfile'):
+                    r['filteredProfile'] = loads(r['filteredProfile'].data)
 #               print 'SamplePreprocessor.emit',i,r.keys()
                 self.emit(QtCore.SIGNAL('updated(int,PyQt_PyObject)'), i, r)
             first = False

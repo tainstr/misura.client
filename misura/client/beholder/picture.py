@@ -336,9 +336,20 @@ class ViewerPicture(QtGui.QGraphicsView):
                                                                     'circle'))
             self.circleAct.setCheckable(True)
         else:
-            self.amenu.addAction(_('Border regression'),
+            self.referenceLineAct = self.amenu.addAction(_('Reference line'),
                                  functools.partial(self.over_by_name,
-                                                   'borderRegression'))
+                                                   'referenceLine'))
+            self.referenceLineAct.setCheckable(True)
+            
+            self.regressionLineAct = self.amenu.addAction(_('Regression line'),
+                                 functools.partial(self.over_by_name,
+                                                   'regressionLine'))
+            self.regressionLineAct.setCheckable(True)
+            
+            self.filteredProfileAct =self.amenu.addAction(_('Filtered profile'),
+                                 functools.partial(self.over_by_name,
+                                                   'filteredProfile'))
+            self.filteredProfileAct.setCheckable(True)
 
         # Border entries
         # TODO: Border overlays

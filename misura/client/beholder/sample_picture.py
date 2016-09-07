@@ -8,6 +8,7 @@ import functools
 import region
 import profile
 import shape
+import border
 from overlay import Overlay
 
 
@@ -114,21 +115,33 @@ class SamplePicture(QtGui.QGraphicsItem):
         # BoxRegion must have same parent as self (sensorplane)
         self.roi = region.BoxRegion(parentItem, self.smp, Z=n)
         self.overlays.append(self.roi)
-
-        self.profile = profile.Profile(parentItem, is_hsm_sample(smp))
+        
+        is_hsm = is_hsm_sample(smp)
+        self.profile = profile.Profile(parentItem, is_hsm)
         self.overlays.append(self.profile)
-
+        
+        self.label = self.pixItem.label
+        self.overlays.append(self.label)
         # TODO: distinguish instrument overlays based on mro!
 
         # Shape-specific
-        self.points = shape.SamplePoints(parentItem)
-        self.overlays.append(self.points)
-        self.baseHeight = shape.BaseHeight(parentItem)
-        self.overlays.append(self.baseHeight)
-        self.circle = shape.CircleFit(parentItem)
-        self.overlays.append(self.circle)
-        self.label = self.pixItem.label
-        self.overlays.append(self.label)
+        if is_hsm:
+            self.points = shape.SamplePoints(parentItem)
+            self.overlays.append(self.points)
+            self.baseHeight = shape.BaseHeight(parentItem)
+            self.overlays.append(self.baseHeight)
+            self.circle = shape.CircleFit(parentItem)
+            self.overlays.append(self.circle)
+        else:
+            self.referenceLine = border.ReferenceLine(parentItem, startLine=True)
+            self.overlays.append(self.referenceLine)
+            
+            self.regressionLine = border.ReferenceLine(parentItem, startLine=False)
+            self.overlays.append(self.regressionLine)
+            
+            self.filteredProfile = profile.Profile(parentItem, False, profile_name='filteredProfile')
+            self.overlays.append(self.filteredProfile)
+
 
         self.show()
 

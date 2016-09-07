@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Graphical overlay for image analysis"""
+"""Graphical overlay for sample shape image analysis"""
 from misura.canon.logger import Log as logging
 from overlay import Overlay
 from PyQt4 import QtGui

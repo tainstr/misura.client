@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """Display grid behind region of interest"""
 from misura.canon.logger import Log as logging
-from overlay import Overlay
-from hook import HookPoint, HookRect
 from PyQt4 import QtGui, QtCore
 
 
