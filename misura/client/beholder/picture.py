@@ -297,13 +297,15 @@ class ViewerPicture(QtGui.QGraphicsView):
                                        _('Morphometrics'))
 
         # General view entries
-        self.roiAct = self.amenu.addAction('View Regions',
+        self.roiAct = self.amenu.addAction(_('View Regions'),
                                            functools.partial(self.over_by_name,
                                                              'roi'))
-        
         self.roiAct.setCheckable(True)
+        
+        self.gridAct = self.amenu.addAction(_('Display Grids'), self.display_grids)        
+        self.gridAct.setCheckable(True)
 
-        roiResetAct = self.amenu.addAction('Reset Regions', self.reset_regions)
+        roiResetAct = self.amenu.addAction(_('Reset Regions'), self.reset_regions)
         roiResetAct.setCheckable(False)
 
         self.profileAct = self.amenu.addAction(_('Profile'),
@@ -529,7 +531,13 @@ class ViewerPicture(QtGui.QGraphicsView):
         if self._oldproc is None and not self._unzoomed:
             self.unzoom()
             self._unzoomed = True
-
+            
+    def display_grids(self, *foo):
+        for smp_pix in self.samples:
+            if self.gridAct.isChecked():
+                smp_pix.roi.grid.set_enabled(True)
+            else:
+                smp_pix.roi.grid.set_enabled(False)
 
     def reconnectSample(self):
         """Remove and regenerate all samples."""
@@ -567,6 +575,7 @@ class ViewerPicture(QtGui.QGraphicsView):
             # Show the roi only if option is checked
             if self.roiAct.isChecked():
                 smp_pix.roi.show()
+                smp_pix.roi.grid.set_enabled(self.gridAct.isChecked())
             self.samples.append(smp_pix)
             # Menu structure for samples
             m = self.menus.get(name, False)

@@ -8,23 +8,34 @@ from PyQt4 import QtGui, QtCore
 
 
 class Grid(object):
-
-    """Region of Interest visualization"""
+    """Display a grid behind a region of interest."""
     length = 100
     vertical = []
     horizontal = []
-    def __init__(self, region, Z=1, length = 50):
+    enabled = False
+    def __init__(self, region, Z=1, length = 100):
         self.region = region
         self.Z = Z
-        self.set_length(length)
+        self.length = length
+        
+    def set_enabled(self, val):
+        self.enabled = val
+        if val:
+            self.set_length()
+        else:
+            self.cleanUp()
+        
         
     def cleanUp(self):
         for item in self.horizontal+self.vertical:
             self.region.scene().removeItem(item)
         self.horizontal = []
-        self.vertical = []       
+        self.vertical = []
+        
     
     def set_length(self, val=-1):
+        if not self.enabled:
+            return
         if val<0:
             val = self.length
         else:
