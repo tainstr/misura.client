@@ -27,8 +27,12 @@ class Status(QtGui.QWidget):
                 server, server.kiln, server.kiln.gete('motorStatus'))
             wg.force_update = True
             self.insert_widget(wg)
-        for opt in 'T', 'S', 'P', 'Ts', 'Tk':
-            wg = widgets.build(server, server.kiln, server.kiln.gete(opt))
+        for opt in 'T', 'S', 'P', 'Ts', 'Tk', 'Th', 'Te':
+            # Skip empty IO pointers
+            opt_dict = server.kiln.gete(opt)
+            if opt_dict.has_key('options') and opt_dict['options'][0]=='None':
+                continue
+            wg = widgets.build(server, server.kiln, opt_dict)
             if wg.type.endswith('IO'):
                 wg.value.force_update = True
             else:

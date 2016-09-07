@@ -67,10 +67,11 @@ for ddir in ['art','i18n','ui']:
 		installed_path=os.path.join(ddir,fname)
 		binaries.append( (installed_path,source_path,'DATA') )
 
-Analyses.append( (a,'misura4', os.path.join('build','graphics.exe')) )
+Analyses.append( (a,'misura4', os.path.join('build','graphics.exe')), 'graphics.ico')
 
 # MISURA 4 ANALYSIS
 AppNames=['acquisition.py','browser.py' ,'conf.py']
+Icons = ['misura.ico', 'browser.ico', 'favicon.ico']
 BaseNames=['acquisition','browser','configuration']
 ExeNames=['acquisition.exe','browser.exe','conf.exe']
 
@@ -81,12 +82,14 @@ for i,name in enumerate(AppNames):
 				 excludes=exim,
 				 hiddenimports=him,
 				 runtime_hooks=rthooks)
-	Analyses.append((a,BaseNames[i],os.path.join('build',ExeNames[i])))
+	Analyses.append(
+		(a,BaseNames[i],os.path.join('build',ExeNames[i]), Icons[i])
+		)
 
 print 'Merging analyses',Analyses
 MERGE(*Analyses)
 
-for an, basename, exename in Analyses:
+for an, basename, exename, icon in Analyses:
 	print 'Building PYZ',basename,exename
 	pyz = PYZ(an.pure)
 	print 'Creating EXE',basename,exename
@@ -98,7 +101,7 @@ for an, basename, exename in Analyses:
 	          strip=None,
 	          upx=False,
 	          console=console,
-	          icon=cli+'art\\favicon.ico')
+	          icon=cli+'art\\' + icon)
 	print 'Collecting',basename,exename
 	coll = COLLECT( exe,
 	               an.binaries,
