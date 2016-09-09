@@ -74,6 +74,7 @@ class ViewerPicture(QtGui.QGraphicsView):
         self.setFrameProcessor(frameProcessor)
         self.setSampleProcessor(sampleProcessor)
         self.reconnectSample()
+        
         # Monitor number of samples
         self.nsmp_obj = widgets.ActiveObject(
             self.server, self.remote, self.remote.gete('nSamples'), parent=self)
@@ -318,12 +319,12 @@ class ViewerPicture(QtGui.QGraphicsView):
                                                                'label'))
         self.labelAct.setCheckable(True)
 
-        self.pointsAct = self.amenu.addAction(_('Points'),
+        # Shape entries
+        is_hsm = '/hsm/' in self.remote['smp0'][0]
+        if is_hsm:
+            self.pointsAct = self.amenu.addAction(_('Points'),
                                               functools.partial(self.over_by_name,
                                                                 'points'))
-
-        # Shape entries
-        if is_hsm_sample(self.remote):
             self.pointsAct.setCheckable(True)
 
             self.baseHeightAct = self.amenu.addAction(_('Base and Height'),

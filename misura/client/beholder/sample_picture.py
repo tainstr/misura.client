@@ -13,7 +13,9 @@ from overlay import Overlay
 
 
 def is_hsm_sample(sample):
-    return 'hsm' in sample['fullpath']
+    r='/hsm/' in sample['fullpath']
+    print 'AAAAAAAAAAAAAAAAAAAAAAA is_hsm_sample',sample['fullpath'],r
+    return r
 
 class MetaItem(QtGui.QGraphicsSimpleTextItem):
 
@@ -116,8 +118,8 @@ class SamplePicture(QtGui.QGraphicsItem):
         self.roi = region.BoxRegion(parentItem, self.smp, Z=n)
         self.overlays.append(self.roi)
         
-        is_hsm = is_hsm_sample(smp)
-        self.profile = profile.Profile(parentItem, is_hsm)
+        self.is_hsm = is_hsm_sample(smp)
+        self.profile = profile.Profile(parentItem, self.is_hsm)
         self.overlays.append(self.profile)
         
         self.label = self.pixItem.label
@@ -125,7 +127,7 @@ class SamplePicture(QtGui.QGraphicsItem):
         # TODO: distinguish instrument overlays based on mro!
 
         # Shape-specific
-        if is_hsm:
+        if self.is_hsm:
             self.points = shape.SamplePoints(parentItem)
             self.overlays.append(self.points)
             self.baseHeight = shape.BaseHeight(parentItem)
