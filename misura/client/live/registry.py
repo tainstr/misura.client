@@ -235,8 +235,7 @@ class KidRegistry(QtCore.QThread):
             self.log_buf = self.log_buf[len(buf):]
         self.emit(QtCore.SIGNAL('log()'))
         for entry in buf:
-            if entry[1] > 40:
-                self.emit(QtCore.SIGNAL('logCritical(QString)'), entry[-1])
+            self.emit(QtCore.SIGNAL('logMessage(int, QString)'), entry[1], entry[-1])
         return True
 
     def setInterval(self, ms):

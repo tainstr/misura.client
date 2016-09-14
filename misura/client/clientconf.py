@@ -52,6 +52,8 @@ ao(default_desc, 'logdir', **{'name': 'Log files directory',
                               'type': 'FilePath'})
 ao(default_desc, 'loglevel', **{'name': 'Logging Level', 'current': 30,
                                 'max': 50, 'min': -1, 'step': 10, 'type': 'Integer', 'parent': 'logdir'})
+ao(default_desc, 'lognotify', **{'name': 'Popup notification level', 'current': 40,
+                                'max': 50, 'min': -1, 'step': 10, 'type': 'Integer', 'parent': 'logdir'})
 ao(default_desc, 'logsize', **{'name': 'Size of each log file', 'current':
                                2048, 'min': 0, 'unit': 'kilobyte', 'type': 'Integer', 'parent': 'logdir'})
 ao(default_desc, 'lognumber', **{'name': 'Max number of logfiles to be kept',

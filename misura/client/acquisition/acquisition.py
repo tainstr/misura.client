@@ -130,9 +130,12 @@ class MainWindow(QtGui.QMainWindow):
             self.set_addr(confdb['recent_server'][-1][0])
         self.showMaximized()
 
-    def notify(self,msg):
+    def notify(self, level, msg):
+        if level<confdb['lognotify']:
+            return False
         self.tray_icon.show()
-        self.tray_icon.showMessage('Misura Server', msg, msecs=2000)
+        self.tray_icon.showMessage('Misura Server', msg, msecs=level*50)
+        return True
 
     def focus_logging(self):
         self.logDock.show()
@@ -198,7 +201,7 @@ class MainWindow(QtGui.QMainWindow):
 
         registry.taskswg.show_signal.connect(self.pending_task_shown)
         registry.taskswg.hide_signal.connect(self.pending_task_hidden)
-        self.connect(registry, QtCore.SIGNAL('logCritical(QString)'), self.notify)
+        self.connect(registry, QtCore.SIGNAL('logMessage(int, QString)'), self.notify)
 
     def pending_task_shown(self):
         self.tasks_dock.show()
