@@ -10,7 +10,8 @@ import sys
 from misura.canon.logger import Log as logging
 from time import sleep
 import signal
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
+from pickle import loads, dumps
 
 import parameters as params
 import network
@@ -18,6 +19,8 @@ from live import registry  # needed for initialization
 from clientconf import confdb, settings, activate_plugins
 signal.signal(signal.SIGINT, signal.SIG_DFL)  # cattura i segnali
 import veusz.utils
+from veusz import document
+
 
 app = None
 translators = []
@@ -239,6 +242,30 @@ def getOpts():
         r[opt] = val
     return r
 
+def get_custom(doc, name):
+    for ctype, cname, val in doc.customs:
+        if cname==name:
+            return val
+    return False
+
+def calc_plot_hierarchy(plots, exclude=':kiln/'):
+    hierarchy = defaultdict(list)
+    
+    for plot, datasets in plots.iteritems():
+        lengths = defaultdict(list)
+        for dsn in datasets:
+            if exclude in dsn:
+                continue
+            lengths[dsn.count('/')].append(dsn)
+        if not lengths:
+            continue
+        L = min(lengths.keys())
+        # The number of topmost datasets makes sligthly decrease hierarchy level 
+        L = L*10000 - len(lengths[L])
+        hierarchy[L].append(plot)
+        
+    hierarchy = sorted(hierarchy.items(), cmp=lambda a,b: a[0]-b[0])
+    return [h[1] for h in hierarchy]
 
 def get_plotted_tree(base, m=False):
     """Builds a dictionary for the base graph:
@@ -247,7 +274,10 @@ def get_plotted_tree(base, m=False):
                       'axis':{axispath:[ds0,ds1,...]},
                       'sample':[smp0,smp1,...]}"""
     if m is False:
-        m = {'plot': OrderedDict(), 'dataset': OrderedDict(), 'axis': OrderedDict(), 'sample': []}
+        m = {'plot': OrderedDict(), 
+             'dataset': OrderedDict(), 
+             'axis': OrderedDict(), 
+             'sample': []}
     for wg in base.children:
         # Recurse until I find an xy object
         if wg.typename in ('page', 'grid'):
@@ -255,11 +285,9 @@ def get_plotted_tree(base, m=False):
         elif wg.typename == 'graph':
             m = get_plotted_tree(wg, m)
         elif wg.typename == 'xy':
-            # 			print 'get_plotted_tree found xy',wg.path
             dsn = wg.settings.yData
             ds = wg.document.data.get(dsn, False)
             if ds is False:
-                # 				print 'get_plotted_tree: dataset not found!',ds
                 continue
             if not m['plot'].has_key(wg.path):
                 m['plot'][wg.path] = []
@@ -268,16 +296,13 @@ def get_plotted_tree(base, m=False):
                 m['dataset'][dsn] = []
             m['dataset'][dsn].append(wg.path)
             if not '/sample' in dsn:
-                # 				print 'get_plotted_tree: skipping sample',dsn
                 continue
             smp = getattr(ds, 'm_smp', False)
             if not smp:
-                # 				print 'get_plotted_tree: sample not assigned',dsn
                 continue
             if smp.ref:
-                # 				print 'get_plotted_tree: sample is reference',smp.ref,smp
                 continue
-            m['sample'].append(smp)
+            m['sample'].append(smp['fullpath'])
             # Save the dataset under its axis key
             axpath = wg.parent.path + '/' + wg.settings.yAxis
             if not m['axis'].has_key(axpath):
@@ -291,7 +316,7 @@ def get_plotted_tree(base, m=False):
                 m['axis'][wg.path] = []
     # Persistent sorting
     for k0 in m.keys():
-        if k0=='sample':
+        if k0 in ('sample', 'changeset'):
             continue
         for k1 in m[k0].keys():
             m[k0][k1] = sorted(m[k0][k1])
