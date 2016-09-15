@@ -14,7 +14,6 @@ from overlay import Overlay
 
 def is_hsm_sample(sample):
     r='/hsm/' in sample['fullpath']
-    print 'AAAAAAAAAAAAAAAAAAAAAAA is_hsm_sample',sample['fullpath'],r
     return r
 
 class MetaItem(QtGui.QGraphicsSimpleTextItem):

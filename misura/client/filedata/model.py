@@ -1,6 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Rich, hierarchical representation of opened tests and their datasets"""
+import threading
+import os
+import functools
+
 from misura.canon.logger import Log as logging
 import sip
 sip.setapi('QString', 2)
@@ -12,15 +16,14 @@ from entry import DatasetEntry
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
-import functools
+
 from misura.canon.option import namingConvention
 from misura.canon.csutil import find_nearest_val
 from entry import iterpath, NodeEntry, dstats
 
 from misura.client.iutils import get_plotted_tree
 from misura.canon.csutil import lockme
-import threading
-import os
+
 from .. import parameters
 
 def ism(obj, cls):
@@ -38,6 +41,9 @@ def resolve_plugin(doc, ds, ent, name=False):
         ent[entry.mid] = entry
         return ent, entry
     return ent, False
+
+
+
 
 from veusz.setting import controls
 void = None

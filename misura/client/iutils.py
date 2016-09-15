@@ -1,17 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Standard interface construction utilities"""
+import os
+import sys
+import collections
+from collections import OrderedDict, defaultdict
+from time import sleep
+import signal
+from pickle import loads, dumps
+
 import veusz.dialogs.exceptiondialog
 veusz.dialogs.exceptiondialog._emailUrl = None
 
 from PyQt4 import QtGui, QtCore
-import os
-import sys
+
 from misura.canon.logger import Log as logging
-from time import sleep
-import signal
-from collections import OrderedDict, defaultdict
-from pickle import loads, dumps
 
 import parameters as params
 import network
@@ -248,23 +251,79 @@ def get_custom(doc, name):
             return val
     return False
 
-def calc_plot_hierarchy(plots, exclude=':kiln/'):
+def iter_widgets(base, typename, direction = 0):
+    """Yields all widgets of type `typename` starting from `base` widget.
+    The search can be restricted to upward (`direction`=-1), downward (`direction`=1) or both (`direction`=0)."""
+    if isinstance(typename, str):
+        typename = [typename]
+    if base.typename in typename:
+        yield base
+    # Search down in the object tree
+    if direction >= 0:
+        for obj in base.children:
+            if obj.typename in typename:
+                yield obj
+
+        for obj in base.children:
+            found = searchFirstOccurrence(obj, typename, direction=1)
+            if found is not None:
+                yield found
+        # Continue upwards
+        if direction == 0:
+            direction = -1
+    # Search up in the object tree
+    # Note: exclude siblings - just look for parents
+    if direction < 0:
+        found = searchFirstOccurrence(base.parent, typename, direction=-1)
+        if found is not None:
+            yield found
+    # Nothing found
+    yield None
+
+def searchFirstOccurrence(base, typename, direction=0):
+    """Search for the nearest occurrence of a widget of type `typename` starting from `base`.
+    The search can be restricted to upward (`direction`=-1), downward (`direction`=1) or both (`direction`=0)."""
+    for wg in iter_widgets(base, typename, direction):
+        if wg:
+            return wg
+
+def most_involved_node(involved_plots, doc):
+    # Collect all involved datasets
+    involved = []
+    for inp in involved_plots:
+        involved += doc.model.plots['plot'].get(inp, [])
+    # Find the common ancestor
+    involved = [inv.split('/') for inv in involved]
+    lengths = [len(inv) for inv in involved]
+    max_len = max(lengths)
+    best_count = 0
+    crumbs = []
+    for i in range(min(lengths)):
+        # Exclude the last element
+        if len(crumbs) >= max_len - 1:
+            break
+        level = [inv[i] for inv in involved]
+        data = collections.Counter(level)
+        best = data.most_common(1)[0][0]
+        count = level.count(best)
+        # Stop if the count decreases
+        if count < best_count:
+            break
+        best_count = count
+        crumbs.append(best)
+    return crumbs
+
+
+def calc_plot_hierarchy(doc, exclude=':kiln/'):
+    pages = doc.model.plots['page']
+    
     hierarchy = defaultdict(list)
     
-    for plot, datasets in plots.iteritems():
-        lengths = defaultdict(list)
-        for dsn in datasets:
-            if exclude in dsn:
-                continue
-            lengths[dsn.count('/')].append(dsn)
-        if not lengths:
-            continue
-        L = min(lengths.keys())
-        # The number of topmost datasets makes sligthly decrease hierarchy level 
-        L = L*10000 - len(lengths[L])
-        hierarchy[L].append(plot)
+    for page, page_plots in pages.iteritems():
+        crumbs = most_involved_node(page_plots, doc)
+        hierarchy[len(crumbs)].append((page, page_plots, crumbs))
         
-    hierarchy = sorted(hierarchy.items(), cmp=lambda a,b: a[0]-b[0])
+    hierarchy = sorted(hierarchy.iteritems(), cmp=lambda a,b: a[0]-b[0])
     return [h[1] for h in hierarchy]
 
 def get_plotted_tree(base, m=False):
@@ -272,12 +331,14 @@ def get_plotted_tree(base, m=False):
             m => {'plot': {plotpath: dsname,...},
                       'dataset': {dsname: plotpath,...},
                       'axis':{axispath:[ds0,ds1,...]},
-                      'sample':[smp0,smp1,...]}"""
+                      'sample':[smp0,smp1,...]. 
+                      'page': [plot names...}"""
     if m is False:
         m = {'plot': OrderedDict(), 
              'dataset': OrderedDict(), 
              'axis': OrderedDict(), 
-             'sample': []}
+             'sample': [],
+             'page': defaultdict(list)}
     for wg in base.children:
         # Recurse until I find an xy object
         if wg.typename in ('page', 'grid'):
@@ -295,6 +356,12 @@ def get_plotted_tree(base, m=False):
             if not m['dataset'].has_key(dsn):
                 m['dataset'][dsn] = []
             m['dataset'][dsn].append(wg.path)
+            
+            # Fill page: plots map
+            page = searchFirstOccurrence(wg, 'page', -1)
+            m['page'][page.name].append(wg.path)
+            
+            # Fill sample map
             if not '/sample' in dsn:
                 continue
             smp = getattr(ds, 'm_smp', False)
@@ -303,11 +370,14 @@ def get_plotted_tree(base, m=False):
             if smp.ref:
                 continue
             m['sample'].append(smp['fullpath'])
+            
             # Save the dataset under its axis key
             axpath = wg.parent.path + '/' + wg.settings.yAxis
             if not m['axis'].has_key(axpath):
                 m['axis'][axpath] = []
             m['axis'][axpath].append(dsn)
+            
+            
         elif wg.typename in ('axis', 'axis-function'):
             # 			print 'get_plotted_tree found axis',wg.path
             if wg.settings.direction != 'vertical':
