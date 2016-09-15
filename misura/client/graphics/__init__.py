@@ -9,3 +9,4 @@ for name in API_NAMES:
 from graphics import Misura3Interface, MisuraInterface, Graphics, GraphicsApp
 from plot import Plot
 from veuszplot import VeuszPlot
+from breadcrumb import Breadcrumb
