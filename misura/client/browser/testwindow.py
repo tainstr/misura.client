@@ -8,7 +8,7 @@ from .. import fileui
 from .. import acquisition
 from ..live import registry
 from misura.canon.csutil import profile
-
+from ..graphics import Breadcrumb
 
 class TestWindow(acquisition.MainWindow):
 
@@ -38,6 +38,7 @@ class TestWindow(acquisition.MainWindow):
         registry.taskswg.removeStorageAndRemoteTabs()
 
     vtoolbar = False
+    breadcrumb = False
 # 	@profile
     def load_version(self, v=-1):
         logging.debug('%s %s', "SETTING VERSION", v)
@@ -69,6 +70,15 @@ class TestWindow(acquisition.MainWindow):
         self.vtoolbar.addAction(' Undo ',self.doc.undoOperation)
         self.vtoolbar.show()
         self.graphWin.show()
+        if self.breadcrumb:
+            self.breadcrumb.hide()
+        self.breadbar = QtGui.QToolBar(_('Breadcrumb'), self)
+        self.breadcrumb = Breadcrumb(self.breadbar)
+        self.breadcrumb.set_plot(self.summaryPlot)
+        self.breadbar.addWidget(self.breadcrumb)
+        self.addToolBar(QtCore.Qt.TopToolBarArea, self.breadbar)
+        self.breadbar.show()
+        
         
 
     def closeEvent(self, ev):
