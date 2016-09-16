@@ -367,13 +367,14 @@ class VeuszPlot(QtGui.QWidget):
         w = 1. * w / self.plot.dpi[0] - .2
         h = 1. * h / self.plot.dpi[1] - .2
         self.cmd.To('/')
-        self.cmd.Set('/width', str(w) + 'in')
-        self.cmd.Set('/height', str(h) + 'in')
+        
 
         logging.debug('%s %s %s', 'fitSize', w, h)
         # If the plot dimension is not sufficient, hide the axes.
         page = self.document.basewidget.getPage(self.plot.getPageNumber())
         g = page.path
+        self.cmd.Set(page.path+'/width', str(w) + 'in')
+        self.cmd.Set(page.path+'/height', str(h) + 'in')
         if g == '/time' or g.endswith('_t'):
             g += '/time'
         elif g == '/temperature' or g.endswith('_T'):
