@@ -287,7 +287,7 @@ def searchFirstOccurrence(base, typename, direction=0):
         if wg:
             return wg
 
-def most_involved_node(involved_plots, doc):
+def most_involved_node(involved_plots, doc, exclude=':kiln'):
     # Collect all involved datasets
     involved = []
     for inp in involved_plots:
@@ -303,6 +303,7 @@ def most_involved_node(involved_plots, doc):
         if len(crumbs) >= max_len - 1:
             break
         level = [inv[i] for inv in involved]
+        level = filter(lambda el: exclude not in el, level)
         data = collections.Counter(level)
         best = data.most_common(1)[0][0]
         count = level.count(best)

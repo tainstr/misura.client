@@ -1,10 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Breadcrumb plot pages navigator."""
-import collections
 from functools import partial
 
-from misura.client.iutils import calc_plot_hierarchy, most_involved_node
+from misura.client.iutils import calc_plot_hierarchy
 
 from PyQt4 import QtGui, QtCore
 
@@ -55,7 +54,6 @@ class Breadcrumb(QtGui.QWidget):
 
         self.doc = False
         self.page = False
-
         self.setLayout(self.lay)
 
     def set_plot(self, plot):
@@ -64,10 +62,6 @@ class Breadcrumb(QtGui.QWidget):
         # Connect plot sigPageChanged to set_page
         self.update()
         self.doc.signalModified.connect(self.update)
-
-    def set_page(self, page):
-        self.page = page
-        self.update()
 
     def clear(self):
         while True:
@@ -80,9 +74,12 @@ class Breadcrumb(QtGui.QWidget):
             self.lay.removeWidget(w)
 
     def update(self):
-        self.clear()
         p = self.plot.plot.getPageNumber()
         page = self.doc.basewidget.children[p]
+        if page == self.page:
+            return False
+        self.clear()
+        self.page = page
         hierarchy = calc_plot_hierarchy(self.doc)
         inpage = False
         for level, pages in enumerate(hierarchy):
@@ -98,18 +95,26 @@ class Breadcrumb(QtGui.QWidget):
         self.crumbs = []
         # Create crumb widgets
         name = ''
+        correct = len(crumbs) - len(hierarchy) 
+        if correct < 0:
+            correct = 0
         for i, label in enumerate(crumbs):
             name += '/' + label
+            i -= correct
+            if i < 0:
+                i = 0
             self.add_crumb(name, hierarchy[i])
 
         if level >= len(hierarchy) - 1:
-            return
+            return True
 
         next = []
         for h in hierarchy[level + 1:]:
             next += h
         if next:
             self.add_crumb('>>', next)
+            
+        return True
 
     def add_crumb(self, name, hierarchy_level):
         crumb = Crumb(name, self.doc, hierarchy_level)

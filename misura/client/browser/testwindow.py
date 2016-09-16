@@ -8,7 +8,7 @@ from .. import fileui
 from .. import acquisition
 from ..live import registry
 from misura.canon.csutil import profile
-from ..graphics import Breadcrumb
+from ..graphics import Breadcrumb, Storyboard
 
 class TestWindow(acquisition.MainWindow):
 
@@ -78,6 +78,15 @@ class TestWindow(acquisition.MainWindow):
         self.breadbar.addWidget(self.breadcrumb)
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.breadbar)
         self.breadbar.show()
+        
+        self.plotboardDock = QtGui.QDockWidget(self.centralWidget())
+        self.plotboardDock.setWindowTitle('Plots Board')
+        self.plotboard = Storyboard(self)
+        self.plotboard.set_plot(self.summaryPlot)
+        self.plotboardDock.setWidget(self.plotboard)
+        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.plotboardDock)
+        if self.name not in ['flash']:
+            self.plotboardDock.hide()
         
         
 
