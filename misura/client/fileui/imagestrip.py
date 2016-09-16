@@ -5,6 +5,7 @@ from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 from minimage import MiniImage
 from misura.client.fileui import htmlreport
+from misura.client import _
 
 standards = ('Misura4', 'Misura3', 'CEN/TS')
 
@@ -60,18 +61,20 @@ class ImageStrip(QtGui.QWidget):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
-        self.menu.addAction('Change length', self.chLen)
-        self.menu.addAction('Change rows', self.chRows)
-        self.actIndex = self.menu.addAction('Step by index', self.by_index)
+        self.menu.addAction(_('Change length'), self.chLen)
+        self.menu.addAction(_('Change rows'), self.chRows)
+        self.actIndex = self.menu.addAction(_('Step by index'), self.by_index)
         self.actIndex.setCheckable(True)
-        self.actTime = self.menu.addAction('Step by time', self.by_time)
+        self.actTime = self.menu.addAction(_('Step by time'), self.by_time)
         self.actTime.setCheckable(True)
-        self.menu.addAction("Export Images", self.export_images)
+        self.menu.addAction(_("Export Images"), self.export_images)
+        self.menu.addAction(_("Render video"), self.render_video)
 
     def export_images(self):
+        #TODO: use time/index stepping
         standard, ok = QtGui.QInputDialog.getItem(self,
-                                                  'Choose standard to show',
-                                                  'Standard',
+                                                  _('Choose standard to show'),
+                                                  _('Standard'),
                                                   standards)
         if not ok:
             return
@@ -103,6 +106,14 @@ class ImageStrip(QtGui.QWidget):
 
         with open(output_filename, 'w') as output_file:
             output_file.write(output_html)
+            
+    def render_video(self):
+        #TODO: use time/index stepping
+        from misura.client import video
+        #pt = '/' + \
+        #    node.path.replace(node.linked.prefix, '').replace('summary', '')
+        v = video.VideoExporter(self.decoder.proxy, self.decoder.datapath)
+        v.exec_()
 
 
 
@@ -231,12 +242,16 @@ class Slider(QtGui.QWidget):
         self.slider.setOrientation(QtCore.Qt.Horizontal)
 
         self.cbPath = QtGui.QComboBox(self)
-
+        
+        self.menuButton = QtGui.QPushButton('...', parent=self)
+        self.menuButton.setMaximumWidth(50)
+        
         self.lay = QtGui.QHBoxLayout()
         self.lay.setContentsMargins(0, 0, 0, 0)
         self.lay.setSpacing(0)
         self.lay.addWidget(self.slider)
         self.lay.addWidget(self.cbPath)
+        self.lay.addWidget(self.menuButton)
         self.setLayout(self.lay)
         self.connect(
             self.cbPath, QtCore.SIGNAL('currentIndexChanged(int)'), self.choice)
@@ -340,6 +355,7 @@ class ImageSlider(QtGui.QWidget):
         self.slider.slider.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(self.slider.slider, QtCore.SIGNAL(
             'customContextMenuRequested(QPoint)'), self.strip.showMenu)
+        self.slider.menuButton.setMenu(self.strip.menu)
 #		self.connect(self.slider,QtCore.SIGNAL('set_idx(int)'),self.set_idx)
         self.slider.slider.valueChanged.connect(self.strip.set_idx)
         self.slider.slider.sliderMoved.connect(self.strip.set_idx)

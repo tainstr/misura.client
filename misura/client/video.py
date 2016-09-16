@@ -127,7 +127,14 @@ class VideoExporter(QtGui.QDialog):
         self.lay = QtGui.QFormLayout()
         self.setLayout(self.lay)
         self.sh = sh
-
+        
+        src = src.split('/')
+        exts = ('profile', 'frame')
+        ext = 0
+        if src[-1] in exts:
+            ext = exts.index(src.pop(-1))
+        src = '/'.join(src)
+        
         self.src = QtGui.QLineEdit()
         self.src.setText(src)
         self.lay.addRow(_("Sample source"), self.src)
@@ -135,7 +142,7 @@ class VideoExporter(QtGui.QDialog):
         self.ext = QtGui.QComboBox()
         self.ext.addItem("profile")
         self.ext.addItem("frame")
-        self.ext.setCurrentIndex(0)
+        self.ext.setCurrentIndex(ext)
         self.lay.addRow(_("Rendering source"), self.ext)
 
 # self.meta=QtGui.QListWidget()
