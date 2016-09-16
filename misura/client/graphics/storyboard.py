@@ -51,7 +51,7 @@ class Storyboard(QtGui.QWidget):
             page = self.page
         return '{}/{}.jpg'.format(self.tmpdir,page.name)
     
-    def update_page_image(self, page=False, crumbs=['']):
+    def update_page_image(self, page=False):
         # initialize cache
         if not page:
             page = self.page
@@ -70,7 +70,6 @@ class Storyboard(QtGui.QWidget):
         # Build the label
         if page.name not in self.cache:
             lbl = QtGui.QToolButton(parent=self)
-            lbl.setText('/'.join(['']+crumbs))
             lbl.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
             func = functools.partial(self.slot_select_page, page.name)        
             lbl.clicked.connect(func)
@@ -83,7 +82,6 @@ class Storyboard(QtGui.QWidget):
         size = QtCore.QSize(200,100)
         pix = icon.pixmap(size)
         lbl.setIconSize(pix.size())
-        
         self.cache[page.name] = lbl
         
     def update(self):
@@ -95,6 +93,7 @@ class Storyboard(QtGui.QWidget):
         if self.page:
             self.update_page_image()
         self.page = page
+        self.update_page_image()
         hierarchy = calc_plot_hierarchy(self.doc)
         inpage = False
         for level, pages in enumerate(hierarchy):
@@ -111,8 +110,9 @@ class Storyboard(QtGui.QWidget):
             page = filter(lambda wg: wg.name==page_name, self.doc.basewidget.children)[0]
             fp = self.fpath(page)
             if not os.path.exists(fp):
-                self.update_page_image(page, crumbs)
+                self.update_page_image(page)
             lbl = self.cache[page_name]
+            lbl.setText('/'.join(['']+crumbs))
             self.lay.addWidget(lbl)
             lbl.show()
             

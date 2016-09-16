@@ -325,7 +325,7 @@ def calc_plot_hierarchy(doc, exclude=':kiln/'):
         hierarchy[len(crumbs)].append((page, page_plots, crumbs))
         
     hierarchy = sorted(hierarchy.iteritems(), cmp=lambda a,b: a[0]-b[0])
-    return [h[1] for h in hierarchy]
+    return [sorted(h[1], key=lambda a: '/'.join(a[2]).lower()) for h in hierarchy]
 
 def get_plotted_tree(base, m=False):
     """Builds a dictionary for the base graph:
