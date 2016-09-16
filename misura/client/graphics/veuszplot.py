@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Simple plotting for browser and live acquisition."""
 import os
+from functools import partial
+
 from misura.canon.logger import Log as logging
 from veusz import qtall as qt4
 from PyQt4 import QtGui, QtCore
@@ -20,7 +22,7 @@ from veusz.document import registerImportCommand
 import veusz.windows.plotwindow as plotwindow
 import veusz.setting as setting
 
-from functools import partial
+
 
 
 def _(text, disambiguation=None, context='PlotWindow'):
@@ -46,13 +48,37 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         plotwindow.PlotWindow.__init__(self, document, parent)
         self.contextmenu = QtGui.QMenu(self)
         self.sigUpdatePage.connect(self.update_page)
-
+        self.navigator = False
         registerImportCommand('MoveToLastPage', self.moveToLastPage)
         self.actionSetTimeout(250, True)
 
     def moveToLastPage(self):
         number_of_pages = self.document.getNumberPages()
         self.setPageNumber(number_of_pages - 1)
+        
+    def set_navigator(self, navigator):
+        self.navigator = navigator
+        
+    def widget_menu(self, menu, pos):
+        widget = self.painthelper.identifyWidgetAtPoint(
+            pos.x(), pos.y(), antialias=self.antialias)
+        if widget is None:
+            return
+        if widget.typename != 'xy':
+            return
+        dsn = widget.settings.yData
+        node = self.document.model.tree.traverse(dsn)
+        if not node:
+            return
+        self.dataset_menu = self.navigator.buildContextMenu(node)
+        dsfunc = partial(self.navigator.expand_node_path, node, select=True)
+        self.dataset_menu.hovered.connect(dsfunc)
+        menu.addMenu(self.dataset_menu)
+         
+        self.group_menu = self.navigator.buildContextMenu(node.parent)
+        grfunc = partial(self.navigator.expand_node_path, node.parent, select=True)
+        self.group_menu.hovered.connect(grfunc)
+        menu.addMenu(self.group_menu)
 
     def contextMenuEvent(self, event):
         """Show context menu."""
@@ -64,6 +90,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         menu.addAction('Properties', self.f)
         self.f1 = partial(self.edit_properties, pos, True)
         menu.addAction('Formatting', self.f1)
+        self.widget_menu(menu, pos)
 
         # add some useful entries
         menu.addAction(self.vzactions['view.zoommenu'])

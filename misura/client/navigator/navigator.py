@@ -58,12 +58,12 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.connect(self, QtCore.SIGNAL('doubleClicked(QModelIndex)'),self.double_clicked)
             self.base_menu = QtGui.QMenu(self)
             self.add_status_actions(self.base_menu)
-            self.file_menu = QtGui.QMenu(self)
-            self.group_menu = QtGui.QMenu(self)
-            self.sample_menu = QtGui.QMenu(self)
-            self.dataset_menu = QtGui.QMenu(self)
-            self.der_menu = QtGui.QMenu(self)
-            self.multi_menu = QtGui.QMenu(self)
+            self.file_menu = QtGui.QMenu(_('File'), self)
+            self.group_menu = QtGui.QMenu(_('Node'), self)
+            self.sample_menu = QtGui.QMenu(_('Sample'), self)
+            self.dataset_menu = QtGui.QMenu(_('Dataset'), self)
+            self.der_menu = QtGui.QMenu(_('Derived'), self)
+            self.multi_menu = QtGui.QMenu(_('Multiary'), self)
 
         else:
             self.connect(
@@ -98,6 +98,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.mod.sigPageChanged.connect(self.ensure_sync_of_view_and_model)
         if self.ncols>1:
             self.setColumnWidth(0, 400)
+            
+        self.mainwindow.plot.set_navigator(self)
             
     def open_file(self, path):
         print 'OPEN FILE', path
@@ -298,7 +300,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.acts_status.append(act)
         return True
 
-    def update_base_menu(self, node=False):
+    def update_base_menu(self, node=False, base_menu=False):
         self.base_menu.clear()
         for domain in self.domains:
             domain.build_base_menu(self.base_menu, node)
@@ -306,46 +308,46 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.act_del.setEnabled(bool(node))
         return self.base_menu
 
-    def update_group_menu(self, node=False):
-        self.group_menu.clear()
+    def update_group_menu(self, node, group_menu):
+        group_menu.clear()
         for domain in self.domains:
-            domain.build_group_menu(self.group_menu, node)
-        self.add_status_actions(self.group_menu)
+            domain.build_group_menu(group_menu, node)
+        self.add_status_actions(group_menu)
         self.act_del.setEnabled(bool(node))
-        return self.group_menu
+        return group_menu
 
-    def update_file_menu(self, node):
-        self.file_menu.clear()
-        self.file_menu.addAction(_('Update view'), self.update_view)
+    def update_file_menu(self, node, file_menu):
+        file_menu.clear()
+        file_menu.addAction(_('Update view'), self.update_view)
         for domain in self.domains:
-            domain.build_file_menu(self.file_menu, node)
-        self.add_status_actions(self.file_menu)
+            domain.build_file_menu(file_menu, node)
+        self.add_status_actions(file_menu)
         self.act_del.setEnabled(bool(node))
-        return self.file_menu
+        return file_menu
 
-    def update_sample_menu(self, node):
-        self.sample_menu.clear()
+    def update_sample_menu(self, node, sample_menu):
+        sample_menu.clear()
         for domain in self.domains:
-            domain.build_sample_menu(self.sample_menu, node)
-        return self.sample_menu
+            domain.build_sample_menu(sample_menu, node)
+        return sample_menu
 
-    def update_dataset_menu(self, node):
-        self.dataset_menu.clear()
+    def update_dataset_menu(self, node, dataset_menu):
+        dataset_menu.clear()
         for domain in self.domains:
-            domain.build_dataset_menu(self.dataset_menu, node)
-        return self.dataset_menu
+            domain.build_dataset_menu(dataset_menu, node)
+        return dataset_menu
 
-    def update_derived_menu(self, node):
-        self.der_menu.clear()
+    def update_derived_menu(self, node, der_menu):
+        der_menu.clear()
         for domain in self.domains:
-            domain.build_derived_dataset_menu(self.der_menu, node)
-        return self.der_menu
+            domain.build_derived_dataset_menu(der_menu, node)
+        return der_menu
 
-    def update_multiary_menu(self, selection):
-        self.multi_menu.clear()
+    def update_multiary_menu(self, selection, multi_menu):
+        multi_menu.clear()
         for domain in self.domains:
-            domain.build_multiary_menu(self.multi_menu, selection)
-        return self.multi_menu
+            domain.build_multiary_menu(multi_menu, selection)
+        return multi_menu
     
     def sync_currentwidget(self):
         selected = self.mainwindow.plot.lastwidgetsselected
@@ -355,39 +357,43 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         else:
             self.cmd.currentwidget = self.get_page()
         return self.cmd.currentwidget
+    
+    def buildContextMenu(self, node, sel=[], menu=False):
+        n = len(sel)
+        if node is None or not node.parent:
+            menu = self.update_base_menu(menu or self.base_menu)
+        elif n>1:
+            menu = self.update_multiary_menu(sel, menu or self.multi_menu)
+        elif node.ds is False:
+            # Identify a "summary" node
+            if not node.parent.parent:
+                menu = self.update_file_menu(node, menu or self.file_menu)
+            # Identify a "sampleN" node
+            elif node.name().startswith('sample'):
+                menu = self.update_sample_menu(node, menu or self.sample_menu)
+            else:
+                menu = self.update_group_menu(node, menu or self.group_menu)
+        # The DatasetEntry refers to a plugin
+        elif hasattr(node.ds, 'getPluginData'):
+            menu = self.update_derived_menu(node, menu or self.der_menu)
+        # The DatasetEntry refers to a standard dataset
+        elif n <= 1:
+            menu = self.update_dataset_menu(node, menu or self.dataset_menu)
+        # No active selection
+        else:
+            menu = self.update_base_menu(node, menu or self.base_menu)
+        return menu
+
 
     def showContextMenu(self, pt):
         # Refresh currentwidget in cmd interface
         self.sync_currentwidget()
         self.previous_selection = self.current_node_path
         sel = self.selectedIndexes()
-        n = len(sel)
         node = self.model().data(self.currentIndex(), role=Qt.UserRole)
         logging.debug('%s %s', 'showContextMenu', node)
-
-        if node is None or not node.parent:
-            menu = self.update_base_menu()
-        elif n>1:
-            menu = self.update_multiary_menu(sel)
-        elif node.ds is False:
-            # Identify a "summary" node
-            if not node.parent.parent:
-                menu = self.update_file_menu(node)
-            # Identify a "sampleN" node
-            elif node.name().startswith('sample'):
-                menu = self.update_sample_menu(node)
-            else:
-                menu = self.update_group_menu(node)
-        # The DatasetEntry refers to a plugin
-        elif hasattr(node.ds, 'getPluginData'):
-            menu = self.update_derived_menu(node)
-        # The DatasetEntry refers to a standard dataset
-        elif n == 1:
-            menu = self.update_dataset_menu(node)
-        # No active selection
-        else:
-            menu = self.update_base_menu(node)
-
+        menu = self.buildContextMenu(node, sel)
+        
         # menu.popup(self.mapToGlobal(pt))
         # Synchronous call to menu, otherise selection is lost on live update
         self.model().pause(1)
