@@ -191,9 +191,9 @@ class SectionBox(QtGui.QToolBox):
             attr = opt.get('attr', False)
             if not attr and opt['type'] == 'Meta':
                 results_list.append(opt)
-            elif ('History' in attr) or ('Result' in attr) or ('ReadOnly' in attr and 'Runtime' not in attr):
+            elif ('History' in attr and 'History' not in attr) or ('Result' in attr) or ('ReadOnly' in attr and 'Runtime' not in attr):
                 results_list.append(opt)
-            elif ('Runtime' in attr) and ('History' not in attr):
+            elif ('Runtime' in attr):
                 status_list.append(opt)
             else:
                 config_list.append(opt)
@@ -207,13 +207,22 @@ class SectionBox(QtGui.QToolBox):
         self.widgetsMap.update(self.results_section.widgetsMap)
         self.widgetsMap.update(self.config_section.widgetsMap) 
         
-        if len(status_list):
-            self.addItem(self.status_section, _('Status'))
-        if len(config_list):
-            self.addItem(self.config_section, _('Configuration'))
-        if len(results_list):
-            self.addItem(self.results_section, _('Results'))
+        self.addItem(self.status_section, _('Status'))
+        self.addItem(self.config_section, _('Configuration'))
+        self.addItem(self.results_section, _('Results'))
         
+        # Set current box on config if remote
+        if not getattr(remObj, 'remObj', False):
+            self.setCurrentIndex(1)
+            
+        if not len(status_list):
+            self.status_section.hide()
+        if not len(config_list):
+            self.config_section.hide()
+        if not len(results_list):
+            self.results_section.hide()
+           
+
         
 
 class Interface(QtGui.QTabWidget):
