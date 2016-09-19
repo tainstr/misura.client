@@ -1,12 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Results tab with access to data tools"""
-from PyQt4 import QtGui, QtCore
-from .. import widgets
 from .. import navigator
+
 from veusz.windows import treeeditwindow
 from veusz.windows import consolewindow
 
+from PyQt4 import QtGui, QtCore
 
 class Results(QtGui.QTabWidget):
 
@@ -14,8 +14,10 @@ class Results(QtGui.QTabWidget):
         super(Results, self).__init__(parent)
         self.setTabPosition(QtGui.QTabWidget.North)
         self.plot = plot
+        
         self.navigator = navigator.Navigator(
             parent=self, mainwindow=plot, cols=2)
+            
         self.plot.connect(
             self.plot, QtCore.SIGNAL('hide_show(QString)'), self.navigator.plot)
 

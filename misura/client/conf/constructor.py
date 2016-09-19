@@ -192,7 +192,7 @@ class SectionBox(QtGui.QToolBox):
             attr = opt.get('attr', False)
             if not attr and opt['type'] == 'Meta':
                 results_list.append(opt)
-            elif ('History' in attr and 'History' not in attr) or ('Result' in attr):
+            elif ('History' in attr and 'Runtime' not in attr) or ('Result' in attr):
                 results_list.append(opt)
             elif ('Runtime' in attr) or ('ReadOnly' in attr) or opt['type']=='ReadOnly':
                 status_list.append(opt)

@@ -90,7 +90,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
     _plots = False
     sigPageChanged = QtCore.pyqtSignal()
 
-    def __init__(self, doc, status=dstats, refresh=True, cols=2):
+    def __init__(self, doc, status=dstats.loaded, refresh=True, cols=2):
         QtCore.QAbstractItemModel.__init__(self)
         self.keys = set()
         self.available_keys = set()
@@ -252,7 +252,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         """Find text color and icon decorations for dataset ds"""
         if role == Qt.FontRole:
             current_font = QtGui.QFont()
-            current_font.setBold(len(ent.data) > 0 and 0 in self.status)
+            current_font.setBold(len(ent.data) > 0 and dstats.available in self.status)
             return current_font
 
         plotpath = self.is_plotted(ent.path)
@@ -437,7 +437,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         # NOTICE: must keep these referenced by the caller
         return curveMap, alterMap
 
-    def build_available_menu(self, menu, func, checkfunc=lambda ent: ent.status > 1):
+    def build_available_menu(self, menu, func, checkfunc=lambda ent: ent.status > dstats.loaded):
         """Builds a menu of available (but empty) datasets, which can be loaded upon request by calling `func`.
         Their action checked status might is provided by `checkfunc`."""
         menu.clear()

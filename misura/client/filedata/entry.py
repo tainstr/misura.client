@@ -10,7 +10,7 @@ import re
 sep = '/'
 # Statuses
 dstats = collections.namedtuple(
-    'DocumentModelEntryStatus', ('available loaded'))(0, 1)
+    'DocumentModelEntryStatus', ('empty outline available loaded'))(0, 1, 2, 3)
 
 
 def iterpath(name, parent=False, splt=sep):
@@ -100,9 +100,9 @@ class AllDocDataAccessor(object):
 class NodeEntry(object):
 
     """Generic node representation for the document model"""
-    _status = 1
+    _status = dstats.loaded
     """Accessibility status"""
-    statuses = {v: [] for v in range(-1, 4)}
+    statuses = {v: [] for v in range(0,4)}
     """Children accessibility status"""
     idx = -1
     name = 'root'
@@ -214,7 +214,7 @@ class NodeEntry(object):
     def status(self):
         s = [c.status for c in self._children.itervalues()]
         if not len(s):
-            return 0
+            return dstats.empty
         return max(s)
 
     def __len__(self):
@@ -223,9 +223,8 @@ class NodeEntry(object):
     def __nonzero__(self):
         return True
 
-    def keys(self, status=1):
-        """List keys based on status.
-        `status` 1 = Visible; 0 = Hidden ; -1 = Available"""
+    def keys(self, status=dstats.loaded):
+        """List keys based on status"""
         r = []
         for sub, item in self.children.iteritems():
             if item.status == status:
@@ -285,7 +284,7 @@ class NodeEntry(object):
 
     # ROOT ENTRY METHODS
 
-    def insert(self, path, status=1):
+    def insert(self, path, status=dstats.loaded):
         """Insert a pure node"""
         if self.doc.data.has_key(path) and isinstance(self.doc.data[path], document.datasets.Dataset1DPlugin):
             return False
@@ -328,7 +327,7 @@ class NodeEntry(object):
         self._children.pop(k)
         return True
 
-    def recursive_status(self, st=1, depth=-1, exclude_rule='\w+/\w+/t$|\w+/\w+/T$', cls=False):
+    def recursive_status(self, st=dstats.loaded, depth=-1, exclude_rule='\w+/\w+/t$|\w+/\w+/T$', cls=False):
         """Recursively list children with status in `st`. `st` can be an iterable (ideally a set()), an integer or a status name.
         `exclude`: regular expression to filter node names
         `depth`<0: infinite recursion
@@ -359,15 +358,12 @@ class NodeEntry(object):
             if child.status >= m:
                 if (not cls) or isinstance(child, cls):
                     r.append(child)
-                else:
-                    logging.debug(
-                        '%s %s %s %s', 'rec skip', child, child.status, st)
             if depth > 0 or depth < 0:  # depth=0 will block!
                 r += child.recursive_status(st, depth=depth - 1)
         self.status_cache = (key, r)
         return r
 
-    def set_doc(self, doc, default_status=0):
+    def set_doc(self, doc, default_status=dstats.available):
         """Build a Hierarchy out of `doc`
         `status`: default status"""
         old = self.copy()
@@ -386,15 +382,15 @@ class NodeEntry(object):
                 dn1 = dn[7 + len(self.splt):]
             self.names[dn] = dn1
             status = default_status
-            if len(d) == 0 and default_status >= 0:
-                status = 0  # put on available
+            if len(d) == 0 and default_status >= dstats.available:
+                status = dstats.available  # put on available
             else:
                 status = default_status
             oldentry = old.traverse(dn)
             if oldentry:
                 oldst = oldentry.status
                 # if it was and still is loaded, keep the old status
-                if status >= 0 and oldst >= 0:
+                if status >= dstats.available and oldst >= dstats.available:
                     status = oldst
 
             self.insert(dn, status)
@@ -417,8 +413,10 @@ class DatasetEntry(NodeEntry):
         ds = self.alldoc.get(self.path, False)
         if ds is False:
             self.parent.remove(self)
-            return 0
-        return int(len(ds) > 0)
+            return dstats.empty
+        if len(ds)>0:
+            return dstats.loaded
+        return dstats.available
 
     @property
     def children(self):

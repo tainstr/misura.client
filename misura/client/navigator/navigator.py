@@ -98,8 +98,9 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.mod.sigPageChanged.connect(self.ensure_sync_of_view_and_model)
         if self.ncols>1:
             self.setColumnWidth(0, 400)
-            
-        self.mainwindow.plot.set_navigator(self)
+        
+        if hasattr(self.mainwindow.plot,'set_navigator'):
+            self.mainwindow.plot.set_navigator(self)
             
     def open_file(self, path):
         print 'OPEN FILE', path
@@ -301,12 +302,12 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return True
 
     def update_base_menu(self, node=False, base_menu=False):
-        self.base_menu.clear()
+        base_menu.clear()
         for domain in self.domains:
-            domain.build_base_menu(self.base_menu, node)
-        self.add_status_actions(self.base_menu)
+            domain.build_base_menu(base_menu, node)
+        self.add_status_actions(base_menu)
         self.act_del.setEnabled(bool(node))
-        return self.base_menu
+        return base_menu
 
     def update_group_menu(self, node, group_menu):
         group_menu.clear()
@@ -361,7 +362,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     def buildContextMenu(self, node, sel=[], menu=False):
         n = len(sel)
         if node is None or not node.parent:
-            menu = self.update_base_menu(menu or self.base_menu)
+            menu = self.update_base_menu(node, menu or self.base_menu)
         elif n>1:
             menu = self.update_multiary_menu(sel, menu or self.multi_menu)
         elif node.ds is False:

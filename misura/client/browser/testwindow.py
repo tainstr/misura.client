@@ -85,9 +85,13 @@ class TestWindow(acquisition.MainWindow):
         self.plotboard.set_plot(self.summaryPlot)
         self.plotboardDock.setWidget(self.plotboard)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.plotboardDock)
+        # TODO: cleanup this! Should pass through some sort of plugin or config mechanism...
         if self.name not in ['flash']:
             self.plotboardDock.hide()
-        
+            self.breadbar.hide()
+        else:
+            from .. import filedata
+            self.navigator.status.add(filedata.dstats.outline)
         
 
     def closeEvent(self, ev):
