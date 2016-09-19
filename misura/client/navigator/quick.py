@@ -9,6 +9,8 @@ from ..filedata import DatasetEntry
 from .. import axis_selection
 import numpy as np
 
+from PyQt4 import QtGui
+
 ism = isinstance
 
 
@@ -38,7 +40,13 @@ class QuickOps(object):
     @node
     def deleteChildren(self, node=False):
         """Delete all children of node."""
-        logging.debug('%s %s %s', 'deleteChildren', node, node.children)
+        logging.debug('deleteChildren', node, node.children)
+        confirmation = QtGui.QMessageBox.warning(self, "Delete nodes",
+                       "You are about to delete data. Do you confirm?",
+                       QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
+        if confirmation != QtGui.QMessageBox.Yes:
+            return
+
         for sub in node.children.values():
             if not sub.ds:
                 continue
