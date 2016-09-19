@@ -49,7 +49,7 @@ def sort_children(prop_dict):
         prop['children'] = children
         prop_dict[handle] = prop
     return prop_dict
-            
+
 
 def orgSections(prop_dict, configuration_level=5):
     """Riordina le chiavi a seconda delle sezioni cui appartengono."""
@@ -60,10 +60,10 @@ def orgSections(prop_dict, configuration_level=5):
         if prop is False:
             continue
         # Add the children key to any option (simplifies further processing)
-        if not prop.has_key('children') or isinstance(prop['children'],list):
+        if not prop.has_key('children') or isinstance(prop['children'], list):
             prop['children'] = collections.OrderedDict()
             prop_dict[handle] = prop
-        
+
         parent = prop.get('parent', False)
         if parent is False:
             continue
@@ -76,7 +76,7 @@ def orgSections(prop_dict, configuration_level=5):
         if not parentopt.has_key('children') or isinstance(parentopt['children'], list):
             parentopt['children'] = collections.OrderedDict()
         # Append the child to the parent
-        parentopt['children'][handle] = prop 
+        parentopt['children'][handle] = prop
         # Delete the child from the main dictionary
         del prop_dict[handle]
         # Update the parent on the main dictionary
@@ -85,7 +85,7 @@ def orgSections(prop_dict, configuration_level=5):
     # Sorting
     prop_dict = sort_children(prop_dict)
     # Sectioning
-    sections = {'Main': []}
+    sections = collections.defaultdict(list)
     for handle, prop in prop_dict.iteritems():
         if not prop.has_key('readLevel'):
             prop['readLevel'] = -1
@@ -99,13 +99,12 @@ def orgSections(prop_dict, configuration_level=5):
             sections['Main'].append(prop)
             continue
         spl = handle.split(spl)
-        if not sections.has_key(spl[0]):
-            sections[spl[0]] = []
         sections[spl[0]].append(prop)
     return sections
 
 
 class Section(QtGui.QWidget):
+    """Form builder for a list of options"""
 
     def __init__(self, server, remObj, prop_list, parent=None, context='Option'):
         QtGui.QWidget.__init__(self, parent)
@@ -145,9 +144,10 @@ class Section(QtGui.QWidget):
         lay.addWidget(more)
         out.setLayout(lay)
         return out
-    
+
     def add_children(self, parent_layout, prop):
-        parent_widget = widgets.build(self.server, self.remObj, prop, parent=self)
+        parent_widget = widgets.build(
+            self.server, self.remObj, prop, parent=self)
         if parent_widget is False:
             return False
         self.widgetsMap[prop['handle']] = parent_widget
@@ -160,26 +160,65 @@ class Section(QtGui.QWidget):
         children_lay = QtGui.QFormLayout()
         children.setLayout(children_lay)
         # Add the parent option plus the expansion button
-        parent_layout.addRow(parent_widget.label_widget, 
+        parent_layout.addRow(parent_widget.label_widget,
                              self.expandable_row(parent_widget, children))
 
         for handle, child in prop['children'].iteritems():
             if handle == prop['handle']:
-                logging.error('Option parenthood loop detected', handle, prop['children'].keys())
+                logging.error(
+                    'Option parenthood loop detected', handle, prop['children'].keys())
                 continue
             self.add_children(children_lay, child)
 
         parent_layout.addRow(children)
         children.hide()
-        
+
     def build(self, prop):
         self.add_children(self.lay, prop)
         return True
 
 
+class SectionBox(QtGui.QToolBox):
+    """Divide section into Status, Configuration and Results toolboxes.""" 
+    def __init__(self, server, remObj, prop_list, parent=None, context='Option'):
+        QtGui.QToolBox.__init__(self, parent=parent)
+
+        status_list = []
+        results_list = []
+        config_list = []
+
+        for opt in prop_list:
+            attr = opt.get('attr', False)
+            if not attr and opt['type'] == 'Meta':
+                results_list.append(opt)
+            elif ('History' in attr) or ('Result' in attr) or ('ReadOnly' in attr and 'Runtime' not in attr):
+                results_list.append(opt)
+            elif ('Runtime' in attr) and ('History' not in attr):
+                status_list.append(opt)
+            else:
+                config_list.append(opt)
+        
+        self.status_section = Section(server, remObj, status_list, parent=self, context=context)
+        self.results_section = Section(server, remObj, results_list, parent=self, context=context)
+        self.config_section = Section(server, remObj, config_list, parent=self, context=context)
+        
+        self.widgetsMap = {}
+        self.widgetsMap.update(self.status_section.widgetsMap)
+        self.widgetsMap.update(self.results_section.widgetsMap)
+        self.widgetsMap.update(self.config_section.widgetsMap) 
+        
+        if len(status_list):
+            self.addItem(self.status_section, _('Status'))
+        if len(config_list):
+            self.addItem(self.config_section, _('Configuration'))
+        if len(results_list):
+            self.addItem(self.results_section, _('Results'))
+        
+        
+
 class Interface(QtGui.QTabWidget):
 
-    """Interfaccia grafica ad un dizionario di configurazione."""
+    """Tabbed interface builder for dictionary of options"""
 
     def __init__(self, server, remObj=False, prop_dict=False, parent=None, context='Option'):
         QtGui.QTabWidget.__init__(self, parent)
@@ -194,19 +233,18 @@ class Interface(QtGui.QTabWidget):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
-        
+
     def show_section(self, name):
         sections = self.sectionsMap.keys()
         if name not in sections:
             logging.warning('No section named', name)
         i = sections.index(name)
         self.setCurrentIndex(i)
-        
+
     def showEvent(self, event):
-        print 'SHOWEVENT'
         self.rebuild()
-        
-    def rebuild(self, prop_dict = False):
+
+    def rebuild(self, prop_dict=False):
         """Rebuild the full widget"""
         if not prop_dict:
             self.remObj.connect()
@@ -214,13 +252,14 @@ class Interface(QtGui.QTabWidget):
             rk = set(self.remObj.keys())
             d = k.symmetric_difference(rk)
             if len(d) == 0:
-                logging.debug('Interface.rebuild not needed: options are equal.')
-                return 
+                logging.debug(
+                    'Interface.rebuild not needed: options are equal.')
+                return
             prop_dict = self.remObj.describe()
             # If a prop_dict was set, just pick currently defined options
             if len(k) and len(prop_dict):
                 visible = set(prop_dict.keys()).intersection(k)
-                prop_dict = {key:prop_dict[key] for key in visible}
+                prop_dict = {key: prop_dict[key] for key in visible}
         if not prop_dict:
             logging.critical(
                 'Impossible to get object description %s', self.remObj._Method__name)
@@ -243,11 +282,10 @@ class Interface(QtGui.QTabWidget):
                 QtGui.QKeySequence(_('Ctrl+S')), self)
             self.connect(self.scSave, QtCore.SIGNAL('activated()'), self.sectionsMap[
                          'Main'].widgetsMap['preset'].save_current)
-        
 
     def redraw(self, foo=0):
         self.close()
-        wg = Section(
+        wg = SectionBox(
             self.server, self.remObj, self.sections['Main'], parent=self)
         self.sectionsMap = collections.OrderedDict({'Main': wg})
         area = QtGui.QScrollArea(self)
@@ -262,7 +300,7 @@ class Interface(QtGui.QTabWidget):
         for section, prop_list in self.sections.iteritems():
             if section == 'Main':
                 continue
-            wg = Section(self.server, self.remObj, prop_list, parent=self)
+            wg = SectionBox(self.server, self.remObj, prop_list, parent=self)
             # Ignore empty sections
             if not len(wg.widgetsMap):
                 continue

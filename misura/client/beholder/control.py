@@ -122,7 +122,7 @@ class CameraController(conf.Interface):
         self.stream = QtGui.QPushButton(_("View camera"))
 
         logging.debug('%s', self.sectionsMap)
-        self.sectionsMap['Main'].lay.addWidget(self.stream)
+        self.sectionsMap['Main'].status_section.lay.addWidget(self.stream)
         self.connect(
             self.stream, QtCore.SIGNAL('clicked()'), self.toggle_stream)
 
