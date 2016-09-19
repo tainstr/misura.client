@@ -182,7 +182,8 @@ class SectionBox(QtGui.QToolBox):
     """Divide section into Status, Configuration and Results toolboxes.""" 
     def __init__(self, server, remObj, prop_list, parent=None, context='Option'):
         QtGui.QToolBox.__init__(self, parent=parent)
-
+        self.server = server
+        self.remObj = remObj
         status_list = []
         results_list = []
         config_list = []
@@ -191,9 +192,9 @@ class SectionBox(QtGui.QToolBox):
             attr = opt.get('attr', False)
             if not attr and opt['type'] == 'Meta':
                 results_list.append(opt)
-            elif ('History' in attr and 'History' not in attr) or ('Result' in attr) or ('ReadOnly' in attr and 'Runtime' not in attr):
+            elif ('History' in attr and 'History' not in attr) or ('Result' in attr):
                 results_list.append(opt)
-            elif ('Runtime' in attr):
+            elif ('Runtime' in attr) or ('ReadOnly' in attr) or opt['type']=='ReadOnly':
                 status_list.append(opt)
             else:
                 config_list.append(opt)
@@ -207,23 +208,35 @@ class SectionBox(QtGui.QToolBox):
         self.widgetsMap.update(self.results_section.widgetsMap)
         self.widgetsMap.update(self.config_section.widgetsMap) 
         
-        self.addItem(self.status_section, _('Status'))
-        self.addItem(self.config_section, _('Configuration'))
-        self.addItem(self.results_section, _('Results'))
+        def add_section(sec,  name):
+            """Add section only if has widgets to show"""
+            if sec.widgetsMap:
+                self.addItem(sec, name)
         
-        # Set current box on config if remote
+        # Prioritize sections
+        add_section(self.config_section, _('Configuration'))
+        
         if not getattr(remObj, 'remObj', False):
-            self.setCurrentIndex(1)
+            add_section(self.results_section, _('Results'))
+            add_section(self.status_section, _('Status'))
+        else:
+            add_section(self.status_section, _('Status'))
+            add_section(self.results_section, _('Results'))
             
-        if not len(status_list):
-            self.status_section.hide()
-        if not len(config_list):
-            self.config_section.hide()
-        if not len(results_list):
-            self.results_section.hide()
-           
-
-        
+        self.reorder()
+    
+    _last_status = False
+    def reorder(self):
+        st = self.server['isRunning']
+        if st:
+            i = self.indexOf(self.status_section)
+        elif self._last_status:
+            i = self.indexOf(self.results_section)
+        else:
+            i = self.indexOf(self.config_section)
+        if i>=0:
+            self.setCurrentIndex(i)
+        self._last_status = st
 
 class Interface(QtGui.QTabWidget):
 
@@ -291,6 +304,11 @@ class Interface(QtGui.QTabWidget):
                 QtGui.QKeySequence(_('Ctrl+S')), self)
             self.connect(self.scSave, QtCore.SIGNAL('activated()'), self.sectionsMap[
                          'Main'].widgetsMap['preset'].save_current)
+                         
+    def reorder(self):
+        # Switch toolbox currentIndexes"
+        for sec in self.sectionsMap.itervalues():
+            sec.reorder()
 
     def redraw(self, foo=0):
         self.close()

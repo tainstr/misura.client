@@ -14,6 +14,7 @@ class MeasureInfo(QtGui.QTabWidget):
     statusView = False
 
     def __init__(self, remote, fixedDoc=False,  parent=None):
+        self.sampleViews = []
         self.fromthermalCycleView = False
         self.fixedDoc = fixedDoc
         QtGui.QTabWidget.__init__(self, parent)
@@ -79,7 +80,7 @@ class MeasureInfo(QtGui.QTabWidget):
 
     def refreshSamples(self, *foo):
         print 'REFRESH SAMPLES'
-        #		nsmp=self.remote.measure['nSamples']
+        #       nsmp=self.remote.measure['nSamples']
         nsmp = self.nobj.current
         if self.nsmp == nsmp:
             logging.debug('NO CHANGE in samples number', self.nsmp, nsmp)
@@ -97,13 +98,16 @@ class MeasureInfo(QtGui.QTabWidget):
         self.addTab(self.measureView, 'Measure')
         self.addTab(self.thermalCycleView, 'Thermal Cycle')
         logging.debug('REFRESH SAMPLES', self.remote.measure['nSamples'])
+        self.sampleViews = []
         for i in range(self.nsmp):
             sample = getattr(self.remote, 'sample' + str(i), False)
             if not sample:
                 logging.debug('Missing sample object nr.', i)
                 continue
-            self.addTab(conf.Interface(
-                self.remote.parent(), sample, sample.describe(), self), 'Sample' + str(i))
+            wg = conf.Interface(
+                self.remote.parent(), sample, sample.describe(), self)
+            self.addTab(wg,  'Sample' + str(i))
+            self.sampleViews.append(wg)
         self.addTab(self.results, 'Results')
         return True
 
@@ -123,3 +127,7 @@ class MeasureInfo(QtGui.QTabWidget):
 
         # Update isRunning widget
         self.statusView.widgets['/isRunning']._get(is_running)
+        
+        self.measureView.reorder()
+        for wg in self.sampleViews:
+            wg.reorder()
