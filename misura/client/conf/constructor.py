@@ -178,10 +178,14 @@ class Section(QtGui.QWidget):
         return True
 
 
-class SectionBox(QtGui.QToolBox):
+class SectionBox(QtGui.QWidget):
     """Divide section into Status, Configuration and Results toolboxes.""" 
     def __init__(self, server, remObj, prop_list, parent=None, context='Option'):
-        QtGui.QToolBox.__init__(self, parent=parent)
+        QtGui.QWidget.__init__(self, parent=parent)
+        self.lay = QtGui.QVBoxLayout()
+        self.setLayout(self.lay)
+        
+        self.tools = False
         self.server = server
         self.remObj = remObj
         status_list = []
@@ -208,10 +212,25 @@ class SectionBox(QtGui.QToolBox):
         self.widgetsMap.update(self.results_section.widgetsMap)
         self.widgetsMap.update(self.config_section.widgetsMap) 
         
+        secs = [self.config_section, self.results_section, self.status_section]
+        lens = [len(sec.widgetsMap)>0 for sec in secs]
+        # Just one active section:
+        print 'AAAAAAAAAAA',lens
+        if sum(lens)<1:
+            return
+        if sum(lens)==1:
+            i = lens.index(True)
+            sec = secs[i]
+            self.lay.addWidget(sec)
+            return
+            
+        self.tools = QtGui.QToolBox(parent=self)
+        self.lay.addWidget(self.tools)
+        
         def add_section(sec,  name):
             """Add section only if has widgets to show"""
             if sec.widgetsMap:
-                self.addItem(sec, name)
+                self.tools.addItem(sec, name)
         
         # Prioritize sections
         add_section(self.config_section, _('Configuration'))
@@ -227,15 +246,19 @@ class SectionBox(QtGui.QToolBox):
     
     _last_status = False
     def reorder(self):
+        # No sections
+        if self.tools is False:
+            return
+        w = None
         st = self.server.has_key('isRunning') and self.server['isRunning']
         if st:
-            i = self.indexOf(self.status_section)
+            w =self.status_section
         elif self._last_status:
-            i = self.indexOf(self.results_section)
+            w = self.results_section
         else:
-            i = self.indexOf(self.config_section)
-        if i>=0:
-            self.setCurrentIndex(i)
+            w = self.config_section
+        if w is not None:
+            self.tools.setCurrentWidget(w)
         self._last_status = st
 
 class Interface(QtGui.QTabWidget):
