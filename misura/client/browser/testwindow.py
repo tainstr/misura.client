@@ -90,7 +90,6 @@ class TestWindow(acquisition.MainWindow):
             self.plotboardDock.hide()
             self.breadbar.hide()
         else:
-            from .. import filedata
             self.navigator.status.add(filedata.dstats.outline)
         
 

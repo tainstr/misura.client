@@ -227,7 +227,7 @@ class SectionBox(QtGui.QToolBox):
     
     _last_status = False
     def reorder(self):
-        st = self.server['isRunning']
+        st = self.server.has_key('isRunning') and self.server['isRunning']
         if st:
             i = self.indexOf(self.status_section)
         elif self._last_status:

@@ -1,5 +1,6 @@
 import socket
 import struct
+from traceback import print_exc
 #http://code.activestate.com/recipes/358449-wake-on-lan/
 def wake_on_lan(macaddress):
     """ Switches on remote computers using WOL. """
@@ -24,8 +25,16 @@ def wake_on_lan(macaddress):
     # Broadcast it to the LAN.
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    sock.sendto(send_data, ('<broadcast>', 7))
     print 'Wake on LAN packet:', data
+    r = False
+    try:
+        sock.sendto(send_data, ('172.16.8.255', 7))
+        r = True 
+        sock.sendto(send_data, ('<broadcast>', 7))
+    except:
+        print_exc()
+        return r
+    return True
     
 
 if __name__ == '__main__':
