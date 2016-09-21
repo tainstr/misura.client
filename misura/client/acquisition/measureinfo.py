@@ -15,6 +15,8 @@ class MeasureInfo(QtGui.QTabWidget):
 
     def __init__(self, remote, fixedDoc=False,  parent=None):
         self.sampleViews = []
+        self.nodes = []
+        self.nodeViews = []
         self.fromthermalCycleView = False
         self.fixedDoc = fixedDoc
         QtGui.QTabWidget.__init__(self, parent)
@@ -77,6 +79,7 @@ class MeasureInfo(QtGui.QTabWidget):
                 self.thermalCycleView.apply()
 
     nsmp = 0
+    
 
     def refreshSamples(self, *foo):
         print 'REFRESH SAMPLES'
@@ -105,12 +108,40 @@ class MeasureInfo(QtGui.QTabWidget):
                 logging.debug('Missing sample object nr.', i)
                 continue
             wg = conf.Interface(
-                self.remote.parent(), sample, sample.describe(), self)
+                self.server, sample, sample.describe(), self)
             self.addTab(wg,  'Sample' + str(i))
             self.sampleViews.append(wg)
+        self.refresh_nodes()
         self.addTab(self.results, 'Results')
         return True
-
+    
+    def refresh_nodes(self, nodes=[]):
+        for nodevi in self.nodeViews:
+            i = self.indexOf(nodevi)
+            if i<0: continue
+            self.removeTab(i)
+        self.nodeViews = []
+        if not nodes:
+            nodes = self.nodes
+        if not nodes:
+            return False
+        self.nodes = nodes
+        print 'REFRESH NODES', nodes
+        c = self.count()
+        for i,n in enumerate(nodes):
+            if n.split('/')[-1].startswith('sample'):
+                continue
+            node = self.server.toPath(n)
+            if not node:
+                logging.debug('Missing node object', n) 
+                continue
+            wg = conf.Interface(
+                self.server, node, node.describe(), self) 
+            self.insertTab(c-1+i, wg, node['name'])
+            self.nodeViews.append(wg)
+        
+        return True
+    
     def closeEvent(self, ev):
         """Disconnect dangerous signals before closing"""
         registry.system_kid_changed.disconnect(self.system_kid_slot)

@@ -9,6 +9,7 @@ from .. import acquisition
 from ..live import registry
 from misura.canon.csutil import profile
 from ..graphics import Breadcrumb, Storyboard
+from misura.client.iutils import calc_plot_hierarchy
 
 class TestWindow(acquisition.MainWindow):
 
@@ -20,7 +21,6 @@ class TestWindow(acquisition.MainWindow):
         self.play.set_doc(doc)
         self.play.sleep = 0.1
         self.load_version(-1)
-
         self.controls.server = self.play
 # 		self.controls.remote=self.play
         for pic, win in self.cameras.itervalues():
@@ -42,6 +42,7 @@ class TestWindow(acquisition.MainWindow):
 # 	@profile
     def load_version(self, v=-1):
         logging.debug('%s %s', "SETTING VERSION", v)
+        self.plot_page = False
         if not self.fixedDoc.proxy.isopen():
             self.fixedDoc.proxy.reopen()
         self.fixedDoc.proxy.set_version(v)
@@ -91,6 +92,26 @@ class TestWindow(acquisition.MainWindow):
             self.breadbar.hide()
         else:
             self.navigator.status.add(filedata.dstats.outline)
+            
+        if self.fixedDoc:    
+            self.doc.model.sigPageChanged.connect(self.slot_page_changed)
+        
+    def slot_page_changed(self):
+        p = self.summaryPlot.plot.getPageNumber()
+        page = self.doc.basewidget.children[p]
+        print 'AAAAAA slot_page', page.name
+        if page == self.plot_page:
+            return False
+        self.plot_page = page
+        
+        hierarchy, level = calc_plot_hierarchy(self.fixedDoc, page)
+        if level<0:
+            return False
+        page_name, page_plots, crumbs = hierarchy[level][0]
+        crumbs = [c.split(':')[-1] for c in crumbs]
+        node_path = '/'+'/'.join(crumbs)
+        self.measureTab.refresh_nodes([node_path])
+        return True
         
 
     def closeEvent(self, ev):
