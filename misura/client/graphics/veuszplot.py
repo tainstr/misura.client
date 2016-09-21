@@ -400,6 +400,8 @@ class VeuszPlot(QtGui.QWidget):
         # If the plot dimension is not sufficient, hide the axes.
         page = self.document.basewidget.getPage(self.plot.getPageNumber())
         g = page.path
+        if g.endswith('_report'):
+            return
         self.cmd.Set(page.path+'/width', str(w) + 'in')
         self.cmd.Set(page.path+'/height', str(h) + 'in')
         if g == '/time' or g.endswith('_t'):

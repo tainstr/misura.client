@@ -130,6 +130,7 @@ def initApp(name='misura', org="Expert System Solutions", domain="expertsystemso
 
 app_closed = False
 
+
 def closeApp():
     """Connected to quit and last window closed signals."""
     # Avoid closing multiple times if multiple signals are sent!
@@ -245,13 +246,15 @@ def getOpts():
         r[opt] = val
     return r
 
+
 def get_custom(doc, name):
     for ctype, cname, val in doc.customs:
-        if cname==name:
+        if cname == name:
             return val
     return False
 
-def iter_widgets(base, typename, direction = 0):
+
+def iter_widgets(base, typename, direction=0):
     """Yields all widgets of type `typename` starting from `base` widget.
     The search can be restricted to upward (`direction`=-1), downward (`direction`=1) or both (`direction`=0)."""
     if isinstance(typename, str):
@@ -280,12 +283,14 @@ def iter_widgets(base, typename, direction = 0):
     # Nothing found
     yield None
 
+
 def searchFirstOccurrence(base, typename, direction=0):
     """Search for the nearest occurrence of a widget of type `typename` starting from `base`.
     The search can be restricted to upward (`direction`=-1), downward (`direction`=1) or both (`direction`=0)."""
     for wg in iter_widgets(base, typename, direction):
         if wg:
             return wg
+
 
 def most_involved_node(involved_plots, doc, exclude=':kiln'):
     # Collect all involved datasets
@@ -294,42 +299,66 @@ def most_involved_node(involved_plots, doc, exclude=':kiln'):
         involved += doc.model.plots['plot'].get(inp, [])
     # Find the common ancestor
     involved = [inv.split('/') for inv in involved]
+    best_involved = involved
     lengths = [len(inv) for inv in involved]
     max_len = max(lengths)
-    best_count = 0
+    best_count = -1
     crumbs = []
-    for i in range(min(lengths)):
+    most_commons = []
+    best = False
+    ordered = []
+    for i in range(max_len):
         # Exclude the last element
-        if len(crumbs) >= max_len - 1:
+        if len(crumbs) >= max_len :
             break
-        level = [inv[i] for inv in involved]
+        # Keep only ancestors
+        best_involved = filter(
+            lambda inv: len(inv) > i+1, best_involved)
+        if crumbs:
+            best_involved = filter(
+                lambda inv: inv[:len(crumbs)] == crumbs, best_involved)
+
+        level = [inv[i] for inv in best_involved]
         level = filter(lambda el: exclude not in el, level)
-        data = collections.Counter(level)
-        best = data.most_common(1)[0][0]
-        count = level.count(best)
+                
+        j = -1
+        mc = []
+        for m, count in collections.Counter(level).most_common():
+            if count < j:
+                break
+            j = count
+            mc.append(m)
+        if not mc:
+            break
+        best = mc[0]
+        most_commons.append(mc)
         # Stop if the count decreases
         if count < best_count:
             break
         best_count = count
         crumbs.append(best)
-    return crumbs
+        
+    print 'most_common', most_commons
+    return crumbs, most_commons
 
 
 def calc_plot_hierarchy(doc, page_obj, exclude=':kiln/'):
     pages = doc.model.plots['page']
-    
+
     hierarchy = defaultdict(list)
-    
+
     for page, page_plots in pages.iteritems():
-        crumbs = most_involved_node(page_plots, doc)
+        crumbs = most_involved_node(page_plots, doc)[0]
         hierarchy[len(crumbs)].append((page, page_plots, crumbs))
-        
-    hierarchy = sorted(hierarchy.iteritems(), cmp=lambda a,b: a[0]-b[0])
-    hierarchy = [sorted(h[1], key=lambda a: '/'.join(a[2]).lower()) for h in hierarchy]
+
+    hierarchy = sorted(hierarchy.iteritems(), cmp=lambda a, b: a[0] - b[0])
+    hierarchy = [sorted(h[1], key=lambda a: '/'.join(a[2]).lower())
+                 for h in hierarchy]
     inpage = False
     level = -1
+    page_idx = -1
     for level, pages in enumerate(hierarchy):
-        for page_name, page_plots, crumbs in pages:
+        for page_idx, (page_name, page_plots, crumbs) in enumerate(pages):
             if page_name == page_obj.name:
                 inpage = True
                 break
@@ -337,8 +366,10 @@ def calc_plot_hierarchy(doc, page_obj, exclude=':kiln/'):
             break
     if not inpage:
         level = -1
-    
-    return hierarchy, level
+        page_idx = -1
+
+    return hierarchy, level, page_idx
+
 
 def get_plotted_tree(base, m=False):
     """Builds a dictionary for the base graph:
@@ -348,9 +379,9 @@ def get_plotted_tree(base, m=False):
                       'sample':[smp0,smp1,...]. 
                       'page': [plot names...}"""
     if m is False:
-        m = {'plot': OrderedDict(), 
-             'dataset': OrderedDict(), 
-             'axis': OrderedDict(), 
+        m = {'plot': OrderedDict(),
+             'dataset': OrderedDict(),
+             'axis': OrderedDict(),
              'sample': [],
              'page': defaultdict(list)}
     for wg in base.children:
@@ -370,11 +401,11 @@ def get_plotted_tree(base, m=False):
             if not m['dataset'].has_key(dsn):
                 m['dataset'][dsn] = []
             m['dataset'][dsn].append(wg.path)
-            
+
             # Fill page: plots map
             page = searchFirstOccurrence(wg, 'page', -1)
             m['page'][page.name].append(wg.path)
-            
+
             # Fill sample map
             if not '/sample' in dsn:
                 continue
@@ -384,14 +415,13 @@ def get_plotted_tree(base, m=False):
             if smp.ref:
                 continue
             m['sample'].append(smp['fullpath'])
-            
+
             # Save the dataset under its axis key
             axpath = wg.parent.path + '/' + wg.settings.yAxis
             if not m['axis'].has_key(axpath):
                 m['axis'][axpath] = []
             m['axis'][axpath].append(dsn)
-            
-            
+
         elif wg.typename in ('axis', 'axis-function'):
             # 			print 'get_plotted_tree found axis',wg.path
             if wg.settings.direction != 'vertical':
@@ -405,6 +435,7 @@ def get_plotted_tree(base, m=False):
         for k1 in m[k0].keys():
             m[k0][k1] = sorted(m[k0][k1])
     return m
+
 
 def shorten(name, number_of_chars_to_show=30):
     if len(name) <= number_of_chars_to_show:

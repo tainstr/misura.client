@@ -12,7 +12,6 @@ from misura.client.iutils import calc_plot_hierarchy
 from PyQt4 import QtGui, QtCore
 
 
-
 class Storyboard(QtGui.QWidget):
 
     def __init__(self, parent=None):
@@ -22,18 +21,18 @@ class Storyboard(QtGui.QWidget):
         self.doc = False
         self.page = False
         self.images = {}
-        
+
         self.setLayout(self.base_lay)
         self.level_modifier = 0
         self._level_modifier = 0
         self.tmpdir = tempfile.mkdtemp()
         self.cache = {}
-        
+
         self.container = QtGui.QWidget()
         self.lay = QtGui.QHBoxLayout()
         self.container.setLayout(self.lay)
         self.base_lay.addWidget(self.container)
-        
+
         self.controls = QtGui.QWidget(self)
         clay = QtGui.QVBoxLayout()
         self.controls.setLayout(clay)
@@ -48,15 +47,15 @@ class Storyboard(QtGui.QWidget):
         clay.addWidget(levelDown)
         self.controls.setMaximumWidth(75)
         self.base_lay.addWidget(self.controls)
-        
+
     def slot_up(self):
         self.level_modifier -= 1
         self.update()
-        
+
     def slot_down(self):
         self.level_modifier += 1
         self.update()
-        
+
     def slot_home(self):
         self.level_modifier = 0
         self.update()
@@ -108,7 +107,7 @@ class Storyboard(QtGui.QWidget):
             lbl.clicked.connect(func)
         else:
             lbl = self.cache[page.name]
-            
+
         # Replace the icon
         icon = QtGui.QIcon(fp)
         lbl.setIcon(icon)
@@ -130,13 +129,13 @@ class Storyboard(QtGui.QWidget):
         else:
             self._level_modifier = 0
             self.level_modifier = 0
-        
+
         self.page = page
         self.update_page_image()
-        hierarchy, level = calc_plot_hierarchy(self.doc, page)
-        if level<0:
+        hierarchy, level, page_idx = calc_plot_hierarchy(self.doc, page)
+        if level < 0:
             return False
-        page_name, page_plots, crumbs = hierarchy[level][0]
+        page_name, page_plots, crumbs = hierarchy[level][page_idx]
 
         N = len(hierarchy)
         level += self.level_modifier
@@ -154,7 +153,6 @@ class Storyboard(QtGui.QWidget):
             lbl.setText('/'.join([''] + crumbs))
             self.lay.addWidget(lbl)
             lbl.show()
-        
 
     def slot_select_page(self, page_name):
         for i, page in enumerate(self.doc.basewidget.children):

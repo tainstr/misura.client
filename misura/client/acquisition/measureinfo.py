@@ -14,9 +14,8 @@ class MeasureInfo(QtGui.QTabWidget):
     statusView = False
 
     def __init__(self, remote, fixedDoc=False,  parent=None):
-        self.sampleViews = []
         self.nodes = []
-        self.nodeViews = []
+        self.nodeViews = {}
         self.fromthermalCycleView = False
         self.fixedDoc = fixedDoc
         QtGui.QTabWidget.__init__(self, parent)
@@ -35,26 +34,30 @@ class MeasureInfo(QtGui.QTabWidget):
                 p.kiln, remote, parent=self)
         else:
             self.thermalCycleView = QtGui.QWidget(self)
-        self.results = QtGui.QWidget(self)
-        # Add a tab to correct inizialization og qTabWidget
-        self.addTab(self.results, 'Results')
+        self.results = QtGui.QWidget()
+        
         self.nobj = widgets.ActiveObject(
             self.server, self.remote.measure, self.remote.measure.gete('nSamples'), parent=self)
+        
+        self.refreshSamples()
+        
         self.nobj.register()
         self.connect(self.nobj, QtCore.SIGNAL('changed()'),
                      self.refreshSamples, QtCore.Qt.QueuedConnection)
         self.connect(
             self, QtCore.SIGNAL("currentChanged(int)"), self.tabChanged)
         self.connect(
-            self, QtCore.SIGNAL("currentChanged(int)"), self.refreshSamples)
+           self, QtCore.SIGNAL("currentChanged(int)"), self.refreshSamples)
+        
+        
 
     def set_doc(self, doc):
         self.results.set_doc(doc)
 
     def tabChanged(self):
         # Do not check tc if local
-        if not getattr(self.remote,'addr'):
-            return 
+        if not getattr(self.remote, 'addr'):
+            return
         currentTab = self.currentWidget()
         if not currentTab == self.thermalCycleView:
             if self.fromthermalCycleView:
@@ -73,22 +76,31 @@ class MeasureInfo(QtGui.QTabWidget):
             tbcurve.append(tbrowcurve)
         if not tbcurve == tbcurveremote:
             r = QtGui.QMessageBox.warning(self, _("Changes not saved"),
-                                          _("Changes to thermal cycle were not saved! Save it now?"),
-                                          QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
+                                          _(
+                                              "Changes to thermal cycle were not saved! Save it now?"),
+                                          QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
             if r == QtGui.QMessageBox.Ok:
                 self.thermalCycleView.apply()
 
     nsmp = 0
     
+    def set_results(self, results):
+        i = self.indexOf(self.results)
+        if i>=0:
+            self.removeTab(i)
+        else:
+            i=self.count()
+        self.results = results
+        self.insertTab(i, self.results, _('Results'))
 
     def refreshSamples(self, *foo):
         print 'REFRESH SAMPLES'
-        #       nsmp=self.remote.measure['nSamples']
         nsmp = self.nobj.current
-        if self.nsmp == nsmp:
+        if self.nsmp == nsmp and self.nodeViews and self.nodes and self.count()>2:
             logging.debug('NO CHANGE in samples number', self.nsmp, nsmp)
             return False
         self.nsmp = nsmp
+        self.blockSignals(True)
         self.clear()
         if not self.fixedDoc:
             self.statusView = status.Status(
@@ -98,50 +110,59 @@ class MeasureInfo(QtGui.QTabWidget):
             self.up_isRunning()
         else:
             self.statusView = False
-        self.addTab(self.measureView, 'Measure')
-        self.addTab(self.thermalCycleView, 'Thermal Cycle')
-        logging.debug('REFRESH SAMPLES', self.remote.measure['nSamples'])
-        self.sampleViews = []
-        for i in range(self.nsmp):
-            sample = getattr(self.remote, 'sample' + str(i), False)
-            if not sample:
-                logging.debug('Missing sample object nr.', i)
-                continue
-            wg = conf.Interface(
-                self.server, sample, sample.describe(), self)
-            self.addTab(wg,  'Sample' + str(i))
-            self.sampleViews.append(wg)
+        self.addTab(self.measureView, _('Measure'))
+        self.addTab(self.thermalCycleView, _('Thermal Cycle'))
+        self.addTab(self.results, _('Results'))
         self.refresh_nodes()
-        self.addTab(self.results, 'Results')
+        self.blockSignals(False)
         return True
     
+    def get_samples(self):
+        nsmp = self.nobj.current
+        self.nsmp = nsmp
+        paths = []
+        p0 = self.remote['fullpath']
+        for i in range(self.nsmp):
+            n =  'sample' + str(i)
+            sample = getattr(self.remote, n, False)
+            if sample:
+                paths.append(p0 + n)
+        print 'GETSAMPLES', paths
+        return paths
+    
     def refresh_nodes(self, nodes=[]):
-        for nodevi in self.nodeViews:
+        # Remove all node tabs
+        for nodevi in self.nodeViews.itervalues():
             i = self.indexOf(nodevi)
-            if i<0: continue
+            if i < 0:
+                continue
             self.removeTab(i)
-        self.nodeViews = []
+            
         if not nodes:
             nodes = self.nodes
         if not nodes:
+            nodes = self.get_samples()
+        print 'REFRESH NODES', nodes, self.nodes
+        if not nodes:
             return False
-        self.nodes = nodes
-        print 'REFRESH NODES', nodes
+        self.nodes = []
         c = self.count()
-        for i,n in enumerate(nodes):
-            if n.split('/')[-1].startswith('sample'):
+        for i, n in enumerate(nodes):
+            if n in self.nodes:
                 continue
             node = self.server.toPath(n)
             if not node:
-                logging.debug('Missing node object', n) 
+                logging.debug('Missing node object', n)
                 continue
-            wg = conf.Interface(
-                self.server, node, node.describe(), self) 
-            self.insertTab(c-1+i, wg, node['name'])
-            self.nodeViews.append(wg)
-        
+            wg = self.nodeViews.get(n, False)
+            if not wg:
+                wg = conf.Interface(
+                        self.server, node, node.describe(), self)
+            self.insertTab(c - 1 + i, wg, node['devpath'].capitalize())
+            self.nodeViews[n] = wg
+            self.nodes.append(n)
         return True
-    
+
     def closeEvent(self, ev):
         """Disconnect dangerous signals before closing"""
         registry.system_kid_changed.disconnect(self.system_kid_slot)
@@ -154,11 +175,12 @@ class MeasureInfo(QtGui.QTabWidget):
     def up_isRunning(self):
         is_running = registry.values.get('/isRunning', False)
         self.thermalCycleView.enable(not is_running)
-        self.tabBar().setStyleSheet("background-color:" + ('red;' if is_running else 'green;'))
+        self.tabBar().setStyleSheet(
+            "background-color:" + ('red;' if is_running else 'green;'))
 
         # Update isRunning widget
         self.statusView.widgets['/isRunning']._get(is_running)
-        
+
         self.measureView.reorder()
-        for wg in self.sampleViews:
+        for wg in self.nodeViews:
             wg.reorder()

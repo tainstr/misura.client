@@ -80,14 +80,14 @@ class Breadcrumb(QtGui.QWidget):
             return False
         self.clear()
         self.page = page
-        hierarchy, level = calc_plot_hierarchy(self.doc, page)
-        if level<0:
+        hierarchy, level, page_idx = calc_plot_hierarchy(self.doc, page)
+        if level < 0:
             return False
-        crumbs = hierarchy[level][0][-1]
+        crumbs = hierarchy[level][page_idx][-1]
         self.crumbs = []
         # Create crumb widgets
         name = ''
-        correct = len(crumbs) - len(hierarchy) 
+        correct = len(crumbs) - len(hierarchy)
         if correct < 0:
             correct = 0
         for i, label in enumerate(crumbs):
@@ -105,7 +105,7 @@ class Breadcrumb(QtGui.QWidget):
             next += h
         if next:
             self.add_crumb('>>', next)
-            
+
         return True
 
     def add_crumb(self, name, hierarchy_level):

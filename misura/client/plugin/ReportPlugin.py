@@ -46,7 +46,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         vsmp = smp_path.split('/')
         smp_name = vsmp[-1]  # sample name
         smp_path = '/' + '/'.join(vsmp)  # cut summary/ stuff
-        report_path = '/report'
+        report_path = '/'+smp_path[1:].replace('/','_')+'_report'
         logging.debug('%s %s %s', smp_path, smp_name, report_path)
         test = fields['sample'].linked
         from .. import filedata
@@ -68,7 +68,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         sample = getattr(instr, smp_name)
 
         d = os.path.join(params.pathArt, fields['template_file_name'])
-        tpl = open(d, 'rb').read()
+        tpl = open(d, 'rb').read().replace("u'report'", "u'{}'".format(report_path[1:]))
         command_interpreter.run(tpl)
 
         page = doc.resolveFullWidgetPath(report_path)
@@ -143,8 +143,9 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         from ..procedure.thermal_cycle import ThermalCyclePlot
         from ..procedure.model import clean_curve
         graph = report_path + '/tc'
-        cf = {'graph': graph, 'xT': 'reportxT',
-              'yT': 'reportyT', 'xR': 'reportxR', 'yR': 'reportyR'}
+        p0 = test.prefix+sample['fullpath'][1:]
+        cf = {'graph': graph, 'xT': p0+'reportxT',
+              'yT': p0+'reportyT', 'xR': p0+'reportxR', 'yR': p0+'reportyR'}
         ThermalCyclePlot.setup(command_interface, with_progress=False, **cf)
         tc = clean_curve(tc, events=False)
         ThermalCyclePlot.importCurve(command_interface, tc, **cf)

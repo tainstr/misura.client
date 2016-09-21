@@ -295,9 +295,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def add_sumtab(self):
         # SUMMARY TREE - In lateral measureTab
-        self.measureTab.results = Results(self, self.summaryPlot)
+        self.measureTab.set_results(Results(self, self.summaryPlot))
         self.navigator = self.measureTab.results.navigator
-        self.measureTab.refreshSamples()
+        
 
     def add_graph(self):
         # PLOT window

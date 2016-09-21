@@ -9,7 +9,8 @@ from .. import acquisition
 from ..live import registry
 from misura.canon.csutil import profile
 from ..graphics import Breadcrumb, Storyboard
-from misura.client.iutils import calc_plot_hierarchy
+from misura.client.iutils import calc_plot_hierarchy, most_involved_node
+
 
 class TestWindow(acquisition.MainWindow):
 
@@ -40,6 +41,7 @@ class TestWindow(acquisition.MainWindow):
     vtoolbar = False
     breadcrumb = False
 # 	@profile
+
     def load_version(self, v=-1):
         logging.debug('%s %s', "SETTING VERSION", v)
         self.plot_page = False
@@ -64,11 +66,11 @@ class TestWindow(acquisition.MainWindow):
         self.menuPlot = fileui.SavePlotMenu(self.fixedDoc)
         self.myMenuBar.measure.addMenu(self.menuPlot)
         self.menuVersions.versionChanged.connect(self.load_version)
-        
+
         if self.vtoolbar:
             self.vtoobar.hide()
         self.vtoolbar = self.summaryPlot.plot.createToolbar(self)
-        self.vtoolbar.addAction(' Undo ',self.doc.undoOperation)
+        self.vtoolbar.addAction(' Undo ', self.doc.undoOperation)
         self.vtoolbar.show()
         self.graphWin.show()
         if self.breadcrumb:
@@ -79,44 +81,56 @@ class TestWindow(acquisition.MainWindow):
         self.breadbar.addWidget(self.breadcrumb)
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.breadbar)
         self.breadbar.show()
-        
+
         self.plotboardDock = QtGui.QDockWidget(self.centralWidget())
         self.plotboardDock.setWindowTitle('Plots Board')
         self.plotboard = Storyboard(self)
         self.plotboard.set_plot(self.summaryPlot)
         self.plotboardDock.setWidget(self.plotboard)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.plotboardDock)
-        # TODO: cleanup this! Should pass through some sort of plugin or config mechanism...
+        # TODO: cleanup this! Should pass through some sort of plugin or config
+        # mechanism...
         if self.name not in ['flash']:
             self.plotboardDock.hide()
             self.breadbar.hide()
         else:
             self.navigator.status.add(filedata.dstats.outline)
-            
-        if self.fixedDoc:    
+
+        if self.fixedDoc:
             self.doc.model.sigPageChanged.connect(self.slot_page_changed)
-        
+
     def slot_page_changed(self):
         p = self.summaryPlot.plot.getPageNumber()
         page = self.doc.basewidget.children[p]
-        print 'AAAAAA slot_page', page.name
         if page == self.plot_page:
             return False
         self.plot_page = page
-        
-        hierarchy, level = calc_plot_hierarchy(self.fixedDoc, page)
-        if level<0:
+
+        hierarchy, level, page_idx = calc_plot_hierarchy(self.fixedDoc, page)
+        if level < 0:
             return False
-        page_name, page_plots, crumbs = hierarchy[level][0]
-        crumbs = [c.split(':')[-1] for c in crumbs]
-        node_path = '/'+'/'.join(crumbs)
-        self.measureTab.refresh_nodes([node_path])
+        plots = hierarchy[level][page_idx][1]
+        crumbs, most_commons = most_involved_node(plots, self.doc)
+        get_path = lambda crumbs: '/' + '/'.join([c.split(':')[-1] for c in crumbs])
+        paths = []
+        if len(crumbs)>0:
+            if len(crumbs)>len(most_commons):
+                paths.append(get_path(crumbs))
+                self.measureTab.refresh_nodes(paths)
+                return True
+            
+            if len(crumbs)==len(most_commons):
+                crumbs.pop(-1)
+            
+            p = get_path(crumbs)
+            for c in sorted(most_commons[-1]):
+                paths.append(p+'/'+c)
+        self.measureTab.refresh_nodes(paths)
         return True
-        
 
     def closeEvent(self, ev):
         should_not_close_application = True
-        ret = QtGui.QMainWindow.closeEvent(self,ev)
+        ret = QtGui.QMainWindow.closeEvent(self, ev)
         return ret
 
     def close(self):
