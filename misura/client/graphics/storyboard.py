@@ -89,6 +89,9 @@ class Storyboard(QtGui.QWidget):
             page = self.page
         if not page:
             return False
+        if page not in self.doc.basewidget.children:
+            print 'NO PAGE!'
+            return False
         pageNum = self.doc.basewidget.children.index(page)
         fp = self.fpath(page)
         export = document.Export(

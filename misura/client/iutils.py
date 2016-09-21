@@ -309,7 +309,7 @@ def most_involved_node(involved_plots, doc, exclude=':kiln'):
     ordered = []
     for i in range(max_len):
         # Exclude the last element
-        if len(crumbs) >= max_len :
+        if len(crumbs) >= max_len : #-1:
             break
         # Keep only ancestors
         best_involved = filter(

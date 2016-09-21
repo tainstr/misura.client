@@ -49,12 +49,14 @@ class MeasureInfo(QtGui.QTabWidget):
         self.connect(
            self, QtCore.SIGNAL("currentChanged(int)"), self.refreshSamples)
         
-        
+        self.tabBar().setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tabBar().customContextMenuRequested.connect(self.show_menu)
 
     def set_doc(self, doc):
         self.results.set_doc(doc)
 
-    def tabChanged(self):
+    def tabChanged(self, *foo):
+        """Check if thermal cycle is saved - only if live"""
         # Do not check tc if local
         if not getattr(self.remote, 'addr'):
             return
@@ -65,6 +67,7 @@ class MeasureInfo(QtGui.QTabWidget):
                 self.fromthermalCycleView = False
         else:
             self.fromthermalCycleView = True
+        
 
     def checkCurve(self):
         tbcurveremote = self.thermalCycleView.remote.get('curve')
@@ -146,6 +149,7 @@ class MeasureInfo(QtGui.QTabWidget):
         if not nodes:
             return False
         self.nodes = []
+        self.menus = []
         c = self.count()
         for i, n in enumerate(nodes):
             if n in self.nodes:
@@ -158,10 +162,26 @@ class MeasureInfo(QtGui.QTabWidget):
             if not wg:
                 wg = conf.Interface(
                         self.server, node, node.describe(), self)
-            self.insertTab(c - 1 + i, wg, node['devpath'].capitalize())
+            j = c - 1 + i
+            self.insertTab(j, wg, node['devpath'].capitalize())
             self.nodeViews[n] = wg
             self.nodes.append(n)
         return True
+    
+    def show_menu(self, pos):
+        tab_idx = self.tabBar().tabAt(pos)
+        wg = self.widget(tab_idx)
+        node = getattr(wg, 'remObj', False)
+        if not node:
+            return
+        node = '0:'+node['fullpath'][1:-1]
+        node = self.results.navigator.doc.model.tree.traverse(node)
+        if not node:
+            return
+        menu = QtGui.QMenu(self)
+        self.results.navigator.buildContextMenu(node, menu=menu)
+        self.results.navigator.expand_node_path(node, select=True)
+        menu.exec_(self.tabBar().mapToGlobal(pos))
 
     def closeEvent(self, ev):
         """Disconnect dangerous signals before closing"""

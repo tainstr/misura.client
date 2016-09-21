@@ -273,7 +273,6 @@ class MainWindow(QtGui.QMainWindow):
         return True
 
     def add_measure(self):
-        # MEASUREMENT INFO
         self.rem('measureDock', 'measureTab')
         self.measureDock = QtGui.QDockWidget(self.centralWidget())
         self.measureDock.setWindowTitle(' Test Configuration')
@@ -283,7 +282,6 @@ class MainWindow(QtGui.QMainWindow):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.measureDock)
 
     def add_snapshots(self):
-        # SNAPSHOTS
         self.rem('snapshotsDock', 'snapshotsStrip')
         self.snapshotsDock = QtGui.QDockWidget(self.centralWidget())
         self.snapshotsDock.setWindowTitle('Story Board')

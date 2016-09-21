@@ -286,22 +286,22 @@ class Interface(QtGui.QTabWidget):
         self.setCurrentIndex(i)
 
     def showEvent(self, event):
-        self.rebuild()
+        self.rebuild(force=True)
 
-    def rebuild(self, prop_dict=False):
+    def rebuild(self, prop_dict=False, force=False):
         """Rebuild the full widget"""
         if not prop_dict:
             self.remObj.connect()
             k = set(self.prop_keys)
             rk = set(self.remObj.keys())
             d = k.symmetric_difference(rk)
-            if len(d) == 0:
+            if len(d) == 0 and not force:
                 logging.debug(
                     'Interface.rebuild not needed: options are equal.')
                 return
             prop_dict = self.remObj.describe()
             # If a prop_dict was set, just pick currently defined options
-            if len(k) and len(prop_dict):
+            if len(k) and len(prop_dict) and not force:
                 visible = set(prop_dict.keys()).intersection(k)
                 prop_dict = {key: prop_dict[key] for key in visible}
         if not prop_dict:

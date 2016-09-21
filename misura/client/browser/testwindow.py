@@ -114,8 +114,9 @@ class TestWindow(acquisition.MainWindow):
         get_path = lambda crumbs: '/' + '/'.join([c.split(':')[-1] for c in crumbs])
         paths = []
         if len(crumbs)>0:
-            if len(crumbs)>len(most_commons):
+            if len(crumbs)>1:
                 paths.append(get_path(crumbs))
+            if len(crumbs)>len(most_commons):
                 self.measureTab.refresh_nodes(paths)
                 return True
             
