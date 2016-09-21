@@ -315,7 +315,7 @@ def most_involved_node(involved_plots, doc, exclude=':kiln'):
     return crumbs
 
 
-def calc_plot_hierarchy(doc, exclude=':kiln/'):
+def calc_plot_hierarchy(doc, page_obj, exclude=':kiln/'):
     pages = doc.model.plots['page']
     
     hierarchy = defaultdict(list)
@@ -325,7 +325,20 @@ def calc_plot_hierarchy(doc, exclude=':kiln/'):
         hierarchy[len(crumbs)].append((page, page_plots, crumbs))
         
     hierarchy = sorted(hierarchy.iteritems(), cmp=lambda a,b: a[0]-b[0])
-    return [sorted(h[1], key=lambda a: '/'.join(a[2]).lower()) for h in hierarchy]
+    hierarchy = [sorted(h[1], key=lambda a: '/'.join(a[2]).lower()) for h in hierarchy]
+    inpage = False
+    level = -1
+    for level, pages in enumerate(hierarchy):
+        for page_name, page_plots, crumbs in pages:
+            if page_name == page_obj.name:
+                inpage = True
+                break
+        if inpage:
+            break
+    if not inpage:
+        level = -1
+    
+    return hierarchy, level
 
 def get_plotted_tree(base, m=False):
     """Builds a dictionary for the base graph:

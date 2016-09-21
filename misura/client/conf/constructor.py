@@ -215,7 +215,6 @@ class SectionBox(QtGui.QWidget):
         secs = [self.config_section, self.results_section, self.status_section]
         lens = [len(sec.widgetsMap)>0 for sec in secs]
         # Just one active section:
-        print 'AAAAAAAAAAA',lens
         if sum(lens)<1:
             return
         if sum(lens)==1:

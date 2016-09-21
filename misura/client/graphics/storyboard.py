@@ -133,17 +133,10 @@ class Storyboard(QtGui.QWidget):
         
         self.page = page
         self.update_page_image()
-        hierarchy = calc_plot_hierarchy(self.doc)
-        inpage = False
-        for level, pages in enumerate(hierarchy):
-            for page_name, page_plots, crumbs in pages:
-                if page_name == page.name:
-                    inpage = True
-                    break
-            if inpage:
-                break
-        if not inpage:
+        hierarchy, level = calc_plot_hierarchy(self.doc, page)
+        if level<0:
             return False
+        page_name, page_plots, crumbs = hierarchy[level][0]
 
         N = len(hierarchy)
         level += self.level_modifier
