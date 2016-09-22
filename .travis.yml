@@ -14,7 +14,7 @@ install:
   - conda update -q --yes conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n test-environment python=2.7 nose numpy scipy pytables pycrypto pyqt4 pygments pil
+  - conda create -q -n test-environment python=2.7 nose numpy scipy pytables pycrypto pyqt pygments pil
   - git clone https://github.com/tainstr/misura.canon.git ../misura.canon
   - export PYTHONPATH=$PYTHONPATH:$(pwd)/../misura.canon
   - git clone https://github.com/tainstr/veusz.git ../veusz
@@ -27,7 +27,8 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
 script:
-  - nosetests -vv --with-coverage --cover-package=misura
+  - python -c "import PyQt4; print 'PyQt4 OK'"
+  - nosetests-2.7 -vv --with-coverage --cover-package=misura
 cache:
   - apt
   - directories:
