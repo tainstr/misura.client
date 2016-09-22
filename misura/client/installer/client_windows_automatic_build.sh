@@ -48,7 +48,7 @@ if [ -z "$1" ] && [ -z "$NEW_CLIENT_COMMITS" ] && [ -z "$NEW_CANON_COMMITS" ] &&
 fi
 
 ##################
-cd -
+cd "$INSTALLER_DIR"
 echo "Changes detected."
 echo "Removing old local build..."
 rm -rf "$DISTRIBUTION_DIR"
