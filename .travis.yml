@@ -16,19 +16,23 @@ install:
   - conda info -a
   - conda create -q -n test-environment python=2.7 nose numpy scipy pytables pycrypto pygments pil
   - source activate test-environment
-  - conda install --channel https://conda.anaconda.org/conda-forge pyqt sip
-  - pip install python-coveralls
+  - python -c "import numpy; import tables; print 'env OK'"
+  - conda install --channel https://conda.anaconda.org/conda-forge pyqt sip python-coveralls
+  - which python
+  - python -c "import PyQt4; import sip; print 'OK'"
   - git clone https://github.com/tainstr/misura.canon.git ../misura.canon
   - export PYTHONPATH=$PYTHONPATH:$(pwd)/../misura.canon
   - git clone https://github.com/tainstr/veusz.git ../veusz
   - export VEUSZ_RESOURCE_DIR=$(pwd)/../veusz
   - export PYTHONPATH=$PYTHONPATH:$VEUSZ_RESOURCE_DIR
-
+  - python -c "import PyQt4; import sip; print 'OK'"
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3
+  - python -c "import PyQt4; import sip; print 'OK'"
 script:
+  - python -c "import PyQt4; import sip; print 'OK'"
   - nosetests-2.7 -vv --with-coverage --cover-package=misura
 cache:
   - apt
