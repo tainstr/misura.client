@@ -22,6 +22,7 @@ if [ -a $BUILD_IN_PROGRSS_FILE ]; then
 fi
 
 git remote update
+git checkout master
 NEW_COMMITS=$(git log HEAD..origin/master --oneline)
 if [ -z "$NEW_COMMITS" ]; then
 	echo "No changes detected."
@@ -29,9 +30,10 @@ if [ -z "$NEW_COMMITS" ]; then
 fi
 
 echo "Changes detected on remote. Pulling sources..."
-git pull --rebase origin/master
+git pull --rebase
 cd $CANON_DIR
-git pull --rebase origin/master
+git checkout master
+git pull --rebase
 cd -
 echo "Done."
 echo "Removing old local build..."
