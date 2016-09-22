@@ -29,9 +29,9 @@ if [ -z "$NEW_COMMITS" ]; then
 fi
 
 echo "Changes detected on remote. Pulling sources..."
-git pull
+git pull --rebase master
 cd $CANON_DIR
-git pull
+git pull --rebase master
 cd -
 echo "Done."
 echo "Removing old local build..."

@@ -202,5 +202,5 @@ class MeasureInfo(QtGui.QTabWidget):
         self.statusView.widgets['/isRunning']._get(is_running)
 
         self.measureView.reorder()
-        for wg in self.nodeViews:
+        for wg in self.nodeViews.itervalues():
             wg.reorder()
