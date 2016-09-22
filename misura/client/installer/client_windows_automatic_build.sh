@@ -16,7 +16,7 @@ BUILD_IN_PROGRSS_FILE=$INSTALLER_DIR/build_in_progress
 LAST_BUILD_STATUS_FILE=$INSTALLER_DIR/last_build_status
 touch $LAST_BUILD_STATUS_FILE
 
-if [ -a $BUILD_IN_PROGRSS_FILE ] && [ -z "$1"]; then
+if [ -a $BUILD_IN_PROGRSS_FILE ] && [ -z "$1" ]; then
 	echo "Build already in progress."
 	exit 0
 fi
