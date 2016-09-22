@@ -21,7 +21,7 @@ install:
   - export VEUSZ_RESOURCE_DIR=$(pwd)/../veusz
   - export PYTHONPATH=$PYTHONPATH:$VEUSZ_RESOURCE_DIR
   - source activate test-environment
-  - conda install --channel https://conda.anaconda.org/conda-forge pyqt
+  - conda install --channel https://conda.anaconda.org/conda-forge pyqt sip
   - pip install python-coveralls
 before_script:
   - "export DISPLAY=:99.0"
