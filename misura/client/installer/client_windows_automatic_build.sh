@@ -21,21 +21,35 @@ if [ -a $BUILD_IN_PROGRSS_FILE ]; then
 	exit 0
 fi
 
+# CLIENT #############
 git remote update
 git checkout master
-NEW_COMMITS=$(git log HEAD..origin/master --oneline)
-if [ -z "$NEW_COMMITS" ]; then
-	echo "No changes detected."
-	exit 0
+NEW_CLIENT_COMMITS=$(git log HEAD..origin/master --oneline)
+git pull --rebase
+
+# CANON ############
+cd $CANON_DIR
+git remote update
+git checkout master
+NEW_CANON_COMMITS=$(git log HEAD..origin/master --oneline)
+git pull --rebase
+
+# VEUSZ ############
+cd $VEUSZ_DIR
+git remote update
+git checkout master
+NEW_VEUSZ_COMMITS=$(git log HEAD..origin/master --oneline)
+git pull --rebase
+
+
+if [ -z "$1" ] && [ -z "$NEW_CLIENT_COMMITS" ] && [ -z "$NEW_CANON_COMMITS" ] && [ -z "$NEW_VEUSZ_COMMITS" ]; then
+   echo "No changes detected."
+   exit 0
 fi
 
-echo "Changes detected on remote. Pulling sources..."
-git pull --rebase
-cd $CANON_DIR
-git checkout master
-git pull --rebase
+##################
 cd -
-echo "Done."
+echo "Changes detected."
 echo "Removing old local build..."
 rm -rf "$DISTRIBUTION_DIR"
 echo "Done."
