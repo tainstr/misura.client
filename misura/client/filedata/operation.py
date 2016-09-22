@@ -87,6 +87,8 @@ class ImportParamsMisura(base.ImportParamsBase):
         'rule_load': clientconf.rule_load,
         'rule_unit': clientconf.rule_unit,
         'overwrite': True,
+        # keep data within the operation object - no real import
+        'dryrun': False, 
     })
 
 
@@ -339,14 +341,15 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         return op
 
     @classmethod
-    def from_rule(cls, rule, linked_filename, uid='', overwrite=True):
+    def from_rule(cls, rule, linked_filename, uid='', overwrite=True, dryrun=False):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
         p = ImportParamsMisura(filename=linked_filename,
                                uid=uid,
                                rule_exc=' *',
                                rule_load=rule,
                                rule_unit=clientconf.confdb['rule_unit'],
-                               overwrite=overwrite)
+                               overwrite=overwrite, 
+                               dryrun=dryrun)
         op = OperationMisuraImport(p)
         return op
 
@@ -621,16 +624,21 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 for sub in subds:
                     names.append(sub.m_name)
                     self.outdatasets[sub.m_name] = sub
-
+        self.imported_names = names
+        self._outdatasets = self.outdatasets
+        if self.params.dryrun:
+            # Do not actually import anything - just keep a reference
+            self.outdatasets = {}
+            return []
         # Detect ds which should be removed from availds because already
         # contained in imported names
         avail_set = set(self._doc.available_data.keys())
         names_set = set(names).union(set(self._doc.data.keys()))
         for dup in names_set.intersection(avail_set):
             self._doc.available_data.pop(dup)
-        logging.debug('%s', 'emitting done')
+        logging.debug('emitting done')
         done()
-        logging.debug('%s %s', 'imported names:', names)
+        logging.debug('imported names:', names)
         self._doc.available_data.update(availds)
 
         # Update linked file parameters
@@ -639,5 +647,5 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         hdf_names = map(
             lambda name: ("/" + name.lstrip(self.prefix) + "$"), hdf_names)
         LF.params.rule_load = '\n'.join(hdf_names)
-        self.imported_names = names
+        
         return names

@@ -66,10 +66,13 @@ class MisuraDocument(document.Document):
             d.reset(self.proxy, datapath=fold)
             self.decoders[fold] = d
             
-    def load_rule(self, filename, rule, overwrite=True):
+    def load_rule(self, filename, rule, overwrite=True, dryrun=False):
         op = OperationMisuraImport.from_rule(
-            rule, filename, overwrite=overwrite)
+            rule, filename, overwrite=overwrite, dryrun=dryrun)
         self.applyOperation(op)
+        r = op._outdatasets
+        del op._outdatasets
+        return r    
         
     def _load(self, path, filename):
         """Load or reload a dataset"""
