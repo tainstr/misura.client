@@ -1,7 +1,7 @@
 REM Compile and deploy script for ESS environment 
 
 set codeBase=%userprofile%\Desktop\misura4
-set deployDir=\\Ess-server\company\Installations\Misura4
+set deployDir=\\192.168.0.118\misura\Installations
 set pyinst=pyinstaller
 set python=C:\Python27\python.exe
 
