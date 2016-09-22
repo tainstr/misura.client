@@ -295,7 +295,7 @@ class Interface(QtGui.QTabWidget):
             k = set(self.prop_keys)
             rk = set(self.remObj.keys())
             d = k.symmetric_difference(rk)
-            if len(d) == 0 and not force:
+            if len(d) == 0:
                 logging.debug(
                     'Interface.rebuild not needed: options are equal.')
                 return
@@ -363,10 +363,9 @@ class Interface(QtGui.QTabWidget):
                     sname = self.prop_dict[sname]['name']
             self.addTab(area, _(sname))
 
-        # se c'è solo una sezione, nascondo la tabBar
-        if len(self.sections.keys()) == 1:
-            self.tabBar().setVisible(False)
-
+        # hide tabBar if just one section
+        self.tabBar().setVisible(len(self.sections.keys()) > 1)
+            
         for sec in self.sectionsMap.itervalues():
             self.widgetsMap.update(sec.widgetsMap)
 
