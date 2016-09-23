@@ -157,15 +157,15 @@ class NodeEntry(object):
         # Root and file entries
         if not self.parent:
             self._path = self._name
-            logging.debug('%s %s', 'Root entry', self._name)
+            logging.debug('Root entry', self._name)
         # File entry
         elif not self.parent.parent:
             self._path = self._name
-            logging.debug('%s %s', 'File entry', self._name)
+            logging.debug('File entry', self._name)
         # First level entries (t, groups)
         elif not self.parent.parent.parent:
             self._path = self.parent.path + ':' + self._name
-            logging.debug('%s %s', 'First level', self._path)
+            logging.debug('First level', self._path)
         # Normal entries
         else:
             self._path = self.splt.join([self.parent.path, self._name])
@@ -272,11 +272,15 @@ class NodeEntry(object):
     @linked.setter
     def linked(self, LF):
         self._linked = LF
+        
+    @property
+    def conf_path(self):
+        return self.path.split(':')[-1]
 
     def get_configuration(self):
         if not self.linked:
             return False
-        path = self.path.split(':')[-1]
+        path = self.conf_path
         configuration_proxy = self.linked.conf
         if '/' in path and len(path)>1:
             configuration_proxy = configuration_proxy.toPath(path)

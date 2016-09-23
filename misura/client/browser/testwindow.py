@@ -68,7 +68,7 @@ class TestWindow(acquisition.MainWindow):
         self.menuVersions.versionChanged.connect(self.load_version)
 
         if self.vtoolbar:
-            self.vtoobar.hide()
+            self.vtoolbar.hide()
         self.vtoolbar = self.summaryPlot.plot.createToolbar(self)
         self.vtoolbar.addAction(' Undo ', self.doc.undoOperation)
         self.vtoolbar.show()
