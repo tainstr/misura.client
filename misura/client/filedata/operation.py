@@ -332,9 +332,15 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
         if ':' in dataset_name:
             dataset_name = dataset_name.split(':')[1]
+            
+        rule = '^(/summary/)?' + dataset_name + '$'
+        version = kw.get('version','')
+        if version:
+            rule += '|^({}/summary/)?'.format(version) + dataset_name + '$'
+            rule += '|^({}/)?'.format(version) + dataset_name + '$'
         p = ImportParamsMisura(filename=linked_filename,
                                rule_exc=' *',
-                               rule_load='^(/summary/)?' + dataset_name + '$',
+                               rule_load=rule,
                                rule_unit=clientconf.confdb['rule_unit'],
                                **kw)
         op = OperationMisuraImport(p)
@@ -382,17 +388,14 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         fp = getattr(doc, 'proxy', False)
         logging.debug('FILENAME', self.filename, type(fp), fp)
         if fp is False or not fp.isopen():
-            self.proxy = getFileProxy(self.filename)
+            self.proxy = getFileProxy(self.filename, version = self.params.version)
+            print 'GOT FILE PROXY', self.proxy, self.proxy.get_version(), self.proxy.conf
         else:
             self.proxy = fp
         job(1, label='Configuration')
         if not self.proxy.isopen():
             self.proxy.reopen()
-            
-        # Load required version
-        self.proxy.set_version(self.params.version)
         LF.version = self.proxy.get_version()    
-        print 'AAAAAAAAAA fileproxy version', self.params.version, self.proxy.get_version()
         self.params.version = LF.version
         # Redefine LF.conf if empty
         if not LF.conf:
@@ -600,8 +603,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                     data = []
             else:
                 # Get raw data and time_sequence
-                logging.debug('Getting raw data', col)
-                data = read_data(self.proxy, col).transpose()
+                logging.debug('Getting raw data', col0)
+                data = read_data(self.proxy, col0).transpose()
                 sub_time_sequence = data[0]
                 data = data[1]
 
