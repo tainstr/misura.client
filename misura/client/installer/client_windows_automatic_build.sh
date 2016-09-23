@@ -25,22 +25,27 @@ fi
 git remote update
 git checkout master
 NEW_CLIENT_COMMITS=$(git log HEAD..origin/master --oneline)
-git pull --rebase
+if [ -z "$NEW_CLIENT_COMMITS" ]; then
+  git pull --rebase
+fi
 
 # CANON ############
 cd $CANON_DIR
 git remote update
 git checkout master
 NEW_CANON_COMMITS=$(git log HEAD..origin/master --oneline)
-git pull --rebase
+if [ -z "$NEW_CANON_COMMITS" ]; then
+  git pull --rebase
+fi
 
 # VEUSZ ############
 cd $VEUSZ_DIR
 git remote update
 git checkout master
 NEW_VEUSZ_COMMITS=$(git log HEAD..origin/master --oneline)
-git pull --rebase
-
+if [ -z "$NEW_VEUSZ_COMMITS" ]; then
+  git pull --rebase
+fi
 
 if [ -z "$1" ] && [ -z "$NEW_CLIENT_COMMITS" ] && [ -z "$NEW_CANON_COMMITS" ] && [ -z "$NEW_VEUSZ_COMMITS" ]; then
    echo "No changes detected."
