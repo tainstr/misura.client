@@ -4,7 +4,6 @@
 from misura.canon.logger import Log as logging
 from misura.canon.plugin.domains import node, nodes
 
-from ..filedata import OperationMisuraImport
 from ..filedata import DatasetEntry
 from .. import axis_selection
 import numpy as np
@@ -54,7 +53,7 @@ class QuickOps(object):
 #
     def _load(self, node):
         """Load or reload a dataset"""
-        self.doc._load(node.path, node.linked.filename)
+        self.doc._load(node.path, node.linked.filename, version=node.linked.version)
         
     @node
     def load_rule(self, node, rule, overwrite=True):
@@ -62,15 +61,15 @@ class QuickOps(object):
         
     @node
     def load(self, node=False):
-        logging.debug('%s %s', 'load', node)
+        logging.debug('load', node)
         if node.linked is None:
-            logging.debug('%s %s', 'Cannot load: no linked file!', node)
+            logging.error('Cannot load: no linked file!', node)
             return
         if not node.linked.filename:
-            logging.debug('%s %s', 'Cannot load: no filename!', node)
+            logging.error('Cannot load: no filename!', node)
             return
         if len(node.data) > 0:
-            logging.debug('%s %s', 'Unloading', node.path)
+            logging.debug('Unloading', node.path)
             # node.ds.data = []
             ds = node.ds
             self.deleteData(node=node)

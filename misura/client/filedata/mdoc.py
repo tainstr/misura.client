@@ -59,25 +59,25 @@ class MisuraDocument(document.Document):
             up = False
             return
 
-        dec = self.proxy.header(['Binary', 'Profile','Image','ImageM3','ImageBMP'])
+        dec = self.proxy.header(
+            ['Binary', 'Profile', 'Image', 'ImageM3', 'ImageBMP'])
         logging.debug('%s %s', 'FOUND FOLDERS', dec)
         for fold in dec:
             d = DataDecoder(self)
             d.reset(self.proxy, datapath=fold)
             self.decoders[fold] = d
-            
-    def load_rule(self, filename, rule, overwrite=True, dryrun=False):
+
+    def load_rule(self, filename, rule, **kw):
         op = OperationMisuraImport.from_rule(
-            rule, filename, overwrite=overwrite, dryrun=dryrun)
+            rule, filename, **kw)
         self.applyOperation(op)
         r = op._outdatasets
         del op._outdatasets
-        return r    
-        
-    def _load(self, path, filename):
+        return r
+
+    def _load(self, path, filename, **kw):
         """Load or reload a dataset"""
-        op = OperationMisuraImport.from_dataset_in_file(
-            path, filename)
+        op = OperationMisuraImport.from_dataset_in_file(path, filename, **kw)
         self.applyOperation(op)
 
     def reconnect(self):
@@ -157,8 +157,9 @@ class MisuraDocument(document.Document):
                 v = a[idx]
             meta[col] = v
         return meta
-    
+
     auto_changeset = 0
+
     @lockme
     def update(self, proxy=False):
         if not self.up:

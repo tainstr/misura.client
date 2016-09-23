@@ -23,7 +23,8 @@ from .. import units
 
 from PyQt4 import QtCore
 
-from misura.client import _
+from .. import _
+from misura.canon.option.common_proxy import from_column
 
 
 sep = '/'
@@ -78,7 +79,7 @@ class ImportParamsMisura(base.ImportParamsBase):
     defaults.update({
         'prefix': '0:',
         'uid': '',
-        'version': None,  # means latest
+        'version': -1,  # means latest
         'reduce': False,
         'reducen': 1000,
         'time_interval': 2,  # interpolation interval for time coord
@@ -251,7 +252,6 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     #TODO: cleaun-up all this proliferation of *_dataset_names!!!
     # Get meas. unit
     u = dataset_measurement_unit(pure_dataset_name, fileproxy, data, variable_name)
-    logging.debug('building the dataset', pure_dataset_name)
     ds = MisuraDataset(data=data, linked=linked_file)
     ds.m_name = prefixed_dataset_name
     ds.m_pos = p
@@ -328,28 +328,26 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         self.rule_unit = clientconf.RulesTable(params.rule_unit)
 
     @classmethod
-    def from_dataset_in_file(cls, dataset_name, linked_filename, uid=''):
+    def from_dataset_in_file(cls, dataset_name, linked_filename, **kw):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
         if ':' in dataset_name:
             dataset_name = dataset_name.split(':')[1]
         p = ImportParamsMisura(filename=linked_filename,
-                               uid=uid,
                                rule_exc=' *',
                                rule_load='^(/summary/)?' + dataset_name + '$',
-                               rule_unit=clientconf.confdb['rule_unit'])
+                               rule_unit=clientconf.confdb['rule_unit'],
+                               **kw)
         op = OperationMisuraImport(p)
         return op
 
     @classmethod
-    def from_rule(cls, rule, linked_filename, uid='', overwrite=True, dryrun=False):
+    def from_rule(cls, rule, linked_filename, **kw):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
         p = ImportParamsMisura(filename=linked_filename,
-                               uid=uid,
                                rule_exc=' *',
                                rule_load=rule,
                                rule_unit=clientconf.confdb['rule_unit'],
-                               overwrite=overwrite, 
-                               dryrun=dryrun)
+                               **kw)
         op = OperationMisuraImport(p)
         return op
 
@@ -390,11 +388,12 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         job(1, label='Configuration')
         if not self.proxy.isopen():
             self.proxy.reopen()
-        if self.proxy.conf is False:
-            self.proxy.load_conf()
+            
         # Load required version
-        if self.params.version is not None:
-            self.proxy.set_version(self.params.version)
+        self.proxy.set_version(self.params.version)
+        LF.version = self.proxy.get_version()    
+        print 'AAAAAAAAAA fileproxy version', self.params.version, self.proxy.get_version()
+        self.params.version = LF.version
         # Redefine LF.conf if empty
         if not LF.conf:
             conf = self.proxy.conf  # ConfigurationProxy
@@ -439,7 +438,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         """Return the list of available node names and the list of nodes which should
         be loaded during this import operation."""
         # Will list only Array-type descending from /summary
-        header = self.proxy.header(['Array'], '/summary')
+        #TODO: introduce version here. Find a more accurate caching system.
+        header = self.proxy.header(['Array'], '/summary') 
         autoload = []
         excluded = []
         logging.debug('%s %s', 'got header', len(header))
@@ -551,7 +551,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         availds = {}
         names = []
         for p, col0 in enumerate(['t'] + available):
-            col = col0.replace('/summary/', '/')
+            #col = col0.replace('/summary/', '/')
+            if col0=='t':
+                col='t'
+            else:
+                col = '/' + '/'.join(from_column(col0))
             job(p + 1, label=col)
             mcol = col
             if mcol.startswith(sep):
@@ -571,7 +575,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 attr = []
                 type = 'Float'
             else:
-                logging.debug('Getting attr', col)
                 obj,  name = self.proxy.conf.from_column(col)
                 opt = obj.gete(name)
                 attr = opt['attr']
