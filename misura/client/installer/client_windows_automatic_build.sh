@@ -21,6 +21,8 @@ if [ -a $BUILD_IN_PROGRSS_FILE ] && [ -z "$1" ]; then
 	exit 0
 fi
 
+touch $BUILD_IN_PROGRSS_FILE
+
 # CLIENT #############
 git remote update
 git checkout master
@@ -60,7 +62,6 @@ rm -rf "$DISTRIBUTION_DIR"
 echo "Done."
 
 echo "Let's start..."
-touch $BUILD_IN_PROGRSS_FILE
 
 rm -rf "$CANON_LINK"
 ln -s "$CANON_DIR" "$CANON_LINK"
