@@ -27,7 +27,7 @@ touch $BUILD_IN_PROGRSS_FILE
 git remote update
 git checkout master
 NEW_CLIENT_COMMITS=$(git log HEAD..origin/master --oneline)
-if [ -z "$NEW_CLIENT_COMMITS" ]; then
+if [ -n "$NEW_CLIENT_COMMITS" ]; then
   git pull --rebase
 fi
 
@@ -36,7 +36,7 @@ cd $CANON_DIR
 git remote update
 git checkout master
 NEW_CANON_COMMITS=$(git log HEAD..origin/master --oneline)
-if [ -z "$NEW_CANON_COMMITS" ]; then
+if [ -n "$NEW_CANON_COMMITS" ]; then
   git pull --rebase
 fi
 
@@ -45,7 +45,7 @@ cd $VEUSZ_DIR
 git remote update
 git checkout master
 NEW_VEUSZ_COMMITS=$(git log HEAD..origin/master --oneline)
-if [ -z "$NEW_VEUSZ_COMMITS" ]; then
+if [ -n "$NEW_VEUSZ_COMMITS" ]; then
   git pull --rebase
 fi
 
