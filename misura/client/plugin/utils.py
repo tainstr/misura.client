@@ -13,6 +13,7 @@ from misura.canon.logger import Log as logging
 
 from misura.client.iutils import searchFirstOccurrence, iter_widgets
 
+
 def convert_datapoint_units(convert_func, dsname, doc):
     """Convert all DataPoint widgets in `doc` using dataset `dsname`
     as the x or y of the curve they are attached to."""
@@ -64,6 +65,7 @@ def smooth(x, window=10, method='hanning'):
     y = y[window:-window + 1]
     return y
 
+
 def derive(v, method, order=1):
     """Derive one time an array, always returning an array of the same length"""
     if method == 'Middle':
@@ -77,13 +79,15 @@ def derive(v, method, order=1):
     d = np.concatenate((app, d))
     return d
 
-def xyderive( x, y, order, method):
+
+def xyderive(x, y, order, method):
     """Compute order-th derivative of `y` with respect to `x`"""
     x = derive(x, method)
     for i in range(order):
         y = derive(y, method)
         y = y / x
     return y
+
 
 class OperationWrapper(object):
 
@@ -94,17 +98,17 @@ class OperationWrapper(object):
     translate = [_]
     plugins_module = plugins
     document_module = document
-    
+
     @property
     def registry(self):
         from .. import live
         return live.registry
-    
+
     @property
     def tasks(self):
         r = getattr(self.registry, 'tasks', False)
         return r
-    
+
     @property
     def ops(self):
         if not self._ops:
@@ -183,31 +187,31 @@ class OperationWrapper(object):
             ds.m_update = up
             n += 1
         return n
-    
+
     def _(self, *a, **k):
         return _(*a, **k)
-    
+
     def get_node_configuration(self, node, rule=False):
         p = node.path
         if rule:
             regex = re.compile(rule.replace('\n', '|'))
             if not regex.search(p):
                 raise self.plugins_module.ToolsPluginException(
-                        self._('The target does not conform to rule {}:\n {}').format(rule, p))
+                    self._('The target does not conform to rule {}:\n {}').format(rule, p))
         if not node.linked:
             raise self.plugins_module.ToolsPluginException(
                 self._('The selected node does not seem to have an associated configuration') + p)
-            
+
         return node.get_configuration()
-    
+
     def node_configuration_dialog(self, configuration_proxy, section='Main'):
         ui = self.plugins_module.FieldConfigurationProxy.conf_module.InterfaceDialog(
             configuration_proxy)
-        ui.setWindowTitle(self._('Review settings for ') + configuration_proxy['fullpath'])
+        ui.setWindowTitle(
+            self._('Review settings for ') + configuration_proxy['fullpath'])
         ui.interface.show_section(section)
-        return ui  
+        return ui
 
-    
     def show_node_configuration(self, configuration_proxy, section='Main'):
         ui = self.node_configuration_dialog(configuration_proxy, section)
         r = ui.exec_()
@@ -215,12 +219,12 @@ class OperationWrapper(object):
             logging.info('Plugin execution aborted', r)
             return False
         return True
-    
-    def set_new_dataset(self, original_dataset, data, name, label, path, unit='volt', dryrun=False):
+
+    def set_new_dataset(self, original_dataset, data, name, label, path, unit='volt', opt=False, dryrun=False):
         """Create a new dataset by copying `original_dataset` and overwriting with `data`"""
         from ..filedata.generate_datasets import new_dataset_operation
-        op = new_dataset_operation(original_dataset, data, name, label, path, unit=unit)
+        op = new_dataset_operation(
+            original_dataset, data, name, label, path, unit=unit, opt=opt)
         if not dryrun:
             self.ops.append(op)
         return op
-        

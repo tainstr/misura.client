@@ -16,10 +16,12 @@ possible_Tcol_names = set(['Temp.', 'Temp', 'Temperature',
                            'T', 'temp', 'temp.', 'temperature'])
 possible_value_names = set(['Value','value','val','v'])
 
-def new_dataset_operation(original_dataset, data, name, label, path, unit='volt'):
+def new_dataset_operation(original_dataset, data, name, label, path, unit='volt', opt=False):
     """Create a new dataset by copying `original_dataset` and overwriting with `data`.
     Returns an operation to be executed by the document."""
     old_unit = getattr(original_dataset, 'old_unit', unit)
+    if not opt:
+        opt = original_dataset.m_opt
     new_dataset = copy(original_dataset)
     new_dataset.tags = set([])
     new_dataset.data = plugins.numpyCopyOrNone(data)
@@ -30,6 +32,8 @@ def new_dataset_operation(original_dataset, data, name, label, path, unit='volt'
     new_dataset.unit = unit
     new_dataset.m_percent = False
     new_dataset.m_label = _(label)
+    new_dataset.m_opt = opt
+    new_dataset.m_name = name
     prefix = original_dataset.linked.prefix
     if not path.startswith(prefix):
         path = prefix+path.lstrip('/')

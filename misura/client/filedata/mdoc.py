@@ -79,11 +79,12 @@ class MisuraDocument(document.Document):
         self.cache[name] = filename 
         open(filename, 'wb').write(dumps(ds))
         logging.debug('Cached', name, filename)
+        self.available_data[name] = ds
         return True
         
     def get_cache(self, name):
         filename = self.cache.get(name, False)
-        if not filename:
+        if not filename or not os.path.exists(filename):
             logging.debug('No dataset in cache', name, filename)
             return False
         ds = loads(open(filename, 'rb').read())

@@ -10,6 +10,9 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 
 import veusz.dataimport.base as base
 
+from misura.canon import option
+from misura.canon.option.common_proxy import from_column
+
 from dataset import MisuraDataset, Sample
 import linked
 from proxy import getFileProxy
@@ -18,13 +21,14 @@ from entry import iterpath
 
 from .. import iutils, live
 from .. import clientconf
-
+from .. import _
 from .. import units
+
 
 from PyQt4 import QtCore
 
-from .. import _
-from misura.canon.option.common_proxy import from_column
+
+
 
 
 sep = '/'
@@ -248,10 +252,13 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
                    hdf_dataset_name=False, 
                    variable_name=False, 
                    m_update=True, p=0, 
-                   linked_file=False, reference_sample=False, rule_unit=lambda *a: False):
+                   linked_file=False, reference_sample=False, 
+                   rule_unit=lambda *a: False,
+                   unit=False):
     #TODO: cleaun-up all this proliferation of *_dataset_names!!!
     # Get meas. unit
-    u = dataset_measurement_unit(pure_dataset_name, fileproxy, data, variable_name)
+    if not unit:
+        unit = dataset_measurement_unit(pure_dataset_name, fileproxy, data, variable_name)
     ds = MisuraDataset(data=data, linked=linked_file)
     ds.m_name = prefixed_dataset_name
     ds.m_pos = p
@@ -260,9 +267,9 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     ds.m_col = pure_dataset_name
     ds.m_update = m_update
     ds.m_conf = fileproxy.conf
-    ds.unit = str(u) if u else u
+    ds.unit = str(unit) if unit else unit
     ds.old_unit = ds.unit
-
+    
     # Read additional metadata
     if len(data) > 0 and pure_dataset_name != 't':
         logging.debug('Reading metadata',  pure_dataset_name)
@@ -270,7 +277,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
         assign_sample_to_dataset(ds, linked_file, reference_sample)
         # Units conversion
         nu = rule_unit(hdf_dataset_name)
-        if u and nu:
+        if unit and nu:
             ds = units.convert(ds, nu[0])
             logging.debug('New dataset unit', ds.unit, ds.old_unit)
 
@@ -507,35 +514,70 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             '%s %s %s %s', 'build', idx + 1, 'samples', self.LF.samples)
         return refsmp
 
+    def search_data(self, col):
+        return self._doc.data.get(col, 
+                            self.outdatasets.get(col, 
+                                self._doc.get_cache(col)))
 
-
-    def create_local_datasets(self, pcol, sub_time_sequence, time_sequence):
+    def create_local_datasets(self, pcol, sub_time_sequence=False, time_sequence=False):
         """Create subordered time and temperature datasets"""
         logging.debug('creating local datasets',  pcol)
+        
+        r = []
+        # Get time column from document or from cache
+        # Search a t child
         subcol = pcol + sep + 't'
-        subvar = 't'
-        subt = create_dataset(self.proxy, sub_time_sequence, subcol,
+        subt = self.search_data(subcol)
+        # Search a t sibling
+        if subt is False:
+            subt = self.search_data('/'.join(pcol.split(sep)[:-1]+['t']))
+        if subt:
+            r.append(subt)
+        elif (sub_time_sequence is not False):
+            subvar = 't'
+            subt = create_dataset(self.proxy, sub_time_sequence, subcol,
                                    subvar, subvar, subvar, 
                                    linked_file=self.LF, reference_sample=self.refsmp,
-                                   rule_unit=self.rule_unit)
-        T = self.prefix + 'kiln/T'
-        # Search in doc and in current outdatasets (kiln/T should be the first
-        # dataset imported!)
-        T = self._doc.data.get(T, self.outdatasets.get(T, False))
+                                   rule_unit=self.rule_unit,
+                                   unit='second')
+            r.append(subt)
+        # Neither subT is possible
+        if not r:
+            return r
+        sub_time_sequence = subt.data
+        # Get existing, created or cached ds
+        subcol = pcol + sep + 'T' 
+        subT = self.search_data(subcol)
+        # Search a sibiling
+        if not subT:
+            subT = self.search_data('/'.join(pcol.split(sep)[:-1]+['T']))
+        if subT:
+            r.append(subT)
+            return r
+        if time_sequence is False:
+            return r
+        
+        # Search in doc, in current outdatasets (kiln/T should be the first
+        # dataset imported!) and in cache
+        Tcol = self.prefix + 'kiln/T'
+        T = self.search_data(Tcol)
         # No main temperature dataset found: cannot build subordered T
         if T is False:
             print logging.error('No temperature dataset found for local dataset', pcol)
-            return [subt]
+            return r
+        # Generate a new local T dataset
         temperature_function = InterpolatedUnivariateSpline(
             time_sequence, T.data, k=1)
         sub_temperature_sequence = temperature_function(sub_time_sequence)
-        subcol = pcol + sep + 'T'
+        
         subvar = 'T'
         subT = create_dataset(self.proxy, sub_temperature_sequence, subcol,
                                    subvar, subvar, subvar, 
                                    linked_file=self.LF, reference_sample=self.refsmp,
+                                   unit=T.unit,
                                    rule_unit=self.rule_unit)
-        return [subt, subT]
+        r.append(subT)
+        return r
 
     def doImport(self):
         """Import data.  Returns a list of datasets which were imported."""
@@ -605,6 +647,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             if col == 't':
                 attr = []
                 type = 'Float'
+                opt = option.ao({}, 't', 'Float', 0, 'Event Time', unit='second')['t']
             else:
                 if opt is False:
                     obj,  name = self.proxy.conf.from_column(col)
@@ -613,7 +656,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 type = opt['type']
                 if attr in ['', 'None', None, False, 0]:
                     attr = []
-
+                    
             if not m_update:
                 # leave ds empty
                 pass
@@ -628,6 +671,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 data = read_data(self.proxy, col0).transpose()
                 sub_time_sequence = data[0]
                 data = data[1]
+                
 
             # Create the dataset
             if ds is False:
@@ -637,9 +681,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                         rule_unit=self.rule_unit)
             if ds is False:
                 continue
-
+            if opt:
+                ds.m_opt = opt
             # Count the dataset
-#           LF.children.append(pcol) #???
             if len(ds.data) > 0:
                 names.append(pcol)
                 self.outdatasets[pcol] = ds
@@ -647,12 +691,13 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 availds[pcol] = ds
 
             # Create sub-time dataset
-            if sub_time_sequence is not False:
+            subds = []
+            if col!='t' and (('Event' in attr) or (type=='Table')):
                 subds = self.create_local_datasets(
                     pcol, sub_time_sequence, time_sequence)
-                for sub in subds:
-                    names.append(sub.m_name)
-                    self.outdatasets[sub.m_name] = sub
+            for sub in subds:
+                names.append(sub.m_name)
+                self.outdatasets[sub.m_name] = sub
         self.imported_names = names
         self._outdatasets = self.outdatasets
         if self.params.dryrun:
