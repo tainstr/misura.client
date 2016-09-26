@@ -77,6 +77,7 @@ class MisuraDataset(document.Dataset):
         self.m_label = ''
         """Label for GUI"""
         self.tags = set([])
+        self.m_opt = False
 
     @property
     def mtype(self):

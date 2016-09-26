@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
 import threading
+import tempfile 
+from pickle import loads, dumps
+import os 
 
 from PyQt4 import QtCore
 
@@ -17,6 +20,7 @@ from model import DocumentModel
 from misura.canon.csutil import lockme
 from .. import units
 from ..clientconf import confdb
+
 MAX = 10**5
 MIN = -10**5
 
@@ -39,11 +43,14 @@ class MisuraDocument(document.Document):
 
     def __init__(self, filename=False, proxy=False, root=False):
         document.Document.__init__(self)
-        self._lock = threading.Lock()
+        self.cache = {} # File-system cache
         self.proxy = False
         self.filename = False
         self.header = []
         self.root = root
+        # File-system cache dir
+        self.cache_dir = tempfile.mkdtemp()
+        self._lock = threading.Lock()
         # Available datasets in the output file
         self.available_data = {}
         self.model = DocumentModel(self)
@@ -66,6 +73,21 @@ class MisuraDocument(document.Document):
             d = DataDecoder(self)
             d.reset(self.proxy, datapath=fold)
             self.decoders[fold] = d
+            
+    def add_cache(self, ds, name):
+        filename = os.path.join(self.cache_dir, '{}.dat'.format(len(self.cache)))
+        self.cache[name] = filename 
+        open(filename, 'wb').write(dumps(ds))
+        logging.debug('Cached', name, filename)
+        return True
+        
+    def get_cache(self, name):
+        filename = self.cache.get(name, False)
+        if not filename:
+            logging.debug('No dataset in cache', name, filename)
+            return False
+        ds = loads(open(filename, 'rb').read())
+        return ds
 
     def load_rule(self, filename, rule, **kw):
         op = OperationMisuraImport.from_rule(

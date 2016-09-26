@@ -216,9 +216,11 @@ class OperationWrapper(object):
             return False
         return True
     
-    def set_new_dataset(self, original_dataset, data, name, label, path, unit='volt'):
+    def set_new_dataset(self, original_dataset, data, name, label, path, unit='volt', dryrun=False):
         """Create a new dataset by copying `original_dataset` and overwriting with `data`"""
         from ..filedata.generate_datasets import new_dataset_operation
         op = new_dataset_operation(original_dataset, data, name, label, path, unit=unit)
-        self.ops.append(op)
+        if not dryrun:
+            self.ops.append(op)
+        return op
         

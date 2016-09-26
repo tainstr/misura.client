@@ -141,7 +141,7 @@ def interpolated(proxy, col, ztime_sequence):
     """Retrieve `col` from `proxy` and interpolate it around `ztime_sequence`"""
     tdata = not_interpolated(proxy, col, ztime_sequence[0], ztime_sequence[-1])
     if tdata is False:
-        return False
+        return []
     t, val = tdata[0], tdata[1]
     # Empty column
     if val is False or len(val) == 0:
@@ -284,6 +284,14 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     return ds
 
 
+def extend_rule(rule, version=False):
+    rule += '|^(/summary/)?' + rule
+    if version:
+        rule += '|^({}/summary/)?'.format(version) + rule
+        rule += '|^({}/)?'.format(version) + rule
+    return rule
+    
+
 class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
     """Import misura HDF File format. This operation is also a QObject so it can send signals to other objects."""
@@ -333,11 +341,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         if ':' in dataset_name:
             dataset_name = dataset_name.split(':')[1]
             
-        rule = '^(/summary/)?' + dataset_name + '$'
-        version = kw.get('version','')
-        if version:
-            rule += '|^({}/summary/)?'.format(version) + dataset_name + '$'
-            rule += '|^({}/)?'.format(version) + dataset_name + '$'
+        #rule = '^(/summary/)?' + dataset_name + '$'
+        rule = extend_rule(dataset_name + '$', kw.get('version',False))
         p = ImportParamsMisura(filename=linked_filename,
                                rule_exc=' *',
                                rule_load=rule,
@@ -349,6 +354,13 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
     @classmethod
     def from_rule(cls, rule, linked_filename, **kw):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
+        version = kw.get('version','')
+        kw['version'] = version
+        rules = rule.splitlines()
+        if version:
+            for i, rule in enumerate(rules):
+                rules[i]=extend_rule(rule, version)
+        rule = '|'.join(rules)
         p = ImportParamsMisura(filename=linked_filename,
                                rule_exc=' *',
                                rule_load=rule,
@@ -389,7 +401,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         logging.debug('FILENAME', self.filename, type(fp), fp)
         if fp is False or not fp.isopen():
             self.proxy = getFileProxy(self.filename, version = self.params.version)
-            print 'GOT FILE PROXY', self.proxy, self.proxy.get_version(), self.proxy.conf
         else:
             self.proxy = fp
         job(1, label='Configuration')
@@ -441,8 +452,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         """Return the list of available node names and the list of nodes which should
         be loaded during this import operation."""
         # Will list only Array-type descending from /summary
-        #TODO: introduce version here. Find a more accurate caching system.
-        header = self.proxy.header(['Array'], '/summary') 
+        cached = ['/summary/'+el.split(':')[-1] for el in self._doc.cache.keys()]
+        header = self.proxy.header(['Array'], '/summary') + cached
         autoload = []
         excluded = []
         logging.debug('%s %s', 'got header', len(header))
@@ -467,9 +478,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 header.remove(h)
                 excluded.append(h)
 
-        logging.debug('%s %s', 'got autoload', autoload)
-        logging.debug('%s %s', 'got excluded', len(excluded))
-        logging.debug('%s %s', 'got header clean', len(header))
+        logging.debug('got autoload', autoload)
+        logging.debug('got excluded', len(excluded))
+        logging.debug('got header clean', len(header))
         self.LF.header = header
         # available, loaded
         self.available = header
@@ -573,35 +584,45 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             else:
                 m_update = False
 
+            # Avoid overwriting
+            if not self.params.overwrite or not m_update:
+                # completely skip processing if dataset is already in document
+                if self._doc.data.has_key(pcol):
+                    continue
+
+
+            # Try reading cached data
+            ds = False
+            data = []
+            opt = False
+            if pcol in self._doc.cache:
+                ds = self._doc.get_cache(pcol)
+                data = ds.data
+                opt = getattr(ds, 'm_opt', False)
+                logging.debug('Got data from cache', pcol, len(data), opt)
+
             sub_time_sequence = False
             if col == 't':
                 attr = []
                 type = 'Float'
             else:
-                obj,  name = self.proxy.conf.from_column(col)
-                opt = obj.gete(name)
+                if opt is False:
+                    obj,  name = self.proxy.conf.from_column(col)
+                    opt = obj.gete(name)
                 attr = opt['attr']
                 type = opt['type']
                 if attr in ['', 'None', None, False, 0]:
                     attr = []
 
-            # Read data
-            if not self.params.overwrite or not m_update:
-                # completely skip processing if dataset is already in document
-                if self._doc.data.has_key(pcol):
-                    continue               
             if not m_update:
-                # empty dataset is created
-                data = []
+                # leave ds empty
+                pass
             elif col == 't':
                 data = time_sequence
-            elif 'Event' not in attr and type!='Table':
+            elif ('Event' not in attr) and (type!='Table') and (len(data)==0):
                 logging.debug('Loading data', col0)
                 data = interpolated(self.proxy, col0, time_sequence)
-                # Interpolation error
-                if data is False:
-                    data = []
-            else:
+            elif len(data)==0:
                 # Get raw data and time_sequence
                 logging.debug('Getting raw data', col0)
                 data = read_data(self.proxy, col0).transpose()
@@ -609,9 +630,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 data = data[1]
 
             # Create the dataset
-            ds = create_dataset(self.proxy, 
-                data, pcol, col, col0, m_var, m_update, p,
-                linked_file=self.LF, reference_sample=self.refsmp, rule_unit=self.rule_unit,)
+            if ds is False:
+                ds = create_dataset(self.proxy, 
+                        data, pcol, col, col0, m_var, m_update, p,
+                        linked_file=self.LF, reference_sample=self.refsmp, 
+                        rule_unit=self.rule_unit)
             if ds is False:
                 continue
 
