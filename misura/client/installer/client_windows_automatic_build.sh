@@ -51,6 +51,7 @@ fi
 
 if [ -z "$1" ] && [ -z "$NEW_CLIENT_COMMITS" ] && [ -z "$NEW_CANON_COMMITS" ] && [ -z "$NEW_VEUSZ_COMMITS" ]; then
    echo "No changes detected."
+   rm $BUILD_IN_PROGRSS_FILE
    exit 0
 fi
 
