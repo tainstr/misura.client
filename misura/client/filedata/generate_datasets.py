@@ -33,7 +33,6 @@ def new_dataset_operation(original_dataset, data, name, label, path, unit='volt'
     new_dataset.m_percent = False
     new_dataset.m_label = _(label)
     new_dataset.m_opt = opt
-    new_dataset.m_name = name
     prefix = original_dataset.linked.prefix
     if not path.startswith(prefix):
         path = prefix+path.lstrip('/')

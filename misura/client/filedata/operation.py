@@ -703,6 +703,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         if self.params.dryrun:
             # Do not actually import anything - just keep a reference
             self.outdatasets = {}
+            done()
             return []
         # Detect ds which should be removed from availds because already
         # contained in imported names

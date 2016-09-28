@@ -74,12 +74,18 @@ class MisuraDocument(document.Document):
             d.reset(self.proxy, datapath=fold)
             self.decoders[fold] = d
             
-    def add_cache(self, ds, name):
+    def add_cache(self, ds, name, overwrite=True):
+        if not overwrite and (name in self.cache):
+            return False
         filename = os.path.join(self.cache_dir, '{}.dat'.format(len(self.cache)))
-        self.cache[name] = filename 
+        self.cache[name] = filename
+        if hasattr(ds, 'document'):
+            del ds.document
+        ds.m_name = name
         open(filename, 'wb').write(dumps(ds))
         logging.debug('Cached', name, filename)
         self.available_data[name] = ds
+        ds.document = self
         return True
         
     def get_cache(self, name):
@@ -88,6 +94,7 @@ class MisuraDocument(document.Document):
             logging.debug('No dataset in cache', name, filename)
             return False
         ds = loads(open(filename, 'rb').read())
+        ds.document = self
         return ds
 
     def load_rule(self, filename, rule, **kw):
