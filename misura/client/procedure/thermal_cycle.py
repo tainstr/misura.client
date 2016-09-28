@@ -171,7 +171,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             print 'OPT', thermal_cycle_options[opt]
         if thermal_cycle_options:
             self.thermal_cycle_optionsWidget = conf.Interface(
-                active_instrument.root, active_instrument.measure, thermal_cycle_options, parent=self)
+                active_instrument.root, active_instrument.measure, thermal_cycle_options, parent=self, fixed=True)
             self.main_layout.addWidget(self.thermal_cycle_optionsWidget)
         self.main_layout.addWidget(self.plot)
 

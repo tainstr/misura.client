@@ -264,7 +264,7 @@ class Interface(QtGui.QTabWidget):
 
     """Tabbed interface builder for dictionary of options"""
 
-    def __init__(self, server, remObj=False, prop_dict=False, parent=None, context='Option'):
+    def __init__(self, server, remObj=False, prop_dict=False, parent=None, context='Option', fixed=False):
         QtGui.QTabWidget.__init__(self, parent)
         self.server = server
         if remObj is False:
@@ -272,6 +272,7 @@ class Interface(QtGui.QTabWidget):
         self.remObj = remObj
         self.prop_dict = {}
         self.prop_keys = []
+        self.fixed = fixed
         self.rebuild(prop_dict)
         self.menu = QtGui.QMenu(self)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -290,7 +291,9 @@ class Interface(QtGui.QTabWidget):
 
     def rebuild(self, prop_dict=False, force=False):
         """Rebuild the full widget"""
-        if not prop_dict:
+        if not prop_dict and self.fixed:
+            prop_dict = self.prop_dict
+        elif not prop_dict:
             self.remObj.connect()
             k = set(self.prop_keys)
             rk = set(self.remObj.keys())
