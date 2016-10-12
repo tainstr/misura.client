@@ -76,10 +76,14 @@ class RunMethod(QtCore.QRunnable):
         self.error = False
         self.running = False
         self.done = False
+        self.abort = self._abort
+        
+    def _abort(self):
+        self.error = 'Aborted'
 
     def run(self):
         self.running = True
-        registry.tasks.jobs(self.step, self.pid)
+        registry.tasks.jobs(self.step, self.pid, self.abort)
         logging.debug(
             'RunMethod.run', self.func, self.args, self.kwargs)
         registry.tasks.job(1, self.pid, self.pid)
