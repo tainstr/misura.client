@@ -82,6 +82,7 @@ class MainWindow(QtGui.QMainWindow):
     remote = None
     doc = False
     uid = False
+    name = 'MainWindow'
     reset_instrument = QtCore.pyqtSignal()
     """Connected to setInstrument"""
 

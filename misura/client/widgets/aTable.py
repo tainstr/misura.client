@@ -206,7 +206,11 @@ class aTableModel(QtCore.QAbstractTableModel):
         for to_unit in group:
             f = functools.partial(self.change_unit, col, to_unit)
             self.unit_funcs.append(f)
-            a = m.addAction(u'{} ({})'.format(to_unit, units.hsymbols[to_unit]), f)
+            lbl = to_unit
+            us = units.hsymbols.get(to_unit, False)
+            if us:
+                lbl += u' ({})'.format(us)
+            a = m.addAction(lbl, f)
             a.setCheckable(True)
             a.setChecked(to_unit==cu)
         return m
