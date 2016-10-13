@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from .. import _
 from misura.client.widgets.active import *
+from misura.client import units
 from functools import partial
 
 
@@ -90,6 +91,8 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.tableObj = tableObj
         self.rows = []
         self.header = []
+        self.unit = 'None'
+        self.csunit = 'None'
         self.up()
 
     def rowCount(self, index=QtCore.QModelIndex()):
@@ -106,13 +109,24 @@ class aTableModel(QtCore.QAbstractTableModel):
         if role != QtCore.Qt.DisplayRole:
             return
         val = row[col]
+        # handle conversion from option unit to client-side unit
+        if self.unit!='None' and self.csunit!='None':
+            u, cu = self.unit[col], self.csunit[col]
+            if u!=cu:
+                val = units.Converter.convert(u, cu, val)
         return val
 
     def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
         if orientation != QtCore.Qt.Horizontal:
             return
         if role == QtCore.Qt.DisplayRole:
-            return self.header[section][0]
+            label = self.header[section][0]
+            unit = False
+            if self.csunit!='None':
+                unit = units.hsymbols.get(self.csunit[section], False)
+            if unit:
+                label += u' ({})'.format(unit)
+            return label
 
     def up(self):
         hp = self.tableObj.current
@@ -120,6 +134,9 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.header = hp[0]
         # Rows are the rest of the option
         self.rows = hp[1:]
+        self.unit = self.tableObj.prop.get('unit', False)
+        if self.csunit=='None':
+            self.csunit = self.unit[:]
         QtCore.QAbstractTableModel.reset(self)
 
     def emptyRow(self):
@@ -148,15 +165,19 @@ class aTableModel(QtCore.QAbstractTableModel):
         if colType == 'Boolean':
             s = value.toBool()
             s = s == True
-            row[icol] = s
+            value = s
         elif colType == 'Float':
-            print 'setting model data', icol,value
-            row[icol] = float(value)
+            value = float(value)
         elif colType == 'Integer':
-            row[icol] = int(value)
+            value = int(value)
         elif colType == 'String':
-            row[icol] = str(value)
-        # Sostituisco la riga:
+            value = str(value)
+        # handle conversion from client-side unit to option unit
+        if self.unit!='None' and self.csunit!='None':
+            u, cu = self.unit[icol], self.csunit[icol]
+            if u!=cu:
+                value = units.Converter.convert(cu, u, value)
+        row[icol] = value
         self.rows[irow] = row
         self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.index(irow, 0),
                   self.index(self.rowCount(), self.columnCount()))
@@ -164,8 +185,34 @@ class aTableModel(QtCore.QAbstractTableModel):
         return True
 
     def apply(self):
-        #FIXME: should work by
         self.tableObj.remObj.set(self.tableObj.handle,  [self.header] + self.rows)
+        
+    def make_header_menu(self, col):
+        if self.unit=='None':
+            logging.debug('No unit defined', self.unit)
+            return False
+        u = self.unit[col]
+        if u in ('None', None, False):
+            logging.debug('No unit set for col', u, col)
+            return False
+        dim = units.known_units.get(u, False)
+        if not dim:
+            logging.debug('Unknown unit:', u)
+            return False
+        group = units.to_base[dim].keys()
+        cu = self.csunit[col]
+        m = QtGui.QMenu(self.tableObj)
+        self.unit_funcs = []
+        for to_unit in group:
+            f = functools.partial(self.change_unit, col, to_unit)
+            self.unit_funcs.append(f)
+            a = m.addAction(u'{} ({})'.format(to_unit, units.hsymbols[to_unit]), f)
+            a.setCheckable(True)
+            a.setChecked(to_unit==cu)
+        return m
+            
+    def change_unit(self, col, to_unit):
+        self.csunit[col] = to_unit
 
 
 class aTableView(QtGui.QTableView):
@@ -180,6 +227,10 @@ class aTableView(QtGui.QTableView):
         self.setSelectionModel(self.selection)
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        
+        self.horizontalHeader().setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.horizontalHeader().customContextMenuRequested.connect(self.showHeaderMenu)
+        
         self.menu = QtGui.QMenu(self)
         self.rowAfter = partial(self.addRow, 1)
         self.rowBefore = partial(self.addRow, -1)
@@ -190,9 +241,20 @@ class aTableView(QtGui.QTableView):
         self.menu.addAction(_('Update'), self.tableObj.get)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
+        
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))
+        
+    def showHeaderMenu(self, pt):
+        column = self.horizontalHeader().logicalIndexAt(pt.x())
+        # show menu about the column
+        menu = self.model().make_header_menu(column)
+        if not menu:
+            logging.debug('No menu for column', column)
+            return False
+        menu.popup(self.horizontalHeader().mapToGlobal(pt))
+        
 
     def addRow(self, pos=0):
         model = self.curveModel
