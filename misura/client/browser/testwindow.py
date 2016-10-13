@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
+
+import veusz.utils
+
 from .. import _
 from .. import filedata
 from .. import fileui
@@ -70,7 +73,7 @@ class TestWindow(acquisition.MainWindow):
         if self.vtoolbar:
             self.vtoolbar.hide()
         self.vtoolbar = self.summaryPlot.plot.createToolbar(self)
-        self.vtoolbar.addAction(' Undo ', self.doc.undoOperation)
+        self.vtoolbar.addAction(veusz.utils.getIcon('kde-edit-undo'), ' Undo ', self.doc.undoOperation)
         self.vtoolbar.show()
         self.graphWin.show()
         if self.breadcrumb:
