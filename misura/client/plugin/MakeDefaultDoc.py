@@ -47,21 +47,18 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
             self.ops.append(document.OperationWidgetAdd(wg, 'grid', name='grid'))
             self.apply_ops(descr='MakeDefaultPlot: Grid')
             wg = wg.getChild('grid')
-        else:
-            print 'NO GRID' 
         return wg 
     
-    def make_title(self, graph):
-        if not self.fields.get('title', False):
-            return False
+    def make_title(self, graph, title):
         page_wg = graph.parent.parent
         if not page_wg.hasChild('grid'):
             page_wg = graph.parent
         self.ops.append(
                 (document.OperationWidgetAdd(page_wg, 'label', name='title')))
         self.apply_ops(descr='MakeDefaultPlot: Title')
-        props = {'xPos': 0.1, 'yPos': 0.96, 'label': self.fields['title']}
+        props = {'xPos': 0.1, 'yPos': 0.96, 'label': title}
         self.dict_toset(page_wg.getChild('title'), props)
+        self.dict_toset(page_wg, {'notes': title})
         return True
 
     def create_page_temperature(self, page):
@@ -69,7 +66,8 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         self.ops.append(document.OperationWidgetAdd(wg, 'graph', name='temp'))
         self.apply_ops(descr='MakeDefaultPlot: Graph Temperature')
         graph = wg.getChild('temp')
-        self.make_title(graph)
+        title = self.fields.get('title', False) or 'By Temperature'
+        self.make_title(graph, title)
         self.adjust_graph(graph, u'Temperature (°C)')
 
     def create_page_time(self, page):
@@ -78,7 +76,8 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
             (document.OperationWidgetAdd(wg, 'graph', name='time')))
         self.apply_ops(descr='MakeDefaultPlot: Graph Time')
         graph = wg.getChild('time')
-        self.make_title(graph)
+        title = self.fields.get('title', False) or 'By time'
+        self.make_title(graph, title)
         self.adjust_graph(graph, 'Time (s)')
 
 
@@ -93,13 +92,11 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         base_page = fields.get('page','')
         if not base_page:
             self.wipe_doc_preserving_filename()
-
         else:
             page_T = base_page + '_T'
             page_t = base_page + '_t'
 
         self.dict_toset(doc.basewidget, {'width': '20cm', 'height': '20cm'})
-
         if fields.get('temp', True):
             self.create_page_temperature(page_T)
         if fields.get('time', True):
