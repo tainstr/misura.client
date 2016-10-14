@@ -89,6 +89,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
     changeset = 0
     _plots = False
     sigPageChanged = QtCore.pyqtSignal()
+    tree = False
 
     def __init__(self, doc, status=dstats.loaded, refresh=True, cols=2):
         QtCore.QAbstractItemModel.__init__(self)
@@ -182,6 +183,8 @@ class DocumentModel(QtCore.QAbstractItemModel):
         self.emit(QtCore.SIGNAL('beginResetModel()'))
         new_tree = NodeEntry()
         new_tree.set_doc(self.doc)
+        if self.tree:
+            new_tree.set_filter(self.tree.regex_rule)
         self.tree = new_tree
         self._plots = False
         self._lock.release()

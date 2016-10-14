@@ -109,6 +109,7 @@ class NodeEntry(object):
     """Node base name"""
     _path = False  # auto calc
     """Node full path or dataset key in doc.data"""
+    _root = False
     _model_path = False
     parent = False
     """Parent node"""
@@ -119,6 +120,8 @@ class NodeEntry(object):
     _linked = False
     """Linked file for first-level nodes"""
     status_cache = (None, False)
+    regex_rule = ''
+    regex = False
 
     def __init__(self, doc=False, name='', parent=False, path=False, model_path=False, splt=sep):
         self.splt = splt
@@ -254,10 +257,23 @@ class NodeEntry(object):
     @property
     def root(self):
         """Retrieve the root node of the tree"""
+        if self._root:
+            return self._root
         item = self
         while item.parent is not False:
             item = item.parent
-        return item
+        self._root = item
+        return self._root
+    
+    def set_filter(self, rule):
+        """Set the filtering regular expression"""
+        self.root.regex_rule = rule
+        if rule:
+            self.root.regex = re.compile(rule)
+        else:
+            self.root.regex = False
+        self.status_cache = (None, False)
+        print 'AAAAAAAAAAAAA set FILTER', self.path, self.regex_rule, id(self.root)
 
     @property
     def linked(self):
@@ -414,7 +430,11 @@ class DatasetEntry(NodeEntry):
 
     @property
     def status(self):
-        ds = self.alldoc.get(self.path, False)
+        # Hide if filtered out
+        if self.root.regex:
+            if not self.root.regex.search(self.path):
+                return dstats.empty
+        ds = self.alldoc.get(self._path, False)
         if ds is False:
             self.parent.remove(self)
             return dstats.empty

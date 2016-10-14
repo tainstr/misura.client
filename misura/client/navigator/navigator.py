@@ -52,10 +52,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         # Menu creation
         if menu:
             self.setContextMenuPolicy(Qt.CustomContextMenu)
-            self.connect(self, QtCore.SIGNAL(
-                'customContextMenuRequested(QPoint)'), self.showContextMenu)
+            self.connect(self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), 
+                         self.showContextMenu)
 
-            self.connect(self, QtCore.SIGNAL('doubleClicked(QModelIndex)'),self.double_clicked)
+            self.connect(self, QtCore.SIGNAL('doubleClicked(QModelIndex)'),
+                         self.double_clicked)
+            
+            #TODO: all these should be implicit
             self.base_menu = QtGui.QMenu(self)
             self.add_status_actions(self.base_menu)
             self.file_menu = QtGui.QMenu(_('File'), self)
@@ -75,6 +78,16 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             'do_open(QString)'), self.open_file)
         self.convert.connect(self.convert_file)
         
+        self.create_shortcuts()
+        
+    def create_shortcuts(self):
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_F), 
+                        self, 
+                        self.edit_regex_rule)
+        
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_F5), 
+                        self, 
+                        self.update_view)
 
     @property
     def tasks(self):
@@ -103,7 +116,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.mainwindow.plot.set_navigator(self)
             
     def open_file(self, path):
-        print 'OPEN FILE', path
+        logging.info('OPEN FILE', path)
         self.doc.proxy = False
         op = filedata.OperationMisuraImport(
             filedata.ImportParamsMisura(filename=path)
@@ -116,13 +129,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.doc.applyOperation(op)
         # Default plot
         p = plugin_class()
-        print 'Default plot on imported names', op.imported_names,confdb[plot_rule_name]
+        logging.debug('Default plot on imported names', op.imported_names,confdb[plot_rule_name])
         result = p.apply(self._mainwindow.cmd, {'dsn': op.imported_names, 
                                        'rule': confdb[plot_rule_name]})
         
         
     def convert_file(self, path):
-        print 'CONVERT FILE', path
+        logging.info('CONVERT FILE', path)
         filedata.convert_file(self, path)
         
     def _open_converted(self):
@@ -294,12 +307,27 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             else:
                 print 'set action as unchecked', name, s, self.status
             self.acts_status.append(act)
-
+        act = menu.addAction(_('Set filter (CTRL+F)'), self.edit_regex_rule)
+        self.acts_status.append(act)
         self.act_del = menu.addAction(_('Delete'), self.deleteChildren)
         self.acts_status.append(self.act_del)
-        act = menu.addAction(_('Update view'), self.update_view)
+        act = menu.addAction(_('Update view (F5)'), self.update_view)
         self.acts_status.append(act)
         return True
+    
+    
+    def edit_regex_rule(self, node=False):
+        #TODO: bring here all filtering options
+        root = self.model().tree
+        out, status = QtGui.QInputDialog.getText(self, _('Edit Navigator RegEx'), 
+                                   _('Enter a regular expression'), 
+                                   text=root.regex_rule)
+        if not status:
+            return False
+        root.set_filter(str(out))
+        if not self.model().paused:
+            self.update_view()
+        
 
     def update_base_menu(self, node=False, base_menu=False):
         base_menu.clear()
