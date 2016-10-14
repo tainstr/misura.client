@@ -111,14 +111,13 @@ class MainWindow(QtGui.QMainWindow):
                                      QtCore.Qt.WindowTitleHint |
                                      QtCore.Qt.WindowMinMaxButtonsHint)
 
-        #self.setWindowIcon(
-        #    QtGui.QIcon(os.path.join(parameters.pathArt, 'browser.svg')))
+        self.setWindowIcon(
+            QtGui.QIcon(os.path.join(parameters.pathArt, 'browser.svg')))
 
     def closeEvent(self, event):
         iutils.app.quit()
         
     def convert_file(self, path):
-        print 'convert_file',path
         filedata.convert_file(self,path)
         
     def _open_converted(self):

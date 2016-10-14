@@ -16,8 +16,9 @@ def confirm_overwrite(path, parent=None):
                             parent=parent)
     ow = msg.addButton(_('Overwrite'), 1)
     re = msg.addButton(_('Rename'), 2)
+    op = msg.addButton(_('Open'), 3)
     ex = msg.addButton(_('Cancel'), 0)
-    v = {ow: 1, re: 2, ex: 0}
+    v = {ow: 1, re: 2, ex: 0, op: 3}
     msg.exec_()
     ret = v[msg.clickedButton()]
     return ret
@@ -45,8 +46,11 @@ def convert_file(caller, path):
         if not ok:
             logging.debug('Overwrite cancelled')
             return False
-    if ok == 2:
-
+    if ok == 3:
+        caller.converter.outpath = outpath
+        caller._open_converted()
+        return True
+    elif ok == 2:
         dname = os.path.dirname(outpath)
         fname = os.path.basename(outpath)[:-3]
         i = 1
