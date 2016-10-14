@@ -126,6 +126,7 @@ class QuickOps(object):
             p = plugin.PlotDatasetPlugin()
             p.apply(self.cmd, args)
         self.doc.setModified()
+        return True
 
     @node
     def deleteData(self, node=False, remove_dataset=True, recursive=True):

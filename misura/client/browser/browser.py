@@ -121,12 +121,13 @@ class MainWindow(QtGui.QMainWindow):
         filedata.convert_file(self,path)
         
     def _open_converted(self):
-        self.open_file(self.converter.outpath)
+        test_window = self.open_file(self.converter.outpath)
+        self.converter.post_open_file(test_window.navigator)
 
     def _failed_conversion(self, error):
         QtGui.QMessageBox.warning(self, _("Failed conversion"), error)
 
-    def open_file(self, path, tab_index=-1):
+    def open_file(self, path, tab_index=-1, **kw):
         path = unicode(path)
         logging.debug('%s %s', 'Browser MainWindow.open_file', path, tab_index)
         if tab_index>0:
@@ -148,6 +149,7 @@ class MainWindow(QtGui.QMainWindow):
         win = cw.addTab(tw, icon, tw.title)
         confdb.mem_file(path, tw.remote.measure['name'])
         cw.setCurrentIndex(cw.count() - 1)
+        return tw
 
     def open_database(self, path, new=False):
         idb = getDatabaseWidget(path, new=new, browser=self)

@@ -24,6 +24,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     """List of currently opened misura Tests and reference to datasets names"""
     tasks = None
     convert = QtCore.pyqtSignal(str)
+    converter = False
     
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=set([filedata.dstats.loaded]), cols=1):
         QtGui.QTreeView.__init__(self, parent)
@@ -115,7 +116,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if hasattr(self.mainwindow.plot,'set_navigator'):
             self.mainwindow.plot.set_navigator(self)
             
-    def open_file(self, path):
+    def open_file(self, path, **kw):
         logging.info('OPEN FILE', path)
         self.doc.proxy = False
         op = filedata.OperationMisuraImport(
@@ -128,11 +129,11 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         op = filedata.OperationMisuraImport.from_rule(confdb[plot_rule_name], path)
         self.doc.applyOperation(op)
         # Default plot
+        #TODO: handle default plot opening
         p = plugin_class()
         logging.debug('Default plot on imported names', op.imported_names,confdb[plot_rule_name])
         result = p.apply(self._mainwindow.cmd, {'dsn': op.imported_names, 
                                        'rule': confdb[plot_rule_name]})
-        
         
     def convert_file(self, path):
         logging.info('CONVERT FILE', path)
@@ -140,6 +141,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         
     def _open_converted(self):
         self.open_file(self.converter.outpath)
+        self.converter.post_open_file(self)
         
     def _failed_conversion(self, error):
         QtGui.QMessageBox.warning(self, _("Failed conversion"), error)
@@ -272,26 +274,29 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         wg = self.doc.resolveFullWidgetPath(plotpath[0])
         self.mainwindow.treeedit.selectWidget(wg)
         self.emit(QtCore.SIGNAL('select(QString)'), plotpath[0])
-
-    def double_clicked(self, index):
-        self.sync_currentwidget()
-        node = self.model().data(index, role=Qt.UserRole)
-        self.previous_selection = node.path
+        
+    def domain_double_clicked(self, node):
+        """Execute double_clicked action on each domain"""
         for domain in self.domains:
             r = domain.double_clicked(node)
             if r:
                 logging.debug('double_clicked', node.path, domain)
                 self.restore_selection()
                 return True
+        return False        
 
-        if isinstance(node, filedata.DatasetEntry) :
-            self.plot(node)
+    def double_clicked(self, index):
+        self.sync_currentwidget()
+        node = self.model().data(index, role=Qt.UserRole)
+        self.previous_selection = node.path
+        if isinstance(node, filedata.DatasetEntry):
+            done = self.plot(node)
         else:
-            logging.error('Not a valid node', node)
-            self.restore_selection()
-            return False
+            done = self.domain_double_clicked(node)
         self.restore_selection()
-        return True
+        if not done:
+            logging.error('Not a valid node', node)
+        return done
 
     def add_status_actions(self, menu):
         menu.addSeparator()
