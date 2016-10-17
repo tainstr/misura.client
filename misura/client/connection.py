@@ -83,7 +83,7 @@ class LoginWindow(QtGui.QDialog):
             password = str(self.password.text())
         if mac:
             self.mac = mac
-        print 'WAKE ON LAN?', repr(self.mac)
+        logging.debug('WAKE ON LAN?', repr(self.mac))
         if self.mac:
             map(wake_on_lan, self.mac.split('\n'))
         save = bool(self.ckSave.checkState())
@@ -99,6 +99,7 @@ class LoginWindow(QtGui.QDialog):
             self.msg = 'Connection Error'
             if self.obj:
                 self.msg = self.obj._error
+            logging.error(self.msg)
             self.login_failed.emit()
         return False
 
