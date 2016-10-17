@@ -51,12 +51,14 @@ def getUsedPrefixes(doc):
     return p
 
 
-def get_linked(doc, params):
+def get_linked(doc, params, create=True):
     opf = getUsedPrefixes(doc)
     # Find if the filename already has a prefix
     lf = opf.get(params.filename, False)
     if lf is not False:
         return lf
+    if not create:
+        return False
     # Find a new non-conflicting prefix
     prefix = params.prefix
     used = [lf.prefix for lf in opf.values()]

@@ -17,6 +17,8 @@ from .. import filedata
 from .. import live
 from .. import plugin
 from ..clientconf import confdb
+from ..filedata import operation
+from veusz.dataimport.base import ImportParamsBase
 
 
 class Navigator(quick.QuickOps, QtGui.QTreeView):
@@ -134,14 +136,19 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         logging.debug('Default plot on imported names', op.imported_names,confdb[plot_rule_name])
         result = p.apply(self._mainwindow.cmd, {'dsn': op.imported_names, 
                                        'rule': confdb[plot_rule_name]})
+        return op
         
     def convert_file(self, path):
         logging.info('CONVERT FILE', path)
         filedata.convert_file(self, path)
         
     def _open_converted(self):
-        self.open_file(self.converter.outpath)
-        self.converter.post_open_file(self)
+        params = ImportParamsBase(filename=self.converter.outpath)
+        LF = operation.get_linked(self.doc, params, create=False)
+        if not LF:
+            op = self.open_file(self.converter.outpath)
+            LF = op.LF
+        self.converter.post_open_file(self, prefix=LF.prefix)
         
     def _failed_conversion(self, error):
         QtGui.QMessageBox.warning(self, _("Failed conversion"), error)
