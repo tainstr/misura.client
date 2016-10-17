@@ -1,6 +1,9 @@
 import socket
 import struct
-from traceback import print_exc
+from traceback import format_exc
+
+from misura.canon.logger import Log as logging
+
 #http://code.activestate.com/recipes/358449-wake-on-lan/
 def wake_on_lan(macaddress):
     """ Switches on remote computers using WOL. """
@@ -25,14 +28,14 @@ def wake_on_lan(macaddress):
     # Broadcast it to the LAN.
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    print 'Wake on LAN packet:', data
+    logging.debug('Wake on LAN packet:', data)
     r = False
     try:
         sock.sendto(send_data, ('172.16.8.255', 7))
         r = True 
         sock.sendto(send_data, ('<broadcast>', 7))
     except:
-        print_exc()
+        logging.debug(format_exc())
         return r
     return True
     
