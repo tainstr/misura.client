@@ -273,7 +273,6 @@ class NodeEntry(object):
         else:
             self.root.regex = False
         self.status_cache = (None, False)
-        print 'AAAAAAAAAAAAA set FILTER', self.path, self.regex_rule, id(self.root)
 
     @property
     def linked(self):

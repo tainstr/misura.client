@@ -8,6 +8,7 @@ from veusz.dialogs.plugin import PluginDialog
 
 from .. import _
 from ..filedata import getFileProxy
+from ..fileui import ImageSlider
 from .. import axis_selection
 
 
@@ -15,6 +16,8 @@ ism = isinstance
 
       
 class MicroscopeSampleNavigatorDomain(NavigatorDomain):
+    storyboards = {}
+    
     def check_node(self, node):
         if not node:
             return False
@@ -92,6 +95,21 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
                 dil=dil, dilT=T, ds_out=out, temperature_dataset=self.doc.data[T].data)
         d = PluginDialog(self.mainwindow, self.doc, p, cls)
         self.mainwindow.showDialog(d)
+        
+    @node
+    def show_storyboard(self, node):
+        obj = self.storyboards.get(node.path, False)
+        if obj:
+            obj.show()
+            return True
+        obj = ImageSlider()
+        obj.set_doc(self.doc)
+        path = node.path.split(':')[-1]
+        path = '/{}/profile'.format(path)
+        obj.setPath(path)
+        self.storyboards[node.path] = obj
+        obj.show()
+        
             
     def add_sample_menu(self, menu, node):
         j = 0
@@ -102,6 +120,7 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
             menu.addAction(_('Surface tension'), self.surface_tension)
         menu.addAction(_('Viscosity'), self.viscosity)
         menu.addAction(_('Show Characteristic Points'), self.showPoints)
+        menu.addAction(_('Open storyboard'), self.show_storyboard)
         menu.addAction(_('Report'), self.hsm_report)
         menu.addAction(_('Render video'), self.render)
         return True

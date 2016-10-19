@@ -9,6 +9,7 @@ from misura.client import _
 
 standards = ('Misura4', 'Misura3', 'CEN/TS')
 
+
 def get_shapes(sample, standard):
     all_shapes = {
         'Misura4': {
@@ -32,7 +33,7 @@ def get_shapes(sample, standard):
             'Flow': 'cen_Flow',
         }
     }
-    void = {'time':'None', 'temp':'None', 'value':'None'}
+    void = {'time': 'None', 'temp': 'None', 'value': 'None'}
     ret = {}
     for shape_key, sample_key in all_shapes[standard].iteritems():
         if sample.has_key(sample_key):
@@ -40,6 +41,7 @@ def get_shapes(sample, standard):
         else:
             ret[shape_key] = void.copy()
     return ret
+
 
 class ImageStrip(QtGui.QWidget):
 
@@ -71,7 +73,7 @@ class ImageStrip(QtGui.QWidget):
         self.menu.addAction(_("Render video"), self.render_video)
 
     def export_images(self):
-        #TODO: use time/index stepping
+        # TODO: use time/index stepping
         standard, ok = QtGui.QInputDialog.getItem(self,
                                                   _('Choose standard to show'),
                                                   _('Standard'),
@@ -103,19 +105,16 @@ class ImageStrip(QtGui.QWidget):
             standard=standard
         )
 
-
         with open(output_filename, 'w') as output_file:
             output_file.write(output_html)
-            
+
     def render_video(self):
-        #TODO: use time/index stepping
+        # TODO: use time/index stepping
         from misura.client import video
-        #pt = '/' + \
+        # pt = '/' + \
         #    node.path.replace(node.linked.prefix, '').replace('summary', '')
         v = video.VideoExporter(self.decoder.proxy, self.decoder.datapath)
         v.exec_()
-
-
 
     def set_doc(self, doc, datapath=False):
         logging.debug('%s %s %s', 'ImageStrip.set_doc', doc, datapath)
@@ -223,7 +222,7 @@ class ImageStrip(QtGui.QWidget):
             idx = self.idx
 
         for label_index in range(self.n):
-            index_with_step =  max(0, idx + (label_index * self.step) - 1)
+            index_with_step = max(0, idx + (label_index * self.step) - 1)
             self.labels[label_index].set_idx(index_with_step)
 
         self.idx = idx
@@ -232,6 +231,7 @@ class ImageStrip(QtGui.QWidget):
 
 class Slider(QtGui.QWidget):
     autofollow = False
+    decoder = False
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent=parent)
@@ -242,10 +242,10 @@ class Slider(QtGui.QWidget):
         self.slider.setOrientation(QtCore.Qt.Horizontal)
 
         self.cbPath = QtGui.QComboBox(self)
-        
+
         self.menuButton = QtGui.QPushButton('...', parent=self)
         self.menuButton.setMaximumWidth(50)
-        
+
         self.lay = QtGui.QHBoxLayout()
         self.lay.setContentsMargins(0, 0, 0, 0)
         self.lay.setSpacing(0)
@@ -255,7 +255,8 @@ class Slider(QtGui.QWidget):
         self.setLayout(self.lay)
         self.connect(
             self.cbPath, QtCore.SIGNAL('currentIndexChanged(int)'), self.choice)
-        self.connect(self.slider, QtCore.SIGNAL('sliderReleased()'), self.slider_released)
+        self.connect(self.slider, QtCore.SIGNAL(
+            'sliderReleased()'), self.slider_released)
 
     def value(self):
         return self.slider.value()
@@ -299,9 +300,11 @@ class Slider(QtGui.QWidget):
         # Update group combo
         self.cbPath.clear()
         gr = []
-        for g in self.doc.decoders.keys():
+        for j, g in enumerate(self.doc.decoders.keys()):
             self.cbPath.addItem(g, g)
             gr.append(g)
+            if self.decoder and g==self.decoder.datapath:
+                i=j
         if i < 0 and len(gr) > 0:
             cgr = gr[0]
             i = 0
@@ -370,7 +373,8 @@ class ImageSlider(QtGui.QWidget):
 
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.strip.showMenu)
-        self.connect(self.slider, QtCore.SIGNAL('sliderReleased()'), self.slider_released)
+        self.connect(self.slider, QtCore.SIGNAL(
+            'sliderReleased()'), self.slider_released)
 
     def slider_released(self):
         self.emit(QtCore.SIGNAL('sliderReleased()'))
@@ -397,6 +401,8 @@ class ImageSlider(QtGui.QWidget):
 
     def setPath(self, path):
         self.strip.set_doc(self.doc, str(path))
+        self.slider.decoder = self.strip.decoder
+        self.slider.reset(False)
 
     def set_idx(self, idx):
         if self.slider.slider.maximum() == 0:
