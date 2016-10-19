@@ -3,6 +3,7 @@
 """Simple plotting for browser and live acquisition."""
 import os
 from functools import partial
+from base64 import b64encode
 
 from misura.canon.logger import Log as logging
 from veusz import qtall as qt4
@@ -11,6 +12,8 @@ from PyQt4 import QtGui, QtCore
 
 from .. import filedata, plugin
 from .. import _
+from ..iutils import searchFirstOccurrence
+
 MAX = 10**5
 MIN = -10**5
 import veusz.setting.settingdb as setdb
@@ -41,6 +44,25 @@ def with_busy_cursor(function_to_decorate):
 
     return wrapper
 
+def process_image_dragMoveEvent(event):
+        logging.debug('dragMoveEvent', event.mimeData())
+        if event.mimeData().hasFormat("image/png"):
+            event.acceptProposedAction()  
+            
+def process_image_dropEvent(plot_window, drop_event):
+        pix = drop_event.mimeData().data("image/png")
+        p = plot_window.getPageNumber()
+        page = plot_window.document.basewidget.children[p]
+        graph = searchFirstOccurrence(page, 'graph')
+        cmd = document.CommandInterface(plot_window.document)
+        name = unicode(drop_event.mimeData().data("text/plain"))
+        name = name.replace(':/',':').replace('/','_')
+        cmd.To(graph.path)
+        cmd.Add('imagefile', name=name, autoadd=False)
+        cmd.To(name)
+        cmd.Set('filename', '{embedded}')
+        cmd.Set('embeddedImageData', unicode(b64encode(pix)))    
+
 
 class VeuszPlotWindow(plotwindow.PlotWindow):
 
@@ -51,6 +73,13 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         self.navigator = False
         registerImportCommand('MoveToLastPage', self.moveToLastPage)
         self.actionSetTimeout(250, True)
+        self.setAcceptDrops(True)
+        
+    def dragMoveEvent(self, event):
+        process_image_dragMoveEvent(event)
+
+    def dropEvent(self, drop_event):
+        process_image_dropEvent(self, drop_event)
 
     def moveToLastPage(self):
         number_of_pages = self.document.getNumberPages()

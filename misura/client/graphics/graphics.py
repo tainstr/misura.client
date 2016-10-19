@@ -35,6 +35,7 @@ from ..confwidget import RecentMenu, ClientConf
 from .. import iutils
 from ..live import Tasks
 from . import plot
+from . import veuszplot
 
 setting.transient_settings['unsafe_mode'] = True
 
@@ -397,6 +398,13 @@ class Graphics(MainWindow):
         self.plot.doPick = lambda mouse_position: plugin.InterceptPlugin.clicked_curve(
             mouse_position, self)
         self.setWindowIcon(QtGui.QIcon(os.path.join(params.pathArt, 'graphics.svg')))
+        self.plot.dragMoveEvent = self.dragEnterEvent
+        self.plot.dropEvent = self.dropEvent
+        
+    def dragMoveEvent(self, event):
+        veuszplot.process_image_dragMoveEvent(event)
+    def dropEvent(self,event):
+        veuszplot.process_image_dropEvent(self.plot, event)
 
     def setupDefaultDoc(self):
         """Make default temperature/time pages"""

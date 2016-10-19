@@ -9,7 +9,7 @@ class Status(QtGui.QWidget):
     def __init__(self, server, remObj, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.widgets = {}
-        # TOD: accept drops
+        # TODO: accept drops
         self.lay = QtGui.QFormLayout()
         self.lay.setLabelAlignment(QtCore.Qt.AlignRight)
         self.lay.setRowWrapPolicy(QtGui.QFormLayout.WrapLongRows)
