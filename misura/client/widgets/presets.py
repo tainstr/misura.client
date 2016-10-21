@@ -10,26 +10,27 @@ from PyQt4 import QtGui
 class PresetManager(aChooser):
 
     def __init__(self, remObj, parent=None, context='Option',
-                 preset_handle='preset', save_handle='save', remove_handle='remove'):
+                 preset_handle='preset', save_handle='save', 
+                 remove_handle='remove', 
+                 rename_handle='rename'):
 
         aChooser.__init__(
             self, remObj, remObj, remObj.gete(preset_handle), parent=parent)
         self.preset_handle = preset_handle
         self.save_handle = save_handle
         self.remove_handle = remove_handle
+        self.rename_handle = rename_handle
         # TODO: make a menu, add Rename, View, etc
-        self.bSave = QtGui.QPushButton(_('Save'))
-        self.bSave.setMaximumWidth(40)
-        self.connect(
-            self.bSave, QtCore.SIGNAL('clicked(bool)'), self.save_current)
+        self.presets_button = QtGui.QPushButton('...')
+        self.presets_button.setMaximumWidth(40)
+        self.presets_button.setMinimumWidth(35)
+        self.preset_menu = QtGui.QMenu()
+        self.presets_button.setMenu(self.preset_menu)
+        self.act_save = self.preset_menu.addAction(_('Save'), self.save_current)
+        self.act_del = self.preset_menu.addAction(_('Delete'), self.remove)
+        self.act_rename = self.preset_menu.addAction(_('Rename'), self.rename)
 
-        self.bDel = QtGui.QPushButton(_('Del'))
-        self.bDel.setMaximumWidth(40)
-        self.connect(self.bDel, QtCore.SIGNAL('clicked(bool)'), self.remove)
-
-        self.lay.addWidget(self.bSave)
-        self.lay.addWidget(self.bDel)
-
+        self.lay.addWidget(self.presets_button)
         self.prevIdx = 0
 
     def add(self, *args):
@@ -40,7 +41,9 @@ class PresetManager(aChooser):
             r = self.remObj.call(self.save_handle, str(name))
         else:
             self.combo.setCurrentIndex(self.prevIdx)
+            r = False
         self.redraw()
+        return r
 
     def remove(self):
         if self.user_is_not_sure("Delete \"%s\" preset?" % self.combo.currentText()):
@@ -54,10 +57,27 @@ class PresetManager(aChooser):
 
     def save_current(self):
         if self.user_is_not_sure("Overwrite \"%s\" preset?" % self.combo.currentText()):
-            return
+            return False
 
-        self.remObj.call(self.save_handle,
+        r = self.remObj.call(self.save_handle,
                          self.adapt2srv(self.combo.currentIndex()))
+        return r
+        
+    def rename(self):
+        if self.current =='factory_default':
+            return self.add()
+        new_name, st = self.user_renames()
+        if not st:
+            return False
+        self.remObj.call(self.rename_handle, str(new_name))
+        self.redraw()
+        self.current = False
+        self.get()
+        return True
+
+    def user_renames(self):
+        new_name, st = QtGui.QInputDialog.getText(self, _('Rename'), _('Enter the new name:'), text=self.current)
+        return new_name, st
 
     def user_is_not_sure(self, message):
         answer = QtGui.QMessageBox.warning(

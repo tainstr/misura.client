@@ -296,7 +296,7 @@ class Slider(QtGui.QWidget):
         i = self.cbPath.currentIndex()
         cgr = str(self.cbPath.itemData(i))
         logging.debug('%s %s %s', 'current group', i, cgr)
-
+        
         # Update group combo
         self.cbPath.clear()
         gr = []
