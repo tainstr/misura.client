@@ -156,6 +156,8 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.plot = ThermalCyclePlot()
         self.connect(self.model, QtCore.SIGNAL(
             "dataChanged(QModelIndex,QModelIndex)"), self.replot)
+        self.connect(self.model, QtCore.SIGNAL(
+            "dataChanged(QModelIndex,QModelIndex)"), self.check_if_saved)
         self.addTable()
 
         self.main_layout.addWidget(self.table)
@@ -269,6 +271,28 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         logging.debug('%s %s', 'replotting', crv)
         self.plot.setCurve(crv)
         self.synchronize_progress_bar_to_table()
+        
+    def check_if_saved(self):
+        crv = self.model.curve(events=True)
+        tbcurve = []
+        for row in self.model.curve(events=True):
+            tbrowcurve = []
+            tbrowcurve.append(row[0])
+            tbrowcurve.append(row[1])
+            tbcurve.append(tbrowcurve)
+        
+        remote_equals = tbcurve == self.remote.get('curve')
+        for btn in [self.bApp, self.bRead]:
+            btn.setStyleSheet(
+                "color:" + (';' if remote_equals else 'red;'))
+        saved_equals = tbcurve == self.remote.get('savedCurve')
+        if saved_equals:
+            self.tcc.setStyleSheet("border-color: ; border-style: ; border-width: 0px;" )
+        else:
+            self.tcc.setStyleSheet(
+            "border-color: red; border-style: solid; border-width: 2px;" )
+        return remote_equals, saved_equals
+            
 
     def addButtons(self):
         # General buttons:

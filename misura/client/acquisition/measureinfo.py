@@ -70,20 +70,14 @@ class MeasureInfo(QtGui.QTabWidget):
         
 
     def checkCurve(self):
-        tbcurveremote = self.thermalCycleView.remote.get('curve')
-        tbcurve = []
-        for row in self.thermalCycleView.model.curve(events=True):
-            tbrowcurve = []
-            tbrowcurve.append(row[0])
-            tbrowcurve.append(row[1])
-            tbcurve.append(tbrowcurve)
-        if not tbcurve == tbcurveremote:
-            r = QtGui.QMessageBox.warning(self, _("Changes not saved"),
-                                          _(
-                                              "Changes to thermal cycle were not saved! Save it now?"),
+        remote_equals, saved_equals = self.thermalCycleView.check_if_saved()
+        if not remote_equals:
+            r = QtGui.QMessageBox.warning(self, _("Changes were not applied"),
+                                          _("Changes to thermal cycle were not applied! Apply now?"),
                                           QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
             if r == QtGui.QMessageBox.Ok:
                 self.thermalCycleView.apply()
+        # TODO: warn also about saved_equals?
 
     nsmp = 0
     
