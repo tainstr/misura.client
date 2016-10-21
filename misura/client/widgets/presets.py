@@ -27,6 +27,7 @@ class PresetManager(aChooser):
         self.preset_menu = QtGui.QMenu()
         self.presets_button.setMenu(self.preset_menu)
         self.act_save = self.preset_menu.addAction(_('Save'), self.save_current)
+        self.act_saveAs = self.preset_menu.addAction(_('Save as...'), self.save_as)
         self.act_del = self.preset_menu.addAction(_('Delete'), self.remove)
         self.act_rename = self.preset_menu.addAction(_('Rename'), self.rename)
 
@@ -62,6 +63,18 @@ class PresetManager(aChooser):
         r = self.remObj.call(self.save_handle,
                          self.adapt2srv(self.combo.currentIndex()))
         return r
+    
+    def save_as(self):
+        new_name, st = self.user_renames(title='Choose a new name')
+        if not st:
+            return False
+        if new_name in self.prop['options']:
+            if self.user_is_not_sure("Overwrite \"%s\" preset?" % new_name):
+                return False
+        r = self.remObj.call(self.save_handle, new_name)
+        self.redraw()
+        return r
+        
         
     def rename(self):
         if self.current =='factory_default':
@@ -75,8 +88,8 @@ class PresetManager(aChooser):
         self.get()
         return True
 
-    def user_renames(self):
-        new_name, st = QtGui.QInputDialog.getText(self, _('Rename'), _('Enter the new name:'), text=self.current)
+    def user_renames(self, title='Rename'):
+        new_name, st = QtGui.QInputDialog.getText(self, _(title), _('Enter the new name:'), text=self.current)
         return new_name, st
 
     def user_is_not_sure(self, message):
