@@ -168,7 +168,6 @@ class ThermalCycleDesigner(QtGui.QSplitter):
                 logging.debug('Measure has no option %s', opt)
                 continue
             thermal_cycle_options[opt] = active_instrument.measure.gete(opt)
-            print 'OPT', thermal_cycle_options[opt]
         if thermal_cycle_options:
             self.thermal_cycle_optionsWidget = conf.Interface(
                 active_instrument.root, active_instrument.measure, thermal_cycle_options, parent=self, fixed=True)
@@ -293,10 +292,10 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.connect(self.tcc, QtCore.SIGNAL('changed()'), self.refresh)
         # Disconnect save button from default call
         self.tcc.disconnect(
-            self.tcc.bSave, QtCore.SIGNAL('clicked(bool)'), self.tcc.save_current)
+            self.tcc.act_save, QtCore.SIGNAL('triggered(bool)'), self.tcc.save_current)
         # Connect to apply_and_save
-        self.connect(self.tcc.bSave, QtCore.SIGNAL(
-            'clicked(bool)'), self.apply_and_save)
+        self.connect(self.tcc.act_save, QtCore.SIGNAL(
+            'triggered(bool)'), self.apply_and_save)
         self.main_layout.addWidget(self.buttonBar)
 
     def addTable(self, crv=None):

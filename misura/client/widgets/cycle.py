@@ -11,7 +11,10 @@ class ThermalCycleChooser(PresetManager):
     def __init__(self, remObj, parent=None, context='Option', table=False):
         self.table = table
         PresetManager.__init__(self,  remObj, parent=parent, context='Option',
-                               preset_handle='thermalCycle', save_handle='save_cycle', remove_handle='delete_cycle')
+                               preset_handle='thermalCycle', 
+                               save_handle='save_cycle', 
+                               remove_handle='delete_cycle',
+                               rename_handle='rename_cycle')
 
     def redraw(self, *args, **kwargs):
         """Overload per introdurre la voce speciale +Add al termine della lista"""
