@@ -65,6 +65,7 @@ class DataDecoder(QtCore.QThread):
     zerotime = -1
     comp = 'JPG'
     comps = set(('JPG', 'PNG'))
+    prefix = '0:'
     _len = 0
 
     def __init__(self, parent=None, maxWidth=100):
@@ -115,10 +116,11 @@ class DataDecoder(QtCore.QThread):
         self.emit(QtCore.SIGNAL('reset()'))
         self.ok = True
 
-    def reset(self, proxy=False, datapath=False):
+    def reset(self, proxy=False, datapath=False, prefix='0:'):
         self._len = 0
         self.zerotime = -1
         self.cached_profiles = {}
+        self.prefix = prefix
         self.ok = False
         if self.isRunning():
             self.exit()

@@ -33,7 +33,7 @@ class MiniImage(unittest.TestCase):
 
         self.sync(decoder)
 
-        doc.decoders[profile] = decoder
+        doc.decoders[fpath+':'+profile] = decoder
 
         mini = fileui.MiniImage(doc, '/hsm/sample0/profile')
         mini.saveDir = iutils_testing.data_dir

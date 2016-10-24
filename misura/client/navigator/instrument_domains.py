@@ -104,8 +104,8 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
             return True
         obj = ImageSlider()
         obj.set_doc(self.doc)
-        path = node.path.split(':')[-1]
-        path = '/{}/profile'.format(path)
+        path = '{}/profile'.format(node.path)
+        logging.debug('Storyboard path', path)
         obj.setPath(path)
         self.storyboards[node.path] = obj
         obj.show()

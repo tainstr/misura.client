@@ -181,7 +181,7 @@ class ImageStrip(QtGui.QWidget):
             del lbl
         self.labels = []
         if self.decoder:
-            datapath = self.decoder.datapath
+            datapath = self.decoder.prefix + self.decoder.datapath[1:]
         else:
             datapath = False
         for i in range(n):
@@ -286,9 +286,6 @@ class Slider(QtGui.QWidget):
         self.reset(choice=True)
 
     def reset(self, choice=False):
-        fp = self.doc.proxy
-        if not fp:
-            return
         self.disconnect(
             self.cbPath, QtCore.SIGNAL('currentIndexChanged(int)'), self.choice)
 
@@ -300,10 +297,11 @@ class Slider(QtGui.QWidget):
         # Update group combo
         self.cbPath.clear()
         gr = []
+        self.doc.create_decoders()
         for j, g in enumerate(self.doc.decoders.keys()):
             self.cbPath.addItem(g, g)
             gr.append(g)
-            if self.decoder and g==self.decoder.datapath:
+            if self.decoder and g==self.decoder.prefix + self.decoder.datapath[1:]:
                 i=j
         if i < 0 and len(gr) > 0:
             cgr = gr[0]
@@ -319,7 +317,7 @@ class Slider(QtGui.QWidget):
             n = getattr(self.decoder, 'datapath', False)
             logging.debug('%s %s', 'resetted to', n)
             if n:
-                self.emit(QtCore.SIGNAL('datapathChanged(QString)'), n)
+                self.emit(QtCore.SIGNAL('datapathChanged(QString)'), cgr)
         m = 0
         if self.decoder:
             m = len(self.decoder)

@@ -242,7 +242,7 @@ class MiniImage(QtGui.QWidget):
             self.zoomIn()
 
     def copy(self):
-        new = MiniImage(self.doc, self.decoder.datapath, parent=self, curWidth=self.img.width(
+        new = MiniImage(self.doc, self.decoder.prefix + self.decoder.datapath[1:], parent=self, curWidth=self.img.width(
         ), maxWidth=self.img.width() * 4, slider=True)
         new.set_idx(self.idx)
 #         new.zoom()

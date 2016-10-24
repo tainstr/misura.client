@@ -13,7 +13,7 @@ import veusz.document as document
 from misura.canon.logger import Log as logging
 from misura.canon.plugin import load_rules
 
-from operation import OperationMisuraImport, ImportParamsMisura
+from operation import OperationMisuraImport, ImportParamsMisura, getUsedPrefixes
 from proxy import getFileProxy
 from decoder import DataDecoder
 from model import DocumentModel
@@ -37,7 +37,7 @@ class MisuraDocument(document.Document):
     def close(self):
         self.up = False
         for k, d in self.decoders.iteritems():
-            print 'Closing decoder', k
+            logging.debug('Closing decoder', k)
             d.close()
         self.decoders = {}
 
@@ -54,7 +54,7 @@ class MisuraDocument(document.Document):
         # Available datasets in the output file
         self.available_data = {}
         self.model = DocumentModel(self)
-        # Create one decoder for each 'dat' group
+        
         self.decoders = {}
         if proxy:
             self.proxy = proxy
@@ -65,14 +65,41 @@ class MisuraDocument(document.Document):
         else:
             up = False
             return
+        
+        self.create_proxy_decoders(self.proxy, '0:')
 
-        dec = self.proxy.header(
+            
+    def create_proxy_decoders(self, proxy, prefix=False):
+        """Create one decoder for each relevant dataset in proxy"""
+        dec = proxy.header(
             ['Binary', 'Profile', 'Image', 'ImageM3', 'ImageBMP'])
         logging.debug('%s %s', 'FOUND FOLDERS', dec)
+        proxy_path = proxy.get_path() + ':'
+        if not prefix:
+            files = getUsedPrefixes(self)
+            linked = files[proxy_path]
+            prefix = linked.prefix
         for fold in dec:
             d = DataDecoder(self)
-            d.reset(self.proxy, datapath=fold)
-            self.decoders[fold] = d
+            d.reset(proxy, datapath=fold, prefix=prefix)
+            self.decoders[prefix + fold[1:]] = d
+        return True
+            
+    def create_decoders(self):
+        """Create decoders for each file"""
+        files = getUsedPrefixes(self)
+        for path, linked in files.iteritems():
+            do = True
+            for dec in self.decoders.itervalues():
+                if dec.proxy.get_path() == path:
+                    logging.debug('Already defined decoders for', path)
+                    do = False
+                    break
+            if not do:
+                continue
+            proxy = getFileProxy(path)
+            self.create_proxy_decoders(proxy, linked.prefix)
+        
             
     def add_cache(self, ds, name, overwrite=True):
         if not overwrite and (name in self.cache):
