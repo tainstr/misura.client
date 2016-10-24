@@ -84,7 +84,11 @@ def get_progress_time_for(current_segment_progress, kiln):
 class ThermalCycleDesigner(QtGui.QSplitter):
 
     """The configuration interface widget. It builds interactive controls to deal with a misura configuration object (options, settings, peripherals configurations, etc)."""
-
+    # Save buttons
+    bApp = False
+    bRead = False
+    tcc = False
+    
     def __init__(self, remote, active_instrument, parent=None, force_live=False):
         iutils.loadIcons()
         QtGui.QSplitter.__init__(self, parent)
@@ -273,6 +277,8 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.synchronize_progress_bar_to_table()
         
     def check_if_saved(self):
+        if False in [self.bApp, self.bRead, self.tcc]:
+            return True, True
         tbcurve = []
         for row in self.model.curve(events=True):
             tbrowcurve = []
@@ -282,6 +288,8 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         
         remote_equals = tbcurve == self.remote.get('curve')
         for btn in [self.bApp, self.bRead]:
+            if not btn:
+                continue
             btn.setStyleSheet(
                 "color:" + (';' if remote_equals else 'red;'))
         saved_equals = True 
