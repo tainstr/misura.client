@@ -83,11 +83,11 @@ class DatabaseModel(QtCore.QAbstractTableModel):
     def select(self):
         self.up()
 
-    def up(self, conditions={}):
+    def up(self, conditions={}, operator=1):
         """TODO: rename to select()"""
         if not self.remote:
             return
-        self.tests = self.remote.query(conditions)
+        self.tests = self.remote.query(conditions, operator)
         self.header = self.remote.header()
         self.sheader = []
         for h in self.header:
@@ -226,6 +226,7 @@ class DatabaseTable(QtGui.QTableView):
         record = iter_selected(self).next()
         # url = 'file://' +
         url = os.path.dirname(record[0])
+        logging.debug('opening file folder at', url)
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
 
     def delete(self):
@@ -297,7 +298,7 @@ class DatabaseWidget(QtGui.QWidget):
         sh = self.table.model().sheader
         hh = self.table.horizontalHeader()
         self.qfilter.clear()
-        self.qfilter.addItem(_('None'), '')
+        self.qfilter.addItem(_('All'), '*')
         for i, h in enumerate(header):
             logging.debug('%s %s %s', 'qfilter', i, h)
             if hh.isSectionHidden(i):
@@ -321,9 +322,18 @@ class DatabaseWidget(QtGui.QWidget):
         d = self.qfilter.itemData(self.qfilter.currentIndex())
         d = str(d)
         val = str(self.nameContains.text())
-        if '' in [val, d]:
+        if len(val)==0:
             return self.up()
-        self.table.model().up({d: val})
+        
+        q={}
+        if d=='*':
+            operator = 0 #OR
+            for col in ('file', 'serial', 'uid', 'id', 'instrument', 'flavour', 'name', 'comment'):
+                q[col] = val
+        else:
+            operator = 1 # AND    
+            q[d] = val
+        self.table.model().up(q, operator)
         
     def emit_selected(self, filename):
         if self.table.selected_tab_index<0:
