@@ -16,6 +16,7 @@ import PlotPlugin
 from ThermalCyclePlugin import drawCycleOnGraph
 from utils import OperationWrapper
 from report_plugin_utils import wr, render_meta
+from veusz.document.operations import OperationWidgetDelete
 
 
 class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
@@ -63,8 +64,15 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         if not instr:
             raise plugins.ToolsPluginException(
                 'No measure configuration found.')
+            
+        # Delete an existing report page to refresh on second run
+        try:
+            page = doc.resolveFullWidgetPath(report_path)
+            op = OperationWidgetDelete(page)
+            self.doc.applyOperation(op)
+        except:
+            pass
         measure = instr.measure
-
         sample = getattr(instr, smp_name)
 
         d = os.path.join(params.pathArt, fields['template_file_name'])
