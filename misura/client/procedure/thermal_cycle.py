@@ -273,7 +273,6 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.synchronize_progress_bar_to_table()
         
     def check_if_saved(self):
-        crv = self.model.curve(events=True)
         tbcurve = []
         for row in self.model.curve(events=True):
             tbrowcurve = []
@@ -285,7 +284,9 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         for btn in [self.bApp, self.bRead]:
             btn.setStyleSheet(
                 "color:" + (';' if remote_equals else 'red;'))
-        saved_equals = tbcurve == self.remote.get('savedCurve')
+        saved_equals = True 
+        if self.remote.has_key('savedCurve'):
+            saved_equals = tbcurve == self.remote.get('savedCurve')
         if saved_equals:
             self.tcc.setStyleSheet("border-color: ; border-style: ; border-width: 0px;" )
         else:
