@@ -136,8 +136,9 @@ class RecentInterface(object):
         d= self.conf.last_directory(self.category)
         file_filter = ''
         for converter in dataimport.data_importers:
-            file_filter+= '{} ({});;'.format(_(converter.name),converter.file_pattern)
-            print 'adding filter', file_filter
+            for ptrn in converter.file_pattern.split(';'):
+                file_filter+= '{} ({});;'.format(_(converter.name) + ' ' + ptrn,ptrn)
+                print 'adding filter', file_filter
         path = QtGui.QFileDialog.getOpenFileName(
             self, _("Data import"),
             d,
