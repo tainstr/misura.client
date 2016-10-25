@@ -29,15 +29,16 @@ function create_icon {
 echo Creating desktop icon for $1
 echo "[Desktop Entry]
 Type=Application
-Exec=bash -c \"source /home/misura/.profile; python /opt/misura4/misura.client/misura/client/bin/$1.py\"
+Exec=bash -c \"source /home/$LOGGED_USER/.profile; python /opt/misura4/misura.client/misura/client/bin/$1.py\"
 Terminal=false
-Name=$1" > "$DESKTOP/$1.desktop"
+Name=$1
+Icon=/opt/misura4/misura.client/misura/client/art/$2" > "$DESKTOP/$1.desktop"
 chmod +x "$DESKTOP/$1.desktop"
 }
 
-create_icon acquisition
-create_icon browser
-create_icon graphics
+create_icon acquisition icon.svg
+create_icon browser browser.svg
+create_icon graphics graphics.svg
 
 echo "INSTALLING..."
 
