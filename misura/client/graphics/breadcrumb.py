@@ -75,6 +75,8 @@ class Breadcrumb(QtGui.QWidget):
 
     def update(self):
         p = self.plot.plot.getPageNumber()
+        if p>len(self.doc.basewidget.children)-1:
+            return False
         page = self.doc.basewidget.children[p]
         if page == self.page:
             return False
