@@ -40,24 +40,28 @@ def from_argv():
     return default(host=r['-h'], port=r['-p'], user=r['-u'], password=r['-w'])
 
 
-def configure_logger(log_file_name):
+def configure_logger(log_file_name=False, logdir=None, logsize=None, level=None):
     import os
     import logging
     import logging.handlers
     from misura.client.clientconf import confdb
     from misura.client.units import Converter
 
-    logdir = confdb['logdir']
+    logdir = logdir or confdb['logdir']
     if not os.path.exists(logdir):
         os.makedirs(logdir)
 
-    logsize = Converter.convert('kilobyte', 'byte', confdb['logsize'])
-    log_file = os.path.join(confdb['logdir'], log_file_name)
-    rotating_file_handler = logging.handlers.RotatingFileHandler(
-        log_file, maxBytes=logsize, backupCount=confdb['lognumber'])
-    rotating_file_handler.setFormatter(
-        logging.Formatter("%(levelname)s: %(asctime)s %(message)s"))
-    logging.getLogger().addHandler(rotating_file_handler)
-    level = confdb['loglevel']
+    logsize = logsize or Converter.convert('kilobyte', 'byte', confdb['logsize'])
+    
+    if log_file_name:
+        log_file = os.path.join(logdir, log_file_name)
+        rotating_file_handler = logging.handlers.RotatingFileHandler(
+                                                                     log_file, 
+                                                                     maxBytes=logsize, 
+                                                                     backupCount=confdb['lognumber'])
+        rotating_file_handler.setFormatter(
+                                           logging.Formatter("%(levelname)s: %(asctime)s %(message)s"))
+        logging.getLogger().addHandler(rotating_file_handler)
+    level = level or confdb['loglevel']
 #     level = 0
     logging.getLogger().setLevel(level)

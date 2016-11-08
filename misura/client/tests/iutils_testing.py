@@ -4,6 +4,7 @@
 import os
 import sys
 from misura.canon.logger import Log
+from misura.client import configure_logger
 from PyQt4 import QtGui, QtCore
 
 
@@ -26,7 +27,7 @@ db3_path = os.path.join(db3_dir, 'test.mdb')
 db3_dir = '\\\\ess-server\\Company\\Database Misura\\2015\\'
 db3_path = '\\\\ess-server\\Company\\Database Misura\\2015\\Misura3-2015.mdb'
 
-
+configure_logger(level=-1)
 data_dir = os.path.join(client_test_dir, 'data')
 rem = None
 
