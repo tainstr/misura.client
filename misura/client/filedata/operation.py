@@ -729,6 +729,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         for p, col0 in enumerate(['t'] + available):
             self._dataset_import(
                 p, col0, time_sequence, availds, names, error_map, sub_map)
+            
         # Error import cycle
         p = 0
         for main_pcol, error_name in error_map.items():
@@ -746,16 +747,19 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             else:
                 error_map.pop(main_pcol)
             p += 1
-
+            
+        # Error association cycle
         for main_name, error_name in error_map.iteritems():
+            # Remove any subordered T,t dataset
             for sub_ds in sub_map.get(error_name, []):
                 sub_name = sub_ds.m_name
                 if sub_name in names:
                     names.remove(sub_name)
                 if sub_name in self.outdatasets:
                     self.outdatasets.pop(sub_name)
-                elif sub_name in availds:
+                if sub_name in availds:
                     availds.pop(sub_name)
+            # Place error data into "serr" array
             if error_name in self.outdatasets:
                 error_ds = self.outdatasets.pop(error_name)
                 main_ds = self.outdatasets[main_name]

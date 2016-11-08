@@ -16,13 +16,16 @@ class aTablePointDelegate(QtGui.QItemDelegate):
     def createEditor(self, parent, option, index):
         mod = index.model()
         col = index.column()
+        p = mod.tableObj.prop.get('precision', 2)
+        if hasattr(p, '__len__'):
+            p = p[col]
         
         colType = mod.header[col][1]
         if colType == 'Float':
             wg = QtGui.QDoubleSpinBox(parent)
             wg.setRange(MIN, MAX)
-            val = mod.data(index)
-            dc = extend_decimals(val)
+            val = float(mod.data(index))
+            dc = extend_decimals(val, default=p)
             wg.setDecimals(dc)
         elif colType == 'Integer':
             wg = QtGui.QSpinBox(parent)
@@ -42,10 +45,12 @@ class aTablePointDelegate(QtGui.QItemDelegate):
         mod = index.model()
         col = index.column()
         colType = mod.header[col][1]
-        if colType in ['Float', 'Integer']:
-            val = mod.data(index)
-            print 'setting editor data',val
+        if colType=='Float':
+            val = float(mod.data(index))
             editor.setValue(val)
+        elif colType=='Integer':
+            val = int(mod.data(index))
+            editor.setValue(val)            
         elif colType == 'String':
             val = mod.data(index)
             editor.setText(val)
@@ -93,6 +98,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.header = []
         self.unit = 'None'
         self.csunit = 'None'
+        self.precision = 'None'
         self.up()
 
     def rowCount(self, index=QtCore.QModelIndex()):
@@ -114,6 +120,13 @@ class aTableModel(QtCore.QAbstractTableModel):
             u, cu = self.unit[col], self.csunit[col]
             if u!=cu:
                 val = units.Converter.convert(u, cu, val)
+        if self.precision!='None':
+            p = self.precision
+            if hasattr(p, '__len__'):
+                p = p[col]
+            print p
+            ps = '{:.'+str(p)+'f}'
+            val = ps.format(val)
         return val
 
     def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
@@ -135,6 +148,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         # Rows are the rest of the option
         self.rows = hp[1:]
         self.unit = self.tableObj.prop.get('unit', False)
+        self.precision = self.tableObj.prop.get('precision', None)
         if self.csunit=='None':
             self.csunit = self.unit[:]
         QtCore.QAbstractTableModel.reset(self)
