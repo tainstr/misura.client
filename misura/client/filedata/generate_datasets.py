@@ -100,8 +100,7 @@ def table_to_datasets(proxy, opt, doc):
     if len(tab) == 0:
         print 'Skip empty table'
         return False
-    
-    value_idxes = range(len(tab))
+    value_idxes = range(tab.shape[1])
     if timecol_idx in value_idxes:
         value_idxes.remove(timecol_idx)
     if Tcol_idx in value_idxes:
