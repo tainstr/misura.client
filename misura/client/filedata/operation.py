@@ -28,9 +28,6 @@ from .. import units
 from PyQt4 import QtCore
 
 
-
-
-
 sep = '/'
 
 
@@ -45,9 +42,8 @@ def getUsedPrefixes(doc):
         if lf is None:
             logging.debug('%s %s', 'no linked file for ', name)
             continue
-#       print 'found linked file',lf.filename,lf.prefix
         p[lf.filename] = lf
-    logging.debug( 'getUsedPrefixes', p, doc.data.keys())
+    logging.debug('getUsedPrefixes', p, doc.data.keys())
     return p
 
 
@@ -69,7 +65,7 @@ def get_linked(doc, params, create=True):
     LF = linked.LinkedMisuraFile(params)
     LF.prefix = prefix
     logging.debug('get_linked', prefix)
-    LF.conf =  False
+    LF.conf = False
     return LF
 
 
@@ -95,7 +91,7 @@ class ImportParamsMisura(base.ImportParamsBase):
         'rule_unit': clientconf.rule_unit,
         'overwrite': True,
         # keep data within the operation object - no real import
-        'dryrun': False, 
+        'dryrun': False,
     })
 
 
@@ -212,6 +208,7 @@ def assign_sample_to_dataset(ds, linked_file, reference_sample):
         return False
     return True
 
+
 def assign_label(ds, col0):
     """Assigns an m_label to the dataset"""
     if col0 == 't':
@@ -225,6 +222,7 @@ def assign_label(ds, col0):
         if opt.has_key('csunit'):
             ds.old_unit = opt["csunit"]
 
+
 def assign_node_attributes(proxy, ds):
     """Try to read column metadata from node attrs"""
     for meta in ['percent', 'initialDimension']:
@@ -234,7 +232,8 @@ def assign_node_attributes(proxy, ds):
             if type(val) == type([]):
                 val = 0
         setattr(ds, 'm_' + meta, val)
-        
+
+
 def dataset_measurement_unit(pure_dataset_name, fileproxy, data, m_var):
     # Get meas. unit
     u = 'None'
@@ -244,23 +243,27 @@ def dataset_measurement_unit(pure_dataset_name, fileproxy, data, m_var):
         u = fileproxy.get_node_attr(pure_dataset_name, 'unit')
         if u in ['', 'None', None, False, 0]:
             u = False
+        elif hasattr(u, '__iter__'):
+            u = u[-1]
         # Correct missing celsius indication
         if not u and m_var == 'T':
-            u = 'celsius'    
+            u = 'celsius'
     return u
 
-def create_dataset(fileproxy, data, prefixed_dataset_name, 
-                   pure_dataset_name, 
-                   hdf_dataset_name=False, 
-                   variable_name=False, 
-                   m_update=True, p=0, 
-                   linked_file=False, reference_sample=False, 
+
+def create_dataset(fileproxy, data, prefixed_dataset_name,
+                   pure_dataset_name,
+                   hdf_dataset_name=False,
+                   variable_name=False,
+                   m_update=True, p=0,
+                   linked_file=False, reference_sample=False,
                    rule_unit=lambda *a: False,
                    unit=False):
-    #TODO: cleaun-up all this proliferation of *_dataset_names!!!
+    # TODO: cleaun-up all this proliferation of *_dataset_names!!!
     # Get meas. unit
     if not unit:
-        unit = dataset_measurement_unit(pure_dataset_name, fileproxy, data, variable_name)
+        unit = dataset_measurement_unit(
+            pure_dataset_name, fileproxy, data, variable_name)
     ds = MisuraDataset(data=data, linked=linked_file)
     ds.m_name = prefixed_dataset_name
     ds.m_pos = p
@@ -271,7 +274,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     ds.m_conf = fileproxy.conf
     ds.unit = str(unit) if unit else unit
     ds.old_unit = ds.unit
-    
+
     # Read additional metadata
     if len(data) > 0 and pure_dataset_name != 't':
         logging.debug('Reading metadata',  pure_dataset_name)
@@ -299,7 +302,23 @@ def extend_rule(rule, version=False):
         rule += '|^({}/summary/)?'.format(version) + rule
         rule += '|^({}/)?'.format(version) + rule
     return rule
-    
+
+
+def prefixed_column_name(col0, prefix):
+    #col = col0.replace('/summary/', '/')
+    if col0 == 't':
+        col = 't'
+    else:
+        col = '/' + '/'.join(from_column(col0))
+    mcol = col
+    if mcol.startswith(sep):
+        mcol = mcol[1:]
+    if mcol.endswith(sep):
+        mcol = mcol[:-1]
+    pcol = prefix + mcol
+    m_var = col.split('/')[-1]
+    return pcol, mcol, m_var, col
+
 
 class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
@@ -323,7 +342,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         self.filename = params.filename
         self.uid = params.uid
         self.load_rules(params)
-        
+
     def load_rules(self, params):
 
         self.rule_exc = False
@@ -349,9 +368,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
         if ':' in dataset_name:
             dataset_name = dataset_name.split(':')[1]
-            
+
         #rule = '^(/summary/)?' + dataset_name + '$'
-        rule = extend_rule(dataset_name + '$', kw.get('version',False))
+        rule = extend_rule(dataset_name + '$', kw.get('version', False))
         p = ImportParamsMisura(filename=linked_filename,
                                rule_exc=' *',
                                rule_load=rule,
@@ -363,12 +382,12 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
     @classmethod
     def from_rule(cls, rule, linked_filename, **kw):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
-        version = kw.get('version','')
+        version = kw.get('version', '')
         kw['version'] = version
         rules = rule.splitlines()
         if version:
             for i, rule in enumerate(rules):
-                rules[i]=extend_rule(rule, version)
+                rules[i] = extend_rule(rule, version)
         rule = '|'.join(rules)
         p = ImportParamsMisura(filename=linked_filename,
                                rule_exc=' *',
@@ -409,13 +428,14 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         fp = getattr(doc, 'proxy', False)
         logging.debug('FILENAME', self.filename, type(fp), fp)
         if fp is False or not fp.isopen():
-            self.proxy = getFileProxy(self.filename, version = self.params.version)
+            self.proxy = getFileProxy(
+                self.filename, version=self.params.version)
         else:
             self.proxy = fp
         job(1, label='Configuration')
         if not self.proxy.isopen():
             self.proxy.reopen()
-        LF.version = self.proxy.get_version()    
+        LF.version = self.proxy.get_version()
         self.params.version = LF.version
         # Redefine LF.conf if empty
         if not LF.conf:
@@ -461,7 +481,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         """Return the list of available node names and the list of nodes which should
         be loaded during this import operation."""
         # Will list only Array-type descending from /summary
-        cached = ['/summary/'+el.split(':')[-1] for el in self._doc.cache.keys()]
+        cached = ['/summary/' + el.split(':')[-1]
+                  for el in self._doc.cache.keys()]
         header = self.proxy.header(['Array'], '/summary') + cached
         autoload = []
         excluded = []
@@ -469,12 +490,16 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # Match rules
         for h in header[:]:
             exc = False
-            if self.rule_exc and self.rule_exc.search(h) is not None:
+            do_exc = bool(self.rule_exc) and bool(self.rule_exc.search(h))
+            do_inc = bool(self.rule_inc) and bool(self.rule_inc.search(h))
+            do_load = bool(self.rule_load) and bool(self.rule_load.search(h))
+            # Force exclusion?
+            if do_exc:
                 # Force inclusion?
-                if (not self.rule_inc) or (self.rule_inc.search(h) is None):
+                if not do_inc:
                     exc = True
             # Force loading?
-            if self.rule_load and self.rule_load.search(h) is not None:
+            if do_load or do_inc:
                 if h.endswith('/T'):
                     autoload.insert(0, h)
                     header.remove(h)
@@ -517,14 +542,14 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         return refsmp
 
     def search_data(self, col):
-        return self._doc.data.get(col, 
-                            self.outdatasets.get(col, 
-                                self._doc.get_cache(col)))
+        return self._doc.data.get(col,
+                                  self.outdatasets.get(col,
+                                                       self._doc.get_cache(col)))
 
     def create_local_datasets(self, pcol, sub_time_sequence=False, time_sequence=False):
         """Create subordered time and temperature datasets"""
         logging.debug('creating local datasets',  pcol)
-        
+
         r = []
         # Get time column from document or from cache
         # Search a t child
@@ -532,54 +557,143 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         subt = self.search_data(subcol)
         # Search a t sibling
         if subt is False:
-            subt = self.search_data('/'.join(pcol.split(sep)[:-1]+['t']))
+            subt = self.search_data('/'.join(pcol.split(sep)[:-1] + ['t']))
         if subt:
             r.append(subt)
         elif (sub_time_sequence is not False):
             subvar = 't'
             subt = create_dataset(self.proxy, sub_time_sequence, subcol,
-                                   subvar, subvar, subvar, 
-                                   linked_file=self.LF, reference_sample=self.refsmp,
-                                   rule_unit=self.rule_unit,
-                                   unit='second')
+                                  subvar, subvar, subvar,
+                                  linked_file=self.LF, reference_sample=self.refsmp,
+                                  rule_unit=self.rule_unit,
+                                  unit='second')
             r.append(subt)
         # Neither subT is possible
         if not r:
             return r
         sub_time_sequence = subt.data
         # Get existing, created or cached ds
-        subcol = pcol + sep + 'T' 
+        subcol = pcol + sep + 'T'
         subT = self.search_data(subcol)
         # Search a sibiling
         if not subT:
-            subT = self.search_data('/'.join(pcol.split(sep)[:-1]+['T']))
+            subT = self.search_data('/'.join(pcol.split(sep)[:-1] + ['T']))
         if subT:
             r.append(subT)
             return r
         if time_sequence is False:
             return r
-        
+
         # Search in doc, in current outdatasets (kiln/T should be the first
         # dataset imported!) and in cache
         Tcol = self.prefix + 'kiln/T'
         T = self.search_data(Tcol)
         # No main temperature dataset found: cannot build subordered T
         if T is False:
-            print logging.error('No temperature dataset found for local dataset', pcol)
+            logging.error(
+                'No temperature dataset found for local dataset', pcol)
             return r
         # Generate a new local T dataset
         temperature_function = InterpolatedUnivariateSpline(
             time_sequence, T.data, k=1)
         sub_temperature_sequence = temperature_function(sub_time_sequence)
-        
+
         subvar = 'T'
         subT = create_dataset(self.proxy, sub_temperature_sequence, subcol,
-                                   subvar, subvar, subvar, 
-                                   linked_file=self.LF, reference_sample=self.refsmp,
-                                   unit=T.unit,
-                                   rule_unit=self.rule_unit)
+                              subvar, subvar, subvar,
+                              linked_file=self.LF, reference_sample=self.refsmp,
+                              unit=T.unit,
+                              rule_unit=self.rule_unit)
         r.append(subT)
         return r
+
+    def _dataset_import(self, p, col0, time_sequence, availds, names, error_map, sub_map):
+        pcol, mcol, m_var, col = prefixed_column_name(col0, self.prefix)
+        job(p + 1, label=col)
+        # Set m_update
+        if m_var == 't' or col0 in self.autoload:
+            m_update = True
+        else:
+            m_update = False
+
+        # Avoid overwriting
+        if not self.params.overwrite or not m_update:
+            # completely skip processing if dataset is already in document
+            if self._doc.data.has_key(pcol):
+                logging.debug('Dataset is already in document', col0)
+                return False
+
+        # Try reading cached data
+        ds = False
+        data = []
+        opt = False
+        if pcol in self._doc.cache:
+            ds = self._doc.get_cache(pcol)
+            data = ds.data
+            opt = getattr(ds, 'm_opt', False)
+            logging.debug('Got data from cache', pcol, len(data), opt)
+
+        sub_time_sequence = False
+        if col == 't':
+            attr = []
+            type = 'Float'
+            opt = option.ao(
+                {}, 't', 'Float', 0, 'Event Time', unit='second')['t']
+        else:
+            if opt is False:
+                obj,  name = self.proxy.conf.from_column(col)
+                opt = obj.gete(name)
+            attr = opt['attr']
+            type = opt['type']
+            if attr in ['', 'None', None, False, 0]:
+                attr = []
+        if not m_update:
+            # leave ds empty
+            logging.debug('Not loading:', col0)
+            pass
+        elif col == 't':
+            data = time_sequence
+        elif ('Event' not in attr) and (type != 'Table') and (len(data) == 0):
+            logging.debug('Loading data', col0)
+            data = interpolated(self.proxy, col0, time_sequence)
+        elif len(data) == 0:
+            # Get raw data and time_sequence
+            logging.debug('Getting raw data', col0)
+            data = read_data(self.proxy, col0).transpose()
+            sub_time_sequence = data[0]
+            data = data[1]
+        # Create the dataset
+        if ds is False:
+            ds = create_dataset(self.proxy,
+                                data, pcol, col, col0, m_var, m_update, p,
+                                linked_file=self.LF, reference_sample=self.refsmp,
+                                rule_unit=self.rule_unit)
+        if ds is False:
+            logging.debug('No dataset created for', col0)
+            return False
+        if opt:
+            ds.m_opt = opt
+        # Count the dataset
+        if len(ds.data) > 0:
+            names.append(pcol)
+            self.outdatasets[pcol] = ds
+        else:
+            availds[pcol] = ds
+        # Remember error dataset relation
+        if opt and opt.has_key('error'):
+            error_map[pcol] = opt['error']
+
+        # Create sub-time dataset
+        subds = []
+        if col != 't' and (('Event' in attr) or (type == 'Table')):
+            subds = self.create_local_datasets(
+                pcol, sub_time_sequence, time_sequence)
+        for sub in subds:
+            names.append(sub.m_name)
+            self.outdatasets[sub.m_name] = sub
+        if subds:
+            sub_map[pcol] = subds
+        return ds
 
     def doImport(self):
         """Import data.  Returns a list of datasets which were imported."""
@@ -608,98 +722,47 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
         availds = {}
         names = []
+        error_map = {}  # Dataset :-> Error option name mapping
+        sub_map = {}  # Local dataset mapping: main :-> (locals, )
+
+        # First import cycle
         for p, col0 in enumerate(['t'] + available):
-            #col = col0.replace('/summary/', '/')
-            if col0=='t':
-                col='t'
+            self._dataset_import(
+                p, col0, time_sequence, availds, names, error_map, sub_map)
+        # Error import cycle
+        p = 0
+        for main_pcol, error_name in error_map.items():
+            m = from_column(main_pcol)
+            m.pop(-1)
+            m.append(error_name)
+            col0 = '/' + '/'.join(m)
+            if main_pcol in self.outdatasets:
+                self.autoload.append(col0)
+            ds = self._dataset_import(
+                p, col0, time_sequence, availds, names, error_map, sub_map)
+            if ds:
+                error_map[main_pcol] = prefixed_column_name(
+                    col0, self.prefix)[0]
             else:
-                col = '/' + '/'.join(from_column(col0))
-            job(p + 1, label=col)
-            mcol = col
-            if mcol.startswith(sep):
-                mcol = mcol[1:]
-            if mcol.endswith(sep):
-                mcol = mcol[:-1]
-            pcol = self.prefix + mcol
-            m_var = col.split('/')[-1]
-            # Set m_update
-            if m_var == 't' or col0 in self.autoload:
-                m_update = True
-            else:
-                m_update = False
+                error_map.pop(main_pcol)
+            p += 1
 
-            # Avoid overwriting
-            if not self.params.overwrite or not m_update:
-                # completely skip processing if dataset is already in document
-                if self._doc.data.has_key(pcol):
-                    continue
+        for main_name, error_name in error_map.iteritems():
+            for sub_ds in sub_map.get(error_name, []):
+                sub_name = sub_ds.m_name
+                if sub_name in names:
+                    names.remove(sub_name)
+                if sub_name in self.outdatasets:
+                    self.outdatasets.pop(sub_name)
+                elif sub_name in availds:
+                    availds.pop(sub_name)
+            if error_name in self.outdatasets:
+                error_ds = self.outdatasets.pop(error_name)
+                main_ds = self.outdatasets[main_name]
+                main_ds.serr = error_ds.data
+            if error_name in availds:
+                availds.pop(error_name)
 
-
-            # Try reading cached data
-            ds = False
-            data = []
-            opt = False
-            if pcol in self._doc.cache:
-                ds = self._doc.get_cache(pcol)
-                data = ds.data
-                opt = getattr(ds, 'm_opt', False)
-                logging.debug('Got data from cache', pcol, len(data), opt)
-
-            sub_time_sequence = False
-            if col == 't':
-                attr = []
-                type = 'Float'
-                opt = option.ao({}, 't', 'Float', 0, 'Event Time', unit='second')['t']
-            else:
-                if opt is False:
-                    obj,  name = self.proxy.conf.from_column(col)
-                    opt = obj.gete(name)
-                attr = opt['attr']
-                type = opt['type']
-                if attr in ['', 'None', None, False, 0]:
-                    attr = []
-                    
-            if not m_update:
-                # leave ds empty
-                pass
-            elif col == 't':
-                data = time_sequence
-            elif ('Event' not in attr) and (type!='Table') and (len(data)==0):
-                logging.debug('Loading data', col0)
-                data = interpolated(self.proxy, col0, time_sequence)
-            elif len(data)==0:
-                # Get raw data and time_sequence
-                logging.debug('Getting raw data', col0)
-                data = read_data(self.proxy, col0).transpose()
-                sub_time_sequence = data[0]
-                data = data[1]
-                
-
-            # Create the dataset
-            if ds is False:
-                ds = create_dataset(self.proxy, 
-                        data, pcol, col, col0, m_var, m_update, p,
-                        linked_file=self.LF, reference_sample=self.refsmp, 
-                        rule_unit=self.rule_unit)
-            if ds is False:
-                continue
-            if opt:
-                ds.m_opt = opt
-            # Count the dataset
-            if len(ds.data) > 0:
-                names.append(pcol)
-                self.outdatasets[pcol] = ds
-            else:
-                availds[pcol] = ds
-
-            # Create sub-time dataset
-            subds = []
-            if col!='t' and (('Event' in attr) or (type=='Table')):
-                subds = self.create_local_datasets(
-                    pcol, sub_time_sequence, time_sequence)
-            for sub in subds:
-                names.append(sub.m_name)
-                self.outdatasets[sub.m_name] = sub
         self.imported_names = names
         self._outdatasets = self.outdatasets
         if self.params.dryrun:
@@ -724,5 +787,5 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         hdf_names = map(
             lambda name: ("/" + name.lstrip(self.prefix) + "$"), hdf_names)
         LF.params.rule_load = '\n'.join(hdf_names)
-        
+
         return names
