@@ -35,6 +35,11 @@ def convert_file(caller, path):
         return True
     caller.converter = False
     caller.converter = dataimport.get_converter(path)
+    if not caller.converter:
+        title = _('No file format converter found')
+        logging.debug(title, path)
+        QtGui.QMessageBox.warning(None, title, title + '\n' + path)
+        return False
     caller.converter.confdb = confdb
     # Check overwrite
     outpath = caller.converter.get_outpath(path)

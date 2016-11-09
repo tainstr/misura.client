@@ -141,6 +141,8 @@ class Plot(VeuszPlot):
         print 'default_plot', plugin_class, plot_rule_name
         p = plugin_class()
         r = p.apply(self.cmd, {'dsn': self.document.data.keys(), 'rule': confdb[plot_rule_name]})
+        if not r:
+            return False
         self.curveNames.update(r)
         self.visibleCurves += r.keys()
         return True
