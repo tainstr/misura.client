@@ -41,7 +41,7 @@ class Convert(unittest.TestCase):
     """Verify conversion from Misura3 to Misura4 files. Windows-only!"""
     def check_logging(self, op):
         """Check length and content of log reference"""
-        t = tables.openFile(op, mode='r')
+        t = tables.open_file(op, mode='r')
         log = t.root.log[:]
         t.close()
         self.assertGreater(len(log), 4)
@@ -117,8 +117,8 @@ class Convert(unittest.TestCase):
         converter.get_outpath('00001S', force=True, keep_img=True)
         op = converter.convert(max_num_images = 10)
         self.assertTrue(op, 'Conversion Failed')
-        t = tables.openFile(op, mode='r')
-        n = filenode.openNode(t.root.conf)
+        t = tables.open_file(op, mode='r')
+        n = filenode.open_node(t.root.conf)
         tree = pickle.loads(n.read())
         measure = tree['hsm']['measure']['self']
         self.assertEqual(measure['nSamples']['current'], 1)

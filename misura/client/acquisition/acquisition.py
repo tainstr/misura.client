@@ -785,7 +785,7 @@ class MainWindow(QtGui.QMainWindow):
         """Slot called when a misura file is opened for post-analysis."""
         # TODO: migrate to the new SharedFile interface
         filename = str(filename)
-        f = tables.openFile(filename, 'r')
+        f = tables.open_file(filename, 'r')
         uid = str(f.root.summary.attrs.uid)
         f.close()
         r = self.post_uid(uid)
