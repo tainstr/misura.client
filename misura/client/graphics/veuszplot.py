@@ -433,10 +433,11 @@ class VeuszPlot(QtGui.QWidget):
             return
         self.cmd.Set(page.path+'/width', str(w) + 'in')
         self.cmd.Set(page.path+'/height', str(h) + 'in')
-        if g == '/time' or g.endswith('_t'):
-            g += '/time'
-        elif g == '/temperature' or g.endswith('_T'):
-            g += '/temp'
+        wg = searchFirstOccurrence(page, 'grid', 1)
+        if wg is None:
+            wg = searchFirstOccurrence(page, 'graph', 1)
+        g = wg.path 
+        
         if h < 2 or w < 4:
             self.cmd.Set(g + '/leftMargin', '0.1cm')
             self.cmd.Set(g + '/bottomMargin', '0.1cm')
