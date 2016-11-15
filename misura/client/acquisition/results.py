@@ -16,7 +16,7 @@ class Results(QtGui.QTabWidget):
         self.plot = plot
         
         self.navigator = navigator.Navigator(
-            parent=self, mainwindow=plot, cols=2)
+            parent=self, mainwindow=plot, cols=1)
             
         self.plot.connect(
             self.plot, QtCore.SIGNAL('hide_show(QString)'), self.navigator.plot)
