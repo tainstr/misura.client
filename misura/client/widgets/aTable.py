@@ -148,7 +148,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         # Rows are the rest of the option
         self.rows = hp[1:]
         self.unit = self.tableObj.prop.get('unit', False)
-        self.precision = self.tableObj.prop.get('precision', None)
+        self.precision = self.tableObj.prop.get('precision', 'None')
         if self.csunit=='None':
             self.csunit = self.unit[:]
         QtCore.QAbstractTableModel.reset(self)
