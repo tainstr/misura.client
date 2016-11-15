@@ -88,7 +88,7 @@ class MeasureInfo(QtGui.QTabWidget):
         else:
             i = self.count()
         self.results = results
-        self.insertTab(i, self.results, _('Results'))
+        self.insertTab(i, self.results, _('Navigator'))
 
     def refreshSamples(self, *foo):
         print 'REFRESH SAMPLES'
@@ -113,7 +113,7 @@ class MeasureInfo(QtGui.QTabWidget):
             self.addTab(self.thermalCycleView, _('Thermal Cycle'))
         else:
             self.thermalCycleView.hide()
-        self.addTab(self.results, _('Results'))
+        self.addTab(self.results, _('Navigator'))
         self.refresh_nodes()
         self.blockSignals(False)
         return True
