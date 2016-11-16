@@ -46,8 +46,8 @@ class MeasureInfo(QtGui.QTabWidget):
                      self.refreshSamples, QtCore.Qt.QueuedConnection)
         self.connect(
             self, QtCore.SIGNAL("currentChanged(int)"), self.tabChanged)
-        self.connect(
-            self, QtCore.SIGNAL("currentChanged(int)"), self.refreshSamples)
+        #self.connect(
+        #    self, QtCore.SIGNAL("currentChanged(int)"), self.refreshSamples)
 
         self.tabBar().setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tabBar().customContextMenuRequested.connect(self.show_menu)
@@ -85,11 +85,9 @@ class MeasureInfo(QtGui.QTabWidget):
         i = self.indexOf(self.results)
         if i >= 0:
             self.removeTab(i)
-        else:
-            i = self.statusView is not False
-            i += self.thermalCycleView.isVisible()
-            i += 1
-        print 'BBBBBBBBBBBBB', i
+        i = self.statusView is not False
+        i += self.thermalCycleView.isVisible()
+        i += 1
         self.results = results
         self.insertTab(i, self.results, _('Navigator'))
 
@@ -131,13 +129,13 @@ class MeasureInfo(QtGui.QTabWidget):
             sample = getattr(self.remote, n, False)
             if sample:
                 paths.append(p0 + n)
-        print 'GETSAMPLES', paths
         return paths
 
     def refresh_nodes(self, nodes=[]):
         # Remove all node tabs
         for nodevi in self.nodeViews.itervalues():
             i = self.indexOf(nodevi)
+            print 'REMOVE NODEVI', i, nodevi, nodevi.remObj['fullpath']
             if i < 0:
                 continue
             self.removeTab(i)
@@ -163,7 +161,7 @@ class MeasureInfo(QtGui.QTabWidget):
             if not wg:
                 wg = conf.Interface(
                     self.server, node, node.describe(), self)
-            j = c - 1 + i
+            j = c + i
             self.insertTab(j, wg, node['devpath'].capitalize())
             self.nodeViews[n] = wg
             self.nodes.append(n)
