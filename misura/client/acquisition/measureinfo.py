@@ -86,7 +86,10 @@ class MeasureInfo(QtGui.QTabWidget):
         if i >= 0:
             self.removeTab(i)
         else:
-            i = self.count()
+            i = self.statusView is not False
+            i += self.thermalCycleView.isVisible()
+            i += 1
+        print 'BBBBBBBBBBBBB', i
         self.results = results
         self.insertTab(i, self.results, _('Navigator'))
 
@@ -178,6 +181,7 @@ class MeasureInfo(QtGui.QTabWidget):
             return
         menu = QtGui.QMenu(self)
         self.results.navigator.buildContextMenu(node, menu=menu)
+        self.results.navigator.selectionModel().clear()
         self.results.navigator.expand_node_path(node, select=True)
         menu.exec_(self.tabBar().mapToGlobal(pos))
 

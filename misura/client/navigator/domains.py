@@ -186,7 +186,6 @@ class DataNavigatorDomain(NavigatorDomain):
         configuration_proxy = node.linked.conf
         if '/' in path:
             configuration_proxy = configuration_proxy.toPath(path)
-
         win = conf.TreePanel(configuration_proxy, select=configuration_proxy)
         win.setWindowTitle('Configuration tree from: %s' % configuration_proxy['name'])
         win.show()
