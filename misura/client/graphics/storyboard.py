@@ -8,7 +8,7 @@ import functools
 from veusz import document
 
 from misura.client.iutils import calc_plot_hierarchy
-
+from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
 
 
@@ -121,10 +121,13 @@ class Storyboard(QtGui.QWidget):
 
     def update(self):
         p = self.plot.plot.getPageNumber()
-        if p<len(self.doc.basewidget.children)-1:
+        logging.debug('Storyboard.update', p, self.level_modifier, self._level_modifier)
+        if p>len(self.doc.basewidget.children)-1:
+            logging.debug('Cannot locate page', p, len(self.doc.basewidget.children)-1)
             return False
         page = self.doc.basewidget.children[p]
         if page == self.page and self.level_modifier == self._level_modifier:
+            logging.debug('Storyboard.update: no change')
             return False
         self.clear()
         if self.page:
@@ -139,6 +142,7 @@ class Storyboard(QtGui.QWidget):
         self.update_page_image()
         hierarchy, level, page_idx = calc_plot_hierarchy(self.doc, page)
         if level < 0:
+            logging.debug('Storyboard.update: negative level requested')
             return False
         page_name, page_plots, crumbs = hierarchy[level][page_idx]
 
