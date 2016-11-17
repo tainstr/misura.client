@@ -30,7 +30,7 @@ class Status(QtGui.QWidget):
         for opt in 'T', 'S', 'P', 'Ts', 'Tk', 'Th', 'Te':
             # Skip empty IO pointers
             opt_dict = server.kiln.gete(opt)
-            if opt_dict.has_key('options') and opt_dict['options'][0]=='None':
+            if opt_dict.has_key('options') and opt_dict['options'][0] == 'None':
                 continue
             wg = widgets.build(server, server.kiln, opt_dict)
             if wg.type.endswith('IO'):
@@ -50,8 +50,11 @@ class Status(QtGui.QWidget):
         self.setLayout(self.lay)
 
     def add_samples_option(self, server, remObj, option):
-        for i in range(remObj.measure['nSamples']):
-            smp = getattr(remObj, 'sample' + str(i))
+        for i in range(remObj.measure['nSamples'] + 1):
+            name = 'sample' + str(i)
+            if not remObj.has_child(name):
+                continue
+            smp = getattr(remObj, name)
             print 'Building widget', smp['fullpath'], option
             wg = widgets.build(server, smp, smp.gete(option))
             self.insert_widget(wg)

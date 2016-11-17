@@ -124,11 +124,13 @@ class MeasureInfo(QtGui.QTabWidget):
         self.nsmp = nsmp
         paths = []
         p0 = self.remote['fullpath']
-        for i in range(self.nsmp):
+        # Iterate one more in case its 1-based
+        for i in range(self.nsmp+1):
             n = 'sample' + str(i)
-            sample = getattr(self.remote, n, False)
-            if sample:
-                paths.append(p0 + n)
+            if not self.remote.has_child(n):
+                continue
+            sample = getattr(self.remote, n)
+            paths.append(p0 + n)
         return paths
 
     def refresh_nodes(self, nodes=[]):

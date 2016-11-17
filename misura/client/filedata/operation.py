@@ -531,10 +531,12 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         refsmp = Sample(linked=self.LF)
         self.LF.samples.append(refsmp)
         # build a list of samples
-        for idx in range(self.instrobj.measure['nSamples']):
-            smp = getattr(self.instrobj, 'sample' + str(idx), False)
-            if not smp:
-                break
+        for idx in range(self.instrobj.measure['nSamples']+1):
+            n = 'sample' + str(idx)
+            if not self.instrobj.has_child(n):
+                self.LF.samples.append(None)
+                continue
+            smp = getattr(self.instrobj, n)
             self.LF.samples.append(
                 Sample(conf=smp, linked=self.LF, ref=False, idx=idx))
         logging.debug(
