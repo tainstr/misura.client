@@ -17,21 +17,30 @@ class Storyboard(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent=parent)
         self.base_lay = QtGui.QHBoxLayout()
-
+        self.setLayout(self.base_lay)
+        
+        
         self.doc = False
         self.page = False
         self.images = {}
 
-        self.setLayout(self.base_lay)
         self.level_modifier = 0
         self._level_modifier = 0
         self.tmpdir = tempfile.mkdtemp()
         self.cache = {}
-
+        
+        
+        
         self.container = QtGui.QWidget()
         self.lay = QtGui.QHBoxLayout()
         self.container.setLayout(self.lay)
-        self.base_lay.addWidget(self.container)
+        
+        
+        self.area = QtGui.QScrollArea()
+        self.area.setWidget(self.container)
+        self.area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.area.setWidgetResizable(True)
+        self.base_lay.addWidget(self.area)
 
         self.controls = QtGui.QWidget(self)
         clay = QtGui.QVBoxLayout()
@@ -88,9 +97,10 @@ class Storyboard(QtGui.QWidget):
         if not page:
             page = self.page
         if not page:
+            print 'NO PAGE!'
             return False
         if page not in self.doc.basewidget.children:
-            print 'NO PAGE!'
+            print 'PAGE DOES NOT EXISTS'
             return False
         pageNum = self.doc.basewidget.children.index(page)
         fp = self.fpath(page)
@@ -104,7 +114,7 @@ class Storyboard(QtGui.QWidget):
 
         # Build the label
         if page.name not in self.cache:
-            lbl = QtGui.QToolButton(parent=self)
+            lbl = QtGui.QToolButton(parent=self.container)
             lbl.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
             func = functools.partial(self.slot_select_page, page.name)
             lbl.clicked.connect(func)
@@ -162,6 +172,7 @@ class Storyboard(QtGui.QWidget):
             lbl.setText('/'.join([''] + crumbs))
             self.lay.addWidget(lbl)
             lbl.show()
+            
 
     def slot_select_page(self, page_name):
         for i, page in enumerate(self.doc.basewidget.children):
