@@ -87,6 +87,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         
     def set_navigator(self, navigator):
         self.navigator = navigator
+        self.sigWidgetClicked.connect(self.navigator.sync_currentwidget)
         
     def widget_menu(self, menu, pos):
         widget = self.painthelper.identifyWidgetAtPoint(

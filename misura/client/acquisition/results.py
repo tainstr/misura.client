@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Results tab with access to data tools"""
 from .. import navigator
-
+from .. import _
 from veusz.windows import treeeditwindow
 from veusz.windows import consolewindow
 
@@ -25,8 +25,9 @@ class Results(QtGui.QTabWidget):
         self.clear()
         te = self.plot.treeedit
         self.props = treeeditwindow.PropertiesDock(doc, te, self)
+        self.props.setWindowTitle(_('No selection'))
         self.formats = treeeditwindow.FormatDock(doc, te, self)
-
+        self.formats.setWindowTitle(_('No selection'))
         self.console = consolewindow.ConsoleWindow(doc, self)
         self.console.checkVisible = lambda *disableCheckVisible: None
 
@@ -36,5 +37,10 @@ class Results(QtGui.QTabWidget):
         self.addTab(self.formats, 'Formatting')
         self.addTab(self.plot.treeedit, 'Objects')
         self.addTab(self.console, 'Console')
-
-        #self.navigator.resizeColumnToContents(0)
+        
+        self.plot.plot.sigWidgetClicked.connect(self.slot_selected_widget)
+        
+    def slot_selected_widget(self, *foo):
+        name = _('For: ')+self.navigator.cmd.currentwidget.name
+        self.props.setWindowTitle(name)
+        self.formats.setWindowTitle(name)

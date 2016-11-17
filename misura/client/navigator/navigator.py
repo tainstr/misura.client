@@ -390,7 +390,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             domain.build_multiary_menu(multi_menu, selection)
         return multi_menu
     
-    def sync_currentwidget(self):
+    def sync_currentwidget(self, *foo):
         selected = self.mainwindow.plot.lastwidgetsselected
         logging.debug('SELECTED widgets', [el.path for el in selected])
         if len(selected):
