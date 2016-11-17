@@ -305,6 +305,15 @@ class aTableView(QtGui.QTableView):
         for i, v in enumerate(self.model().visible):
             self.setColumnHidden(i, not v)
 
+    def resize_height(self):
+        self.resizeRowsToContents()
+        self.resizeColumnsToContents()
+        h = self.horizontalHeader().height()
+        for i in range(self.model().rowCount()):
+            h += self.rowHeight(i)
+        self.setMinimumHeight(h)
+        return h
+
 class aTable(ActiveWidget):
 
     def __init__(self, server, path, prop,  parent=None):
@@ -313,8 +322,17 @@ class aTable(ActiveWidget):
         self.table = aTableView(self)
         self.lay.addWidget(self.table)
         self.initializing = False
+        self.table.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+        self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+        self.resize_height()
+    
+    def resize_height(self):
+        h = self.table.resize_height()
+        self.setMinimumHeight(h)
 
     def update(self):
         if self.initializing:
             return
         self.table.up()
+        self.resize_height()
+        
