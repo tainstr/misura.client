@@ -10,6 +10,7 @@ from veusz import document
 from misura.client.iutils import calc_plot_hierarchy
 from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
+from veusz.document.operations import OperationWidgetDelete
 
 
 class Storyboard(QtGui.QWidget):
@@ -19,22 +20,20 @@ class Storyboard(QtGui.QWidget):
         self.base_lay = QtGui.QHBoxLayout()
         self.setLayout(self.base_lay)
         
-        
         self.doc = False
         self.page = False
         self.images = {}
 
         self.level_modifier = 0
         self._level_modifier = 0
+        self.parent_modifier = False
+        self._parent_modifier = False
         self.tmpdir = tempfile.mkdtemp()
         self.cache = {}
-        
-        
         
         self.container = QtGui.QWidget()
         self.lay = QtGui.QHBoxLayout()
         self.container.setLayout(self.lay)
-        
         
         self.area = QtGui.QScrollArea()
         self.area.setWidget(self.container)
@@ -67,6 +66,7 @@ class Storyboard(QtGui.QWidget):
 
     def slot_home(self):
         self.level_modifier = 0
+        self.parent_modifier = False
         self.update()
 
     def set_plot(self, plot):
@@ -109,15 +109,22 @@ class Storyboard(QtGui.QWidget):
             fp,
             pageNum,
         )
-
         export.export()
 
         # Build the label
         if page.name not in self.cache:
             lbl = QtGui.QToolButton(parent=self.container)
             lbl.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-            func = functools.partial(self.slot_select_page, page.name)
-            lbl.clicked.connect(func)
+            show_func = functools.partial(self.slot_select_page, page.name)
+            list_children_func = functools.partial(self.slot_list_children, page.name)
+            del_func = functools.partial(self.slot_delete_page, page.name)
+            lbl.clicked.connect(show_func)
+            menu = QtGui.QMenu()
+            menu.addAction('Show', show_func)
+            menu.addAction('List children', list_children_func)
+            menu.addAction('Delete', del_func)
+            lbl.setMenu(menu)
+            
         else:
             lbl = self.cache[page.name]
 
@@ -136,7 +143,7 @@ class Storyboard(QtGui.QWidget):
             logging.debug('Cannot locate page', p, len(self.doc.basewidget.children)-1)
             return False
         page = self.doc.basewidget.children[p]
-        if page == self.page and self.level_modifier == self._level_modifier:
+        if page == self.page and self.level_modifier == self._level_modifier and self.parent_modifier == self._parent_modifier:
             logging.debug('Storyboard.update: no change')
             return False
         self.clear()
@@ -144,6 +151,7 @@ class Storyboard(QtGui.QWidget):
             self.update_page_image()
         if page == self.page:
             self._level_modifier = self.level_modifier
+            self._parent_modifier = self.parent_modifier
         else:
             self._level_modifier = 0
             self.level_modifier = 0
@@ -155,14 +163,17 @@ class Storyboard(QtGui.QWidget):
             logging.debug('Storyboard.update: negative level requested')
             return False
         page_name, page_plots, crumbs = hierarchy[level][page_idx]
-
         N = len(hierarchy)
         level += self.level_modifier
         if level < 0:
             level = 0
         if level >= N:
             level = N - 1
+            
         for page_name, page_plots, crumbs in hierarchy[level]:
+            if self.parent_modifier:
+                if not page_name.startswith(self.parent_modifier):
+                    continue
             page = filter(
                 lambda wg: wg.name == page_name, self.doc.basewidget.children)[0]
             fp = self.fpath(page)
@@ -172,10 +183,21 @@ class Storyboard(QtGui.QWidget):
             lbl.setText('/'.join([''] + crumbs))
             self.lay.addWidget(lbl)
             lbl.show()
-            
+     
+    def slot_list_children(self, page_name):
+        self.parent_modifier = page_name
+        self.slot_down()
 
     def slot_select_page(self, page_name):
         for i, page in enumerate(self.doc.basewidget.children):
             if page.name == page_name:
                 self.plot.plot.setPageNumber(i)
                 break
+            
+    def slot_delete_page(self, page_name):
+        for i, page in enumerate(self.doc.basewidget.children):
+            if page.name == page_name:
+                op = OperationWidgetDelete(page)
+                self.doc.applyOperation(op)
+                break
+        self.update()
