@@ -96,6 +96,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.tableObj = tableObj
         self.rows = []
         self.header = []
+        self.visible = []
         self.unit = 'None'
         self.csunit = 'None'
         self.precision = 'None'
@@ -124,7 +125,6 @@ class aTableModel(QtCore.QAbstractTableModel):
             p = self.precision
             if hasattr(p, '__len__'):
                 p = p[col]
-            print p
             ps = '{:.'+str(p)+'f}'
             val = ps.format(val)
         return val
@@ -149,6 +149,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.rows = hp[1:]
         self.unit = self.tableObj.prop.get('unit', False)
         self.precision = self.tableObj.prop.get('precision', 'None')
+        self.visible = self.tableObj.prop.get('visible', [1]*len(self.header))
         if self.csunit=='None':
             self.csunit = self.unit[:]
         QtCore.QAbstractTableModel.reset(self)
@@ -259,7 +260,7 @@ class aTableView(QtGui.QTableView):
         self.menu.addAction(_('Update'), self.tableObj.get)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
-        
+        self.update_visible_columns()
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))
@@ -295,7 +296,14 @@ class aTableView(QtGui.QTableView):
         i = self.currentIndex().row()
         model.rows.pop(i)
         model.apply()
-
+        
+    def up(self):
+        self.model().up()
+        self.update_visible_columns()
+    
+    def update_visible_columns(self):
+        for i, v in enumerate(self.model().visible):
+            self.setColumnHidden(i, not v)
 
 class aTable(ActiveWidget):
 
@@ -309,4 +317,4 @@ class aTable(ActiveWidget):
     def update(self):
         if self.initializing:
             return
-        self.table.model().up()
+        self.table.up()
