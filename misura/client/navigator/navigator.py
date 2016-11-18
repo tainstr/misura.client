@@ -293,7 +293,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return False        
 
     def double_clicked(self, index):
-        self.sync_currentwidget()
+        self.sync_currentwidget(update_navigator_selection=False)
         node = self.model().data(index, role=Qt.UserRole)
         self.previous_selection = node.path
         if isinstance(node, filedata.DatasetEntry):
@@ -390,14 +390,19 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             domain.build_multiary_menu(multi_menu, selection)
         return multi_menu
     
-    def sync_currentwidget(self, *foo):
+    def sync_currentwidget(self, *foo, **kw):
         selected = self.mainwindow.plot.lastwidgetsselected
         logging.debug('SELECTED widgets', [el.path for el in selected])
+        tn = [wg.typename for wg in selected]
         if len(selected):
-            self.cmd.currentwidget = selected[0]
+            i = 0
+            if 'xy' in tn:
+                i = tn.index('xy')
+            self.cmd.currentwidget = selected[i]
         else:
             self.cmd.currentwidget = self.get_page()
-        if self.cmd.currentwidget.typename =='xy':
+        up = kw.get('update_navigator_selection', True)
+        if self.cmd.currentwidget.typename =='xy' and up:
             dsn = self.cmd.currentwidget.settings.yData
             node = self.model().tree.traverse(dsn)
             self.selectionModel().clear()
@@ -433,7 +438,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def showContextMenu(self, pt):
         # Refresh currentwidget in cmd interface
-        self.sync_currentwidget()
+        self.sync_currentwidget(update_navigator_selection=False)
         self.previous_selection = self.current_node_path
         sel = self.selectedIndexes()
         node = self.model().data(self.currentIndex(), role=Qt.UserRole)
