@@ -397,6 +397,11 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.cmd.currentwidget = selected[0]
         else:
             self.cmd.currentwidget = self.get_page()
+        if self.cmd.currentwidget.typename =='xy':
+            dsn = self.cmd.currentwidget.settings.yData
+            node = self.model().tree.traverse(dsn)
+            self.selectionModel().clear()
+            self.expand_node_path(node, select=True)
         return self.cmd.currentwidget
     
     def buildContextMenu(self, node, sel=[], menu=False):

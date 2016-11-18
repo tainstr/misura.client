@@ -32,11 +32,11 @@ class Results(QtGui.QTabWidget):
         self.console.checkVisible = lambda *disableCheckVisible: None
 
 
-        self.addTab(self.navigator, 'Data')
-        self.addTab(self.props, 'Properties')
-        self.addTab(self.formats, 'Formatting')
-        self.addTab(self.plot.treeedit, 'Objects')
-        self.addTab(self.console, 'Console')
+        self.addTab(self.navigator, _('Data'))
+        self.addTab(self.props, _('Properties'))
+        self.addTab(self.formats, _('Formatting'))
+        self.addTab(self.plot.treeedit, _('Objects'))
+        self.addTab(self.console, _('Console'))
         
         self.plot.plot.sigWidgetClicked.connect(self.slot_selected_widget)
         
