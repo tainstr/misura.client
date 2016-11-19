@@ -255,6 +255,7 @@ class MainWindow(QtGui.QMainWindow):
             self.instrumentSelector = InstrumentSelector(self, self.setInstrument)
             self.instrumentDock.setWidget(self.instrumentSelector)
             self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.instrumentDock)
+            registry.taskswg.sync.storage_sync.collect()
         else:
             self.instrumentDock = QtGui.QWidget()
         ri = self.server['runningInstrument']  # currently running

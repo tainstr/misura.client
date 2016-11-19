@@ -154,9 +154,12 @@ class StorageSync(object):
     def collect(self, server=False):
         if not server:
             server = self.server
+        if not server:
+            logging.debug('StorageSync.collect: No remote storage defined')
+            return 0
         all_tests = server.storage.list_tests()
         if all_tests is None:
-            logging.error('Impossible to retrieve remote storage list.')
+            logging.error('StorageSync.collect: Impossible to retrieve remote storage list.')
             return 0
         
         def already_downloaded(uid):
