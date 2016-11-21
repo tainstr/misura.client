@@ -224,8 +224,7 @@ class DatabaseTable(QtGui.QTableView):
 
     def view_folder(self):
         record = iter_selected(self).next()
-        # url = 'file://' +
-        url = os.path.dirname(record[0])
+        url = 'file:///' + os.path.dirname(record[0])
         logging.debug('opening file folder at', url)
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
 
