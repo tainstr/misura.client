@@ -1,2 +1,1 @@
-__version__ = '4.0.23'
-__vsz_file_format_version__ = '1'
+__version__ = '4.0.24'
