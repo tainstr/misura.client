@@ -31,7 +31,7 @@ class MenuBar(unittest.TestCase):
 
     def setUp(self):
         from misura import instrument
-        from misura import server
+        from misura.droid import server
 
         self.root = server.MainServer()
         self.remote_instrument = self.root.instruments[0]

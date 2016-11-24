@@ -17,7 +17,7 @@ class Dummy(object):
 class MainWindow(unittest.TestCase):
 
     def setUp(self):
-        from misura import server
+        from misura.droid import server
 
         self.server = server.MainServer()
         self.server_proxy = option.ConfigurationProxy(self.server.tree()[0])

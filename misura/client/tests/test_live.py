@@ -20,7 +20,7 @@ class KidRegistry(unittest.TestCase):
         
     def setUp(self):
         registry.clear()
-        from misura import server
+        from misura.droid import server
         self.root = option.ConfigurationProxy(server.BaseServer().tree()[0])
         registry.obj = self.root
         

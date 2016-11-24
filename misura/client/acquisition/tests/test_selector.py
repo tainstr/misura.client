@@ -18,7 +18,7 @@ class Parent(QtGui.QWidget):
 class InstrumentSelector(unittest.TestCase):
 
     def setUp(self):
-        from misura import server
+        from misura.droid import server
 
         # Fire instantiate the full server with all defined instruments
         self.server = server.MainServer()
