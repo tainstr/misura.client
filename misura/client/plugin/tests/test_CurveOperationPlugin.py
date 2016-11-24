@@ -10,6 +10,7 @@ import numpy as np
 
 
 import veusz.document as document
+import veusz.datasets as datasets
 import veusz.plugins
 
 from PyQt4 import QtGui
@@ -27,7 +28,7 @@ def tearDownModule():
 
 def insertData(doc, datadict):
     for key, data in datadict.iteritems():
-        ds = document.Dataset(data)
+        ds = datasets.Dataset(data)
         doc.setData(key, ds)
 
 #@unittest.skip('')

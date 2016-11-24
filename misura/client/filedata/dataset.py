@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Libreria per il plotting semplice durante l'acquisizione."""
-from veusz import document
+from veusz import datasets
 from misura.canon import option
 import collections
 
@@ -47,10 +47,10 @@ class Sample(object):
         return self.conf.has_key(key)
 
 
-class MisuraDataset(document.Dataset):
+class MisuraDataset(datasets.Dataset):
 
     def __init__(self, data=[], linked=False):
-        document.Dataset.__init__(self, data=data, linked=linked)
+        datasets.Dataset.__init__(self, data=data, linked=linked)
 # 		assert linked!=False
         self.m_keep = True
         """Save on commit"""

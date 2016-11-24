@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
 import threading
-import tempfile 
+import tempfile
 from pickle import loads, dumps
-import os 
+import os
 
 from PyQt4 import QtCore
 
@@ -43,7 +43,7 @@ class MisuraDocument(document.Document):
 
     def __init__(self, filename=False, proxy=False, root=False):
         document.Document.__init__(self)
-        self.cache = {} # File-system cache
+        self.cache = {}  # File-system cache
         self.proxy = False
         self.filename = False
         self.header = []
@@ -54,7 +54,7 @@ class MisuraDocument(document.Document):
         # Available datasets in the output file
         self.available_data = {}
         self.model = DocumentModel(self)
-        
+
         self.decoders = {}
         if proxy:
             self.proxy = proxy
@@ -65,10 +65,9 @@ class MisuraDocument(document.Document):
         else:
             up = False
             return
-        
+
         self.create_proxy_decoders(self.proxy, '0:')
 
-            
     def create_proxy_decoders(self, proxy, prefix=False):
         """Create one decoder for each relevant dataset in proxy"""
         dec = proxy.header(
@@ -84,7 +83,7 @@ class MisuraDocument(document.Document):
             d.reset(proxy, datapath=fold, prefix=prefix)
             self.decoders[prefix + fold[1:]] = d
         return True
-            
+
     def create_decoders(self):
         """Create decoders for each file"""
         files = getUsedPrefixes(self)
@@ -99,12 +98,12 @@ class MisuraDocument(document.Document):
                 continue
             proxy = getFileProxy(path)
             self.create_proxy_decoders(proxy, linked.prefix)
-        
-            
+
     def add_cache(self, ds, name, overwrite=True):
         if not overwrite and (name in self.cache):
             return False
-        filename = os.path.join(self.cache_dir, '{}.dat'.format(len(self.cache)))
+        filename = os.path.join(
+            self.cache_dir, '{}.dat'.format(len(self.cache)))
         self.cache[name] = filename
         if hasattr(ds, 'document'):
             del ds.document
@@ -114,7 +113,7 @@ class MisuraDocument(document.Document):
         self.available_data[name] = ds
         ds.document = self
         return True
-        
+
     def get_cache(self, name):
         filename = self.cache.get(name, False)
         if not filename or not os.path.exists(filename):
@@ -267,8 +266,8 @@ class MisuraDocument(document.Document):
         ks = set(self.data.keys()) | set(self.available_data.keys())
         dh = header - ks
 
-        temporary_disabled = False
-        if temporary_disabled and len(dh) > 0:
+        header_autoupdate = False
+        if header_autoupdate and len(dh) > 0:
             logging.debug(
                 '%s %s', 'RELOADING DATA: HEADER DIFFERS. Missing:', dh)
             logging.debug('%s %s', 'header', header)
@@ -277,12 +276,12 @@ class MisuraDocument(document.Document):
             dsnames = self.reloadData()
             self._lock.acquire(False)
             return dsnames
+
         # Avoid firing individual updates
         self.suspendUpdates()
         for col in self.data.keys():
             ds = self.data[col]
             if len(ds.data) == 0:
-                #               print 'Skipping empty',col,ds.m_col
                 continue
             if not getattr(ds, 'm_col', False):
                 # Not a misura dataset
@@ -302,8 +301,8 @@ class MisuraDocument(document.Document):
                 elif to_unit and to_unit != from_unit:
                     val = units.Converter.convert(from_unit, to_unit, val)
                 updata = [val]
-                logging.debug(
-                    '%s %s %s %s %s %s', 'Updating', col, opt, updata, from_unit, to_unit)
+                logging.debug('Updating', col, opt, updata, from_unit, to_unit)
+                
             N = len(ds.data)
             ds.insertRows(N, 1, {'data': updata})
             k.append(col)
@@ -312,3 +311,14 @@ class MisuraDocument(document.Document):
         self.enableUpdates()
         self.emit(QtCore.SIGNAL('updated()'))
         return k
+
+
+def print_history(lst, j=1, ids=False):
+    if ids is False:
+        ids = {}
+    i = -1
+    for i, op in enumerate(lst):
+        print j + i + 1, op
+        ids[id(op)] = op
+        j, ids = print_history(getattr(op, 'operations', []), j, ids)
+    return j + i + 1, ids
