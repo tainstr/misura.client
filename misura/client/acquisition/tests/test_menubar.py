@@ -6,7 +6,7 @@ import unittest
 
 from misura.client.acquisition import menubar
 from test_controls import Parent
-
+from misura.droid import server
 
 from PyQt4 import QtGui, QtCore
 
@@ -26,14 +26,10 @@ class Parent(QtGui.QWidget):
     def delayed_start(self):
         return True
 
-@unittest.skip("Needs the server, so it should not be run automatically")
 class MenuBar(unittest.TestCase):
 
     def setUp(self):
-        from misura import instrument
-        from misura.droid import server
-
-        self.root = server.MainServer()
+        self.root = server.MainServer(plug='misura.droid.instrument.Instrument')
         self.remote_instrument = self.root.instruments[0]
         self.remote_instrument.parent = lambda: self.root
         self.remote_instrument.server = self.root
@@ -42,7 +38,6 @@ class MenuBar(unittest.TestCase):
 
     def test_init(self):
         number_of_instruments = len(self.root.instruments)
-
         self.assertEqual(
             len(self.menu_bar.lstInstruments), number_of_instruments)
         self.assertEqual(

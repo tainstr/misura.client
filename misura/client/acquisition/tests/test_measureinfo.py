@@ -19,7 +19,7 @@ from PyQt4 import QtGui, QtCore
 class MeasureInfo(unittest.TestCase):
 
     def setUp(self):
-        from misura import instrument
+        from misura.droid import instrument
         from misura import kiln, flex
 
         file_proxy = filedata.getFileProxy(

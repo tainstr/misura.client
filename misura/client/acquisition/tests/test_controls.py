@@ -36,7 +36,7 @@ class Controls(unittest.TestCase):
 
     def setUp(self):
         from misura import utils_testing
-        from misura import instrument
+        from misura.droid import instrument
         self.server = utils_testing.dummyServer()
         self.remote_instrument = instrument.Instrument(self.server)
         self.remote_instrument.start_acquisition = lambda: self.server.set(
