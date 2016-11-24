@@ -14,7 +14,6 @@ from misura.client import _
 from PyQt4 import QtGui, QtCore
 from tasks import Tasks
 
-
 # TODO: we should NEVER reference widgets here, just KIDs (except pending
 # tasks)
 class KidRegistry(QtCore.QThread):
@@ -36,7 +35,7 @@ class KidRegistry(QtCore.QThread):
     """Signal emitted when connection errors counter changes."""
     connection_error_count = 0
     max_connection_errors = 0
-    max_log_buf = 5000
+    max_log_buf = 15000
 
     def __init__(self):
         QtCore.QThread.__init__(self)
@@ -232,10 +231,10 @@ class KidRegistry(QtCore.QThread):
         self.log_time = ltime
         self.log_buf += buf
         if len(self.log_buf)>self.max_log_buf:
-            self.log_buf = self.log_buf[len(buf):]
-        self.emit(QtCore.SIGNAL('log()'))
+            self.log_buf = self.log_buf[self.max_log_buf:]
         for entry in buf:
             self.emit(QtCore.SIGNAL('logMessage(int, QString)'), entry[1], entry[-1])
+        self.emit(QtCore.SIGNAL('log()'))
         return True
 
     def setInterval(self, ms):
@@ -260,6 +259,8 @@ class KidRegistry(QtCore.QThread):
             if self.obj['isRunning']:
                 if self.doc:
                     self.doc.update(proxy=self.proxy)
+                    
+        return True
 
 
     def control_loop(self):
@@ -280,14 +281,14 @@ class KidRegistry(QtCore.QThread):
             logging.debug('%s', 'KidRegistry.control_loop: Not connected')
             return True
         self.obj._reg = self
-
-        self.update_doc()
-
+        
         r = True
-        if not self.updateLog():
-            r = False
-        if self.update_all() is False:
-            r = False
+        if r:
+            r = self.update_doc() is not False
+        if r:
+            r = self.update_all() is not False
+        if r:
+            r = self.updateLog() is not False
         return r
 
     def run(self):

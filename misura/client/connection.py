@@ -232,7 +232,7 @@ from datetime import datetime
 
 
 class LiveLog(QtGui.QTextEdit):
-    _max_character_length = 1e7
+    _max_character_length = 1e6
 
     def __init__(self, parent=None):
         QtGui.QTextEdit.__init__(self, parent)
@@ -247,8 +247,9 @@ class LiveLog(QtGui.QTextEdit):
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
         if registry != None:
-            self.connect(registry, QtCore.SIGNAL(
-                'log()'), self.slotUpdate, QtCore.Qt.QueuedConnection)
+            self.connect(registry, QtCore.SIGNAL('log()'), 
+                         self.slotUpdate, 
+                         QtCore.Qt.QueuedConnection)
         self.slotUpdate()
         self.setFont(QtGui.QFont('TypeWriter',  7, 50, False))
 
@@ -268,6 +269,8 @@ class LiveLog(QtGui.QTextEdit):
             if type(line) != type([]):
                 continue
             if len(line) < 2:
+                continue
+            if line in self.current_buf:
                 continue
             st = datetime.fromtimestamp(line[0]).strftime('%X')
             p = line[1]
