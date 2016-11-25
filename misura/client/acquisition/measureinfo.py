@@ -69,6 +69,8 @@ class MeasureInfo(QtGui.QTabWidget):
             self.fromthermalCycleView = True
 
     def checkCurve(self):
+        if not hasattr(self.thermalCycleView, 'check_if_saved'):
+            return 
         remote_equals, saved_equals = self.thermalCycleView.check_if_saved()
         if not remote_equals:
             r = QtGui.QMessageBox.warning(self, _("Changes were not applied"),
@@ -196,7 +198,8 @@ class MeasureInfo(QtGui.QTabWidget):
 
     def up_isRunning(self):
         is_running = registry.values.get('/isRunning', False)
-        self.thermalCycleView.enable(not is_running)
+        if hasattr(self.thermalCycleView, 'enable'):
+            self.thermalCycleView.enable(not is_running)
         self.tabBar().setStyleSheet(
             "background-color:" + ('red;' if is_running else 'green;'))
 

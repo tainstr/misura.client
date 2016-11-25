@@ -15,29 +15,31 @@ class Status(QtGui.QWidget):
         self.lay.setRowWrapPolicy(QtGui.QFormLayout.WrapLongRows)
         wg = widgets.build(server, server, server.gete('isRunning'))
         self.insert_widget(wg)
-
-        wg = widgets.build(server, server.kiln, server.kiln.gete('analysis'))
-        self.insert_widget(wg)
+        has_kiln = server.has_child('kiln')
+        if has_kiln:
+            wg = widgets.build(server, server.kiln, server.kiln.gete('analysis'))
+            self.insert_widget(wg)
         for opt in 'name', 'elapsed':
             wg = widgets.build(
                 server, remObj.measure, remObj.measure.gete(opt))
             self.insert_widget(wg)
-        if server.kiln['motorStatus'] >= 0:
-            wg = widgets.build(
-                server, server.kiln, server.kiln.gete('motorStatus'))
-            wg.force_update = True
-            self.insert_widget(wg)
-        for opt in 'T', 'S', 'P', 'Ts', 'Tk', 'Th', 'Te':
-            # Skip empty IO pointers
-            opt_dict = server.kiln.gete(opt)
-            if opt_dict.has_key('options') and opt_dict['options'][0] == 'None':
-                continue
-            wg = widgets.build(server, server.kiln, opt_dict)
-            if wg.type.endswith('IO'):
-                wg.value.force_update = True
-            else:
+        if has_kiln:
+            if server.kiln['motorStatus'] >= 0:
+                wg = widgets.build(
+                    server, server.kiln, server.kiln.gete('motorStatus'))
                 wg.force_update = True
-            self.insert_widget(wg)
+                self.insert_widget(wg)
+            for opt in 'T', 'S', 'P', 'Ts', 'Tk', 'Th', 'Te':
+                # Skip empty IO pointers
+                opt_dict = server.kiln.gete(opt)
+                if opt_dict.has_key('options') and opt_dict['options'][0] == 'None':
+                    continue
+                wg = widgets.build(server, server.kiln, opt_dict)
+                if wg.type.endswith('IO'):
+                    wg.value.force_update = True
+                else:
+                    wg.force_update = True
+                self.insert_widget(wg)
         n = remObj['devpath']
 
         if n != 'kiln':
