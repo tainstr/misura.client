@@ -142,7 +142,7 @@ def not_interpolated(proxy, col, startt, endt):
 def interpolated(proxy, col, ztime_sequence):
     """Retrieve `col` from `proxy` and interpolate it around `ztime_sequence`"""
     tdata = not_interpolated(proxy, col, ztime_sequence[0], ztime_sequence[-1])
-    if tdata is False:
+    if tdata is (False, False):
         return []
     t, val = tdata[0], tdata[1]
     # Empty column
@@ -665,7 +665,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             sub_time_sequence = data[0]
             data = data[1]
         # Create the dataset
-        if ds is False:
+        if ds is False and data is not False:
             ds = create_dataset(self.proxy,
                                 data, pcol, col, col0, m_var, m_update, p,
                                 linked_file=self.LF, reference_sample=self.refsmp,
