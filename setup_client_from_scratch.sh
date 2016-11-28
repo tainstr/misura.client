@@ -48,7 +48,7 @@ sudo apt-get -y build-dep veusz
 sudo apt-get -y install python-qt4-sql libqt4-sql-sqlite
 #sudo apt-get -y install python-pyqt5 libqt5sql5-sqlite
 sudo apt-get -y install wget unzip git-core python-setuptools python-scipy
-sudo apt-get -y install libhdf5-7 libhdf5-dev
+sudo apt-get -y install libhdf5-10 libhdf5-dev
 sudo easy_install pip
 
 export HDF5_DIR=/opt/local
@@ -63,9 +63,28 @@ echo "done."
 
 echo "Getting Misura4 sources..."
 cd $TARGET_DIR
-git clone https://bitbucket.org/tainstr/misura.client.git
-git clone https://bitbucket.org/tainstr/misura.canon.git
-git clone https://github.com/tainstr/veusz.git
+if [ -d misura.client ]; then
+	cd misura.client
+	git pull --rebase
+	cd ..
+else
+	git clone https://bitbucket.org/tainstr/misura.client.git
+fi
+if [ -d misura.canon ]; then
+	cd misura.canon
+	git pull --rebase
+	cd ..
+else
+	git clone https://bitbucket.org/tainstr/misura.canon.git
+fi 
+
+if [ -d veusz ]; then
+	cd veusz
+	git pull --rebase
+	cd ..
+else
+	git clone https://github.com/tainstr/veusz.git
+fi
 echo "done cloning."
 
 
