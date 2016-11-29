@@ -20,18 +20,26 @@ board_left_angk_path = 'idx0/board2'
 board_right_xy_path = 'idx0/board3'
 board_right_ang_path = 'idx0/board4'
 
+# TEST
+left_cam_serial = 'simcam0'
+right_cam_serial = 'simcam1'
+flex_cam_serial = 'simcam2'
+micro_cam_serial = 'simcam3'
+
 ##################
+from misura.canon.logger import Log as logging
+from exceptions import RuntimeError
 
 def send_to_zero(motor):
     print 'sending to zero:', motor['fullpath']
     motor['micro'] = 'lower step'
     print motor['limits']
-    motor.wait()
+    motor.wait(60)
     if motor['goingTo']!=0:
-        motor.send_log('goingTo!=0 after send_to_zero',40)
+        logging.error('goingTo!=0 after send_to_zero',motor['goingTo'])
         return False
     if motor['position']==0:
-        motor.send_log('position!=0 after send_to_zero',40)
+        logging.error('position!=0 after send_to_zero',motor['goingTo'])
         return False
     return True
 
@@ -53,8 +61,8 @@ def motor_find_limits(motor, name):
     motor['name'] = name
     motor['micro'] = 'both ends'
     print motor['limits']
-    motor.wait()
-    motor.send_log('found steps: {}'.format(motor['steps']))
+    motor.wait(60)
+    logging.error('found steps: {}'.format(motor['steps']))
     send_to_zero(motor)
     motor.save('default')
     return True
@@ -81,12 +89,19 @@ def board_find_limits(board, xname=False, yname=False):
 
 def starting_position(motor, steps, config_name):
     motor['goingTo'] = steps
-    motor.wait()
+    motor.wait(60)
     if motor['position']!=steps:
-        motor.send_log('starting_position: steps mismatch',motor['position'], steps)
+        logging.error('starting_position: steps mismatch',motor['position'], steps)
     motor.save(config_name)
     motor['goingTo'] = 0
-    motor.wait()
+    motor.wait(60)
+    
+def toPath(parent, path):
+    r = parent.toPath(path)
+    if not r:
+        msg = logging.critical('Path was not found:', path)
+        raise RuntimeError(msg)
+    return r
 
 class FirstSetupWizard(object):
     def __init__(self, server, left_cam_serial = left_cam_serial,
@@ -106,11 +121,12 @@ class FirstSetupWizard(object):
         self.server = server
         m = server
         self.board_main = m.morla.idx0 
-        self.board_microfocus = m.morla.toPath(board_microfocus_path)
-        self.board_left_xy = m.morla.toPath(board_left_xy_path)
-        self.board_left_angk = m.morla.toPath(board_left_angk_path)
-        self.board_right_xy = m.morla.toPath(board_right_xy_path)
-        self.board_right_ang = m.morla.toPath(board_right_ang_path)
+        mo = m.morla
+        self.board_microfocus = toPath(mo, board_microfocus_path)
+        self.board_left_xy = toPath(mo, board_left_xy_path)
+        self.board_left_angk = toPath(mo, board_left_angk_path)
+        self.board_right_xy = toPath(mo, board_right_xy_path)
+        self.board_right_ang = toPath(mo, board_right_ang_path)
         
         
         self.m_focus = self.board_microfocus.X
@@ -126,22 +142,22 @@ class FirstSetupWizard(object):
         
         # Camera names
         assert len(m.beholder.list()) == 4, 'Wrong camera identification'
-        self.left_cam = getattr(m.beholder, left_cam_serial)
+        self.left_cam = toPath(m.beholder, left_cam_serial)
         self.left_cam['name'] = 'Left'
         self.left_cam['autocrop'] = 'Never'
         self.left_cam['clock'] = 26
         self.left_cam.save('default')
-        self.right_cam = getattr(m.beholder, right_cam_serial)
+        self.right_cam = toPath(m.beholder, right_cam_serial)
         self.right_cam['name'] = 'Right'
         self.right_cam['autocrop'] = 'Never'
         self.right_cam['clock'] = 26
         self.right_cam.save('default')
-        self.flex_cam = getattr(m.beholder, flex_cam_serial)
+        self.flex_cam = toPath(m.beholder, flex_cam_serial)
         self.flex_cam['name'] = 'Flex'
         self.flex_cam['autocrop'] = 'Never'
         self.flex_cam['clock'] = 26
         self.flex_cam.save('default')
-        self.micro_cam = getattr(m.beholder, micro_cam_serial)
+        self.micro_cam = toPath(m.beholder, micro_cam_serial)
         self.micro_cam['name'] = 'Microscope'
         self.micro_cam['clock'] = 92
         self.micro_cam.save('default')
@@ -162,6 +178,31 @@ class FirstSetupWizard(object):
         self.left_x['mOde'] = 2
         self.right_ang['mOde'] = 2
         self.right_x['mOde'] = 2
+        
+        print 'Initialization Order'
+        
+        order = lambda *lst: '\n'.join([dev['fullpath'][:-1] for dev in lst]+['#END'])
+        m = self.server.morla
+        
+        orderZero = order(self.m_micro, self.m_focus,
+                      self.left_x, self.right_x,
+                      self.left_y, self.right_y,
+                      self.left_ang, self.right_ang)
+        
+        m['orderZero'] = orderZero
+        m['order'] = orderZero
+        
+        m.save('default')
+        
+        orderHsm = order(self.left_ang, self.right_ang,
+                         self.left_x, self.right_x,
+                         self.left_y, self.right_y,
+                         self.m_micro, self.m_focus,
+                         )
+        m['order'] = orderHsm
+        m.save('hsm')
+        
+    def configure_limits(self):
         # Safety zero positioning
         board_send_to_zero(self.board_microfocus)
         board_find_limits(self.board_microfocus, 'Focus', 'Microscope')
@@ -194,6 +235,28 @@ class FirstSetupWizard(object):
     
         print 'Flex motors'
         starting_position(self.m_micro, self.m_micro['steps'] / 2, 'flex')
+        
+
+#END
+        
+    def configure_baudrates(self):
+        b0 = self.server.morla.idx0
+        b0.raw("{0000}115200b")      # sets baudrate to 115200 for board 4
+        b0.raw("{000}115200b")       # sets baudrate to 115200 for board 3
+        b0.raw("{00}115200b")        # sets baudrate to 115200 for board 2
+        b0.raw("{0}115200b")         # sets baudrate to 115200 for board 1
+        b0.raw("{}115200b")          # sets baudrate to 115200 for board 0
+        
+        b0.baudrate = 115200         # tells the server the new baudrate
+        
+        b0.raw("{0000}123456789e")   # saves eeprom for board 4
+        b0.raw("{000}123456789e")    # saves eeprom for board 3
+        b0.raw("{00}123456789e")     # saves eeprom for board 2
+        b0.raw("{0}123456789e")      # saves eeprom for board 1
+        b0.raw("{}123456789e")       # saves eeprom for board 0
+        
+        b0.save('default')
+        
     
     
     ######
@@ -329,15 +392,36 @@ class FirstSetupWizard(object):
     
         m.kiln.save('default')
         
-    def do(self):
+    def do(self, argv=False):
         """Full setup"""
-        self.configure_motors()
-        self.configure_cameras()
-        self.configure_encoders()
-        self.configure_kiln()
+        if not argv:
+            argv='mcek'
+        if 'm' in argv:
+            self.configure_motors()
+        if 'l' in argv:
+            self.configure_limits()
+        if 'b' in argv:
+            self.configure_baudrates()
+        if 'c' in argv:
+            self.configure_cameras()
+        if 'e' in argv:
+            self.configure_encoders()
+        if 'k' in argv:
+            self.configure_kiln()
         
 if __name__ == '__main__':
+    from sys import argv
     from misura.client import from_argv
+    print """
+    m - motors
+    l - limits
+    b - baudrates
+    c - cameras
+    e - encoders
+    k - kiln
+    Default: mcek
+    All: mlbcek
+    """
     m = from_argv()
     fsw = FirstSetupWizard(m)
-    fsw.do()
+    fsw.do(argv[1])
