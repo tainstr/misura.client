@@ -224,13 +224,18 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         # Configuration table
         conf_table_exists = cursor.execute(
             "select 1 from sqlite_master where type='table' and name='conf'").fetchone()
+        loaded = False
         if conf_table_exists:
-            stored_desc = self.store.read_table(cursor, 'conf')
-            desc = default_desc.copy()
-            desc.update(stored_desc)
-            self.desc = self.migrate_desc(desc)
-            logging.debug('%s %s', 'Loaded configuration', self.desc)
-        else:
+            try:
+                stored_desc = self.store.read_table(cursor, 'conf')
+                desc = default_desc.copy()
+                desc.update(stored_desc)
+                self.desc = self.migrate_desc(desc)
+                logging.debug('%s %s', 'Loaded configuration', self.desc)
+                loaded=True
+            except:
+                logging.error(format_exc())
+        if not loaded:
             logging.debug('%s', 'Recreating client configuration')
             for key, val in default_desc.iteritems():
                 self.store.desc[key] = option.Option(**val)
@@ -249,7 +254,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             self.path, detect_types=sqlite3.PARSE_DECLTYPES)
         self.conn.text_factory = unicode
         cursor = self.conn.cursor()
-
+        
         self.load_configuration(cursor)
         cursor.close()
         
