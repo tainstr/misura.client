@@ -90,7 +90,8 @@ class Storyboard(QtGui.QWidget):
     def fpath(self, page=False):
         if not page:
             page = self.page
-        return '{}/{}.jpg'.format(self.tmpdir, page.name)
+        fp = os.path.join(self.tmpdir, page.name+'.jpg')
+        return fp 
 
     def update_page_image(self, page=False):
         # initialize cache
@@ -104,6 +105,7 @@ class Storyboard(QtGui.QWidget):
             return False
         pageNum = self.doc.basewidget.children.index(page)
         fp = self.fpath(page)
+        logging.debug('writing page to', fp)
         export = document.Export(
             self.doc,
             fp,
@@ -127,8 +129,9 @@ class Storyboard(QtGui.QWidget):
             
         else:
             lbl = self.cache[page.name]
-
+            
         # Replace the icon
+        logging.debug('loading page from', fp)
         icon = QtGui.QIcon(fp)
         lbl.setIcon(icon)
         size = QtCore.QSize(200, 100)
