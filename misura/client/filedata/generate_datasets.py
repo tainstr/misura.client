@@ -15,8 +15,9 @@ possible_timecol_names = set(['Time', 'time', 't'])
 possible_Tcol_names = set(['Temp.', 'Temp', 'Temperature',
                            'T', 'temp', 'temp.', 'temperature'])
 possible_value_names = set(['Value','value','val','v'])
+possible_error_names = set(['Error','error','err','e'])
 
-def new_dataset_operation(original_dataset, data, name, label, path, unit='volt', opt=False):
+def new_dataset_operation(original_dataset, data, name, label, path, unit='volt', opt=False, error=None):
     """Create a new dataset by copying `original_dataset` and overwriting with `data`.
     Returns an operation to be executed by the document."""
     old_unit = getattr(original_dataset, 'old_unit', unit)
@@ -37,6 +38,8 @@ def new_dataset_operation(original_dataset, data, name, label, path, unit='volt'
     if not path.startswith(prefix):
         path = prefix+path.lstrip('/')
     new_dataset.m_name = path
+    if error is not None:
+        new_dataset.serr = error
     return document.OperationDatasetSet(path, new_dataset)
 
 def search_column_name(column_names_list, possible_names):
@@ -58,8 +61,10 @@ def add_datasets_to_doc(datasets, doc, original_dataset=False):
     #TODO: find a way to reliably detect the original_dataset for multi-test docs!
     if not original_dataset:
         original_dataset = doc.data['0:t']
-    for (pure_dataset_name, (data, variable_name, label)) in datasets.iteritems():
-        op = new_dataset_operation(original_dataset, data, variable_name, label, pure_dataset_name, unit=unit)
+    for (pure_dataset_name, values) in datasets.iteritems():
+        (data, variable_name, label) = values[:3]
+        error = None if len(values)==3 else values[3]
+        op = new_dataset_operation(original_dataset, data, variable_name, label, pure_dataset_name, unit=unit, error=error)
         ops.append(op)
     if len(ops) > 0:
         doc.applyOperation(
@@ -88,6 +93,8 @@ def table_to_datasets(proxy, opt, doc):
 
     Tcol_name, Tcol_idx = search_column_name(column_names, 
                                              possible_Tcol_names)
+    Ecol_name, Ecol_idx = search_column_name(column_names, 
+                                             possible_error_names)
     
     if (timecol_name == False) and (Tcol_name == False):
         print 'Neither time nor temperature columns were found', header
@@ -100,11 +107,13 @@ def table_to_datasets(proxy, opt, doc):
     if len(tab) == 0:
         print 'Skip empty table'
         return False
-    value_idxes = range(tab.shape[1])
+    value_idxes = range(tab.shape[0])
     if timecol_idx in value_idxes:
         value_idxes.remove(timecol_idx)
     if Tcol_idx in value_idxes:
         value_idxes.remove(Tcol_idx)
+        if Ecol_idx in value_idxes:
+            value_idxes.remove(Ecol_idx)
         
     if len(value_idxes)==0:
         print 'No value columns found in table', len(tab), tab, value_idxes, header
@@ -118,7 +127,10 @@ def table_to_datasets(proxy, opt, doc):
     
     if len(value_idxes)==1:
         idx = value_idxes[0]
-        datasets[base_path] = (tab[idx], opt['handle'], opt['name'])
+        err = None
+        if Ecol_name:
+            err = tab[Ecol_idx]
+        datasets[base_path] = (tab[idx], opt['handle'], opt['name'], err)
         add_tT(base_path)
     else:
         for idx in value_idxes:
