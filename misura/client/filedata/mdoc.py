@@ -161,10 +161,11 @@ class MisuraDocument(document.Document):
             return []
         logging.debug('%s %s', 'Reloading Data', self.filename)
         rule_load = confdb['rule_load'] + '\n' + confdb['rule_plot']
-        for rule in load_rules:
-            if not confdb.has_key(rule):
+        for gen_rule_func in load_rules:
+            rule = gen_rule_func(confdb)
+            if not rule:
                 continue
-            rule_load += '\n' + confdb[rule]
+            rule_load += '\n' + rule
         op = OperationMisuraImport(
             ImportParamsMisura(filename=self.filename,
                                time_interval=self.interval,

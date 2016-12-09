@@ -137,10 +137,10 @@ class Plot(VeuszPlot):
         logging.debug(
             '%s %s', 'APPLY DEFAULT PLOT PLUGIN', dataset_names)
         instrument_name = self.document.data.values()[0].linked.instrument
-        plugin_class, plot_rule_name = get_default_plot_plugin_class(instrument_name)
-        print 'default_plot', plugin_class, plot_rule_name
+        plugin_class, plot_rule = get_default_plot_plugin_class(instrument_name)
+        print 'default_plot', plugin_class, plot_rule
         p = plugin_class()
-        r = p.apply(self.cmd, {'dsn': self.document.data.keys(), 'rule': confdb[plot_rule_name]})
+        r = p.apply(self.cmd, {'dsn': self.document.data.keys(), 'rule': plot_rule})
         if not r:
             return False
         self.curveNames.update(r)

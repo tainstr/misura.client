@@ -413,7 +413,7 @@ class VeuszPlot(QtGui.QWidget):
         """Fit the plot into the widget size.
         `zoom` asks for zooming factor preservation."""
         if not isinstance(self.plot, VeuszPlotWindow):
-            logging.debug('%s', 'Cannot fitSize on widget')
+            logging.debug( 'Cannot fitSize on widget')
             return
         if not zoom:
             self.plot.slotViewZoom11()
@@ -426,9 +426,11 @@ class VeuszPlot(QtGui.QWidget):
         self.cmd.To('/')
         
 
-        logging.debug('%s %s %s', 'fitSize', w, h)
+        logging.debug('fitSize', w, h)
         # If the plot dimension is not sufficient, hide the axes.
         page = self.document.basewidget.getPage(self.plot.getPageNumber())
+        if page is None:
+            page = self.document.basewidget.children[0]
         g = page.path
         if g.endswith('_report'):
             return

@@ -18,6 +18,7 @@ import units
 
 import parameters as params
 from . import _
+from copy import deepcopy
 
 default_misuradb_path = os.path.expanduser("~/MisuraData/misuradb")
 
@@ -181,6 +182,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             return None
         # Load/create
         self.known_uids = {}
+        self.default_desc = deepcopy(default_desc)
         self.load(path)
 
     _rule_style = RulesTable()
@@ -230,7 +232,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                 stored_desc = self.store.read_table(cursor, 'conf')
                 desc = default_desc.copy()
                 desc.update(stored_desc)
-                self.desc = self.migrate_desc(desc)
+                self.desc = desc
                 logging.debug('%s %s', 'Loaded configuration', self.desc)
                 loaded=True
             except:
@@ -241,6 +243,25 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                 self.store.desc[key] = option.Option(**val)
             self.desc = self.store.desc
             self.store.write_table(cursor, "conf")
+            
+    
+            
+    def migrate_desc(self):
+        """Migrate saved newdesc to current hard-coded configuration structure default_desc"""
+        desc_ret = {}
+        for key, val in self.desc.iteritems():
+            if self.default_desc.has_key(key):
+                saved_opt = option.Option(**val)
+                coded_opt = option.Option(**self.default_desc[key])
+                saved_opt.migrate_from(coded_opt)
+                desc_ret[key] = saved_opt
+        self.desc = desc_ret 
+        
+    def add_option(self, *a, **k):
+        """When a new option is defined, add also to default_desc definition"""
+        out = option.ConfigurationProxy.add_option(self, *a, **k)
+        self.default_desc[out['handle']] = out.entry
+        return out
             
     def load(self, path=False):
         """Load an existent client configuration database, or create a new one."""
@@ -273,18 +294,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self.reset_rules()
         self.create_index()
 
-    def migrate_desc(self, desc):
-        """Migrate saved newdesc to current hard-coded configuration structure default_desc"""
-        desc_ret = {}
 
-        for key, val in desc.iteritems():
-            if default_desc.has_key(key):
-                saved_opt = option.Option(**val)
-                coded_opt = option.Option(**default_desc[key])
-                saved_opt.migrate_from(coded_opt)
-                desc_ret[key] = saved_opt
-
-        return desc_ret
 
     def create_index(self):
         self.index = False
@@ -500,6 +510,7 @@ def activate_plugins(confdb):
     print 'updating clientconf', clientconf_update_functions
     for update_func in clientconf_update_functions:
         update_func(confdb)
+    confdb.migrate_desc()
 
 settings = QtCore.QSettings(
     QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope, 'Expert System Solutions', 'Misura 4')

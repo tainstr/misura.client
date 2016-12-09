@@ -65,11 +65,11 @@ class CustomInterface(object):
         veusz.utils.addToolbarActions(tb, actions, tuple(actions.keys()))
 
     def defaultPlot(self, dataset_names, instrument_name):
-        plugin_class, plot_rule_name = plot.get_default_plot_plugin_class(instrument_name)
-        print 'defaultPlot', plugin_class, plot_rule_name
+        plugin_class, plot_rule = plot.get_default_plot_plugin_class(instrument_name)
+        print 'defaultPlot', plugin_class, plot_rule
         p = plugin_class()
         result = p.apply(self.mw.cmd, {'dsn': dataset_names, 
-                                       'rule': confdb[plot_rule_name]})
+                                       'rule': plot_rule})
         print 'apply', result, dataset_names
         self.mw.document.enableUpdates()
         self.mw.plot.actionForceUpdate()
@@ -83,10 +83,11 @@ def misura_import(self, filename, **options):
                 'rule_inc': confdb['rule_inc'],
                 'rule_load': confdb['rule_load'] + '\n' + confdb['rule_plot'],
                 'rule_unit': confdb['rule_unit']}
-    for rule in load_rules:
-        if not confdb.has_key(rule):
+    for gen_rule_func in load_rules:
+        rule = gen_rule_func(confdb)
+        if not rule:
             continue
-        defaults['rule_load'] += '\n' + confdb[rule]
+        defaults['rule_load'] += '\n' + rule
     for k, v in defaults.iteritems():
         if options.has_key(k):
             continue

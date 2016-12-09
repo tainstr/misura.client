@@ -80,6 +80,7 @@ from misura.canon.plugin import default_plot_plugins, default_plot_rules
 from .. import plugin
 
 def get_default_plot_plugin_class(instrument_name):
+    from ..clientconf import confdb
     plugin_class = plugin.DefaultPlotPlugin
     plugin_name = default_plot_plugins.get(instrument_name, False)
     if plugin_name:
@@ -88,5 +89,6 @@ def get_default_plot_plugin_class(instrument_name):
                 plugin_class = cls
                 break
     print 'defaultPlot', plugin_class
-    plot_rule_name = default_plot_rules.get(instrument_name, 'rule_plot')
-    return plugin_class, plot_rule_name
+    plot_rule_func = default_plot_rules.get(instrument_name, lambda *a: 'rule_plot')
+    plot_rule = plot_rule_func(confdb)
+    return plugin_class, plot_rule
