@@ -73,7 +73,8 @@ class TestWindow(acquisition.MainWindow):
         if self.vtoolbar:
             self.vtoolbar.hide()
         self.vtoolbar = self.summaryPlot.plot.createToolbar(self)
-        self.vtoolbar.addAction(veusz.utils.getIcon('kde-edit-undo'), ' Undo ', self.doc.undoOperation)
+        self.vtoolbar.addAction(
+            veusz.utils.getIcon('kde-edit-undo'), ' Undo ', self.doc.undoOperation)
         self.vtoolbar.show()
         self.graphWin.show()
         if self.breadcrumb:
@@ -98,6 +99,7 @@ class TestWindow(acquisition.MainWindow):
             self.breadbar.hide()
         else:
             self.navigator.status.add(filedata.dstats.outline)
+            self.summaryPlot.cmd.Remove('/time')
 
         if self.fixedDoc:
             self.doc.model.sigPageChanged.connect(self.slot_page_changed)
@@ -114,32 +116,32 @@ class TestWindow(acquisition.MainWindow):
             return False
         plots = hierarchy[level][page_idx][1]
         crumbs, most_commons = most_involved_node(plots, self.doc)
-        get_path = lambda crumbs: '/' + '/'.join([c.split(':')[-1] for c in crumbs])
+        get_path = lambda crumbs: '/' + \
+            '/'.join([c.split(':')[-1] for c in crumbs])
         paths = []
-        if len(crumbs)>0:
-            if len(crumbs)>1:
+        if len(crumbs) > 0:
+            if len(crumbs) > 1:
                 paths.append(get_path(crumbs))
-            if len(crumbs)>len(most_commons):
+            if len(crumbs) > len(most_commons):
                 self.measureTab.refresh_nodes(paths)
                 return True
-            
-            if len(crumbs)==len(most_commons):
+
+            if len(crumbs) == len(most_commons):
                 crumbs.pop(-1)
-            
+
             p = get_path(crumbs)
             for c in sorted(most_commons[-1]):
-                paths.append(p+'/'+c)
+                paths.append(p + '/' + c)
         self.measureTab.refresh_nodes(paths)
         return True
 
     def closeEvent(self, ev):
-        should_not_close_application = True
+        self.close()
         ret = QtGui.QMainWindow.closeEvent(self, ev)
         return ret
 
     def close(self):
         self.play.close()
-        self.fixedDoc.proxy.close()
         acquisition.MainWindow.close(self)
 
     def set_idx(self, idx):
@@ -161,6 +163,7 @@ class TestWindow(acquisition.MainWindow):
             return
         # Overwrite
         r = self.fixedDoc.proxy.run_scripts(self.remote)
+        r = self.fixedDoc.proxy.conf.update_aggregates(recursive=-1)
         if r:
             # 			# Update every ActiveWidget connected to the registry
             registry.force_redraw()

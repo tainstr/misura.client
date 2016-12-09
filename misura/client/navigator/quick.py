@@ -102,17 +102,17 @@ class QuickOps(object):
             logging.debug('%s %s', 'Quick.plot', page)
             # Get X temperature names
             xnames = self.xnames(node, page='/temperature')
-            assert len(xnames) > 0
-            p = plugin.PlotDatasetPlugin()
-            p.apply(self.cmd, {
-                    'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': '/temperature/temp'})
+            if len(xnames) > 0:
+                p = plugin.PlotDatasetPlugin()
+                p.apply(self.cmd, {
+                        'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': '/temperature/temp'})
 
             # Get time datasets
             xnames = self.xnames(node, page='/time')
-            assert len(xnames) > 0
-            p = plugin.PlotDatasetPlugin()
-            p.apply(self.cmd, {
-                    'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': '/time/time'})
+            if len(xnames) > 0:
+                p = plugin.PlotDatasetPlugin()
+                p.apply(self.cmd, {
+                        'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': '/time/time'})
         else:
             if page.startswith('/report'):
                 page = page + '/temp'
@@ -225,14 +225,14 @@ class QuickOps(object):
 
     def xnames(self, y, page=False):
         """Get X dataset name for Y node y, in `page`"""
-        logging.debug('%s %s %s %s', 'XNAMES', y, type(y), y.path)
-        logging.debug('%s %s', 'y.linked', y.linked)
-        logging.debug('%s %s', 'y.parent.linked', y.parent.linked)
-
         if page == False:
             page = self.model().page
         lk = y.linked if y.linked else y.parent.linked
-
+        try:
+            self.doc.resolveFullWidgetPath(page)
+        except:
+            logging.error('No page', page)
+            return []
         xname = axis_selection.get_best_x_for(y.path, lk.prefix, self.doc.data, page)
 
         return [xname]
