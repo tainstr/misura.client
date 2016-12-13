@@ -244,8 +244,6 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             self.desc = self.store.desc
             self.store.write_table(cursor, "conf")
             
-    
-            
     def migrate_desc(self):
         """Migrate saved newdesc to current hard-coded configuration structure default_desc"""
         desc_ret = {}

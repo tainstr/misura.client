@@ -26,6 +26,7 @@ from .. import units
 
 
 from PyQt4 import QtCore
+from misura.canon.plugin import default_plot_rules
 
 
 sep = '/'
@@ -88,9 +89,11 @@ class ImportParamsMisura(base.ImportParamsBase):
         'rule_exc': clientconf.rule_exc,
         'rule_inc': clientconf.rule_inc,
         'rule_load': clientconf.rule_load,
+        # dynamically generate a load rule based on file contents
+        'gen_rule_load': False,
         'rule_unit': clientconf.rule_unit,
         'overwrite': True,
-        # keep data within the operation object - no real import
+        # keep data within the operation object - no real import to document
         'dryrun': False,
     })
 
@@ -320,6 +323,29 @@ def prefixed_column_name(col0, prefix):
     return pcol, mcol, m_var, col
 
 
+def cmp_rule(rule):
+    """Compile rule if valid"""
+    if len(rule) == 0:
+        return False, False
+    r = rule.replace('\n', '|')
+    return r, re.compile(r)
+
+
+def generate_rule_from_conf(confdb, conf=False, rule=False):
+    vrule = []
+    for rule_func in default_plot_rules.itervalues():
+        r = rule_func(confdb=confdb, conf=conf)
+        if r:
+            vrule.append(r)
+    if len(vrule):
+        vrule = '\n'.join(vrule)
+        if not rule:
+            rule = vrule
+        else:
+            rule += '\n' + vrule
+    return rule, re.compile(rule)
+
+
 class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
     """Import misura HDF File format. This operation is also a QObject so it can send signals to other objects."""
@@ -344,23 +370,13 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         self.load_rules(params)
 
     def load_rules(self, params):
-
         self.rule_exc = False
-        if len(params.rule_exc) > 0:
-            r = params.rule_exc.replace('\n', '|')
-            logging.debug('Exclude rule', r)
-            self.rule_exc = re.compile(r)
-        self.rule_inc = False
-        if len(params.rule_inc) > 0:
-            r = params.rule_inc.replace('\n', '|')
-            logging.debug('Include rule', r)
-            self.rule_inc = re.compile(r)
-        self.rule_load = False
-        if len(params.rule_load) > 0:
-            r = params.rule_load.replace('\n', '|')
-            self._rule_load = r
-            logging.debug('Load rule', r)
-            self.rule_load = re.compile(r)
+        self._rule_exc, self.rule_exc = cmp_rule(params.rule_exc)
+        logging.debug('Exclude rule', self._rule_exc)
+        self._rule_inc, self.rule_inc = cmp_rule(params.rule_inc)
+        logging.debug('Include rule', self._rule_inc)
+        self._rule_load, self.rule_load = cmp_rule(params.rule_load)
+        logging.debug('Load rule', self._rule_load)
         self.rule_unit = clientconf.RulesTable(params.rule_unit)
 
     @classmethod
@@ -400,7 +416,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
     def do(self, document):
         """Override do() in order to get a reference to the document!"""
         self._doc = document
-        base.OperationDataImportBase.do(self, document)
+        return base.OperationDataImportBase.do(self, document)
 
     def get_file_proxy(self):
         """Try to open a FileProxy and a LinkedFile from the parameters (filename and uid)"""
@@ -452,6 +468,10 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         LF.title = self.instrobj.measure['name']
         self.measurename = LF.title
         self.LF = LF
+        # Dynamically generate load rules
+        if self.params.gen_rule_load:
+            self._rule_load, self.rule_load = generate_rule_from_conf(clientconf.confdb,
+                                                                      conf, self._rule_load)
         return True
 
     def get_time_sequence(self, instrobj):
@@ -531,7 +551,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         refsmp = Sample(linked=self.LF)
         self.LF.samples.append(refsmp)
         # build a list of samples
-        for idx in range(self.instrobj.measure['nSamples']+1):
+        for idx in range(self.instrobj.measure['nSamples'] + 1):
             n = 'sample' + str(idx)
             if not self.instrobj.has_child(n):
                 self.LF.samples.append(None)
@@ -731,7 +751,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         for p, col0 in enumerate(['t'] + available):
             self._dataset_import(
                 p, col0, time_sequence, availds, names, error_map, sub_map)
-            
+
         # Error import cycle
         p = 0
         for main_pcol, error_name in error_map.items():
@@ -749,7 +769,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             else:
                 error_map.pop(main_pcol)
             p += 1
-            
+
         # Error association cycle
         for main_name, error_name in error_map.iteritems():
             # Remove any subordered T,t dataset

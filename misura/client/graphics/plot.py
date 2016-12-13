@@ -3,11 +3,9 @@
 """Simple plotting for browser and live acquisition."""
 from misura.canon.logger import Log as logging
 from misura.canon import csutil
-from misura.canon.plugin import default_plot_plugins, default_plot_rules
 
-from .. import plugin
-from ..clientconf import confdb
 from ..filedata import get_default_plot_plugin_class
+from ..clientconf import confdb
 from veuszplot import VeuszPlot
 from PyQt4 import QtGui, QtCore
 
@@ -134,10 +132,11 @@ class Plot(VeuszPlot):
         dataset_names = self.document.data.keys()
         if len(dataset_names)==0:
             return False
-        logging.debug(
-            '%s %s', 'APPLY DEFAULT PLOT PLUGIN', dataset_names)
-        instrument_name = self.document.data.values()[0].linked.instrument
-        plugin_class, plot_rule = get_default_plot_plugin_class(instrument_name)
+        logging.debug('APPLY DEFAULT PLOT PLUGIN', dataset_names)
+        linked = self.document.data.values()[0].linked
+        instrument_name = linked.instrument
+        plugin_class, plot_rule_func = get_default_plot_plugin_class(instrument_name)
+        plot_rule = plot_rule_func(confdb, linked.conf)
         print 'default_plot', plugin_class, plot_rule
         p = plugin_class()
         r = p.apply(self.cmd, {'dsn': self.document.data.keys(), 'rule': plot_rule})

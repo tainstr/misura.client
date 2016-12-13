@@ -4,11 +4,19 @@ import os
 
 from misura.canon.logger import Log as logging
 from PyQt4 import QtGui, QtCore
+
+import veusz.plugins as plugins
+
+from misura.canon.plugin import dataimport
+from misura.canon.plugin import default_plot_plugins, default_plot_rules
+
 from .. import _
 from ..clientconf import confdb
-from operation import jobs, job, done
 from .. import widgets
-from misura.canon.plugin import dataimport
+from .. import plugin
+
+from operation import jobs, job, done
+
 
 def confirm_overwrite(path, parent=None):
     msg = QtGui.QMessageBox(QtGui.QMessageBox.Warning, _('Overwrite destination file?'),
@@ -76,8 +84,6 @@ def convert_file(caller, path):
     QtCore.QThreadPool.globalInstance().start(run)
     return True
 
-from misura.canon.plugin import default_plot_plugins, default_plot_rules
-from .. import plugin
 
 def get_default_plot_plugin_class(instrument_name):
     from ..clientconf import confdb
@@ -89,6 +95,5 @@ def get_default_plot_plugin_class(instrument_name):
                 plugin_class = cls
                 break
     print 'defaultPlot', plugin_class
-    plot_rule_func = default_plot_rules.get(instrument_name, lambda *a: 'rule_plot')
-    plot_rule = plot_rule_func(confdb)
-    return plugin_class, plot_rule
+    plot_rule_func = default_plot_rules.get(instrument_name, lambda *a: confdb['rule_plot'])
+    return plugin_class, plot_rule_func

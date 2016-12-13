@@ -16,7 +16,7 @@ import veusz.setting as setting
 from veusz import veusz_main
 
 from misura.canon.logger import Log as logging
-from misura.canon.plugin import dataimport, load_rules
+from misura.canon.plugin import dataimport
 
 from .. import helpmenu, configure_logger
 
@@ -30,12 +30,12 @@ from ..plugin import *  # ??? devo importarlo per pyinstaller...!
 from .. import navigator
 from ..clientconf import confdb
 from ..database import getDatabaseWidget, getRemoteDatabaseWidget
-import veuszplot
+
 from ..confwidget import RecentMenu, ClientConf
 from .. import iutils
 from ..live import Tasks
 from . import plot
-from . import veuszplot
+
 
 setting.transient_settings['unsafe_mode'] = True
 
@@ -65,7 +65,9 @@ class CustomInterface(object):
         veusz.utils.addToolbarActions(tb, actions, tuple(actions.keys()))
 
     def defaultPlot(self, dataset_names, instrument_name):
-        plugin_class, plot_rule = plot.get_default_plot_plugin_class(instrument_name)
+        plugin_class, plot_rule_func = plot.get_default_plot_plugin_class(instrument_name)
+        linked = self.doc.data[dataset_names[0]].linked
+        plot_rule = plot_rule_func(confdb, linked.conf)
         print 'defaultPlot', plugin_class, plot_rule
         p = plugin_class()
         result = p.apply(self.mw.cmd, {'dsn': dataset_names, 
@@ -82,12 +84,8 @@ def misura_import(self, filename, **options):
     defaults = {'rule_exc': confdb['rule_exc'],
                 'rule_inc': confdb['rule_inc'],
                 'rule_load': confdb['rule_load'] + '\n' + confdb['rule_plot'],
-                'rule_unit': confdb['rule_unit']}
-    for gen_rule_func in load_rules:
-        rule = gen_rule_func(confdb)
-        if not rule:
-            continue
-        defaults['rule_load'] += '\n' + rule
+                'rule_unit': confdb['rule_unit'], 
+                'gen_rule_load': True}
     for k, v in defaults.iteritems():
         if options.has_key(k):
             continue
@@ -95,7 +93,7 @@ def misura_import(self, filename, **options):
     # lookup filename
     filename = unicode(filename)
     realfilename = self.findFileOnImportPath(filename)
-    logging.debug('%s %s %s', 'open_file:', filename, realfilename)
+    logging.debug('open_file:', filename, realfilename)
     print 'misura_import with params', options
     p = filedata.ImportParamsMisura(
         filename=realfilename, version=-1, **options)

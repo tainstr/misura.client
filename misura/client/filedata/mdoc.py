@@ -11,7 +11,7 @@ from PyQt4 import QtCore
 import veusz.document as document
 
 from misura.canon.logger import Log as logging
-from misura.canon.plugin import load_rules
+from misura.canon.plugin import default_plot_rules
 
 from operation import OperationMisuraImport, ImportParamsMisura, getUsedPrefixes
 from proxy import getFileProxy
@@ -161,8 +161,8 @@ class MisuraDocument(document.Document):
             return []
         logging.debug('%s %s', 'Reloading Data', self.filename)
         rule_load = confdb['rule_load'] + '\n' + confdb['rule_plot']
-        for gen_rule_func in load_rules:
-            rule = gen_rule_func(confdb)
+        for gen_rule_func in default_plot_rules.itervalues():
+            rule = gen_rule_func(confdb, self.proxy.conf)
             if not rule:
                 continue
             rule_load += '\n' + rule

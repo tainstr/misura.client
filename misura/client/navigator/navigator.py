@@ -122,18 +122,19 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         logging.info('OPEN FILE', path)
         self.doc.proxy = False
         op = filedata.OperationMisuraImport(
-            filedata.ImportParamsMisura(filename=path)
+            filedata.ImportParamsMisura(filename=path, gen_rule_load=True)
         )
         self.doc.applyOperation(op)
         confdb.mem_file(path, op.measurename)
         # Load additional curves for plotting
-        plugin_class, plot_rule = filedata.get_default_plot_plugin_class(op.instrument)
-        op = filedata.OperationMisuraImport.from_rule(plot_rule, path)
-        self.doc.applyOperation(op)
+        plugin_class, plot_rule_func = filedata.get_default_plot_plugin_class(op.instrument)
+        plot_rule = plot_rule_func(confdb, op.proxy.conf)
+        #op = filedata.OperationMisuraImport.from_rule(plot_rule, path)
+        #self.doc.applyOperation(op)
         # Default plot
         #TODO: handle default plot opening
         p = plugin_class()
-        logging.debug('Default plot on imported names', op.imported_names,confdb[plot_rule_name])
+        logging.debug('Default plot on imported names', op.imported_names)
         result = p.apply(self._mainwindow.cmd, {'dsn': op.imported_names, 
                                        'rule': plot_rule})
         return op
