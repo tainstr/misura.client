@@ -90,8 +90,8 @@ class Storyboard(QtGui.QWidget):
     def fpath(self, page=False):
         if not page:
             page = self.page
-        jpg = page.name.replace(':','__')+'.jpg'
-        fp = os.path.join(self.tmpdir, jpg)
+        img = page.name.replace(':','__')+'.png'
+        fp = os.path.join(self.tmpdir, img)
         return fp 
 
     def update_page_image(self, page=False):
