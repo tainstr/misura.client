@@ -90,6 +90,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
     _plots = False
     sigPageChanged = QtCore.pyqtSignal()
     tree = False
+    paused = False
 
     def __init__(self, doc, status=dstats.loaded, refresh=True, cols=2):
         QtCore.QAbstractItemModel.__init__(self)
@@ -134,8 +135,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
             self.set_idx(idx)
             return True
         return False
-
-    paused = False
 
     @lockme
     def pause(self, do=True):

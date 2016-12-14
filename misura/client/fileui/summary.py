@@ -48,6 +48,7 @@ class SummaryModel(QtCore.QAbstractTableModel):
         return self.model.tree
 
     def refresh(self):
+        logging.debug('SummaryView.refresh')
         self.model.refresh()
         self.update()
 
@@ -242,6 +243,7 @@ class SummaryView(QtGui.QTableView):
         self.connect(doc, QtCore.SIGNAL('updated()'), self.update)
 
     def refresh(self):
+        logging.debug('SummaryView.refresh')
         self.model().refresh()
 
     def update(self):

@@ -155,14 +155,14 @@ class MainWindow(QtGui.QMainWindow):
     def rem(self, d, w=False):
         """Removes a dock widget by name"""
         d = getattr(self, d, False)
-        if not d:
-            return
-        self.removeDockWidget(d)
-        d.deleteLater()
+        if d:
+            self.removeDockWidget(d)
+            d.deleteLater()
         if not w:
             return
         w = getattr(self, w, False)
         if w:
+            w.blockSignals(True)
             w.deleteLater()
 
     def set_addr(self, addr):

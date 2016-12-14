@@ -174,13 +174,13 @@ class MisuraDocument(document.Document):
                                rule_load=rule_load,
                                rule_unit=confdb['rule_unit'])
         )
-        logging.debug('%s', 'apply operation')
+        logging.debug('reloadData: apply operation')
         self.applyOperation(op)
         if not self.proxy:
             self.proxy = op.proxy
 #       self.proxy.reopen() # apply will close it!
         dsnames = op.outdatasets
-        logging.debug('%s %s', 'reloadData dsnames', dsnames.keys())
+        logging.debug('reloadData dsnames', dsnames.keys())
 
         self.emit(QtCore.SIGNAL('updated()'))
         self.emit(QtCore.SIGNAL('reloaded()'))

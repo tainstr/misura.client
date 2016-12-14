@@ -281,6 +281,7 @@ class NodeEntry(object):
             return self._linked
         for c in self.children.itervalues():
             if c.linked:
+                self._linked = c.linked
                 return c.linked
         return False
 

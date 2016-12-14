@@ -192,6 +192,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return page
 
     def update_view(self):
+        logging.debug('update_view')
         if len(self.doc.suspendupdates)>0:
             logging.debug('Cannot update_view: suspendedupdates!')
             return

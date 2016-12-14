@@ -142,13 +142,13 @@ class Storyboard(QtGui.QWidget):
 
     def update(self):
         p = self.plot.plot.getPageNumber()
-        logging.debug('Storyboard.update', p, self.level_modifier, self._level_modifier)
+        #logging.debug('Storyboard.update', p, self.level_modifier, self._level_modifier)
         if p>len(self.doc.basewidget.children)-1:
             logging.debug('Cannot locate page', p, len(self.doc.basewidget.children)-1)
             return False
         page = self.doc.basewidget.children[p]
         if page == self.page and self.level_modifier == self._level_modifier and self.parent_modifier == self._parent_modifier:
-            logging.debug('Storyboard.update: no change')
+            #logging.debug('Storyboard.update: no change')
             return False
         self.clear()
         if self.page:

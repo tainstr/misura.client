@@ -18,36 +18,33 @@ from misura.client.iutils import calc_plot_hierarchy, most_involved_node
 class TestWindow(acquisition.MainWindow):
 
     """View of a single test file"""
-
+    
     def __init__(self, doc, parent=None):
         acquisition.MainWindow.__init__(self, doc=doc, parent=parent)
         self.play = filedata.FilePlayer(self)
-        self.play.set_doc(doc)
-        self.play.sleep = 0.1
-        self.load_version(-1)
-        self.controls.server = self.play
-# 		self.controls.remote=self.play
-        for pic, win in self.cameras.itervalues():
-            pic.setSampleProcessor(self.play)
-# 			d=self.doc.decoders['/dat/'+pic.role]
-# 			pic.setFrameProcessor(d)
 
-        self.graphWin.showMaximized()
-# 		self.summaryPlot.default_plot()
-        self.removeToolBar(self.controls)
-        self.connect(self.play, QtCore.SIGNAL('set_idx(int)'), self.set_idx)
-        self.connect(self.imageSlider, QtCore.SIGNAL(
-            'set_idx(int)'), self.play.set_idx)
+        self.load_version(-1)
 
         registry.taskswg.removeStorageAndRemoteTabs()
 
     vtoolbar = False
     breadcrumb = False
+    breadbar = False
+    plotboard=False
 # 	@profile
 
     def load_version(self, v=-1):
-        logging.debug('%s %s', "SETTING VERSION", v)
+        self.fixedDoc.paused = True
+        if self.breadbar:
+            self.removeToolBar(self.breadbar)
+            self.breadcrumb.hide()
+            self.breadcrumb.deleteLater()
+        if self.plotboard:
+            self.plotboard.blockSignals(True)
+            self.rem('plotboardDock', 'plotboard')
+        logging.debug("SETTING VERSION", v)
         self.plot_page = False
+        
         if not self.fixedDoc.proxy.isopen():
             self.fixedDoc.proxy.reopen()
         self.fixedDoc.proxy.set_version(v)
@@ -77,15 +74,16 @@ class TestWindow(acquisition.MainWindow):
             veusz.utils.getIcon('kde-edit-undo'), ' Undo ', self.doc.undoOperation)
         self.vtoolbar.show()
         self.graphWin.show()
-        if self.breadcrumb:
-            self.breadcrumb.hide()
+        
+
         self.breadbar = QtGui.QToolBar(_('Breadcrumb'), self)
         self.breadcrumb = Breadcrumb(self.breadbar)
         self.breadcrumb.set_plot(self.summaryPlot)
         self.breadbar.addWidget(self.breadcrumb)
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.breadbar)
         self.breadbar.show()
-
+        
+        
         self.plotboardDock = QtGui.QDockWidget(self.centralWidget())
         self.plotboardDock.setWindowTitle('Plots Board')
         self.plotboard = Storyboard(self)
@@ -103,6 +101,24 @@ class TestWindow(acquisition.MainWindow):
 
         if self.fixedDoc:
             self.doc.model.sigPageChanged.connect(self.slot_page_changed)
+        
+        self.play.set_doc(self.fixedDoc)
+        self.play.sleep = 0.1
+        self.controls.server = self.play
+#         self.controls.remote=self.play
+        for pic, win in self.cameras.itervalues():
+            pic.setSampleProcessor(self.play)
+#             d=self.doc.decoders['/dat/'+pic.role]
+#             pic.setFrameProcessor(d)
+
+        self.graphWin.showMaximized()
+#         self.summaryPlot.default_plot()
+        self.removeToolBar(self.controls)
+        self.connect(self.play, QtCore.SIGNAL('set_idx(int)'), self.set_idx)
+        self.connect(self.imageSlider, QtCore.SIGNAL(
+            'set_idx(int)'), self.play.set_idx)
+        
+        self.fixedDoc.paused = False
 
     def slot_page_changed(self):
         p = self.summaryPlot.plot.getPageNumber()

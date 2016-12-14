@@ -123,6 +123,7 @@ class Plot(VeuszPlot):
                      self.reload_data_callback)
 
     def reload_data_callback(self):
+        logging.debug('reload_data_callback')
         self.model.refresh()
         self.default_plot()
         self.idx_connect()

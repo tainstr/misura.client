@@ -68,11 +68,10 @@ class CustomInterface(object):
         plugin_class, plot_rule_func = plot.get_default_plot_plugin_class(instrument_name)
         linked = self.doc.data[dataset_names[0]].linked
         plot_rule = plot_rule_func(confdb, linked.conf)
-        print 'defaultPlot', plugin_class, plot_rule
+        logging.debug('defaultPlot', plugin_class, plot_rule)
         p = plugin_class()
         result = p.apply(self.mw.cmd, {'dsn': dataset_names, 
                                        'rule': plot_rule})
-        print 'apply', result, dataset_names
         self.mw.document.enableUpdates()
         self.mw.plot.actionForceUpdate()
         self.mw.m4.openedFiles.refresh_model()

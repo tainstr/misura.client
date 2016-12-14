@@ -407,6 +407,12 @@ class VeuszPlot(QtGui.QWidget):
             return
         self.fitSize(zoom=True)
         self.plot.actionForceUpdate()
+        
+    def set_if_differs(self, setpath, value):
+        if self.cmd.Get(setpath)!=value:
+            self.cmd.Set(setpath, value)
+            return True
+        return False
 
     @QtCore.pyqtSignature("fitSize()")
     def fitSize(self, zoom=False):
@@ -415,7 +421,7 @@ class VeuszPlot(QtGui.QWidget):
         if not isinstance(self.plot, VeuszPlotWindow):
             logging.debug( 'Cannot fitSize on widget')
             return
-        if not zoom:
+        if not zoom and self.plot.zoomfactor!=1.:
             self.plot.slotViewZoom11()
         w = self.plot.width()
         h = self.plot.height()
@@ -425,8 +431,6 @@ class VeuszPlot(QtGui.QWidget):
         h = 1. * h / self.plot.dpi[1] - .2
         self.cmd.To('/')
         
-
-        logging.debug('fitSize', w, h)
         # If the plot dimension is not sufficient, hide the axes.
         page = self.document.basewidget.getPage(self.plot.getPageNumber())
         if page is None:
@@ -434,35 +438,41 @@ class VeuszPlot(QtGui.QWidget):
         g = page.path
         if g.endswith('_report'):
             return
-        self.cmd.Set(page.path+'/width', str(w) + 'in')
-        self.cmd.Set(page.path+'/height', str(h) + 'in')
+        sw = '{:.1f}in'.format(w)
+        sh = '{:.1f}in'.format(h)
+        r1 = self.set_if_differs(page.path+'/width', sw)
+        r2 = self.set_if_differs(page.path+'/height', sh)
+        if not r1 and not r2:
+            logging.debug('fitSize: nothing to do')
+            return
+        logging.debug('fitSize', w, h)
         wg = searchFirstOccurrence(page, 'grid', 1)
         if wg is None:
             wg = searchFirstOccurrence(page, 'graph', 1)
         g = wg.path 
         
         if h < 2 or w < 4:
-            self.cmd.Set(g + '/leftMargin', '0.1cm')
-            self.cmd.Set(g + '/bottomMargin', '0.1cm')
-            self.cmd.Set(g + '/rightMargin', '0.1cm')
+            self.set_if_differs(g + '/leftMargin', '0.1cm')
+            self.set_if_differs(g + '/bottomMargin', '0.1cm')
+            self.set_if_differs(g + '/rightMargin', '0.1cm')
             try:
-                self.cmd.Set(g + '/x/hide', True)
-                self.cmd.Set(g + '/y/hide', True)
+                self.set_if_differs(g + '/x/hide', True)
+                self.set_if_differs(g + '/y/hide', True)
             except:
                 pass
             self.emit(QtCore.SIGNAL('smallPlot()'))
         else:
             print 'settings for', g
-            self.cmd.Set(g + '/leftMargin', '1.5cm')
-            self.cmd.Set(g + '/bottomMargin', '1.1cm')
-            self.cmd.Set(g + '/rightMargin', '1.4cm')
+            self.set_if_differs(g + '/leftMargin', '1.5cm')
+            self.set_if_differs(g + '/bottomMargin', '1.1cm')
+            self.set_if_differs(g + '/rightMargin', '1.4cm')
             try:
-                self.cmd.Set(g + '/x/hide', False)
-                self.cmd.Set(g + '/y/hide', False)
+                self.set_if_differs(g + '/x/hide', False)
+                self.set_if_differs(g + '/y/hide', False)
             except:
                 pass
             self.emit(QtCore.SIGNAL('bigPlot()'))
-        logging.debug('%s', 'endfitsize')
+        logging.debug('endfitsize')
         self.emit(QtCore.SIGNAL('fitSize()'))
 
     def slotDataEdit(self, editdataset=None):
