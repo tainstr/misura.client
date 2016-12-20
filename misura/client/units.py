@@ -16,7 +16,8 @@ base_units = {'micron': 'length',
               'poise': 'viscosity',
               'cm^2/s': 'diffusivity',
               'gram': 'weight',
-              'volt': 'tension'}
+              'volt': 'tension',
+              'ohm': 'resistance'}
 
 from_base = {'length': {'micron': lambda v: v,
                         'nanometer': lambda v: v * 1E3,
@@ -34,30 +35,34 @@ from_base = {'length': {'micron': lambda v: v,
              'temperature': {'celsius': lambda v: v, 'kelvin': lambda v: v + 273.15, 'fahrenheit': lambda v: 32 + (9 * v / 5.)},
              'heating rate': {'celsius/min': lambda v: v, 'kelvin/min': lambda v: v + 273.15, 'fahrenheit/min': lambda v: 32 + (9 * v / 5.)},
              # time
-             'time': {'millisecond': lambda v: v*1000. , 'second': lambda v: v, 'minute': lambda v: v / 60., 'hour': lambda v: v / 3600., 'day': lambda v: v / 86400.},
+             'time': {'millisecond': lambda v: v * 1000., 'second': lambda v: v, 'minute': lambda v: v / 60., 'hour': lambda v: v / 3600., 'day': lambda v: v / 86400.},
              'part': {'percent': lambda v: v, 'permille': lambda v: v * 10., 'permyriad': lambda v: v * 100.,
                       'ppm': lambda v: v * 10000., 'ppb': lambda v: v * (1.E7), 'ppt': lambda v: v * (1.E10)},
              'frequency': {'hertz': lambda v: v, 'kilohertz': lambda v: v / 1000.},
-            'memory': {
-                'byte': lambda v: v * 1000,
-                'kilobyte': lambda v: v,
-                'megabyte': lambda v: v * 1E-3,
-                'gigabyte': lambda v: v * 1E-6,
-                },
-            'viscosity': {'poise': lambda v: v * 10,
-                'pascal/s': lambda v: v,
-                },
-            'diffusivity': {'cm^2/s': lambda v: v,
-                            'm^2/s': lambda v: v * 1E-4,
-                'mm^2/s': lambda v: v * 1E2,
-                },
-            'weight': {'gram': lambda v: v,
-                'kilogram': lambda v: v * 1E-3,
-                'milligram': lambda v: v * 1E3
-                },
-            'tension': {'volt': lambda v: v,
+             'memory': {
+    'byte': lambda v: v * 1000,
+    'kilobyte': lambda v: v,
+    'megabyte': lambda v: v * 1E-3,
+    'gigabyte': lambda v: v * 1E-6,
+},
+    'viscosity': {'poise': lambda v: v * 10,
+                  'pascal/s': lambda v: v,
+                  },
+    'diffusivity': {'cm^2/s': lambda v: v,
+                    'm^2/s': lambda v: v * 1E-4,
+                    'mm^2/s': lambda v: v * 1E2,
+                    },
+    'weight': {'gram': lambda v: v,
+               'kilogram': lambda v: v * 1E-3,
+               'milligram': lambda v: v * 1E3
+               },
+    'tension': {'volt': lambda v: v,
                 'millivolt': lambda v: v * 1E3
                 },
+    'resistance': {'ohm': lambda v: v,
+                   'milliohm': lambda v: v * 1E3,
+                   'megaohm': lambda v: v * 1E-6,
+                   },
 }
 
 derivatives = {'length': {'micron': 1,
@@ -65,36 +70,40 @@ derivatives = {'length': {'micron': 1,
                           'millimeter': 1E-3,
                           'centimeter': 1E-4,
                           'meter': 1E-6},
-           'area': {'micron^2': lambda v: v, 'nanometer^2': lambda v: v * 1E6, 'millimeter^2': lambda v: v * 1E-6},
-           'volume': {'micron^3': lambda v: v, 'nanometer^3': lambda v: v * 1E9, 'millimeter^3': lambda v: v * 1E-9},
-           'angle': {'degree': 1, 'radian': pi / 180.},  # angle
-           'temperature': {'celsius': 1, 'kelvin': 1, 'fahrenheit': 9 / 5.},
-           'heating rate': {'celsius/min': 1, 'kelvin/min': 1, 'fahrenheit/min': 9 / 5.},
-           'time': {'millisecond': 1000., 'second': 1., 'minute': 1 / 60., 'hour': 1 / 3600., 'day': 1 / 86400.},
-           'part': {'percent': 1, 'permille': 10., 'permyriad': 100.,  # parts
-                    'ppm': 10000., 'ppb': 1.E7, 'ppt': 1.E10},
-           'frequency': {'hertz': 1, 'kilohertz': 1 / 1000.},  # freq
-           'memory': {
-                'byte': 1000,
-                'kilobyte': 1,
-                'megabyte': 1E-3,
-                'gigabyte': 1E-6,
-                },
-                'viscosity': {
-                'poise': 10,
-                'pascal/s': 1,
-                },
-            'diffusivity': {'cm^2/s': 1,
-                'm^2/s': 1E-4,
-                'mm^2/s': 1E2,
-                },
-            'weight': {'gram': 1,
-                'kilogram': 1E-3,
-                'milligram': 1E3
-                },
-            'tension': {'volt': 1,
+               'area': {'micron^2': lambda v: v, 'nanometer^2': lambda v: v * 1E6, 'millimeter^2': lambda v: v * 1E-6},
+               'volume': {'micron^3': lambda v: v, 'nanometer^3': lambda v: v * 1E9, 'millimeter^3': lambda v: v * 1E-9},
+               'angle': {'degree': 1, 'radian': pi / 180.},  # angle
+               'temperature': {'celsius': 1, 'kelvin': 1, 'fahrenheit': 9 / 5.},
+               'heating rate': {'celsius/min': 1, 'kelvin/min': 1, 'fahrenheit/min': 9 / 5.},
+               'time': {'millisecond': 1000., 'second': 1., 'minute': 1 / 60., 'hour': 1 / 3600., 'day': 1 / 86400.},
+               'part': {'percent': 1, 'permille': 10., 'permyriad': 100.,  # parts
+                        'ppm': 10000., 'ppb': 1.E7, 'ppt': 1.E10},
+               'frequency': {'hertz': 1, 'kilohertz': 1 / 1000.},  # freq
+               'memory': {
+    'byte': 1000,
+    'kilobyte': 1,
+    'megabyte': 1E-3,
+    'gigabyte': 1E-6,
+},
+    'viscosity': {
+    'poise': 10,
+    'pascal/s': 1,
+},
+    'diffusivity': {'cm^2/s': 1,
+                    'm^2/s': 1E-4,
+                    'mm^2/s': 1E2,
+                    },
+    'weight': {'gram': 1,
+               'kilogram': 1E-3,
+               'milligram': 1E3
+               },
+    'tension': {'volt': 1,
                 'millivolt': 1E3
                 },
+    'resistance': {'ohm': 1,
+                   'milliohm': 1E3,
+                   'megaohm': 1E-6,
+                   },
 }
 
 to_base = {'length': {'micron': lambda v: v,
@@ -113,30 +122,34 @@ to_base = {'length': {'micron': lambda v: v,
            'temperature': {'celsius': lambda v: v, 'kelvin': lambda v: v - 273.15, 'fahrenheit': lambda v: 5 * (v - 32) / 9},
            'heating rate': {'celsius/min': lambda v: v, 'kelvin/min': lambda v: v - 273.15, 'fahrenheit/min': lambda v: 5 * (v - 32) / 9},
            # time
-           'time': {'millisecond': lambda v: v/1000., 'second': lambda v: v, 'minute': lambda v: v * 60., 'hour': lambda v: v * 3600., 'day': lambda v: v * 86400.},
+           'time': {'millisecond': lambda v: v / 1000., 'second': lambda v: v, 'minute': lambda v: v * 60., 'hour': lambda v: v * 3600., 'day': lambda v: v * 86400.},
            'part': {'percent': lambda v: v, 'permille': lambda v: v / 10., 'permyriad': lambda v: v / 100.,  # parts
                     'ppm': lambda v: v / 10000., 'ppb': lambda v: 1. * v / (10 ** 7), 'ppt': lambda v: 1. * v / 10 ** 10},  # freq
            'frequency': {'hertz': lambda v: v, 'kilohertz': lambda v: v * 1000.},
            'memory': {
-                'byte': lambda v: v * 1E-3,
-                'kilobyte': lambda v: v,
-                'megabyte': lambda v: v * 1E3,
-                'gigabyte': lambda v: v * 1E6,
-                },
-            'viscosity': {
-                'poise': lambda v: v * 0.1,
-                'pascal/s': lambda v: v,
-                },
-            'diffusivity': {'cm^2/s': lambda v: v,
-                'm^2/s': lambda v: v * 1E4,
-                'mm^2/s': lambda v: v * 1E-2,
-                },
-            'weight': {'gram': lambda v: v,
+    'byte': lambda v: v * 1E-3,
+    'kilobyte': lambda v: v,
+    'megabyte': lambda v: v * 1E3,
+    'gigabyte': lambda v: v * 1E6,
+},
+    'viscosity': {
+    'poise': lambda v: v * 0.1,
+    'pascal/s': lambda v: v,
+},
+    'diffusivity': {'cm^2/s': lambda v: v,
+                    'm^2/s': lambda v: v * 1E4,
+                    'mm^2/s': lambda v: v * 1E-2,
+                    },
+    'weight': {'gram': lambda v: v,
                'kilogram': lambda v: v * 1E3,
                'milligram': lambda v: v * 1E-3},
-            'tension': {'volt': lambda v: v,
+    'tension': {'volt': lambda v: v,
                 'millivolt': lambda v: v * 1E-3,
                 },
+    'resistance': {'ohm': lambda v: v,
+                   'milliohm': lambda v: v * 1E-3,
+                   'megaohm': lambda v: v * 1E6,
+                   },
 }
 
 # Latex symbols for Veusz
@@ -165,6 +178,7 @@ symbols = {'micron': '{\mu}m', 	'nanometer': 'nm', 	'millimeter': 'mm',
            'kilogram': 'kg',
            'volt': 'V',
            'millivolt': 'mV',
+           'ohm': '\Omega', 'milliohm': 'm\Omega', 'megaohm': 'M\Omega',
            }
 
 # HTML symbols for Qt
@@ -180,6 +194,7 @@ hsymbols.update({'micron': u'\u03bcm', 'micron^2': u'\u03bcm²', 'micron^3': u'\
                  'cm^2/s': u'cm²s⁻¹',
                  'm^2/s': u'm²s⁻¹',
                  'mm^2/s': u'mm²s⁻¹',
+                 'ohm': u'\u03A9', 'milliohm': u'm\u03A9', 'megaohm': u'M\u03A9',
                  })
 
 
@@ -203,6 +218,7 @@ user_defaults = {'length': 'micron',
                  'diffusivity': 'cm^2/s',
                  'weight': 'gram',
                  'tension': 'volt',
+                 'resistance': 'ohm',
                  }
 
 
