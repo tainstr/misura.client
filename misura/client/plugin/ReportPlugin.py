@@ -76,6 +76,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         sample = getattr(instr, smp_name)
 
         d = os.path.join(params.pathArt, fields['template_file_name'])
+        logo = os.path.join(params.pathArt, 'logo.png')
         tpl = open(d, 'rb').read().replace("u'report'", "u'{}'".format(report_path[1:]))
         command_interpreter.run(tpl)
 
@@ -113,6 +114,8 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
             page.getChild('serial'), 'label', wr('Serial', test.conf['eq_sn']))
         self.toset(
             page.getChild('furnace'), 'label', wr('Furnace', kiln['ksn']))
+        self.toset(
+            page.getChild('logo'), 'filename', logo)
 
         msg = ''
 
