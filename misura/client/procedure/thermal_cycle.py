@@ -179,6 +179,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
                 active_instrument.root, active_instrument.measure, thermal_cycle_options, parent=self, fixed=True)
             self.main_layout.addWidget(self.thermal_cycle_optionsWidget)
         self.main_layout.addWidget(self.plot)
+        self.setSizes([1, 1, 1, 500, 200, 0])
 
     def progress_changed(self, current_segment_progress):
         self.plot.set_progress(get_progress_time_for(current_segment_progress,
@@ -329,7 +330,25 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         # Connect to apply_and_save
         self.connect(self.tcc.act_save, QtCore.SIGNAL(
             'triggered(bool)'), self.apply_and_save)
+        
+        self.bPlot = QtGui.QPushButton("Plot")
+        self.bPlot.setCheckable(True)
+        self.bPlot.setChecked(False)
+        self.connect(self.bPlot, QtCore.SIGNAL('clicked(bool)'), self.toggle_plot)
+        self.buttons.addWidget(self.bPlot)
+        
+        self.buttonBar.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
         self.main_layout.addWidget(self.buttonBar)
+        
+    def toggle_plot(self, *a):
+        sz = self.sizes()
+        if sz[-1] == 0:
+            sz[-1] = 500
+            self.bPlot.setChecked(True)
+            self.setSizes(sz)
+        else:
+            self.bPlot.setChecked(False)
+            self.setSizes([1, 1, 1, 500, 200, 0])
 
     def addTable(self, crv=None):
         if crv == None:
@@ -337,7 +356,6 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             logging.debug('%s %s', 'got remote curve', crv)
         if len(crv) == 0:
             crv = [[0, 0]]
-#           self.plot.hide()
         if not self.plot.isVisible():
             self.plot.show()
         pb = QtGui.QProgressBar(self)
