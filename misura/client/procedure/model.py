@@ -88,6 +88,8 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
             if col == row.colTEMP:
                 if isinstance(r, basestring):
                     r = r.replace('>', 'Event: ')
+            else:
+                r = round(r, 1)
             return r
 
         if role == QtCore.Qt.ForegroundRole:
