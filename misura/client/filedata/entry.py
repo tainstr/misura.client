@@ -19,7 +19,7 @@ def iterpath(name, parent=False, splt=sep):
     if ':' in v[0]:
         g = v[0].split(':')
         v = g + v[1:]
-
+        
     # Recursively build the path
     isLeaf = False
     for i, sub in enumerate(v):
@@ -298,7 +298,8 @@ class NodeEntry(object):
             return False
         path = self.conf_path
         configuration_proxy = self.linked.conf
-        if '/' in path and len(path)>1:
+        
+        if len(path)>1:
             configuration_proxy = configuration_proxy.toPath(path)
         return configuration_proxy
 

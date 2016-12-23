@@ -20,6 +20,7 @@ from model import DocumentModel
 from misura.canon.csutil import lockme
 from .. import units
 from ..clientconf import confdb
+from misura.client.axis_selection import get_best_x_for
 
 MAX = 10**5
 MIN = -10**5
@@ -312,7 +313,41 @@ class MisuraDocument(document.Document):
         self.enableUpdates()
         self.emit(QtCore.SIGNAL('updated()'))
         return k
-
+    
+    def save(self, filename, mode='vsz'):
+        r = document.Document.save(self, filename, mode)
+        proxies = {}
+        version = get_version_name(filename)
+        for name, ds in self.data.iteritems():
+            if not ds.linked or not os.path.exists(ds.linked.filename):
+                logging.debug('Skipping unlinked dataset', name, ds.linked)
+                continue
+            vfn = ds.linked.filename
+            node = self.model.tree.traverse(name)
+            conf = node.parent.get_configuration()
+            if not conf or not conf.has_key(node.name()):
+                logging.debug('Skipping invalid dataset:', name, node.name())
+                continue
+            proxy = proxies.get(vfn, False)
+            # Ensure conf is saved into proper version
+            if proxy is False:
+                proxy = getFileProxy(vfn)
+                proxies[vfn] = proxy
+                verpath =  proxy.get_version_by_name(version)
+                # Create a new version
+                if not verpath:
+                    verpath = proxy.create_version(version)
+                else:
+                    proxy.set_version(verpath)
+                # Load proper version
+                proxy.save_conf(node.linked.conf.tree())
+            time_name = get_best_x_for(name, ds.linked.prefix, self.data, '_t')
+            time_data = self.model.doc.data[time_name].data
+            proxy.save_data(ds.m_col, ds.data, time_data, opt=ds.m_opt)
+                
+                
+def get_version_name(vsz):
+    return os.path.basename(vsz).replace('.vsz', '')   
 
 def print_history(lst, j=1, ids=False):
     if ids is False:
