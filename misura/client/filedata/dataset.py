@@ -84,14 +84,17 @@ class MisuraDataset(datasets.Dataset):
         """Object type"""
         return self.__class__.__name__
     
-    def saveDataRelationToText(self, fileobj, name):
-        """Write data if changed from the linked file"""
+    def save_datasetAsText(self, fileobj, name):
         # TODO: only if ds is not equal to its original version
         # build up descriptor
         out = "SetDataVal('{}','data', slice(None,None), [" .format(name)
         fileobj.write(out)
         fileobj.write(self.datasetAsText(fmt='%e', join=' ').replace('\n', ', '))
-        fileobj.write("])\n")
+        fileobj.write("])\n")        
+    
+    def saveDataRelationToText(self, fileobj, name):
+        """Write data if changed from the linked file"""
+        self.save_datasetAsText(fileobj, name)
         
         for attr in ('m_keep', 'm_name', 'm_pos', 'm_col', 'm_var',
                      'm_label', 'm_initialDimension', 'm_percent', 'm_update',
