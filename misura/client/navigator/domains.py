@@ -92,17 +92,6 @@ class DataNavigatorDomain(NavigatorDomain):
         fl = self.model().files
         logging.debug('%s %s', 'got linked files', self.model().files[:])
 
-    @node
-    def commit(self, node=False):
-        """Write datasets to linked file. """
-        name, st = QtGui.QInputDialog.getText(
-            self, "Version Name", "Choose a name for the data version you are saving:")
-        if not st:
-            logging.debug('%s', 'Aborted')
-            return
-        logging.debug('%s %s', 'Committing data to', node.filename)
-        node.commit(unicode(name))
-
     def add_load(self, menu, node):
         """Add load/unload action"""
         self.act_load = menu.addAction(_('Load'), self.navigator.load)
@@ -134,6 +123,7 @@ class DataNavigatorDomain(NavigatorDomain):
 
     @node
     def save_on_current_version(self, node=False):
+        #FIXME: Find out local t dataset!
         proxy = getFileProxy(node.linked.filename)
         prefix = node.linked.prefix
         try:

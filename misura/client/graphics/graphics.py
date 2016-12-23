@@ -66,7 +66,8 @@ class CustomInterface(object):
 
     def defaultPlot(self, dataset_names, instrument_name):
         plugin_class, plot_rule_func = plot.get_default_plot_plugin_class(instrument_name)
-        linked = self.doc.data[dataset_names[0]].linked
+        logging.debug('defaultPlot', dataset_names, instrument_name, plugin_class)
+        linked = self.mw.document.data[dataset_names.iterkeys().next()].linked
         plot_rule = plot_rule_func(confdb, linked.conf)
         logging.debug('defaultPlot', plugin_class, plot_rule)
         p = plugin_class()
