@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Plot persistence on hdf files"""
-import cStringIO
 import os
 import functools
 
@@ -78,7 +77,11 @@ class SavePlotMenu(QtGui.QMenu):
 
     def load_plot(self, plot_id):
         """Load selected plot"""
-        text = self.proxy.get_plot(plot_id)
+        text, attrs = self.proxy.get_plot(plot_id)
+        # Try to set the current version to the plot_id
+        ver = attrs.get('version')
+        if ver!=self.proxy.get_version():
+            self.proxy.set_version(ver)
         # TODO: replace with tempfile
         tmp = 'tmp_load_file.vsz'
         open(tmp, 'w').write(text)
@@ -95,20 +98,8 @@ class SavePlotMenu(QtGui.QMenu):
             plot_id = self.current_plot_id
         else:
             plot_id = validate_filename(name, bad=[' '])
-        text = cStringIO.StringIO()
-        self.doc.saveToFile(text)
-        text = text.getvalue()
-
-        ci = document.CommandInterface(self.doc)
-        tmp = 'tmp_veusz_render.jpg'
-        ci.Export(tmp, page=page)
-        render = open(tmp, 'rb').read()
-        if not len(render):
-            logging.debug('Failed rendering')
-            render = False   
-        r = self.proxy.save_plot(
-            text, plot_id=plot_id, title=name, render=render, render_format='jpg')
-# 		os.remove(tmp)
+            
+        r = self.doc.save_plot(self.proxy, plot_id, page, name)
         return r
 
     def new_plot(self):
@@ -130,3 +121,5 @@ class SavePlotMenu(QtGui.QMenu):
         else:
             QtGui.QToolTip.hideText()
         return QtGui.QMenu.event(self, ev)
+    
+

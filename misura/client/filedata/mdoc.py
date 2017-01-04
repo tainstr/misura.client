@@ -5,6 +5,7 @@ import threading
 import tempfile
 from pickle import loads, dumps
 import os
+import cStringIO
 
 from PyQt4 import QtCore
 
@@ -314,10 +315,33 @@ class MisuraDocument(document.Document):
         self.emit(QtCore.SIGNAL('updated()'))
         return k
     
+    def save_plot(self, proxy, version, page=0, name=False, text=False):
+        if not name:
+            name = version
+        if not text:
+            text = cStringIO.StringIO()
+            self.saveToFile(text)
+            text = text.getvalue()
+    
+        ci = document.CommandInterface(self)
+        tmp = 'tmp_veusz_render.jpg'
+        ci.Export(tmp, page=page)
+        render = open(tmp, 'rb').read()
+        if not len(render):
+            logging.debug('Failed rendering')
+            render = False   
+        r = proxy.save_plot(
+            text, plot_id=version, title=name, render=render, render_format='jpg')
+        os.remove(tmp)
+        return r
+    
+
     def save(self, filename, mode='vsz'):
         r = document.Document.save(self, filename, mode)
-        proxies = {}
         version = get_version_name(filename)
+        vsz_text = open(filename, 'rb').read()
+        proxies = {} # filename: fileproxy
+        plots = set([])  # filename where plot is already saved 
         for name, ds in self.data.iteritems():
             if not ds.linked or not os.path.exists(ds.linked.filename):
                 logging.debug('Skipping unlinked dataset', name, ds.linked)
@@ -341,9 +365,15 @@ class MisuraDocument(document.Document):
                     proxy.set_version(verpath)
                 # Load proper version
                 proxy.save_conf(node.linked.conf.tree())
+            if vfn not in plots:
+                #TODO: detect current page
+                self.save_plot(proxy, version, text=vsz_text)
+                plots.add(vfn)
             time_name = get_best_x_for(name, ds.linked.prefix, self.data, '_t')
             time_data = self.model.doc.data[time_name].data
-            proxy.save_data(ds.m_col, ds.data, time_data, opt=ds.m_opt)
+            proxy.save_data(ds.m_col, ds.data, time_data, opt=ds.m_opt) 
+        return r        
+        
                 
                 
 def get_version_name(vsz):
