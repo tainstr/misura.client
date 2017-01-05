@@ -94,7 +94,7 @@ class MisuraDataset(datasets.Dataset):
     
     def saveDataRelationToText(self, fileobj, name):
         """Write data if changed from the linked file"""
-        self.save_datasetAsText(fileobj, name)
+        #self.save_datasetAsText(fileobj, name)
         
         for attr in ('m_keep', 'm_name', 'm_pos', 'm_col', 'm_var',
                      'm_label', 'm_initialDimension', 'm_percent', 'm_update',
