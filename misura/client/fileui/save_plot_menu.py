@@ -3,6 +3,7 @@
 """Plot persistence on hdf files"""
 import os
 import functools
+from datetime import datetime
 
 from veusz import document
 from veusz.utils import pixmapAsHtml
@@ -39,6 +40,7 @@ class SavePlotMenu(QtGui.QMenu):
     def redraw(self):
         self.clear()
         vd = self.proxy.get_plots(render=True)
+        vers = self.proxy.get_versions()
         self.plots = vd
         if vd is None:
             return
@@ -47,7 +49,8 @@ class SavePlotMenu(QtGui.QMenu):
         for v, info in vd.iteritems():
             logging.debug('Found plot %s %s', v, info[:2])
             p = functools.partial(self.load_plot, v)
-            act = self.addAction(' - '.join(info[:2]), p)
+            vername = vers[info[4]][0]
+            act = self.addAction(' - '.join((info[0], info[1], vername)), p)
             act.setCheckable(True)
             if info[2]:
                 pix = QtGui.QPixmap()
@@ -70,20 +73,42 @@ class SavePlotMenu(QtGui.QMenu):
             act = self.addAction(_('Delete current plot'), self.remove_plot)
 
     def preview(self, plot_id):
-        print 'PREVIEW', plot_id
+        logging.debug('PREVIEW', plot_id)
         img = self.plots[plot_id][2]
         pix = QtGui.QPixmap()
         pix.loadFromData(img, 'JPG')
         self.lbl = QtGui.QLabel()
         self.lbl.setPixmap(pix)
         self.lbl.show()
+        
+    def load_plot_version(self, version_path):
+        """Search last occurence of plot with required version"""
+        plots = self.proxy.get_plots()
+        ok = []
+        for plot_id, info in plots.iteritems():
+            if info[4]==version_path:
+                info = list(info)
+                info.append(plot_id)
+                info[1] = datetime.strptime(info[1], "%H:%M:%S, %d/%m/%Y")
+                ok.append(info)
+        if not ok:
+            logging.debug('No applicable plot for selected version')
+            self.current_plot_id = False
+            self.redraw()
+            return False
+        ok.sort(key=lambda el: el[1])
+        ok = ok[-1]
+        self.load_plot(ok[-1], load_version=False)
+        
+        
+        
 
-    def load_plot(self, plot_id):
+    def load_plot(self, plot_id, load_version=True):
         """Load selected plot"""
         text, attrs = self.proxy.get_plot(plot_id)
         # Try to set the current version to the plot_id
         ver = attrs.get('version', False)
-        if ver and ver!=self.proxy.get_version():
+        if load_version and ver and ver!=self.proxy.get_version():
             self.proxy.set_version(ver)
             self.versionChanged.emit(self.proxy.get_version())
         # TODO: replace with tempfile

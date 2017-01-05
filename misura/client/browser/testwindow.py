@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from functools import partial
 from misura.canon.logger import Log as logging
+
 from PyQt4 import QtGui, QtCore
 
 import veusz.utils
@@ -31,9 +33,10 @@ class TestWindow(acquisition.MainWindow):
     breadcrumb = False
     breadbar = False
     plotboard=False
-# 	@profile
+    menuVersions = False
+    menuPlot = False
 
-    def load_version(self, v=-1):
+    def load_version(self, v=-1, load_plot_version=True):
         self.fixedDoc.paused = True
         if self.breadbar:
             self.removeToolBar(self.breadbar)
@@ -60,13 +63,10 @@ class TestWindow(acquisition.MainWindow):
         # Menu Bar mod
         self.actStandard = self.myMenuBar.measure.addAction(
             _('Re-evaluate standards'), self.re_standard)
-
-        self.menuVersions = fileui.VersionMenu(self.fixedDoc.proxy)
-        self.myMenuBar.measure.addMenu(self.menuVersions)
-        self.menuPlot = fileui.SavePlotMenu(self.fixedDoc)
-        self.myMenuBar.measure.addMenu(self.menuPlot)
-        self.menuVersions.versionChanged.connect(self.load_version)
-
+        if load_plot_version:
+            load_plot_version = self.fixedDoc.proxy.get_version()
+        self.create_version_plot_menus(load_plot_version)
+        
         if self.vtoolbar:
             self.vtoolbar.hide()
         self.vtoolbar = self.summaryPlot.plot.createToolbar(self)
@@ -101,11 +101,10 @@ class TestWindow(acquisition.MainWindow):
 
         if self.fixedDoc:
             self.doc.model.sigPageChanged.connect(self.slot_page_changed)
-        
+        self.play = filedata.FilePlayer(self)
         self.play.set_doc(self.fixedDoc)
         self.play.sleep = 0.1
-        self.controls.server = self.play
-#         self.controls.remote=self.play
+        self.controls.remote=self.play
         for pic, win in self.cameras.itervalues():
             pic.setSampleProcessor(self.play)
 #             d=self.doc.decoders['/dat/'+pic.role]
@@ -119,6 +118,19 @@ class TestWindow(acquisition.MainWindow):
             'set_idx(int)'), self.play.set_idx)
         
         self.fixedDoc.paused = False
+        
+    def create_version_plot_menus(self, version_path=False):
+        if not self.menuVersions:
+            self.menuVersions = fileui.VersionMenu(self.fixedDoc)
+            self.menuVersions.versionChanged.connect(partial(self.load_version, load_plot_version=True))
+        if not self.menuPlot:
+            self.menuPlot = fileui.SavePlotMenu(self.fixedDoc)
+            self.menuPlot.versionChanged.connect(partial(self.load_version, load_plot_version=False))
+        if version_path:
+            self.menuPlot.load_plot_version(version_path)
+            
+        self.myMenuBar.measure.addMenu(self.menuVersions)
+        self.myMenuBar.measure.addMenu(self.menuPlot)
 
     def slot_page_changed(self):
         p = self.summaryPlot.plot.getPageNumber()

@@ -30,7 +30,7 @@ class FilePlayer(QtCore.QThread):
         if self.doc:
             for dec in doc.decoders.itervalues():
                 logging.debug('%s %s', 'stopping decoder', dec.datapath)
-                doc.terminate()
+                dec.terminate()
         self.params = {}
         self.samples = []
         self.opt = set([])
