@@ -108,8 +108,10 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
 
     def wipe_doc_preserving_filename(self):
         name = self.doc.filename
+        pname = self.doc.proxy_filename
         self.doc.wipe()
         self.doc.filename = name
+        self.doc.proxy_filename = pname
 
     def add_versions_to_file(self):
         command_interface = document.CommandInterface(self.doc)

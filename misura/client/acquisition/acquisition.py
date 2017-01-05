@@ -699,10 +699,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def _finishFileProxy(self, doc):
         self.tasks.done('Waiting for data')
-        logging.debug(
-            '%s %s %s %s', 'RESETFILEPROXY', doc.filename, doc.data.keys(), doc.up)
+        logging.debug('RESETFILEPROXY', doc.proxy_filename, doc.data.keys(), doc.up)
         self.set_doc(doc)
-        logging.debug('%s', 'MainWindow.resetFileProxy: Restarting registry')
+        logging.debug('MainWindow.resetFileProxy: Restarting registry')
 
         registry.restart_updating_doc()
         registry.toggle_run(True)

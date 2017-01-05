@@ -47,7 +47,7 @@ class MisuraDocument(document.Document):
         document.Document.__init__(self)
         self.cache = {}  # File-system cache
         self.proxy = False
-        self.filename = False
+        self.proxy_filename = False
         self.header = []
         self.root = root
         # File-system cache dir
@@ -60,10 +60,10 @@ class MisuraDocument(document.Document):
         self.decoders = {}
         if proxy:
             self.proxy = proxy
-            self.filename = proxy.get_path()
+            self.proxy_filename = proxy.get_path()
         elif filename:
             self.proxy = getFileProxy(filename)
-            self.filename = filename
+            self.proxy_filename = filename
         else:
             up = False
             return
@@ -157,11 +157,11 @@ class MisuraDocument(document.Document):
         for name in self.data.keys():
             self.deleteData(name)
         self.model.paused = False
-        if self.filename is False:
+        if self.proxy_filename is False:
             logging.debug('%s', 'no filename defined')
             self.reloading = False
             return []
-        logging.debug('%s %s', 'Reloading Data', self.filename)
+        logging.debug('%s %s', 'Reloading Data', self.proxy_filename)
         rule_load = confdb['rule_load'] + '\n' + confdb['rule_plot']
         for gen_rule_func in default_plot_rules.itervalues():
             rule = gen_rule_func(confdb, self.proxy.conf)
@@ -169,7 +169,7 @@ class MisuraDocument(document.Document):
                 continue
             rule_load += '\n' + rule
         op = OperationMisuraImport(
-            ImportParamsMisura(filename=self.filename,
+            ImportParamsMisura(filename=self.proxy_filename,
                                time_interval=self.interval,
                                rule_exc=confdb['rule_exc'],
                                rule_inc=confdb['rule_inc'],
