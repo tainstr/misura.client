@@ -333,15 +333,11 @@ class MisuraDocument(document.Document):
         r = proxy.save_plot(
             text, plot_id=version, title=name, render=render, render_format='jpg')
         os.remove(tmp)
-        return r
+        return r, text
     
-
-    def save(self, filename, mode='vsz'):
-        r = document.Document.save(self, filename, mode)
-        version = get_version_name(filename)
-        vsz_text = open(filename, 'rb').read()
-        proxies = {} # filename: fileproxy
-        plots = set([])  # filename where plot is already saved 
+    def save_version_and_plot(self, version, vsz_text=False):
+        proxies = {} # filename: (fileproxy)
+        plots = set([])  # filename where plot is already saved
         for name, ds in self.data.iteritems():
             if not ds.linked or not os.path.exists(ds.linked.filename):
                 logging.debug('Skipping unlinked dataset', name, ds.linked)
@@ -367,11 +363,20 @@ class MisuraDocument(document.Document):
                 proxy.save_conf(node.linked.conf.tree())
             if vfn not in plots:
                 #TODO: detect current page
-                self.save_plot(proxy, version, text=vsz_text)
+                r, vsz_text = self.save_plot(proxy, version, text=vsz_text)
                 plots.add(vfn)
             time_name = get_best_x_for(name, ds.linked.prefix, self.data, '_t')
             time_data = self.model.doc.data[time_name].data
-            proxy.save_data(ds.m_col, ds.data, time_data, opt=ds.m_opt) 
+            proxy.save_data(ds.m_col, ds.data, time_data, opt=ds.m_opt)
+        for proxy in proxies.itervalues():
+            proxy.flush()
+
+    def save(self, filename, mode='vsz'):
+        """Override Document.save to include version and plot"""
+        r = document.Document.save(self, filename, mode)
+        version = get_version_name(filename)
+        vsz_text = open(filename, 'rb').read()
+        r = self.save_version_and_plot(version, vsz_text)
         return r        
         
                 

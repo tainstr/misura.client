@@ -12,10 +12,12 @@ class VersionMenu(QtGui.QMenu):
     """Available object versions menu"""
     versionChanged = QtCore.pyqtSignal(('QString'))
 
-    def __init__(self, proxy, parent=None):
+    def __init__(self, doc, parent=None):
         QtGui.QMenu.__init__(self, parent=parent)
         self.setTitle(_('Version'))
-        self.proxy = proxy
+        self.doc = doc
+        #TODO: submenu for each proxy in doc
+        self.proxy = doc.proxy
         self.redraw()
         self.connect(self, QtCore.SIGNAL('aboutToShow()'), self.redraw)
 
@@ -58,8 +60,8 @@ class VersionMenu(QtGui.QMenu):
                 QtGui.QMessageBox.critical(
                     self, _("Not saved"), _("Cannot overwrite original version"))
                 return False
-        self.proxy.save_conf()
-        self.proxy.flush()
+        version_name, version_date = self.proxy.get_versions()[self.proxy.get_version()]
+        self.doc.save_version_and_plot(version_name)
         return True
 
     def new_version(self):
