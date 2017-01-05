@@ -18,6 +18,7 @@ class SavePlotMenu(QtGui.QMenu):
 
     """Available embedded plots menu"""
     plotChanged = QtCore.pyqtSignal(('QString'))
+    versionChanged = QtCore.pyqtSignal(('QString'))
     current_plot_id = False
     doc = False
 
@@ -65,6 +66,8 @@ class SavePlotMenu(QtGui.QMenu):
         self.loadActs.append((self.save_plot, act))
         if len(vd) == 0:
             act.setEnabled(False)
+        if self.current_plot_id:
+            act = self.addAction(_('Delete current plot'), self.remove_plot)
 
     def preview(self, plot_id):
         print 'PREVIEW', plot_id
@@ -79,9 +82,10 @@ class SavePlotMenu(QtGui.QMenu):
         """Load selected plot"""
         text, attrs = self.proxy.get_plot(plot_id)
         # Try to set the current version to the plot_id
-        ver = attrs.get('version')
-        if ver!=self.proxy.get_version():
+        ver = attrs.get('version', False)
+        if ver and ver!=self.proxy.get_version():
             self.proxy.set_version(ver)
+            self.versionChanged.emit(self.proxy.get_version())
         # TODO: replace with tempfile
         tmp = 'tmp_load_file.vsz'
         open(tmp, 'w').write(text)
@@ -101,6 +105,15 @@ class SavePlotMenu(QtGui.QMenu):
             
         r = self.doc.save_plot(self.proxy, plot_id, page, name)
         return r
+    
+    def remove_plot(self, plot_id=False):
+        """Delete current plot or plot_id folder structure"""
+        if not plot_id:
+            plot_id = self.current_plot_id
+        node = '/plot/{}'.format(plot_id)
+        self.proxy.remove_node(node, recursive=True)
+        logging.debug('Removed plot', node)
+        
 
     def new_plot(self):
         """Create a new plot"""
