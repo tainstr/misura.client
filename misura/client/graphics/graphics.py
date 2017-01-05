@@ -128,9 +128,12 @@ document.CommandInterface.SetDataVal = set_data_val
 
 def set_data_attr(self, dsname, attrname, val):
     """Set dataset attribute `attrname` to `val`"""
-    ds = self.document.data[dsname]
+    logging.debug('setting attr', dsname, attrname, val)
+    ds = self.document.data.get(dsname, False)
+    if ds is False:
+        logging.debug('set_data_attr: dataset not found!', dsname)
+        return
     setattr(ds, attrname, val)
-    print 'setting attr', dsname, attrname, val
     op = document.OperationDatasetSet(dsname, ds)
     self.document.applyOperation(op)
 

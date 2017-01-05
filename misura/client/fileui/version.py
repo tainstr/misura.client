@@ -41,11 +41,11 @@ class VersionMenu(QtGui.QMenu):
             self.loadActs.append((p, act))
         if len(vd) > 0:
             self.addSeparator()
-        act = self.addAction(_('New version'), self.new_version)
+        act = self.addAction(_('New version and plot'), self.new_version)
         self.loadActs.append((self.new_version, act))
-        act = self.addAction(_('Save version and plot'), self.save_version)
+        act = self.addAction(_('Overwrite current'), self.save_version)
         self.loadActs.append((self.save_version, act))
-        self.actRemove = self.addAction(_('Delete version'), self.remove_version)
+        self.actRemove = self.addAction(_('Delete current'), self.remove_version)
         self.actRemove.setEnabled(bool(cur))
         self.actValidate = self.addAction(_('Check signature'), self.signature)
 
@@ -76,7 +76,7 @@ class VersionMenu(QtGui.QMenu):
         if not st:
             return False
         self.proxy.create_version(unicode(name))
-        self.actRemove.setEnabled(True)
+        self.save_version()
         return True
     
     def remove_version(self):

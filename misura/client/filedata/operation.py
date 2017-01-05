@@ -188,9 +188,9 @@ def done(pid="File import"):
         t.done(pid)
 
 
-def assign_sample_to_dataset(ds, linked_file, reference_sample):
+def assign_sample_to_dataset(ds, linked_file, reference_sample, hdf_dataset_name):
     """Find out the sample index to which this dataset refers"""
-    col = ds.m_col
+    col = hdf_dataset_name
     obj, var = linked_file.conf.from_column(col)
     if '/sample' in col:
         parts = col.split(sep)
@@ -214,9 +214,9 @@ def assign_sample_to_dataset(ds, linked_file, reference_sample):
 
 def assign_label(ds, col0):
     """Assigns an m_label to the dataset"""
-    if col0 == 't':
+    if 't' in [col0, ds.m_var]:
         ds.m_label = _("Time")
-    elif col0 == 'T':
+    elif 'T' in [col0, ds.m_var]:
         ds.m_label = _("Temperature")
     else:
         ds_object, ds_name = ds.m_conf.from_column(col0)
@@ -226,24 +226,24 @@ def assign_label(ds, col0):
             ds.old_unit = opt["csunit"]
 
 
-def assign_node_attributes(proxy, ds):
+def assign_node_attributes(proxy, ds, hdf_dataset_name):
     """Try to read column metadata from node attrs"""
     for meta in ['percent', 'initialDimension']:
         val = 0
-        if proxy.has_node_attr(ds.m_col, meta):
-            val = proxy.get_node_attr(ds.m_col, meta)
+        if proxy.has_node_attr(hdf_dataset_name, meta):
+            val = proxy.get_node_attr(hdf_dataset_name, meta)
             if type(val) == type([]):
                 val = 0
         setattr(ds, 'm_' + meta, val)
 
 
-def dataset_measurement_unit(pure_dataset_name, fileproxy, data, m_var):
+def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
     # Get meas. unit
     u = 'None'
-    if pure_dataset_name == 't':
+    if hdf_dataset_name == 't':
         u = 'second'
     elif len(data):
-        u = fileproxy.get_node_attr(pure_dataset_name, 'unit')
+        u = fileproxy.get_node_attr(hdf_dataset_name, 'unit')
         if u in ['', 'None', None, False, 0]:
             u = False
         elif hasattr(u, '__iter__'):
@@ -263,10 +263,11 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
                    rule_unit=lambda *a: False,
                    unit=False):
     # TODO: cleaun-up all this proliferation of *_dataset_names!!!
+    logging.debug('create_dataset', prefixed_dataset_name, pure_dataset_name, hdf_dataset_name, variable_name)
     # Get meas. unit
     if not unit:
         unit = dataset_measurement_unit(
-            pure_dataset_name, fileproxy, data, variable_name)
+            hdf_dataset_name, fileproxy, data, variable_name)
     ds = MisuraDataset(data=data, linked=linked_file)
     ds.m_name = prefixed_dataset_name
     ds.m_pos = p
@@ -279,10 +280,10 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     ds.old_unit = ds.unit
 
     # Read additional metadata
-    if len(data) > 0 and pure_dataset_name != 't':
-        logging.debug('Reading metadata',  pure_dataset_name)
-        assign_node_attributes(fileproxy, ds)
-        assign_sample_to_dataset(ds, linked_file, reference_sample)
+    if len(data) > 0 and pure_dataset_name not in ['t', 'T']:
+        logging.debug('Reading metadata',  hdf_dataset_name)
+        assign_node_attributes(fileproxy, ds, hdf_dataset_name)
+        assign_sample_to_dataset(ds, linked_file, reference_sample, hdf_dataset_name)
         # Units conversion
         nu = rule_unit(hdf_dataset_name)
         if unit and nu:
@@ -295,7 +296,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
             ds.tags.add(parent)
     if hdf_dataset_name:
         assign_label(ds, hdf_dataset_name)
-
+    logging.debug('done create_dataset', prefixed_dataset_name, pure_dataset_name, hdf_dataset_name, variable_name)
     return ds
 
 
@@ -648,7 +649,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # Try reading cached data
         ds = False
         data = []
-        opt = False
+        opt = {}
         if pcol in self._doc.cache:
             ds = self._doc.get_cache(pcol)
             data = ds.data
@@ -662,11 +663,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             opt = option.ao(
                 {}, 't', 'Float', 0, 'Event Time', unit='second')['t']
         else:
-            if opt is False:
+            if len(opt)==0 and not col[-2:] in ['/T','/t']:
                 obj,  name = self.proxy.conf.from_column(col)
                 opt = obj.gete(name)
-            attr = opt['attr']
-            type = opt['type']
+            attr = opt.get('attr', [])
+            type = opt.get('type', 'Float')
             if attr in ['', 'None', None, False, 0]:
                 attr = []
         if not m_update:
@@ -684,6 +685,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             data = read_data(self.proxy, col0).transpose()
             sub_time_sequence = data[0]
             data = data[1]
+            logging.debug('Done raw data', col0)
         # Create the dataset
         if ds is False and data is not False:
             ds = create_dataset(self.proxy,
@@ -813,5 +815,5 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         hdf_names = map(
             lambda name: ("/" + name.lstrip(self.prefix) + "$"), hdf_names)
         LF.params.rule_load = '\n'.join(hdf_names)
-
+        print '\n'.join(names)
         return names

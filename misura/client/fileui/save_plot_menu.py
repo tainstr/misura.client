@@ -126,6 +126,8 @@ class SavePlotMenu(QtGui.QMenu):
             plot_id = validate_filename(name, bad=[' '])
 
         r = self.doc.save_plot(self.proxy, plot_id, page, name)
+        self.current_plot_id = plot_id
+        self.redraw()
         return r
 
     def remove_plot(self, plot_id=False):

@@ -367,7 +367,7 @@ class MisuraDocument(document.Document):
                 plots.add(vfn)
             time_name = get_best_x_for(name, ds.linked.prefix, self.data, '_t')
             time_data = self.model.doc.data[time_name].data
-            proxy.save_data(ds.m_col, ds.data, time_data, opt=ds.m_opt)
+            proxy.save_data(name, ds.data, time_data, opt=ds.m_opt)
         for proxy in proxies.itervalues():
             proxy.flush()
 
