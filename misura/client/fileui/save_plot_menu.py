@@ -49,7 +49,7 @@ class SavePlotMenu(QtGui.QMenu):
         for v, info in vd.iteritems():
             logging.debug('Found plot %s %s', v, info[:2])
             p = functools.partial(self.load_plot, v)
-            vername = vers[info[4]][0]
+            vername = vers.get(info[4], ['???'])[0]
             act = self.addAction(' - '.join((info[0], info[1], vername)), p)
             act.setCheckable(True)
             if info[2]:
@@ -80,13 +80,13 @@ class SavePlotMenu(QtGui.QMenu):
         self.lbl = QtGui.QLabel()
         self.lbl.setPixmap(pix)
         self.lbl.show()
-        
+
     def load_plot_version(self, version_path):
         """Search last occurence of plot with required version"""
         plots = self.proxy.get_plots()
         ok = []
         for plot_id, info in plots.iteritems():
-            if info[4]==version_path:
+            if info[4] == version_path:
                 info = list(info)
                 info.append(plot_id)
                 info[1] = datetime.strptime(info[1], "%H:%M:%S, %d/%m/%Y")
@@ -99,16 +99,13 @@ class SavePlotMenu(QtGui.QMenu):
         ok.sort(key=lambda el: el[1])
         ok = ok[-1]
         self.load_plot(ok[-1], load_version=False)
-        
-        
-        
 
     def load_plot(self, plot_id, load_version=True):
         """Load selected plot"""
         text, attrs = self.proxy.get_plot(plot_id)
         # Try to set the current version to the plot_id
         ver = attrs.get('version', False)
-        if load_version and ver and ver!=self.proxy.get_version():
+        if load_version and ver and ver != self.proxy.get_version():
             self.proxy.set_version(ver)
             self.versionChanged.emit(self.proxy.get_version())
         # TODO: replace with tempfile
@@ -127,18 +124,21 @@ class SavePlotMenu(QtGui.QMenu):
             plot_id = self.current_plot_id
         else:
             plot_id = validate_filename(name, bad=[' '])
-            
+
         r = self.doc.save_plot(self.proxy, plot_id, page, name)
         return r
-    
+
     def remove_plot(self, plot_id=False):
         """Delete current plot or plot_id folder structure"""
         if not plot_id:
             plot_id = self.current_plot_id
+        if not plot_id:
+            logging.debug('No current plot')
+            return False
         node = '/plot/{}'.format(plot_id)
         self.proxy.remove_node(node, recursive=True)
         logging.debug('Removed plot', node)
-        
+        return True
 
     def new_plot(self):
         """Create a new plot"""
@@ -159,5 +159,3 @@ class SavePlotMenu(QtGui.QMenu):
         else:
             QtGui.QToolTip.hideText()
         return QtGui.QMenu.event(self, ev)
-    
-

@@ -97,7 +97,10 @@ class TestWindow(acquisition.MainWindow):
             self.breadbar.hide()
         else:
             self.navigator.status.add(filedata.dstats.outline)
-            self.summaryPlot.cmd.Remove('/time')
+            try:
+                self.summaryPlot.cmd.Remove('/time')
+            except:
+                pass
 
         if self.fixedDoc:
             self.doc.model.sigPageChanged.connect(self.slot_page_changed)
