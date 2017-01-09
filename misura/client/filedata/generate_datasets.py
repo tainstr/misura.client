@@ -20,7 +20,12 @@ possible_error_names = set(['Error','error','err','e'])
 def new_dataset_operation(original_dataset, data, name, label, path, unit='volt', opt=False, error=None):
     """Create a new dataset by copying `original_dataset` and overwriting with `data`.
     Returns an operation to be executed by the document."""
-    old_unit = getattr(original_dataset, 'old_unit', unit)
+    old_unit = unit
+    if opt:
+        if unit is False:
+            unit=opt.get('csunit', False)
+        old_unit = opt.get('unit', unit)
+    old_unit = getattr(original_dataset, 'old_unit', old_unit)
     if not opt:
         opt = original_dataset.m_opt
     new_dataset = copy(original_dataset)
@@ -62,9 +67,10 @@ def add_datasets_to_doc(datasets, doc, original_dataset=False):
     if not original_dataset:
         original_dataset = doc.data['0:t']
     for (pure_dataset_name, values) in datasets.iteritems():
-        (data, variable_name, label) = values[:3]
-        error = None if len(values)==3 else values[3]
-        op = new_dataset_operation(original_dataset, data, variable_name, label, pure_dataset_name, unit=unit, error=error)
+        (data, variable_name, label, error, opt) = values[:5]
+        print 'DDDDDDDD', pure_dataset_name, opt
+        op = new_dataset_operation(original_dataset, data, variable_name, label, pure_dataset_name, 
+                                   unit=unit, error=error, opt=opt)
         ops.append(op)
     if len(ops) > 0:
         doc.applyOperation(
@@ -121,24 +127,24 @@ def table_to_datasets(proxy, opt, doc):
     
     def add_tT(path):
         if timecol_name:
-            datasets[path+'/t'] = (tab[timecol_idx], 't', 'Time')
+            datasets[path+'/t'] = (tab[timecol_idx], 't', 'Time', None, False)
         if Tcol_name:
-            datasets[path+'/T'] = (tab[Tcol_idx], 'T', 'Temperature')        
+            datasets[path+'/T'] = (tab[Tcol_idx], 'T', 'Temperature', None, False)        
     
     if len(value_idxes)==1:
         idx = value_idxes[0]
         err = None
         if Ecol_name:
             err = tab[Ecol_idx]
-        datasets[base_path] = (tab[idx], opt['handle'], opt['name'], err)
+        datasets[base_path] = (tab[idx], opt['handle'], opt['name'], err, opt)
         add_tT(base_path)
     else:
         for idx in value_idxes:
             name = column_names[idx]
             sub_path = base_path+'/'+ name
-            datasets[sub_path] = (tab[idx], name, opt['name']+' - '+name)
+            datasets[sub_path] = (tab[idx], name, opt['name']+' - '+name, None, opt)
         add_tT(base_path)
-            
+    print 'CCCCCCCCCCCCCC', opt      
     add_datasets_to_doc(datasets, doc)
     return True
 

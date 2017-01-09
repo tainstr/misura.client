@@ -45,7 +45,7 @@ class SavePlotMenu(QtGui.QMenu):
         if vd is None:
             return
         logging.debug('Current plot %s', self.current_plot_id)
-        self.loadActs = []
+        self.loadActs = [] # just keep a reference
         for v, info in vd.iteritems():
             logging.debug('Found plot %s %s', v, info[:2])
             p = functools.partial(self.load_plot, v)
@@ -63,7 +63,10 @@ class SavePlotMenu(QtGui.QMenu):
             self.loadActs.append((p, act))
         if len(vd) > 0:
             self.addSeparator()
-        act = self.addAction(_('Save new plot'), self.new_plot)
+        act = self.addAction(_('New plot for current version'), self.new_plot)
+        self.loadActs.append((self.new_plot, act))
+        act = self.addAction(_('New plot in new version'), 
+                               functools.partial(self.new_plot, with_version=True))
         self.loadActs.append((self.new_plot, act))
         act = self.addAction(_('Overwrite current plot'), self.save_plot)
         self.loadActs.append((self.save_plot, act))
@@ -118,17 +121,19 @@ class SavePlotMenu(QtGui.QMenu):
         os.remove(tmp)
         self.current_plot_id = plot_id
 
-    def save_plot(self, name=False, page=1):
+    def save_plot(self, name=False, page=1, with_version=False):
         """Save overwrite plot in current name"""
         if not name:
             plot_id = self.current_plot_id
         else:
             plot_id = validate_filename(name, bad=[' '])
-
-        r = self.doc.save_plot(self.proxy, plot_id, page, name)
+        if with_version:
+            r= self.doc.save_version_and_plot(plot_id)
+        else:
+            r = self.doc.save_plot(self.proxy, plot_id, page, name)
         self.current_plot_id = plot_id
         self.redraw()
-        return r
+        return     
 
     def remove_plot(self, plot_id=False):
         """Delete current plot or plot_id folder structure"""
@@ -140,16 +145,22 @@ class SavePlotMenu(QtGui.QMenu):
         node = '/plot/{}'.format(plot_id)
         self.proxy.remove_node(node, recursive=True)
         logging.debug('Removed plot', node)
+        self.proxy.flush()
         return True
 
-    def new_plot(self):
+    def new_plot(self, with_version=False):
         """Create a new plot"""
         # TODO: ask for render and pagenumber
-        name, st = QtGui.QInputDialog.getText(
-            self, _('Plot name'), _('Choose a name for this plot'))
+        if with_version:
+            title = _('Plot and version name')
+            msg = _('Choose a name for this plot and version')
+        else:
+            title = _('Plot name')
+            msg = _('Choose a name for this plot')
+        name, st = QtGui.QInputDialog.getText(self, title, msg)
         if not st:
             return False
-        r = self.save_plot(name)
+        r = self.save_plot(name, with_version=with_version)
         if r:
             self.current_plot_id = name
 

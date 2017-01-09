@@ -43,7 +43,7 @@ class VersionMenu(QtGui.QMenu):
             self.addSeparator()
         act = self.addAction(_('New version and plot'), self.new_version)
         self.loadActs.append((self.new_version, act))
-        act = self.addAction(_('Overwrite current'), self.save_version)
+        act = self.addAction(_('Overwrite current version and plot'), self.save_version)
         self.loadActs.append((self.save_version, act))
         self.actRemove = self.addAction(_('Delete current'), self.remove_version)
         self.actRemove.setEnabled(bool(cur))

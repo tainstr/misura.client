@@ -707,7 +707,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         if opt and opt.has_key('error'):
             error_map[pcol] = opt['error']
 
-        # Create sub-time dataset
+        # Create sub-time dataset. Should be done after the import finishes!
         subds = []
         if col != 't' and (('Event' in attr) or (type == 'Table')):
             subds = self.create_local_datasets(

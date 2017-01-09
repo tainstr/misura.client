@@ -71,7 +71,7 @@ class GenerateDatasets(unittest.TestCase):
         self.check_dataset(ds)
 
     def test_add_dataset_to_doc(self):
-        datasets = {'0:a/b/c': ([1, 2, 3], 'Test', 'Test dataset')}
+        datasets = {'0:a/b/c': ([1, 2, 3], 'Test', 'Test dataset', False, None)}
         original_dataset = self.doc.data['0:kiln/T']
         gd.add_datasets_to_doc(datasets, self.doc, original_dataset)
         self.assertIn('0:a/b/c', self.doc.data)

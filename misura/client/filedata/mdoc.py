@@ -325,11 +325,14 @@ class MisuraDocument(document.Document):
     
         ci = document.CommandInterface(self)
         tmp = 'tmp_veusz_render.jpg'
+        mx = len(self.basewidget.children)-1
+        if page>mx:
+            page = mx
         ci.Export(tmp, page=page)
         render = open(tmp, 'rb').read()
         if not len(render):
             logging.debug('Failed rendering')
-            render = False   
+            render = False
         r = proxy.save_plot(
             text, plot_id=version, title=name, render=render, render_format='jpg')
         os.remove(tmp)
@@ -366,10 +369,11 @@ class MisuraDocument(document.Document):
                 r, vsz_text = self.save_plot(proxy, version, text=vsz_text)
                 plots.add(vfn)
             time_name = get_best_x_for(name, ds.linked.prefix, self.data, '_t')
-            time_data = self.model.doc.data[time_name].data
+            time_data = self.data[time_name].data
             proxy.save_data(name, ds.data, time_data, opt=ds.m_opt)
         for proxy in proxies.itervalues():
             proxy.flush()
+        return True
 
     def save(self, filename, mode='vsz'):
         """Override Document.save to include version and plot"""
