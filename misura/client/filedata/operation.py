@@ -289,6 +289,10 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
         if unit and nu:
             ds = units.convert(ds, nu[0])
             logging.debug('New dataset unit', ds.unit, ds.old_unit)
+    elif pure_dataset_name=='t':
+        ds.m_opt = option.ao({}, 't', 'Float', 0, 'Time', unit=ds.unit)['t']
+    elif pure_dataset_name=='T':
+        ds.m_opt = option.ao({}, 'T', 'Float', 0, 'Temperature', unit=ds.unit)['T']
 
     # Add the hierarchy tags
     for sub, parent, leaf in iterpath(pure_dataset_name):

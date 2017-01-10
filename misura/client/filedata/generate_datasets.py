@@ -5,6 +5,7 @@ import numpy as np
 from copy import copy
 import re
 
+from misura.canon import option
 import veusz.plugins as plugins
 import veusz.document as document
 
@@ -68,7 +69,6 @@ def add_datasets_to_doc(datasets, doc, original_dataset=False):
         original_dataset = doc.data['0:t']
     for (pure_dataset_name, values) in datasets.iteritems():
         (data, variable_name, label, error, opt) = values[:5]
-        print 'DDDDDDDD', pure_dataset_name, opt
         op = new_dataset_operation(original_dataset, data, variable_name, label, pure_dataset_name, 
                                    unit=unit, error=error, opt=opt)
         ops.append(op)
@@ -81,8 +81,12 @@ def table_to_datasets(proxy, opt, doc):
     """Generate time, temp, etc datasets from Table-type `opt`."""
     tab = opt['current']
     header = tab[0]
+    Ncol = len(header)
+    unit = opt.get('unit', False)
+    if not unit:
+        unit = [False]*Ncol
     # Invalid table
-    if len(header) == 0:
+    if Ncol == 0:
         return False
     print 'table_to_datasets', proxy['fullpath'], opt['handle'], header
     column_types = [e[1] for e in header]
@@ -127,9 +131,17 @@ def table_to_datasets(proxy, opt, doc):
     
     def add_tT(path):
         if timecol_name:
-            datasets[path+'/t'] = (tab[timecol_idx], 't', 'Time', None, False)
+            u = unit[timecol_idx]
+            if not u:
+                u = 'second'
+            topt = option.ao({}, 't', 'Float', 0, 'Time', unit=u)['t']
+            datasets[path+'/t'] = (tab[timecol_idx], 't', 'Time', None, topt)
         if Tcol_name:
-            datasets[path+'/T'] = (tab[Tcol_idx], 'T', 'Temperature', None, False)        
+            u = unit[Tcol_idx]
+            if not u:
+                u = 'celsius'            
+            Topt = option.ao({}, 'T', 'Float', 0, 'Temperature', unit=u)['T']
+            datasets[path+'/T'] = (tab[Tcol_idx], 'T', 'Temperature', None, Topt)        
     
     if len(value_idxes)==1:
         idx = value_idxes[0]
@@ -144,7 +156,6 @@ def table_to_datasets(proxy, opt, doc):
             sub_path = base_path+'/'+ name
             datasets[sub_path] = (tab[idx], name, opt['name']+' - '+name, None, opt)
         add_tT(base_path)
-    print 'CCCCCCCCCCCCCC', opt      
     add_datasets_to_doc(datasets, doc)
     return True
 

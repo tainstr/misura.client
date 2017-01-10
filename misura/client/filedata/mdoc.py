@@ -345,10 +345,12 @@ class MisuraDocument(document.Document):
             if not ds.linked or not os.path.exists(ds.linked.filename):
                 logging.debug('Skipping unlinked dataset', name, ds.linked)
                 continue
+            is_local = name[-2:] in ('/t', '/T')
             vfn = ds.linked.filename
             node = self.model.tree.traverse(name)
             conf = node.parent.get_configuration()
-            if not conf or not conf.has_key(node.name()):
+            # Exclude dataset not linked to any real option, except local t,T ds
+            if (not conf or not conf.has_key(node.name())) and not is_local:
                 logging.debug('Skipping invalid dataset:', name, node.name())
                 continue
             proxy = proxies.get(vfn, False)
@@ -368,8 +370,11 @@ class MisuraDocument(document.Document):
                 #TODO: detect current page
                 r, vsz_text = self.save_plot(proxy, version, text=vsz_text)
                 plots.add(vfn)
-            time_name = get_best_x_for(name, ds.linked.prefix, self.data, '_t')
-            time_data = self.data[time_name].data
+            if name[-2:]=='/t':
+                time_data = ds.data
+            else:
+                time_name = get_best_x_for(name, ds.linked.prefix, self.data, '_t')
+                time_data = self.data[time_name].data
             proxy.save_data(name, ds.data, time_data, opt=ds.m_opt)
         for proxy in proxies.itervalues():
             proxy.flush()
