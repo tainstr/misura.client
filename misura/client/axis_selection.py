@@ -25,10 +25,13 @@ def get_best_x_for(y_path, prefix, data, page_or_graph):
     return xname
 
 def get_suborderd_x(dataset_path, name='T'):
-    return dataset_path + "/" + name
+    sub = "_" + name
+    if dataset_path[-2:] in ('_t', '_T'):
+        return dataset_path[:-2] + sub
+    return dataset_path + sub
 
 def get_neighbor_x(dataset_path, name='T'):
-    return "/".join(dataset_path.split("/")[0:-1]) + "/" + name
+    return "/".join(dataset_path.split("/")[0:-1]) + "_" + name
 
 def is_temperature(path):
     return re.search('.*/T$|.*kiln/T', path)

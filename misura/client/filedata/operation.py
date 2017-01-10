@@ -218,6 +218,10 @@ def assign_label(ds, col0):
         ds.m_label = _("Time")
     elif 'T' in [col0, ds.m_var]:
         ds.m_label = _("Temperature")
+    elif getattr(ds, 'm_opt', False):
+        ds.m_label = _(ds.m_opt["name"])
+        if ds.m_opt.has_key('csunit'):
+            ds.old_unit = ds.m_opt["csunit"]
     else:
         ds_object, ds_name = ds.m_conf.from_column(col0)
         opt = ds_object.gete(ds_name)
@@ -280,7 +284,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     ds.old_unit = ds.unit
 
     # Read additional metadata
-    if len(data) > 0 and pure_dataset_name not in ['t', 'T']:
+    if len(data) > 0 and prefixed_dataset_name[-2:] not in ('_t', '_T', ':t'):
         logging.debug('Reading metadata',  hdf_dataset_name)
         assign_node_attributes(fileproxy, ds, hdf_dataset_name)
         assign_sample_to_dataset(ds, linked_file, reference_sample, hdf_dataset_name)
@@ -289,10 +293,10 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
         if unit and nu:
             ds = units.convert(ds, nu[0])
             logging.debug('New dataset unit', ds.unit, ds.old_unit)
-    elif pure_dataset_name=='t':
-        ds.m_opt = option.ao({}, 't', 'Float', 0, 'Time', unit=ds.unit)['t']
-    elif pure_dataset_name=='T':
-        ds.m_opt = option.ao({}, 'T', 'Float', 0, 'Temperature', unit=ds.unit)['T']
+    elif prefixed_dataset_name.endswith('t'):
+        ds.m_opt = option.ao({}, variable_name, 'Float', 0, 'Time', unit=ds.unit)[variable_name]
+    elif prefixed_dataset_name.endswith('_T'):
+        ds.m_opt = option.ao({}, variable_name, 'Float', 0, 'Temperature', unit=ds.unit)[variable_name]
 
     # Add the hierarchy tags
     for sub, parent, leaf in iterpath(pure_dataset_name):
@@ -580,15 +584,16 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         r = []
         # Get time column from document or from cache
         # Search a t child
-        subcol = pcol + sep + 't'
+        vcol = pcol.split(sep)
+        subcol = pcol + '_t'
         subt = self.search_data(subcol)
         # Search a t sibling
         if subt is False:
-            subt = self.search_data('/'.join(pcol.split(sep)[:-1] + ['t']))
+            subt = self.search_data(pcol+'_t')
         if subt:
             r.append(subt)
         elif (sub_time_sequence is not False):
-            subvar = 't'
+            subvar =vcol[-1]+'_t'
             subt = create_dataset(self.proxy, sub_time_sequence, subcol,
                                   subvar, subvar, subvar,
                                   linked_file=self.LF, reference_sample=self.refsmp,
@@ -600,11 +605,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             return r
         sub_time_sequence = subt.data
         # Get existing, created or cached ds
-        subcol = pcol + sep + 'T'
+        subcol = pcol + '_T'
         subT = self.search_data(subcol)
         # Search a sibiling
         if not subT:
-            subT = self.search_data('/'.join(pcol.split(sep)[:-1] + ['T']))
+            subT = self.search_data(pcol+ '_T')
         if subT:
             r.append(subT)
             return r
@@ -625,7 +630,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             time_sequence, T.data, k=1)
         sub_temperature_sequence = temperature_function(sub_time_sequence)
 
-        subvar = 'T'
+        subvar = vcol[-1]+'_T'
         subT = create_dataset(self.proxy, sub_temperature_sequence, subcol,
                               subvar, subvar, subvar,
                               linked_file=self.LF, reference_sample=self.refsmp,
@@ -667,7 +672,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             opt = option.ao(
                 {}, 't', 'Float', 0, 'Event Time', unit='second')['t']
         else:
-            if len(opt)==0 and not col[-2:] in ['/T','/t']:
+            if len(opt)==0 and not col[-2:] in ['_T','_t']:
                 obj,  name = self.proxy.conf.from_column(col)
                 opt = obj.gete(name)
             attr = opt.get('attr', [])

@@ -135,13 +135,13 @@ def table_to_datasets(proxy, opt, doc):
             if not u:
                 u = 'second'
             topt = option.ao({}, 't', 'Float', 0, 'Time', unit=u)['t']
-            datasets[path+'/t'] = (tab[timecol_idx], 't', 'Time', None, topt)
+            datasets[path+'_t'] = (tab[timecol_idx], path+'_t', 'Time', None, topt)
         if Tcol_name:
             u = unit[Tcol_idx]
             if not u:
                 u = 'celsius'            
             Topt = option.ao({}, 'T', 'Float', 0, 'Temperature', unit=u)['T']
-            datasets[path+'/T'] = (tab[Tcol_idx], 'T', 'Temperature', None, Topt)        
+            datasets[path+'_T'] = (tab[Tcol_idx], path+'_T', 'Temperature', None, Topt)        
     
     if len(value_idxes)==1:
         idx = value_idxes[0]

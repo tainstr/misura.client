@@ -345,7 +345,7 @@ class MisuraDocument(document.Document):
             if not ds.linked or not os.path.exists(ds.linked.filename):
                 logging.debug('Skipping unlinked dataset', name, ds.linked)
                 continue
-            is_local = name[-2:] in ('/t', '/T')
+            is_local = name[-2:] in ('_t', '_T')
             vfn = ds.linked.filename
             node = self.model.tree.traverse(name)
             conf = node.parent.get_configuration()
@@ -370,7 +370,7 @@ class MisuraDocument(document.Document):
                 #TODO: detect current page
                 r, vsz_text = self.save_plot(proxy, version, text=vsz_text)
                 plots.add(vfn)
-            if name[-2:]=='/t':
+            if name[-2:]=='_t':
                 time_data = ds.data
             else:
                 time_name = get_best_x_for(name, ds.linked.prefix, self.data, '_t')
