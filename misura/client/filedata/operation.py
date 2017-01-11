@@ -23,6 +23,7 @@ from .. import iutils, live
 from .. import clientconf
 from .. import _
 from .. import units
+from ..axis_selection import get_best_x_for
 
 
 from PyQt4 import QtCore
@@ -267,7 +268,8 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
                    rule_unit=lambda *a: False,
                    unit=False):
     # TODO: cleaun-up all this proliferation of *_dataset_names!!!
-    logging.debug('create_dataset', prefixed_dataset_name, pure_dataset_name, hdf_dataset_name, variable_name)
+    logging.debug('create_dataset', prefixed_dataset_name,
+                  pure_dataset_name, hdf_dataset_name, variable_name)
     # Get meas. unit
     if not unit:
         unit = dataset_measurement_unit(
@@ -287,24 +289,28 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     if len(data) > 0 and prefixed_dataset_name[-2:] not in ('_t', '_T', ':t'):
         logging.debug('Reading metadata',  hdf_dataset_name)
         assign_node_attributes(fileproxy, ds, hdf_dataset_name)
-        assign_sample_to_dataset(ds, linked_file, reference_sample, hdf_dataset_name)
+        assign_sample_to_dataset(
+            ds, linked_file, reference_sample, hdf_dataset_name)
         # Units conversion
         nu = rule_unit(hdf_dataset_name)
         if unit and nu:
             ds = units.convert(ds, nu[0])
             logging.debug('New dataset unit', ds.unit, ds.old_unit)
-    elif prefixed_dataset_name.endswith('t'):
-        ds.m_opt = option.ao({}, variable_name, 'Float', 0, 'Time', unit=ds.unit)[variable_name]
+    elif prefixed_dataset_name.endswith('_t'):
+        ds.m_opt = option.ao(
+            {}, variable_name, 'Float', 0, 'Time', unit=ds.unit)[variable_name]
     elif prefixed_dataset_name.endswith('_T'):
-        ds.m_opt = option.ao({}, variable_name, 'Float', 0, 'Temperature', unit=ds.unit)[variable_name]
+        ds.m_opt = option.ao(
+            {}, variable_name, 'Float', 0, 'Temperature', unit=ds.unit)[variable_name]
 
     # Add the hierarchy tags
     for sub, parent, leaf in iterpath(pure_dataset_name):
-        if leaf:
+        if leaf and parent:
             ds.tags.add(parent)
     if hdf_dataset_name:
         assign_label(ds, hdf_dataset_name)
-    logging.debug('done create_dataset', prefixed_dataset_name, pure_dataset_name, hdf_dataset_name, variable_name)
+    logging.debug('done create_dataset', prefixed_dataset_name,
+                  pure_dataset_name, hdf_dataset_name, variable_name)
     return ds
 
 
@@ -577,23 +583,29 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                                   self.outdatasets.get(col,
                                                        self._doc.get_cache(col)))
 
-    def create_local_datasets(self, pcol, sub_time_sequence=False, time_sequence=False):
+    def create_local_datasets(self, pcol, sub_time_sequence=False, time_sequence=False, dataset_names=[]):
         """Create subordered time and temperature datasets"""
         logging.debug('creating local datasets',  pcol)
-
         r = []
+        best_t = get_best_x_for(pcol, self.LF.prefix, dataset_names, '_t')
+        best_T = get_best_x_for(pcol, self.LF.prefix, dataset_names, '_T')
+        if best_t != self.LF.prefix + 't' or best_T != self.LF.prefix + 'kiln/T':
+            logging.debug('local datasets already defined for', pcol)
+            return r
+
         # Get time column from document or from cache
         # Search a t child
         vcol = pcol.split(sep)
+        parent = '/'.join(vcol[:-1])
         subcol = pcol + '_t'
         subt = self.search_data(subcol)
         # Search a t sibling
         if subt is False:
-            subt = self.search_data(pcol+'_t')
+            subt = self.search_data(parent + '_t')
         if subt:
             r.append(subt)
         elif (sub_time_sequence is not False):
-            subvar =vcol[-1]+'_t'
+            subvar = vcol[-1] + '_t'
             subt = create_dataset(self.proxy, sub_time_sequence, subcol,
                                   subvar, subvar, subvar,
                                   linked_file=self.LF, reference_sample=self.refsmp,
@@ -609,11 +621,12 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         subT = self.search_data(subcol)
         # Search a sibiling
         if not subT:
-            subT = self.search_data(pcol+ '_T')
+            subT = self.search_data(parent + '_T')
         if subT:
             r.append(subT)
             return r
         if time_sequence is False:
+            logging.debug('No main time sequence for local dataset', pcol)
             return r
 
         # Search in doc, in current outdatasets (kiln/T should be the first
@@ -630,7 +643,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             time_sequence, T.data, k=1)
         sub_temperature_sequence = temperature_function(sub_time_sequence)
 
-        subvar = vcol[-1]+'_T'
+        subvar = vcol[-1] + '_T'
         subT = create_dataset(self.proxy, sub_temperature_sequence, subcol,
                               subvar, subvar, subvar,
                               linked_file=self.LF, reference_sample=self.refsmp,
@@ -666,15 +679,20 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             logging.debug('Got data from cache', pcol, len(data), opt)
 
         sub_time_sequence = False
+        is_local = (col0[-2:] in ('_T', '_t'))
         if col == 't':
             attr = []
             type = 'Float'
             opt = option.ao(
                 {}, 't', 'Float', 0, 'Event Time', unit='second')['t']
         else:
-            if len(opt)==0 and not col[-2:] in ['_T','_t']:
+            if len(opt) == 0 and not is_local:
                 obj,  name = self.proxy.conf.from_column(col)
-                opt = obj.gete(name)
+                if obj.has_key(name):
+                    opt = obj.gete(name)
+                else:
+                    logging.error(
+                        'Cannot map dataset to option', col, col0, pcol, mcol)
             attr = opt.get('attr', [])
             type = opt.get('type', 'Float')
             if attr in ['', 'None', None, False, 0]:
@@ -685,7 +703,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             pass
         elif col == 't':
             data = time_sequence
-        elif ('Event' not in attr) and (type != 'Table') and (len(data) == 0):
+        elif ('Event' not in attr) and (type != 'Table') and (len(data) == 0) and not is_local:
             logging.debug('Loading data', col0)
             data = interpolated(self.proxy, col0, time_sequence)
         elif len(data) == 0:
@@ -716,16 +734,10 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         if opt and opt.has_key('error'):
             error_map[pcol] = opt['error']
 
-        # Create sub-time dataset. Should be done after the import finishes!
-        subds = []
-        if col != 't' and (('Event' in attr) or (type == 'Table')):
-            subds = self.create_local_datasets(
-                pcol, sub_time_sequence, time_sequence)
-        for sub in subds:
-            names.append(sub.m_name)
-            self.outdatasets[sub.m_name] = sub
-        if subds:
-            sub_map[pcol] = subds
+        # Remember sub time sequence for local ds creation
+        if len(ds.data) > 0 and col != 't' and (('Event' in attr) or (type == 'Table')):
+            sub_map[pcol] = (sub_time_sequence)
+
         return ds
 
     def doImport(self):
@@ -749,19 +761,21 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # Get time sequence
         time_sequence = self.get_time_sequence(self.instrobj)
         if time_sequence is False:
-            logging.debug(
-                '%s %s', 'No time_sequence! Aborting.', self.instrobj.measure['elapsed'])
+            logging.debug('No time_sequence! Aborting.', 
+                          self.instrobj.measure['elapsed'])
             return []
 
         availds = {}
         names = []
         error_map = {}  # Dataset :-> Error option name mapping
+        # Collect datasets which might have locals (pcol : sub_time_sequence)
+        sub_map0 = {}
         sub_map = {}  # Local dataset mapping: main :-> (locals, )
 
         # First import cycle
         for p, col0 in enumerate(['t'] + available):
             self._dataset_import(
-                p, col0, time_sequence, availds, names, error_map, sub_map)
+                p, col0, time_sequence, availds, names, error_map, sub_map0)
 
         # Error import cycle
         p = 0
@@ -773,13 +787,27 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             if main_pcol in self.outdatasets:
                 self.autoload.append(col0)
             ds = self._dataset_import(
-                p, col0, time_sequence, availds, names, error_map, sub_map)
+                p, col0, time_sequence, availds, names, error_map, sub_map0)
             if ds:
                 error_map[main_pcol] = prefixed_column_name(
                     col0, self.prefix)[0]
             else:
                 error_map.pop(main_pcol)
             p += 1
+
+        # Local datasets creation
+        # Create sub-time dataset. Should be done after the import finishes!
+        overall_dataset_names = set(
+            self.outdatasets.keys() + self._doc.data.keys() + self._doc.cache.keys())
+        for pcol, sub_time_sequence in sub_map0.iteritems():
+            subds = self.create_local_datasets(
+                pcol, sub_time_sequence, time_sequence, dataset_names=overall_dataset_names)
+            for sub in subds:
+                names.append(sub.m_name)
+                self.outdatasets[sub.m_name] = sub
+            if subds:
+                logging.debug('ADDING SUBDS', pcol, subds, sub_map)
+                sub_map[pcol] = subds
 
         # Error association cycle
         for main_name, error_name in error_map.iteritems():
