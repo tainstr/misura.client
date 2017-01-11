@@ -117,6 +117,8 @@ class MisuraDocument(document.Document):
         return True
 
     def get_cache(self, name):
+        if self.data.has_key(name):
+            return self.data[name]
         filename = self.cache.get(name, False)
         if not filename or not os.path.exists(filename):
             logging.debug('No dataset in cache', name, filename)

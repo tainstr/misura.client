@@ -579,9 +579,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         return refsmp
 
     def search_data(self, col):
-        return self._doc.data.get(col,
-                                  self.outdatasets.get(col,
-                                                       self._doc.get_cache(col)))
+        return  self._doc.get_cache(col) or self.outdatasets.get(col, False)
 
     def create_local_datasets(self, pcol, sub_time_sequence=False, time_sequence=False, dataset_names=[]):
         """Create subordered time and temperature datasets"""
