@@ -348,7 +348,7 @@ class NodeEntry(object):
         self._children.pop(k)
         return True
 
-    def recursive_status(self, st=dstats.loaded, depth=-1, exclude_rule='\w+/\w+/t$|\w+/\w+/T$', cls=False):
+    def recursive_status(self, st=dstats.loaded, depth=-1, exclude_rule='\w+/\w+/t$|\w+/\w+_t$|\w+/\w+_T$', cls=False):
         """Recursively list children with status in `st`. `st` can be an iterable (ideally a set()), an integer or a status name.
         `exclude`: regular expression to filter node names
         `depth`<0: infinite recursion
