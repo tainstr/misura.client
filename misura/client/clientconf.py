@@ -41,6 +41,10 @@ ao(default_desc, 'saveLogin', **
 ao(default_desc, 'autoConnect', **
    {'name': 'Auto-connect to last server used',
     'current': True, 'type': 'Boolean'})
+
+ao(default_desc, 'authLevel', 'Chooser', 2, 'Authorization level when opening test files', 
+   values=range(6), options=['guest', 'basic', 'user', 'tech', 'maint', 'admin'])
+
 ao(default_desc, 'hdatabase', **
    {'name': 'Recent Database Files', 'current': 10, 'max': 100, 'min': 1, 'type': 'Integer'})
 ao(default_desc, 'hfile', **{'name': 'Recent Test Files',
@@ -243,6 +247,9 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                 self.store.desc[key] = option.Option(**val)
             self.desc = self.store.desc
             self.store.write_table(cursor, "conf")
+        # Apply authorization level
+        option.ConfigurationProxy._readLevel = self['authLevel']
+        option.ConfigurationProxy._writeLevel = self['authLevel']
             
     def migrate_desc(self):
         """Migrate saved newdesc to current hard-coded configuration structure default_desc"""
