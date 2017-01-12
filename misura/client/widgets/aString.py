@@ -17,6 +17,8 @@ class aString(ActiveWidget):
         else:
             self.browser = QtGui.QLineEdit("")
             self.signal = 'editingFinished()'
+        
+        self.browser.setReadOnly(self.readonly)
         self.extended = extended
         self.connect(self.browser,   QtCore.SIGNAL(self.signal), self.text_updated)
         self.lay.addWidget(self.browser)

@@ -16,7 +16,7 @@ class aChooser(ActiveWidget):
         self.redraw(reget=False)
         self.lay.addWidget(self.combo)
         self.connect(
-            self.combo,  QtCore.SIGNAL('currentIndexChanged(int)'), self.set)
+            self.combo,  QtCore.SIGNAL('currentIndexChanged(int)'), self.try_set)
 
     def enterEvent(self, event):
         """Update the widget anytime the mouse enters its area.
@@ -26,6 +26,12 @@ class aChooser(ActiveWidget):
         else:
             self.get()
         return ActiveWidget.enterEvent(self, event)
+    
+    def try_set(self, idx):
+        result = self.set(idx)
+        new_idx = self.adapt2gui(result)
+        if new_idx!=idx:
+            self.redraw()
 
     def redraw(self, reget=True):
         self.combo.blockSignals(True)
@@ -63,7 +69,7 @@ class aChooser(ActiveWidget):
             r = str(r)
         elif self.tuplelike:
             r = tuple(r)
-        logging.debug('%s %s %s', 'adapt2srv', idx, r)
+        logging.debug('adapt2srv', idx, r)
         return r
 
     def adapt2gui(self, val):

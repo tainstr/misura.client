@@ -126,7 +126,6 @@ class Active(object):
         write_level = getattr(self.remObj, '_writeLevel', 5)
         self.readonly = (self.type == 'ReadOnly') or (
             'ReadOnly' in self.attr) or (write_level < self.writeLevel)
-
         self.hard = 'Hard' in self.attr
         self.hot = 'Hot' in self.attr
         self.label = _(self.name)
