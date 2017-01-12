@@ -46,7 +46,9 @@ def configure_logger(log_file_name=False, logdir=None, logsize=None, level=None)
     import logging.handlers
     from misura.client.clientconf import confdb
     from misura.client.units import Converter
-
+    from misura.canon.logger import formatter
+    
+    root = logging.getLogger()
     logdir = logdir or confdb['logdir']
     if not os.path.exists(logdir):
         os.makedirs(logdir)
@@ -59,9 +61,10 @@ def configure_logger(log_file_name=False, logdir=None, logsize=None, level=None)
                                                                      log_file, 
                                                                      maxBytes=logsize, 
                                                                      backupCount=confdb['lognumber'])
-        rotating_file_handler.setFormatter(
-                                           logging.Formatter("%(levelname)s: %(asctime)s %(message)s"))
-        logging.getLogger().addHandler(rotating_file_handler)
+        root.addHandler(rotating_file_handler)
+    
+    for h in root.handlers:
+        h.setFormatter(formatter)
     level = level or confdb['loglevel']
 #     level = 0
-    logging.getLogger().setLevel(level)
+    root.setLevel(level)

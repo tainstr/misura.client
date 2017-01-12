@@ -115,9 +115,9 @@ def getRemoteFile(address):
     return RemoteFileProxy(obj)
 
 
-def getFileProxy(filename, version=''):
+def getFileProxy(filename, **kw):
     if filename.startswith('http'):
         r = getRemoteFile(filename)
     else:
-        r = SharedFile(filename, version=version)
+        r = SharedFile(filename, **kw)
     return r
