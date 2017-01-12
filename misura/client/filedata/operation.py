@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Libreria per il plotting semplice durante l'acquisizione."""
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
 from exceptions import BaseException
 import numpy as np
 from copy import deepcopy
@@ -32,6 +32,7 @@ from misura.canon.plugin import default_plot_rules
 
 sep = '/'
 
+logging = get_module_logging(__name__)
 
 class EmptyDataset(BaseException):
     pass
