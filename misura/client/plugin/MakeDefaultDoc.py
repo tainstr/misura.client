@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Simple plotting for browser and live acquisition."""
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from misura.canon import version as canon_version
 from misura.client import version as client_version
 import veusz.plugins

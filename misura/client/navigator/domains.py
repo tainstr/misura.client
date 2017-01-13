@@ -3,7 +3,8 @@
 
 import functools
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from misura.canon.plugin import navigator_domains, NavigatorDomain, node, nodes
 from misura.canon.indexer import SharedFile
 

@@ -7,7 +7,8 @@ from ArrangePlugin import ArrangePlugin
 from time import time
 from misura.client.iutils import get_plotted_tree
 import os
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 import utils
 import PercentilePlugin
 from .. import units

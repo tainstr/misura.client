@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Plot preview for thermal cycle."""
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 import numpy as np
 from numpy import array
 from .. import _

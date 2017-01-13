@@ -2,7 +2,8 @@ import socket
 import struct
 from traceback import format_exc
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 #http://code.activestate.com/recipes/358449-wake-on-lan/
 def wake_on_lan(macaddress):

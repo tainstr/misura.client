@@ -5,7 +5,8 @@ from .. import _
 from misura.client.widgets.active import *
 import numpy as np
 import cPickle as pickle
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 
 class Profile(QtGui.QGraphicsView):

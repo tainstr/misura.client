@@ -5,7 +5,8 @@ from misura.client.widgets.active import *
 from aChooser import aChooser
 from .. import _
 from ..network import TransferThread
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 
 class aFileList(aChooser):

@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """Live data retrieve and processing"""
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from time import sleep, time
 from cPickle import loads
 from misura.client import _

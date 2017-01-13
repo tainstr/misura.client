@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tabular view of data in a MisuraDocument"""
 import os
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 from .. import iutils, _
 import re

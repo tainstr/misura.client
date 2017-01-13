@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Surface tension from capillarity shape and scale parameters and expansion data."""
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 import veusz.plugins as plugins
 import numpy as np
 from scipy import interpolate

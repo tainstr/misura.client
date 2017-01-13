@@ -7,7 +7,8 @@ from traceback import format_exc
 import os
 import tables
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from misura.canon import csutil
 from misura.client import configure_logger
 

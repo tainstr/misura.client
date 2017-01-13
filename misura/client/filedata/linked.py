@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """Libreria per il plotting semplice durante l'acquisizione."""
 import os
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 import veusz.dataimport.base as base
 from misura.canon import option
 import collections

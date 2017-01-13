@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """misura Configuration Manager"""
 import os
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 import sqlite3
 import re
 from traceback import format_exc, print_exc

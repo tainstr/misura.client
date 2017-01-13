@@ -2,7 +2,8 @@
 from PyQt4 import QtGui
 from pygments import formatters, lexer, lexers, styles
 from .. import _
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 
 def get_tokens_unprocessed(self, text, stack=('root',)):

@@ -6,7 +6,8 @@ from traceback import format_exc
 from misura.client.parameters import MAX, MIN
 from misura.client.widgets.active import ActiveWidget, extend_decimals
 import math
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 
 class FocusableSlider(QtGui.QSlider):

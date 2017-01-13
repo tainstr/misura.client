@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Graphical overlay for image analysis"""
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from overlay import Overlay
 from hook import HookPoint, HookRect
 from PyQt4 import QtGui, QtCore

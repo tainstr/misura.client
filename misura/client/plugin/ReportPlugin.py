@@ -3,7 +3,8 @@
 """Tools and plugins for Veusz, providing Misura Thermal Analysis functionality"""
 import os
 import datetime
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 import veusz
 import veusz.plugins as plugins

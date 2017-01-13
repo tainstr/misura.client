@@ -1,7 +1,8 @@
 #!/usr/bin/pythonthin
 # -*- coding: utf-8 -*-
 """Arrange curves and axes"""
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 import veusz.plugins as plugins
 import veusz.utils
 from misura.client.iutils import get_plotted_tree

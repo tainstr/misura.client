@@ -3,7 +3,8 @@
 """Tree visualization of opened misura Files in a document."""
 import os
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from misura.canon.plugin import navigator_domains
 from misura.canon.plugin.domains import node, nodes
 import veusz.document as document

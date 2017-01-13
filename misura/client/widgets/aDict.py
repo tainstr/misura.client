@@ -1,8 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from .. import _
-from misura.canon.logger import Log as logging
 from misura.client.widgets.active import *
+from .. import _
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
+
 from misura.client import units
 
 

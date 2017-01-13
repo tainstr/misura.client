@@ -27,7 +27,8 @@ flex_cam_serial = 'simcam2'
 micro_cam_serial = 'simcam3'
 
 ##################
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from exceptions import RuntimeError
 
 def send_to_zero(motor):

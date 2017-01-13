@@ -5,7 +5,8 @@ from traceback import format_exc
 import functools
 import threading
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from misura.canon.csutil import lockme
 from misura.client import _
 from misura.client.sync import SyncWidget

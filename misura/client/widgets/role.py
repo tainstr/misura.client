@@ -3,7 +3,8 @@
 from PyQt4 import QtCore, QtGui
 from active import ActiveWidget, getRemoteDev
 from .. import _
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 
 class Role(ActiveWidget):

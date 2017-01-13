@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Designer per il ciclo termico."""
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from .. import _
 from misura.canon import option
 from misura.canon.csutil import next_point, decode_cool_event

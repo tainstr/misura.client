@@ -3,7 +3,8 @@
 import os 
 import functools
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from .. import network, conf, _
 from ..clientconf import confdb
 from ..connection import LoginWindow, addrConnection

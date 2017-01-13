@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """Configuration interface for misura.
 Global instrument parametrization and setup."""
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from PyQt4 import QtGui, QtCore
 import constructor
 from devtree import ServerView

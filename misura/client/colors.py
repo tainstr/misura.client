@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from numpy import prod
 
 
@@ -21,7 +22,7 @@ def colorLevels(n):
         LR, LG, LB = vL
         if m == 0:
             break
-    logging.debug('%s %s %s %s', 'levels', LR, LG, LB)
+    logging.debug('levels', LR, LG, LB)
     return LR, LG, LB
 
 # Conversione da tupla R,G,B a codice HTML compreso da Veusz

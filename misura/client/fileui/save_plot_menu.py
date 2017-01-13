@@ -7,7 +7,8 @@ from datetime import datetime
 
 from veusz import document
 from veusz.utils import pixmapAsHtml
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from misura.canon.csutil import validate_filename
 from .. import _
 from .. import clientconf

@@ -6,7 +6,8 @@ import urllib2
 import urllib
 from time import sleep
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from PyQt4 import QtCore
 from ...canon import indexer, csutil
 from mproxy import urlauth, dataurl

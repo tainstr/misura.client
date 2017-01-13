@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Intercept all curves in a given x or y by placing datapoints."""
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 import veusz.widgets
 import veusz.plugins as plugins
 import veusz.document as document

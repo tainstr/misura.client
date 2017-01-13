@@ -11,7 +11,7 @@ from PyQt4 import QtCore
 
 import veusz.document as document
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
 from misura.canon.plugin import default_plot_rules
 
 from operation import OperationMisuraImport, ImportParamsMisura, getUsedPrefixes
@@ -26,6 +26,7 @@ from misura.client.axis_selection import get_best_x_for
 MAX = 10**5
 MIN = -10**5
 
+logging = get_module_logging(__name__)
 
 class MisuraDocument(document.Document):
 

@@ -4,7 +4,8 @@ import functools
 
 from PyQt4 import QtGui, QtCore
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from misura.canon.plugin import dataimport
 
 from . import _

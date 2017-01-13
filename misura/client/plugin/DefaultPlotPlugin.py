@@ -6,7 +6,8 @@ import re
 import veusz.plugins as plugins
 from veusz import document
 from misura.canon.option import namingConvention
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from .. import axis_selection
 from PlotPlugin import PlotDatasetPlugin
 from MakeDefaultDoc import MakeDefaultDoc

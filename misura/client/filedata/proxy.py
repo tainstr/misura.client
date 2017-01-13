@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from misura.client.connection import addrConnection
 from misura.canon.indexer import SharedFile
 from cPickle import loads
