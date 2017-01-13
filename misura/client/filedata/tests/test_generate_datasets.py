@@ -80,17 +80,17 @@ class GenerateDatasets(unittest.TestCase):
     def check_generated(self, proxy):
         self.assertIn('0:ok', self.doc.data)
         self.assertEqual(list(self.doc.data['0:ok'].data), [3, 30, 300])
-        self.assertIn('0:ok/t', self.doc.data)
-        self.assertEqual(list(self.doc.data['0:ok/t'].data), [1, 10, 100])
-        self.assertIn('0:ok/T', self.doc.data)
-        self.assertEqual(list(self.doc.data['0:ok/T'].data), [2, 20, 200])
+        self.assertIn('0:ok_t', self.doc.data)
+        self.assertEqual(list(self.doc.data['0:ok_t'].data), [1, 10, 100])
+        self.assertIn('0:ok_T', self.doc.data)
+        self.assertEqual(list(self.doc.data['0:ok_T'].data), [2, 20, 200])
         
     def cleanup(self):
         if not '0:ok' in self.doc.data:
             return
         del self.doc.data['0:ok']
-        del self.doc.data['0:ok/t']
-        del self.doc.data['0:ok/T']
+        del self.doc.data['0:ok_t']
+        del self.doc.data['0:ok_T']
 
     def test_table_to_datasets(self):
         self.cleanup()

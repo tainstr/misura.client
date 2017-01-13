@@ -10,7 +10,7 @@ class AxisSelection(unittest.TestCase):
 
     def test_get_neighbor_x(self):
         sample_path = "0:/path/XXX/fullpath/XXX"
-        expected_sample_temperature_path = "0:/path/XXX/fullpath/T"
+        expected_sample_temperature_path = "0:/path/XXX/fullpath_T"
 
         actual_sample_temperature_path = axis_selection.get_neighbor_x(
             sample_path)
@@ -35,11 +35,11 @@ class AxisSelection(unittest.TestCase):
 
     def test_best_x_is_sample_temperature(self):
         page = "a no time page"
-        data = {"a/path/for/sample/T": "some data"}
+        data = {"a/path/for/sample_T": "some data"}
         prefix = "a_prefix:"
         path = "a/path/for/sample/key"
 
-        self.assertEqual("a/path/for/sample/T",
+        self.assertEqual("a/path/for/sample_T",
                          axis_selection.get_best_x_for(path, prefix, data, page))
 
     def test_is_temperature(self):
