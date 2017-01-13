@@ -64,6 +64,7 @@ class VersionMenu(QtGui.QMenu):
                 QtGui.QMessageBox.critical(
                     self, _("Not saved"), _("Cannot overwrite original version"))
                 return False
+            return True
         version_name, version_date = self.proxy.get_versions()[self.proxy.get_version()]
         self.doc.save_version_and_plot(version_name)
         self.actRemove.setEnabled(True)

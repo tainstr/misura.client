@@ -358,7 +358,7 @@ class MisuraDocument(document.Document):
             proxy = proxies.get(vfn, False)
             # Ensure conf is saved into proper version
             if proxy is False:
-                proxy = getFileProxy(vfn)
+                proxy = getFileProxy(vfn, version=None)
                 proxies[vfn] = proxy
                 verpath =  proxy.get_version_by_name(version)
                 # Create a new version
@@ -380,6 +380,7 @@ class MisuraDocument(document.Document):
             proxy.save_data(name, ds.data, time_data, opt=ds.m_opt)
         for proxy in proxies.itervalues():
             proxy.flush()
+            proxy.close()
         return True
 
     def save(self, filename, mode='vsz'):
