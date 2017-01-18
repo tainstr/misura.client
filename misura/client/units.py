@@ -18,7 +18,8 @@ base_units = {'micron': 'length',
               'cm^2/s': 'diffusivity',
               'gram': 'weight',
               'volt': 'tension',
-              'ohm': 'resistance'}
+              'ohm': 'resistance',
+              'volt/second': 'tensionRate'}
 
 from_base = {'length': {'micron': lambda v: v,
                         'nanometer': lambda v: v * 1E3,
@@ -64,6 +65,7 @@ from_base = {'length': {'micron': lambda v: v,
                    'milliohm': lambda v: v * 1E3,
                    'megaohm': lambda v: v * 1E-6,
                    },
+    'tensionRate': {'volt/second': lambda v: v},
 }
 
 derivatives = {'length': {'micron': 1,
@@ -105,6 +107,7 @@ derivatives = {'length': {'micron': 1,
                    'milliohm': 1E3,
                    'megaohm': 1E-6,
                    },
+    'tensionRate': {'volt/second': 1},
 }
 
 to_base = {'length': {'micron': lambda v: v,
@@ -151,6 +154,7 @@ to_base = {'length': {'micron': lambda v: v,
                    'milliohm': lambda v: v * 1E-3,
                    'megaohm': lambda v: v * 1E6,
                    },
+    'tensionRate': {'volt/second': lambda v: v},
 }
 
 # Latex symbols for Veusz
@@ -180,6 +184,7 @@ symbols = {'micron': '{\mu}m', 	'nanometer': 'nm', 	'millimeter': 'mm',
            'volt': 'V',
            'millivolt': 'mV',
            'ohm': '\Omega', 'milliohm': 'm\Omega', 'megaohm': 'M\Omega',
+           'volt/second': 'V/s',
            }
 
 # HTML symbols for Qt
@@ -220,6 +225,7 @@ user_defaults = {'length': 'micron',
                  'weight': 'gram',
                  'tension': 'volt',
                  'resistance': 'ohm',
+                 'tensionRate': 'volt/second',
                  }
 
 
