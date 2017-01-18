@@ -475,6 +475,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             LF.conf = conf
         else:
             conf = LF.conf
+        conf.doc = doc
+        conf.filename = self.params.filename
         instr = conf['runningInstrument']
         LF.instrument = instr
         self.instrument = instr

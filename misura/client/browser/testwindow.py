@@ -54,6 +54,8 @@ class TestWindow(acquisition.MainWindow):
         self.fixedDoc.proxy.set_version(v)
         if self.fixedDoc.proxy.conf is False:
             self.fixedDoc.proxy.load_conf()
+        self.fixedDoc.proxy.conf.doc = self.fixedDoc
+        self.fixedDoc.proxy.conf.filename = self.fixedDoc.proxy.path
         self.setServer(self.fixedDoc.proxy.conf)
         self.name = self.fixedDoc.proxy.get_node_attr('/conf', 'instrument')
         self.imageSlider.slider.choice()
