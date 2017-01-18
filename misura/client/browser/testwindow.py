@@ -15,6 +15,7 @@ from .. import acquisition
 from ..live import registry
 from misura.canon.csutil import profile
 from ..graphics import Breadcrumb, Storyboard
+
 from misura.client.iutils import calc_plot_hierarchy, most_involved_node
 
 
@@ -73,8 +74,6 @@ class TestWindow(acquisition.MainWindow):
         if self.vtoolbar:
             self.vtoolbar.hide()
         self.vtoolbar = self.summaryPlot.plot.createToolbar(self)
-        self.vtoolbar.addAction(
-            veusz.utils.getIcon('kde-edit-undo'), ' Undo ', self.doc.undoOperation)
         self.vtoolbar.show()
         self.graphWin.show()
         
@@ -124,6 +123,7 @@ class TestWindow(acquisition.MainWindow):
             'set_idx(int)'), self.play.set_idx)
         
         self.fixedDoc.paused = False
+        
         
     def create_version_plot_menus(self, version_path=False):
         if not self.menuVersions:

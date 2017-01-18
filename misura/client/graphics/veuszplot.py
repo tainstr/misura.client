@@ -296,6 +296,8 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         r = plotwindow.PlotWindow.setPageNumber(self, page)
         self.update_page()
         return r
+    
+
 
 
 class VeuszPlot(QtGui.QWidget):
