@@ -371,7 +371,7 @@ class Converter(dataimport.Converter):
         else:
             tree[instr]['sample0'] = deepcopy(smp_tree)
         # Get a configuration proxy
-        tree = option.ConfigurationProxy(tree)
+        tree = option.ConfigurationProxy(tree, readLevel=5, writeLevel=5)
         instrobj = getattr(tree, instr)
         tree['runningInstrument'] = instr
         tree['lastInstrument'] = instr
