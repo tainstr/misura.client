@@ -135,7 +135,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         return axes, axcolors
 
     def arrange_curve(self, plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formatting_opt):
-        # Set colors according to axes
+        """Set colors according to axes"""
         obj = self.doc.resolveFullWidgetPath(plotpath)
         # Get y dataset
         y = obj.settings['yData']
@@ -143,7 +143,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             logging.error('No y dataset found - skipping invisible curve', plotpath, y)
             return False
         
-        # Flag passed by PlotPlugin to operate only on currently plotted curves exclusively
+        # Flag passed by PlotPlugin to operate exclusively on currently plotted curves
         plotted_dataset_names = self.fields.get('plotted_dataset_names', False)
         
         if not plotted_dataset_names or y in plotted_dataset_names:

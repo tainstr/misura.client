@@ -34,6 +34,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plugins.FieldTextMulti("graphs", 'Target graphs', default=graphs),
             plugins.FieldText("title", 'Plot title', default=title),
         ]
+        self.created = []
         
     def get_time_datasets(self, names, graph):
         x = []
@@ -93,6 +94,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             )
         self.apply_ops()
         logging.debug('Done create_graph', graph)
+        self.created.append(graph)
         return True
           
     def plot_on_graph(self, names, graph):
