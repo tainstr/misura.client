@@ -6,8 +6,6 @@ from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from PyQt4 import QtGui, QtCore
 
-import veusz.plugins as plugins
-
 from misura.canon.plugin import dataimport
 from misura.canon.plugin import default_plot_plugins, default_plot_rules
 
@@ -88,13 +86,7 @@ def convert_file(caller, path):
 
 def get_default_plot_plugin_class(instrument_name):
     from ..clientconf import confdb
-    plugin_class = plugin.DefaultPlotPlugin
-    plugin_name = default_plot_plugins.get(instrument_name, False)
-    if plugin_name:
-        for cls in plugins.toolspluginregistry:
-            if cls.__name__ == plugin_name:
-                plugin_class = cls
-                break
+    plugin_class = default_plot_plugins.get(instrument_name, plugin.DefaultPlotPlugin)
     print 'defaultPlot', plugin_class
     plot_rule_func = default_plot_rules.get(instrument_name, lambda *a: confdb['rule_plot'])
     return plugin_class, plot_rule_func

@@ -94,7 +94,6 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             )
         self.apply_ops()
         logging.debug('Done create_graph', graph)
-        self.created.append(graph)
         return True
           
     def plot_on_graph(self, names, graph):
@@ -108,6 +107,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         result = PlotDatasetPlugin().apply(
             self.cmd, {'x': x, 'y': y, 'currentwidget': graph})
         print 'Done plot_on_graph', graph
+        self.created.append(graph)
         return result
         
     def apply(self, cmd, fields):
