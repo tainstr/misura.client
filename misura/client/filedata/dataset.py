@@ -74,31 +74,96 @@ class MisuraDataset(datasets.Dataset):
         """Measurement unit"""
         self.old_unit = None
         """Original measurement unit"""
-        self.m_label = ''
-        """Label for GUI"""
         self.tags = set([])
         self.m_opt = False
+        
+    @property
+    def m_percent(self):
+        return self.attr['m_percent']
+    @m_percent.setter
+    def m_percent(self, nval):
+        self.attr['m_percent'] = nval
+        
+    @property
+    def m_label(self):
+        return self.attr['label']
+    @m_label.setter
+    def m_label(self, nval):
+        self.attr['label'] = nval
+        
+    @property
+    def unit(self):
+        return self.attr['unit']
+    @unit.setter
+    def unit(self, nval):
+        self.attr['unit'] = nval
+        
+    @property
+    def old_unit(self):
+        return self.attr['old_unit']
+    @old_unit.setter
+    def old_unit(self, nval):
+        self.attr['old_unit'] = nval
+        
+    @property
+    def m_opt(self):
+        return self.attr['m_opt']
+    @m_opt.setter
+    def m_opt(self, nval):
+        self.attr['m_opt'] = nval
+        
+    @property
+    def m_update(self):
+        return self.attr['m_update']
+    @m_update.setter
+    def m_update(self, nval):
+        self.attr['m_update'] = nval
+        
+    @property
+    def m_initialDimension(self):
+        return self.attr['m_initialDimension']
+    @m_initialDimension.setter
+    def m_initialDimension(self, nval):
+        self.attr['m_initialDimension'] = nval
+        
+    @property
+    def m_keep(self):
+        return self.attr['m_keep']
+    @m_keep.setter
+    def m_keep(self, nval):
+        self.attr['m_keep'] = nval
+        
+    @property
+    def m_name(self):
+        return self.attr['m_name']
+    @m_name.setter
+    def m_name(self, nval):
+        self.attr['m_name'] = nval
+        
+    @property
+    def m_pos(self):
+        return self.attr['m_pos']
+    @m_pos.setter
+    def m_pos(self, nval):
+        self.attr['m_pos'] = nval
+        
+    @property
+    def m_smp(self):
+        return self.attr['m_smp']
+    @m_smp.setter
+    def m_smp(self, nval):
+        self.attr['m_smp'] = nval
+        
+    @property
+    def m_var(self):
+        return self.attr['m_var']
+    @m_var.setter
+    def m_var(self, nval):
+        self.attr['m_var'] = nval
 
     @property
     def mtype(self):
         """Object type"""
         return self.__class__.__name__
-    
-    def save_datasetAsText(self, fileobj, name):
-        # TODO: only if ds is not equal to its original version
-        # build up descriptor
-        out = "SetDataVal('{}','data', slice(None,None), [" .format(name)
-        fileobj.write(out)
-        fileobj.write(self.datasetAsText(fmt='%e', join=' ').replace('\n', ', '))
-        fileobj.write("])\n")        
-    
-    def saveDataRelationToText(self, fileobj, name):
-        """Write data if changed from the linked file"""
-        #self.save_datasetAsText(fileobj, name)
-        
-        for attr in ('m_keep', 'm_name', 'm_pos', 'm_col', 'm_var',
-                     'm_label', 'm_initialDimension', 'm_percent', 'm_update',
-                     'unit','old_unit'):
-            out = "SetDataAttr({!r}, {!r}, {!r})\n".format(name, attr, getattr(self, attr))
-            fileobj.write(out)
+           
         

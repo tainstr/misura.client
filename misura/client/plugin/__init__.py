@@ -10,7 +10,6 @@ from synaxis import SynAxis
 from ImageReference import ImageReference
 
 # Pure-Veusz Plugin (not Misura-aware)
-from ZoomAxesPlugin import ZoomAxesPlugin
 from InterceptPlugin import InterceptPlugin
 from DeriveDatasetPlugin import DeriveDatasetPlugin
 from CurveOperationPlugin import CurveOperationPlugin
