@@ -59,14 +59,14 @@ class Intercept(utils.OperationWrapper, veusz.widgets.Line):
         yax = self.parent.getChild(obj.settings.yAxis)
         oy, oy2 = translateCoord(yax, [self.y, self.y2])
 
-        logging.debug('%s %s %s %s %s', 'limits', ox, oy2, ox2, oy2)
+        logging.debug('limits', ox, oy2, ox2, oy2)
 
         # Get the data from the plot obj
         vx = doc.data[obj.settings.xData].data
         vy = doc.data[obj.settings.yData].data
         # Line angle
         ang = np.arctan((oy2 - oy) / (ox2 - ox))
-        logging.debug('%s %s', 'Angle', ang * 180 / np.pi)
+        logging.debug('Angle', ang * 180 / np.pi)
         # Rotation matrix
         rot = np.matrix([
             [np.cos(ang), np.sin(ang)],
@@ -82,19 +82,17 @@ class Intercept(utils.OperationWrapper, veusz.widgets.Line):
         crossing = np.diff(np.sign(r[1] - roy))
 #		print 'Diff sign',crossing,np.abs(crossing).sum()
         crossings = np.where(crossing != 0)[0]
-        logging.debug('%s %s', 'Crossings', crossings)
+        logging.debug('Crossings', crossings)
         # Find valid crossing
         cx = []
         found = {obj: {}}
         for c in crossings:
             if not (min(ox, ox2) < vx[c] < max(ox, ox2) or min(oy, oy2) < vy[c] < max(oy, oy2)):
-                logging.debug(
-                    '%s %s %s %s', 'ignoring crossing', c, vx[c], vy[c])
+                logging.debug('ignoring crossing', c, vx[c], vy[c])
                 continue
             # Avoid very similar entries
             if c + 1 in cx or c - 1 in cx:
-                logging.debug(
-                    '%s %s %s %s', 'Ignoring too near crossing', c, vx[c], vy[c])
+                logging.debug('Ignoring too near crossing', c, vx[c], vy[c])
                 continue
             cx.append(c)
             # Must create a new DataPoint widget for this crossing
@@ -116,7 +114,7 @@ class Intercept(utils.OperationWrapper, veusz.widgets.Line):
         return True
 
     def actionUp(self, x=None, y=None, x2=None, y2=None):
-        logging.debug('%s', 'INTERCEPT LINE UP')
+        logging.debug('INTERCEPT LINE UP')
         doc = self.document
         s = self.settings
         self.ops = []
@@ -125,7 +123,7 @@ class Intercept(utils.OperationWrapper, veusz.widgets.Line):
         aligned = self.toset(self, 'positioning', 'relative')
         aligned = aligned and self.toset(self, 'mode', 'point-to-point')
         if not aligned:
-            logging.debug('%s %s', 'Not aligned: apply ops', self.ops)
+            logging.debug('Not aligned: apply ops', self.ops)
             doc.applyOperation(
                 document.OperationMultiple(self.ops, descr='InterceptUp'))
             self.ops = []
@@ -134,7 +132,7 @@ class Intercept(utils.OperationWrapper, veusz.widgets.Line):
         y = s.yPos[0] if y is None else y
         x2 = s.xPos2[0] if x2 is None else x2
         y2 = s.yPos2[0] if y2 is None else y2
-        logging.debug('%s %s %s %s', x, y, x2, y2)
+        logging.debug(x, y, x2, y2)
         self.x = x
         self.y = y
         self.x2 = x2

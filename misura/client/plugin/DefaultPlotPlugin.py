@@ -131,16 +131,16 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             if ':' in ds1:
                 ds1 = ds1.split(':')[1]
             var = namingConvention(ds1)[0]
-            logging.debug('%s %s %s', 'Checking', ds, var)
+            logging.debug('Checking', ds, var)
             if rp and rp.search(ds1):
                 names.append(ds)
                 
         if not len(names):
-            print 'NOTHING TO PLOT', names, fields['rule'], dsn, rp
+            logging.debug('NOTHING TO PLOT', names, fields['rule'], dsn, rp)
             return False
 
         names = sorted(names)
-        logging.debug('%s %s', "VARS", names)
+        logging.debug("VARS", names)
         
         result={}
         graphs = fields.get('graphs',['/time/time', '/temperature/temp'])

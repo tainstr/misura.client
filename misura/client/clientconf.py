@@ -147,13 +147,13 @@ class RulesTable(object):
         for row in tab:
             if len(row) <= 1:
                 logging.debug('skipping malformed rule', row)
-                logging.debug('%s %s', 'skipping malformed rule', row)
+                logging.debug('skipping malformed rule', row)
             if isinstance(row[0], tuple):
                 # Skip header row
                 continue
             r = row[0]
             if len(r) == 0:
-                logging.debug('%s %s', 'skipping empty rule', row)
+                logging.debug('skipping empty rule', row)
                 continue
             r = re.compile(r.replace('\n', '|'))
             self.rules.append(r)
@@ -238,12 +238,12 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                 desc = default_desc.copy()
                 desc.update(stored_desc)
                 self.desc = desc
-                logging.debug('%s %s', 'Loaded configuration', self.desc)
+                logging.debug('Loaded configuration', self.desc)
                 loaded=True
             except:
                 logging.error(format_exc())
         if not loaded:
-            logging.debug('%s', 'Recreating client configuration')
+            logging.debug('Recreating client configuration')
             for key, val in default_desc.iteritems():
                 self.store.desc[key] = option.Option(**val)
             self.desc = self.store.desc
@@ -271,7 +271,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             
     def load(self, path=False):
         """Load an existent client configuration database, or create a new one."""
-        logging.debug('LOAD %s', path)
+        logging.debug('LOAD', path)
         self.index = False
         self.close()
         if path:
@@ -311,11 +311,11 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             self.save()
 
         if path and os.path.exists(path):
-            logging.debug('Creating indexer at %s', path)
+            logging.debug('Creating indexer at', path)
             self.index = Indexer(path)
             return True
         else:
-            logging.debug('Default database not found: "%s"', path)
+            logging.debug('Default database not found:', path)
             return False
 
     def clean_rules(self):
@@ -324,7 +324,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
 
     def save(self, path=False):
         """Save to an existent client configuration database."""
-        logging.debug('%s', 'SAVING')
+        logging.debug('SAVING')
         cursor = self.conn.cursor()
         self.clean_rules()
         self.store.write_table(cursor, 'conf', desc=self.desc)
@@ -454,7 +454,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             dbPath = self.index.dbPath
             file_path = self.index.searchUID(uid)
             if file_path:
-                logging.debug('uid found in default db %s %s', uid, file_path)
+                logging.debug('uid found in default db', uid, file_path)
                 return file_path, dbPath
         else:
             dbPath = False
@@ -475,18 +475,18 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             if path == dbPath:
                 continue
             if not os.path.exists(path):
-                logging.debug('Skip db: %s', path)
+                logging.debug('Skip db:', path)
                 continue
             try:
                 db = Indexer(path)
             except:
-                logging.info('Db open error: \n%s',format_exc())
+                logging.info('Db open error: \n',format_exc())
                 continue
             file_path = db.searchUID(uid)
             if file_path:
                 dbPath = path
                 break
-            logging.debug('UID not found: %s %s', uid, path)
+            logging.debug('UID not found:', uid, path)
         if not file_path:
             return False
         self.known_uids[self.uid] = file_path

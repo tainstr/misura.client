@@ -68,7 +68,7 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
         for axp, dslist in tree['axis'].iteritems():
             if not fields['ds'] in dslist:
                 continue
-            logging.debug('%s %s', 'Propagating to', cvt)
+            logging.debug('Propagating to', cvt)
             cvt += dslist
             upax.append(axp)
         # If time dataset, propagate to all time datasets
@@ -88,8 +88,7 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
             ncur = getattr(self.doc.data[nds], 'unit', False)
             if not ncur:
                 continue
-            logging.debug(
-                '%s %s', 'Really propagating unit conversion to', nds)
+            logging.debug('Really propagating unit conversion to', nds)
             fields = {
                 'ds': nds, 'propagate': False, 'convert': fields['convert']}
             self.ops.append(

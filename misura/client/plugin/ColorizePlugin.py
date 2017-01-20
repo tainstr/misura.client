@@ -46,7 +46,7 @@ class ColorizePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         g = utils.searchFirstOccurrence(c, 'graph', -1)
         if g is None or g.typename != 'graph':
-            logging.debug('%s %s %s', 'found', g, c)
+            logging.debug('found', g, c)
             raise plugins.ToolsPluginException(
                 'Error: Curve is not contained in a graph.')
         pts = fields['x']

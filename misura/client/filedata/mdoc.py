@@ -75,7 +75,7 @@ class MisuraDocument(document.Document):
         """Create one decoder for each relevant dataset in proxy"""
         dec = proxy.header(
             ['Binary', 'Profile', 'Image', 'ImageM3', 'ImageBMP'])
-        logging.debug('%s %s', 'FOUND FOLDERS', dec)
+        logging.debug('FOUND FOLDERS', dec)
         proxy_path = proxy.get_path() + ':'
         if not prefix:
             files = getUsedPrefixes(self)
@@ -153,7 +153,7 @@ class MisuraDocument(document.Document):
         # Clear all previous datasets, in order to avoid duplicates
         self.zerotime = None
         if not self.up:
-            logging.debug('%s %s', 'No up', self.up)
+            logging.debug('No up', self.up)
             return []
         # Save current units and delete datasets
         self.model.paused = True
@@ -161,10 +161,10 @@ class MisuraDocument(document.Document):
             self.deleteData(name)
         self.model.paused = False
         if self.proxy_filename is False:
-            logging.debug('%s', 'no filename defined')
+            logging.debug('no filename defined')
             self.reloading = False
             return []
-        logging.debug('%s %s', 'Reloading Data', self.proxy_filename)
+        logging.debug('Reloading Data', self.proxy_filename)
         rule_load = confdb['rule_load'] + '\n' + confdb['rule_plot']
         for gen_rule_func in default_plot_rules.itervalues():
             rule = gen_rule_func(confdb, self.proxy.conf)
@@ -199,7 +199,7 @@ class MisuraDocument(document.Document):
             return {}
         cols = self.data.keys()
         if len(cols) == 0:
-            logging.debug('%s %s', 'No data loaded in document', self.data)
+            logging.debug('No data loaded in document', self.data)
             self.reloadData()
             return False
         if len(self.data['0:t']) < idx:
@@ -212,8 +212,7 @@ class MisuraDocument(document.Document):
                 continue
             a = ds.data
             if len(a) <= idx:
-                logging.debug(
-                    '%s %s %s', 'Non-uniform length found:', col, len(a))
+                logging.debug('Non-uniform length found:', col, len(a))
                 v = a[-1]
             else:
                 v = a[idx]
@@ -229,8 +228,7 @@ class MisuraDocument(document.Document):
         if not proxy:
             proxy = self.proxy
         if not self.data.has_key('0:t'):
-            logging.debug(
-                '%s %s', 'Time dataset is missing. Reloading.', self.data.keys())
+            logging.debug('Time dataset is missing. Reloading.', self.data.keys())
             self._lock.release()
             dsnames = self.reloadData()
             self._lock.acquire(False)
@@ -253,7 +251,7 @@ class MisuraDocument(document.Document):
         # interval rounding
         elp = (elp // self.interval) * self.interval
         if (elp - lastt) < self.interval:
-            logging.debug('%s %s %s', 'Update not needed', elp, lastt)
+            logging.debug('Update not needed', elp, lastt)
             return []
         logging.debug('Update needed: %.2f>%.2f doc' % (elp, lastt))
         # New time point in time units
@@ -274,10 +272,9 @@ class MisuraDocument(document.Document):
 
         header_autoupdate = False
         if header_autoupdate and len(dh) > 0:
-            logging.debug(
-                '%s %s', 'RELOADING DATA: HEADER DIFFERS. Missing:', dh)
-            logging.debug('%s %s', 'header', header)
-            logging.debug('%s %s', 'keys', ks)
+            logging.debug('RELOADING DATA: HEADER DIFFERS. Missing:', dh)
+            logging.debug('header', header)
+            logging.debug('keys', ks)
             self._lock.release()
             dsnames = self.reloadData()
             self._lock.acquire(False)

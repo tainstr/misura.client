@@ -19,11 +19,11 @@ def clean_curve(dat, events=True):
     for index_row, ent in enumerate(dat):
         t, T = ent[:2]
         if None in ent:
-            logging.debug('%s %s', 'Skipping row', index_row)
+            logging.debug('Skipping row', index_row)
             continue
         if isinstance(T, basestring):
             print 'Basestring', T
-            logging.debug('%s %s', 'EVENT', index_row)
+            logging.debug('EVENT', index_row)
             T = str(T)
             if events:
                 t += time_correction
@@ -45,10 +45,10 @@ def clean_curve(dat, events=True):
                 # assume a 10 min dwell time / delta
                 timeout = 10/dT
             else:
-                logging.debug('%s %s', 'Skipping EVENT', index_row)
+                logging.debug('Skipping EVENT', index_row)
                 continue
             if timeout < 0:
-                logging.debug('Cannot render event %s %s', index_row, ev)
+                logging.debug('Cannot render event', index_row, ev)
                 continue
             time_correction += timeout
         t += time_correction
@@ -110,14 +110,12 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         index_row = index.row()
         index_column = index.column()
         if not index.isValid() or index_row < 0 or index_row > self.rowCount() or index_column < 0 or index_column > self.columnCount():
-            logging.debug(
-                '%s %s %s', 'setData: invalid line', index_row, index_column)
+            logging.debug('setData: invalid line', index_row, index_column)
             return False
         if isinstance(value, basestring) and (not value.startswith('>')):
             value = float(value)
         row_entry = self.dat[index_row]
-        logging.debug(
-            '%s %s %s %s %s', 'setData:', index_row, index_column, value, row_entry[index_column])
+        logging.debug('setData:', index_row, index_column, value, row_entry[index_column])
         row_entry[index_column] = value
         self.dat[index_row] = row_entry
         self.update_rows_from(index_row)
@@ -129,8 +127,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         return True
 
     def insertRows(self, position, rows_number=1, index=QtCore.QModelIndex(), values=False):
-        logging.debug(
-            '%s %s %s %s', 'insertRows', position, rows_number, index.row())
+        logging.debug('insertRows', position, rows_number, index.row())
         self.beginInsertRows(
             QtCore.QModelIndex(), position, position + rows_number - 1)
         if not values:

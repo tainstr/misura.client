@@ -105,12 +105,12 @@ class MisuraDataset(datasets.Dataset):
     def old_unit(self, nval):
         self.attr['old_unit'] = nval
         
-    @property
-    def m_opt(self):
-        return self.attr['m_opt']
-    @m_opt.setter
-    def m_opt(self, nval):
-        self.attr['m_opt'] = nval
+#     @property
+#     def m_opt(self):
+#         return self.attr['m_opt']
+#     @m_opt.setter
+#     def m_opt(self, nval):
+#         self.attr['m_opt'] = nval
         
     @property
     def m_update(self):
@@ -147,12 +147,12 @@ class MisuraDataset(datasets.Dataset):
     def m_pos(self, nval):
         self.attr['m_pos'] = nval
         
-    @property
-    def m_smp(self):
-        return self.attr['m_smp']
-    @m_smp.setter
-    def m_smp(self, nval):
-        self.attr['m_smp'] = nval
+#     @property
+#     def m_smp(self):
+#         return self.attr['m_smp']
+#     @m_smp.setter
+#     def m_smp(self, nval):
+#         self.attr['m_smp'] = nval
         
     @property
     def m_var(self):

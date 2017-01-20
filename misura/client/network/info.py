@@ -20,7 +20,7 @@ class ServerInfo(object):
             txt = txt[::-1]
         self.txt = txt
         v = self.txt.split('; ')
-        logging.debug('%s %s %s', txt, self.txt, v)
+        logging.debug(txt, self.txt, v)
         self.serial = v[0].split('=')[1]
         self.cap = []
         if len(v) > 1:

@@ -42,7 +42,7 @@ class RemoteFileProxy(object):
         # Otherwise unpickle the configuration tree dict and get a
         # ConfigurationProxy for it
         d = self._decode(self.obj.conf_tree)
-        logging.debug('%s %s %s', 'loading conf', len(d), d.keys())
+        logging.debug('loading conf', len(d), d.keys())
         self.conf = option.ConfigurationProxy(desc=d)
         return True
 

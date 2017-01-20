@@ -242,9 +242,9 @@ def create_tree(outFile, tree, path='/'):
     """Recursive tree structure creation"""
     for key, foo in tree.list():
         if outFile.has_node(path, key):
-            logging.debug('Path already found: %s %s', path, key)
+            logging.debug('Path already found:', path, key)
             continue
-        logging.debug('%s %s %s', 'Creating group:', path, key)
+        logging.debug('Creating group:', path, key)
         outFile.create_group(path, key, key)
         dest = path + key + '/'
         if outFile.has_node(dest):
@@ -280,7 +280,7 @@ class Converter(dataimport.Converter):
         cursor.execute("select * from PROVE where IDProve = '%s'" % tcode)
         tests = cursor.fetchall()
         if len(tests) != 1:
-            logging.debug('%s %s', 'Wrong number of tests found', tests)
+            logging.debug( 'Wrong number of tests found', tests)
             conn.close()
             return False
         test = tests[0]
@@ -289,9 +289,9 @@ class Converter(dataimport.Converter):
         cursor.execute(
             "select * from IMMAGINI where [IDProve] = '%s' order by Tempo" % self.icode)
         self.rows = cursor.fetchall()
-        logging.debug('%s %s', 'CONVERT GOT', len(self.rows))
+        logging.debug('CONVERT GOT', len(self.rows))
         if len(self.rows) < 1:
-            logging.debug('%s %s', 'No points', self.rows)
+            logging.debug('No points', self.rows)
             conn.close()
             return False
         conn.close()
@@ -325,7 +325,7 @@ class Converter(dataimport.Converter):
                 outFile = indexer.SharedFile(outpath, mode='w')
             # If I am not forcing neither keeping images, return the current file
             else:
-                logging.debug('%s %s', 'Already exported path:', outpath)
+                logging.debug('Already exported path:', outpath)
                 return outpath
         # If it does not exist, create!
         else:
@@ -394,7 +394,7 @@ class Converter(dataimport.Converter):
         tdate0 = self.test[m3db.fprv.Data]
         zerotime = mktime(tdate0.timetuple())
         tdate = tdate0.strftime("%H:%M:%S, %d/%m/%Y")
-        logging.debug('%s %s', self.test[m3db.fprv.Data].strftime("%H:%M:%S, %d/%m/%Y"))
+        logging.debug(self.test[m3db.fprv.Data].strftime("%H:%M:%S, %d/%m/%Y"))
         instrobj.measure['zerotime'] = zerotime
         instrobj.measure['name'] = self.test[m3db.fprv.Desc_Prova]
         instrobj.measure['comment'] = self.test[m3db.fprv.Note]
@@ -418,7 +418,7 @@ class Converter(dataimport.Converter):
         header, columns = m3db.getHeaderCols(self.test[m3db.fprv.Tipo_Prova], self.tcode)
         rows = np.array(self.rows)
         self.rows = rows
-        logging.debug('%s %s %s %s', header, columns, len(rows[0]), instr)
+        logging.debug(header, columns, len(rows[0]), instr)
         instr_path = '/' + instr
         smp_path = instr_path + '/sample0'
 
@@ -445,7 +445,7 @@ class Converter(dataimport.Converter):
                 data = timecol
                 continue
             if columns[i] >= rows.shape[1]:
-                logging.debug("Skipping undefined column. Old db? %s", columns[i])
+                logging.debug("Skipping undefined column. Old db?", columns[i])
                 continue
             data = rows[:, columns[i]].astype('float')[unidx]
             # Skip invalid data
@@ -471,7 +471,7 @@ class Converter(dataimport.Converter):
                 data = data / 10.
                 unit = 'micron'
             elif col == 'w':
-                logging.debug('%s', data)
+                logging.debug(data)
                 data = data / 200.
                 unit = 'micron'
             if col in ['T', 'P', 'S']:
@@ -591,7 +591,7 @@ class Converter(dataimport.Converter):
             img = '%sH.%03i' % (self.icode, int(num))
             img = os.path.join(imgdir, img)
             if not os.path.exists(img):
-                logging.debug('%s %s', 'Skipping non-existent image', img)
+                logging.debug('Skipping non-existent image', img)
                 continue
 
             im, size = decompress(img, frm)
@@ -603,8 +603,8 @@ class Converter(dataimport.Converter):
             ref.commit([[t, im]])
             oi += 1
             self.outFile.flush()
-        logging.debug('%s %s', 'Included images:', oi)
-        logging.debug('%s %s', 'Expected size:', esz / 1000000.)
+        logging.debug('Included images:', oi)
+        logging.debug('Expected size:', esz / 1000000.)
         return True
 
 
@@ -635,7 +635,7 @@ def decompress(img, frm):
             return (r, im.size)
     except:
         logging.debug(format_exc())
-        logging.debug('%s %s', 'Error reading image', img)
+        logging.debug('Error reading image', img)
         r = ('', (0, 0))
     return r
 

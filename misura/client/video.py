@@ -7,7 +7,7 @@ import numpy as np
 try:
     import cv2 as cv
 except:
-    logging.debug('%s', 'OpenCV is not available. Video Export is disabled.')
+    logging.debug('OpenCV is not available. Video Export is disabled.')
     cv = False
 
 from misura.canon import csutil, reference
@@ -34,7 +34,7 @@ def export(sh, frame='/hsm/sample0/frame',
            acquisition_start_temperature=20):
     """Base video export function"""
     if cv is False:
-        logging.debug('%s', 'No OpenCV library')
+        logging.debug('No OpenCV library')
         return False
     if not output.lower().endswith('.avi'):
         output += '.avi'
@@ -99,7 +99,7 @@ def export(sh, frame='/hsm/sample0/frame',
                 break
             im = np.dstack((im, im, im))
         else:
-            logging.debug('%s', 'Unsupported reference')
+            logging.debug('Unsupported reference')
             break
         # Get T
         ti = csutil.find_nearest_val(tT, t, seed=ti)
@@ -111,11 +111,11 @@ def export(sh, frame='/hsm/sample0/frame',
         if prog:
             QtGui.qApp.processEvents()
             if i > 1 and prog.value() == 0:
-                logging.debug('%s %s', 'Export cancelled at frame', i)
+                logging.debug('Export cancelled at frame', i)
                 break
             prog.setValue(i-i0)
 
-    logging.debug('%s %s', 'releasing', output)
+    logging.debug('releasing', output)
     out.release()
     return True
 
@@ -216,7 +216,7 @@ class VideoExporter(QtGui.QDialog):
 
     def cancel(self):
         """Interrupt export thread"""
-        logging.debug('%s %s', 'Cancel clicked!', self.prog)
+        logging.debug('Cancel clicked!', self.prog)
         if self.prog:
             self.prog.setValue(0)
 

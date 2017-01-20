@@ -56,7 +56,7 @@ class ViewerDialog(QtGui.QDialog):
         self.toggle_stream(do=False)
 
     def close(self):
-        logging.debug('%s', 'ViewerDialog.close')
+        logging.debug('ViewerDialog.close')
         self.toggle_stream(do=False)
         if self.viewer:
             self.viewer.close()
@@ -73,12 +73,10 @@ class ViewerDialog(QtGui.QDialog):
         r = (1. * h) / w
         if r != self.r:
             # Adjust dialog height
-            logging.debug(
-                '%s %s %s', 'Resize dialog to', self.width(), self.width() * r)
+            logging.debug('Resize dialog to', self.width(), self.width() * r)
             self.resize(self.width(), self.width() * r)
             # Resize the graphics view height
-            logging.debug(
-                '%s %s %s', 'Resize viewer to', self.viewer.width(), self.viewer.width() * r)
+            logging.debug('Resize viewer to', self.viewer.width(), self.viewer.width() * r)
             self.viewer.resize(self.viewer.width(), self.viewer.width() * r)
             self.viewer.userZoom = False
             # Keep current image ratio
@@ -88,17 +86,17 @@ class ViewerDialog(QtGui.QDialog):
 
     def toggle_stream(self, do=None):
         """Activate/deactivate camera viewing"""
-        logging.debug('%s %s', 'ViewerDialog.toggle_stream', do)
+        logging.debug('ViewerDialog.toggle_stream', do)
         if not self.viewer:
             return
         if do == None:
             self.toggle_stream(do=self.viewer.processor.stream ^ 1)
             return
         if do > 0:
-            logging.debug('%s', 'start')
+            logging.debug('start')
             self.show()
             self.viewer.toggle(do=1)
         else:
-            logging.debug('%s', 'stop')
+            logging.debug('stop')
             self.viewer.toggle(do=0)
             self.hide()

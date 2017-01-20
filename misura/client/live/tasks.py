@@ -43,8 +43,8 @@ class RemoteTasks(QtGui.QWidget):
                 self.progress.hide()
                 self.progress.unregister()
             except:
-                logging.debug(
-                    'While removing old progress... \n%s', format_exc())
+                logging.debug('While removing old progress... \n', 
+                    format_exc())
             finally:
                 self.progress = False
 
@@ -130,7 +130,7 @@ class LocalTasks(QtGui.QWidget):
 
         self.connect(self, QtCore.SIGNAL('sig_done0()'),
                      self._done, conntype)
-        logging.debug('%s', 'LocalTasks initialized')
+        logging.debug( 'LocalTasks initialized')
         self.log_messages = ''
 
     def __len__(self):
@@ -188,7 +188,7 @@ class LocalTasks(QtGui.QWidget):
         """Progress job `pid` to `step`, and display `label`. A negative step causes the bar to progress by 1."""
         wg = self.prog.get(pid, False)
         if not wg:
-            logging.debug('LocalTasks.job: no job defined! %s', pid)
+            logging.debug('LocalTasks.job: no job defined!', pid)
             return False
         if step < 0:
             step = wg.pb.value() + 1

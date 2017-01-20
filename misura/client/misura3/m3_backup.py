@@ -23,22 +23,22 @@ tests = cursor.fetchall()
 
 bkpath = path + '_backup.tar'
 bk = tarfile.TarFile(bkpath, 'w')
-logging.debug('%s %s', 'Created ', bkpath)
+logging.debug('Created ', bkpath)
 bk.add(path, arcname=os.path.basename(path))
-logging.debug('%s %s', 'Added mdb', path)
+logging.debug('Added mdb', path)
 N = len(tests)
 for i, test in enumerate(tests):
     if test[3] not in [0, 1, 2, 3, 4, 110, 111]:
-        logging.debug('%s %s %s', 'No img for ', test[0], test[3])
+        logging.debug( 'No img for ', test[0], test[3])
         continue
     imgd = test[0][:5].upper()
     idt = os.path.join(dirp, imgd)
     if not os.path.exists(idt):
-        logging.debug('%s %s %s', 'No dir for ', test[0], test[3])
+        logging.debug('No dir for ', test[0], test[3])
         continue
-    logging.debug('%s %s %s', 'add', idt, 100 * i / N)
+    logging.debug('add', idt, 100 * i / N)
     bk.add(idt, arcname=imgd)
 bk.close()
-logging.debug('%s %s', 'closed', bkpath)
+logging.debug('closed', bkpath)
 
 sys.exit(0)

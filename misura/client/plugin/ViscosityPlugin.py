@@ -99,7 +99,7 @@ class ViscosityPlugin(plugins.DatasetPlugin):
         if fields['ds_out'] == '':
             raise plugins.DatasetPluginException('Invalid output dataset name')
         # make a new dataset with name in fields['ds_out']
-        logging.debug('%s %s', 'DSOUT', fields)
+        logging.debug('DSOUT', fields)
         self.ds_out = plugins.Dataset1D(fields['ds_out'])
         self.ds_out.unit = 'poise'
 

@@ -38,11 +38,9 @@ class DataPoint(unittest.TestCase):
             self.dp.point_index = start
             self.dp.x = self.dp.xData[self.dp.point_index]
             self.dp.y = self.dp.yData[self.dp.point_index]
-        logging.debug(
-            '%s %s %s %s', 'starting from', self.dp.point_index, self.dp.x, self.dp.y)
+        logging.debug('starting from', self.dp.point_index, self.dp.x, self.dp.y)
         self.assertTrue(self.dp.critical_search(self.dp.settings.search))
-        logging.debug(
-            '%s %s %s %s', 'ending in', self.dp.point_index, self.dp.x, self.dp.y)
+        logging.debug('ending in', self.dp.point_index, self.dp.x, self.dp.y)
         self.assertAlmostEqual(self.dp.point_index, expect, delta=delta)
 
     def critical_search(self, delta=None):

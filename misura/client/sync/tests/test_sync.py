@@ -38,7 +38,7 @@ cdb['database'] = test_confdb
 sync.sync.confdb = cdb
 
 
-logging.debug('%s %s', remote_dbpath, local_dbpath)
+logging.debug(remote_dbpath, local_dbpath)
 
 
 class StorageSync(unittest.TestCase):

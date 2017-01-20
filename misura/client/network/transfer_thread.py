@@ -132,7 +132,7 @@ class TransferThread(QtCore.QThread):
 
     def download_url(self, url, outfile):
         """Download from url and save to outfile path"""
-        logging.debug('%s %s %s', 'download url', url, outfile)
+        logging.debug('download url', url, outfile)
         self.aborted = False
         self.prefix = 'Download: '
         self.url = url
@@ -140,7 +140,7 @@ class TransferThread(QtCore.QThread):
         self.outfile = outfile
         url = self.prepare_opener(url)
         self.dlStarted.emit(url, outfile)
-        logging.debug('TransferThread.download_url %s', url)
+        logging.debug('TransferThread.download_url', url)
         req = urllib2.urlopen(url)
         dim = int(req.info().getheaders('Content-Length')[0])
         self.dlSize.emit(dim)
@@ -164,7 +164,7 @@ class TransferThread(QtCore.QThread):
         # Remove if aborted
         if self.aborted:
             logging.debug(
-                '%s %s', 'Download ABORTED. Removing local file:', outfile)
+                'Download ABORTED. Removing local file:', outfile)
             os.remove(outfile)
             self.dlAborted.emit(url, outfile)
         # Append to db if defined
@@ -199,19 +199,18 @@ class TransferThread(QtCore.QThread):
             self.dlWaiting.emit(url, outfile, itr)
             if itr >= self.retry:
                 break
-            logging.debug('%s %s', 'Waiting for uid reservation', uid)
+            logging.debug('Waiting for uid reservation', uid)
             sleep(1)
             itr += 1
             if self.aborted:
-                logging.debug('%s %s', 'Aborted waiting for uid reservation', uid)
+                logging.debug('Aborted waiting for uid reservation', uid)
                 self.dlAborted.emit(url, outfile)
                 return False
         # Reserve again
         server.storage.test.reserve(uid)
         # Abort if not reserved
         if not server.storage.test.is_reserved(uid):
-            logging.debug(
-                '%s %s %s', 'Cannot reserve UID for download', uid, url)
+            logging.debug('Cannot reserve UID for download', uid, url)
             self.dlAborted.emit(url, outfile)
             return False
         self.download_url(url, outfile)
@@ -245,9 +244,9 @@ class TransferThread(QtCore.QThread):
             enc = urllib.urlencode({'opt': opt,
                                     'filename': remotefile,
                                     'data': data})
-            logging.debug('%s %s %s %s', 'urlopen', url, opt, remotefile)
+            logging.debug('urlopen', url, opt, remotefile)
             content = urllib2.urlopen(url=url, data=enc).read()
-            logging.debug('%s %s', 'Transferred chunk', content)
+            logging.debug('Transferred chunk', content)
             done += len(data)
             if len(data) == 0:
                 fp.close()
@@ -256,7 +255,7 @@ class TransferThread(QtCore.QThread):
 #             sleep(0.1)
         # Remove if aborted
         if self.aborted:
-            logging.debug('%s %s', 'Upload ABORTED at', done)
+            logging.debug('Upload ABORTED at', done)
             self.dlAborted.emit(url, localfile)
         self.dlFinished.emit(url, localfile)
 

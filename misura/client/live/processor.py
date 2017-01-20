@@ -62,7 +62,6 @@ class FrameProcessor(QtCore.QThread):
                 n += 1
                 if not ent:
                     continue
-#               logging.debug('%s', ent)
                 x, y, w, h, fr = ent
                 # Create a QImage for signalling
                 img = QtGui.QImage()
@@ -84,7 +83,6 @@ class FrameProcessor(QtCore.QThread):
         self.exit(0)
 
     def toggle_run(self, do=None):
-        #       logging.debug('%s %s', 'FrameProcessor.toggle_run', do)
         if do == True:
             if not self.isRunning():
                 self.stream = True
@@ -147,7 +145,7 @@ class SampleProcessor(QtCore.QThread):
                 r = smp.multiget(list(self.opt - set(['roi', 'crop'])))
                 if not r:
                     continue
-#                   logging.debug('%s %s %s', 'Live update failed: multiget returned', r, self.opt)
+#                   logging.debug('Live update failed: multiget returned', r, self.opt)
                 if r.has_key('profile'):
                     r['profile'] = loads(r['profile'].data)
                 if r.has_key('filteredProfile'):
@@ -158,7 +156,7 @@ class SampleProcessor(QtCore.QThread):
             sleep(self.waiting)
 
     def toggle_run(self, do=None):
-        #       logging.debug('%s %s', 'SampleProcessor.toggle_run', do)
+        #       logging.debug('SampleProcessor.toggle_run', do)
         if do == True:
             if not self.isRunning():
                 self.stream = True

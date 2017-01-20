@@ -78,7 +78,7 @@ class BoxRegion(Overlay):
         self._opt = list(val)[0]
 
     def get(self):
-        logging.debug('%s %s %s', 'BoxRegion.get', self.remObj, self._opt)
+        logging.debug('BoxRegion.get', self.remObj, self._opt)
         re = self.remObj.get(self._opt)
         self.current = {self._opt: re}
         return re
@@ -108,18 +108,18 @@ class BoxRegion(Overlay):
     def up(self):
         """Read and redraw server values."""
         if self.moving:
-            logging.debug('%s', 'BoxRegion is moving')
+            logging.debug('BoxRegion is moving')
             return
         if not self.isVisible():
-            logging.debug('%s', 'BoxRegion not visible')
+            logging.debug('BoxRegion not visible')
             return False
         if not self.validate():
-            logging.debug('%s', 'BoxRegion not validated')
+            logging.debug('BoxRegion not validated')
             return False
 #		r = self.get()
         r = self.current[self._opt]
         if r is None:
-            logging.debug('%s %s', 'Region UP error: no values', r)
+            logging.debug('Region UP error: no values', r)
         x, y, w, h = r
         self.box.setPos(0, 0)
         self.box.setRect(QtCore.QRectF(x, y, w, h))

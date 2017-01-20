@@ -114,7 +114,7 @@ class PygmentsHighlighter(QtGui.QSyntaxHighlighter):
 
         # Lex the text using Pygments
         index = 0
-        logging.debug('%s %s', self._lexer, type(self._lexer))
+        logging.debug(self._lexer, type(self._lexer))
         for token, text in self._lexer.get_tokens(qstring):
             length = len(text)
             self.setFormat(index, length, self._get_format(token))

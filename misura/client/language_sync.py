@@ -79,8 +79,7 @@ def update(lang, ctx, base='misura'):
     filename = os.path.join(pathLang, base + '_' + lang + '.ts')
     # No previous translations: nothing to update!
     if not os.path.exists(filename):
-        logging.debug(
-            '%s %s %s', lang.upper(), '\tOriginal translation not found:', filename)
+        logging.debug(lang.upper(), '\tOriginal translation not found:', filename)
         return ctx
     # Update from found filename
     for line in open(filename, 'r'):
@@ -116,7 +115,7 @@ def write_ts(lang, ctx):
     out.write(header % lang)
     for c, ent in ctx.iteritems():
         out.write(context_h % c)
-        logging.debug('%s %s', '\tContext:', c)
+        logging.debug('\tContext:', c)
         for s, e in ent.iteritems():
             if e[0] == '':
                 out.write(u_entry % (s, e[0], e[1]))
@@ -253,7 +252,7 @@ def autodoc(obj):
 
 
     if not os.path.exists(path_rst):
-        logging.debug('Creating index.rst %s', path_rst)
+        logging.debug('Creating index.rst', path_rst)
         open(path_rst, 'w').close()
 
     rst = open(path_rst, 'r').read()
@@ -285,7 +284,7 @@ def collect_conf(module, translations):
             continue
         if obj in done: continue
         done.add(obj)
-        logging.debug('%s %s %s', 'Found conf_def', obj.__name__, conf_def)
+        logging.debug('Found conf_def', obj.__name__, conf_def)
         autodoc(obj)
         for el in conf_def:
             if not isinstance(el, dict):
@@ -297,7 +296,7 @@ def collect_conf(module, translations):
             if not h:
                 missing += 1
                 h = '!!!_missing_handle_{}'.format(missing)
-            logging.debug('%s %s %s', obj, h, tr)
+            logging.debug(obj, h, tr)
             translations[h] = tr
             # Get translatable option names
             opt = el.get('options', False)
@@ -320,12 +319,11 @@ def iterpackage(package):
     missing = 0
     for importer, modname, ispkg in pkgutil.iter_modules(package.__path__, prefix):
         if modname.split('.')[-1] in ('client', 'canon', 'libvideodev', 'utils'):
-            logging.debug('%s %s', 'skipping', modname)
+            logging.debug('skipping', modname)
             continue
-        logging.debug(
-            '%s %s', "Found submodule %s (is a package: %s)" % (modname, ispkg))
+        logging.debug("Found submodule %s (is a package: %s)" % (modname, ispkg))
         module = __import__(modname, fromlist="dummy")
-        logging.debug('%s %s', "Imported", module)
+        logging.debug("Imported", module)
         translations, ms = collect_conf(module, translations)
         missing += ms
         if ispkg:
@@ -341,7 +339,7 @@ def collect():
     from misura.canon.indexer import indexer
 
     translations, missing = iterpackage(misura)
-    logging.debug('%s %s %s %s', 'Stats', len(
+    logging.debug('Stats', len(
         translations), len(set(translations)), missing)
 
     for column in indexer.columns_to_translate:
@@ -530,7 +528,7 @@ def scan_client_source(path, out=False):
             if not fn.endswith('.py'):
                 continue
             fp = os.path.join(root, fn)
-            logging.debug('%s %s', 'Scanning', fp)
+            logging.debug('Scanning', fp)
             python_find_strings(fp, retn)
     # Simplify output
     if not out:
@@ -566,7 +564,7 @@ def language_sync():
 
     statistics = {}
     for l in langs:
-        logging.debug('%s %s', 'LANGUAGE:', l)
+        logging.debug('LANGUAGE:', l)
         ctx = update(l, contexts.copy(), base='misura')
         ctx = update(l, ctx)
         write_ts(l, ctx)
@@ -579,10 +577,10 @@ def language_sync():
             for k, e in v.iteritems():
                 contexts[c][k] = ('', '')
 
-    logging.debug('%s', 'Completeness:')
+    logging.debug('Completeness:')
     for l in langs:
         s = statistics[l]
-        logging.debug('%s %s %s', '%s: %.2f %% (missing: %i)' %
+        logging.debug('%s: %.2f %% (missing: %i)' %
                       (l.upper(), 100. * s[1] / (s[1] + s[2]), s[2]))
 
 if __name__ == '__main__':

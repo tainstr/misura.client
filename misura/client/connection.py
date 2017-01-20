@@ -175,7 +175,7 @@ class ServerSelector(QtGui.QToolBox):
         self.redraw()
 
     def redraw(self):
-        logging.debug('%s', 'redraw')
+        logging.debug('redraw')
         while True:
             wg = self.currentWidget()
             idx = self.currentIndex()

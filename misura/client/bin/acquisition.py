@@ -10,7 +10,7 @@ if __name__ == '__main__':
     multiprocessing.freeze_support()
     iutils.initApp()
     o = iutils.getOpts()
-    logging.debug('%s %s', 'Passed options', o)
+    logging.debug('Passed options', o)
     app = iutils.app
     mw = acquisition.MainWindow()
     if o['-h']:

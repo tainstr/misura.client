@@ -117,7 +117,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
     def set_idx(self, t):
         if self.paused:
             return False
-        logging.debug('%s %s', 'DocumentModel.set_idx', t)
+        logging.debug('DocumentModel.set_idx', t)
         # TODO: convert to time index
         tds = self.doc.data.get('t', False)
         if tds is False:
@@ -132,14 +132,14 @@ class DocumentModel(QtCore.QAbstractItemModel):
         """Changes current values to requested time `t`"""
         if '0:t' in self.doc.data:
             idx = find_nearest_val(self.doc.data['0:t'].data, t, seed=self.idx)
-            logging.debug('%s %s %s', 'Setting time t', t, idx)
+            logging.debug('Setting time t', t, idx)
             self.set_idx(idx)
             return True
         return False
 
     @lockme
     def pause(self, do=True):
-        logging.debug('%s %s', 'Set paused', do)
+        logging.debug('Set paused', do)
         self.paused = do
         if do:
             self.disconnect(
@@ -177,7 +177,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
                 logging.debug('model.refresh(): NOTHING CHANGED')
                 return False
 
-        logging.debug('%s %s', 'REFRESHING MODEL', self.paused)
+        logging.debug('REFRESHING MODEL', self.paused)
         self.paused = True
         self.doc.suspendUpdates()
         self.emit(QtCore.SIGNAL('beginResetModel()'))
@@ -327,12 +327,12 @@ class DocumentModel(QtCore.QAbstractItemModel):
     def index(self, row, column, parent=voididx):
         parent = self.nodeFromIndex(parent)
         if not (isinstance(parent, DatasetEntry) or isinstance(parent, NodeEntry)):
-            logging.debug('%s %s', 'child ERROR', parent)
+            logging.debug('child ERROR', parent)
             return voididx
         assert row >= 0
         lst = parent.recursive_status(self.status, depth=0)
         if row >= len(lst):
-            logging.debug('%s %s %s', 'WRONG ROW', row, len(lst))
+            logging.debug('WRONG ROW', row, len(lst))
             return voididx
         assert row < len(lst), 'index() ' + str(parent) + \
             str(row) + str(lst) + str(self.status)
@@ -403,7 +403,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         for index in indexes:
             node = self.nodeFromIndex(index)
             out.append(node.path)
-        logging.debug('%s %s', 'mimeData', out)
+        logging.debug('mimeData', out)
         dat = QtCore.QMimeData()
         dat.setData("text/plain", ';'.join(out))
         return dat
@@ -501,7 +501,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         which matches the parent first level axis."""
         menu.clear()
         axs = self.plots['axis'].keys()
-        logging.debug('%s %s', 'AXES', axs)
+        logging.debug('AXES', axs)
         axmap = {}
         axs1 = []  # First level (no match setting)
         axs2 = {}  # Second level (matching)
@@ -509,7 +509,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         for pt in axs:
             # discard axis not in current page
             if not pt.startswith(self.page):
-                logging.debug('%s %s %s', 'Ax: Other page', pt, self.page)
+                logging.debug('Ax: Other page', pt, self.page)
                 continue
             sp = pt.split('/')
             axname = sp.pop(-1)
@@ -554,7 +554,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         The `second` will become `second`-level and will be listed
         in every other first-level axis referenced in its match setting."""
 
-        logging.debug('matching %s %s', first, second)
+        logging.debug('matching', first, second)
         s = self.doc.resolveFullSettingPath(first + '/linked')
         s1 = self.doc.resolveFullSettingPath(first + '/linkedaxis')
         ops = []

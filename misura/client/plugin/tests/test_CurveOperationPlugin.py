@@ -15,15 +15,15 @@ import veusz.plugins
 
 from PyQt4 import QtGui
 
-logging.debug('%s %s', 'Importing', __name__)
+logging.debug('Importing', __name__)
 
 
 def setUpModule():
-    logging.debug('%s %s', 'setUpModule', __name__)
+    logging.debug('setUpModule', __name__)
 
 
 def tearDownModule():
-    logging.debug('%s %s', 'tearDownModule', __name__)
+    logging.debug('tearDownModule', __name__)
 
 
 def insertData(doc, datadict):
@@ -61,13 +61,13 @@ class TestCurveOperationPlugin(unittest.TestCase):
         # SUPERSAMPLING
         # Subtract B to A
         sup = self.do(ax, ay, bx, by, 'A-B')
-        logging.debug('%s %s', 'Supersampling', sup.sum())
+        logging.debug('Supersampling', sup.sum())
         # Output value should have same length of ref. array, A
         self.assertEqual(len(sup), len(ay))
 
         # UNDERSAMPLING
         und = self.do(bx, by, ax, ay, 'A-B')
-        logging.debug('%s %s', 'Undersampling', und.sum())
+        logging.debug('Undersampling', und.sum())
         # Output value should have same length of ref. array, B
         self.assertEqual(len(und), len(by))
         self.assertAlmostEqual(sup.sum(), 0)

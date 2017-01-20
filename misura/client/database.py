@@ -292,7 +292,7 @@ class DatabaseWidget(QtGui.QWidget):
         self.up()
 
     def up(self):
-        logging.debug('%s', 'DATABASEWIDGET UP')
+        logging.debug('DATABASEWIDGET UP')
         self.table.model().up()
         header = self.table.model().header
         sh = self.table.model().sheader
@@ -300,7 +300,7 @@ class DatabaseWidget(QtGui.QWidget):
         self.qfilter.clear()
         self.qfilter.addItem(_('All'), '*')
         for i, h in enumerate(header):
-            logging.debug('%s %s %s', 'qfilter', i, h)
+            logging.debug('qfilter', i, h)
             if hh.isSectionHidden(i):
                 continue
             self.qfilter.addItem(_(sh[i]), h)
@@ -391,7 +391,7 @@ def getRemoteDatabaseWidget(path):
     from .connection import addrConnection
     obj = addrConnection(path)
     if not obj:
-        logging.debug('%s', 'Connection FAILED')
+        logging.debug('Connection FAILED')
         return False
     idb = DatabaseWidget(obj.storage)
     idb.up()

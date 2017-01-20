@@ -55,8 +55,7 @@ class StorageSync(object):
             dbpath = confdb['database']
         self.dbpath = dbpath
         if not os.path.exists(self.dbpath):
-            logging.debug(
-                '%s %s', 'Database path does not exist!', self.dbpath)
+            logging.debug('Database path does not exist!', self.dbpath)
             return False
         self.maindb = indexer.Indexer(self.dbpath)
         self.db = indexer.Indexer(self.dbpath + '.sync')
@@ -79,13 +78,13 @@ class StorageSync(object):
     def rem_uid(self, uid, tname):
         """Remove `uid` from table `tname`"""
         self.db.execute("DELETE from {} where uid='{}'".format(tname, uid))
-        logging.debug('removed uid %s %s', tname, uid)
+        logging.debug('removed uid', tname, uid)
 
     def add_record(self, record, tname):
         """Adds `record` list to table `tname`"""
         v = ('?,' * len(record))[:-1]
         self.db.execute("INSERT INTO {} VALUES ({})".format(tname, v), record)
-        logging.debug('added record %s %s', tname, record)
+        logging.debug('added record', tname, record)
 
     def download_record(self, record):
         uid = record[2]
@@ -93,11 +92,11 @@ class StorageSync(object):
             self.rem_uid(uid, 'sync_approve')
 
         if self.has_uid(uid, 'sync_exclude'):
-            logging.debug('%s %s', 'Record was excluded. Enabling.', record)
+            logging.debug('Record was excluded. Enabling.', record)
             self.rem_uid(uid, 'sync_exclude')
 
         if self.has_uid(uid, 'sync_error'):
-            logging.debug('%s %s', 'Retrying: ', record)
+            logging.debug('Retrying: ', record)
             self.rem_uid(uid, 'sync_error')
 
         if len(record) > record_length:
@@ -116,7 +115,7 @@ class StorageSync(object):
         # Check if previously approved (remove!) or already excluded (exit)
         uid = record[2]
         if self.has_uid(uid, 'sync_queue'):
-            logging.debug('%s %s', 'Record was queued. Enabling.', record)
+            logging.debug('Record was queued. Enabling.', record)
             self.rem_uid(uid, 'sync_queue')
 
         if self.has_uid(uid, 'sync_approve'):
@@ -126,7 +125,7 @@ class StorageSync(object):
             self.rem_uid(uid, 'sync_error')
 
         if self.has_uid(uid, 'sync_exclude'):
-            logging.debug('%s %s', 'Record already excluded', record)
+            logging.debug('Record already excluded', record)
             return False
         if len(record) > record_length:
             record = record[:record_length]
@@ -139,7 +138,7 @@ class StorageSync(object):
         r = self.server.storage.remove_uid(uid)
         logging.debug('Remove file result', uid, r)
         if self.has_uid(uid, 'sync_queue'):
-            logging.debug('%s %s', 'Record was queued. Enabling.', record)
+            logging.debug('Record was queued. Enabling.', record)
             self.rem_uid(uid, 'sync_queue')
 
         if self.has_uid(uid, 'sync_approve'):

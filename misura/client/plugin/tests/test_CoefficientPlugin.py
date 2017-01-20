@@ -14,15 +14,15 @@ import veusz.datasets as datasets
 import veusz.plugins
 
 
-logging.debug('%s %s', 'Importing', __name__)
+logging.debug('Importing', __name__)
 
 
 def setUpModule():
-    logging.debug('%s %s', 'setUpModule', __name__)
+    logging.debug('setUpModule', __name__)
 
 
 def tearDownModule():
-    logging.debug('%s %s', 'tearDownModule', __name__)
+    logging.debug('tearDownModule', __name__)
 
 
 def insertData(doc, datadict):

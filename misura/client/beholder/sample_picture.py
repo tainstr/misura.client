@@ -51,11 +51,11 @@ class MetaLabel(Overlay):
             t += '{}: {:.2e}\n'.format(k, v)
         if len(t) == 0:
             t = 'Empty'
-        logging.debug('%s %s %s', 'updating to', t, 'MetaLabels')
+        logging.debug('updating to', t, 'MetaLabels')
         self.label.setText(t)
 
     def add(self, name):
-        logging.debug('%s %s', 'adding name', name)
+        logging.debug('adding name', name)
         self.opt.add(name)
         rem = functools.partial(self.remove, name)
         a = self.menu.addAction(name, rem)
@@ -65,7 +65,7 @@ class MetaLabel(Overlay):
         self.parentItem().parentItem().opt_changed = True
 
     def remove(self, name):
-        logging.debug('%s %s', 'removing name', name)
+        logging.debug('removing name', name)
         self.opt.remove(name)
         del self.current[name]
         self.menu.removeAction(self.acts[name][0])
@@ -82,16 +82,16 @@ class SamplePix(QtGui.QGraphicsPixmapItem):
         self.label.unscale(factor)
 
     def dragEnterEvent(self, event):
-        logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
+        logging.debug('dragEnterEvent', event.mimeData())
         event.acceptProposedAction()
         if event.mimeData().hasFormat("text/plain"):
             event.acceptProposedAction()
 
     def dropEvent(self, event):
-        logging.debug('%s', 'DROP EVENT')
+        logging.debug('DROP EVENT')
         opt = str(event.mimeData().text()).replace(
             'summary', '').replace('//', '/').split('/')[-1]
-        logging.debug('%s %s', 'Adding option:', opt)
+        logging.debug('Adding option:', opt)
         self.label.add(opt)
         self.parentItem().opt_changed = True
 
@@ -178,8 +178,8 @@ class SamplePicture(QtGui.QGraphicsItem):
                 try:
                     ov.slot_update(multiget)
                 except:
-                    logging.debug('%s', 'Overlay update error')
-                    logging.debug('%s', format_exc())
+                    logging.debug('Overlay update error')
+                    logging.debug(format_exc())
         return True
 
     @property

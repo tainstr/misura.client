@@ -24,7 +24,7 @@ def main():
     do = False
 
     def up():
-        logging.debug('%s', 'up')
+        logging.debug('up')
         global do
         if do:
             return

@@ -17,15 +17,15 @@ import veusz.plugins
 
 from PyQt4 import QtGui
 
-logging.debug('%s %s', 'Importing', __name__)
+logging.debug('Importing', __name__)
 
 
 def setUpModule():
-    logging.debug('%s %s', 'setUpModule', __name__)
+    logging.debug('setUpModule', __name__)
 
 
 def tearDownModule():
-    logging.debug('%s %s', 'tearDownModule', __name__)
+    logging.debug('tearDownModule', __name__)
 
 
 def insertData(doc, datadict):
@@ -49,9 +49,9 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
         doc = document.Document()
         p = self.create_plugin(doc, fields, beta, R0, T, dil='', dilT='', gdil='', gdilT='', **kw)
 
-        logging.debug('%s', 'get ds')
+        logging.debug('get ds')
         p.getDatasets(fields)
-        logging.debug('%s', 'update ds')
+        logging.debug('update ds')
         out = p.updateDatasets(fields, veusz.plugins.DatasetPluginHelper(doc))
         return out
 
@@ -63,12 +63,12 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
             if ds[k] == '':
                 fields[k] = ''
                 continue
-            logging.debug('%s %s', 'inserting data', k)
+            logging.debug('inserting data', k)
             insertData(doc, {k: ds[k]})
             fields[k] = k
         fields.update(kw)
         fields['ds_out'] = 'out'
-        logging.debug('%s', 'build op')
+        logging.debug('build op')
         return SurfaceTensionPlugin(**fields)
 
     def test_infnan(self):
@@ -85,7 +85,7 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
         # Both nan and inf should be converted to zero
         self.assertEqual(out[-1], 0)
         self.assertEqual(out[-2], 0)
-        logging.debug('%s', out)
+        logging.debug(out)
 
     def test_water(self):
         """Filled with water test data"""
@@ -95,7 +95,7 @@ class TestSurfaceTensionPlugin(unittest.TestCase):
         T = np.ones(N) * 25
         out = self.do(beta, R0, T)
         self.assertEqual(len(out), N)
-        logging.debug('%s %s', 'water', out)
+        logging.debug('water', out)
 
     def test_when_temperature_changes_too_little_sample_expansion_and_sample_expansion_temperature_are_empty(self):
         """

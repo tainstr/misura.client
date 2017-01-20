@@ -14,7 +14,7 @@ class TimeSpinBox(QtGui.QDoubleSpinBox):
         self.setRange(0, 10 ** 7)
 
     def textFromValue(self, s):
-        logging.debug('%s %s', 'textFromValue', s)
+        logging.debug('textFromValue', s)
         s = s * 60
         h, s = divmod(s, 3600)
         m, s = divmod(s, 60)
@@ -22,9 +22,9 @@ class TimeSpinBox(QtGui.QDoubleSpinBox):
 
     def valueFromText(self, qstr):
         qstr = str(qstr).replace(' ', '')
-        logging.debug('%s %s', 'valueFromText', qstr)
+        logging.debug('valueFromText', qstr)
         if len(qstr) == 0:
-            logging.debug('%s %s', 'valueFromText: empty', qstr)
+            logging.debug('valueFromText: empty', qstr)
             return 0.
         if ':' in qstr:
             h, m, s = qstr.split(':')
@@ -34,19 +34,19 @@ class TimeSpinBox(QtGui.QDoubleSpinBox):
         return r / 60
 
     def setTime(self, t):
-        logging.debug('%s %s', 'setTime', t)
+        logging.debug('setTime', t)
         self.setValue(t)
 
     def setText(self, txt):
-        logging.debug('%s %s', 'setText', txt)
+        logging.debug('setText', txt)
         val = self.valueFromText(txt)
         self.setValue(val)
 
     def validate(self, inp, pos):
-        logging.debug('%s %s %s', 'validate', inp, pos)
+        logging.debug('validate', inp, pos)
         try:
             self.valueFromText(inp)
             return (QtGui.QValidator.Acceptable, inp, pos)
         except:
-            logging.debug('%s %s %s', 'invalid', inp, pos)
+            logging.debug('invalid', inp, pos)
             return (QtGui.QValidator.Intermediate, inp, pos)

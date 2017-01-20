@@ -9,7 +9,7 @@ from misura.client.acquisition import MainWindow
 from misura.client.tests import iutils_testing as iut
 from PyQt4 import QtGui
 
-logging.debug('%s %s', 'Importing', __name__)
+logging.debug('Importing', __name__)
 
 ut = False
 
@@ -17,13 +17,13 @@ def setUpModule():
     global ut
     from misura import utils_testing
     ut = utils_testing
-    logging.debug('%s %s', 'setUpModule', __name__)
+    logging.debug('setUpModule', __name__)
     ut.parallel(1)
 
 
 def tearDownModule():
     #ut.parallel(0)
-    logging.debug('%s %s', 'tearDownModule', __name__)
+    logging.debug('tearDownModule', __name__)
 
 
 class HuAcquisition(unittest.TestCase):
@@ -39,8 +39,7 @@ class HuAcquisition(unittest.TestCase):
 # 	@unittest.skip('')
     def test_setInstrument(self):
         self.mw = MainWindow()
-        logging.debug(
-            '%s %s %s', 'setting instrument', self.root.hsm, self.root)
+        logging.debug('setting instrument', self.root.hsm, self.root)
         self.mw.setInstrument(self.root.hsm, self.root)
         self.mw.show()
         QtGui.qApp.exec_()

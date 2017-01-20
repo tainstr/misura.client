@@ -49,11 +49,11 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         smp_name = vsmp[-1]  # sample name
         smp_path = '/' + '/'.join(vsmp)  # cut summary/ stuff
         report_path = '/'+smp_path[1:].replace('/','_')+'_report'
-        logging.debug('%s %s %s', smp_path, smp_name, report_path)
+        logging.debug(smp_path, smp_name, report_path)
         test = fields['sample'].linked
         from .. import filedata
         if not filedata.ism(test, filedata.LinkedMisuraFile):
-            logging.debug('%s %s', type(test), test)
+            logging.debug(type(test), test)
             raise plugins.ToolsPluginException(
                 'The target must be misura test file')
         # Search for test name

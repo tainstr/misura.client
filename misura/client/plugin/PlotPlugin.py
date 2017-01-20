@@ -90,7 +90,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     def initCurve(self, name='Curve', xData='xD', yData='yD',
                   yAxis='y', axisLabel='Curve', graph='/page/graph'):
         """Configure a new curve (appearance, axes positions, data labels"""
-        logging.debug('%s %s %s %s', 'initCurve', name, xData, yData)
+        logging.debug('initCurve', name, xData, yData)
 
         doc = self.doc
 
@@ -107,7 +107,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 gobj, 'axis-function', name=yAxis, direction='vertical'))
 
         # Create graph and axis (if needed)
-        logging.debug('%s %s', 'applying operations', preop)
+        logging.debug('applying operations', preop)
         doc.applyOperation(
             document.OperationMultiple(preop, descr='PlotDataset:Create'))
 
@@ -147,7 +147,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         pc = getattr(ds, 'm_percent', None)
         if pc is None:
-            logging.debug('%s %s', 'No m_percent attribute defined', dsn)
+            logging.debug('No m_percent attribute defined', dsn)
             return False
 
         cvt = None
@@ -160,7 +160,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         if cvt is None or cvt == pc:
             return False
         # A conversion should happen
-        logging.debug('%s %s %s', 'CONVERTING', cvt, pc)
+        logging.debug('CONVERTING', cvt, pc)
         self.ops.append(document.OperationToolsPlugin(
             PercentilePlugin.PercentilePlugin(),
             {
@@ -204,7 +204,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             raise plugins.ToolsPluginException(
                 'You should run this tool on a graph')
 
-        logging.debug('%s %s %s', 'Plotting:', fields['x'], fields['y'])
+        logging.debug('Plotting:', fields['x'], fields['y'])
         cnames = {}
         doc = cmd.document
         t = time()
@@ -228,7 +228,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             ds = doc.data[y]
             # If the ds is recursively derived, substitute it by its entry
             if not hasattr(ds, 'm_smp'):
-                logging.debug('%s %s', 'Retrieving ent', y)
+                logging.debug('Retrieving ent', y)
                 ds = doc.ent.get(y, False)
 
             # Get the curve and axis name

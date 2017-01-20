@@ -9,11 +9,11 @@ import multiprocessing
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    logging.debug('%s', 'initApp')
+    logging.debug('initApp')
     iutils.initApp()
-    logging.debug('%s %s', 'done initApp', confdb['recent_server'])
+    logging.debug('done initApp', confdb['recent_server'])
     o = iutils.getOpts()
-    logging.debug('%s %s', 'Passed options', o)
+    logging.debug('Passed options', o)
     fp = o['-o']
     mc = conf.MConf(fixed_path=fp)
     if o['-h']:

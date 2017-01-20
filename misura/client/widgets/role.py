@@ -96,7 +96,7 @@ class RoleIO(ActiveWidget):
         """ Draw the referred widget"""
         self.prop = self.remObj.gete(self.handle)
         if not self.prop:
-            logging.warning('Cannot get option  %s', self.handle)
+            logging.warning('Cannot get option  ', self.handle)
             return
         opt = self.prop['options']
         if opt[0] == '.':
@@ -217,7 +217,7 @@ class RoleEditor(QtGui.QWidget):
         # Set current values
         devpath = self.current[0]
         objpath = self.w.server.searchPath(devpath)
-        logging.debug('%s %s %s', 'server.searchPath', objpath, self.current)
+        logging.debug('server.searchPath', objpath, self.current)
         if objpath is False:
             return
         # this will emit a currentChanged(), triggering select()

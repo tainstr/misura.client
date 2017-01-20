@@ -17,18 +17,18 @@ from PyQt4 import QtGui
 
 # TODO: test if just one coordinate!
 
-logging.debug('%s %s', 'Importing', __name__)
+logging.debug('Importing', __name__)
 
 
 def setUpModule():
-    logging.debug('%s %s', 'setUpModule', __name__)
+    logging.debug('setUpModule', __name__)
     #ut.parallel(1)
 
 
 def tearDownModule():
-    logging.debug('%s', 'Quitting app')
+    logging.debug( 'Quitting app')
     #ut.parallel(0)
-    logging.debug('%s %s', 'tearDownModule', __name__)
+    logging.debug('tearDownModule', __name__)
 
 
 class ViewerControl(unittest.TestCase):

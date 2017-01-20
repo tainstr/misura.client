@@ -58,7 +58,7 @@ class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         #self.ops.append(document.OperationDatasetSetVal(fields['ds'], 'data',slice(None,None),ds1.data[:]))
 
         self.apply_ops()
-        logging.debug('%s %s %s', 'Converted %s %s using initial dimension %.2f.' % (
+        logging.debug('Converted %s %s using initial dimension %.2f.' % (
             fields['ds'], fields['action'], ds.m_initialDimension))
 # 		QtGui.QMessageBox.information(None,'Percentile output',
 # 				'Converted %s %s using initial dimension %.2f.' % (fields['ds'], msg, ds.m_initialDimension))
@@ -76,7 +76,7 @@ class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         for axp, dslist in tree['axis'].iteritems():
             if not fields['ds'] in dslist:
                 continue
-            logging.debug('%s %s', 'Propagating to', cvt)
+            logging.debug('Propagating to', cvt)
             cvt += dslist
             upax.append(axp)
         cvt = list(set(cvt))
@@ -88,7 +88,7 @@ class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             ncur = getattr(self.doc.data[nds], 'm_percent', None)
             if ncur == ds.m_percent:
                 continue
-            logging.debug('%s %s', 'Really propagating percentile to', nds)
+            logging.debug('Really propagating percentile to', nds)
             fields = {
                 'ds': nds, 'propagate': False, 'action': act, 'auto': True}
             self.ops.append(

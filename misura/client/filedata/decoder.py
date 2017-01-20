@@ -79,7 +79,7 @@ class DataDecoder(QtCore.QThread):
             QtGui.qApp, QtCore.SIGNAL('lastWindowClosed()'), self.close)
 
     def close(self, *foo):
-        logging.debug('%s %s', 'CLOSING DataDecoder', self.tmpdir)
+        logging.debug('CLOSING DataDecoder', self.tmpdir)
         if self.tmpdir and os.path.exists(self.tmpdir):
             shutil.rmtree(self.tmpdir)
         self.ok = False
@@ -110,8 +110,7 @@ class DataDecoder(QtCore.QThread):
                 self.datapath, '_reference_class')
 #            self.ext = self.proxy.get_node_attr(self.datapath, 'type')
             self.ext = self.refClassName
-            logging.debug(
-                '%s %s %s %s', 'DataDecoder.setDataPath', datapath, self.refClassName, self.ext)
+            logging.debug('DataDecoder.setDataPath', datapath, self.refClassName, self.ext)
             self.refclass = getattr(reference, self.refClassName)
 
         self.emit(QtCore.SIGNAL('reset()'))
@@ -138,37 +137,37 @@ class DataDecoder(QtCore.QThread):
         if not fp:
             fp = self.proxy
         if fp is False or self.datapath is False:
-            logging.debug('%s', 'DataDecoder: no proxy or datapath')
+            logging.debug('DataDecoder: no proxy or datapath')
             self._len = 0
             return self._len
         try:
             r = fp.len(self.datapath)
             assert r is not None
         except:
-            logging.debug('%s', 'get_len first pass')
+            logging.debug('get_len first pass')
             traceback.print_exc()
             fp = fp.copy()
             try:
                 r = fp.len(self.datapath)
             except:
-                logging.debug('%s', 'get_len second pass')
+                logging.debug('get_len second pass')
                 traceback.print_exc()
                 r = 0
 
-        logging.debug('%s %s', 'DataDecoder.get_len', r)
+        logging.debug('DataDecoder.get_len', r)
         if r is not None:
             self._len = r
         return self._len
 
     def __len__(self):
         if self.isRunning():
-            logging.debug('%s %s', 'decoder running', self._len)
+            logging.debug('decoder running', self._len)
             return self._len
         r = 0
         try:
             r = self.get_len()
         except:
-            logging.debug('%s %s', 'Getting __len__', self.datapath)
+            logging.debug('Getting __len__', self.datapath)
             traceback.print_exc()
         return r
 
@@ -186,7 +185,7 @@ class DataDecoder(QtCore.QThread):
         if not fp:
             fp = self.proxy
         if fp is False:
-            logging.debug('%s', 'get_data: no file proxy')
+            logging.debug('get_data: no file proxy')
             return False
 
         sequence_id = '%i' % (seq)
@@ -197,10 +196,9 @@ class DataDecoder(QtCore.QThread):
             t0 = time()
             entry = fp.col_at(self.datapath, seq, True)
             t1 = time()
-            logging.debug('%s %s', 'DataDecoder entry search', t1 - t0)
+            logging.debug('DataDecoder entry search', t1 - t0)
             if entry is None or len(entry) <= 5:
-                logging.debug(
-                    '%s %s %s %s %s', 'NO DATA', self.datapath, seq, self.ext, entry)
+                logging.debug('NO DATA', self.datapath, seq, self.ext, entry)
                 return False
             self.cached_profiles[sequence_id] = entry
 
@@ -208,13 +206,12 @@ class DataDecoder(QtCore.QThread):
         try:
             t, dat = self.refclass.decode(entry)
         except:
-            logging.debug(
-                '%s %s %s', 'DataDecoder getting', self.datapath, seq)
+            logging.debug('DataDecoder getting', self.datapath, seq)
             traceback.print_exc()
             return False
         # Direct image conversion
         if self.ext == 'Image':
-            logging.debug('%s %s', 'toQImage', seq)
+            logging.debug('toQImage', seq)
             # Create a QImage for signalling
             pix = QtGui.QImage()
             L = pix.loadFromData(dat, self.comp)
@@ -225,18 +222,18 @@ class DataDecoder(QtCore.QThread):
             return t, pix
         # FIXME: how to detect misura compression? Different Ext? Or different ReferenceClass?
         elif self.ext == 'ImageM3':
-            logging.debug('%s %s', 'decompressing', seq)
+            logging.debug('decompressing', seq)
             dat = bitmap.decompress(dat)
             qimg = QtGui.QImage()
             qimg.loadFromData(dat,'BMP')
             return t, qimg
         # Writing a profile onto an image
         elif self.ext == 'Profile':
-            logging.debug('%s %s', 'Profile', seq)
+            logging.debug('Profile', seq)
             ((w, h), x, y) = dat
             return t, draw_profile(x, y)
 
-        logging.debug('%s %s', 'Format not recognized', self.ext)
+        logging.debug('Format not recognized', self.ext)
         return False
 
     def dequeue(self, seq):
@@ -265,17 +262,17 @@ class DataDecoder(QtCore.QThread):
 
     def get(self, seq):
         if self.proxy is False or self.datapath is False:
-            logging.debug('%s %s', 'proxy', self.proxy)
-            logging.debug('%s %s', 'datapath', self.datapath)
+            logging.debug('proxy', self.proxy)
+            logging.debug('datapath', self.datapath)
             return False
         if not (seq in self.names):
-            logging.debug('%s %s', 'queue', seq)
+            logging.debug('queue', seq)
             self.queue.append(seq)
             # If queue is longer than maximum cache length, remove oldest point
             if len(self.queue) >= params.maxImageCacheSize:
                 self.queue.pop(0)
             if not self.isRunning():
-                logging.debug('%s', 'Restart decoder')
+                logging.debug('Restart decoder')
                 self.start()
             return False
         if self.zerotime < 0:
@@ -284,7 +281,7 @@ class DataDecoder(QtCore.QThread):
         if self.ext == 'img':
             self.emit(QtCore.SIGNAL('readyImage(QImage)'), dat)
         self.emit(QtCore.SIGNAL('readyFrame()'))
-        logging.debug('%s %s %s', 'found data', self.zerotime, t)
+        logging.debug('found data', self.zerotime, t)
         # Compatibility with absolute-time datasets
         if t > self.zerotime:
             t -= self.zerotime
@@ -293,7 +290,7 @@ class DataDecoder(QtCore.QThread):
     def run(self):
         """Runs the decoding in a separate process"""
         if self.proxy is False:
-            logging.debug('%s', 'No proxy defined')
+            logging.debug('No proxy defined')
             return
 #		self.proxy.close()
         fp = self.proxy.copy()

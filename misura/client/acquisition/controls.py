@@ -39,7 +39,7 @@ class Controls(QtGui.QToolBar):
         QtGui.QToolBar.__init__(self, parent)
         self._lock = Lock()
         self.remote = remote
-        logging.debug('%s', 'Controls: init')
+        logging.debug('Controls: init')
         self.ended_set = set()
         self.stopped_set = set()
         self.start_stop_notification = StartedFinishedNotification(self, self.started)
@@ -51,14 +51,14 @@ class Controls(QtGui.QToolBar):
         if self.name != 'kiln':
             self.coolAct = self.addAction('Cool', self.stop_kiln)
 
-        logging.debug('%s %s', 'Controls: ', self.name)
+        logging.debug('Controls: ', self.name)
         if self.name == 'post':
             self.addAction('Machine Database', parent.showIDB)
             self.addAction('Test File', parent.openFile)
             self.addAction('Misura3 Database', parent.showDB3)
         self.isRunning = self.server['isRunning']
         self.updateActions()
-        logging.debug('%s', 'Controls end init')
+        logging.debug('Controls end init')
         self.stopped.connect(self.hide_prog)
         self.started.connect(self.hide_prog)
         self.connect(self, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
@@ -72,7 +72,7 @@ class Controls(QtGui.QToolBar):
     def system_kid_slot(self, kid):
         """Slot processing system_kid_changed signals from KidRegistry.
         Calls updateActions if /isRunning is received."""
-        logging.debug('%s %s', 'system_kid_slot: received', kid)
+        logging.debug('system_kid_slot: received', kid)
         if not self._lock.acquire(False):
             logging.debug(
                 "Controls.system_kid_slot: Impossible to acquire lock")
@@ -91,7 +91,7 @@ class Controls(QtGui.QToolBar):
             if self.remote['closingTest'] != 0:
                 self.closingTest = self.remote['closingTest']
                 logging.debug(
-                    'Waiting closingTest... %s', self.remote['closingTest'])
+                    'Waiting closingTest... ', self.remote['closingTest'])
                 return
 
             if self.server['isRunning']:
@@ -185,7 +185,7 @@ class Controls(QtGui.QToolBar):
             self.started.emit()
         except:
             msg = format_exc()
-            logging.debug('%s', msg)
+            logging.debug(msg)
         self.paused = False
         self.started.emit()
         if not self.mute:
@@ -301,10 +301,10 @@ class MotionControls(QtGui.QToolBar):
         paths = {}
         # Collect all focus paths
         for pic, win in self.parent().cameras.itervalues():
-            logging.debug('%s', pic)
-            logging.debug('%s', pic.remote)
-            logging.debug('%s', pic.remote.encoder)
-            logging.debug('%s', pic.remote.encoder.focus)
+            logging.debug(pic)
+            logging.debug(pic.remote)
+            logging.debug(pic.remote.encoder)
+            logging.debug(pic.remote.encoder.focus)
 
             obj = pic.remote.encoder.focus.role2dev('motor')
             if not obj:

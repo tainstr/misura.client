@@ -52,12 +52,12 @@ class aMeta(ActiveWidget):
     def receive_drop(self, event):
         """Receive drops from MiniImage"""
         txt = str(event.mimeData().text())
-        logging.debug('Received drop event %s', txt)
+        logging.debug('Received drop event', txt)
         if not txt.startswith('point:'):
             return
         foo, path, t, T = txt.split(':')
         if not self.prop['kid'].startswith(path):
-            logging.debug("Wrong destination %s", path)
+            logging.debug("Wrong destination", path)
         self.current['time'] = float(t)
         self.current['temp'] = float(T)
         self.current['value'] = 'None'

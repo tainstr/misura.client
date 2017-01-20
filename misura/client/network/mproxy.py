@@ -46,7 +46,7 @@ def remote_dbdir(server):
     # Filter away the misura.sqlite filename
     p = server.storage.get_dbpath().split('/')[:-1]
     r = '/'.join(p)
-    logging.debug('%s %s', 'remote_dbdir', r)
+    logging.debug('remote_dbdir', r)
     return r
 
 
@@ -63,7 +63,7 @@ def dataurl(server, uid):
         p = '/' + p
     # Prepend remote HTTPS/data path
     url = server.data_addr + urllib.quote(p.encode('utf8'))
-    logging.debug('dataurl %s %s --> %s', server.data_addr, p, url)
+    logging.debug('dataurl %s %s --> %s' % (server.data_addr, p, url))
     return url, p
 
 
@@ -125,11 +125,11 @@ def reconnect(func):
         try:
             r = func(self, *a, **k)
         except (xmlrpclib.ProtocolError, httplib.CannotSendRequest, httplib.BadStatusLine, httplib.ResponseNotReady):
-            logging.debug('RECONNNECTING %s', func)
+            logging.debug('RECONNNECTING', func)
             self.connect()
             return func(self, *a, **k)
         except:
-            logging.debug('UNHANDLED EXCEPTION %s', func)
+            logging.debug('UNHANDLED EXCEPTION', func)
             logging.debug(format_exc())
             if self._reg:
                 self._reg.connection_error()
@@ -354,10 +354,10 @@ class MisuraProxy(object):
     @lockme
     def info(self, key):
         """Pretty print information about `key`"""
-        logging.debug('%s %s', 'Option:', key)
+        logging.debug('Option:', key)
         e = self.remObj.gete(key)
         for k, v in e.iteritems():
-            logging.debug('%s %s %s %s', '\t', k, ':', v)
+            logging.debug('\t', k, ':', v)
 
     @lockme
     def lastlog(self):
@@ -403,8 +403,7 @@ class MisuraProxy(object):
         if self.remObj is not False:
             return self.__setitem__(key, val)
         elif key in self._remoteNames:
-            logging.debug(
-                '%s %s', 'Overwrite of a remote object name is forbidden!', key)
+            logging.debug('Overwrite of a remote object name is forbidden!', key)
             return False
         else:
             return object.__setattr__(self, key, val)

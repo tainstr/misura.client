@@ -22,7 +22,7 @@ class MeasureInfo(QtGui.QTabWidget):
         QtGui.QTabWidget.__init__(self, parent)
         self.setTabPosition(QtGui.QTabWidget.East)
         self.remote = remote
-        logging.debug('%s %s %s %s', 'MeasureInfo paths', remote.parent(
+        logging.debug('MeasureInfo paths', remote.parent(
         )._Method__name, remote._Method__name, remote.measure._Method__name)
         # Configurazione della Misura
         self.server = remote.parent()

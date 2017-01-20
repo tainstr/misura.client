@@ -20,9 +20,8 @@ def determine_path():
             root = os.path.realpath(root)
         return os.path.dirname(os.path.abspath(root))
     except:
-        logging.debug('%s %s', "I'm sorry, but something is wrong.")
-        logging.debug(
-            '%s', "There is no __file__ variable. Please contact the author.")
+        logging.debug("I'm sorry, but something is wrong.")
+        logging.debug("There is no __file__ variable. Please contact the author.")
         sys.exit()
 
 d = determine_path()
@@ -54,15 +53,15 @@ def load_tests(loader, tests, pattern):
     d2 = os.path.split(d2)[0]
     os.chdir(d2)
 # 	os.chdir(d1)
-    logging.debug('%s %s', 'TESTS from:', d2)
+    logging.debug('TESTS from:', d2)
     for i, a in enumerate(lst):
         print i, a
     for dirpath in lst:
-        logging.debug('%s %s', 'Adding main dir', dirpath)
+        logging.debug('Adding main dir', dirpath)
         for pattern in patterns:
             for all_test_suite in unittest.defaultTestLoader.discover(dirpath, pattern=pattern, top_level_dir=d2):
                 for test_suite in all_test_suite:
-                    logging.debug('%s %s %s', 'adding', dirpath, test_suite)
+                    logging.debug('adding', dirpath, test_suite)
                     try:
                         suite.addTests(test_suite)
                     except:
@@ -71,4 +70,3 @@ def load_tests(loader, tests, pattern):
 
 if __name__ == '__main__':
     unittest.main(verbosity=1)
-    logging.debug('%s', 'DONE')

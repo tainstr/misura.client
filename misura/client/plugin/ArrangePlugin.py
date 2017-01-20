@@ -52,14 +52,14 @@ def find_unused_color(used):
     idx = 0
     color = kelly_colors[idx]
     while color in used:            
-        logging.debug('%s %s', 'color is used', color)
+        logging.debug('color is used', color)
         idx += 1
         if idx>=len(kelly_colors):
             logging.error('Exausted free colors!')
             color = '#000000'
         else:
             color = kelly_colors[idx]
-    logging.debug('%s %s', 'found color', color)
+    logging.debug('found color', color)
     return color
 
 class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
@@ -114,7 +114,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             if self.fields['dataset'] == 'Line Color':
                 if hasattr(ax, 'm_auto'):
                     color = axcolors[ax.name]
-                    logging.debug('%s %s', 'm_auto override', color)
+                    logging.debug('m_auto override', color)
                 elif len(axes)>1:
                     # Generate html color for this idx
                     color = find_unused_color(used)

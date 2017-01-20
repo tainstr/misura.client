@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import logging
-logging.debug('%s', 'Importing ' + __name__)
+logging.debug( 'Importing ' + __name__)
 
 import unittest
 from misura.canon.logger import Log as logging

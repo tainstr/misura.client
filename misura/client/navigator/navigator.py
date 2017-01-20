@@ -264,11 +264,11 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             if act.isChecked():
                 final.add(s)
         if len(final) == 0:
-            logging.debug('%s', 'no valid status requested')
+            logging.debug('no valid status requested')
             return
         self.status = final
         self.model().status = final
-        logging.debug('%s %s', 'STATUS SET TO', final)
+        logging.debug('STATUS SET TO', final)
         self.ensure_sync_of_view_and_model()
 
     def select(self, idx):
@@ -445,7 +445,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.previous_selection = self.current_node_path
         sel = self.selectedIndexes()
         node = self.model().data(self.currentIndex(), role=Qt.UserRole)
-        logging.debug('%s %s', 'showContextMenu', node)
+        logging.debug('showContextMenu', node)
         menu = self.buildContextMenu(node, sel)
         
         # menu.popup(self.mapToGlobal(pt))

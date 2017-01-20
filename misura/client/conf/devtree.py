@@ -49,7 +49,7 @@ class Item(object):
         while node.name != 'server':
             path = [node.name] + path
             node = node.parent
-        logging.debug('%s %s', "path", path)
+        logging.debug("path", path)
         return path
 
     def index_path(self, path):
@@ -63,8 +63,7 @@ class Item(object):
         for name in path:
             #logging.debug('index_path searching', name, node.names)
             if name not in node.names:
-                logging.debug(
-                    '%s %s %s %s', 'NAME NOT FOUND', name, node.name, node.names)
+                logging.debug('NAME NOT FOUND', name, node.name, node.names)
                 return False, False
             i = node.names.index(name)
             node = node.children[i]
@@ -123,15 +122,14 @@ class ServerModel(QtCore.QAbstractItemModel):
         """Returns the sequence of model indexes starting from a path: parent0...parentN.nodename"""
         # Get the full sequence of indexes and the parent node
         idx, node = self.item.children[0].index_path(path)
-        logging.debug(
-            '%s %s %s %s', 'ServerModel.index_path: FOUND', path, idx, node)
+        logging.debug('ServerModel.index_path: FOUND', path, idx, node)
         if not idx:
             return []
 #		return self.createIndex(idx[-1], 0, node),idx
         jdx = []
         jdx.append(self.createIndex(0, 0, self.item.children[0]))
         for i in idx:
-            logging.debug('%s %s %s', 'indexing', jdx[-1], i)
+            logging.debug('indexing', jdx[-1], i)
             jdx.append(self.index(i, 0, jdx[-1]))
         return jdx
 

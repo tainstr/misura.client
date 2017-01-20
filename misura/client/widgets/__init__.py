@@ -84,8 +84,7 @@ def build(server, remObj, prop, parent=None):
         elif prop['kid'] == '/progress':
             obj = RoleProgress(*arg)
     except:
-        logging.debug(
-            '%s %s %s %s %s', 'Building ', prop, 'of', remObj, 'error:')
+        logging.debug('Building ', prop, 'of', remObj, 'error:')
         logging.debug(format_exc())
         if obj:
             obj.hide()
@@ -119,7 +118,7 @@ if __name__ == '__main__':
 #	wgs.append(aTable(srv, srv.simulator.flexion,srv.simulator.flexion.gete('MultiLayer_material')))
     wgs.append(aProfile(srv, srv.hsm.sample0, srv.hsm.sample0.gete('profile')))
     for wg in wgs:
-        logging.debug('%s', wg)
+        logging.debug(wg)
         lay.addRow(wg.label, wg)
     qb.setLayout(lay)
     qb.show()

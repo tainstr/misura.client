@@ -192,7 +192,7 @@ class CalibrationTool(QtGui.QDialog):
         self.vis_sync()
         self.factor = self.newUm.value() / self.rpl.current
         self.newFactor.setText(u'%.2f \u00b5m/px' % self.factor)
-        logging.debug('%s %s', "Factor", self.factor)
+        logging.debug("Factor", self.factor)
 
     def closeEvent(self, e):
         self.cleanUp()
@@ -201,7 +201,7 @@ class CalibrationTool(QtGui.QDialog):
     def cleanUp(self, *foo):
         self.sample.analyzer['calibration'] = False
         logging.debug(
-            'Camera exiting calibration %s', self.sample.analyzer['calibration'])
+            'Camera exiting calibration', self.sample.analyzer['calibration'])
         s = self.pixItem.scene()
         lst = self.pt1, self.pt2, self.line, self.stop1, self.stop2
         for item in lst:

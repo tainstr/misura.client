@@ -38,12 +38,12 @@ def getRemoteDev(server, devpath):
     if devpath == 'None':
         return False, None
     sp = server.searchPath(devpath)
-    logging.debug('%s %s %s', 'Getting Remote Dev', sp, devpath)
+    logging.debug('Getting Remote Dev', sp, devpath)
     if not sp:
         return False, None
-    logging.debug('%s %s', 'Getting Remote Dev', sp)
+    logging.debug('Getting Remote Dev', sp)
     dev = server.toPath(sp)
-    logging.debug('%s %s %s', 'Got Remote Dev', devpath, dev)
+    logging.debug('Got Remote Dev', devpath, dev)
     return True, dev
 
 
@@ -71,8 +71,8 @@ class RunMethod(QtCore.QRunnable):
         self.args = args
         self.kwargs = kwargs
         self.pid = 'Waiting: {}'.format(func)
-        logging.debug(
-            'RunMethod initialized %s %s %s', self.func, self.args, self.kwargs)
+        logging.debug('RunMethod initialized', self.func, 
+                      self.args, self.kwargs)
         self.runnables.append(self)
         self.error = False
         self.running = False
@@ -186,7 +186,7 @@ class Active(object):
 
     def emitError(self, msg):
         msg = self.tr(msg)
-        logging.debug('%s', msg)
+        logging.debug(msg)
 
     def emitOptional(self):
         pass
@@ -360,7 +360,7 @@ class LabelWidget(QtGui.QLabel):
         return QtGui.QLabel.dropEvent(event)
 
     def dragEnterEvent(self, event):
-        logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
+        logging.debug('dragEnterEvent', event.mimeData())
         event.acceptProposedAction()
         if event.mimeData().hasFormat("text/plain"):
             event.acceptProposedAction()
@@ -441,10 +441,10 @@ class ActiveWidget(Active, QtGui.QWidget):
                 act.setChecked(False)
                 continue
             act.setChecked(True)
-            logging.debug('%s %s', 'Setting csunit to', u)
+            logging.debug('Setting csunit to', u)
             r = self.remObj.setattr(self.handle, 'csunit', u)
             self.prop['csunit'] = u
-            logging.debug('%s %s', 'result', r)
+            logging.debug('result', r)
         self.set_label()
         self.update_menu()
         self.update()
@@ -456,16 +456,16 @@ class ActiveWidget(Active, QtGui.QWidget):
         if self.enable_check:
             out['enabled'] = self.enable_check.isChecked()
 
-        logging.debug('%s %s', 'updating flags', out)
+        logging.debug('updating flags', out)
         r = self.remObj.setFlags(self.handle, out)
         return r
 
     def update_menu(self):
         flags = self.remObj.getFlags(self.handle)
-        logging.debug('%s %s', 'remote flags', flags)
+        logging.debug('remote flags', flags)
         for key, act in self.flags.iteritems():
             if not flags.has_key(key):
-                logging.debug('%s %s %s', 'Error, key disappeared', key)
+                logging.debug('Error, key disappeared', key)
             act.setChecked(flags[key] * 2)
             if key == 'enabled':
                 self.enable_check.setChecked(flags[key] * 2)
@@ -498,7 +498,7 @@ class ActiveWidget(Active, QtGui.QWidget):
             un = self.emenu.addMenu(_('Units'))
             kgroup, f, p = units.get_unit_info(u, units.from_base)
             same = units.from_base.get(kgroup, {u: lambda v: v}).keys()
-            logging.debug('%s %s', kgroup, same)
+            logging.debug( kgroup, same)
             for u1 in same:
                 p = functools.partial(self.set_unit, u1)
                 act = un.addAction(_(u1), p)
@@ -620,14 +620,14 @@ class ActiveWidget(Active, QtGui.QWidget):
         return QtGui.QWidget.dropEvent(self, event)
 
     def dragEnterEvent(self, event):
-        logging.debug('%s %s', 'dragEnterEvent', event.mimeData())
+        logging.debug('dragEnterEvent', event.mimeData())
         event.acceptProposedAction()
         if event.mimeData().hasFormat("text/plain"):
             event.acceptProposedAction()
 
     def show_info(self):
         prop = self.prop
-        logging.debug('%s', prop)
+        logging.debug(prop)
         t = '<h1> Option: %s </h1>' % prop.get('name', 'Object')
 
         for k, v in prop.iteritems():

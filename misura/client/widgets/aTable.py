@@ -30,8 +30,7 @@ class aTablePointDelegate(QtGui.QItemDelegate):
         elif colType == 'Integer':
             wg = QtGui.QSpinBox(parent)
             wg.setRange(-2147483647, 2147483647)
-            logging.debug(
-                '%s %s %s', 'Created QSpingBox', wg.maximum(), wg.minimum())
+            logging.debug('Created QSpingBox', wg.maximum(), wg.minimum())
         elif colType == 'String':
             wg = QtGui.QLineEdit(parent)
         elif colType == 'Boolean':

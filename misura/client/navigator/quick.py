@@ -88,7 +88,7 @@ class QuickOps(object):
         """Slot for plotting by temperature and time the currently selected entry"""
         pt = self.model().is_plotted(node.path)
         if pt:
-            logging.debug('%s %s', 'UNPLOTTING', node)
+            logging.debug('UNPLOTTING', node)
             self.deleteData(node=node, remove_dataset=False, recursive=False)
             return
         # Load if no data
@@ -100,7 +100,7 @@ class QuickOps(object):
         # If standard page, plot both T,t
         page = self.model().page
         if page.startswith('/temperature/') or page.startswith('/time/'):
-            logging.debug('%s %s', 'Quick.plot', page)
+            logging.debug('Quick.plot', page)
             # Get X temperature names
             xnames = self.xnames(node, page='/temperature')
             if len(xnames) > 0:
@@ -117,7 +117,7 @@ class QuickOps(object):
         else:
             if page.startswith('/report'):
                 page = page + '/temp'
-            logging.debug('%s %s', 'Quick.plot on currentwidget', page)
+            logging.debug('Quick.plot on currentwidget', page)
             xnames = self.xnames(node, page=page)
             assert len(xnames) > 0
             args = {'x': xnames, 'y': [yname] * len(xnames), 'currentwidget': self.cmd.currentwidget.path}
@@ -193,12 +193,12 @@ class QuickOps(object):
 
         # Remove object and unreferenced axes
         for obj in remplot + remax + remobj:
-            logging.debug('%s %s %s', 'Removing obj', obj.name, obj.path)
+            logging.debug('Removing obj', obj.name, obj.path)
             obj.parent.removeChild(obj.name)
         # Finally, delete dataset
         if remove_dataset:
             self.doc.deleteDataset(node_path)
-            logging.debug('%s %s', 'deleted', node_path)
+            logging.debug('deleted', node_path)
 
         # Recursive call over derived datasets
         if recursive:

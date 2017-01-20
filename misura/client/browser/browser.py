@@ -130,7 +130,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def open_file(self, path, tab_index=-1, **kw):
         path = unicode(path)
-        logging.debug('%s %s', 'Browser MainWindow.open_file', path, tab_index)
+        logging.debug('Browser MainWindow.open_file', path, tab_index)
         if tab_index>0:
             tab = self.tab.widget(tab_index)
             tab.measureTab.results.navigator.open_file(path)
@@ -197,7 +197,7 @@ class MainWindow(QtGui.QMainWindow):
             
 
     def close_tab(self, idx):
-        logging.debug('%s %s', 'Tab close requested', idx)
+        logging.debug('Tab close requested', idx)
         if idx == 0:
             return
         w = self.tab.widget(idx)

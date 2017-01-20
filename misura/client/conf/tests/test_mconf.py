@@ -13,16 +13,16 @@ from misura.client import filedata
 from PyQt4 import QtGui
 
 nativem4 = os.path.join(iutils_testing.data_dir, 'test_video.h5')
-logging.debug('%s %s', 'Importing', __name__)
+logging.debug('Importing', __name__)
 main = __name__ == '__main__'
 
 
 def setUpModule():
-    logging.debug('%s %s', 'setUpModule', __name__)
+    logging.debug('setUpModule', __name__)
 
 
 def tearDownModule():
-    logging.debug('%s %s', 'tearDownModule', __name__)
+    logging.debug('tearDownModule', __name__)
 
 
 
@@ -35,7 +35,7 @@ class TestTreePanel(unittest.TestCase):
         self.server = file_proxy.conf
 
     def test_recursiveModel(self):
-        logging.debug('%s', '######## STARTING MCONF #######' * 10)
+        logging.debug('######## STARTING MCONF #######' * 10)
         m = conf.TreePanel(self.server.users, select=self.server.users)
         if main:
             m.show()

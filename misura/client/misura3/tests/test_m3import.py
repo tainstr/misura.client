@@ -74,7 +74,7 @@ class Convert(unittest.TestCase):
 
     def check_import(self, op, names=False):
         """Simulate a data import operation"""
-        logging.debug('%s %s', 'check_import', op)
+        logging.debug('check_import', op)
         fp = indexer.SharedFile(op)
         fp.load_conf()
         rm = devtree.recursiveModel(fp.conf)

@@ -25,14 +25,14 @@ class VersionMenu(QtGui.QMenu):
     def redraw(self):
         self.clear()
         vd = self.proxy.get_versions()
-        logging.debug('%s %s', 'Got info', vd)
+        logging.debug('Got info', vd)
         if vd is None:
             return
         cur = self.proxy.get_version()
-        logging.debug('%s %s', 'Current version', cur)
+        logging.debug('Current version', cur)
         self.loadActs = []
         for v, info in vd.iteritems():
-            logging.debug('%s %s %s', 'Found version', v, info)
+            logging.debug('Found version', v, info)
             p = functools.partial(self.load_version, v)
             act = self.addAction(' - '.join(info), p)
             act.setCheckable(True)

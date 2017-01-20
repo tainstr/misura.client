@@ -17,17 +17,17 @@ from misura.morla import sim_motor
 from misura.microscope import Hsm
 from misura.flex import Flex
 
-logging.debug('%s %s', 'Importing', __name__)
+logging.debug(Importing', __name__)
 
 
 def setUpModule():
-    logging.debug('%s %s', 'setUpModule', __name__)
+    logging.debug('setUpModule', __name__)
     #ut.parallel(True)
 
 
 def tearDownModule():
-    logging.debug('%s', 'Quitting app')
-    logging.debug('%s %s', 'tearDownModule', __name__)
+    logging.debug('Quitting app')
+    logging.debug('tearDownModule', __name__)
     #ut.parallel(False)
 
 instr_class = Hsm

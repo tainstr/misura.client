@@ -43,7 +43,7 @@ def getUsedPrefixes(doc):
     for name, ds in doc.data.iteritems():
         lf = ds.linked
         if lf is None:
-            logging.debug('%s %s', 'no linked file for ', name)
+            logging.debug('no linked file for ', name)
             continue
         p[lf.filename] = lf
     logging.debug('getUsedPrefixes', p, doc.data.keys())
@@ -111,11 +111,11 @@ def read_data(proxy, col):
 
 def not_interpolated(proxy, col, startt, endt):
     """Retrieve `col` from `proxy` and extend its time range from `startt` to `endt`"""
-    logging.debug('%s %s %s %s', 'not interpolating col', col, startt, endt)
+    logging.debug('not interpolating col', col, startt, endt)
     # Take first point to get column start time
     zt = proxy.col(col, 0)
     if zt is None or len(zt) == 0:
-        logging.debug('%s %s %s', 'Skipping column: no data', col, zt)
+        logging.debug('Skipping column: no data', col, zt)
         return False, False
     zt = zt[0]
     data = read_data(proxy, col)
@@ -441,10 +441,10 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             new = clientconf.confdb.resolve_uid(self.uid)
             if new:
                 logging.debug(
-                    'Opening by uid %s: %s instead of %s', self.uid, new, self.filename)
+                    'Opening by uid %s: %s instead of %s' % (self.uid, new, self.filename))
                 self.filename = new[0]
             else:
-                logging.debug('Impossible to resolve uid: %s', self.uid)
+                logging.debug('Impossible to resolve uid:', self.uid)
         else:
             logging.debug('No uid defined in params')
         if not self.filename:
@@ -497,12 +497,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         elapsed0 = self.proxy.get_node_attr('/conf', 'elapsed')
         elapsed = int(instrobj.measure['elapsed'])
         elapsed = max(elapsed, elapsed0)
-        logging.debug('%s %s', 'got elapsed', elapsed)
+        logging.debug('got elapsed', elapsed)
         # Create time dataset
         time_sequence = []
         if self._doc.data.has_key(self.prefix + 't'):
-            logging.debug(
-                '%s %s', 'Document already have a time sequence for this prefix', self.prefix)
+            logging.debug('Document already have a time sequence for this prefix', self.prefix)
             ds = self._doc.data[self.prefix + 't']
             try:
                 ds = units.convert(ds, 'second')
@@ -524,7 +523,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         header = self.proxy.header(['Array'], '/summary') + cached
         autoload = []
         excluded = []
-        logging.debug('%s %s', 'got header', len(header))
+        logging.debug('got header', len(header))
         # Match rules
         for h in header[:]:
             exc = False
@@ -577,8 +576,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             smp = getattr(self.instrobj, n)
             self.LF.samples.append(
                 Sample(conf=smp, linked=self.LF, ref=False, idx=idx))
-        logging.debug(
-            '%s %s %s %s', 'build', idx + 1, 'samples', self.LF.samples)
+        logging.debug('build', idx + 1, 'samples', self.LF.samples)
         return refsmp
 
     def search_data(self, col):

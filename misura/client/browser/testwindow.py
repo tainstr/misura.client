@@ -179,8 +179,7 @@ class TestWindow(acquisition.MainWindow):
         acquisition.MainWindow.close(self)
 
     def set_idx(self, idx):
-        logging.debug(
-            '%s %s %s', 'TestWindow.set_idx', self.play.isRunning(), idx)
+        logging.debug('TestWindow.set_idx', self.play.isRunning(), idx)
         if not self.play.isRunning():
             self.play.set_idx(idx)
         else:
@@ -192,8 +191,7 @@ class TestWindow(acquisition.MainWindow):
         """Re-evaluate the meta-data generating scripts (standards)."""
         fp = self.fixedDoc.proxy
         if fp.__class__.__name__ != 'SharedFile':
-            logging.debug(
-                '%s', 'Error: restandard is only possible on local files')
+            logging.debug('Error: restandard is only possible on local files')
             return
         # Overwrite
         r = self.fixedDoc.proxy.run_scripts(self.remote)

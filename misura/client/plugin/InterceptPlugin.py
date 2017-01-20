@@ -93,16 +93,16 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         hor = axn == 'X'
         datapoint_paths = []
-        logging.debug('%s %s', 'targets', targetds)
+        logging.debug( 'targets', targetds)
         for datapoint_parent in g.children:
             if not isinstance(datapoint_parent, veusz.widgets.point.PointPlotter):
                 continue
             if datapoint_parent.settings.hide:
-                logging.debug('%s %s', 'Skipping hidden object', datapoint_parent.path)
+                logging.debug('Skipping hidden object', datapoint_parent.path)
                 continue
             if datapoint_parent.settings.yData not in targetds and len(targetds) > 0:
-                logging.debug(
-                    '%s %s %s', 'Skipping non-targeted object', datapoint_parent.path, datapoint_parent.settings.yData)
+                logging.debug('Skipping non-targeted object', datapoint_parent.path, 
+                              datapoint_parent.settings.yData)
                 continue
             # Search the nearest point
             x = datapoint_parent.settings.get('xData').getFloatArray(doc)
@@ -138,7 +138,7 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
             datapoint_paths.append(datapoint_parent.path + '/' + name)
 
-        logging.debug('%s %s', 'Intercepting', self.ops)
+        logging.debug('Intercepting', self.ops)
         self.apply_ops('Intercept')
 
         for path in datapoint_paths:

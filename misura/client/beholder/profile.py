@@ -48,16 +48,16 @@ class Profile(Overlay):
             return
         prf = self.current[self.profile_name]
         if len(prf) < 3:
-            logging.debug('%s %s', "No profile", prf)
+            logging.debug("No profile", prf)
             return False
         sz, x, y = prf
         # Discart malformed profiles
         if len(sz) < 2 or len(x) < 1 or len(x) != len(y):
-            logging.debug('%s %s', "Malformed profile", prf)
+            logging.debug("Malformed profile", prf)
             return False
         # Discart malformed profiles
         if len(x) <= 1 or len(x) != len(y):
-            logging.debug('%s %s', "Malformed profile", prf)
+            logging.debug("Malformed profile", prf)
             return False
         # Translate points with respect to sample ROI
         rx, ry, rw, rh = self.current['roi']

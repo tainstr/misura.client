@@ -13,7 +13,7 @@ class DensityFunction(object):
     """Callable returning density at any temperature, given a reference density and temperature and linear/volumetric expansion curves"""
 
     def __init__(self, rho0, T0, dil=False, T=False, ex_start=0, ex_end=0, dim='Linear'):
-        logging.debug('%s %s %s %s %s %s %s %s', 'DensityFunction',
+        logging.debug('DensityFunction',
                       rho0, T0, dil, T, ex_start, ex_end, dim)
         self.rho0 = rho0
         self.T0 = T0

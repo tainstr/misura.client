@@ -16,9 +16,8 @@ def determine_path():
             root = os.path.realpath(root)
         return os.path.dirname(os.path.abspath(root))
     except:
-        Log.debug('%s %s', "I'm sorry, but something is wrong.")
-        Log.debug(
-            '%s', "There is no __file__ variable. Please contact the author.")
+        Log.debug("I'm sorry, but something is wrong.")
+        Log.debug("There is no __file__ variable. Please contact the author.")
         sys.exit()
 
 client_test_dir = os.path.join(determine_path())
@@ -46,7 +45,7 @@ class Dummy(object):
         self.p = parent
 
     def set(self, a, v):
-        Log.debug('%s %s %s', 'Dummy.set', a, v)
+        Log.debug('Dummy.set', a, v)
         return True
 
     def copy(self):
@@ -58,7 +57,7 @@ class Dummy(object):
         return self.p
 
     def analyze(self, *foo):
-        Log.debug('%s %s', 'Analyzer arguments', len(foo))
+        Log.debug('Analyzer arguments', len(foo))
 
     def __getattr__(self, a='dummy'):
         if a == 'dummyname':
@@ -103,14 +102,14 @@ def enableSignalDebugging(obj=QtCore.QObject, **kwargs):
 
     def printIt(msg):
         def call(*args):
-            Log.debug('%s %s', msg, args)
+            Log.debug(msg, args)
         return call
     obj.connect = _wrapConnect(connectCall, obj.connect)
     obj.disconnect = _wrapDisconnect(disconnectCall, obj.disconnect)
     oldEmit = obj.emit
 
     def new_emit(self, *args):
-        Log.debug('%s %s', 'EMIT', args)
+        Log.debug('EMIT', args)
         emitCall(self, *args)
         oldEmit(self, *args)
 
@@ -143,7 +142,7 @@ class FakeProxy(network.MisuraProxy):
         return FakeProxy(r)
 
     def parent(self):
-        Log.debug('%s', dir(self.remObj))
+        Log.debug(dir(self.remObj))
         return FakeProxy(self.remObj.parent())
 
     def child(self, name):

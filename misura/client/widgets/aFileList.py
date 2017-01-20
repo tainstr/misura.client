@@ -27,7 +27,7 @@ class aFileList(aChooser):
         n = QtGui.QFileDialog.getOpenFileName(
             parent=self, caption=_("Upload File"))
         if len(n) == 0 or not os.path.exists(n):
-            logging.debug('%s', 'File Upload Aborted')
+            logging.debug('File Upload Aborted')
             return
         if os.path.basename(n) in self.prop['options']:
             # TODO: allow to overwrite....
@@ -36,8 +36,7 @@ class aFileList(aChooser):
             return
         url = self.remObj.conn_addr + \
             self.remObj['fullpath'][:-1]  # remove trailing /
-        logging.debug(
-            '%s %s %s %s', 'Transfer target:', repr(url), n, self.handle)
+        logging.debug('Transfer target:', repr(url), n, self.handle)
         self.transfer = TransferThread(
             url=url, outfile=n, post={'opt': self.handle}, parent=self)
         from ..live import registry

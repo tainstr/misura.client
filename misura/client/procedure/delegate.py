@@ -76,7 +76,7 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
         # First row is not editable
         col = index.column()
         if index.row() == 0 and col in [row.colTIME]:
-            logging.debug('%s', 'row0 is not editable')
+            logging.debug('row0 is not editable')
             return
         mod = index.model()
         val = mod.data(index)
@@ -92,22 +92,20 @@ class ThermalPointDelegate(QtGui.QItemDelegate):
         col = index.column()
         # first row is not editable
         if index.row() == 0 and col != row.colTEMP:
-            logging.debug(
-                '%s %s %s', 'setModelData: First row is not editable', index.row(), index.column())
+            logging.debug('setModelData: First row is not editable', index.row(), index.column())
             return
         val = None
         if hasattr(editor, 'value'):
             val = editor.value()
-            logging.debug('%s %s', 'editor value', val)
+            logging.debug('editor value', val)
         elif hasattr(editor, 'text'):
             val = editor.text()
-            logging.debug('%s %s', 'editor text', val)
+            logging.debug('editor text', val)
             if hasattr(editor, 'valueFromText'):
                 val = editor.valueFromText(val)
-                logging.debug('%s %s', 'editor valueFromText', val)
+                logging.debug('editor valueFromText', val)
         if val is not None:
-            logging.debug(
-                '%s %s %s %s', 'setModelData', val, index.row(), index.column())
+            logging.debug('setModelData', val, index.row(), index.column())
             model.setData(index, val, QtCore.Qt.DisplayRole)
         else:
             QtGui.QItemDelegate.setModelData(self, editor, model, index)

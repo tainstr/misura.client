@@ -133,7 +133,7 @@ fprv = fieldPRV()
 def getHeaderCols(tt, tcode='', all=False):
     """Selects and returns the appropriate columns and their headers"""
     global etp, fimg
-    logging.debug('%s %s %s', 'getHeaderCols', tt, tcode)
+    logging.debug('getHeaderCols', tt, tcode)
     # DILATOMETRY
     h = ['t', 'T']
     c = [fimg.Tempo, fimg.Temp]
@@ -243,7 +243,7 @@ def getCharacteristicShapes(test, cols):
         return sh
     vt = numpy.array(cols[fimg.Tempo]).astype('float')
     vT = numpy.array(cols[fimg.Temp]).astype('float')
-    logging.debug('%s', vT)
+    logging.debug(vT)
     for i, name in enumerate('Temp_Sint,Temp_Rammoll,Temp_Sfera,Temp_Mezza_Sfera,Temp_Fusione'.split(',')):
         r = test[getattr(fprv, name)]
         if r == None:
@@ -258,7 +258,7 @@ def getCharacteristicShapes(test, cols):
         d = numpy.abs(v - r)
         idx = numpy.where(d == d.min())[0][0]
         idx = int(idx)
-        logging.debug('%s %s %s', 'Where:', r, idx)
+        logging.debug('Where:', r, idx)
         if idx == 0:
             t = 'None'
             T = 'None'
@@ -282,7 +282,7 @@ def getConnectionCursor(path):
     else:
         driver = "{Microsoft Access Driver (*.mdb)}"
         cs = "DRIVER=%s;DBQ=%s" % (driver, path)
-    logging.debug('%s', cs)
+    logging.debug(cs)
     conn = pyodbc.connect(cs)
     cursor = conn.cursor()
     return conn, cursor

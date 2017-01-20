@@ -25,12 +25,12 @@ class FilePlayer(QtCore.QThread):
 
     def set_doc(self, doc):
         if self.isRunning():
-            logging.debug('%s', 'stopping')
+            logging.debug('stopping')
             self.stream = 0
             self.terminate()
         if self.doc:
             for dec in doc.decoders.itervalues():
-                logging.debug('%s %s', 'stopping decoder', dec.datapath)
+                logging.debug('stopping decoder', dec.datapath)
                 dec.terminate()
         self.params = {}
         self.samples = []
@@ -55,7 +55,7 @@ class FilePlayer(QtCore.QThread):
         return 'Test replay started'
 
     def stop_acquisition(self, *a):
-        logging.debug('%s', 'STOP ACQUISITION')
+        logging.debug('STOP ACQUISITION')
         self.stream = 0
         self.terminate()
 
@@ -63,13 +63,13 @@ class FilePlayer(QtCore.QThread):
         pass
 
     def outIdx(self, idx):
-        logging.debug('%s %s', 'outIdx', idx)
+        logging.debug('outIdx', idx)
         self.idx = idx
 
     def set_idx(self, idx=-1):
-        logging.debug('%s %s', 'FilePlay.set_idx', idx)
+        logging.debug('FilePlay.set_idx', idx)
         if not self.doc:
-            logging.debug('%s', 'NO DOC')
+            logging.debug('NO DOC')
             return
         if idx < 0:
             idx = self.idx
@@ -77,11 +77,10 @@ class FilePlayer(QtCore.QThread):
         for dec in self.doc.decoders.itervalues():
             dimg = dec.get(idx)
             if not dimg:
-                logging.debug(
-                    '%s %s %s', 'error getting data from', dec.datapath, idx)
+                logging.debug('error getting data from', dec.datapath, idx)
             img = img and dec.get(idx)
         if not img:
-            logging.debug('%s', 'Could not get some data')
+            logging.debug('Could not get some data')
             return
         self.idx = idx
 
@@ -130,7 +129,7 @@ class FilePlayer(QtCore.QThread):
 
     def run(self):
         if not self.doc:
-            logging.debug('%s', 'No document defined!')
+            logging.debug('No document defined!')
             self.stream = False
             return
         self.set_idx(self.idx)

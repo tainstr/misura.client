@@ -52,7 +52,7 @@ class SensorPlane(QtGui.QGraphicsItem):
         f = 1. / factor
         pen = self.pre.pen()
         w = pen.widthF() * f
-        logging.debug('%s %s %s %s', 'Rescaling pens to ', w, factor, f)
+        logging.debug('Rescaling pens to ', w, factor, f)
         pen.setWidthF(w)
         self.pre.setPen(pen)
         pen = self.cropBox.pen()
@@ -81,23 +81,20 @@ class SensorPlane(QtGui.QGraphicsItem):
         enc = getattr(self.remote.encoder, coord, None)
         if enc is None:
             return 0
-        logging.debug(
-            '%s %s %s %s', 'encoder coord is', coord, enc['align'], inv)
+        logging.debug('encoder coord is', coord, enc['align'], inv)
         self.align = inv * 1. * enc['align']
         mp = enc['motor'][0]
         m = self.remote.root.toPath(mp)
         if m in [None, False, 'None'] or m._Method__name == None or mp in ['None', None]:
             return 0
-        logging.debug(
-            '%s %s %s %s %s %s', 'GOT MOTOR', coord, mp, m, type(m), m._Method__name)
+        logging.debug('GOT MOTOR', coord, mp, m, type(m), m._Method__name)
         if new is None:
             # Return pixel position
             self.moving[coord] = m['moving']
             return 1. * m['position'] * self.align
         m['goingTo'] = new / self.align
         self.moving[coord] = 1
-        logging.debug(
-            '%s %s %s %s', 'moving to', new / self.align, new, self.align)
+        logging.debug('moving to', new / self.align, new, self.align)
         return new
 
     def motion_start(self):
@@ -107,8 +104,7 @@ class SensorPlane(QtGui.QGraphicsItem):
         self.pre.setRect(0, 0, r.width(), r.height())
         self.pre.show()
         self.setCursor(QtCore.Qt.ClosedHandCursor)
-        logging.debug(
-            '%s %s %s %s', 'motionStart', self.m_start, self.x(), self.y())
+        logging.debug('motionStart', self.m_start, self.x(), self.y())
 
     def motion_update(self):
         """Called periodically while the motor is moving"""
@@ -120,8 +116,7 @@ class SensorPlane(QtGui.QGraphicsItem):
         dy0 = y - y0
         dx1 = x1 - x
         dy1 = y1 - y
-        logging.debug(
-            '%s %s %s %s %s %s %s %s %s', 'motion_update', x0, x, x1, y0, y, y1, dx0, dx1)
+        logging.debug('motion_update', x0, x, x1, y0, y, y1, dx0, dx1)
         self.setPos(-dx0, -dy0)
         self.pre.setPos(-dx1, -dy1)
         self.pt.setPos(-dx1, -dy1)
@@ -130,7 +125,7 @@ class SensorPlane(QtGui.QGraphicsItem):
             self.timer.stop()
             self.pre.hide()
             self.setCursor(QtCore.Qt.ArrowCursor)
-            logging.debug('%s %s', 'TIMER STOP', self.moving)
+            logging.debug('TIMER STOP', self.moving)
             self.pt.setPos(0, 0)
             self.setPos(0, 0)
             self.pt.ensureVisible()
@@ -141,7 +136,7 @@ class SensorPlane(QtGui.QGraphicsItem):
         # Relative position with respect to the middle of the point
         dx = (self.pt.x())
         dy = (self.pt.y())
-        logging.debug('%s %s %s %s %s', 'motion_stop', x, dx, y, dy)
+        logging.debug('motion_stop', x, dx, y, dy)
         x -= dx
         y -= dy
         self.pos('x', x)
@@ -149,8 +144,7 @@ class SensorPlane(QtGui.QGraphicsItem):
         self.m_stop = x, y
         self.timer.start()
         self.setCursor(QtCore.Qt.BusyCursor)
-        logging.debug(
-            '%s %s %s %s', 'motionStop', self.m_stop, dx / self.align, dy / self.align)
+        logging.debug('motionStop', self.m_stop, dx / self.align, dy / self.align)
 
     def motion_preview(self):
         # TODO: show preview labels

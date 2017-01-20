@@ -16,7 +16,7 @@ def wr(k, v, n=18, inter=' '):
     v = '\\\\'.join(v)
     v = v.replace('_', '\\_')
     r = '{}{}{}'.format(k, inter, v)
-    logging.debug('%s %s %s %s', 'wrapped', k, v, r)
+    logging.debug('wrapped', k, v, r)
     return r
 
 invalid = (None, 'None', '')
@@ -45,8 +45,7 @@ def render_meta(obj, notfound=False, n=30, inter=' ', full=False, zt=0):
                     t = c['time']
                     if t > zt:
                         t -= zt
-                    logging.debug(
-                        '%s %s %s %s', 'render time', c['time'], t, zt)
+                    logging.debug('render time', c['time'], t, zt)
                     v += ', {}'.format(datetime.timedelta(seconds=int(t)))
         w = wr(m['name'], v, n=n, inter=inter)
         msg += '\\\\' + w

@@ -43,8 +43,7 @@ class TreePanel(QtGui.QSplitter):
         self.setHandleWidth(10)
         if select is not False:
             self.select_remote(select)
-        logging.debug(
-            '%s %s %s', 'TreePanel.__init__', self.server, self.remote)
+        logging.debug('TreePanel.__init__', self.server, self.remote)
 
     def objTable(self):
         self.tab.currentWidget().show_details()
@@ -73,29 +72,29 @@ class TreePanel(QtGui.QSplitter):
             title = ''
         current = self.tab.currentIndex()
         if current >= 0 and not keepCurrent:
-            logging.debug('%s', 'Removing current tab')
+            logging.debug('Removing current tab')
             self.tab.currentWidget().close()
             self.closeTab(current)
         elif current < 0:
             current = 0
-        logging.debug('%s %s', 'Inserting tab', current)
+        logging.debug('Inserting tab', current)
         i = self.tab.insertTab(current, widget, title)
         self.tab.setTabToolTip(i, widget.name)
-        logging.debug('%s %s', 'Setting current index', i)
+        logging.debug('Setting current index', i)
         self.tab.setCurrentIndex(i)
 
     def select(self, index, keepCurrent=False):
         model = self.view.model()
         node = model.data(index, role=-1)
         path = node.path
-        logging.debug('%s %s', 'selecting remote path', path)
+        logging.debug('selecting remote path', path)
         obj = self.remote.toPath(path)
-        logging.debug('%s %s', 'found object', obj)
+        logging.debug('found object', obj)
         self.select_remote(obj, keepCurrent)
 
     def select_remote(self, obj, keepCurrent=False):
-        logging.debug('%s %s %s', "select_remote obj", obj, obj.parent())
-        logging.debug('%s %s', 'mro', obj['mro'])
+        logging.debug("select_remote obj", obj, obj.parent())
+        logging.debug('mro', obj['mro'])
         path = obj['fullpath'].replace('MAINSERVER', 'server').split('/')
         if len(path) == 0:
             path = [self.remote['devpath']]
@@ -109,9 +108,9 @@ class TreePanel(QtGui.QSplitter):
         else:
             page = constructor.Interface(
                 self.server, obj, obj.describe(), parent=self)
-        logging.debug('%s %s %s', "constructor", page, path[-1])
+        logging.debug("constructor", page, path[-1])
         self.setPage(page, '/'.join(path), keepCurrent=keepCurrent)
-        logging.debug('%s', "page ok")
+        logging.debug("page ok")
 
 
 class MConf(QtGui.QMainWindow):
@@ -159,7 +158,7 @@ class MConf(QtGui.QMainWindow):
         addr = str(addr)
         obj = addrConnection(addr)
         if not obj:
-            logging.debug('%s', 'MConf.setAddr: Connection to address failed')
+            logging.debug('MConf.setAddr: Connection to address failed')
             return
         network.setRemote(obj)
 
@@ -184,7 +183,7 @@ class MConf(QtGui.QMainWindow):
             self.tree.close()
             del self.tree
         self.tree = TreePanel(self.server, parent=self)
-        logging.debug('%s', self.tree.view.model().item.children)
+        logging.debug(self.tree.view.model().item.children)
         self.tab.addTab(self.tree, _("Tree Panel"))
         self.tab.setCurrentIndex(2)
 

@@ -78,19 +78,19 @@ def initClient():
 def initTranslations(app):
     appTranslator = QtCore.QTranslator()
     pathLang = os.path.join(params.determine_path(), 'i18n')
-    logging.debug('%s %s', 'initClient: pathLang', pathLang)
+    logging.debug('initClient: pathLang', pathLang)
     lang = confdb['lang']
     if lang == 'sys':
         lang = params.locale
-    logging.debug('%s', "misura_" + lang)
+    logging.debug("misura_" + lang)
     if appTranslator.load("misura_" + lang, pathLang):
-        logging.debug('%s', 'installing translator')
+        logging.debug('installing translator')
         app.installTranslator(appTranslator)
         # devo creare un riferimento permanente onde evitare che il QTranslator
         # vada distrutto
         translators.append(appTranslator)
     else:
-        logging.debug('%s', 'translations not available')
+        logging.debug('translations not available')
 
 
 def initNetwork():
@@ -229,7 +229,7 @@ def getOpts():
     import sys
     import getopt
     opts, args = getopt.getopt(sys.argv[1:], 'h:o:')
-    logging.debug('%s %s', opts, args)
+    logging.debug(opts, args)
     h = 'https://admin:admin@localhost:3880/RPC'
     o = '/'
     r = {'-h': False, '-o': False}
@@ -422,7 +422,7 @@ def loadIcons():
                 'm4.melting', 'm4.single-ramp', 'm4.icon']:
         n = key.split('.')[1] + '.svg'
         n = os.path.join(params.pathArt, n)
-        logging.debug('%s', n)
+        logging.debug( n)
         if not os.path.exists(n):
             continue
         veusz.utils.action._iconcache[key] = QtGui.QIcon(n)

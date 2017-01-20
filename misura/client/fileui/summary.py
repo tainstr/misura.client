@@ -136,10 +136,10 @@ class SummaryModel(QtCore.QAbstractTableModel):
                 ordered.remove(None)
         else:
             ordered = self._loaded[:]
-        logging.debug('%s %s', 'ordered', ordered)
+        logging.debug('ordered', ordered)
         n = len(ordered)
         if not n:
-            logging.debug('%s', 'No columns to export.')
+            logging.debug('No columns to export.')
             return False
         f = open(path, 'w')
         if header:
@@ -191,7 +191,7 @@ class SummaryHeader(QtGui.QHeaderView):
             return 'No point for hide()'
         i = self.logicalIndexAt(self.point)
         self.hideSection(i)
-        logging.debug('%s %s', 'Hide', i)
+        logging.debug('Hide', i)
 
     def show_more(self):
         """Load more columns from document model"""
@@ -258,11 +258,11 @@ class SummaryView(QtGui.QTableView):
         if idx < 0:
             idx = 0
         cidx = self.currentIndex()
-        logging.debug('%s %s', 'cidx', cidx)
+        logging.debug('cidx', cidx)
         col = cidx.column()
         if col < 0:
             col = 0
-        logging.debug('%s %s %s %s', 'row, col', idx, col)
+        logging.debug('row, col', idx, col)
         midx = self.model().index(idx, col)
         self.setCurrentIndex(midx)
 

@@ -172,7 +172,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             'onKilnStopped', 'kilnBeforeStart', 'kilnAfterEnd', 'duration',
                     'coolingBelowTemp', 'coolingAfterTime', 'postDeformation'):
             if not active_instrument.measure.has_key(opt):
-                logging.debug('Measure has no option %s', opt)
+                logging.debug('Measure has no option', opt)
                 continue
             thermal_cycle_options[opt] = active_instrument.measure.gete(opt)
         if thermal_cycle_options:
@@ -274,7 +274,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 
     def replot(self, *args):
         crv = self.model.curve(events=False)
-        logging.debug('%s %s', 'replotting', crv)
+        logging.debug('replotting', crv)
         self.plot.setCurve(crv)
         self.synchronize_progress_bar_to_table()
         
@@ -354,7 +354,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
     def addTable(self, crv=None):
         if crv == None:
             crv = self.remote.get('curve')
-            logging.debug('%s %s', 'got remote curve', crv)
+            logging.debug('got remote curve', crv)
         if len(crv) == 0:
             crv = [[0, 0]]
         if not self.plot.isVisible():
@@ -373,7 +373,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.addTable([])
 
     def refresh(self, *args):
-        logging.debug('%s', 'ThermalCycleDesigner.refresh')
+        logging.debug('ThermalCycleDesigner.refresh')
         self.addTable()
 
     def apply(self):
@@ -388,7 +388,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
     def loadCSV(self):
         fname = QtGui.QFileDialog.getOpenFileName(
             self, 'Choose a *.csv file containing a time-temperature curve', '', "CSV Files (*.csv)")
-        logging.debug('%s', fname)
+        logging.debug(fname)
         f = open(fname, 'r')
         crv = []
         for row in f:

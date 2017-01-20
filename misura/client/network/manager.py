@@ -55,15 +55,15 @@ class NetworkManager(QtCore.QThread):
                               rrtype, rrclass, rdata, ttl):
         """Get the IP address of the referenced service"""
         # Unqueue this reference
-        logging.debug('%s %s', 'query_record_callback', sdRef)
+        logging.debug('query_record_callback', sdRef)
         self.queue.remove(sdRef)
         if errorCode != pybonjour.kDNSServiceErr_NoError:
             return
         ip = socket.inet_ntoa(rdata)  # IP
-        logging.debug('%s %s %s', 'Searching', fullname, self.resolved)
+        logging.debug('Searching', fullname, self.resolved)
         srv = self.resolved[fullname.replace('.', '')]
         srv.ip = ip
-        logging.debug('%s %s', 'Found service:', srv)
+        logging.debug('Found service:', srv)
         self.emit(QtCore.SIGNAL('found(QString)'), srv.addr)
         self.servers[srv.fullname] = srv
         # Close query reference
@@ -76,15 +76,15 @@ class NetworkManager(QtCore.QThread):
         if not pybonjour:
             return
         # Unqueue this reference
-        logging.debug('%s %s', 'resolve_callback', sdRef)
+        logging.debug('resolve_callback', sdRef)
         self.queue.remove(sdRef)
         if errorCode != pybonjour.kDNSServiceErr_NoError:
-            logging.debug('%s %s', 'kDNSService Error:', errorCode)
+            logging.debug('kDNSService Error:', errorCode)
             return
         if not fullname.startswith('misura'):
-            logging.debug('%s %s', 'Wrong service name:', fullname)
+            logging.debug('Wrong service name:', fullname)
             return
-        logging.debug('%s', 'Query IP')
+        logging.debug('Query IP')
         # Query for IP address
         query_sdRef = pybonjour.DNSServiceQueryRecord(interfaceIndex=interfaceIndex,
                                                       fullname=hosttarget,
@@ -97,7 +97,7 @@ class NetworkManager(QtCore.QThread):
         self.queue.append(query_sdRef)
         # Close resolve reference
         sdRef.close()
-        logging.debug('%s', 'done resolve_callback')
+        logging.debug('done resolve_callback')
 
     def browse_callback(self, sdRef, flags, interfaceIndex, errorCode, serviceName,
                         regtype, replyDomain):
@@ -105,10 +105,10 @@ class NetworkManager(QtCore.QThread):
         if not pybonjour:
             return
         if errorCode != pybonjour.kDNSServiceErr_NoError:
-            logging.debug('%s %s', 'Found error ', errorCode)
+            logging.debug('Found error ', errorCode)
             return
         if serviceName[:7] != 'misura':
-            logging.debug('%s %s', 'Wrong service name:', fullname)
+            logging.debug('Wrong service name:', fullname)
             return
         fullname = serviceName + '.' + regtype + replyDomain
         # If flags means the service has been lost, remove it
@@ -116,8 +116,8 @@ class NetworkManager(QtCore.QThread):
             if not self.servers.has_key(fullname):
                 return
             srv = self.servers.pop(fullname)
-            logging.debug('%s', self.servers)
-            logging.debug('%s %s', 'Service lost', srv)
+            logging.debug(self.servers)
+            logging.debug('Service lost', srv)
             self.emit(QtCore.SIGNAL('lost(QString)'), srv.fullname)
             return
         # Ask full resolution of the service
@@ -136,7 +136,7 @@ class NetworkManager(QtCore.QThread):
         sleep(1)
         pybonjour.DNSServiceProcessResult(self.browser)
         while self.scan:
-            logging.debug('%s %s', 'scan', self.queue)
+            logging.debug('scan', self.queue)
             # Search for something to process
             ready = select.select([self.browser] + self.queue, [], [], 2)
             for ref in ready[0]:
@@ -144,7 +144,7 @@ class NetworkManager(QtCore.QThread):
             # If there is nothing left to do, wait
             if len(self.queue) == 0:
                 sleep(5)
-        logging.debug('%s', 'Network Manager CLOSED')
+        logging.debug('Network Manager CLOSED')
         self.browser.close()
 
     def copy(self, path=False):

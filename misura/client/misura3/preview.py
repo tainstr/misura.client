@@ -19,7 +19,7 @@ class ImagePreviewModel(QtCore.QAbstractTableModel):
         self.dat = []
         self.path = ''
         if not os.path.exists(os.path.dirname(path)):
-            logging.debug('%s %s', 'Path does not exists', path)
+            logging.debug('Path does not exists', path)
             QtCore.QAbstractTableModel.reset(self)
             return
         self.dat = data

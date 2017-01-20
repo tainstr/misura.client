@@ -45,10 +45,10 @@ class SavePlotMenu(QtGui.QMenu):
         self.plots = vd
         if vd is None:
             return
-        logging.debug('Current plot %s', self.current_plot_id)
+        logging.debug('Current plot', self.current_plot_id)
         self.loadActs = [] # just keep a reference
         for v, info in vd.iteritems():
-            logging.debug('Found plot %s %s', v, info[:2])
+            logging.debug('Found plot', v, info[:2])
             p = functools.partial(self.load_plot, v)
             vername = vers.get(info[4], ['???'])[0]
             act = self.addAction(' - '.join((info[0], info[1], vername)), p)

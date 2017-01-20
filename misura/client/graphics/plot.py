@@ -11,7 +11,6 @@ from veuszplot import VeuszPlot
 from PyQt4 import QtGui, QtCore
 
 
-
 from veusz import plugins
 
 qt4 = QtGui
@@ -21,9 +20,6 @@ MIN = -10**5
 
 
 hidden_curves = ['iA', 'iB', 'iC', 'iD', 'xmass', 'ymass']
-
-
-
 
 
 class Plot(VeuszPlot):
@@ -132,16 +128,18 @@ class Plot(VeuszPlot):
 
     def default_plot(self):
         dataset_names = self.document.data.keys()
-        if len(dataset_names)==0:
+        if len(dataset_names) == 0:
             return False
         logging.debug('APPLY DEFAULT PLOT PLUGIN', dataset_names)
         linked = self.document.data.values()[0].linked
         instrument_name = linked.instrument
-        plugin_class, plot_rule_func = get_default_plot_plugin_class(instrument_name)
+        plugin_class, plot_rule_func = get_default_plot_plugin_class(
+            instrument_name)
         plot_rule = plot_rule_func(confdb, linked.conf)
         print 'default_plot', plugin_class, plot_rule
         p = plugin_class()
-        r = p.apply(self.cmd, {'dsn': self.document.data.keys(), 'rule': plot_rule})
+        r = p.apply(
+            self.cmd, {'dsn': self.document.data.keys(), 'rule': plot_rule})
         if not r:
             return False
         self.curveNames.update(r)
@@ -150,14 +148,14 @@ class Plot(VeuszPlot):
 
     def byTime(self):
         self.plot.setPageNumber(1)
-        logging.debug('%s %s', 'byTime', self.plot.getPageNumber())
+        logging.debug('byTime', self.plot.getPageNumber())
         self.actByTime.setChecked(True)
         self.actByTemp.setChecked(False)
         self.doc.model.set_page('/time')
 
     def byTemp(self):
         self.plot.setPageNumber(0)
-        logging.debug('%s %s', 'byTemp', self.plot.getPageNumber())
+        logging.debug('byTemp', self.plot.getPageNumber())
         self.actByTime.setChecked(False)
         self.actByTemp.setChecked(True)
         self.doc.model.set_page('/temperature')
@@ -172,7 +170,7 @@ class Plot(VeuszPlot):
         return col in self.visibleCurves
 
     def updateCurvesMenu(self):
-        logging.debug('%s %s', 'updateCurvesMenu', self.document.data.keys())
+        logging.debug('updateCurvesMenu', self.document.data.keys())
         self.doc.model.set_page(
             self.doc.basewidget.children[self.plot.pagenumber].path)
         hsf = lambda name: self.hide_show(name, update=True)
@@ -181,7 +179,7 @@ class Plot(VeuszPlot):
         return
 
     def updateCurveActions(self):
-        logging.debug('%s', 'UPDATE CURVE ACTIONS')
+        logging.debug('UPDATE CURVE ACTIONS')
         self.doc.model.set_page(
             self.doc.basewidget.children[self.plot.pagenumber].path)
         self.axesMenu.clear()
@@ -194,7 +192,7 @@ class Plot(VeuszPlot):
         else:
             dsnames = self.doc.reloadData()
         if len(dsnames) == 0:
-            logging.debug('%s', 'No data to reload')
+            logging.debug('No data to reload')
             return
         self.updateCurvesMenu()
         if not update:
@@ -207,15 +205,13 @@ class Plot(VeuszPlot):
         self.reloadData(update=True)
         self.set_idx()
 
-
-
     def set_idx(self, seq=-1):
         """Moves the position line according to the requested point sequence index."""
         self.idx_disconnect()
         if seq < 0:
             seq = self.idx
         for g, dsn in (('/time/time/', '0:t'), ('/temperature/temp/', '0:kiln/T')):
-            logging.debug('%s', self.document.data.keys())
+            logging.debug(self.document.data.keys())
             ds = self.document.data[dsn]
             if seq >= len(ds.data):
                 return
@@ -225,7 +221,7 @@ class Plot(VeuszPlot):
             rg = xax.getPlottedRange()
             # Calc relative position with respect to X axis
             rel = (xval - rg[0]) / (rg[1] - rg[0])
-            logging.debug('%s %s %s %s %s %s', 'Red bar relative position:',
+            logging.debug('Red bar relative position:',
                           rel, xval, rg, xax.autorange, xax.plottedrange)
             self.cmd.To(g + 'idx')
             self.cmd.Set('xPos', rel)
@@ -238,7 +234,7 @@ class Plot(VeuszPlot):
         self.t = t
         idx = csutil.find_nearest_val(
             self.document.data['0:t'].data, t, seed=self.idx)
-        logging.debug('%s', 'Setting time t')
+        logging.debug('Setting time t')
         self.set_idx(idx)
 
     def move_line(self, g):

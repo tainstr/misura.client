@@ -50,7 +50,7 @@ class InstrumentSelector(QtGui.QWidget):
                 continue
             obj = getattr(server, name, False)
             if obj is False:
-                logging.debug('%s %s', 'Instrument not found', name)
+                logging.debug('Instrument not found', name)
                 continue
             f = functools.partial(self.setInstrument, obj, preset=name)
             self.func.append(f)

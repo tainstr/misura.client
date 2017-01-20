@@ -18,7 +18,7 @@ class aMaterial(aString):
 
     def listMaterials(self):
         mats = self.server.storage.listMaterials()
-        logging.debug('%s', mats)
+        logging.debug(mats)
         mat = QtGui.QInputDialog.getItem(self, "Select the material name",
                                          "Select an already used material name or input a new one.",
                                          QtCore.QStringList(mats))

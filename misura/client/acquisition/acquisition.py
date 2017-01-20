@@ -59,11 +59,11 @@ def check_time_delta(server):
     dt = time() - t
     delta = int((t - s) + (dt / 3.))
     if delta < 10:
-        logging.debug('Time delta is not significant %s', delta)
+        logging.debug('Time delta is not significant', delta)
         return True
     pre = server['timeDelta']
     if pre:
-        logging.debug('Time delta already set: %s', server['timeDelta'])
+        logging.debug('Time delta already set:', server['timeDelta'])
     btn = QtGui.QMessageBox.warning(None, _('Hardware clock error'),
                       _('Instrument time is different from your current time (delta: {}s).\n Apply difference and restart?').format(delta),
                       QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
@@ -325,12 +325,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def init_instrument(self, soft=False, name='default'):
         # TODO: this scheme could be automated via a decorator: @thread
-        logging.debug('%s', 'Calling init_instrument in QThreadPool')
+        logging.debug('Calling init_instrument in QThreadPool')
         r = widgets.RunMethod(self._init_instrument, soft, name)
         r.pid = 'Instrument initialization '
         QtCore.QThreadPool.globalInstance().start(r)
-        logging.debug('%s %s %s',
-                      'active threads:',
+        logging.debug('active threads:',
                       QtCore.QThreadPool.globalInstance().activeThreadCount(),
                       QtCore.QThreadPool.globalInstance().maxThreadCount())
 
@@ -347,13 +346,13 @@ class MainWindow(QtGui.QMainWindow):
         self.clean_interface(remote)
 
         self.controls = Controls(self.remote, parent=self)
-        logging.debug('%s', 'Created controls')
+        logging.debug('Created controls')
         self.controls.stopped.connect(self.stopped)
         self.controls.started.connect(self.resetFileProxy)
         self.controls.mute = bool(self.fixedDoc)
         self.addToolBar(self.controls)
         self.toolbars.append(self.controls)
-        logging.debug('%s', 'Done controls')
+        logging.debug('Done controls')
         pid = self.instrument_pid()
         self.tasks.job(-1, pid, 'Status panel')
 
@@ -379,7 +378,7 @@ class MainWindow(QtGui.QMainWindow):
         # Populate Cameras
         self.tasks.job(-1, pid, 'Show cameras')
         paths = self.remote['devices']
-        logging.debug('%s %s', 'setInstrument PATHS:', paths)
+        logging.debug('setInstrument PATHS:', paths)
 
         for path in paths:
             lst = self.server.searchPath(path[1])
@@ -453,7 +452,7 @@ class MainWindow(QtGui.QMainWindow):
         self.instrumentDock.hide()
         name = self.remote['devpath']
         self.name = name
-        logging.debug('Setting remote %s %s %s', remote, self.remote, name)
+        logging.debug('Setting remote ', remote, self.remote, name)
         title = _('Misura Acquisition: %s (%s)') %  (name, self.remote['comment'])
         self.setWindowTitle(title)
         self.tray_icon.setToolTip(title)
@@ -462,7 +461,7 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.qApp.processEvents()
         # Close cameras
         for p, (pic, win) in self.cameras.iteritems():
-            logging.debug('deleting cameras %s %s %s', p, pic, win)
+            logging.debug('deleting cameras', p, pic, win)
             pic.close()
             win.hide()
             win.close()
@@ -474,7 +473,7 @@ class MainWindow(QtGui.QMainWindow):
         self.myMenuBar.close()
         self.myMenuBar = MenuBar(server=self.server, parent=self)
         self.setMenuWidget(self.myMenuBar)
-        logging.debug('%s', 'Done menubar')
+        logging.debug('Done menubar')
 
 
         # Remove any remaining subwindow
@@ -486,7 +485,7 @@ class MainWindow(QtGui.QMainWindow):
             tb.close()
             del tb
         self.toolbars = []
-        logging.debug('%s', 'Cleaned toolbars')
+        logging.debug('Cleaned toolbars')
 
     def setInstrument(self, remote=False, server=False, preset='default'):
         if self.fixedDoc:
@@ -535,24 +534,24 @@ class MainWindow(QtGui.QMainWindow):
         self.tasks.job(-1, pid, 'Setting document in live registry')
         registry.set_doc(doc)
 
-        logging.debug('%s', 'imageSlider')
+        logging.debug('imageSlider')
         self.tasks.job(-1, pid, 'Sync snapshots with document')
         self.imageSlider.set_doc(doc)
 
-        logging.debug('%s', 'summaryPlot')
+        logging.debug('summaryPlot')
         self.tasks.job(-1, pid, 'Sync graph with document')
         self.summaryPlot.set_doc(doc)
 
-        logging.debug('%s', 'navigator')
+        logging.debug('navigator')
         self.tasks.job(-1, pid, 'Sync document tree')
         self.navigator.set_doc(doc)
 
         self.measureTab.set_doc(doc)
 
-        logging.debug('%s', 'dataTable')
+        logging.debug('dataTable')
         self.tasks.job(-1, pid, 'Sync data table')
         self.dataTable.set_doc(doc)
-        logging.debug('%s', 'connect')
+        logging.debug('connect')
         self.connect(self.imageSlider, QtCore.SIGNAL(
             'set_time(float)'), self.set_slider_position)
         self.connect(self.imageSlider, QtCore.SIGNAL(
@@ -620,8 +619,7 @@ class MainWindow(QtGui.QMainWindow):
                 live_file.load_conf()
 
                 if not live_file.has_node('/conf'):
-                    logging.debug(
-                        '%s', 'Conf node not found: acquisition has not been initialized.')
+                    logging.debug('Conf node not found: acquisition has not been initialized.')
                     self.tasks.job(0, 'Waiting for data',
                                    'Conf node not found: acquisition has not been initialized.')
                     self.tasks.done('Waiting for data')
@@ -635,7 +633,7 @@ class MainWindow(QtGui.QMainWindow):
             self.tasks.jobs(0, 'Test initialization')
             if recursion == 0:
                 self.tasks.setFocus()
-            logging.debug('%s', 'Waiting for initialization to complete...')
+            logging.debug('Waiting for initialization to complete...')
             self.resetFileProxyLater(0, recursion + 1)
             return False
         else:
@@ -655,10 +653,10 @@ class MainWindow(QtGui.QMainWindow):
                 return False
             fid = self.remote.measure['uid']
             if fid == '':
-                logging.debug('%s %s', 'no active test', fid)
+                logging.debug('no active test', fid)
                 self.tasks.done('Waiting for data')
                 return False
-            logging.debug('%s %s', 'resetFileProxy to live ', fid)
+            logging.debug('resetFileProxy to live ', fid)
             self.server.connect()
 
             live_uid = self.server.storage.test.live.get_uid()
@@ -669,7 +667,7 @@ class MainWindow(QtGui.QMainWindow):
 
             if fid == self.uid:
                 logging.debug(
-                    '%s', 'Measure id is still the same. Aborting resetFileProxy.')
+                    'Measure id is still the same. Aborting resetFileProxy.')
                 self.tasks.job(0, 'Waiting for data',
                                'Measure id is still the same. Aborting resetFileProxy.')
                 self.tasks.done('Waiting for data')
@@ -731,9 +729,9 @@ class MainWindow(QtGui.QMainWindow):
         registry.toggle_run(False)
 
         uid = self.remote.measure['uid']
-        logging.debug('acquisition.MainWindow.stopped %s', uid)
+        logging.debug('acquisition.MainWindow.stopped', uid)
         if uid in self.saved_set:
-            logging.debug('UID already saved! %s', uid)
+            logging.debug('UID already saved!', uid)
             return False
         self.saved_set.add(uid)
 
@@ -743,7 +741,7 @@ class MainWindow(QtGui.QMainWindow):
 
         dbpath = confdb['database']
         if not os.path.exists(dbpath):
-            logging.debug('A non-existent db path was specified %s', dbpath)
+            logging.debug('A non-existent db path was specified', dbpath)
             return False
 
         # Start download thread
@@ -803,7 +801,7 @@ class MainWindow(QtGui.QMainWindow):
     def post_uid(self, uid):
         uid = str(uid)
         r = self.server.storage.searchUID(uid)
-        logging.debug('%s %s', 'SEARCH UID', r)
+        logging.debug('SEARCH UID', r)
         if not r:
             return False
         self.remote.init_uid(uid)

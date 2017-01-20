@@ -28,14 +28,14 @@ def determine_path(root=False):
 
 # Percorso dell'eseguibile
 pathClient = determine_path()
-logging.debug('%s %s', 'pathClient', pathClient)
+logging.debug('pathClient', pathClient)
 # Percorso utilizzato per immagazzinare la configurazione del client
 pathConf = os.path.expanduser("~/MisuraData/conf.sqlite")
 pathLang = os.path.join(pathClient, 'i18n')
-logging.debug('%s %s', 'pathLang', pathLang)
+logging.debug('pathLang', pathLang)
 pathArt = os.path.join(pathClient, 'art')
 pathUi = os.path.join(pathClient, 'ui')
-logging.debug('%s %s', 'pathArt', pathArt)
+logging.debug('pathArt', pathArt)
 locale = QtCore.QLocale.system().name()
 locale = str(locale.split('_')[0]).lower()
 

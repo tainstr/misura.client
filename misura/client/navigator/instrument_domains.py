@@ -70,7 +70,7 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
         - 5 nodes selected: interpret as separate (beta, r0, T) + (dil, T) datasets and try to assign based on their name and path
         """
         if len(nodes) > 1:
-            logging.debug('%s', 'Not implemented')
+            logging.debug('Not implemented')
             return False
         smp = nodes[0].children
         dbeta, nbeta = self.dsnode(smp['beta'])

@@ -40,7 +40,7 @@ class aChooser(ActiveWidget):
         self.combo.clear()
         # Get new property
         self.prop = self.remObj.gete(self.handle)
-        logging.debug('%s %s', 'aChooser.redraw', self.prop)
+        logging.debug('aChooser.redraw', self.prop)
         opt = self.prop.get('options', [])
         vals = self.prop.get('values', opt)
         # Associate opt-val couples to new combo entries

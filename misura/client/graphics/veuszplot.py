@@ -287,7 +287,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         n = self.getPageNumber()
         page = self.document.basewidget.getPage(n)
         if page is None:
-            logging.debug('%s %s', 'NO PAGE FOUND', n)
+            logging.debug('NO PAGE FOUND', n)
         else:
             self.docchangeset = -100 # force plot update for page resizing
             self.document.model.set_page(page.path)
@@ -400,7 +400,7 @@ class VeuszPlot(QtGui.QWidget):
             self.fitSize()
 
     def showEvent(self, e):
-        logging.debug('%s', 'show event')
+        logging.debug('show event')
         self.fitSize()
 #		self.plot.delayed.singleShot(100, self.delayedUpdate)
 

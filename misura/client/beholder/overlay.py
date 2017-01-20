@@ -72,8 +72,7 @@ class Overlay(QtGui.QGraphicsItem):
     def validate(self):
         for opt in self.opt:
             if not self.current.has_key(opt):
-                logging.debug(
-                    '%s %s %s', 'Validation Failed', self.ovname, self.Z)
+                logging.debug('Validation Failed', self.ovname, self.Z)
                 return False
         return True
 

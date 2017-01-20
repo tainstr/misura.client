@@ -67,7 +67,7 @@ def simpleConnection(addr, user='', password='', mac='', save=True):
     try:
         obj.remObj.echo('echo')
     except ProtocolError as err:
-        logging.debug('%s', 'FAILED simpleConnection at echo')
+        logging.debug('FAILED simpleConnection at echo')
         logging.debug(format_exc())
         if err.errcode == 401:
             obj._error = 'Authorization Failed!'
@@ -96,7 +96,7 @@ def getConnection(addr, user='', password='', mac='', save=True, smart=False):
     st, obj = simpleConnection(addr, user, password, mac, save)
     setRemote(obj)
     if not st:
-        logging.debug('%s', 'Connection failed')
+        logging.debug('Connection failed')
         return st, obj
     manager.remote.remObj.send_log(
         "Client connection: " + repr(platform.uname()))
@@ -109,7 +109,7 @@ def getConnection(addr, user='', password='', mac='', save=True, smart=False):
 
 def setRemote(obj):
     global manager
-    logging.debug('%s %s', 'Setting network.manager.remote', repr(obj))
+    logging.debug('Setting network.manager.remote', repr(obj))
     manager.addr = obj.addr
     manager.user = obj.user
     manager.password = obj.password
@@ -132,7 +132,7 @@ def closeConnection():
     if manager.remote != None:
         manager.remote.users.logout()
     manager.remote = None
-    logging.debug('%s %s', 'Disconnected from', manager.addr)
+    logging.debug('Disconnected from', manager.addr)
     return True
 
 if __name__ == '__main__':

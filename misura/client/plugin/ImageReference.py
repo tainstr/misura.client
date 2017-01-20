@@ -74,13 +74,13 @@ class ImageReference(utils.OperationWrapper, veusz.widgets.ImageFile):
         dec = self.dec
         dec.reset(fp, datapath=s.dataset)
         seq = dec.get_time(t)
-        logging.debug('%s %s', 'sequence', seq)
+        logging.debug('sequence', seq)
         r = dec.get_data(seq)
         fp.close()
 
-        logging.debug('%s %s', 'data', r)
+        logging.debug('data', r)
         if not r:
-            logging.debug('%s %s %s', 'Could not get image data', t, seq)
+            logging.debug('Could not get image data', t, seq)
             return
         t, pix = r
         ba = QtCore.QByteArray()
@@ -88,7 +88,7 @@ class ImageReference(utils.OperationWrapper, veusz.widgets.ImageFile):
         buf.open(QtCore.QIODevice.WriteOnly)
         pix.save(buf, 'PNG')
         encoded = veusz.compat.cbytes(ba.toBase64()).decode('ascii')
-        logging.debug('%s', 'encoded')
+        logging.debug('encoded')
         self.cacheimage = pix
         self.cacheembeddata = encoded
 
@@ -113,7 +113,7 @@ class ImageReference(utils.OperationWrapper, veusz.widgets.ImageFile):
     def drawShape(self, painter, rect):
         """Draw image."""
         s = self.settings
-        logging.debug('%s', 'drawShape')
+        logging.debug('drawShape')
         # draw border and fill
         painter.drawRect(rect)
 

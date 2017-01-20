@@ -230,7 +230,7 @@ user_defaults = {'length': 'micron',
 
 
 def get_unit_info(unit, units):
-    logging.debug('%s %s', 'get_unit_info', unit)
+    logging.debug('get_unit_info', unit)
     p = unit.split('^')
     u = p[0]
     if len(p) == 2:
@@ -390,7 +390,7 @@ def convert(ds, to_unit):
         ini1 = func(ini)
         ds.m_initialDimension = ini1
         ds1.m_initialDimension = ini1
-        logging.debug('%s %s %s', 'converting m_initialDimension', ini, ini1)
+        logging.debug('converting m_initialDimension', ini, ini1)
     return ds1
 
 
@@ -403,7 +403,7 @@ def percentile_action(ds, action='Invert'):
             action = 'To Absolute'
         else:
             action = 'To Percent'
-    logging.debug('percentile_action %s', action)
+    logging.debug('percentile_action', action)
     return action
 
 

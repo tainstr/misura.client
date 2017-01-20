@@ -243,15 +243,15 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         n = self.mw.plot.getPageNumber()
         page = self.mw.document.basewidget.getPage(n)
         if page is None:
-            logging.debug('%s %s', 'NO PAGE FOUND', n)
+            logging.debug('NO PAGE FOUND', n)
             return
         if self.openedFiles.model().page.startswith(page.path):
-            logging.debug('Not updating page %s', page.path)
+            logging.debug('Not updating page', page.path)
             return
         logging.debug(
-            'MisuraInterface.update_page %s %s', self.openedFiles.model().page, page.path)
+            'MisuraInterface.update_page', self.openedFiles.model().page, page.path)
         self.openedFiles.model().set_page(page.path)
-        logging.debug('%s', 'done model.set_page')
+        logging.debug('done model.set_page')
         self.connect(
             self.mw.plot, QtCore.SIGNAL("sigUpdatePage"), self.update_page)
 
@@ -383,15 +383,15 @@ class Graphics(MainWindow):
     def __init__(self, *a):
         configure_logger('graphics.log')
         iutils.loadIcons()
-        logging.debug('%s', 'Load Icons OK')
+        logging.debug('Load Icons OK')
         self._document = MisuraDocument()
         # Shortcuts to command interpreter and interface
         MainWindow.__init__(self, *a)
-        logging.debug('%s', 'MainWindow init')
+        logging.debug('MainWindow init')
         self.ci = self.console.interpreter
         self.cmd = self.ci.interface
         # misura Interface
-        logging.debug('%s', 'misura Interface')
+        logging.debug('misura Interface')
         self.m4 = MisuraInterface(self)
         # Misura3 Interface
         # print 'Misura3 Interface'
@@ -444,7 +444,7 @@ class GraphicsApp(veusz_main.VeuszApp):
                     emptywins[0].openFile(filename)
         if not created:
             # create blank window
-            logging.debug('%s', 'creating blank window')
+            logging.debug('creating blank window')
             MainWindow.CreateWindow()
 
     def startup(self):

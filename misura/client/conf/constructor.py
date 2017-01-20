@@ -20,7 +20,7 @@ from PyQt4 import QtGui, QtCore, QtSvg
 
 def desc2html(desc):
     """Crea una rappresentazione HTML del dizionario di descrizione."""
-    logging.debug('%s', 'show details')
+    logging.debug('show details')
     t = '<h1> Properties for: %s </h1>' % desc.get(
         'name', {'current': 'Object'})['current']
     items = desc.items()
@@ -70,8 +70,7 @@ def orgSections(prop_dict, configuration_level=5):
             continue
         parentopt = prop_dict.get(parent, False)
         if parentopt is False:
-            logging.debug(
-                '%s %s %s', 'Non-existent parent for ', handle, prop['parent'])
+            logging.debug('Non-existent parent for ', handle, prop['parent'])
             continue
         # Create the children list on the parent option
         if not parentopt.has_key('children') or isinstance(parentopt['children'], list):
@@ -309,8 +308,8 @@ class Interface(QtGui.QTabWidget):
                 visible = set(prop_dict.keys()).intersection(k)
                 prop_dict = {key: prop_dict[key] for key in visible}
         if not prop_dict:
-            logging.critical(
-                'Impossible to get object description %s', self.remObj._Method__name)
+            logging.critical('Impossible to get object description', 
+                             self.remObj._Method__name)
             return
         self.clear()
         self.sections = orgSections(prop_dict, self.remObj._readLevel)
@@ -380,7 +379,7 @@ class Interface(QtGui.QTabWidget):
             wg.close()
             wg.destroy()
         for i in range(self.count()):
-            logging.debug('%s', 'remove tab')
+            logging.debug('remove tab')
             self.removeTab(self.currentIndex())
         self.clear()
 
@@ -391,7 +390,6 @@ class Interface(QtGui.QTabWidget):
                 if wg.type == 'Button':
                     continue
                 wg.register()
-#                logging.debug('%s %s %s %s', 'updating:', s, w, wg.async_get())
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))

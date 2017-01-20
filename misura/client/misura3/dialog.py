@@ -130,7 +130,7 @@ class TestDialog(QtGui.QWidget):
     def getPath(self):
         path = settings.value('/Misura3Archive', None)
         if path is None or not os.path.exists(path):
-            logging.debug('%s %s', 'path does not exist', path)
+            logging.debug('path does not exist', path)
             return False
         return path
 
@@ -163,7 +163,7 @@ class TestDialog(QtGui.QWidget):
 
     def setFilterType(self, idx):
         tt = self.filterType.itemData(idx)
-        logging.debug('%s %s', 'Selecting', tt)
+        logging.debug('Selecting', tt)
         self.cursor.execute("select * from PROVE where [Tipo Prova] = %i" % tt)
         tests = self.cursor.fetchall()
         self.table.curveModel.setTests(tests)
@@ -196,7 +196,7 @@ class TestDialog(QtGui.QWidget):
             logging.error('Conversion aborted', self.converter.outpath)
             self.converter.interrupt = True
             return
-        logging.debug('%s %s', 'exported to ', self.outdir)
+        logging.debug('exported to ', self.outdir)
         self.emit(QtCore.SIGNAL('imported(QString)'), self.outpath)
         self.emit(QtCore.SIGNAL('select(QString)'), self.outpath)
 
@@ -254,7 +254,7 @@ class TestDialog(QtGui.QWidget):
                 continue
             done.append(i)
             prova = self.table.curveModel.tests[i]
-            logging.debug('%s %s', 'importing test: ', prova)
+            logging.debug('importing test: ', prova)
             self.tname = validate_tabname(prova[2])
             imported = self.path + '|' + str(prova[0])
             self.convert(imported)

@@ -25,7 +25,7 @@ class IconImage(veusz.widgets.ImageFile):
         """Construct list of settings."""
         lst = ['None'] + veusz.utils.action._iconcache.keys()
         lst.sort()
-        logging.debug('%s', lst)
+        logging.debug(lst)
         s.add(veusz.setting.Choice('iconname',
                                    lst,
                                    'None',
@@ -82,7 +82,7 @@ class IconImage(veusz.widgets.ImageFile):
         pixmap = self.cachepixmap
         # pixmap rectangle
         prect = QtCore.QRectF(pixmap.rect())
-        logging.debug('%s', prect)
+        logging.debug(prect)
 #		# preserve aspect ratio
         if s.aspect:
             xr = rect.width() / prect.width()

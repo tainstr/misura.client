@@ -73,7 +73,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
         return self.document
 
     def actionUp(self):
-        logging.debug('%s', 'SYNC LINE UP')
+        logging.debug('SYNC LINE UP')
         self.ops = []
         doc = self.document
         ref = None  # Reference curve is the first child
@@ -95,7 +95,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
             obj = self.parent.getChild(uc)
             if obj is None:
                 if i == 0:
-                    logging.debug('%s', 'No reference curve defined')
+                    logging.debug('No reference curve defined')
                     return
                 break
             xax = self.parent.getChild(obj.settings.xAxis)
@@ -202,7 +202,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
         """Restore dataset translated by values"""
         for uc, d in self.trcum.iteritems():
             obj = self.document.resolveFullWidgetPath(uc)
-            logging.debug('%s %s %s %s', 'restoring curve', uc, d, obj)
+            logging.debug('restoring curve', uc, d, obj)
             yds_name = obj.settings.yData
             yds = self.document.data[yds_name]
             new = yds.data + d
@@ -213,7 +213,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
             # Set original dataset to copied one
             op = document.OperationDatasetSet(yds_name, ydsn)
             self.ops.append(op)
-        logging.debug('%s %s', 'axmap', self.axmap)
+        logging.debug('axmap', self.axmap)
         for uc, (newax, oldax, (minVal, maxVal)) in self.axmap.iteritems():
             obj = self.document.resolveFullWidgetPath(uc)
             self.toset(obj, 'yAxis', oldax)

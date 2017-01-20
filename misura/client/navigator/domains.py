@@ -54,7 +54,7 @@ class DataNavigatorDomain(NavigatorDomain):
         # FIXME: model no longer have a "tests" structure.
         lk = node.linked
         if not lk:
-            logging.debug('%s %s', 'Node does not have linked file', node.path)
+            logging.debug('Node does not have linked file', node.path)
             return False
         for ds in self.doc.data.values():
             if ds.linked == lk:
@@ -68,10 +68,10 @@ class DataNavigatorDomain(NavigatorDomain):
 
     @node
     def reloadFile(self, node=False):
-        logging.debug('%s', 'RELOADING')
+        logging.debug('RELOADING')
         if not node.linked:
             return False
-        logging.debug('%s', node.linked.reloadLinks(self.doc))
+        logging.debug(node.linked.reloadLinks(self.doc))
 
     @node
     def recalculate_metadata(self, node=False):
@@ -86,12 +86,12 @@ class DataNavigatorDomain(NavigatorDomain):
 
     def load_version(self, LF, version):
         # FIXME: VERSIONING!
-        logging.debug('%s', 'LOAD VERSION')
+        logging.debug('LOAD VERSION')
         LF.params.version = version
         LF.reloadLinks(self.doc)
 
         fl = self.model().files
-        logging.debug('%s %s', 'got linked files', self.model().files[:])
+        logging.debug('got linked files', self.model().files[:])
 
     def add_load(self, menu, node):
         """Add load/unload action"""
@@ -401,7 +401,7 @@ class MathNavigatorDomain(NavigatorDomain):
         """Slot for opening the dataset edit window on the currently selected entry"""
         ds, y = self.dsnode(node)
         name = node.path
-        logging.debug('%s %s', 'name', name)
+        logging.debug('name', name)
         dialog = self.mainwindow.slotDataEdit(name)
         if ds is not y:
             dialog.slotDatasetEdit()
@@ -490,13 +490,13 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
     @node
     def setInitialDimension(self, node=False):
         """Invoke the initial dimension plugin on the current entry"""
-        logging.debug('%s %s %s', 'Searching dataset name', node, node.path)
+        logging.debug('Searching dataset name', node, node.path)
         n = self.doc.datasetName(node.ds)
         ini = getattr(node.ds, 'm_initialDimension', False)
         if not ini:
             ini = 100.
         xname = self.xnames(node)[0]
-        logging.debug('%s %s %s', 'Invoking InitialDimensionPlugin', n, ini)
+        logging.debug('Invoking InitialDimensionPlugin', n, ini)
         from misura.client import plugin
         p = plugin.InitialDimensionPlugin(ds=n, ini=ini, ds_x = xname)
         d = PluginDialog(
@@ -514,9 +514,9 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
 
     @node
     def set_unit(self, node=False, convert=False):
-        logging.debug('%s %s %s %s', 'set_unit:', node, node.unit, convert)
+        logging.debug('set_unit:', node, node.unit, convert)
         if node.unit == convert or not convert or not node.unit:
-            logging.debug('%s', 'set_unit: Nothing to do')
+            logging.debug('set_unit: Nothing to do')
             return
         n = self.doc.datasetName(node.ds)
         from misura.client import plugin
@@ -543,7 +543,7 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
         un = menu.addMenu(_('Units'))
         kgroup, f, p = units.get_unit_info(u, units.from_base)
         same = units.from_base.get(kgroup, {u: lambda v: v}).keys()
-        logging.debug('%s %s', kgroup, same)
+        logging.debug( kgroup, same)
         for u1 in same:
             p = functools.partial(self.set_unit, convert=u1)
             act = un.addAction(_(u1), p)

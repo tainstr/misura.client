@@ -39,7 +39,7 @@ def find_pos(dslist, p=0):
             p = max(p, d.m_pos)
         else:
             d.m_pos = p + 1
-            logging.debug('%s %s %s', 'Assign pos', d.path, p + 1)
+            logging.debug('Assign pos', d.path, p + 1)
         p += 1
     for d in dslist:
         p = find_pos(d.children.keys(), p)
@@ -317,9 +317,8 @@ class NodeEntry(object):
             path = path[len(self.path) + len(splt):]
         item = self
         linked = False
-#		logging.debug('%s %s', 'going to insert', path)
+        
         for sub, parent, leaf in iterpath(path):
-            #			logging.debug('%s %s %s %s %s %s %s', 'iterating', sub, parent, leaf, repr(item.path), repr(item._name), id(parent))
             # Remember the first part of the path (0:summary, etc)
             if not parent:
                 linked = sub
@@ -342,9 +341,7 @@ class NodeEntry(object):
 
     def remove(self, child):
         k = child._name
-#		logging.debug('%s %s %s', 'removing ', k, self.path)
         if not self._children.has_key(k):
-            #			logging.debug('%s %s %s %s', 'Asking to remove non existent node', k, 'from', self.path)
             return False
         self._children.pop(k)
         return True

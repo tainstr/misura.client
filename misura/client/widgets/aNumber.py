@@ -40,7 +40,7 @@ class FocusableSlider(QtGui.QSlider):
     def mouseDoubleClickEvent(self, ev):
         self.zoomed = 1 ^ self.zoomed
         self.zoom.emit(self.zoomed)
-        logging.debug('mouseDoubleClickEvent %s', self.zoomed)
+        logging.debug('mouseDoubleClickEvent', self.zoomed)
         return QtGui.QSlider.mouseDoubleClickEvent(self, ev)
 
 
@@ -156,7 +156,7 @@ class aNumber(ActiveWidget):
             return False
         # Block remote updates while editing
         if self.spinbox.hasFocus():
-            logging.debug('%s', 'aNumber.update has focus - skipping')
+            logging.debug('aNumber.update has focus - skipping')
             return False
         self.spinbox.blockSignals(True)
         # Update minimum and maximum

@@ -50,7 +50,7 @@ class aDict(ActiveWidget):
         self.map = {}
         self.cmap = {}
         if self.current is None:
-            logging.debug('%s %s', 'No current value to update', self.label)
+            logging.debug('No current value to update', self.label)
             return
         cur = self.adapt2gui(self.current)
         for key, val in cur.iteritems():
@@ -73,7 +73,7 @@ class aDict(ActiveWidget):
                     max = self.prop['max'][key]
                 sb.setRange(min, max)
                 sb.setSingleStep(1)
-                logging.debug('%s %s %s', 'updating', self.label, val)
+                logging.debug('updating', self.label, val)
                 sb.setValue(val)
                 if not self.readonly:
                     self.connect(

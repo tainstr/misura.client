@@ -28,7 +28,7 @@ class Profile(QtGui.QGraphicsView):
             self.path = False
         # Discart malformed profiles
         if len(x) <= 1 or len(x) != len(y):
-            logging.debug('%s %s', "Malformed profile", prf)
+            logging.debug("Malformed profile", prf)
             return
         # Convert x,y, vectors into a QPointF list
         lst = list(QtCore.QPointF(ix, y[i]) for i, ix in enumerate(x))
@@ -51,8 +51,7 @@ class aProfile(ActiveWidget):
 
     def set(self, *foo, **kfoo):
         """Override set() method in order to avoid forbidden write operations"""
-        logging.debug(
-            '%s', "Set operation is not possible on Profile properties")
+        logging.debug("Set operation is not possible on Profile properties")
 
     def adapt2gui(self, val):
         """Unpickle profile data"""
@@ -64,16 +63,16 @@ class aProfile(ActiveWidget):
         """Update graphics scene"""
         prf = self.adapt2gui(self.current)
         if prf is None:
-            logging.debug('%s', 'No profile')
+            logging.debug('No profile')
             return
         # Discart malformed profiles
         if len(prf) < 3:
-            logging.debug('%s %s', "No profile", prf)
+            logging.debug("No profile", prf)
             return
         sz, x, y = prf
         # Discart malformed profiles
         if len(sz) < 2 or len(x) < 1 or len(x) != len(y):
-            logging.debug('%s %s', "Malformed profile", prf)
+            logging.debug( "Malformed profile", prf)
             return
         # Minimum dimension
         self.profile.updateSize(sz)

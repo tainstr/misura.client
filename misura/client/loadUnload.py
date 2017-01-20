@@ -9,14 +9,14 @@ from sys import argv, exit
 from numpy import *
 
 
-def wait(pos):
+def wait(obj, pos):
     """Attendi che il motore raggiunga una certa posizione"""
     obj['goingTo'] = pos
     now = pos + 1
     while now != pos:
         sleep(.1)
         now = obj['position']
-        logging.debug('%s %s %s', 'waiting ', pos, now)
+        logging.debug('waiting ', pos, now)
 
 
 def main():
@@ -37,12 +37,12 @@ def main():
         d = upos - m4.flex.camera['pos']
         msg = '[%i:%.2f%%] Displacement: %i' % (i, 100. * i / N, d)
         m4.send_log(msg)
-        logging.debug('%s', msg)
+        logging.debug(msg)
         sleep(1)
 
-    wait(unload)
+    wait(obj, unload)
     sleep(10)
-    logging.debug('%s', 'Stopping acquisition')
+    logging.debug('Stopping acquisition')
     m4.flex.stop_acquisition()
 
 if __name__ == '__main__':

@@ -93,8 +93,8 @@ class ThermalCyclePlot(VeuszPlot):
             y1 = np.diff(y) / np.diff(x)
             y1 = array([y1, y1]).transpose().flatten()
             x1 = array([x, x]).transpose().flatten()[1:-1]
-            logging.debug('%s %s', 'x1', x1)
-            logging.debug('%s %s', 'y1', y1)
+            logging.debug('x1', x1)
+            logging.debug( 'y1', y1)
             cmd.SetData(yR, y1)
             cmd.SetData(xR, x1)
         else:

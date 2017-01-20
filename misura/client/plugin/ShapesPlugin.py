@@ -72,10 +72,10 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         g = self.doc.resolveFullWidgetPath(cur)
         g = utils.searchFirstOccurrence(g, 'graph')
         if g is None or g.typename != 'graph':
-            logging.debug('%s %s', 'Found graph:', g)
+            logging.debug('Found graph:', g)
             raise plugins.ToolsPluginException(
                 'You should run this tool on a graph')
-        logging.debug('%s %s', 'ShapesPlugin searching', p)
+        logging.debug('ShapesPlugin searching', p)
         cur = g.path
         conf = False
         vds = []
@@ -87,15 +87,15 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 vds.append(ent.path)
         if not conf or len(vds) == 0:
             raise plugins.ToolsPluginException('No metadata found for ' + p)
-        logging.debug('%s %s', 'Found datasets', vds)
+        logging.debug('Found datasets', vds)
         smpp = smpe.path.split(':')[-1]
         # Detect if a sample dataset was selected and go up one level
         if smpp.split('/')[-2].startswith('sample'):
             smpp = smpe.parent.path
         smpp = smpp.replace('summary', '')
-        logging.debug('%s %s %s', 'Found sample path', smpp, p)
+        logging.debug('Found sample path', smpp, p)
         smp = conf.toPath(smpp)
-        logging.debug('%s %s', 'config', smp)
+        logging.debug('config', smp)
 
         all_items = smp.describe().iteritems()
         sample_shapes = filter(lambda item: item[1]['type'] == 'Meta', all_items)
@@ -110,7 +110,7 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             shape_name = str(fields['text']).replace('$shape$', remove_prefix(shape))
             txt = u'%s - %s °C' % (shape_name, pt['temp'])
             if t in [0, None, 'None'] or T in [0, None, 'None']:
-                logging.debug('%s %s', 'Shape not found:', shape)
+                logging.debug('Shape not found:', shape)
                 continue
             # Absolute time translations
             if t > conf['zerotime'] / 2:
@@ -131,7 +131,7 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             self.ops.append(
                 document.OperationToolsPlugin(InterceptPlugin(), f))
 
-        logging.debug('%s %s', 'ShapesPlugin ops', self.ops)
+        logging.debug('ShapesPlugin ops', self.ops)
         self.apply_ops()
 
 

@@ -8,15 +8,15 @@ from misura.client import filedata
 import iutils_testing as iut
 from PyQt4 import QtGui
 
-logging.debug('%s %s', 'Importing', __name__)
+logging.debug('Importing', __name__)
 
 
 def setUpModule():
-    logging.debug('%s %s', 'setUpModule', __name__)
+    logging.debug('setUpModule', __name__)
 
 
 def tearDownModule():
-    logging.debug('%s %s', 'tearDownModule', __name__)
+    logging.debug('tearDownModule', __name__)
 
 
 from3 = os.path.join(iut.data_dir, 'm3_hsm.h5')
