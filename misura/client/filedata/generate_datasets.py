@@ -30,6 +30,7 @@ def new_dataset_operation(original_dataset, data, name, label, path, unit='volt'
     if not opt:
         opt = original_dataset.m_opt
     new_dataset = copy(original_dataset)
+    new_dataset.attr = dict({}, **original_dataset.attr)
     new_dataset.tags = set([])
     new_dataset.data = plugins.numpyCopyOrNone(data)
     new_dataset.m_var = name

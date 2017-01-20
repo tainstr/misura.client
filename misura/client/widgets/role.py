@@ -105,12 +105,14 @@ class RoleIO(ActiveWidget):
         else:
             path = self.server.searchPath(opt[0])
             obj = self.server.toPath(opt[0])
+            logging.debug('RoleIO search', opt[0], path, obj)
         fu = False
         # Is update needed?
         if self.value:
             if hasattr(self.value, 'prop'):
                 kid = opt[0] + opt[-1]
                 if kid == self.value.prop['kid']:
+                    logging.debug('RoleIO: no update', kid)
                     return
                 fu = self.value.force_update
             # Remove old widget
@@ -125,6 +127,7 @@ class RoleIO(ActiveWidget):
             self.value.force_update = fu
             # TODO: manage units and menu, which is bounded to label_widget
         else:
+            logging.debug('Pointless RoleIO', path, obj, opt[2])
             self.value = QtGui.QLabel('None')
         self.lay.addWidget(self.value)
         self.ioact.setText('{}: {} : {}'.format(*opt))
@@ -237,8 +240,8 @@ class RoleEditor(QtGui.QWidget):
         self.config.addItem('default', 'default')
         path = self.tree.current_fullpath()
         st, self.remDev = getRemoteDev(self.w.server, path)
-        logging.debug('%s %s %s %s', 'redraw_config Got Remote Dev', self.current[
-                      0], path, self.remDev)
+        logging.debug('redraw_config Got Remote Dev', 
+                      self.current[0], path, self.remDev)
         if st and (self.remDev is not None):
             for pre in self.remDev.listPresets():
                 if pre == 'default':
@@ -252,8 +255,8 @@ class RoleEditor(QtGui.QWidget):
         self.io.clear()
         self.io.addItem('None', 'None')
         if self.remDev:
-            for pre in self.remDev.iolist():
-                logging.debug('%s %s', 'IO Listing', pre)
+            for pre in self.remDev.keys():
+                logging.debug('IO Listing', pre)
                 self.io.addItem(pre, pre)
 
     def apply(self):

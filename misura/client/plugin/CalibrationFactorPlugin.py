@@ -163,6 +163,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         df += start_value - df[start_index]
         # TODO: define new derived datasets for these
         dsf = copy(Tds)
+        dsf.attr = dict({}, **Tds.attr)
         dsf.tags = set([])
         dsf.data = plugins.numpyCopyOrNone(df)
         dsf.m_var = name + '_fit'
@@ -182,6 +183,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         # Translate zero so it matches the fit
         d -= d[start_index] - df[start_index]
         dsd = copy(Tds)
+        dsd.attr = dict({}, **Tds.attr)
         dsd.tags = set([])
         dsd.data = plugins.numpyCopyOrNone(d)
         dsd.m_var = name
