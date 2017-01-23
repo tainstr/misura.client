@@ -269,8 +269,8 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
                    rule_unit=lambda *a: False,
                    unit=False):
     # TODO: cleaun-up all this proliferation of *_dataset_names!!!
-    logging.debug('create_dataset', prefixed_dataset_name,
-                  pure_dataset_name, hdf_dataset_name, variable_name)
+    #logging.debug('create_dataset', prefixed_dataset_name,
+    #              pure_dataset_name, hdf_dataset_name, variable_name)
     # Get meas. unit
     if not unit:
         unit = dataset_measurement_unit(
@@ -310,8 +310,8 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
             ds.tags.add(parent)
     if hdf_dataset_name:
         assign_label(ds, hdf_dataset_name)
-    logging.debug('done create_dataset', prefixed_dataset_name,
-                  pure_dataset_name, hdf_dataset_name, variable_name)
+    #logging.debug('done create_dataset', prefixed_dataset_name,
+    #              pure_dataset_name, hdf_dataset_name, variable_name)
     return ds
 
 
@@ -698,20 +698,19 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 attr = []
         if not m_update:
             # leave ds empty
-            logging.debug('Not loading:', col0)
+            #logging.debug('Not loading:', col0)
             pass
         elif col == 't':
             data = time_sequence
         elif ('Event' not in attr) and (type != 'Table') and (len(data) == 0) and not is_local:
             logging.debug('Loading data', col0)
             data = interpolated(self.proxy, col0, time_sequence)
-        elif len(data) == 0:
+        elif len(data) == 0 and col0 in self.LF.header:
             # Get raw data and time_sequence
             logging.debug('Getting raw data', col0)
             data = read_data(self.proxy, col0).transpose()
             sub_time_sequence = data[0]
             data = data[1]
-            logging.debug('Done raw data', col0)
         # Create the dataset
         if ds is False and data is not False:
             ds = create_dataset(self.proxy,

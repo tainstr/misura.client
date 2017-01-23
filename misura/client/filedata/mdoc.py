@@ -383,11 +383,12 @@ class MisuraDocument(document.Document):
                 r, vsz_text = self.save_plot(proxy, version, text=vsz_text)
                 plots.add(vfn)
             if name[-2:]=='_t':
+                time_name = 't'
                 time_data = ds.data
             else:
                 time_name = get_best_x_for(name, ds.linked.prefix, self.data.keys()+self.cache.keys(), '_t')
                 time_data = self.get_cache(time_name).data
-                print 'AAAAAAAAAA', len(time_data), len(ds.data)
+            logging.debug('Writing dataset', name)
             proxy.save_data(name, ds.data, time_data, opt=ds.m_opt)
         for proxy in proxies.itervalues():
             proxy.flush()
