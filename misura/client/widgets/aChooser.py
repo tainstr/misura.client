@@ -14,6 +14,8 @@ class aChooser(ActiveWidget):
     def __init__(self, server, path, prop, parent=None):
         ActiveWidget.__init__(self, server, path,  prop, parent)
         self.combo = QtGui.QComboBox(parent=self)
+        self._options = []
+        self._values = []
         self.redraw(reget=False)
         self.lay.addWidget(self.combo)
         self.connect(
@@ -26,23 +28,26 @@ class aChooser(ActiveWidget):
             self.redraw()
         else:
             self.get()
+            self.redraw()
         return ActiveWidget.enterEvent(self, event)
-    
+
     def try_set(self, idx):
         result = self.set(idx)
         new_idx = self.adapt2gui(result)
-        if new_idx!=idx:
+        if new_idx != idx:
             self.redraw()
 
     def redraw(self, reget=True):
+        # Get new property
+        self.prop = self.remObj.gete(self.handle)
+        opt = self.prop.get('options', [])
+        vals = self.prop.get('values', opt)
+        if opt == self._options or vals == self._values:
+            logging.debug('No update needed')
+            return False
         self.combo.blockSignals(True)
         # Cleans combo entries
         self.combo.clear()
-        # Get new property
-        self.prop = self.remObj.gete(self.handle)
-        logging.debug('aChooser.redraw', self.prop)
-        opt = self.prop.get('options', [])
-        vals = self.prop.get('values', opt)
         # Associate opt-val couples to new combo entries
         for i in range(len(opt)):
             k = opt[i]
@@ -60,8 +65,11 @@ class aChooser(ActiveWidget):
         if reget:
             self.get()
         self.update()
+        self._options = opt
+        self._values = vals
         # Restore signals
         self.combo.blockSignals(False)
+        return True
 
     def adapt2srv(self, idx):
         """Translates combobox index into server value"""
@@ -88,6 +96,7 @@ class aChooser(ActiveWidget):
 
 
 class async_aChooser(aChooser):
+
     def __init__(self, server, path, prop, parent=None):
         aChooser.__init__(self, server, path,  prop, parent)
 
@@ -95,7 +104,7 @@ class async_aChooser(aChooser):
         """Set a new value `val` to server. Convert val into server units."""
         val = self.adapt2srv(val)
         if val == self.current:
-            logging.debug('Not setting',self.handle, repr(val))
+            logging.debug('Not setting', self.handle, repr(val))
             return True
 
         QtCore.QTimer.singleShot(0, lambda: self.remObj.set(self.handle, val))
