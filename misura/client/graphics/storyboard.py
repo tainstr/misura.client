@@ -4,6 +4,7 @@
 import tempfile
 import os
 import functools
+import textwrap
 
 from veusz import document
 
@@ -119,6 +120,7 @@ class Storyboard(QtGui.QWidget):
         if page.name not in self.cache:
             lbl = QtGui.QToolButton(parent=self.container)
             lbl.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+            lbl.setStyleSheet("QToolButton { font: 12px}")
             show_func = functools.partial(self.slot_select_page, page.name)
             list_children_func = functools.partial(
                 self.slot_list_children, page.name)
@@ -174,7 +176,7 @@ class Storyboard(QtGui.QWidget):
         if level < 0:
             logging.debug('Storyboard.update: negative level requested')
             return False
-        page_name, page_plots, crumbs = hierarchy[level][page_idx]
+        page_name, page_plots, crumbs, notes = hierarchy[level][page_idx]
         N = len(hierarchy)
         level += self.level_modifier
         if level < 0:
@@ -182,7 +184,7 @@ class Storyboard(QtGui.QWidget):
         if level >= N:
             level = N - 1
 
-        for page_name, page_plots, crumbs in hierarchy[level]:
+        for page_name, page_plots, crumbs, notes in hierarchy[level]:
             if self.parent_modifier:
                 if not page_name.startswith(self.parent_modifier):
                     continue
@@ -192,7 +194,11 @@ class Storyboard(QtGui.QWidget):
             if not os.path.exists(fp):
                 self.update_page_image(page)
             lbl = self.cache[page_name]
-            lbl.setText('/'.join([''] + crumbs))
+            txt = '/'.join([''] + crumbs)
+            if notes:
+                notes = textwrap.fill(notes, 25, break_long_words=False)
+                txt+='\n'+notes
+            lbl.setText(txt)
             self.lay.addWidget(lbl)
             lbl.show()
 

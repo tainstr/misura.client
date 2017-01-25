@@ -29,12 +29,13 @@ class Crumb(QtGui.QLabel):
         """Builds menu for upward navigation"""
         self.menu.clear()
         self.callables = []
-        for page, page_plots, crumbs in self.hierarchy:
-            # if crumbs == self.name:
-            #    continue
+        for page, page_plots, crumbs, notes in self.hierarchy:
             func = partial(self.sigSelectPage.emit, page)
             self.callables.append(func)
-            self.menu.addAction('/'.join([''] + crumbs), func)
+            txt = '/'.join([''] + crumbs)
+            if notes:
+                txt += ' ('+  notes +')'
+            self.menu.addAction(txt, func)
 
     def show_menu(self, event):
         """Show associated menu"""
@@ -85,7 +86,7 @@ class Breadcrumb(QtGui.QWidget):
         hierarchy, level, page_idx = calc_plot_hierarchy(self.doc, page)
         if level < 0:
             return False
-        crumbs = hierarchy[level][page_idx][-1]
+        crumbs = hierarchy[level][page_idx][-2]
         self.crumbs = []
         # Create crumb widgets
         name = ''

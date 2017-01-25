@@ -315,7 +315,8 @@ def calc_plot_hierarchy(doc, page_obj, exclude=':kiln/'):
 
     for page, page_plots in pages.iteritems():
         crumbs = most_involved_node(page_plots, doc)[0]
-        hierarchy[len(crumbs)].append((page, page_plots, crumbs))
+        notes = doc.resolveFullWidgetPath(page).settings.notes
+        hierarchy[len(crumbs)].append((page, page_plots, crumbs, notes))
 
     hierarchy = sorted(hierarchy.iteritems(), cmp=lambda a, b: a[0] - b[0])
     hierarchy = [sorted(h[1], key=lambda a: '/'.join(a[2]).lower())
@@ -324,7 +325,7 @@ def calc_plot_hierarchy(doc, page_obj, exclude=':kiln/'):
     level = -1
     page_idx = -1
     for level, pages in enumerate(hierarchy):
-        for page_idx, (page_name, page_plots, crumbs) in enumerate(pages):
+        for page_idx, (page_name, page_plots, crumbs, notes) in enumerate(pages):
             if page_name == page_obj.name:
                 inpage = True
                 break
