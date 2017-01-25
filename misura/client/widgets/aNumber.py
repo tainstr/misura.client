@@ -49,14 +49,13 @@ class aNumber(ActiveWidget):
     zoomed = False
     precision = -1
     error = None
+
     def __init__(self, server, remObj, prop, parent=None, slider_class=FocusableSlider):
         ActiveWidget.__init__(self, server, remObj, prop, parent)
         min_value = self.prop.get('min', None)
         max_value = self.prop.get('max', None)
         step = self.prop.get('step', False)
-        error = self.prop.get('error', None)
-        if error and remObj.has_key(error):
-            error = remObj.get(error)
+
         self.precision = self.prop.get('precision', -1)
         self.divider = 1.
         # If max/min are defined, create the slider widget
@@ -75,7 +74,6 @@ class aNumber(ActiveWidget):
             self.sValueChanged = 'valueChanged(int)'
             self.spinbox = QtGui.QSpinBox(parent=self)
         self.spinbox.setKeyboardTracking(False)
-        self.set_error(error)
         self.lay.addWidget(self.spinbox)
         self.setRange(min_value, max_value, step)
         # Connect signals
@@ -91,18 +89,24 @@ class aNumber(ActiveWidget):
             self.connect(
                 self.spinbox, QtCore.SIGNAL(self.sValueChanged), self.boxPush)
         self.update(minmax=False)
-        
+
     def set_error(self, error=None):
+        if error is None:
+            error = self.prop.get('error', None)
+            if error and self.remObj.has_key(error):
+                error = self.remObj.get(error)
         self.error = error
         if error is None:
             self.spinbox.setSuffix('')
             return False
         template = u'{}'
-        if self.error>0 and (self.error<0.1 or self.error>100):
-            template = u'{:.1e}'
-        self.spinbox.setSuffix(u' \u00b1 '+template.format(error))
+        if self.double:
+            p = self.precision
+            if p < 0:
+                p = self.spinbox.decimals()    
+            template = u'{:.' + str(p) + u'f}'
+        self.spinbox.setSuffix(u' \u00b1 ' + template.format(error))
         return True
-        
 
     def setOrientation(self, direction):
         if not self.slider:
@@ -175,6 +179,7 @@ class aNumber(ActiveWidget):
         if self.spinbox.hasFocus():
             logging.debug('aNumber.update has focus - skipping')
             return False
+        self.set_error()
         self.spinbox.blockSignals(True)
         # Update minimum and maximum
         if self.slider and minmax:
@@ -189,7 +194,7 @@ class aNumber(ActiveWidget):
         cur = self.adapt2gui(self.current)
         try:
             if self.double:
-                if self.precision>=0:
+                if self.precision >= 0:
                     dc = self.precision
                 else:
                     dc = extend_decimals(cur)
