@@ -10,10 +10,11 @@ from PyQt4 import QtGui, QtCore
 
 class Results(QtGui.QTabWidget):
 
-    def __init__(self, parent, plot):
+    def __init__(self, parent, plot, readLevel=5):
         super(Results, self).__init__(parent)
         self.setTabPosition(QtGui.QTabWidget.North)
         self.plot = plot
+        self.readLevel = readLevel
         
         self.navigator = navigator.Navigator(
             parent=self, mainwindow=plot, cols=1)
@@ -35,8 +36,13 @@ class Results(QtGui.QTabWidget):
         self.addTab(self.navigator, _('Data'))
         self.addTab(self.props, _('Properties'))
         self.addTab(self.formats, _('Formatting'))
-        self.addTab(self.plot.treeedit, _('Objects'))
-        self.addTab(self.console, _('Console'))
+        
+        if self.readLevel>2:
+            self.addTab(self.plot.treeedit, _('Objects'))
+            self.addTab(self.console, _('Console'))
+        else:
+            self.console.hide()
+            self.plot.treeedit.hide()
         
         self.plot.plot.sigWidgetClicked.connect(self.slot_selected_widget)
         
