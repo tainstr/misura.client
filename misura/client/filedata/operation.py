@@ -655,7 +655,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         pcol, mcol, m_var, col = prefixed_column_name(col0, self.prefix)
         job(p + 1, label=col)
         # Set m_update
-        if m_var == 't' or col0 in self.autoload:
+        if (m_var == 't') or (col0 in self.autoload):
             m_update = True
         else:
             m_update = False
@@ -679,6 +679,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
         sub_time_sequence = False
         is_local = (col0[-2:] in ('_T', '_t'))
+        is_error = pcol in error_map.values()
         if col == 't':
             attr = []
             type = 'Float'
@@ -687,7 +688,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         else:
             if len(opt) == 0 and not is_local:
                 obj,  name = self.proxy.conf.from_column(col)
-                if obj.has_key(name):
+                if obj and obj.has_key(name):
                     opt = obj.gete(name)
                 else:
                     logging.error(
@@ -698,11 +699,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 attr = []
         if not m_update:
             # leave ds empty
-            #logging.debug('Not loading:', col0)
+            logging.debug('Not loading:', col0, m_update)
             pass
         elif col == 't':
             data = time_sequence
-        elif ('Event' not in attr) and (type != 'Table') and (len(data) == 0) and not is_local:
+        elif ('Event' not in attr) and (type != 'Table') and (len(data) == 0) and not is_local and not is_error:
             logging.debug('Loading data', col0)
             data = interpolated(self.proxy, col0, time_sequence)
         elif len(data) == 0 and col0 in self.LF.header:
@@ -781,18 +782,24 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             m = from_column(main_pcol)
             m.pop(-1)
             m.append(error_name)
-            col0 = '/' + '/'.join(m)
+            col0 = '/summary/' + '/'.join(m)
+            ds_name = prefixed_column_name(col0, self.prefix)[0]
+            
             if main_pcol in self.outdatasets:
                 self.autoload.append(col0)
+                logging.debug('Added to autoload', col0, self.autoload)
+            else:
+                logging.debug('Skip error dataset', main_pcol, self.outdatasets.keys())
+                error_map.pop(main_pcol)
+                continue
             ds = self._dataset_import(
                 p, col0, time_sequence, availds, names, error_map, sub_map0)
-            if ds:
-                error_map[main_pcol] = prefixed_column_name(
-                    col0, self.prefix)[0]
-            else:
+            logging.debug('Error dataset', main_pcol, error_name, ds_name, ds)
+            if ds is False:
                 error_map.pop(main_pcol)
+            else:
+                error_map[main_pcol] = ds_name
             p += 1
-
         # Local datasets creation
         # Create sub-time dataset. Should be done after the import finishes!
         overall_dataset_names = set(
@@ -804,9 +811,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 names.append(sub.m_name)
                 self.outdatasets[sub.m_name] = sub
             if subds:
-                logging.debug('ADDING SUBDS', pcol, subds, sub_map)
+                logging.debug('Local datasets', pcol, subds, sub_map)
                 sub_map[pcol] = subds
-
+                
         # Error association cycle
         for main_name, error_name in error_map.iteritems():
             # Remove any subordered T,t dataset
@@ -819,13 +826,18 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 if sub_name in availds:
                     availds.pop(sub_name)
             # Place error data into "serr" array
+            logging.debug('Assigning error dataset', main_name, error_name)
             if error_name in self.outdatasets:
                 error_ds = self.outdatasets.pop(error_name)
                 main_ds = self.outdatasets[main_name]
                 main_ds.serr = error_ds.data
+            else:
+                logging.debug('No error dataset found', main_name, error_name)
             if error_name in availds:
                 availds.pop(error_name)
-
+            if error_name in names:
+                names.remove(error_name)
+        
         self.imported_names = names
         self._outdatasets = self.outdatasets
         if self.params.dryrun:

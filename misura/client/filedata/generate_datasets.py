@@ -164,6 +164,7 @@ def table_to_datasets(proxy, opt, doc):
         datasets[base_path] = (tab[idx], opt['handle'], opt['name'], err, opt)
         add_tT(base_path)
     else:
+        logging.debug('Generating multi column datasets')
         for idx in value_idxes:
             name = column_names[idx]
             sub_path = base_path + '/' + name
