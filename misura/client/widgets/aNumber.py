@@ -48,21 +48,25 @@ class aNumber(ActiveWidget):
     zoom_factor = 10.
     zoomed = False
     precision = -1
+    error = None
     def __init__(self, server, remObj, prop, parent=None, slider_class=FocusableSlider):
         ActiveWidget.__init__(self, server, remObj, prop, parent)
-        min = self.prop.get('min', None)
-        max = self.prop.get('max', None)
+        min_value = self.prop.get('min', None)
+        max_value = self.prop.get('max', None)
         step = self.prop.get('step', False)
+        error = self.prop.get('error', None)
+        if error and remObj.has_key(error):
+            error = remObj.get(error)
         self.precision = self.prop.get('precision', -1)
         self.divider = 1.
         # If max/min are defined, create the slider widget
         self.slider = False
-        if None not in [max, min]:
+        if None not in [max_value, min_value]:
             self.slider = slider_class(QtCore.Qt.Horizontal, parent=self)
             self.slider.zoom.connect(self.setZoom)
             self.lay.addWidget(self.slider)
         # Identify float type from type or current/max/min/step
-        if self.type == 'Float' or type(0.1) in [type(self.current), type(min), type(max), type(step)]:
+        if self.type == 'Float' or type(0.1) in [type(self.current), type(min_value), type(max_value), type(step)]:
             self.double = True
             self.sValueChanged = 'valueChanged(double)'
             self.spinbox = QtGui.QDoubleSpinBox(parent=self)
@@ -71,8 +75,9 @@ class aNumber(ActiveWidget):
             self.sValueChanged = 'valueChanged(int)'
             self.spinbox = QtGui.QSpinBox(parent=self)
         self.spinbox.setKeyboardTracking(False)
+        self.set_error(error)
         self.lay.addWidget(self.spinbox)
-        self.setRange(min, max, step)
+        self.setRange(min_value, max_value, step)
         # Connect signals
         if self.readonly:
             if self.slider:
@@ -86,6 +91,18 @@ class aNumber(ActiveWidget):
             self.connect(
                 self.spinbox, QtCore.SIGNAL(self.sValueChanged), self.boxPush)
         self.update(minmax=False)
+        
+    def set_error(self, error=None):
+        self.error = error
+        if error is None:
+            self.spinbox.setSuffix('')
+            return False
+        template = u'{}'
+        if self.error>0 and (self.error<0.1 or self.error>100):
+            template = u'{:.1e}'
+        self.spinbox.setSuffix(u' \u00b1 '+template.format(error))
+        return True
+        
 
     def setOrientation(self, direction):
         if not self.slider:
