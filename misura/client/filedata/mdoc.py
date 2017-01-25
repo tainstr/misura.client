@@ -370,12 +370,8 @@ class MisuraDocument(document.Document):
             if proxy is False:
                 proxy = getFileProxy(vfn, version=None)
                 proxies[vfn] = proxy
-                verpath =  proxy.get_version_by_name(version)
-                # Create a new version
-                if not verpath:
-                    verpath = proxy.create_version(version)
-                else:
-                    proxy.set_version(verpath)
+                # Create a new version or get same version
+                proxy.create_version(version, overwrite=True)
                 # Load proper version
                 proxy.save_conf(node.linked.conf.tree())
             if vfn not in plots:
