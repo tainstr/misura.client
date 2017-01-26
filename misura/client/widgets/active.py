@@ -342,6 +342,7 @@ class LabelWidget(QtGui.QLabel):
         QtGui.QLabel.__init__(
             self, unicode(_(prop['name'], context='Option')), parent=active)
         self.prop = prop
+        self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
 
     def mousePressEvent(self, event):
         return self.active.bmenu.mousePressEvent(event)
@@ -375,6 +376,7 @@ class ActiveWidget(Active, QtGui.QWidget):
     def __init__(self, server, remObj, prop, parent=None, context='Option'):
         Active.__init__(self, server, remObj, prop, context)
         QtGui.QWidget.__init__(self, parent)
+        self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.lay = QtGui.QHBoxLayout()

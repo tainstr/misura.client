@@ -261,6 +261,7 @@ class aTableView(QtGui.QTableView):
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
         self.update_visible_columns()
+        
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))
@@ -322,9 +323,16 @@ class aTable(ActiveWidget):
         self.table = aTableView(self)
         self.lay.addWidget(self.table)
         self.initializing = False
-        self.table.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+        self.table.setSizePolicy(self.sizePolicy())
+        
         self.resize_height()
+    
+    def resizeEvent(self, event):
+        if self.parent():
+            self.setMinimumWidth(self.parent().width()-50)
+        return QtGui.QWidget.resizeEvent(self, event) 
+            
     
     def resize_height(self):
         h = self.table.resize_height()
