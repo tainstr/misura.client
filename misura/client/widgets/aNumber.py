@@ -101,10 +101,9 @@ class aNumber(ActiveWidget):
             return False
         template = u'{}'
         if self.double:
-            p = self.precision
-            if p < 0:
-                p = self.spinbox.decimals()    
-            template = u'{:.' + str(p) + u'f}'
+            p = self.precision if self.precision > 0 else 1    
+            dc = extend_decimals(error, default=0, extend_by=p)    
+            template = u'{:.' + str(dc) + u'f}'
         self.spinbox.setSuffix(u' \u00b1 ' + template.format(error))
         return True
 
@@ -194,10 +193,8 @@ class aNumber(ActiveWidget):
         cur = self.adapt2gui(self.current)
         try:
             if self.double:
-                if self.precision >= 0:
-                    dc = self.precision
-                else:
-                    dc = extend_decimals(cur)
+                p = self.precision if self.precision > 0 else 1    
+                dc = extend_decimals(cur, default=0, extend_by=p)
                 self.spinbox.setDecimals(dc)
             else:
                 cur = int(cur)

@@ -25,10 +25,8 @@ def extend_decimals(cur, default=2, extend_by=2):
     """Find out how many decimals to enable in editing for float value `num`"""
     cur = float(cur)
     if abs(cur) < 1 and abs(cur) > 1e-32:
-        print 'extend_decimals for', cur
         dc = math.log(abs(1. / cur), 10)
-        dc = round(abs(dc), 0)
-        print 'extend_decimals for', cur, dc
+        dc = int(abs(dc))
         base = max(int(dc), default)
         return base + extend_by
     return default
