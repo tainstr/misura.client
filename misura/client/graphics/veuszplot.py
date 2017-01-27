@@ -66,7 +66,8 @@ def process_image_dropEvent(plot_window, drop_event):
 
 
 class VeuszPlotWindow(plotwindow.PlotWindow):
-
+    sigNearestWidget = QtCore.pyqtSignal(object)
+    
     def __init__(self, document, parent=None):
         plotwindow.PlotWindow.__init__(self, document, parent)
         self.contextmenu = QtGui.QMenu(self)
@@ -91,8 +92,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         self.sigWidgetClicked.connect(self.navigator.sync_currentwidget)
         
     def widget_menu(self, menu, pos):
-        widget = self.painthelper.identifyWidgetAtPoint(
-            pos.x(), pos.y(), antialias=self.antialias)
+        widget = self.identify_widget(pos)
         if widget is None:
             return
         if widget.typename != 'xy':
@@ -110,7 +110,14 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         grfunc = partial(self.navigator.expand_node_path, node.parent, select=True)
         self.group_menu.hovered.connect(grfunc)
         menu.addMenu(self.group_menu)
-
+        
+    def mouseMoveEvent(self, event):
+        ret = plotwindow.PlotWindow.mouseMoveEvent(self, event)
+        pos = self.mapToScene(event.pos())
+        widget = self.identify_widget(pos)
+        self.sigNearestWidget.emit(widget)
+        return ret
+        
     def contextMenuEvent(self, event):
         """Show context menu."""
         menu = QtGui.QMenu()
@@ -181,13 +188,17 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         f = open(name, 'w')
         self.document.saveToFile(f)
         f.close()
-
-    def edit_properties(self, pos, frm=False):
+        
+    def identify_widget(self, pos):
         widget = self.painthelper.identifyWidgetAtPoint(
             pos.x(), pos.y(), antialias=self.antialias)
         if widget is None:
             # select page if nothing clicked
-            widget = self.document.basewidget.getPage(self.pagenumber)
+            widget = self.document.basewidget.getPage(self.pagenumber) 
+        return widget      
+
+    def edit_properties(self, pos, frm=False):
+        widget = self.identify_widget(pos)
         self.w = treeeditwindow.PropertyList(
             self.document, showformatsettings=frm)
         s = treeeditwindow.SettingsProxySingle(self.document, widget.settings)

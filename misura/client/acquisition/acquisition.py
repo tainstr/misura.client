@@ -158,6 +158,11 @@ class MainWindow(QtGui.QMainWindow):
         self.plotqueuelabel.show()
 
         # a label for the cursor position readout
+        self.widgetnamelabel = QtGui.QLabel(statusbar)
+        statusbar.addPermanentWidget(self.widgetnamelabel)
+        self.widgetnamelabel.show()
+        
+        # a label for the cursor position readout
         self.axisvalueslabel = QtGui.QLabel(statusbar)
         statusbar.addPermanentWidget(self.axisvalueslabel)
         self.axisvalueslabel.show()
@@ -171,7 +176,16 @@ class MainWindow(QtGui.QMainWindow):
         self.summaryPlot.plot.sigQueueChange.connect(self.plotQueueChanged)
         self.summaryPlot.plot.sigPointPicked.connect(self.slotUpdatePickerLabel)
         self.summaryPlot.plot.sigAxisValuesFromMouse.connect(self.slotUpdateAxisValues)
+        self.summaryPlot.plot.sigNearestWidget.connect(self.slotUpdateNearWidget)
         self.summaryPlot.plot.sigUpdatePage.connect(self.slotUpdatePage)
+        
+    def slotUpdateNearWidget(self, widget):
+        txt = widget.path
+        for s in ('notes', 'key', 'label'):
+            if s in widget.settings:
+                txt = widget.settings.get(s).val
+                break
+        self.widgetnamelabel.setText(txt)
         
     def slotUpdatePickerLabel(self, info):
         """Display the picked point"""
