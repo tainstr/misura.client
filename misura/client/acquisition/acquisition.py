@@ -7,6 +7,8 @@ from traceback import format_exc
 import os
 import tables
 
+from veusz import utils as vutils
+
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from misura.canon import csutil
@@ -120,6 +122,8 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle(_('Misura Live'))
         self.myMenuBar = MenuBar(parent=self)
         self.setMenuWidget(self.myMenuBar)
+        
+        self.add_statusbar()
         self.add_server_selector()
 
         self.reset_file_proxy_timer = QtCore.QTimer()
@@ -131,12 +135,114 @@ class MainWindow(QtGui.QMainWindow):
         if not self.fixedDoc and confdb['autoConnect'] and len(confdb['recent_server']) > 1:
             self.set_addr(confdb['recent_server'][-1][0])
         self.showMaximized()
+        
+        
+    def add_statusbar(self):
+        """Add statusBar widgets"""
+        statusbar = self.statusbar = QtGui.QStatusBar(self)
+        self.setStatusBar(statusbar)
+        self.updateStatusbar(_('Ready'))
+
+        # a label for the picker readout
+        self.pickerlabel = QtGui.QLabel(statusbar)
+        self._setPickerFont(self.pickerlabel)
+        statusbar.addPermanentWidget(self.pickerlabel)
+        self.pickerlabel.hide()
+
+        # plot queue - how many plots are currently being drawn
+        self.plotqueuecount = 0
+        
+        self.plotqueuelabel = QtGui.QLabel()
+        self.plotqueuelabel.setToolTip(_("Number of rendering jobs remaining"))
+        statusbar.addWidget(self.plotqueuelabel)
+        self.plotqueuelabel.show()
+
+        # a label for the cursor position readout
+        self.axisvalueslabel = QtGui.QLabel(statusbar)
+        statusbar.addPermanentWidget(self.axisvalueslabel)
+        self.axisvalueslabel.show()
+
+        # a label for the page number readout
+        self.pagelabel = QtGui.QLabel(statusbar)
+        statusbar.addPermanentWidget(self.pagelabel)
+        self.pagelabel.show()
+        
+    def connect_statusbar(self):
+        self.summaryPlot.plot.sigQueueChange.connect(self.plotQueueChanged)
+        self.summaryPlot.plot.sigPointPicked.connect(self.slotUpdatePickerLabel)
+        self.summaryPlot.plot.sigAxisValuesFromMouse.connect(self.slotUpdateAxisValues)
+        self.summaryPlot.plot.sigUpdatePage.connect(self.slotUpdatePage)
+        
+    def slotUpdatePickerLabel(self, info):
+        """Display the picked point"""
+        #TODO: disentangle from Veusz code and import from there
+        xv, yv = info.coords
+        xn, yn = info.labels
+        xt, yt = info.displaytype
+        ix = str(info.index)
+        if ix:
+            ix = '[' + ix + ']'
+
+        # format values for display
+        def fmt(val, dtype):
+            if dtype == 'date':
+                return vutils.dateFloatToString(val)
+            elif dtype == 'numeric':
+                return '%0.5g' % val
+            elif dtype == 'text':
+                return val
+            else:
+                raise RuntimeError
+
+        xtext = fmt(xv, xt)
+        ytext = fmt(yv, yt)
+
+        t = '%s: %s%s = %s, %s%s = %s' % (
+            info.widget.name, xn, ix, xtext, yn, ix, ytext)
+        self.pickerlabel.setText(t)
+        
+    def slotUpdateAxisValues(self, values):
+        """Update the position where the mouse is relative to the axes."""
+        #TODO: disentangle from Veusz code and import from there
+        if values:
+            # construct comma separated text representing axis values
+            valitems = [
+                '%s=%#.4g' % (name, values[name])
+                for name in sorted(values) ]
+            self.axisvalueslabel.setText(', '.join(valitems))
+        else:
+            self.axisvalueslabel.setText(_('No position'))
+            
+    def slotUpdatePage(self, number):
+        """Update page number when the plot window says so."""
+
+        np = self.doc.getNumberPages()
+        if np == 0:
+            self.pagelabel.setText(_("No pages"))
+        else:
+            self.pagelabel.setText(_("Page %i/%i") % (number+1, np))
+            
+    def plotQueueChanged(self, incr):
+        self.plotqueuecount += incr
+        text = u'•' * self.plotqueuecount
+        self.plotqueuelabel.setText(text)
+            
+    def updateStatusbar(self, text):
+        '''Display text for a set period.'''
+        self.statusBar().showMessage(text, 2000)
+        
+    def _setPickerFont(self, label):
+        f = label.font()
+        f.setBold(True)
+        f.setPointSizeF(f.pointSizeF() * 1.2)
+        label.setFont(f)
 
     def notify(self, level, msg):
         if level<confdb['lognotify']:
             return False
         self.tray_icon.show()
         self.tray_icon.showMessage('Misura Server', msg, msecs=level*50)
+        self.updateStatusbar(msg)
         return True
 
     def focus_logging(self):
@@ -541,6 +647,7 @@ class MainWindow(QtGui.QMainWindow):
         logging.debug('summaryPlot')
         self.tasks.job(-1, pid, 'Sync graph with document')
         self.summaryPlot.set_doc(doc)
+        self.connect_statusbar()
 
         logging.debug('navigator')
         self.tasks.job(-1, pid, 'Sync document tree')
