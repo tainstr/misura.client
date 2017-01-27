@@ -24,7 +24,7 @@ from .. import misura3
 from .. import connection
 from .. import iutils
 from .. import parameters
-from ..clientconf import confdb, settings
+from ..clientconf import confdb
 from ..confwidget import RecentWidget
 from .menubar import MenuBar
 from .selector import InstrumentSelector

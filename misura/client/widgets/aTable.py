@@ -405,9 +405,10 @@ class aTableView(QtGui.QTableView):
         self.menu = QtGui.QMenu(self)
         self.rowAfter = partial(self.addRow, 1)
         self.rowBefore = partial(self.addRow, -1)
-        self.menu.addAction(_('Add row after'), self.rowAfter)
-        self.menu.addAction(_('Add row before'), self.rowBefore)
-        self.menu.addAction(_('Delete row'), self.remRow)
+        if not self.tableObj.readonly:
+            self.menu.addAction(_('Add row after'), self.rowAfter)
+            self.menu.addAction(_('Add row before'), self.rowBefore)
+            self.menu.addAction(_('Delete row'), self.remRow)
         self.menu.addSeparator()
         self.menu.addAction(_('Update'), self.tableObj.get)
         self.menu.addAction(_('Export'), self.export)
