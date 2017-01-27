@@ -276,7 +276,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         
         
     def make_visible_units_action(self, menu):
-        act = menu.addAction(_('Visible'))
+        act = menu.addAction(_('Visible units'))
         act.setCheckable(True)
         act.setChecked(self.view_units)
         act.triggered.connect(self.trigger_view_units)
@@ -366,11 +366,29 @@ class ColHead(object):
         self.index = index
     def __str__(self):
         return self.name
+    
+class ZoomAction(QtGui.QWidgetAction):
+    def __init__(self, parent=None):
+        QtGui.QWidgetAction.__init__(self, parent)
+        self.w = QtGui.QWidget()
+        self.lay = QtGui.QVBoxLayout()
+        self.w.setLayout(self.lay)
+        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal, parent=parent)
+        self.slider.setMaximum(100)
+        self.slider.setMinimum(0)
+        self.slider.setValue(50)
+        self.lay.addWidget(self.slider)
+        self.lay.setContentsMargins(0, 0, 0, 0)
+        self.lay.setSpacing(0)
+        self.setDefaultWidget(self.w)
+        
+
 
 class aTableView(QtGui.QTableView):
 
     def __init__(self, parent=None):
         QtGui.QTableView.__init__(self, parent)
+        self.ref_font_size = self.font().pointSize()
         self.tableObj = parent
         self.curveModel = aTableModel(parent)
         self.setModel(self.curveModel)
@@ -393,6 +411,12 @@ class aTableView(QtGui.QTableView):
         self.menu.addSeparator()
         self.menu.addAction(_('Update'), self.tableObj.get)
         self.menu.addAction(_('Export'), self.export)
+        
+        self.menu_zoom = self.menu.addMenu(_('Zoom'))
+        self.act_zoom = ZoomAction(self.menu_zoom)
+        self.act_zoom.slider.valueChanged.connect(self.set_zoom)
+        self.menu_zoom.addAction(self.act_zoom)
+        
         self.model().make_visible_units_action(self.menu)
         self.model().make_add_columns_menu(self.menu)
         self.connect(
@@ -402,6 +426,7 @@ class aTableView(QtGui.QTableView):
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))
+        
         
     def showHeaderMenu(self, pt):
         column = self.horizontalHeader().logicalIndexAt(pt.x())
@@ -463,12 +488,21 @@ class aTableView(QtGui.QTableView):
             h += self.rowHeight(i)
         self.setMinimumHeight(h)
         return h
+    
+    def set_zoom(self, val):
+        val = self.ref_font_size*(1+((val - 50)/100.))
+        d = '{{ font-size: {:.0f}pt; selection-background-color: red; }}'.format(val)
+        s = 'QTableView '+d
+        s += '\n' + 'QHeaderView '+d
+        self.setStyleSheet(s)
+        self.resizeRowsToContents()
+        self.resizeColumnsToContents()
 
 class aTable(ActiveWidget):
 
-    def __init__(self, server, path, prop,  parent=None):
+    def __init__(self, server, path, prop,  *a, **kw):
         self.initializing = True
-        ActiveWidget.__init__(self, server, path, prop, parent)
+        ActiveWidget.__init__(self, server, path, prop, *a, **kw)
         self.table = aTableView(self)
         self.lay.addWidget(self.table)
         self.initializing = False
