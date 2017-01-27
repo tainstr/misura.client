@@ -89,6 +89,7 @@ class aTablePointDelegate(QtGui.QItemDelegate):
 
 
 class aTableModel(QtCore.QAbstractTableModel):
+    view_units = True
 
     def __init__(self, tableObj):
         QtCore.QAbstractTableModel.__init__(self)
@@ -135,7 +136,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole:
             label = self.header[section][0]
             unit = False
-            if self.csunit!='None':
+            if self.csunit!='None' and self.view_units:
                 unit = units.hsymbols.get(self.csunit[section], False)
             if unit:
                 label += u' ({})'.format(unit)
@@ -201,8 +202,13 @@ class aTableModel(QtCore.QAbstractTableModel):
 
     def apply(self):
         self.tableObj.remObj.set(self.tableObj.handle,  [self.header] + self.rows)
-        
-    def make_header_menu(self, col):
+    
+    def trigger_view_units(self, status):
+        self.view_units = status
+        QtCore.QAbstractTableModel.reset(self) 
+    
+    def make_unit_menu(self, menu, col):
+        """Adds a submenu allowing to choose column unit"""
         if self.unit=='None':
             logging.debug('No unit defined', self.unit)
             return False
@@ -216,7 +222,11 @@ class aTableModel(QtCore.QAbstractTableModel):
             return False
         group = units.to_base[dim].keys()
         cu = self.csunit[col]
-        m = QtGui.QMenu(self.tableObj)
+        m = menu.addMenu(_('Unit'))
+        act = m.addAction(_('Visible'))
+        act.setCheckable(True)
+        act.setChecked(self.view_units)
+        act.triggered.connect(self.trigger_view_units)
         self.unit_funcs = []
         for to_unit in group:
             f = functools.partial(self.change_unit, col, to_unit)
@@ -229,6 +239,42 @@ class aTableModel(QtCore.QAbstractTableModel):
             a.setCheckable(True)
             a.setChecked(to_unit==cu)
         return m
+    
+    _menu_funcs = [] # Keep references for partial functions
+    def make_visibility_action(self, menu, col, name=False):
+        if not name:
+            name = self.header[col][0]
+        act = menu.addAction(name)
+        f = functools.partial(self.change_visibility, col)
+        act.triggered.connect(f)
+        act.setCheckable(True)
+        act.setChecked(self.visible[col])
+        self._menu_funcs.append(f)
+        return act
+    
+    def change_visibility(self, col, status=True):
+        """Hide/show `col` according to `status`"""
+        self.visible[col] = status
+        self.tableObj.table.update_visible_columns()
+    
+    def make_add_columns_menu(self, menu):
+        """Adds a submenu allowing to choose visible/hidden columns"""
+        m = menu.addMenu(_('More'))
+        for col, vis in enumerate(self.visible):
+            if vis:
+                continue
+            self.make_visibility_action(m, col)
+        return m
+        
+    
+    def make_header_menu(self, col):
+        """Build table header context menu for `col`"""
+        self._menu_funcs = []
+        menu = QtGui.QMenu(self.tableObj)
+        self.make_visibility_action(menu, col, name=_('Visible'))
+        self.make_add_columns_menu(menu)
+        self.make_unit_menu(menu, col)
+        return menu
             
     def change_unit(self, col, to_unit):
         self.csunit[col] = to_unit
