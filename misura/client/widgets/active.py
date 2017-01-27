@@ -119,6 +119,7 @@ class Active(object):
         self.remObj = remObj
         self.path = remObj._Method__name
         self.prop = prop
+        self.context = context
 
         for p in 'current', 'type', 'handle', 'factory_default', 'attr', 'readLevel', 'writeLevel', 'name':
             setattr(self, p, prop[p])
@@ -402,6 +403,18 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.menu_timer.setInterval(500)
         self.connect(self.menu_timer, QtCore.SIGNAL(
             'timeout()'), self.do_hide_menu, QtCore.Qt.QueuedConnection)
+        
+    def new_window(self):
+        """Displays a copy of the widget in a new window"""
+        win = QtGui.QWidget()
+        lay = QtGui.QVBoxLayout()
+        wg = self.__class__(self.server, self.remObj, self.prop, parent=win)
+        win.setWindowTitle(self.label)
+        lay.addWidget(wg.label_widget)
+        lay.addWidget(wg)
+        win.setLayout(lay)
+        self._win = win
+        win.show()
 
     @lockme
     def closeEvent(self, event):
@@ -510,6 +523,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.emenu.addAction(_('Set default value'), self.set_default)
         self.emenu.addAction(_('Check for modification'), self.get)
         self.emenu.addAction(_('Option Info'), self.show_info)
+        self.emenu.addAction(_('Detach'), self.new_window)
         if self.remObj.compare_presets is not None:
             self.emenu.addMenu(self.presets_menu)
         #self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
