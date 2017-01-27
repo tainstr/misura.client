@@ -7,13 +7,14 @@ logging = get_module_logging(__name__)
 
 from .. import iutils, _
 import re
-from misura.client.clientconf import settings
+
+from misura.client.widgets import table_model_export
 # TODO: these functions should be generalized and applied also by the
 # navigator. THey should also present data in hierarchy (not plain).
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 voididx = QtCore.QModelIndex()
-
+    
 
 class SummaryModel(QtCore.QAbstractTableModel):
     _rowCount = 0
@@ -124,47 +125,6 @@ class SummaryModel(QtCore.QAbstractTableModel):
         s = iutils.num_to_string(val)
         return s
 
-    def export(self, path='/tmp/misura/m.csv', order=False, sep=';\t', header=False):
-        """Export to csv file `path`, following column order `order`, using separator `sep`,
-        prepending `header`"""
-        # Terrible way of reordering!
-        if order is not False:
-            ordered = [None] * len(self._loaded)
-            for i, j in order.iteritems():
-                ordered[j] = self._loaded[i]
-            for i in range(ordered.count(None)):
-                ordered.remove(None)
-        else:
-            ordered = self._loaded[:]
-        logging.debug('ordered', ordered)
-        n = len(ordered)
-        if not n:
-            logging.debug('No columns to export.')
-            return False
-        f = open(path, 'w')
-        if header:
-            f.write(header + '\n')
-        msg = ('{}' + sep) * len(ordered) + '\n'
-        ch = [h.replace('summary/', '') for h in ordered]
-        f.write(msg.format(*ch))
-        dat = []
-        nmax = 0
-        for h in ordered:
-            d = self.doc.data[h].data
-            if len(d) > nmax:
-                nmax = len(d)
-            dat.append(d)
-
-        def get(v, i):
-            if i >= len(v):
-                return v[-1]
-            return v[i]
-        i = 0
-        while i < nmax:
-            vals = [get(v, i) for v in dat]
-            f.write(msg.format(*vals))
-            i += 1
-        f.close()
 
 
 class SummaryHeader(QtGui.QHeaderView):
@@ -200,23 +160,10 @@ class SummaryHeader(QtGui.QHeaderView):
 
     def export(self):
         """Export to CSV file"""
-        # TODO: produce a header section based on present samples' metadata
-        d = settings.value('/FileSaveToDir', os.path.expanduser('~'))
-        path = os.path.join(str(d), 'export.csv')
-        dest = str(QtGui.QFileDialog.getSaveFileName(
-            self, "Export To CSV...", path))
-        if dest == '':
-            return
-        if not dest.lower().endswith('.csv'):
-            dest += '.csv'
-        # Compute visual index order mapping to logical index,
-        # as a consequence of visually moving columns
-        order = {}
-        for i in range(self.parent().model().columnCount(self.currentIndex())):
-            if self.isSectionHidden(i):
-                continue
-            order[i] = self.visualIndex(i)
-        self.parent().model().export(path=dest, order=order)
+        model = self.parent().model()
+        def get_column_func(name):
+            return model.doc.data[name].data
+        table_model_export(model._loaded, get_column_func, model, self)
 
     def show_menu(self, pt):
         self.point = pt

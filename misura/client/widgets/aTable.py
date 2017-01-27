@@ -1,10 +1,77 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from functools import partial
+import os
+
 from .. import _
 from misura.client.widgets.active import *
 from misura.client import units
-from functools import partial
+from misura.client.clientconf import settings
 
+def _export(loaded, get_column_func, 
+            path='/tmp/misura/m.csv', 
+            order=False, sep=';\t', header=False):
+    """Export to csv file `path`, following column order `order`, using separator `sep`,
+    prepending `header`"""
+    # Terrible way of reordering!
+    logging.debug('ordering', loaded, order)
+    if order is not False:
+        ordered = [None] * len(loaded)
+        for i, j in order.iteritems():
+            ordered[j] = loaded[i]
+        for i in range(ordered.count(None)):
+            ordered.remove(None)
+    else:
+        ordered = loaded[:]
+    logging.debug('ordered', ordered)
+    n = len(ordered)
+    if not n:
+        logging.debug('No columns to export.')
+        return False
+    f = open(path, 'w')
+    if header:
+        f.write(header + '\n')
+    msg = ('{}' + sep) * len(ordered) + '\n'
+    ch = [str(h).replace('summary/', '').replace('\n', '_') for h in ordered]
+    f.write(msg.format(*ch))
+    dat = []
+    nmax = 0
+    for h in ordered:
+        d = get_column_func(h)
+        if len(d) > nmax:
+            nmax = len(d)
+        dat.append(d)
+
+    def get(v, i):
+        if i >= len(v):
+            return v[-1]
+        return v[i]
+    i = 0
+    while i < nmax:
+        vals = [get(v, i) for v in dat]
+        f.write(msg.format(*vals))
+        i += 1
+    f.close()
+
+def table_model_export(loaded, get_column_func, model, header_view):
+    """Prepare to export to CSV file"""
+    # TODO: produce a header section based on present samples' metadata
+    d = settings.value('/FileSaveToDir', os.path.expanduser('~'))
+    path = os.path.join(str(d), 'export.csv')
+    dest = str(QtGui.QFileDialog.getSaveFileName(
+        header_view, "Export To CSV...", path))
+    if dest == '':
+        return
+    if not dest.lower().endswith('.csv'):
+        dest += '.csv'
+    # Compute visual index order mapping to logical index,
+    # as a consequence of visually moving columns
+    order = {}
+    for logicalIndex in range(model.columnCount(header_view.currentIndex())):
+        if header_view.isSectionHidden(logicalIndex):
+            continue
+        order[logicalIndex] = header_view.visualIndex(logicalIndex)
+    _export(loaded, get_column_func, path=dest, order=order)
 
 class aTablePointDelegate(QtGui.QItemDelegate):
 
@@ -206,6 +273,14 @@ class aTableModel(QtCore.QAbstractTableModel):
     def trigger_view_units(self, status):
         self.view_units = status
         QtCore.QAbstractTableModel.reset(self) 
+        
+        
+    def make_visible_units_action(self, menu):
+        act = menu.addAction(_('Visible'))
+        act.setCheckable(True)
+        act.setChecked(self.view_units)
+        act.triggered.connect(self.trigger_view_units)
+        return act
     
     def make_unit_menu(self, menu, col):
         """Adds a submenu allowing to choose column unit"""
@@ -223,10 +298,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         group = units.to_base[dim].keys()
         cu = self.csunit[col]
         m = menu.addMenu(_('Unit'))
-        act = m.addAction(_('Visible'))
-        act.setCheckable(True)
-        act.setChecked(self.view_units)
-        act.triggered.connect(self.trigger_view_units)
+        self.make_visible_units_action(m)
         self.unit_funcs = []
         for to_unit in group:
             f = functools.partial(self.change_unit, col, to_unit)
@@ -278,7 +350,22 @@ class aTableModel(QtCore.QAbstractTableModel):
             
     def change_unit(self, col, to_unit):
         self.csunit[col] = to_unit
+        
+    @property
+    def visible_indexes(self):
+        """Return a list of visible column indexes"""
+        r = []
+        for i, v in enumerate(self.visible):
+            if v: 
+                r.append(i)
+        return r
 
+class ColHead(object):
+    def __init__(self, index, name):
+        self.name = name
+        self.index = index
+    def __str__(self):
+        return self.name
 
 class aTableView(QtGui.QTableView):
 
@@ -295,6 +382,7 @@ class aTableView(QtGui.QTableView):
         
         self.horizontalHeader().setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.horizontalHeader().customContextMenuRequested.connect(self.showHeaderMenu)
+        self.horizontalHeader().setMovable(True)
         
         self.menu = QtGui.QMenu(self)
         self.rowAfter = partial(self.addRow, 1)
@@ -304,6 +392,9 @@ class aTableView(QtGui.QTableView):
         self.menu.addAction(_('Delete row'), self.remRow)
         self.menu.addSeparator()
         self.menu.addAction(_('Update'), self.tableObj.get)
+        self.menu.addAction(_('Export'), self.export)
+        self.model().make_visible_units_action(self.menu)
+        self.model().make_add_columns_menu(self.menu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
         self.update_visible_columns()
@@ -316,10 +407,22 @@ class aTableView(QtGui.QTableView):
         column = self.horizontalHeader().logicalIndexAt(pt.x())
         # show menu about the column
         menu = self.model().make_header_menu(column)
+        menu.addAction(_('Export'), self.export)
         if not menu:
             logging.debug('No menu for column', column)
             return False
         menu.popup(self.horizontalHeader().mapToGlobal(pt))
+    
+    def export(self):
+        """Export to CSV file"""
+        model = self.model()            
+        def get_column_func(head):
+            index = head.index
+            print 'get_column_func', head, index, len(model.rows)
+            return [row[index] for row in model.rows]
+        h  = self.horizontalHeader()
+        loaded = [ColHead(i, name[0]) for i, name in enumerate(model.header)]
+        table_model_export(loaded, get_column_func, model, h)
         
 
     def addRow(self, pos=0):

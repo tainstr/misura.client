@@ -17,7 +17,7 @@ from aNumber import aNumber,  aNumberAction,  FocusableSlider
 from aProgress import aProgress, RoleProgress
 from aString import aString
 from aScript import aScript
-from aTable import aTable
+from aTable import aTable, table_model_export
 from aProfile import aProfile
 from aTime import aTime, aDelay
 from aFileList import aFileList
