@@ -7,9 +7,11 @@ from .. import _
 from misura.client.widgets.active import *
 from misura.client import units
 from misura.client.clientconf import settings
+from couchdb.client import Row
 
-def _export(loaded, get_column_func, 
-            path='/tmp/misura/m.csv', 
+
+def _export(loaded, get_column_func,
+            path='/tmp/misura/m.csv',
             order=False, sep=';\t', header=False):
     """Export to csv file `path`, following column order `order`, using separator `sep`,
     prepending `header`"""
@@ -53,6 +55,7 @@ def _export(loaded, get_column_func,
         i += 1
     f.close()
 
+
 def table_model_export(loaded, get_column_func, model, header_view):
     """Prepare to export to CSV file"""
     # TODO: produce a header section based on present samples' metadata
@@ -73,6 +76,7 @@ def table_model_export(loaded, get_column_func, model, header_view):
         order[logicalIndex] = header_view.visualIndex(logicalIndex)
     _export(loaded, get_column_func, path=dest, order=order)
 
+
 class aTablePointDelegate(QtGui.QItemDelegate):
 
     """Delegato per la modifica delle celle in una tabella"""
@@ -86,13 +90,13 @@ class aTablePointDelegate(QtGui.QItemDelegate):
         p = mod.tableObj.prop.get('precision', 2)
         if hasattr(p, '__len__'):
             p = p[col]
-        
+
         colType = mod.header[col][1]
         if colType == 'Float':
             wg = QtGui.QDoubleSpinBox(parent)
             wg.setRange(MIN, MAX)
             val = float(mod.data(index))
-            dc = extend_decimals(val, default=0, extend_by=p+2)
+            dc = extend_decimals(val, default=0, extend_by=p + 2)
             wg.setDecimals(dc)
         elif colType == 'Integer':
             wg = QtGui.QSpinBox(parent)
@@ -111,12 +115,12 @@ class aTablePointDelegate(QtGui.QItemDelegate):
         mod = index.model()
         col = index.column()
         colType = mod.header[col][1]
-        if colType=='Float':
+        if colType == 'Float':
             val = float(mod.data(index))
             editor.setValue(val)
-        elif colType=='Integer':
+        elif colType == 'Integer':
             val = int(mod.data(index))
-            editor.setValue(val)            
+            editor.setValue(val)
         elif colType == 'String':
             val = mod.data(index)
             editor.setText(val)
@@ -137,7 +141,7 @@ class aTablePointDelegate(QtGui.QItemDelegate):
         if colType in ['Float', 'Integer']:
             val = editor.text()
             val = editor.valueFromText(val)
-            print 'setting model data',val
+            print 'setting model data', val
             model.setData(index, val, QtCore.Qt.DisplayRole)
         elif colType == 'Boolean':
             if index.row() == 0:
@@ -157,6 +161,8 @@ class aTablePointDelegate(QtGui.QItemDelegate):
 
 class aTableModel(QtCore.QAbstractTableModel):
     view_units = True
+    rotated = False
+    perpendicular_header_col = -1
 
     def __init__(self, tableObj):
         QtCore.QAbstractTableModel.__init__(self)
@@ -170,44 +176,64 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.up()
 
     def rowCount(self, index=QtCore.QModelIndex()):
+        if self.rotated:
+            return len(self.header)
         return len(self.rows)
 
     def columnCount(self, index=QtCore.QModelIndex()):
+        if self.rotated:
+            return len(self.rows)
         return len(self.header)
 
-    def data(self, index, role=QtCore.Qt.DisplayRole):
-        if not index.isValid() or not (0 <= index.row() <= self.rowCount()):
-            return 0
-        row = self.rows[index.row()]
-        col = index.column()
-        if role != QtCore.Qt.DisplayRole:
-            return
+    def format_data(self, col, row):
+        row = self.rows[row]
         val = row[col]
         # handle conversion from option unit to client-side unit
-        if self.unit!='None' and self.csunit!='None':
+        if self.unit != 'None' and self.csunit != 'None':
             u, cu = self.unit[col], self.csunit[col]
-            if u!=cu:
+            if u != cu:
                 val = units.Converter.convert(u, cu, val)
-        if self.precision!='None':
+        if self.precision != 'None':
             p = self.precision
             if hasattr(p, '__len__'):
                 p = p[col]
             dc = extend_decimals(val, default=0, extend_by=p)
-            ps = '{:.'+str(dc)+'f}'
+            ps = '{:.' + str(dc) + 'f}'
             val = ps.format(val)
         return val
 
-    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
-        if orientation != QtCore.Qt.Horizontal:
+    def data(self, index, role=QtCore.Qt.DisplayRole):
+        if not index.isValid() or not (0 <= index.row() <= self.rowCount()):
+            return 0
+        if role != QtCore.Qt.DisplayRole:
             return
-        if role == QtCore.Qt.DisplayRole:
-            label = self.header[section][0]
-            unit = False
-            if self.csunit!='None' and self.view_units:
-                unit = units.hsymbols.get(self.csunit[section], False)
-            if unit:
-                label += u' ({})'.format(unit)
-            return label
+        row = index.row()
+        col = index.column()
+        if self.rotated:
+            a = col
+            col = row
+            row = a
+        return self.format_data(col, row)
+
+    def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
+        if role != QtCore.Qt.DisplayRole:
+            return
+        if self.rotated and orientation != QtCore.Qt.Vertical:
+            if self.perpendicular_header_col < 0:
+                return 
+            return self.format_data(self.perpendicular_header_col, section)
+        elif not self.rotated and orientation != QtCore.Qt.Horizontal:
+            if self.perpendicular_header_col < 0:
+                return 
+            return self.format_data(self.perpendicular_header_col, section)
+
+        label = self.header[section][0]
+        unit = False
+        if self.csunit != 'None' and self.view_units:
+            unit = units.hsymbols.get(self.csunit[section], False)
+        if unit:
+            label += u' ({})'.format(unit)
+        return label
 
     def up(self):
         hp = self.tableObj.current
@@ -217,8 +243,9 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.rows = hp[1:]
         self.unit = self.tableObj.prop.get('unit', False)
         self.precision = self.tableObj.prop.get('precision', 'None')
-        self.visible = self.tableObj.prop.get('visible', [1]*len(self.header))
-        if self.csunit=='None':
+        self.visible = self.tableObj.prop.get(
+            'visible', [1] * len(self.header))
+        if self.csunit == 'None':
             self.csunit = self.unit[:]
         QtCore.QAbstractTableModel.reset(self)
 
@@ -243,6 +270,10 @@ class aTableModel(QtCore.QAbstractTableModel):
             return False
         irow = index.row()
         icol = index.column()
+        if self.rotated:
+            a = icol
+            icol = irow
+            irow = a
         colType = self.header[icol][1]
         row = self.rows[irow]
         if colType == 'Boolean':
@@ -256,9 +287,9 @@ class aTableModel(QtCore.QAbstractTableModel):
         elif colType == 'String':
             value = str(value)
         # handle conversion from client-side unit to option unit
-        if self.unit!='None' and self.csunit!='None':
+        if self.unit != 'None' and self.csunit != 'None':
             u, cu = self.unit[icol], self.csunit[icol]
-            if u!=cu:
+            if u != cu:
                 value = units.Converter.convert(cu, u, value)
         row[icol] = value
         self.rows[irow] = row
@@ -268,23 +299,23 @@ class aTableModel(QtCore.QAbstractTableModel):
         return True
 
     def apply(self):
-        self.tableObj.remObj.set(self.tableObj.handle,  [self.header] + self.rows)
-    
+        self.tableObj.remObj.set(
+            self.tableObj.handle,  [self.header] + self.rows)
+
     def trigger_view_units(self, status):
         self.view_units = status
-        QtCore.QAbstractTableModel.reset(self) 
-        
-        
+        QtCore.QAbstractTableModel.reset(self)
+
     def make_visible_units_action(self, menu):
         act = menu.addAction(_('Visible units'))
         act.setCheckable(True)
         act.setChecked(self.view_units)
         act.triggered.connect(self.trigger_view_units)
         return act
-    
+
     def make_unit_menu(self, menu, col):
         """Adds a submenu allowing to choose column unit"""
-        if self.unit=='None':
+        if self.unit == 'None':
             logging.debug('No unit defined', self.unit)
             return False
         u = self.unit[col]
@@ -309,10 +340,11 @@ class aTableModel(QtCore.QAbstractTableModel):
                 lbl += u' ({})'.format(us)
             a = m.addAction(lbl, f)
             a.setCheckable(True)
-            a.setChecked(to_unit==cu)
+            a.setChecked(to_unit == cu)
         return m
-    
-    _menu_funcs = [] # Keep references for partial functions
+
+    _menu_funcs = []  # Keep references for partial functions
+
     def make_visibility_action(self, menu, col, name=False):
         if not name:
             name = self.header[col][0]
@@ -323,12 +355,12 @@ class aTableModel(QtCore.QAbstractTableModel):
         act.setChecked(self.visible[col])
         self._menu_funcs.append(f)
         return act
-    
+
     def change_visibility(self, col, status=True):
         """Hide/show `col` according to `status`"""
         self.visible[col] = status
         self.tableObj.table.update_visible_columns()
-    
+
     def make_add_columns_menu(self, menu):
         """Adds a submenu allowing to choose visible/hidden columns"""
         m = menu.addMenu(_('More'))
@@ -337,8 +369,23 @@ class aTableModel(QtCore.QAbstractTableModel):
                 continue
             self.make_visibility_action(m, col)
         return m
-        
     
+    def set_as_perpendicular_header(self, col):
+        # Unset
+        if self.perpendicular_header_col == col:
+            col = -1
+        self.perpendicular_header_col = col
+        QtCore.QAbstractTableModel.reset(self)
+        self.emit(QtCore.SIGNAL('layoutChanged()'))
+        self.tableObj.resize_height()
+    
+    def make_perpendicular_header_action(self, menu, col):
+        f = functools.partial(self.set_as_perpendicular_header, col)
+        act = menu.addAction(_('Use as header'), f)
+        act.setCheckable(True)
+        act.setChecked(self.perpendicular_header_col==col)
+        return act
+        
     def make_header_menu(self, col):
         """Build table header context menu for `col`"""
         self._menu_funcs = []
@@ -346,28 +393,34 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.make_visibility_action(menu, col, name=_('Visible'))
         self.make_add_columns_menu(menu)
         self.make_unit_menu(menu, col)
+        self.make_perpendicular_header_action(menu, col)
         return menu
-            
+
     def change_unit(self, col, to_unit):
         self.csunit[col] = to_unit
-        
+
     @property
     def visible_indexes(self):
         """Return a list of visible column indexes"""
         r = []
         for i, v in enumerate(self.visible):
-            if v: 
+            if v:
                 r.append(i)
         return r
 
+
 class ColHead(object):
+
     def __init__(self, index, name):
         self.name = name
         self.index = index
+
     def __str__(self):
         return self.name
-    
+
+
 class ZoomAction(QtGui.QWidgetAction):
+
     def __init__(self, parent=None):
         QtGui.QWidgetAction.__init__(self, parent)
         self.w = QtGui.QWidget()
@@ -381,7 +434,6 @@ class ZoomAction(QtGui.QWidgetAction):
         self.lay.setContentsMargins(0, 0, 0, 0)
         self.lay.setSpacing(0)
         self.setDefaultWidget(self.w)
-        
 
 
 class aTableView(QtGui.QTableView):
@@ -397,68 +449,79 @@ class aTableView(QtGui.QTableView):
         self.setSelectionModel(self.selection)
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        
-        self.horizontalHeader().setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.horizontalHeader().customContextMenuRequested.connect(self.showHeaderMenu)
-        self.horizontalHeader().setMovable(True)
-        
-        self.menu = QtGui.QMenu(self)
-        self.rowAfter = partial(self.addRow, 1)
-        self.rowBefore = partial(self.addRow, -1)
-        if not self.tableObj.readonly:
-            self.menu.addAction(_('Add row after'), self.rowAfter)
-            self.menu.addAction(_('Add row before'), self.rowBefore)
-            self.menu.addAction(_('Delete row'), self.remRow)
-        self.menu.addSeparator()
-        self.menu.addAction(_('Update'), self.tableObj.get)
-        self.menu.addAction(_('Export'), self.export)
-        
-        self.menu_zoom = self.menu.addMenu(_('Zoom'))
-        self.act_zoom = ZoomAction(self.menu_zoom)
-        self.act_zoom.slider.valueChanged.connect(self.set_zoom)
-        self.menu_zoom.addAction(self.act_zoom)
-        
-        self.model().make_visible_units_action(self.menu)
-        self.model().make_add_columns_menu(self.menu)
+
+        for h in (self.horizontalHeader(), self.verticalHeader()):
+            h.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+            h.customContextMenuRequested.connect(self.showHeaderMenu)
+            h.setMovable(True)
+
+
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
         self.update_visible_columns()
-        
+
+    @property
+    def main_header(self):
+        return self.verticalHeader() if self.rotated else self.horizontalHeader()
+
+    @property
+    def rotated(self):
+        return self.model().rotated
 
     def showMenu(self, pt):
-        self.menu.popup(self.mapToGlobal(pt))
-        
-        
+        menu = QtGui.QMenu(self)
+        self.rowAfter = partial(self.addRow, 1)
+        self.rowBefore = partial(self.addRow, -1)
+        if not self.tableObj.readonly:
+            menu.addAction(_('Add row after'), self.rowAfter)
+            menu.addAction(_('Add row before'), self.rowBefore)
+            menu.addAction(_('Delete row'), self.remRow)
+        menu.addSeparator()
+
+        menu.addAction(_('Update'), self.tableObj.get)
+        menu.addAction(_('Export'), self.export)
+        self.act_rotate = menu.addAction(_('Rotate'), self.rotate)
+        self.act_rotate.setCheckable(True)
+        self.act_rotate.setChecked(False)
+        menu_zoom = menu.addMenu(_('Zoom'))
+        act_zoom = ZoomAction(menu_zoom)
+        act_zoom.slider.valueChanged.connect(self.set_zoom)
+        menu_zoom.addAction(act_zoom)
+        self.model().make_visible_units_action(menu)
+        self.model().make_add_columns_menu(menu)
+        menu.popup(self.mapToGlobal(pt))
+
     def showHeaderMenu(self, pt):
-        column = self.horizontalHeader().logicalIndexAt(pt.x())
+        h = self.main_header
+        column = h.logicalIndexAt(pt.x())
         # show menu about the column
         menu = self.model().make_header_menu(column)
         menu.addAction(_('Export'), self.export)
         if not menu:
             logging.debug('No menu for column', column)
             return False
-        menu.popup(self.horizontalHeader().mapToGlobal(pt))
-    
+        menu.popup(h.mapToGlobal(pt))
+
     def export(self):
         """Export to CSV file"""
-        model = self.model()            
+        model = self.model()
+
         def get_column_func(head):
             index = head.index
             print 'get_column_func', head, index, len(model.rows)
             return [row[index] for row in model.rows]
-        h  = self.horizontalHeader()
+        h = self.main_header
         loaded = [ColHead(i, name[0]) for i, name in enumerate(model.header)]
         table_model_export(loaded, get_column_func, model, h)
-        
 
     def addRow(self, pos=0):
         model = self.curveModel
         new = model.emptyRow()
         i = self.currentIndex()
         if i:
-            i=i.row()
+            i = i.row()
         else:
-            i=0
+            i = 0
         if pos == 0:  # At the end
             model.rows.append(new)
         elif pos == 1:  # After current
@@ -472,11 +535,11 @@ class aTableView(QtGui.QTableView):
         i = self.currentIndex().row()
         model.rows.pop(i)
         model.apply()
-        
+
     def up(self):
         self.model().up()
         self.update_visible_columns()
-    
+
     def update_visible_columns(self):
         for i, v in enumerate(self.model().visible):
             self.setColumnHidden(i, not v)
@@ -484,20 +547,29 @@ class aTableView(QtGui.QTableView):
     def resize_height(self):
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
-        h = self.horizontalHeader().height()
+        h = self.main_header.height()
         for i in range(self.model().rowCount()):
             h += self.rowHeight(i)
-        self.setMinimumHeight(h)
+        #self.setMinimumHeight(h)
         return h
-    
+
     def set_zoom(self, val):
-        val = self.ref_font_size*(1+((val - 50)/100.))
-        d = '{{ font-size: {:.0f}pt; selection-background-color: red; }}'.format(val)
-        s = 'QTableView '+d
-        s += '\n' + 'QHeaderView '+d
+        val = self.ref_font_size * (1 + ((val - 50) / 100.))
+        d = '{{ font-size: {:.0f}pt; selection-background-color: red; }}'.format(
+            val)
+        s = 'QTableView ' + d
+        s += '\n' + 'QHeaderView ' + d
         self.setStyleSheet(s)
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
+
+    def rotate(self):
+        self.model().rotated = not self.model().rotated
+        self.act_rotate.setChecked(self.model().rotated)
+        self.up()
+        self.resizeRowsToContents()
+        self.resizeColumnsToContents()
+
 
 class aTable(ActiveWidget):
 
@@ -507,17 +579,17 @@ class aTable(ActiveWidget):
         self.table = aTableView(self)
         self.lay.addWidget(self.table)
         self.initializing = False
-        self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+        self.setSizePolicy(
+            QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Maximum)
         self.table.setSizePolicy(self.sizePolicy())
-        
+
         self.resize_height()
-    
+
     def resizeEvent(self, event):
         if self.parent():
-            self.setMinimumWidth(self.parent().width()-50)
-        return QtGui.QWidget.resizeEvent(self, event) 
-            
-    
+            self.setMinimumWidth(self.parent().width() - 50)
+        return QtGui.QWidget.resizeEvent(self, event)
+
     def resize_height(self):
         h = self.table.resize_height()
         self.setMinimumHeight(h)
@@ -527,4 +599,3 @@ class aTable(ActiveWidget):
             return
         self.table.up()
         self.resize_height()
-        
