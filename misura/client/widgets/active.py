@@ -14,7 +14,7 @@ from .. import units
 from ..clientconf import confdb
 from .. import _
 from ..live import registry
-
+from .builder import build
 
 from PyQt4 import QtGui, QtCore
 
@@ -524,6 +524,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.emenu.addAction(_('Check for modification'), self.get)
         self.emenu.addAction(_('Option Info'), self.show_info)
         self.emenu.addAction(_('Detach'), self.new_window)
+        if self.prop.get('aggregate', ''):
+            self.emenu.addAction(_('Explore aggregate'), self.explore_aggregate)
         if self.remObj.compare_presets is not None:
             self.emenu.addMenu(self.presets_menu)
         #self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
@@ -648,3 +650,26 @@ class ActiveWidget(Active, QtGui.QWidget):
             t += '<b>{}</b>: {}<br/>'.format(k, v)
 
         info_dialog(t, parent=self)
+        
+    def explore_aggregate(self):
+        agg = self.prop.get('aggregate', "")
+        print agg
+        f, targets, values, devs = self.remObj.collect_aggregate(agg, self.handle)
+        w = QtGui.QWidget()
+        lay = QtGui.QFormLayout()
+        w.setLayout(lay)
+        root = self.remObj.root
+        for t in targets: 
+            if t!=self.handle:
+                lay.addWidget(QtGui.QLabel('---  ' + _('Aggregation Target: ') +t + '  ---'))
+            for fullpath in devs[t]:
+                dev = root.toPath(fullpath)
+                wg = build(self.server, dev, dev.gete(t), parent=w)
+                wg.label_widget.setText('{} ({}): {}'.format(dev['name'], dev['devpath'], _(wg.prop['name'])))
+                lay.addRow(wg.label_widget, wg)
+        win = QtGui.QScrollArea()
+        win.setWidgetResizable(True)
+        win.setWidget(w)
+        win.setWindowTitle(_('Explore aggregate: {} ({})').format(self.label, self.handle))
+        self._agg_win = win
+        win.show()

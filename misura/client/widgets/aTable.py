@@ -447,8 +447,9 @@ class aTableView(QtGui.QTableView):
         self.setItemDelegate(aTablePointDelegate(self))
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.setSelectionModel(self.selection)
-        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        if self.tableObj.readonly:
+            self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
 
         for h in (self.horizontalHeader(), self.verticalHeader()):
             h.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -555,7 +556,7 @@ class aTableView(QtGui.QTableView):
 
     def set_zoom(self, val):
         val = self.ref_font_size * (1 + ((val - 50) / 100.))
-        d = '{{ font-size: {:.0f}pt; selection-background-color: red; }}'.format(
+        d = '{{ font-size: {:.0f}pt; }}'.format(
             val)
         s = 'QTableView ' + d
         s += '\n' + 'QHeaderView ' + d
