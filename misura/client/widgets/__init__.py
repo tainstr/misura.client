@@ -26,7 +26,7 @@ from role import Role,  RoleIO, RoleEditor,  RoleDialog
 from cycle import ThermalCycleChooser
 from motorslider import MotorSlider, MotorSliderAction
 
-from builder import build
+from builder import build, build_aggregate_view
 from PyQt4 import QtGui, QtCore
 
 
