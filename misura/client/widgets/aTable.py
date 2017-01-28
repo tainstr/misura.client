@@ -5,6 +5,7 @@ import os
 
 from .. import _
 from misura.client.widgets.active import *
+from .builder import build_aggregate_view
 from misura.client import units
 from misura.client.clientconf import settings
 from couchdb.client import Row
@@ -470,6 +471,7 @@ class aTableView(QtGui.QTableView):
         return self.model().rotated
 
     def showMenu(self, pt):
+        index = self.indexAt(pt)
         menu = QtGui.QMenu(self)
         self.rowAfter = partial(self.addRow, 1)
         self.rowBefore = partial(self.addRow, -1)
@@ -490,11 +492,59 @@ class aTableView(QtGui.QTableView):
         menu_zoom.addAction(act_zoom)
         self.model().make_visible_units_action(menu)
         self.model().make_add_columns_menu(menu)
+        
+        # View local aggregation
+        if self.tableObj.prop.get('aggregate', ''):
+            menu_agg = menu.addMenu(_('Explore aggregation'))
+            self._f_cell_agg = functools.partial(self.cell_aggregation, index)
+            self._f_col_agg = functools.partial(self.col_aggregation, index)
+            self._f_row_agg = functools.partial(self.row_aggregation, index)
+            menu_agg.addAction(_('Cell'), self._f_cell_agg)
+            menu_agg.addAction(_('Column'), self._f_col_agg)
+            menu_agg.addAction(_('Row'), self._f_row_agg)
+        
+        
         menu.popup(self.mapToGlobal(pt))
+        
+    def _coord(self, index):
+        col = index.column()
+        row = index.row()
+        if self.rotated:
+            a = row
+            row = col
+            col = a
+        return col, row
+        
+    def cell_aggregation(self, index):
+        from misura.client.conf import Interface
+        r = self.tableObj.remObj.collect_aggregate(self.tableObj.prop['aggregate'], 
+                                                    self.tableObj.handle)
+        f, targets, values, devs = r
+        col, row = self._coord(index)
+        t = targets[col]
+        devpath = devs[t][row]
+        root = self.tableObj.remObj.root
+        dev = root.toPath(devpath)
+        print dev['fullpath']
+        win = Interface(root, dev)
+        win.show()
+        win.highlight_option(t)
+        #win.setWindowTitle('Aggregation source')
+        self._cell_win = win
+        
+    
+    def col_aggregation(self, index):
+        pass
+    
+    def row_aggregation(self, index):
+        pass
 
     def showHeaderMenu(self, pt):
         h = self.main_header
-        column = h.logicalIndexAt(pt.x())
+        coord = pt.x()
+        if self.rotated:
+            coord = pt.y()
+        column = h.logicalIndexAt(coord)
         # show menu about the column
         menu = self.model().make_header_menu(column)
         menu.addAction(_('Export'), self.export)
