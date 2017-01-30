@@ -416,7 +416,7 @@ class Interface(QtGui.QTabWidget):
             if self.prop_dict.has_key(sname):
                 if self.prop_dict[sname]['type'] == 'Section':
                     sname = self.prop_dict[sname]['name']
-            self.addTab(section, _(sname))
+            self.addTab(wg, _(sname))
             
             f = functools.partial(self.scroll_to, area)
             wg.sigScrollTo.connect(f)

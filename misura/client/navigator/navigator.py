@@ -4,6 +4,7 @@
 import os
 
 from misura.canon.logger import get_module_logging
+from misura.client.filedata.operation import getUsedPrefixes
 logging = get_module_logging(__name__)
 from misura.canon.plugin import navigator_domains
 from misura.canon.plugin.domains import node, nodes
@@ -411,6 +412,33 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.selectionModel().clear()
             self.expand_node_path(node, select=True)
         return self.cmd.currentwidget
+    
+    def build_menu_from_configuration(self, proxy, menu=False):
+        """Build a menu from a MisuraProxy or ConfigurationProxy"""
+        if not menu:
+            menu = QtGui.QMenu()
+        uid = proxy.instrument.measure['uid']
+        linked = False
+        for ln in getUsedPrefixes(self.doc).values(): # LinkedFiles
+            root = getattr(ln, 'conf', False)
+            if not root: 
+                continue
+            ins = proxy.instrument
+            if not ins:
+                logging.debug('Configuration does not have an active instrument!') 
+                continue
+            if ins.measure['uid'] == uid:
+                linked = ln
+                break
+        if not ins:
+            logging.error('Cannot find a LinkedFile for configuration', proxy)
+            return False
+        node_path =  linked.prefix + proxy['fullpath'][1:-1]
+        node = self.doc.model.tree.traverse(node_path)
+        menu = self.buildContextMenu(node, menu=menu)
+        self.selectionModel().clear()
+        self.expand_node_path(node, select=True)  
+        return menu      
     
     def buildContextMenu(self, node, sel=[], menu=False):
         n = len(sel)

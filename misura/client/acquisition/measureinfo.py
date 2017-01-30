@@ -178,14 +178,8 @@ class MeasureInfo(QtGui.QTabWidget):
         node = getattr(wg, 'remObj', False)
         if not node:
             return
-        node = '0:' + node['fullpath'][1:-1]
-        node = self.results.navigator.doc.model.tree.traverse(node)
-        if not node:
-            return
         menu = QtGui.QMenu(self)
-        self.results.navigator.buildContextMenu(node, menu=menu)
-        self.results.navigator.selectionModel().clear()
-        self.results.navigator.expand_node_path(node, select=True)
+        self.results.navigator.build_menu_from_configuration(node, menu)
         menu.exec_(self.tabBar().mapToGlobal(pos))
 
     def closeEvent(self, ev):

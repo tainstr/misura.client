@@ -138,7 +138,7 @@ def reconnect(func):
     return reconnect_wrapper
 
 
-class MisuraProxy(object):
+class MisuraProxy(common_proxy.CommonProxy):
 
     """Classe wrapper per ServerProxy. Introduce le funzioni __getitem__ e __setitem__."""
     _Method__name = 'MAINSERVER'

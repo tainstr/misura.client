@@ -493,13 +493,8 @@ class aTableView(QtGui.QTableView):
         
         # View local aggregation
         if self.tableObj.prop.get('aggregate', ''):
-            menu_agg = menu.addMenu(_('Explore aggregation'))
             self._f_cell_agg = functools.partial(self.cell_aggregation, index)
-            self._f_col_agg = functools.partial(self.col_aggregation, index)
-            self._f_row_agg = functools.partial(self.row_aggregation, index)
-            menu_agg.addAction(_('Cell'), self._f_cell_agg)
-            menu_agg.addAction(_('Column'), self._f_col_agg)
-            menu_agg.addAction(_('Row'), self._f_row_agg)
+            menu.addAction(_('Cell aggregation'), self._f_cell_agg)
         
         
         menu.popup(self.mapToGlobal(pt))
@@ -530,12 +525,6 @@ class aTableView(QtGui.QTableView):
         #win.setWindowTitle('Aggregation source')
         self._cell_win = win
         
-    
-    def col_aggregation(self, index):
-        pass
-    
-    def row_aggregation(self, index):
-        pass
 
     def showHeaderMenu(self, pt):
         h = self.main_header
