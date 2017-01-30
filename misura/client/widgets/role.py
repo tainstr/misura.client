@@ -80,6 +80,7 @@ class Role(ActiveWidget):
 class RoleIO(ActiveWidget):
     isIO = True
     value = None
+    io_menu = False
 
     def __init__(self, *a, **k):
         ActiveWidget.__init__(self, *a, **k)
@@ -123,6 +124,10 @@ class RoleIO(ActiveWidget):
         if path and obj and opt[2] not in ('None', None):
             from misura.client.widgets import build
             self.value = build(self.server, obj, obj.gete(opt[2]))
+            if self.io_menu:
+                self.emenu.removeAction(self.io_menu)
+            self.io_menu = self.emenu.addMenu(self.value.emenu)
+            self.io_menu.setText(_('Referred option'))
             self.value.label_widget.hide()
             self.value.force_update = fu
             # TODO: manage units and menu, which is bounded to label_widget
