@@ -14,7 +14,7 @@ from .. import units
 from ..clientconf import confdb
 from .. import _
 from ..live import registry
-from .builder import build_aggregate_view
+from .builder import build_aggregate_view, build_recursive_aggregation_menu
 
 from PyQt4 import QtGui, QtCore
 
@@ -380,6 +380,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self._win_map = {}
         self.lay = QtGui.QHBoxLayout()
         self.lay.setContentsMargins(0, 0, 0, 0)
         self.lay.setSpacing(0)
@@ -534,7 +535,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.emenu.addAction(_('Option Info'), self.show_info)
         self.emenu.addAction(_('Detach'), self.new_window)
         if self.prop.get('aggregate', ''):
-            self.emenu.addAction(_('Explore aggregation'), self.explore_aggregate)
+            self.agg_menu = self.emenu.addMenu(_('Aggregation'))
+            self.agg_menu.menuAction().hovered.connect(functools.partial(self.build_aggregation_menu, self.agg_menu))
         if self.remObj.compare_presets is not None:
             self.emenu.addMenu(self.presets_menu)
         self.nav_menu = self.emenu.addMenu(_('Navigator'))
@@ -549,6 +551,22 @@ class ActiveWidget(Active, QtGui.QWidget):
             self.bmenu.hide()
         self.set_label()
         self.lay.addWidget(self.bmenu)
+        
+    def build_aggregation_menu(self, menu):
+        menu.clear()
+        menu.addAction(_('List'), self.explore_aggregate)
+        menu.addSeparator()
+        aggregation = self.prop.get('aggregate', "")
+        build_recursive_aggregation_menu(self.remObj.root, self.remObj, aggregation, self.handle, menu, self._win_map)
+
+        
+    def explore_aggregate(self):
+        agg = self.prop.get('aggregate', "")
+        f, targets, values, devs = self.remObj.collect_aggregate(agg, self.handle)
+        win = build_aggregate_view(self.remObj.root, targets, devs, self.handle)
+        win.setWindowTitle(_('Explore aggregation: {} ({})').format(self.label, self.handle))
+        self._agg_win = win
+        win.show()        
 
 
     def build_presets_menu(self):
@@ -661,13 +679,7 @@ class ActiveWidget(Active, QtGui.QWidget):
 
         info_dialog(t, parent=self)
         
-    def explore_aggregate(self):
-        agg = self.prop.get('aggregate', "")
-        f, targets, values, devs = self.remObj.collect_aggregate(agg, self.handle)
-        win = build_aggregate_view(self.remObj.root, targets, devs, self.handle)
-        win.setWindowTitle(_('Explore aggregation: {} ({})').format(self.label, self.handle))
-        self._agg_win = win
-        win.show()
+
         
 
     
