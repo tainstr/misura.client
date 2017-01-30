@@ -433,8 +433,14 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if not ins:
             logging.error('Cannot find a LinkedFile for configuration', proxy)
             return False
+        # Use instrument node where measure node is asked for
+        if proxy['devpath'] =='measure':
+            proxy = proxy.parent()
         node_path =  linked.prefix + proxy['fullpath'][1:-1]
         node = self.doc.model.tree.traverse(node_path)
+        if not node:
+            logging.debug('Node not found while building menu', node_path)
+            return False
         menu = self.buildContextMenu(node, menu=menu)
         self.selectionModel().clear()
         self.expand_node_path(node, select=True)  

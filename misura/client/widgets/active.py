@@ -482,7 +482,14 @@ class ActiveWidget(Active, QtGui.QWidget):
             act.setChecked(flags[key] * 2)
             if key == 'enabled':
                 self.enable_check.setChecked(flags[key] * 2)
-
+        
+        if self.remObj.navigator:
+            self.remObj.navigator.build_menu_from_configuration(self.remObj, self.nav_menu)
+            self.emenu.addAction(self.nav_menu.menuAction())
+        else:
+            logging.debug('NO navigator defined', self.remObj._navigator)
+            self.emenu.removeAction(self.nav_menu.menuAction())
+        
     def build_extended_menu(self):
         # Extended menu
         self.emenu.clear()
@@ -519,8 +526,10 @@ class ActiveWidget(Active, QtGui.QWidget):
                 if u1 == u:
                     act.setChecked(True)
                 self.units[u1] = (act, p)
-
-        self.emenu.addAction(_('Set default value'), self.set_default)
+                
+        if not self.readonly:
+            self.emenu.addAction(_('Set default value'), self.set_default)
+            
         self.emenu.addAction(_('Check for modification'), self.get)
         self.emenu.addAction(_('Option Info'), self.show_info)
         self.emenu.addAction(_('Detach'), self.new_window)
@@ -528,6 +537,7 @@ class ActiveWidget(Active, QtGui.QWidget):
             self.emenu.addAction(_('Explore aggregation'), self.explore_aggregate)
         if self.remObj.compare_presets is not None:
             self.emenu.addMenu(self.presets_menu)
+        self.nav_menu = self.emenu.addMenu(_('Navigator'))
         #self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
         # Units button
         self.bmenu = LabelUnit(self.prop, self)

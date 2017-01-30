@@ -493,11 +493,22 @@ class aTableView(QtGui.QTableView):
         
         # View local aggregation
         if self.tableObj.prop.get('aggregate', ''):
-            self._f_cell_agg = functools.partial(self.cell_aggregation, index)
-            menu.addAction(_('Cell aggregation'), self._f_cell_agg)
+            self.make_aggregation_menu(index, menu)
+            
         
         
         menu.popup(self.mapToGlobal(pt))
+        
+    def make_aggregation_menu(self, index, menu):
+        self._f_cell_agg = functools.partial(self.cell_aggregation, index)
+        menu.addAction(_('Cell aggregation'), self._f_cell_agg)
+        
+        nav = self.tableObj.remObj.navigator
+        if nav:
+            dev, t = self.aggregate_cell_source(index)
+            nav.build_menu_from_configuration(dev, menu)
+            
+        return menu        
         
     def _coord(self, index):
         col = index.column()
@@ -506,10 +517,10 @@ class aTableView(QtGui.QTableView):
             a = row
             row = col
             col = a
-        return col, row
-        
-    def cell_aggregation(self, index):
-        from misura.client.conf import Interface
+        return col, row 
+    
+    def aggregate_cell_source(self, index):
+        """Returns the aggregation source device and option name for cell at `index`"""
         r = self.tableObj.remObj.collect_aggregate(self.tableObj.prop['aggregate'], 
                                                     self.tableObj.handle)
         f, targets, values, devs = r
@@ -518,11 +529,16 @@ class aTableView(QtGui.QTableView):
         devpath = devs[t][row]
         root = self.tableObj.remObj.root
         dev = root.toPath(devpath)
+        return dev, t
+        
+    def cell_aggregation(self, index):
+        from misura.client.conf import Interface
+        dev, t = self.aggregate_cell_source(index)
         print dev['fullpath']
-        win = Interface(root, dev)
+        win = Interface(dev.root, dev)
         win.show()
         win.highlight_option(t)
-        #win.setWindowTitle('Aggregation source')
+        win.setWindowTitle(_('Aggregation source ')+win.windowTitle())
         self._cell_win = win
         
 

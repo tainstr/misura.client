@@ -19,7 +19,6 @@ if hasattr(ssl, '_create_unverified_context'):
 
 sep = '/'
 
-
 def urlauth(url):
     """Decode and strip away the auth part of an url.
     Returns user, password and clean url"""
@@ -139,13 +138,9 @@ def reconnect(func):
 
 
 class MisuraProxy(common_proxy.CommonProxy):
-
     """Classe wrapper per ServerProxy. Introduce le funzioni __getitem__ e __setitem__."""
     _Method__name = 'MAINSERVER'
-    _parent = False
     _error = ''
-    _rmodel = False
-    """Cached remote recursive model dictionary"""
     _recursiveModel = False
     """Cached recursive item model"""
     remObj = False
@@ -156,10 +151,6 @@ class MisuraProxy(common_proxy.CommonProxy):
     """User name"""
     password = False
     """User password"""
-    _readLevel = 0
-    """Read level"""
-    _writeLevel = 0
-    """Write level"""
     _remoteDict = {}
     """Remote methods and object paths"""
     _refresh_interval = 0
@@ -179,7 +170,6 @@ class MisuraProxy(common_proxy.CommonProxy):
     _protect = set(['remObj', 'conn_addr', 'data_addr', 'to_root', 'toPath', 'root', 'connect', 'paste', 'copy', 'describe',
                     'info', 'lastlog', 'get', 'from_column', 'parent', 'child', 'call', 'devices', 'roledev'])
     """Local names which must not be accessed remotely"""
-    sep = '/'
 
     def __init__(self, addr='', user='', password='', mac='', proxy=False, reg=False):
         self._lock = threading.Lock()
@@ -226,10 +216,10 @@ class MisuraProxy(common_proxy.CommonProxy):
         # FIXME: this will cause memory leak on labor2...
         if self._smartnaming:
             for entry in self.remObj.system.listMethods():
-                if entry.count(self.sep) == 0:
+                if entry.count(self.separator) == 0:
                     d['MAINSERVER'].append(entry)
                     continue
-                entry = entry.split(self.sep)
+                entry = entry.split(self.separator)
                 part = entry[0]
                 if part not in d['MAINSERVER']:
                     d['MAINSERVER'].append(part)
@@ -240,7 +230,7 @@ class MisuraProxy(common_proxy.CommonProxy):
                         d[part] = []
                     if e not in d[part]:
                         d[part].append(e)
-                    part += self.sep + e
+                    part += self.separator + e
         self._remoteDict = d
         self._dtime = self.remObj.time() - time()
         return oldname
@@ -255,7 +245,7 @@ class MisuraProxy(common_proxy.CommonProxy):
         if name in ['MAINSERVER', '']:
             return
         if isinstance(name, str):
-            lst = name.split(self.sep)
+            lst = name.split(self.separator)
         else:
             lst = name
         for p in lst:
@@ -423,7 +413,7 @@ class MisuraProxy(common_proxy.CommonProxy):
             if self._Method__name == 'MAINSERVER':
                 cpath = path
             else:
-                cpath = self._Method__name + self.sep + path
+                cpath = self._Method__name + self.separator + path
             if (cpath not in self._remoteNames):
                 if self._has_key(path):
                     return self.get(path)
@@ -433,15 +423,15 @@ class MisuraProxy(common_proxy.CommonProxy):
     def toPath(self, lst):
         """Returns a copy of the object at the path expressed in list/string lst"""
         if type(lst) == type(''):
-            if lst.endswith(self.sep):
+            if lst.endswith(self.separator):
                 lst = lst[:-1]
-            if lst.startswith(self.sep):
+            if lst.startswith(self.separator):
                 lst = lst[1:]
-            lst = lst.split(self.sep)
+            lst = lst.split(self.separator)
             if lst[0] == 'server':
                 lst.pop(0)
         obj = self.copy()
-        obj._toMethodName(self.sep.join(lst))
+        obj._toMethodName(self.separator.join(lst))
         return obj
 
     def from_column(self, col0):

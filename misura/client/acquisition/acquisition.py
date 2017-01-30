@@ -666,6 +666,7 @@ class MainWindow(QtGui.QMainWindow):
         logging.debug('navigator')
         self.tasks.job(-1, pid, 'Sync document tree')
         self.navigator.set_doc(doc)
+        self.server._navigator = self.navigator
 
         self.measureTab.set_doc(doc)
 
