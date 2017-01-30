@@ -503,10 +503,12 @@ class aTableView(QtGui.QTableView):
         self._f_cell_agg = functools.partial(self.cell_aggregation, index)
         menu.addAction(_('Cell aggregation'), self._f_cell_agg)
         
-        nav = self.tableObj.remObj.navigator
-        if nav:
-            dev, t = self.aggregate_cell_source(index)
-            nav.build_menu_from_configuration(dev, menu)
+        dev, t = self.aggregate_cell_source(index)
+        dmenu = menu.addMenu('{} ({})'.format(dev['name'], dev['devpath']))
+        p = dev.gete(t)
+        aggregation = p.get('aggregate', '')
+        if aggregation:
+            build_recursive_aggregation_menu(dev.root, dev, aggregation, t, dmenu, self.tableObj._win_map)
             
         return menu        
         
