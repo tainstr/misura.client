@@ -110,19 +110,26 @@ def build_aggregate_view(root, targets, devs, handle=False):
     return win
 
 
-def build_recursive_aggregation_menu(root , main_dev, aggregation, handle, menu, menu_map=False, win_map=False):
+def build_recursive_aggregation_menu(root , main_dev, aggregation, handles_map, menu, menu_map=False, win_map=False, col=None):
     """Resolve aggregation chain"""
+    handle = handles_map.get(main_dev['fullpath'])
     f, targets, values, devs = main_dev.collect_aggregate(aggregation, handle)
     if menu_map is False:
         menu_map = {} #dev:menu
     if win_map is False:
         win_map={}
     for t in targets:
+        if col is not None:
+            devs = [devs[col]]
         for fullpath in devs[t]:
             dev = root.toPath(fullpath)
             if not dev: 
                 continue
             dmenu = menu_map.get(fullpath, False)
+            t = handles_map.get(fullpath, t)
+            # Special target to explicitly skip the device
+            if t=='#SKIP#':
+                continue
             if not dmenu:
                 dmenu = menu.addMenu('{} ({})'.format(dev['name'], dev['devpath']))
                 dmenu.addAction(_('View'), functools.partial(explore_child_aggregate, dev, t, win_map))
@@ -134,16 +141,16 @@ def build_recursive_aggregation_menu(root , main_dev, aggregation, handle, menu,
             agg = prop.get('aggregate', "")
             if not agg:
                 continue
-            build_recursive_aggregation_menu(root, dev, agg, t, dmenu, menu_map=menu_map, win_map=win_map)
+            build_recursive_aggregation_menu(root, dev, agg, handles_map, dmenu, menu_map=menu_map, win_map=win_map)
 
 def explore_child_aggregate(dev, target, win_map={}):
     from ..conf import Interface
-    win = Interface(dev.root, dev, dev.describe())
-    win.highlight_option(target)
+    win = Interface(dev.root, dev)
     win.setWindowTitle(_('Explore aggregation: {} ({})').format(dev['name'], dev['devpath']))
     win_map[dev['fullpath']] = win
     win.show()
-
+    win.highlight_option(target)
+    
 if __name__ == '__main__':
     import sys
     from misura.client import iutils, network

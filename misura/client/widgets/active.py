@@ -557,7 +557,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         menu.addAction(_('List'), self.explore_aggregate)
         menu.addSeparator()
         aggregation = self.prop.get('aggregate', "")
-        build_recursive_aggregation_menu(self.remObj.root, self.remObj, aggregation, self.handle, menu, self._win_map)
+        build_recursive_aggregation_menu(self.remObj.root, self.remObj, aggregation, 
+                                         {self.remObj['fullpath']: self.handle}, menu, self._win_map)
 
         
     def explore_aggregate(self):

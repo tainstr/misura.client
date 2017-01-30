@@ -7,6 +7,7 @@ from .. import _
 from misura.client.widgets.active import *
 from misura.client import units
 from misura.client.clientconf import settings
+from builder import build_recursive_aggregation_menu, explore_child_aggregate
 
 
 def _export(loaded, get_column_func,
@@ -219,11 +220,11 @@ class aTableModel(QtCore.QAbstractTableModel):
             return
         if self.rotated and orientation != QtCore.Qt.Vertical:
             if self.perpendicular_header_col < 0:
-                return 
+                return
             return self.format_data(self.perpendicular_header_col, section)
         elif not self.rotated and orientation != QtCore.Qt.Horizontal:
             if self.perpendicular_header_col < 0:
-                return 
+                return
             return self.format_data(self.perpendicular_header_col, section)
 
         label = self.header[section][0]
@@ -368,7 +369,7 @@ class aTableModel(QtCore.QAbstractTableModel):
                 continue
             self.make_visibility_action(m, col)
         return m
-    
+
     def set_as_perpendicular_header(self, col):
         # Unset
         if self.perpendicular_header_col == col:
@@ -377,14 +378,14 @@ class aTableModel(QtCore.QAbstractTableModel):
         QtCore.QAbstractTableModel.reset(self)
         self.emit(QtCore.SIGNAL('layoutChanged()'))
         self.tableObj.resize_height()
-    
+
     def make_perpendicular_header_action(self, menu, col):
         f = functools.partial(self.set_as_perpendicular_header, col)
         act = menu.addAction(_('Use as header'), f)
         act.setCheckable(True)
-        act.setChecked(self.perpendicular_header_col==col)
+        act.setChecked(self.perpendicular_header_col == col)
         return act
-        
+
     def make_header_menu(self, col):
         """Build table header context menu for `col`"""
         self._menu_funcs = []
@@ -455,7 +456,6 @@ class aTableView(QtGui.QTableView):
             h.customContextMenuRequested.connect(self.showHeaderMenu)
             h.setMovable(True)
 
-
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
         self.update_visible_columns()
@@ -490,59 +490,101 @@ class aTableView(QtGui.QTableView):
         menu_zoom.addAction(act_zoom)
         self.model().make_visible_units_action(menu)
         self.model().make_add_columns_menu(menu)
-        
+
         # View local aggregation
         if self.tableObj.prop.get('aggregate', ''):
             self.make_aggregation_menu(index, menu)
-            
-        
-        
+
         menu.popup(self.mapToGlobal(pt))
-        
+
     def make_aggregation_menu(self, index, menu):
-        self._f_cell_agg = functools.partial(self.cell_aggregation, index)
-        menu.addAction(_('Cell aggregation'), self._f_cell_agg)
-        
-        dev, t = self.aggregate_cell_source(index)
-        dmenu = menu.addMenu('{} ({})'.format(dev['name'], dev['devpath']))
+        dev, t, targets_map = self.aggregate_cell_source(index)
+        menu.addAction(_('Cell source: {} ({})').format(dev['name'], dev['devpath']), 
+                       functools.partial(explore_child_aggregate, dev, t))
+        # See if target option is an aggregation in its turn
         p = dev.gete(t)
         aggregation = p.get('aggregate', '')
         if aggregation:
-            build_recursive_aggregation_menu(dev.root, dev, aggregation, t, dmenu, self.tableObj._win_map)
-            
-        return menu        
-        
+            build_recursive_aggregation_menu(
+                dev.root, dev, aggregation, targets_map, menu, win_map=self.tableObj._win_map)
+
+        return menu
+
     def _coord(self, index):
+        """Return col, row considering rotation"""
         col = index.column()
         row = index.row()
         if self.rotated:
             a = row
             row = col
             col = a
-        return col, row 
-    
-    def aggregate_cell_source(self, index):
+        return col, row
+
+    def aggregate_cell_source(self, index, targets_map=False):
         """Returns the aggregation source device and option name for cell at `index`"""
-        r = self.tableObj.remObj.collect_aggregate(self.tableObj.prop['aggregate'], 
-                                                    self.tableObj.handle)
+        wg = self.tableObj
+        r = wg.remObj.collect_aggregate(wg.prop['aggregate'], wg.handle)
         f, targets, values, devs = r
-        col, row = self._coord(index)
+        col0, row0 = self._coord(index)
+        # Calculate target index from
+        if targets_map is False:
+            targets_map = {}
+        col = col0
+        row = row0
+        j = 0
+        j0 = 0
+        found = False
+        # Resolve merge_tables shape
+        for i, t in enumerate(targets):
+            for d, tab in enumerate(values[t]):
+                if not hasattr(tab, '__len__'):
+                    j0 = j
+                    j += 1
+                if not hasattr(tab[0], '__len__'):
+                    j0 = j
+                    j += 1
+                else:
+                    # Table header length
+                    j0 = j
+                    j += len(tab[0])
+                if j0 <= col < j:
+                    col = i
+                    row = d
+                    found = True
+                    break
+            if found:
+                break
         t = targets[col]
         devpath = devs[t][row]
-        root = self.tableObj.remObj.root
+        root = wg.remObj.root
         dev = root.toPath(devpath)
-        return dev, t
         
+        # Complete targets_map for highlight_option
+        targets_map[devpath] = t
+        if found:
+            sub_target_col = col0 - j0
+            prop = dev.gete(t)
+            agg = prop.get('aggregate', '')
+            if agg:
+                r = dev.collect_aggregate(agg, t)
+                f, targets, values, devs = r
+                print targets, sub_target_col, col0, j0
+                subt = targets[sub_target_col]
+                for fullpath in devs[subt]:
+                    targets_map[fullpath] = '#SKIP#'
+                targets_map[devs[subt][row0]] = subt
+                    
+        return dev, t, targets_map
+
     def cell_aggregation(self, index):
         from misura.client.conf import Interface
-        dev, t = self.aggregate_cell_source(index)
+        dev, t, targets_map = self.aggregate_cell_source(index)
         print dev['fullpath']
         win = Interface(dev.root, dev)
         win.show()
         win.highlight_option(t)
-        win.setWindowTitle(_('Aggregation source ')+win.windowTitle())
+        win.setWindowTitle(_('Aggregation source: ') + win.windowTitle())
         self._cell_win = win
-        
 
     def showHeaderMenu(self, pt):
         h = self.main_header
@@ -606,7 +648,7 @@ class aTableView(QtGui.QTableView):
         h = self.main_header.height()
         for i in range(self.model().rowCount()):
             h += self.rowHeight(i)
-        #self.setMinimumHeight(h)
+        # self.setMinimumHeight(h)
         return h
 
     def set_zoom(self, val):

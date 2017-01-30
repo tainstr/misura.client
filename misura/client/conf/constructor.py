@@ -268,8 +268,10 @@ class SectionBox(QtGui.QWidget):
         return
         w = None
         st = self.server.has_key('isRunning') and self.server['isRunning']
+        # Hide everything
         for w in [self.config_section, self.status_section, self.results_section]:
             w.hide()
+        # Select what to show
         if st:
             w =self.status_section
         elif self._last_status:
@@ -277,9 +279,10 @@ class SectionBox(QtGui.QWidget):
         else:
             w = self.config_section
         if w is not None:
-            w.setVisible(True)
+            w.show()
             self.sigScrollTo.emit(w.pos().x(), w.pos().y()+50)
         else:
+            # Or show everything
             for w in [self.config_section, self.status_section, self.results_section]:
                 w.show()           
         self._last_status = st         
@@ -301,7 +304,6 @@ class SectionBox(QtGui.QWidget):
             y+=parent.y()
             x+=parent.x()
             parent =parent.parent()
-        print 'AAAAAAAAA', x, y, sec.y(), wg.y(), sec.height()
         self.sigScrollTo.emit(x, y)
         return wg
         
@@ -416,7 +418,7 @@ class Interface(QtGui.QTabWidget):
             if self.prop_dict.has_key(sname):
                 if self.prop_dict[sname]['type'] == 'Section':
                     sname = self.prop_dict[sname]['name']
-            self.addTab(wg, _(sname))
+            self.addTab(area, _(sname))
             
             f = functools.partial(self.scroll_to, area)
             wg.sigScrollTo.connect(f)
@@ -437,11 +439,12 @@ class Interface(QtGui.QTabWidget):
         sec = self.sectionsMap[sec]
         self.setCurrentWidget(area)
         wg =  sec.highlight_option(handle)
+        logging.debug('HIGHLIGHT OPT', handle)
         return wg
     
     def scroll_to(self, area, x, y):
-        print 'SCROLL_TO', area,x,y
-        area.ensureVisible(x, y+500)
+        logging.debug('SCROLL_TO', area,x,y)
+        area.ensureVisible(x, y-50)
         
     def close(self):
         if not self.sectionsMap:
@@ -450,7 +453,7 @@ class Interface(QtGui.QTabWidget):
             wg.close()
             wg.destroy()
         for i in range(self.count()):
-            logging.debug('remove tab')
+            logging.debug('remove tab', i)
             self.removeTab(self.currentIndex())
         self.clear()
 
