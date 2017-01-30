@@ -5,10 +5,8 @@ import os
 
 from .. import _
 from misura.client.widgets.active import *
-from .builder import build_aggregate_view
 from misura.client import units
 from misura.client.clientconf import settings
-from couchdb.client import Row
 
 
 def _export(loaded, get_column_func,
