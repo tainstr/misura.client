@@ -30,11 +30,8 @@ class PlotSubMenu(QtGui.QMenu):
         self.render = render
         self.render_format = render_format
         self.menuAction().hovered.connect(self.redraw)
-        print 'AAAAAAAAAA', version, plot_id, title, date, render_format
-        # self.redraw()
 
     def redraw(self):
-        print 'BBBBBBBBBBB', self.version, self.plot_id, self._title, self.date, self.render_format
         self.clear()
         act = self.addAction(_('Load plot'), self.load_plot)
         if self.render and self.render_format:
@@ -42,7 +39,6 @@ class PlotSubMenu(QtGui.QMenu):
             pix.loadFromData(self.render, self.render_format.upper())
             tooltip = "<html>{}</html>".format(pixmapAsHtml(pix))
             act.setCheckable(True)
-            print 'setting checked', self.version_menu.current_plot_id, repr(self.plot_id)
             act.setChecked(self.version_menu.current_plot_id == self.plot_id)
             act.setToolTip(tooltip)
         if self.version == self.version_menu.current:
