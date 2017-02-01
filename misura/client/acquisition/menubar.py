@@ -119,6 +119,7 @@ class MenuBar(QtGui.QMenuBar):
 
     def getConnection(self, srv):
         LoginWindow(srv.addr, srv.user, srv.password, srv.mac, parent=self).exec_()
+        
 
     def setServer(self, server=False):
         self.instruments.clear()
@@ -191,8 +192,19 @@ class MenuBar(QtGui.QMenuBar):
 
     def arrange_windows(self):
         windows.arrange(self.parent().centralWidget(), self.parent().name)
+        
+    def clear_windows(self):
+        """Closes all configuration-dependent windows"""
+        for key, w in self.windows.items():
+            if not isinstance(w, conf.TreePanel) and not isinstance(w, conf.MConf):
+                continue
+            w.close()
+            w.hide()
+            self.windows.pop(key)
+            
 
     def setInstrument(self, remote, server):
+        self.clear_windows()
         self.setServer(server)
         self.remote = remote
         self.lstActions = []
@@ -267,6 +279,8 @@ class MenuBar(QtGui.QMenuBar):
         self.devices = self.settings.addMenu(_('Devices'))
         self.connect(
             self.devices, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
+        
+        #FIXME: devices are empty in browser!
         paths = self.remote['devices']
 
         for path in paths:

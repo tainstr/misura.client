@@ -11,7 +11,7 @@ from PyQt4 import QtGui, QtCore
 class Results(QtGui.QTabWidget):
 
     def __init__(self, parent, plot, readLevel=5):
-        super(Results, self).__init__(parent)
+        super(Results, self).__init__(parent=parent)
         self.setTabPosition(QtGui.QTabWidget.North)
         self.plot = plot
         self.readLevel = readLevel
@@ -32,7 +32,7 @@ class Results(QtGui.QTabWidget):
         self.console = consolewindow.ConsoleWindow(doc, self)
         self.console.checkVisible = lambda *disableCheckVisible: None
 
-
+        
         self.addTab(self.navigator, _('Data'))
         self.addTab(self.props, _('Properties'))
         self.addTab(self.formats, _('Formatting'))

@@ -37,24 +37,19 @@ class TestWindow(acquisition.MainWindow):
     plotboard=False
     menuVersions = False
 
-    def load_version(self, v=-1, load_plot_version=True):
+    def load_version(self, v=-1):
         self.fixedDoc.paused = True
         logging.debug("SETTING VERSION", v)
         self.plot_page = False
-        if load_plot_version:
-            if not self.fixedDoc.proxy.isopen():
-                self.fixedDoc.proxy.reopen()
-            self.fixedDoc.proxy.set_version(v)
-            if self.fixedDoc.proxy.conf is False:
-                self.fixedDoc.proxy.load_conf()
-            self.fixedDoc.proxy.conf.doc = self.fixedDoc
-            self.fixedDoc.proxy.conf.filename = self.fixedDoc.proxy.path
-        else:
-            self.fixedDoc.paused = False
-            return
-        #FIXME: this will not update configurations!
-        self.setServer(self.fixedDoc.proxy.conf)
+        if not self.fixedDoc.proxy.isopen():
+            self.fixedDoc.proxy.reopen()
+        self.fixedDoc.proxy.set_version(v)
+        if self.fixedDoc.proxy.conf is False:
+            self.fixedDoc.proxy.load_conf()
+        self.fixedDoc.proxy.conf.doc = self.fixedDoc
+        self.fixedDoc.proxy.conf.filename = self.fixedDoc.proxy.path
         
+        self.setServer(self.fixedDoc.proxy.conf)
         
         self.name = self.fixedDoc.proxy.get_node_attr('/conf', 'instrument')
         self.imageSlider.slider.choice()
@@ -63,11 +58,9 @@ class TestWindow(acquisition.MainWindow):
         self.setWindowTitle('Test: ' + self.remote.measure['name'])
 
         # Menu Bar mod
-        self.actStandard = self.myMenuBar.measure.addAction(
-            _('Re-evaluate standards'), self.re_standard)
-        if load_plot_version:
-            load_plot_version = self.fixedDoc.proxy.get_version()
-        self.create_version_plot_menus(load_plot_version)
+
+        
+        self.create_version_plot_menus()
         
         if self.vtoolbar:
             self.vtoolbar.hide()
@@ -75,7 +68,7 @@ class TestWindow(acquisition.MainWindow):
         self.vtoolbar.show()
         self.graphWin.show()
         
-
+        
         self.add_breadcrumb()
         self.add_plotboard()
         
@@ -141,12 +134,29 @@ class TestWindow(acquisition.MainWindow):
         self.plotboardDock.setWidget(self.plotboard)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.plotboardDock)        
         
-    def create_version_plot_menus(self, version_path=False):
+    def create_version_plot_menus(self):
+        self.actStandard = self.myMenuBar.measure.addAction(
+            _('Re-evaluate standards'), self.re_standard)
         if not self.menuVersions:
             self.menuVersions = fileui.VersionMenu(self.fixedDoc)
-            self.menuVersions.versionChanged.connect(partial(self.load_version, load_plot_version=False))
+            self.menuVersions.versionChanged.connect(partial(self.slot_version_changed))
             
         self.myMenuBar.measure.addMenu(self.menuVersions)
+        
+    def slot_version_changed(self):
+        """Proxy version changed. Need to refresh all ConfigurationInterface objects"""
+        self.server = self.fixedDoc.proxy.conf
+        self.remote = self.server.instrument
+        self.add_measure()
+        self.add_sumtab()
+        self.add_table()
+        self.add_menubar()
+
+        self.create_version_plot_menus()
+        self.navigator.set_doc(self.doc)
+        self.measureTab.results.set_doc(self.doc)
+        
+        
 
     def slot_page_changed(self):
         p = self.summaryPlot.plot.getPageNumber()

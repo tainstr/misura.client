@@ -194,7 +194,7 @@ def assign_sample_to_dataset(ds, linked_file, reference_sample, hdf_dataset_name
     """Find out the sample index to which this dataset refers"""
     col = hdf_dataset_name
     obj, var = linked_file.conf.from_column(col)
-    if '/sample' in col:
+    if '/sample' in col and reference_sample:
         parts = col.split(sep)
         for q in parts:
             if q.startswith('sample'):
@@ -591,7 +591,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         if best_t != self.LF.prefix + 't' or best_T != self.LF.prefix + 'kiln/T':
             logging.debug('local datasets already defined for', pcol)
             return r
-
+        
         # Get time column from document or from cache
         # Search a t child
         vcol = pcol.split(sep)

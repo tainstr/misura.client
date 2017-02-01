@@ -88,6 +88,9 @@ class MainWindow(QtGui.QMainWindow):
     name = 'MainWindow'
     reset_instrument = QtCore.pyqtSignal()
     """Connected to setInstrument"""
+    server = False
+    remote = False
+    myMenuBar = False
 
     @property
     def tasks(self):
@@ -120,8 +123,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.area)
         self.setMinimumSize(800, 600)
         self.setWindowTitle(_('Misura Live'))
-        self.myMenuBar = MenuBar(parent=self)
-        self.setMenuWidget(self.myMenuBar)
+        self.add_menubar()
         
         self.add_statusbar()
         self.add_server_selector()
@@ -135,6 +137,17 @@ class MainWindow(QtGui.QMainWindow):
         if not self.fixedDoc and confdb['autoConnect'] and len(confdb['recent_server']) > 1:
             self.set_addr(confdb['recent_server'][-1][0])
         self.showMaximized()
+        
+    
+    def add_menubar(self):
+        if self.myMenuBar:
+            self.myMenuBar.clear_windows()
+            self.myMenuBar.close()
+            del self.myMenuBar
+        self.myMenuBar = MenuBar(server=self.server, parent=self)
+        if self.remote and self.server:
+            self.myMenuBar.setInstrument(self.remote, self.server)  
+        self.setMenuBar(self.myMenuBar) 
         
         
     def add_statusbar(self):
@@ -343,8 +356,7 @@ class MainWindow(QtGui.QMainWindow):
         iutils.app.quit()
         return ret
 
-    _blockResetFileProxy = False
-
+    _blockResetFileProxy = False    
 
     def setServer(self, server=False):
         self._blockResetFileProxy = True
@@ -358,9 +370,7 @@ class MainWindow(QtGui.QMainWindow):
                 return False
         registry.toggle_run(True)
         self.serverDock.hide()
-        self.myMenuBar.close()
-        del self.myMenuBar
-        self.myMenuBar = MenuBar(server=self.server, parent=self)
+        self.add_menubar()
         self.rem('logDock')
         self.logDock = QtGui.QDockWidget(self.centralWidget())
         self.logDock.setWindowTitle('Log Messages')
@@ -371,7 +381,7 @@ class MainWindow(QtGui.QMainWindow):
             self.logDock.setWidget(connection.LiveLog(self.logDock))
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.logDock)
         
-        self.setMenuBar(self.myMenuBar)
+        
         if not self.fixedDoc:
             self.rem('instrumentDock')
             self.instrumentDock = QtGui.QDockWidget(self.centralWidget())
@@ -400,7 +410,7 @@ class MainWindow(QtGui.QMainWindow):
     def add_measure(self):
         self.rem('measureDock', 'measureTab')
         self.measureDock = QtGui.QDockWidget(self.centralWidget())
-        self.measureDock.setWindowTitle(' Test Configuration')
+        self.measureDock.setWindowTitle(_('Test Configuration'))
         self.measureTab = MeasureInfo(
             self.remote, self.fixedDoc, parent=self.measureDock)
         self.measureDock.setWidget(self.measureTab)
@@ -409,7 +419,7 @@ class MainWindow(QtGui.QMainWindow):
     def add_snapshots(self):
         self.rem('snapshotsDock', 'snapshotsStrip')
         self.snapshotsDock = QtGui.QDockWidget(self.centralWidget())
-        self.snapshotsDock.setWindowTitle('Story Board')
+        self.snapshotsDock.setWindowTitle(_('Story Board'))
         self.imageSlider = fileui.ImageSlider()
         self.snapshotsDock.setWidget(self.imageSlider)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.snapshotsDock)
@@ -418,7 +428,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def add_sumtab(self):
         # SUMMARY TREE - In lateral measureTab
-        self.measureTab.set_results(Results(self, self.summaryPlot, self.server._readLevel))
+        self.measureTab.set_results(Results(self.measureTab, self.summaryPlot, self.server._readLevel))
         self.navigator = self.measureTab.results.navigator
         
 
@@ -427,7 +437,7 @@ class MainWindow(QtGui.QMainWindow):
         self.summaryPlot = graphics.Plot()
         self.graphWin = self.centralWidget().addSubWindow(
             self.summaryPlot, subWinFlags)
-        self.graphWin.setWindowTitle('Data Plot')
+        self.graphWin.setWindowTitle(_('Data Plot'))
         self.graphWin.hide()
 
     def add_table(self):
@@ -590,11 +600,11 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.qApp.processEvents()
 
         self.tasks.job(1, pid, 'Preparing menus')
+        self.remote = remote
         self.myMenuBar.close()
         self.myMenuBar = MenuBar(server=self.server, parent=self)
         self.setMenuWidget(self.myMenuBar)
         logging.debug('Done menubar')
-
 
         # Remove any remaining subwindow
         self.centralWidget().closeAllSubWindows()
