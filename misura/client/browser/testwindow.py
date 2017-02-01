@@ -36,28 +36,26 @@ class TestWindow(acquisition.MainWindow):
     breadbar = False
     plotboard=False
     menuVersions = False
-    menuPlot = False
 
     def load_version(self, v=-1, load_plot_version=True):
         self.fixedDoc.paused = True
-        if self.breadbar:
-            self.removeToolBar(self.breadbar)
-            self.breadcrumb.hide()
-            self.breadcrumb.deleteLater()
-        if self.plotboard:
-            self.plotboard.blockSignals(True)
-            self.rem('plotboardDock', 'plotboard')
         logging.debug("SETTING VERSION", v)
         self.plot_page = False
-        
-        if not self.fixedDoc.proxy.isopen():
-            self.fixedDoc.proxy.reopen()
-        self.fixedDoc.proxy.set_version(v)
-        if self.fixedDoc.proxy.conf is False:
-            self.fixedDoc.proxy.load_conf()
-        self.fixedDoc.proxy.conf.doc = self.fixedDoc
-        self.fixedDoc.proxy.conf.filename = self.fixedDoc.proxy.path
+        if load_plot_version:
+            if not self.fixedDoc.proxy.isopen():
+                self.fixedDoc.proxy.reopen()
+            self.fixedDoc.proxy.set_version(v)
+            if self.fixedDoc.proxy.conf is False:
+                self.fixedDoc.proxy.load_conf()
+            self.fixedDoc.proxy.conf.doc = self.fixedDoc
+            self.fixedDoc.proxy.conf.filename = self.fixedDoc.proxy.path
+        else:
+            self.fixedDoc.paused = False
+            return
+        #FIXME: this will not update configurations!
         self.setServer(self.fixedDoc.proxy.conf)
+        
+        
         self.name = self.fixedDoc.proxy.get_node_attr('/conf', 'instrument')
         self.imageSlider.slider.choice()
         self.imageSlider.strip.set_idx()
@@ -78,20 +76,10 @@ class TestWindow(acquisition.MainWindow):
         self.graphWin.show()
         
 
-        self.breadbar = QtGui.QToolBar(_('Breadcrumb'), self)
-        self.breadcrumb = Breadcrumb(self.breadbar)
-        self.breadcrumb.set_plot(self.summaryPlot)
-        self.breadbar.addWidget(self.breadcrumb)
-        self.addToolBar(QtCore.Qt.TopToolBarArea, self.breadbar)
-        self.breadbar.show()
+        self.add_breadcrumb()
+        self.add_plotboard()
         
-        
-        self.plotboardDock = QtGui.QDockWidget(self.centralWidget())
-        self.plotboardDock.setWindowTitle('Plots Board')
-        self.plotboard = Storyboard(self)
-        self.plotboard.set_plot(self.summaryPlot)
-        self.plotboardDock.setWidget(self.plotboard)
-        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.plotboardDock)
+
         # TODO: cleanup this! Should pass through some sort of plugin or config
         # mechanism...
         if self.name not in ['flash']:
@@ -104,16 +92,10 @@ class TestWindow(acquisition.MainWindow):
             except:
                 pass
 
-        if self.fixedDoc:
-            self.doc.model.sigPageChanged.connect(self.slot_page_changed)
-        self.play = filedata.FilePlayer(self)
-        self.play.set_doc(self.fixedDoc)
-        self.play.sleep = 0.1
-        self.controls.remote=self.play
-        for pic, win in self.cameras.itervalues():
-            pic.setSampleProcessor(self.play)
-#             d=self.doc.decoders['/dat/'+pic.role]
-#             pic.setFrameProcessor(d)
+        
+        self.doc.model.sigPageChanged.connect(self.slot_page_changed)
+        
+        self.add_playback()
 
         self.graphWin.showMaximized()
 #         self.summaryPlot.default_plot()
@@ -124,19 +106,47 @@ class TestWindow(acquisition.MainWindow):
         
         self.fixedDoc.paused = False
         
+    def add_playback(self):
+        """FIXME: DISABLED"""
+        self.play = filedata.FilePlayer(self)
+        self.play.set_doc(self.fixedDoc)
+        self.play.sleep = 0.1
+        self.controls.remote=self.play
+        for pic, win in self.cameras.itervalues():
+            pic.setSampleProcessor(self.play)
+#             d=self.doc.decoders['/dat/'+pic.role]
+#             pic.setFrameProcessor(d)       
+        
+        
+    def add_breadcrumb(self):
+        if self.breadbar:
+            self.removeToolBar(self.breadbar)
+            self.breadcrumb.hide()
+            self.breadcrumb.deleteLater()
+        self.breadbar = QtGui.QToolBar(_('Breadcrumb'), self)
+        self.breadcrumb = Breadcrumb(self.breadbar)
+        self.breadcrumb.set_plot(self.summaryPlot)
+        self.breadbar.addWidget(self.breadcrumb)
+        self.addToolBar(QtCore.Qt.TopToolBarArea, self.breadbar)
+        self.breadbar.show() 
+        
+    def add_plotboard(self):
+        if self.plotboard:
+            self.plotboard.blockSignals(True)
+            self.rem('plotboardDock', 'plotboard')            
+        self.plotboardDock = QtGui.QDockWidget(self.centralWidget())
+        self.plotboardDock.setWindowTitle('Plots Board')
+        self.plotboard = Storyboard(self)
+        self.plotboard.set_plot(self.summaryPlot)
+        self.plotboardDock.setWidget(self.plotboard)
+        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.plotboardDock)        
         
     def create_version_plot_menus(self, version_path=False):
         if not self.menuVersions:
             self.menuVersions = fileui.VersionMenu(self.fixedDoc)
-            self.menuVersions.versionChanged.connect(partial(self.load_version, load_plot_version=True))
-        if not self.menuPlot:
-            self.menuPlot = fileui.SavePlotMenu(self.fixedDoc)
-            self.menuPlot.versionChanged.connect(partial(self.load_version, load_plot_version=False))
-        if version_path:
-            self.menuPlot.load_plot_version(version_path)
+            self.menuVersions.versionChanged.connect(partial(self.load_version, load_plot_version=False))
             
         self.myMenuBar.measure.addMenu(self.menuVersions)
-        self.myMenuBar.measure.addMenu(self.menuPlot)
 
     def slot_page_changed(self):
         p = self.summaryPlot.plot.getPageNumber()
