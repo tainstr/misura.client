@@ -10,9 +10,10 @@ from misura.canon.logger import Log as logging
 
 from .. import _
 
+
 def build(server, remObj, prop, parent=None):
     """Build a property widget based on a property dict"""
-    #FIXME: horrible! change package layout to fix this!
+    # FIXME: horrible! change package layout to fix this!
     from aBoolean import aBoolean
     from aButton import aButton
     from aChooser import aChooser, async_aChooser
@@ -34,7 +35,6 @@ def build(server, remObj, prop, parent=None):
     A = prop.get('attr', [])
     T = prop['type']
     if 'Hidden' in A + [T]:
-        #        print 'Hidden property',prop
         return False
     obj = False
     try:
@@ -52,7 +52,7 @@ def build(server, remObj, prop, parent=None):
         elif T == 'Boolean':
             obj = aBoolean(*arg)
         elif T in ['Chooser', 'Menu', 'FileList']:
-            choosers = { 'motorStatus': async_aChooser }
+            choosers = {'motorStatus': async_aChooser}
             chooser = choosers.get(prop['handle'], aChooser)
             obj = chooser(*arg)
         elif T == 'Preset':
@@ -92,17 +92,19 @@ def build(server, remObj, prop, parent=None):
         return False
     return obj
 
+
 def build_aggregate_view(root, targets, devs, handle=False):
     w = QtGui.QWidget()
     lay = QtGui.QFormLayout()
     w.setLayout(lay)
-    for t in targets: 
-        if t!=handle:
+    for t in targets:
+        if t != handle:
             lay.addRow(QtGui.QLabel(_('Aggregation Target: ') + t))
         for fullpath in devs[t]:
             dev = root.toPath(fullpath)
             wg = build(root, dev, dev.gete(t), parent=w)
-            wg.label_widget.setText('{} ({}): {}'.format(dev['name'], dev['devpath'], _(wg.prop['name'])))
+            wg.label_widget.setText(
+                '{} ({}): {}'.format(dev['name'], dev['devpath'], _(wg.prop['name'])))
             lay.addRow(wg.label_widget, wg)
     win = QtGui.QScrollArea()
     win.setWidgetResizable(True)
@@ -110,47 +112,80 @@ def build_aggregate_view(root, targets, devs, handle=False):
     return win
 
 
-def build_recursive_aggregation_menu(root , main_dev, aggregation, handles_map, menu, menu_map=False, win_map=False, col=None):
-    """Resolve aggregation chain"""
-    handle = handles_map.get(main_dev['fullpath'])
-    f, targets, values, devs = main_dev.collect_aggregate(aggregation, handle)
-    if menu_map is False:
-        menu_map = {} #dev:menu
+
+def build_aggregation_menu(root, dev, menu, target='name', win_map=False):
     if win_map is False:
-        win_map={}
+        win_map = {}
+    dmenu = menu.addMenu('{} ({})'.format(dev['name'], dev['devpath']))
+    dmenu.addAction(_('View'), functools.partial(
+        explore_child_aggregate, dev, target, win_map))
+    nav_menu = dmenu.addMenu(_('Navigator'))
+    f = functools.partial(
+        root.navigator.build_menu_from_configuration, dev, nav_menu)
+    nav_menu.menuAction().hovered.connect(f)
+    return dmenu
+
+
+def build_recursive_aggregation_menu(root, main_dev, aggregation, handles_map, menu, menu_map=False, win_map=False, col=None):
+    """Resolve aggregation chain"""
+    if menu_map is False:
+        menu_map = {}  # dev:menu
+    if win_map is False:
+        win_map = {}
+    
+    fullpath = main_dev['fullpath']
+    handle = handles_map.get(fullpath)
+    f, targets, values, devs = main_dev.collect_aggregate(aggregation, handle)
+    
+    if fullpath+'::list' not in menu_map:
+        act = menu.addAction(_('List aggregated options'), 
+                       functools.partial(list_aggregate, main_dev, aggregation))
+        menu_map[fullpath+'::list'] = act 
+        menu.addSeparator()
+    
     for t in targets:
         if col is not None:
             devs = [devs[col]]
         for fullpath in devs[t]:
             dev = root.toPath(fullpath)
-            if not dev: 
+            if not dev:
                 continue
-            dmenu = menu_map.get(fullpath, False)
             t = handles_map.get(fullpath, t)
             # Special target to explicitly skip the device
-            if t=='#SKIP#':
+            if t == '#SKIP#':
                 continue
+            # Get a cached menu
+            dmenu = menu_map.get(fullpath, False)
             if not dmenu:
-                dmenu = menu.addMenu('{} ({})'.format(dev['name'], dev['devpath']))
-                dmenu.addAction(_('View'), functools.partial(explore_child_aggregate, dev, t, win_map))
-                nav_menu = dmenu.addMenu(_('Navigator'))
-                f = functools.partial(root.navigator.build_menu_from_configuration, dev, nav_menu)
-                nav_menu.menuAction().hovered.connect(f)
+                dmenu = build_aggregation_menu(
+                    root, dev, menu, target=t, win_map=win_map)
                 menu_map[fullpath] = dmenu
             prop = dev.gete(t)
             agg = prop.get('aggregate', "")
             if not agg:
                 continue
-            build_recursive_aggregation_menu(root, dev, agg, handles_map, dmenu, menu_map=menu_map, win_map=win_map)
+            dmenu.addSeparator()
+            build_recursive_aggregation_menu(
+                root, dev, agg, handles_map, dmenu, menu_map=menu_map, win_map=win_map)
+
 
 def explore_child_aggregate(dev, target, win_map={}):
     from ..conf import Interface
     win = Interface(dev.root, dev)
-    win.setWindowTitle(_('Explore aggregation: {} ({})').format(dev['name'], dev['devpath']))
+    win.setWindowTitle(
+        _('Explore aggregation: {} ({})').format(dev['name'], dev['devpath']))
     win_map[dev['fullpath']] = win
     win.show()
     win.highlight_option(target)
     
+def list_aggregate(self, dev, aggregate):
+    f, targets, values, devs = dev.collect_aggregate(aggregate, self.handle)
+    win = build_aggregate_view(self.remObj.root, targets, devs, self.handle)
+    win.setWindowTitle(_('Explore aggregation: {} ({})').format(self.label, self.handle))
+    win.show()        
+    return win
+
+
 if __name__ == '__main__':
     import sys
     from misura.client import iutils, network

@@ -7,7 +7,7 @@ from .. import _
 from misura.client.widgets.active import *
 from misura.client import units
 from misura.client.clientconf import settings
-from builder import build_recursive_aggregation_menu, explore_child_aggregate
+from . import builder
 
 
 def _export(loaded, get_column_func,
@@ -499,14 +499,14 @@ class aTableView(QtGui.QTableView):
 
     def make_aggregation_menu(self, index, menu):
         dev, t, targets_map = self.aggregate_cell_source(index)
-        menu.addAction(_('Cell source: {} ({})').format(dev['name'], dev['devpath']), 
-                       functools.partial(explore_child_aggregate, dev, t))
+        root = dev.root
+        dmenu = builder.build_aggregation_menu(root, dev, menu, target=t, win_map=self.tableObj._win_map)
         # See if target option is an aggregation in its turn
         p = dev.gete(t)
         aggregation = p.get('aggregate', '')
         if aggregation:
-            build_recursive_aggregation_menu(
-                dev.root, dev, aggregation, targets_map, menu, win_map=self.tableObj._win_map)
+            builder.build_recursive_aggregation_menu(root, dev, aggregation, 
+                                                     targets_map, dmenu, win_map=self.tableObj._win_map)
 
         return menu
 
@@ -520,15 +520,13 @@ class aTableView(QtGui.QTableView):
             col = a
         return col, row
 
-    def aggregate_cell_source(self, index, targets_map=False):
+    def aggregate_cell_source(self, index):
         """Returns the aggregation source device and option name for cell at `index`"""
         wg = self.tableObj
         r = wg.remObj.collect_aggregate(wg.prop['aggregate'], wg.handle)
         f, targets, values, devs = r
         col0, row0 = self._coord(index)
-        # Calculate target index from
-        if targets_map is False:
-            targets_map = {}
+        targets_map = {}
         col = col0
         row = row0
         j = 0
@@ -575,16 +573,6 @@ class aTableView(QtGui.QTableView):
                 targets_map[devs[subt][row0]] = subt
                     
         return dev, t, targets_map
-
-    def cell_aggregation(self, index):
-        from misura.client.conf import Interface
-        dev, t, targets_map = self.aggregate_cell_source(index)
-        print dev['fullpath']
-        win = Interface(dev.root, dev)
-        win.show()
-        win.highlight_option(t)
-        win.setWindowTitle(_('Aggregation source: ') + win.windowTitle())
-        self._cell_win = win
 
     def showHeaderMenu(self, pt):
         h = self.main_header

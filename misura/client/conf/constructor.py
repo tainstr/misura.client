@@ -382,7 +382,7 @@ class Interface(QtGui.QTabWidget):
         # Switch toolbox currentIndexes"
         for sec in self.sectionsMap.itervalues():
             sec.reorder()
-
+    
     def redraw(self, foo=0):
         self.close()
         wg = SectionBox(

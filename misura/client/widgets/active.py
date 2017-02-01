@@ -14,7 +14,7 @@ from .. import units
 from ..clientconf import confdb
 from .. import _
 from ..live import registry
-from .builder import build_aggregate_view, build_recursive_aggregation_menu
+from . import builder
 
 from PyQt4 import QtGui, QtCore
 
@@ -554,20 +554,9 @@ class ActiveWidget(Active, QtGui.QWidget):
         
     def build_aggregation_menu(self, menu):
         menu.clear()
-        menu.addAction(_('List'), self.explore_aggregate)
-        menu.addSeparator()
         aggregation = self.prop.get('aggregate', "")
-        build_recursive_aggregation_menu(self.remObj.root, self.remObj, aggregation, 
+        builder.build_recursive_aggregation_menu(self.remObj.root, self.remObj, aggregation, 
                                          {self.remObj['fullpath']: self.handle}, menu, self._win_map)
-
-        
-    def explore_aggregate(self):
-        agg = self.prop.get('aggregate', "")
-        f, targets, values, devs = self.remObj.collect_aggregate(agg, self.handle)
-        win = build_aggregate_view(self.remObj.root, targets, devs, self.handle)
-        win.setWindowTitle(_('Explore aggregation: {} ({})').format(self.label, self.handle))
-        self._agg_win = win
-        win.show()        
 
 
     def build_presets_menu(self):
@@ -580,7 +569,6 @@ class ActiveWidget(Active, QtGui.QWidget):
             value = repr(val)
             value = (value[:15] + '..') if len(value) > 15 else value
             label = '{}: {}'.format(preset, value)
-            print 'preset action',preset, val
             p = functools.partial(self.set_raw, val)
             self.presets_menu.addAction(label, p)
             self.presets[preset] = (p, val)
