@@ -17,6 +17,55 @@ from .. import _
 from .. import clientconf
 
 
+class PlotSubMenu(QtGui.QMenu):
+
+    def __init__(self, version_menu, version, plot_id, title, date, render=False, render_format=False, parent=False):
+        QtGui.QMenu.__init__(self, parent=parent)
+        self.setTitle(' - '.join((title, date)))
+        self.version_menu = version_menu
+        self.version = version
+        self.plot_id = plot_id
+        self._title = title
+        self.date = date
+        self.render = render
+        self.render_format = render_format
+        self.menuAction().hovered.connect(self.redraw)
+        print 'AAAAAAAAAA', version, plot_id, title, date, render_format
+        # self.redraw()
+
+    def redraw(self):
+        print 'BBBBBBBBBBB', self.version, self.plot_id, self._title, self.date, self.render_format
+        self.clear()
+        act = self.addAction(_('Load plot'), self.load_plot)
+        if self.render and self.render_format:
+            pix = QtGui.QPixmap()
+            pix.loadFromData(self.render, self.render_format.upper())
+            tooltip = "<html>{}</html>".format(pixmapAsHtml(pix))
+            act.setCheckable(True)
+            print 'setting checked', self.version_menu.current_plot_id, repr(self.plot_id)
+            act.setChecked(self.version_menu.current_plot_id == self.plot_id)
+            act.setToolTip(tooltip)
+        if self.version == self.version_menu.current:
+            self.addAction(
+                _('Overwrite plot'), self.version_menu.overwrite_plot)
+        self.addAction(_('Delete plot'), self.remove_plot)
+
+    def load_plot(self):
+        self.version_menu.load_plot(self.version, self.plot_id)
+
+    def remove_plot(self):
+        self.version_menu.remove_plot(self.version, self.plot_id)
+
+    def event(self, ev):
+        """Tooltip preview handling"""
+        if ev.type() == QtCore.QEvent.ToolTip:
+            QtGui.QToolTip.showText(
+                ev.globalPos(), self.activeAction().toolTip())
+        else:
+            QtGui.QToolTip.hideText()
+        return QtGui.QMenu.event(self, ev)
+
+
 class VersionMenu(QtGui.QMenu):
 
     """Available object versions menu"""
@@ -29,8 +78,7 @@ class VersionMenu(QtGui.QMenu):
         QtGui.QMenu.__init__(self, parent=parent)
         self.setTitle(_('Version'))
         self.doc = doc
-        self.redraw()
-        self.aboutToShow.connect(self.redraw)
+        self.menuAction().hovered.connect(self.redraw)
 
     @property
     def proxy(self):
@@ -38,31 +86,6 @@ class VersionMenu(QtGui.QMenu):
         if not self.doc:
             return False
         return self.doc.proxy
-
-    def add_plot_menu(self, version, menu):
-        p = self.proxy.get_plots(version=version, render=True)
-        if not p:
-            logging.debug('No plots for selected version', version)
-            return False
-        menu.addSeparator()
-        if version == self.current:
-            menu.addAction(_('Save new plot'), self.new_plot)
-        for plot_id, (title, date, render, render_format) in p.iteritems():
-            pmenu = menu.addMenu(' - '.join((title, date)))
-            act = pmenu.addAction(_('Load plot'),
-                                  functools.partial(self.load_plot, version, plot_id))
-            pix = QtGui.QPixmap()
-            pix.loadFromData(render, render_format.upper())
-            tooltip = "<html>{}</html>".format(pixmapAsHtml(pix))
-            act.setCheckable(True)
-            print 'setting checked', self.current_plot_id, repr(plot_id)
-            act.setChecked(self.current_plot_id == plot_id)
-            act.setToolTip(tooltip)
-            if version == self.current:
-                pmenu.addAction(_('Overwrite plot'),
-                                functools.partial(self.load_plot, version, plot_id))
-            pmenu.addAction(_('Delete plot'),
-                            functools.partial(self.remove_plot, version, plot_id))
 
     def load_plot(self, version, plot_id):
         if version != self.current:
@@ -111,14 +134,17 @@ class VersionMenu(QtGui.QMenu):
         logging.debug('Loading latest plot for version', self.current, ok[-1])
         self.load_plot(self.current, ok[-1])
 
-    def remove_plot(self, plot_id=False):
+    def remove_plot(self, version=False, plot_id=False):
         """Delete current plot or plot_id folder structure"""
         if not plot_id:
             plot_id = self.current_plot_id
-        if not plot_id:
-            logging.debug('No current plot')
+        if not version:
+            version = self.current
+        if not plot_id or not version:
+            logging.debug('No current plot or version')
             return False
-        node = self.proxy.versioned('/plot/{}'.format(plot_id))
+        node = self.proxy.versioned(
+            '/plot/{}'.format(plot_id), version=version)
         self.proxy.remove_node(node, recursive=True)
         logging.debug('Removed plot', node)
         self.proxy.flush()
@@ -136,6 +162,19 @@ class VersionMenu(QtGui.QMenu):
 
     def overwrite_plot(self):
         self.save_plot(name=self.current_plot_id)
+
+    def add_plot_menu(self, version, menu):
+        if version == self.current:
+            menu.addAction(_('Save new plot'), self.new_plot)
+        p = self.proxy.get_plots(version=version, render=True)
+        if not p:
+            logging.debug('No plots for selected version', version)
+            return False
+        menu.addSeparator()
+        for plot_id, (title, date, render, render_format) in p.iteritems():
+            pmenu = PlotSubMenu(self, version, plot_id, title,
+                                date, render, render_format, parent=menu)
+            menu.addMenu(pmenu)
 
     def redraw(self):
         self.clear()
@@ -156,46 +195,42 @@ class VersionMenu(QtGui.QMenu):
                 act.setChecked(True)
             # Keep in memory
             self.loadActs.append((p, act))
-            self.add_plot_menu(v, vermenu)
+            if v:
+                vermenu.addAction(_('Delete version'), 
+                                  functools.partial(self.remove_version, v))
+                vermenu.addAction(_('Overwrite version'), 
+                                    functools.partial(self.save_version, v))
+                self.add_plot_menu(v, vermenu)
         if len(vd) > 0:
             self.addSeparator()
         act = self.addAction(_('New version and plot'), self.new_version)
         self.loadActs.append((self.new_version, act))
-        self.actOverwrite = self.addAction(
-            _('Overwrite current version and plot'), self.save_version)
-        self.actOverwrite.setEnabled(bool(self.current))
-        self.loadActs.append((self.save_version, self.actOverwrite))
-        self.actRemove = self.addAction(
-            _('Delete current'), self.remove_version)
-        self.actRemove.setEnabled(bool(self.current))
         self.actValidate = self.addAction(_('Check signature'), self.signature)
 
     def load_version(self, v, latest_plot=True):
         """Load selected version"""
         self.proxy.set_version(v)
         v = self.proxy.get_version()
-        self.actRemove.setEnabled(bool(v))
-        self.actOverwrite.setEnabled(bool(v))
         self.current = v
         if latest_plot:
             self.load_latest_plot()
         self.versionChanged.emit(v)
 
-    def save_version(self):
+    def save_version(self, version=False):
         """Save configuration in current version"""
         # Try to create a new version
-        if self.proxy.get_version() == '':
+        if not version:
+            version = self.proxy.get_version()
+        if version == '':
             if not self.new_version():
                 QtGui.QMessageBox.critical(
                     self, _("Not saved"), _("Cannot overwrite original version"))
                 return False
             return True
-        self.current = self.proxy.get_version()
-        version_name, version_date = self.proxy.get_versions()[self.current]
+        version_name, version_date = self.proxy.get_versions()[version]
         self.doc.save_version_and_plot(version_name)
         self.current_plot_id = version_name
-        self.actRemove.setEnabled(True)
-        self.actOverwrite.setEnabled(True)
+        self.current = self.proxy.get_version()
         return True
 
     def new_version(self):
@@ -208,17 +243,19 @@ class VersionMenu(QtGui.QMenu):
         self.save_version()
         return True
 
-    def remove_version(self):
+    def remove_version(self, version=False):
         """Delete current plot or plot_id folder structure"""
-        ver = self.proxy.get_version()
-        if not ver:
-            logging.debug('No current version to be removed')
+        if not version:
+            version = self.proxy.get_version()
+        if not version:
+            logging.debug('No current version can be removed')
             self.actRemove.setEnabled(False)
             return False
-        self.proxy.remove_version(ver)
-        logging.debug('Removed version', ver)
+        self.proxy.remove_version(version)
+        logging.debug('Removed version', version)
         # Return to original version
-        self.load_version(0)
+        if version == self.current:
+            self.load_version(0)
         return True
 
     def signature(self):
