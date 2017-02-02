@@ -6,7 +6,6 @@ logging = get_module_logging(__name__)
 import functools
 import os
 import collections
-from copy import deepcopy
 
 from misura.canon import option
 from misura.canon.option import sorter, prop_sorter
@@ -103,26 +102,58 @@ def orgSections(prop_dict, configuration_level=5):
     return sections
 
 
-class Section(QtGui.QWidget):
+class Section(QtGui.QGroupBox):
     """Form builder for a list of options"""
 
-    def __init__(self, server, remObj, prop_list, parent=None, context='Option'):
-        QtGui.QWidget.__init__(self, parent)
+    def __init__(self, server, remObj, prop_list, title='Group', parent=None, context='Option'):
+        QtGui.QGroupBox.__init__(self, parent)
+        self.setTitle(title)
         prop_list.sort(prop_sorter)
         self.p = []
         self.server = server
         self.remObj = remObj
         self.path = remObj._Method__name
-
+        self.setStyleSheet("""QGroupBox { background-color: transparent; 
+        border: 1px solid gray; border-radius: 5px; 
+        margin-top: 10px; margin-bottom: 10px; }
+        QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0px 5px; }""")
+        self.setCheckable(True)
+        self.clicked.connect(self.enable_disable)
         self.lay = QtGui.QFormLayout()
         self.lay.setLabelAlignment(QtCore.Qt.AlignRight)
         self.lay.setRowWrapPolicy(QtGui.QFormLayout.WrapLongRows)
+        self.setLayout(self.lay)
         self.widgetsMap = {}
         self.parentsMap = {}
+        self.groupsMap = {}
         for prop in prop_list:
             self.build(prop)
 
-        self.setLayout(self.lay)
+    def enable_disable(self, status=True):
+        if status:
+            self.expand()
+        else:
+            self.collapse()
+
+    def expand(self):
+        print 'AAAAAAAAA expand', self.title()
+        for w in self.groupsMap.itervalues():
+            w.show()
+        for w in self.widgetsMap.itervalues():
+            w.show()
+            w.label_widget.show()
+        self.setMaximumHeight(16777215)
+        self.setChecked(True)
+
+    def collapse(self):
+        print 'AAAAAAAAA collapse', self.title()
+        for w in self.groupsMap.itervalues():
+            w.hide()
+        for w in self.widgetsMap.itervalues():
+            w.hide()
+            w.label_widget.hide()
+        self.setMaximumHeight(40)
+        self.setChecked(False)
 
     def hide_show(self, children, button):
         """Hide or show option's children"""
@@ -135,20 +166,36 @@ class Section(QtGui.QWidget):
 
     def expandable_row(self, wg, children):
         more = QtGui.QPushButton("+")
-        more.setMaximumWidth(50)
+        more.setMaximumWidth(30)
         p = functools.partial(self.hide_show, children, more)
         self.p.append(p)
         self.connect(more, QtCore.SIGNAL('clicked()'), p)
-        out = QtGui.QWidget()
+
+        # Create the group box
+        group = QtGui.QGroupBox(wg.label)
+        group.setAlignment(QtCore.Qt.AlignRight)
+        group.setFlat(False)
+        group.setStyleSheet("""QGroupBox { background-color: transparent; border: 1px solid gray; border-radius: 5px; }
+        QGroupBox::title { subcontrol-position: top center; padding: 0 5px; }""")
+        group.clicked.connect(p)
+
+        out = QtGui.QWidget(group)
         lay = QtGui.QHBoxLayout()
+        lay.addWidget(wg.label_widget)
         lay.addWidget(wg)
         lay.addWidget(more)
         out.setLayout(lay)
-        return out
 
-    def add_children(self, parent_layout, prop):
+        glay = QtGui.QVBoxLayout()
+        glay.addWidget(out)
+        glay.addWidget(children)
+        group.setLayout(glay)
+        return group
+
+    def add_children(self, main_widget, prop):
+        parent_layout = main_widget.layout()
         parent_widget = widgets.build(
-            self.server, self.remObj, prop, parent=self)
+            self.server, self.remObj, prop, parent=main_widget)
         if parent_widget is False:
             return False
         self.widgetsMap[prop['handle']] = parent_widget
@@ -157,27 +204,26 @@ class Section(QtGui.QWidget):
             parent_layout.addRow(parent_widget.label_widget, parent_widget)
             return True
         # Widget hosting the children form
-        children = QtGui.QWidget()
+        children = QtGui.QWidget(parent_widget)
         children_lay = QtGui.QFormLayout()
         children.setLayout(children_lay)
         # Add the parent option plus the expansion button
-        parent_layout.addRow(parent_widget.label_widget,
-                             self.expandable_row(parent_widget, children))
+        group = self.expandable_row(parent_widget, children)
+        self.groupsMap[parent_widget.handle] = group
+        parent_layout.addRow(group)
         for handle, child in prop['children'].iteritems():
             if handle == prop['handle']:
                 logging.error(
                     'Option parenthood loop detected', handle, prop['children'].keys())
                 continue
-            self.add_children(children_lay, child)
+            self.add_children(children, child)
             self.parentsMap[handle] = children
-
-        parent_layout.addRow(children)
         children.hide()
 
     def build(self, prop):
-        self.add_children(self.lay, prop)
+        self.add_children(self, prop)
         return True
-    
+
     def highlight_option(self, handle):
         self.show()
         wg = self.widgetsMap.get(handle, False)
@@ -187,20 +233,15 @@ class Section(QtGui.QWidget):
         parent = self.parentsMap.get(handle, False)
         if parent is not False:
             parent.show()
-        wg.label_widget.setStyleSheet('QWidget { font-weight: bold; color: red; }')
+        wg.label_widget.setStyleSheet(
+            'QWidget { font-weight: bold; color: red; }')
         return wg
-    
-    def toggle_visible(self):
-        if self.isVisible():
-            self.hide()
-        else:
-            self.show()
 
 
 class SectionBox(QtGui.QWidget):
-    """Divide section into Status, Configuration and Results toolboxes.""" 
+    """Divide section into Status, Configuration and Results toolboxes."""
     sigScrollTo = QtCore.pyqtSignal(int, int)
-    
+
     def __init__(self, server, remObj, prop_list, parent=None, context='Option'):
         QtGui.QWidget.__init__(self, parent=parent)
         self.lay = QtGui.QVBoxLayout()
@@ -217,96 +258,104 @@ class SectionBox(QtGui.QWidget):
                 results_list.append(opt)
             elif ('History' in attr and 'Runtime' not in attr) or ('Result' in attr):
                 results_list.append(opt)
-            elif ('Runtime' in attr) or ('ReadOnly' in attr) or opt['type']=='ReadOnly':
+            elif ('Runtime' in attr) or ('ReadOnly' in attr) or opt['type'] == 'ReadOnly':
                 status_list.append(opt)
             else:
                 config_list.append(opt)
-        
-        self.status_section = Section(server, remObj, status_list, parent=self, context=context)
-        self.results_section = Section(server, remObj, results_list, parent=self, context=context)
-        self.config_section = Section(server, remObj, config_list, parent=self, context=context)
-        
+
+        self.status_section = Section(server, remObj, status_list,  title=_('Status'),
+                                      parent=None, context=context)
+        self.results_section = Section(server, remObj, results_list, title=_('Results'),
+                                       parent=None, context=context)
+        self.config_section = Section(server, remObj, config_list, title=_('Configuration'),
+                                      parent=None, context=context)
+
         self.widgetsMap = {}
         self.widgetsMap.update(self.status_section.widgetsMap)
         self.widgetsMap.update(self.results_section.widgetsMap)
-        self.widgetsMap.update(self.config_section.widgetsMap) 
-        
+        self.widgetsMap.update(self.config_section.widgetsMap)
+
         secs = [self.config_section, self.results_section, self.status_section]
-        lens = [len(sec.widgetsMap)>0 for sec in secs]
+        lens = [len(sec.widgetsMap) > 0 for sec in secs]
         # Just one active section:
-        if sum(lens)<1:
+        if sum(lens) < 1:
             return
-        if sum(lens)==1:
+        if sum(lens) == 1:
             i = lens.index(True)
             sec = secs[i]
             self.lay.addWidget(sec)
             return
-        
-        def add_section(sec,  name):
+
+        def add_section(sec):
             """Add section only if has widgets to show"""
-            if sec.widgetsMap:
-                label = QtGui.QPushButton(name)
-                label.setFlat(True)
-                label.clicked.connect(sec.toggle_visible)
-                self.lay.addWidget(label)
+            if not sec.widgetsMap:
+                sec.hide()
+            else:
                 self.lay.addWidget(sec)
-        
+
         # Prioritize sections
-        add_section(self.config_section, _('Configuration'))
-        
+        add_section(self.config_section)
+
         if not getattr(remObj, 'remObj', False):
-            add_section(self.results_section, _('Results'))
-            add_section(self.status_section, _('Status'))
+            add_section(self.results_section)
+            add_section(self.status_section)
         else:
-            add_section(self.status_section, _('Status'))
-            add_section(self.results_section, _('Results'))
-            
+            add_section(self.status_section)
+            add_section(self.results_section)
+
+        self.lay.addStretch(1)
         self.reorder()
-    
+
     _last_status = False
+
     def reorder(self):
-        return
+        # return
         w = None
         st = self.server.has_key('isRunning') and self.server['isRunning']
+        status = {}
         # Hide everything
         for w in [self.config_section, self.status_section, self.results_section]:
-            w.hide()
+            status[w] = w.isChecked()
         # Select what to show
         if st:
-            w =self.status_section
+            status[self.status_section] = True
+            status[self.config_section] = False
         elif self._last_status:
-            w = self.results_section
+            status[self.results_section] = True
         else:
-            w = self.config_section
-        if w is not None:
-            w.show()
-            self.sigScrollTo.emit(w.pos().x(), w.pos().y()+50)
-        else:
-            # Or show everything
-            for w in [self.config_section, self.status_section, self.results_section]:
-                w.show()           
-        self._last_status = st         
-        
+            status[self.config_section] = not status[self.results_section]
+            status[self.status_section] = False
+        for w, vis in status.iteritems():
+            if vis and not w.isChecked():
+                w.expand()
+                self.sigScrollTo.emit(w.pos().x(), w.pos().y() + 50)
+            elif not vis:
+                w.collapse()
+
+        self._last_status = status
+
     def highlight_option(self, handle):
         for sec in [self.config_section, self.status_section, self.results_section]:
             if handle in sec.widgetsMap:
                 break
             else:
-                sec=False
+                sec = False
         if not sec:
-            logging.debug('SectionBox.highlight_option: not visible/found', handle)
+            logging.debug(
+                'SectionBox.highlight_option: not visible/found', handle)
             return False
-        wg =  sec.highlight_option(handle)
+        wg = sec.highlight_option(handle)
         x = sec.x()
         y = sec.y()
         parent = wg
-        while parent!=sec:
-            y+=parent.y()
-            x+=parent.x()
-            parent =parent.parent()
+        while parent != sec:
+            y += parent.y()
+            x += parent.x()
+            parent = parent.parent()
         self.sigScrollTo.emit(x, y)
         return wg
-        
+
+
 class Interface(QtGui.QTabWidget):
 
     """Tabbed interface builder for dictionary of options"""
@@ -356,7 +405,7 @@ class Interface(QtGui.QTabWidget):
                 visible = set(prop_dict.keys()).intersection(k)
                 prop_dict = {key: prop_dict[key] for key in visible}
         if not prop_dict:
-            logging.critical('Impossible to get object description', 
+            logging.critical('Impossible to get object description',
                              self.remObj._Method__name)
             return
         self.clear()
@@ -377,18 +426,18 @@ class Interface(QtGui.QTabWidget):
                 QtGui.QKeySequence(_('Ctrl+S')), self)
             self.connect(self.scSave, QtCore.SIGNAL('activated()'), self.sectionsMap[
                          'Main'].widgetsMap['preset'].save_current)
-                         
+
     def reorder(self):
         # Switch toolbox currentIndexes"
         for sec in self.sectionsMap.itervalues():
             sec.reorder()
-    
+
     def redraw(self, foo=0):
         self.close()
         wg = SectionBox(
             self.server, self.remObj, self.sections['Main'], parent=self)
         self.sectionsMap = collections.OrderedDict({'Main': wg})
-        self._funcs =[]
+        self._funcs = []
         area = QtGui.QScrollArea(self)
         area.setWidget(wg)
         area.setWidgetResizable(True)
@@ -419,33 +468,33 @@ class Interface(QtGui.QTabWidget):
                 if self.prop_dict[sname]['type'] == 'Section':
                     sname = self.prop_dict[sname]['name']
             self.addTab(area, _(sname))
-            
+
             f = functools.partial(self.scroll_to, area)
             wg.sigScrollTo.connect(f)
             self._funcs.append(f)
 
         # hide tabBar if just one section
         self.tabBar().setVisible(len(self.sections.keys()) > 1)
-            
+
         for sec in self.sectionsMap.itervalues():
             self.widgetsMap.update(sec.widgetsMap)
-            
+
     def highlight_option(self, handle):
         """Ensure `handle` widget is visible"""
         sec = 'Main'
-        if '_' in handle and len(self.sectionsMap)>1:
+        if '_' in handle and len(self.sectionsMap) > 1:
             sec = handle.split('_')[0]
         area = self.areasMap[sec]
         sec = self.sectionsMap[sec]
         self.setCurrentWidget(area)
-        wg =  sec.highlight_option(handle)
+        wg = sec.highlight_option(handle)
         logging.debug('HIGHLIGHT OPT', handle)
         return wg
-    
+
     def scroll_to(self, area, x, y):
-        logging.debug('SCROLL_TO', area,x,y)
-        area.ensureVisible(x, y-50)
-        
+        logging.debug('SCROLL_TO', area, x, y)
+        area.ensureVisible(x, y - 50)
+
     def close(self):
         if not self.sectionsMap:
             return
