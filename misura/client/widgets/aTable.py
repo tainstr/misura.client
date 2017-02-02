@@ -483,7 +483,7 @@ class aTableView(QtGui.QTableView):
         menu.addAction(_('Export'), self.export)
         self.act_rotate = menu.addAction(_('Rotate'), self.rotate)
         self.act_rotate.setCheckable(True)
-        self.act_rotate.setChecked(False)
+        self.act_rotate.setChecked(self.rotated)
         menu_zoom = menu.addMenu(_('Zoom'))
         act_zoom = ZoomAction(menu_zoom)
         act_zoom.slider.valueChanged.connect(self.set_zoom)
@@ -538,7 +538,7 @@ class aTableView(QtGui.QTableView):
                 if not hasattr(tab, '__len__'):
                     j0 = j
                     j += 1
-                if not hasattr(tab[0], '__len__'):
+                elif not hasattr(tab[0], '__len__'):
                     j0 = j
                     j += 1
                 else:

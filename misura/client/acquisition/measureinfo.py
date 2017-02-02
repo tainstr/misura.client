@@ -27,7 +27,7 @@ class MeasureInfo(QtGui.QTabWidget):
         # Configurazione della Misura
         self.server = remote.parent()
         self.measureView = conf.Interface(
-            self.server, remote.measure, remote.measure.describe(), parent=self)
+            self.server, remote.measure, remote.measure.describe(), parent=None)
         # Thermal cycle - only if a kiln obj exists
         p = self.server
         if p.has_child('kiln'):
@@ -165,7 +165,7 @@ class MeasureInfo(QtGui.QTabWidget):
             wg = self.nodeViews.get(n, False)
             if not wg:
                 wg = conf.Interface(
-                    self.server, node, node.describe(), self)
+                    self.server, node, node.describe(), parent=None)
             j = c + i
             self.insertTab(j, wg, node['devpath'].capitalize())
             self.nodeViews[n] = wg
