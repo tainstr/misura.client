@@ -17,7 +17,9 @@ def configuration_check(obj):
             continue
         if opt['type'] == 'Button':
             continue
-        comparison = obj.compare_presets(k)
+        comparison = None
+        if obj.compare_presets:
+            comparison = obj.compare_presets(k)
         if comparison is None:
             # TODO: manage server-side
             output.append((opt, 'MISSING'))
@@ -60,7 +62,8 @@ def render_configuration_check(output, columns):
 
 
 def object_header(obj):
-    return '<h2>{}, <u>{}</u></h2><p>of type {}</p><br/>\n'.format(obj['fullpath'], obj['name'], obj['mro'][0],)
+    mro ='Unknown' if not len(obj['mro']) else obj['mro'][0]
+    return '<h2>{}, <u>{}</u></h2><p>of type {}</p><br/>\n'.format(obj['fullpath'], obj['name'], mro,)
 
 
 def recursive_configuration_check(obj, final=True):

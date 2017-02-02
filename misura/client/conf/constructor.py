@@ -25,13 +25,15 @@ def desc2html(desc):
     items = desc.items()
     items.sort(sorter)
     t += '<table border="1" cellpadding="4" font="Monospace">'
-    t += '<tr> <td>Property</td> <td>Current Value</td> <td>Factory Default</td>'
+    t += '<tr> <td>Property</td> <td>Current Value</td> <td>Factory Default</td> <td> ... </td></tr>'
     for prop, val in items:
         if val['type'] == 'Section':
             continue
         if prop != 'controls':
-            t += '<tr> <td><big><u>%s</u>  </big></td> <td>  <b>%r</b></td> <td>  %r</td> </tr>' % (prop, val['current'],
-                                                                                                    desc[prop].get('factory_default'))
+            more = 'type: %r <br/> attr: %r' % (val['type'], val['attr'])
+            t += '<tr> <td><big><u>%s</u>  </big></td> <td>  <b>%r</b></td> <td>  %r</td> <td>  %s</td></tr>' % (prop, val['current'],
+                                                                                                    val.get('factory_default', ''),
+                                                                                                    more)
     t += '</table>'
     t = t.replace('\\n', '<br/>')
     return t
@@ -374,6 +376,8 @@ class Interface(QtGui.QTabWidget):
         self.server = server
         if remObj is False:
             remObj = server
+        if remObj.doc:
+            remObj.doc.sigConfProxyModified.connect(functools.partial(self.rebuild, False, True))
         self.remObj = remObj
         self.prop_dict = {}
         self.prop_keys = []
@@ -397,6 +401,7 @@ class Interface(QtGui.QTabWidget):
 
     def rebuild(self, prop_dict=False, force=False):
         """Rebuild the full widget"""
+        logging.debug('AAAAAAAAA REBUILD', force)
         if not prop_dict and self.fixed:
             prop_dict = self.prop_dict
         elif not prop_dict:
@@ -404,7 +409,7 @@ class Interface(QtGui.QTabWidget):
             k = set(self.prop_keys)
             rk = set(self.remObj.keys())
             d = k.symmetric_difference(rk)
-            if len(d) == 0:
+            if len(d) == 0 and not force:
                 logging.debug(
                     'Interface.rebuild not needed: options are equal.')
                 return
