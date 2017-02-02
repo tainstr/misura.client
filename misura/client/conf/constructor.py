@@ -102,6 +102,45 @@ def orgSections(prop_dict, configuration_level=5):
     return sections
 
 
+class OptionsGroup(QtGui.QGroupBox):
+    def __init__(self, wg, children, parent=None):
+        QtGui.QGroupBox.__init__(self, parent=parent)
+        self.setTitle(wg.label)
+        self.wg = wg
+        self.children = children
+        self.more = QtGui.QPushButton("+")
+        self.more.setMaximumWidth(30)
+        self.more.clicked.connect(self.hide_show)
+        self.setFlat(False)
+        self.setStyleSheet("""QGroupBox { background-color: transparent; border: 1px solid gray; border-radius: 5px; }
+        QGroupBox::title { subcontrol-position: top center; padding: 0 5px; }""")
+        out = QtGui.QWidget(self)
+        lay = QtGui.QHBoxLayout()
+        lay.addWidget(wg.label_widget)
+        lay.addWidget(wg)
+        lay.addWidget(self.more)
+        out.setLayout(lay)
+        
+        glay = QtGui.QVBoxLayout()
+        glay.addWidget(out)
+        glay.addWidget(children)
+        self.setLayout(glay)     
+        
+    def expand(self):
+        self.children.show()
+        self.more.setText('-')
+        
+    def collapse(self):
+        self.children.hide()
+        self.more.setText('+')                         
+        
+    def hide_show(self):
+        """Hide or show option's children"""
+        if self.children.isVisible():
+            self.collapse()
+        else:
+            self.expand()
+        
 class Section(QtGui.QGroupBox):
     """Form builder for a list of options"""
 
@@ -136,7 +175,6 @@ class Section(QtGui.QGroupBox):
             self.collapse()
 
     def expand(self):
-        print 'AAAAAAAAA expand', self.title()
         for w in self.groupsMap.itervalues():
             w.show()
         for w in self.widgetsMap.itervalues():
@@ -146,7 +184,6 @@ class Section(QtGui.QGroupBox):
         self.setChecked(True)
 
     def collapse(self):
-        print 'AAAAAAAAA collapse', self.title()
         for w in self.groupsMap.itervalues():
             w.hide()
         for w in self.widgetsMap.itervalues():
@@ -155,42 +192,14 @@ class Section(QtGui.QGroupBox):
         self.setMaximumHeight(40)
         self.setChecked(False)
 
-    def hide_show(self, children, button):
-        """Hide or show option's children"""
-        if children.isVisible():
-            children.hide()
-            button.setText('+')
-        else:
-            children.show()
-            button.setText('-')
+            
+    def expand_children(self):
+        for group in self.groupsMap.itervalues():
+            group.expand()
 
-    def expandable_row(self, wg, children):
-        more = QtGui.QPushButton("+")
-        more.setMaximumWidth(30)
-        p = functools.partial(self.hide_show, children, more)
-        self.p.append(p)
-        self.connect(more, QtCore.SIGNAL('clicked()'), p)
-
-        # Create the group box
-        group = QtGui.QGroupBox(wg.label)
-        group.setAlignment(QtCore.Qt.AlignRight)
-        group.setFlat(False)
-        group.setStyleSheet("""QGroupBox { background-color: transparent; border: 1px solid gray; border-radius: 5px; }
-        QGroupBox::title { subcontrol-position: top center; padding: 0 5px; }""")
-        group.clicked.connect(p)
-
-        out = QtGui.QWidget(group)
-        lay = QtGui.QHBoxLayout()
-        lay.addWidget(wg.label_widget)
-        lay.addWidget(wg)
-        lay.addWidget(more)
-        out.setLayout(lay)
-
-        glay = QtGui.QVBoxLayout()
-        glay.addWidget(out)
-        glay.addWidget(children)
-        group.setLayout(glay)
-        return group
+    def collapse_children(self):
+        for group in self.groupsMap.itervalues():
+            group.collapse()
 
     def add_children(self, main_widget, prop):
         parent_layout = main_widget.layout()
@@ -208,7 +217,7 @@ class Section(QtGui.QGroupBox):
         children_lay = QtGui.QFormLayout()
         children.setLayout(children_lay)
         # Add the parent option plus the expansion button
-        group = self.expandable_row(parent_widget, children)
+        group = OptionsGroup(parent_widget, children, parent=self)
         self.groupsMap[parent_widget.handle] = group
         parent_layout.addRow(group)
         for handle, child in prop['children'].iteritems():
