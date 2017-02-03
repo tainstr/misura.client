@@ -190,7 +190,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         row = self.rows[row]
         val = row[col]
         if val is None:
-            return ''
+            return None
         # handle conversion from option unit to client-side unit
         if self.unit != 'None' and self.csunit != 'None':
             u, cu = self.unit[col], self.csunit[col]
@@ -525,6 +525,9 @@ class aTableView(QtGui.QTableView):
         menu.popup(self.mapToGlobal(pt))
 
     def make_aggregation_menu(self, index, menu):
+        if self.model().data(index) is None:
+            logging.debug('Empty cell')
+            return menu
         dev, t, targets_map = self.aggregate_cell_source(index)
         root = dev.root
         dmenu = builder.build_aggregation_menu(
