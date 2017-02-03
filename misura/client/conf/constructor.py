@@ -248,7 +248,9 @@ class Section(QtGui.QGroupBox):
             'QWidget { font-weight: bold; color: red; }')
         return wg
 
-
+CONFIG_SEC = 0
+STATUS_SEC = 1
+RESULT_SEC = 2
 class SectionBox(QtGui.QWidget):
     """Divide section into Status, Configuration and Results toolboxes."""
     sigScrollTo = QtCore.pyqtSignal(int, int)
@@ -280,20 +282,21 @@ class SectionBox(QtGui.QWidget):
                                        parent=None, context=context)
         self.config_section = Section(server, remObj, config_list, title=_('Configuration'),
                                       parent=None, context=context)
+        
+        self.sections = [self.config_section, self.status_section, self.results_section]
 
         self.widgetsMap = {}
         self.widgetsMap.update(self.status_section.widgetsMap)
         self.widgetsMap.update(self.results_section.widgetsMap)
         self.widgetsMap.update(self.config_section.widgetsMap)
 
-        secs = [self.config_section, self.results_section, self.status_section]
-        lens = [len(sec.widgetsMap) > 0 for sec in secs]
+        lens = [len(sec.widgetsMap) > 0 for sec in self.sections]
         # Just one active section:
         if sum(lens) < 1:
             return
         if sum(lens) == 1:
             i = lens.index(True)
-            sec = secs[i]
+            sec = self.sections[i]
             self.lay.addWidget(sec)
             return
 
@@ -318,30 +321,39 @@ class SectionBox(QtGui.QWidget):
         self.reorder()
 
     _last_status = False
+    
+    
+    def get_status(self):
+        status = [True,True,True]
+        # Hide everything
+        for i,w in enumerate(self.sections):
+            status[i] = w.isChecked() and len(w.widgetsMap)>0
+        return status
+    
+    def set_status(self, status):
+        for i, st in enumerate(status):
+            w = self.sections[i]
+            if st and len(w.widgetsMap)>0:
+                w.expand()
+                self.sigScrollTo.emit(w.pos().x(), w.pos().y() + 50)
+            else:
+                w.collapse()
 
     def reorder(self):
         # return
         w = None
         st = self.server.has_key('isRunning') and self.server['isRunning']
-        status = {}
-        # Hide everything
-        for w in [self.config_section, self.status_section, self.results_section]:
-            status[w] = w.isChecked()
+        status = self.get_status()
         # Select what to show
         if st:
-            status[self.status_section] = True
-            status[self.config_section] = False
+            status[STATUS_SEC] = True
+            status[CONFIG_SEC] = False
         elif self._last_status:
-            status[self.results_section] = True
+            status[RESULT_SEC] = True
         else:
-            status[self.config_section] = not status[self.results_section]
-            status[self.status_section] = False
-        for w, vis in status.iteritems():
-            if vis and not w.isChecked():
-                w.expand()
-                self.sigScrollTo.emit(w.pos().x(), w.pos().y() + 50)
-            elif not vis:
-                w.collapse()
+            status[CONFIG_SEC] = not status[RESULT_SEC]
+            status[STATUS_SEC] = False
+        self.set_status(status)
 
         self._last_status = status
 
@@ -377,7 +389,7 @@ class Interface(QtGui.QTabWidget):
         if remObj is False:
             remObj = server
         if remObj.doc:
-            remObj.doc.sigConfProxyModified.connect(functools.partial(self.rebuild, False, True))
+            remObj.doc.sigConfProxyModified.connect(functools.partial(self.rebuild, False, True, True))
         self.remObj = remObj
         self.prop_dict = {}
         self.prop_keys = []
@@ -388,6 +400,7 @@ class Interface(QtGui.QTabWidget):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
+        self.first_show = True
 
     def show_section(self, name):
         sections = self.sectionsMap.keys()
@@ -397,11 +410,20 @@ class Interface(QtGui.QTabWidget):
         self.setCurrentIndex(i)
 
     def showEvent(self, event):
+        if self.first_show:
+            self.first_show = False
+            return
         self.rebuild(force=True)
 
-    def rebuild(self, prop_dict=False, force=False):
+    _prev_section = False
+    _prev_section_status = False
+    def rebuild(self, prop_dict=False, force=False, redraw=False):
         """Rebuild the full widget"""
-        logging.debug('AAAAAAAAA REBUILD', force)
+        # Cache previous status
+        if self.sectionsMap:
+            i = self.currentIndex()
+            self._prev_section = self.sectionsMap.keys()[i]
+            self._prev_section_status = self.sectionsMap[self._prev_section].get_status() 
         if not prop_dict and self.fixed:
             prop_dict = self.prop_dict
         elif not prop_dict:
@@ -409,13 +431,13 @@ class Interface(QtGui.QTabWidget):
             k = set(self.prop_keys)
             rk = set(self.remObj.keys())
             d = k.symmetric_difference(rk)
-            if len(d) == 0 and not force:
+            if len(d) == 0 and not (force or redraw):
                 logging.debug(
                     'Interface.rebuild not needed: options are equal.')
                 return
             prop_dict = self.remObj.describe()
             # If a prop_dict was set, just pick currently defined options
-            if len(k) and len(prop_dict) and not force:
+            if len(k) and len(prop_dict) and not redraw:
                 visible = set(prop_dict.keys()).intersection(k)
                 prop_dict = {key: prop_dict[key] for key in visible}
         if not prop_dict:
@@ -440,6 +462,11 @@ class Interface(QtGui.QTabWidget):
                 QtGui.QKeySequence(_('Ctrl+S')), self)
             self.connect(self.scSave, QtCore.SIGNAL('activated()'), self.sectionsMap[
                          'Main'].widgetsMap['preset'].save_current)
+            
+        # Restore previous status
+        if self._prev_section and self._prev_section in self.sectionsMap:
+            self.show_section(self._prev_section)
+            self.sectionsMap[self._prev_section].set_status(self._prev_section_status)
 
     def reorder(self):
         # Switch toolbox currentIndexes"
