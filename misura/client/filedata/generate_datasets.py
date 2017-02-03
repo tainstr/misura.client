@@ -14,11 +14,19 @@ import veusz.document as document
 
 from .. import _
 
-possible_timecol_names = set(['Time', 'time', 't'])
-possible_Tcol_names = set(['Temp.', 'Temp', 'Temperature',
-                           'T', 'temp', 'temp.', 'temperature'])
-possible_value_names = set(['Value', 'value', 'val', 'v'])
-possible_error_names = set(['Error', 'error', 'err', 'e'])
+contains = lambda s, words: sum([word in s for word in words])
+
+possible_timecol_names = ('time', )
+is_time_col = lambda col: contains(col.lower(), possible_timecol_names)
+
+possible_Tcol_names = ('temp', 'temp.', 'temperature', 'setpoint', )
+
+is_T_col = lambda col: contains(col.lower(), possible_Tcol_names)
+
+possible_error_names = ('error', 'err', 'uncertainty')
+
+is_error_col = lambda col: contains(col.lower(), possible_error_names)
+
 
 
 def new_dataset_operation(original_dataset, data, name, label, path, unit='volt', opt=False, error=None):
@@ -53,17 +61,18 @@ def new_dataset_operation(original_dataset, data, name, label, path, unit='volt'
     return document.OperationDatasetSet(path, new_dataset)
 
 
-def search_column_name(column_names_list, possible_names):
-    """Search for `column_names` amonst `possible_names` and return its index"""
-    column_names = set(column_names_list)
-    missing = possible_names - column_names
-    col_name = possible_names - missing
-    if len(col_name) != 1:
-        logging.debug(
-            'No univoque col name', missing, col_name, possible_names)
-        return False, -1
-    col_name = col_name.pop()
-    idx = column_names_list.index(col_name)
+def search_column_name(column_names_list, is_col=lambda col: False):
+    """Search for `column_names_list` checking with is_col() function"""
+    idx = -1
+    col_name = False
+    for i, col in enumerate(column_names_list):
+        if is_col(col):
+            if col_name:
+                logging.debug('No univoque col name', col_name)
+                return False, -1
+            logging.debug('Found', col, i)
+            col_name = col
+            idx = i
     return col_name, idx
 
 
@@ -109,12 +118,12 @@ def table_to_datasets(proxy, opt, doc):
     column_names = [e[0] for e in header]
 
     timecol_name, timecol_idx = search_column_name(column_names,
-                                                   possible_timecol_names)
+                                                   is_time_col)
 
     Tcol_name, Tcol_idx = search_column_name(column_names,
-                                             possible_Tcol_names)
+                                             is_T_col)
     Ecol_name, Ecol_idx = search_column_name(column_names,
-                                             possible_error_names)
+                                             is_error_col)
 
     if (timecol_name == False) and (Tcol_name == False):
         logging.debug(

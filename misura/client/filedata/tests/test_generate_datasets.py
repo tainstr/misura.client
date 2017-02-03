@@ -30,7 +30,26 @@ def make_conf_proxy():
         (1, 2, 3), ])
     return proxy
 
+class GenerateDatasetsUtilities(unittest.TestCase):
+    def test_search_column_name(self):
+        def check(names, func, expected):
+            r = gd.search_column_name(names,
+                                      func)
+            self.assertEqual(r, expected)
 
+        check(['time', 'a', 'b'], gd.is_time_col, ('time', 0))
+        check(['q', 'Time', 'a', 'b'], gd.is_time_col, ('Time', 1))
+        check(['q', 'time', 'a', 'Time'], gd.is_time_col, (False, -1))
+
+        check(['Temp', 'a', 'b'], gd.is_T_col, ('Temp', 0))
+        check(['q', 'Temp', 'a', 'b'], gd.is_T_col, ('Temp', 1))
+        check(['q', 'Temp.', 'a', 'temperature'],
+              gd.is_T_col, (False, -1))
+        
+        check(['err', 'a', 'b'], gd.is_error_col, ('err', 0))
+        check(['q', 'Error', 'a', 'b'], gd.is_error_col, ('Error', 1))
+        check(['q', 'error', 'a', 'Time'], gd.is_error_col, (False, -1))
+        
 class GenerateDatasets(unittest.TestCase):
 
     @classmethod
@@ -39,21 +58,6 @@ class GenerateDatasets(unittest.TestCase):
         cls.doc = filedata.MisuraDocument(proxy=f)
         cls.doc.reloadData()
         f.close()
-
-    def test_search_column_name(self):
-        def check(names, possible, expected):
-            r = gd.search_column_name(names,
-                                      possible)
-            self.assertEqual(r, expected)
-
-        check(['t', 'a', 'b'], gd.possible_timecol_names, ('t', 0))
-        check(['q', 'time', 'a', 'b'], gd.possible_timecol_names, ('time', 1))
-        check(['q', 't', 'a', 'Time'], gd.possible_timecol_names, (False, -1))
-
-        check(['T', 'a', 'b'], gd.possible_Tcol_names, ('T', 0))
-        check(['q', 'Temp', 'a', 'b'], gd.possible_Tcol_names, ('Temp', 1))
-        check(['q', 'Temp.', 'a', 'temperature'],
-              gd.possible_Tcol_names, (False, -1))
 
     def check_dataset(self, ds, unit='volt'):
         self.assertEqual(list(ds.data), [1, 2, 3])
@@ -118,4 +122,4 @@ class GenerateDatasets(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
