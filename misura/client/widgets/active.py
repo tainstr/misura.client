@@ -118,9 +118,19 @@ class Active(object):
         self.server = server
         self.remObj = remObj
         self.path = remObj._Method__name
-        self.prop = prop
         self.context = context
+        
+        self.update_option(prop)
 
+        # Update the widget whenever the manager gets reconnected
+        network.manager.connect(network.manager, QtCore.SIGNAL(
+            'connected()'), self.reconnect, QtCore.Qt.QueuedConnection)
+        
+    def update_option(self, prop = False):
+        if not prop:
+            prop = self.remObj.gete(self.handle)
+            logging.debug('Active.update_option', self.handle)
+        self.prop = prop
         for p in 'current', 'type', 'handle', 'factory_default', 'attr', 'readLevel', 'writeLevel', 'name':
             setattr(self, p, prop[p])
         write_level = getattr(self.remObj, '_writeLevel', 5)
@@ -128,11 +138,8 @@ class Active(object):
             'ReadOnly' in self.attr) or (write_level < self.writeLevel)
         self.hard = 'Hard' in self.attr
         self.hot = 'Hot' in self.attr
-        self.label = _(self.name)
-
-        # Update the widget whenever the manager gets reconnected
-        network.manager.connect(network.manager, QtCore.SIGNAL(
-            'connected()'), self.reconnect, QtCore.Qt.QueuedConnection)
+        self.label = _(self.name)    
+        
 
     def isVisible(self):
         """Compatibility function with QWidget"""
@@ -555,8 +562,10 @@ class ActiveWidget(Active, QtGui.QWidget):
     def build_aggregation_menu(self, menu):
         menu.clear()
         aggregation = self.prop.get('aggregate', "")
+        logging.debug('Build aggregation menu:', self.handle, aggregation)
+        self._menu_map = {}
         builder.build_recursive_aggregation_menu(self.remObj.root, self.remObj, aggregation, 
-                                         {self.remObj['fullpath']: self.handle}, menu, self._win_map)
+                                         {self.remObj['fullpath']: self.handle}, menu, self._menu_map, self._win_map)
 
 
     def build_presets_menu(self):

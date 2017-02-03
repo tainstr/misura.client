@@ -163,6 +163,7 @@ class aTableModel(QtCore.QAbstractTableModel):
     view_units = True
     rotated = False
     perpendicular_header_col = -1
+    sigOutdated = QtCore.pyqtSignal()
 
     def __init__(self, tableObj):
         QtCore.QAbstractTableModel.__init__(self)
@@ -235,19 +236,40 @@ class aTableModel(QtCore.QAbstractTableModel):
             label += u' ({})'.format(unit)
         return label
 
-    def up(self):
+    def validate(self):
+        """Validate model consistency"""
+        N = len(self.header)
+        v = len(self.visible) == N
+        if v and self.unit:
+            v = len(self.unit) == N
+        if v and self.precision != 'None':
+            v = len(self.precision) == N
+        if v and self.csunit!='None':
+            v = len(self.csunit)==N
+        if not v:
+            logging.error('aTableModel data is outdated!', self.tableObj.handle)
+        return v
+
+    def up(self, validate=True):
         hp = self.tableObj.current
         # Table header is the first row in the option
         self.header = hp[0]
         # Rows are the rest of the option
         self.rows = hp[1:]
         self.unit = self.tableObj.prop.get('unit', False)
+        if self.unit:
+            if self.csunit == 'None' or len(self.csunit) != len(self.unit):
+                self.csunit = self.unit[:]
         self.precision = self.tableObj.prop.get('precision', 'None')
         self.visible = self.tableObj.prop.get(
             'visible', [1] * len(self.header))
-        if self.csunit == 'None':
-            self.csunit = self.unit[:]
+        v = self.validate()
+        if validate and not v:
+            self.tableObj.update_option()
+            self.up(validate=False)
+            
         QtCore.QAbstractTableModel.reset(self)
+        return v
 
     def emptyRow(self):
         """Create a valid empty row for addition"""
@@ -388,6 +410,7 @@ class aTableModel(QtCore.QAbstractTableModel):
 
     def make_header_menu(self, col):
         """Build table header context menu for `col`"""
+        self.validate()
         self._menu_funcs = []
         menu = QtGui.QMenu(self.tableObj)
         self.make_visibility_action(menu, col, name=_('Visible'))
@@ -500,12 +523,13 @@ class aTableView(QtGui.QTableView):
     def make_aggregation_menu(self, index, menu):
         dev, t, targets_map = self.aggregate_cell_source(index)
         root = dev.root
-        dmenu = builder.build_aggregation_menu(root, dev, menu, target=t, win_map=self.tableObj._win_map)
+        dmenu = builder.build_aggregation_menu(
+            root, dev, menu, target=t, win_map=self.tableObj._win_map)
         # See if target option is an aggregation in its turn
         p = dev.gete(t)
         aggregation = p.get('aggregate', '')
         if aggregation:
-            builder.build_recursive_aggregation_menu(root, dev, aggregation, 
+            builder.build_recursive_aggregation_menu(root, dev, aggregation,
                                                      targets_map, dmenu, win_map=self.tableObj._win_map)
 
         return menu
@@ -524,7 +548,7 @@ class aTableView(QtGui.QTableView):
         """Returns the aggregation source device and option name for cell at `index`"""
         wg = self.tableObj
         r = wg.remObj.collect_aggregate(wg.prop['aggregate'], wg.handle)
-        f, targets, values, devs = r
+        f, targets, values, devs, foo = r
         col0, row0 = self._coord(index)
         targets_map = {}
         col = col0
@@ -556,7 +580,7 @@ class aTableView(QtGui.QTableView):
         devpath = devs[t][row]
         root = wg.remObj.root
         dev = root.toPath(devpath)
-        
+
         # Complete targets_map for highlight_option
         targets_map[devpath] = t
         if found:
@@ -565,13 +589,13 @@ class aTableView(QtGui.QTableView):
             agg = prop.get('aggregate', '')
             if agg:
                 r = dev.collect_aggregate(agg, t)
-                f, targets, values, devs = r
+                f, targets, values, devs, devs0 = r
                 print targets, sub_target_col, col0, j0
                 subt = targets[sub_target_col]
                 for fullpath in devs[subt]:
                     targets_map[fullpath] = '#SKIP#'
                 targets_map[devs[subt][row0]] = subt
-                    
+
         return dev, t, targets_map
 
     def showHeaderMenu(self, pt):
@@ -623,8 +647,12 @@ class aTableView(QtGui.QTableView):
         model.apply()
 
     def up(self):
-        self.model().up()
+        r = self.model().up()
+        if not r:
+            # Require a complete redraw
+            return False
         self.update_visible_columns()
+        return True
 
     def update_visible_columns(self):
         for i, v in enumerate(self.model().visible):
@@ -658,18 +686,16 @@ class aTableView(QtGui.QTableView):
 
 
 class aTable(ActiveWidget):
-
+    table = False
     def __init__(self, server, path, prop,  *a, **kw):
-        self.initializing = True
         ActiveWidget.__init__(self, server, path, prop, *a, **kw)
         self.table = aTableView(self)
         self.lay.addWidget(self.table)
-        self.initializing = False
         self.setSizePolicy(
             QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Maximum)
         self.table.setSizePolicy(self.sizePolicy())
-
         self.resize_height()
+        self.table.model().sigOutdated.connect(self.update_option)
 
     def resizeEvent(self, event):
         if self.parent():
@@ -681,7 +707,7 @@ class aTable(ActiveWidget):
         self.setMinimumHeight(h)
 
     def update(self):
-        if self.initializing:
+        if self.table is False:
             return
         self.table.up()
         self.resize_height()
