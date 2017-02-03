@@ -241,11 +241,12 @@ class Section(QtGui.QGroupBox):
         if wg is False:
             logging.error('Section.highlight_option: not found', handle)
             return False
-        parent = self.parentsMap.get(handle, False)
+        parent = self.groupsMap.get(handle, False)
         if parent is not False:
-            parent.show()
+            parent.expand()
         wg.label_widget.setStyleSheet(
             'QWidget { font-weight: bold; color: red; }')
+        self.expand()
         return wg
 
 CONFIG_SEC = 0
