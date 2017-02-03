@@ -135,14 +135,14 @@ def build_recursive_aggregation_menu(root, main_dev, aggregation, handles_map, m
     
     fullpath = main_dev['fullpath']
     handle = handles_map.get(fullpath)
-    f, targets, values, devs = main_dev.collect_aggregate(aggregation, handle)
+    f, targets, values, devs, foo = main_dev.collect_aggregate(aggregation, handle)
     
     if fullpath+'::list' not in menu_map:
         act = menu.addAction(_('List aggregated options'), 
                        functools.partial(list_aggregate, main_dev, aggregation, handle, win_map))
         menu_map[fullpath+'::list'] = act 
         menu.addSeparator()
-    
+        
     for t in targets:
         if col is not None:
             devs = [devs[col]]
@@ -165,8 +165,11 @@ def build_recursive_aggregation_menu(root, main_dev, aggregation, handles_map, m
             if not agg:
                 continue
             dmenu.addSeparator()
-            build_recursive_aggregation_menu(
+            handles_map[fullpath] = t
+            # Dynamically create deeper layers on request
+            f = functools.partial(build_recursive_aggregation_menu,
                 root, dev, agg, handles_map, dmenu, menu_map=menu_map, win_map=win_map)
+            dmenu.menuAction().hovered.connect(f)
 
 
 def explore_child_aggregate(dev, target, win_map={}):
@@ -179,11 +182,11 @@ def explore_child_aggregate(dev, target, win_map={}):
     win.highlight_option(target)
     
 def list_aggregate(dev, aggregate, handle, win_map={}):
-    f, targets, values, devs = dev.collect_aggregate(aggregate, handle)
+    f, targets, values, devs, foo = dev.collect_aggregate(aggregate, handle)
     win = build_aggregate_view(dev.root, targets, devs, handle)
     win.setWindowTitle(_('Explore aggregation: {} ({})').format(dev['name'], handle))
     win.show()
-    win_map[dev['fullpath']+'::'+handle] = win     
+    win_map[id(win)] = win     
     return win
 
 
