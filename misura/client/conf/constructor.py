@@ -107,7 +107,7 @@ def orgSections(prop_dict, configuration_level=5):
 class OptionsGroup(QtGui.QGroupBox):
     def __init__(self, wg, children, parent=None):
         QtGui.QGroupBox.__init__(self, parent=parent)
-        self.setTitle(wg.label)
+        self.setTitle(wg.prop.get('group', wg.label))
         self.wg = wg
         self.children = children
         self.more = QtGui.QPushButton("+")
