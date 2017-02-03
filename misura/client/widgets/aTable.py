@@ -189,6 +189,8 @@ class aTableModel(QtCore.QAbstractTableModel):
     def format_data(self, col, row):
         row = self.rows[row]
         val = row[col]
+        if val is None:
+            return ''
         # handle conversion from option unit to client-side unit
         if self.unit != 'None' and self.csunit != 'None':
             u, cu = self.unit[col], self.csunit[col]
@@ -245,10 +247,11 @@ class aTableModel(QtCore.QAbstractTableModel):
             v = len(self.unit) == N
         if v and self.precision != 'None':
             v = len(self.precision) == N
-        if v and self.csunit!='None':
-            v = len(self.csunit)==N
+        if v and self.csunit != 'None':
+            v = len(self.csunit) == N
         if not v:
-            logging.error('aTableModel data is outdated!', self.tableObj.handle)
+            logging.error(
+                'aTableModel data is outdated!', self.tableObj.handle)
         return v
 
     def up(self, validate=True):
@@ -268,7 +271,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         if validate and not v:
             self.tableObj.update_option()
             self.up(validate=False)
-            
+
         QtCore.QAbstractTableModel.reset(self)
         return v
 
@@ -549,53 +552,53 @@ class aTableView(QtGui.QTableView):
         """Returns the aggregation source device and option name for cell at `index`"""
         wg = self.tableObj
         r = wg.remObj.collect_aggregate(wg.prop['aggregate'], wg.handle)
-        f, targets, values, devs, foo = r
+        func_name, targets, values, fullpaths, foo = r
         col0, row0 = self._coord(index)
         targets_map = {}
         col = col0
         row = row0
         j = 0
         j0 = 0
-        found = False
+        is_merge_tables = func_name == 'merge_tables'
+        found = not is_merge_tables
         # Resolve merge_tables shape
-        for i, t in enumerate(targets):
-            for d, tab in enumerate(values[t]):
-                if not hasattr(tab, '__len__'):
-                    j0 = j
+        for target_index, target in enumerate(targets):
+            if found:  # or not a merge_tables
+                break
+            for device_index, value in enumerate(values[target]):
+                j0 = j
+                if not hasattr(value, '__len__'):
                     j += 1
-                elif not hasattr(tab[0], '__len__'):
-                    j0 = j
+                elif not hasattr(value[0], '__len__'):
                     j += 1
                 else:
                     # Table header length
-                    j0 = j
-                    j += len(tab[0])
+                    j += len(value[0])
                 if j0 <= col < j:
-                    col = i
-                    row = d
+                    col = target_index
+                    row = device_index
                     found = True
                     break
-            if found:
-                break
+
         t = targets[col]
-        devpath = devs[t][row]
+        devpath = fullpaths[t][row]
         root = wg.remObj.root
         dev = root.toPath(devpath)
 
         # Complete targets_map for highlight_option
         targets_map[devpath] = t
-        if found:
+        if found and is_merge_tables:
             sub_target_col = col0 - j0
             prop = dev.gete(t)
             agg = prop.get('aggregate', '')
             if agg:
                 r = dev.collect_aggregate(agg, t)
-                f, targets, values, devs, devs0 = r
+                f, targets, values, fullpaths, devs = r
                 print targets, sub_target_col, col0, j0
                 subt = targets[sub_target_col]
-                for fullpath in devs[subt]:
+                for fullpath in fullpaths[subt]:
                     targets_map[fullpath] = '#SKIP#'
-                targets_map[devs[subt][row0]] = subt
+                targets_map[fullpaths[subt][row0]] = subt
 
         return dev, t, targets_map
 
@@ -688,6 +691,7 @@ class aTableView(QtGui.QTableView):
 
 class aTable(ActiveWidget):
     table = False
+
     def __init__(self, server, path, prop,  *a, **kw):
         ActiveWidget.__init__(self, server, path, prop, *a, **kw)
         self.table = aTableView(self)
