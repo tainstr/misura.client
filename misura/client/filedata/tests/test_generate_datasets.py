@@ -19,14 +19,14 @@ nativem4 = os.path.join(iutils_testing.data_dir, 'test_video.h5')
 def make_conf_proxy():
     proxy = option.ConfigurationProxy()
     proxy.add_option('ok', 'Table', [
-        [('time', 'Float'), ('T', 'Float'), ('value', 'Float')],
+        [('time', 'Float'), ('Temp', 'Float'), ('value', 'Float')],
         (1, 2, 3), (10, 20, 30), (100, 200, 300)])
     proxy.add_option('non_float', 'Table', [
         [('time', 'Float'), ('T', 'Float'), ('value', 'String')],
         (1, 2, 'a'), ])
 
     proxy.add_option('double_time', 'Table', [
-        [('time', 'Float'), ('t', 'Float'), ('value', 'Float')],
+        [('time', 'Float'), ('Time', 'Float'), ('value', 'Float')],
         (1, 2, 3), ])
     return proxy
 
@@ -48,7 +48,7 @@ class GenerateDatasetsUtilities(unittest.TestCase):
         
         check(['err', 'a', 'b'], gd.is_error_col, ('err', 0))
         check(['q', 'Error', 'a', 'b'], gd.is_error_col, ('Error', 1))
-        check(['q', 'error', 'a', 'Time'], gd.is_error_col, (False, -1))
+        check(['q', 'error', 'a', 'Error'], gd.is_error_col, (False, -1))
         
 class GenerateDatasets(unittest.TestCase):
 
