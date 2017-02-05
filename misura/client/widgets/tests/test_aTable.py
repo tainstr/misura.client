@@ -42,6 +42,8 @@ class aTable(unittest.TestCase):
         model.perpendicular_header_col = 0
         self.assertEqual(model.headerData(0, QtCore.Qt.Vertical),  'pippo')
         
+        iutils_testing.show(widget, __name__)
+        
         # Check rotation
         model.rotated = True
         self.assertEqual(model.rowCount(), 3)
@@ -52,7 +54,7 @@ class aTable(unittest.TestCase):
         self.assertEqual(model.headerData(1, QtCore.Qt.Vertical),  'ColInt')
         self.assertEqual(model.headerData(2, QtCore.Qt.Vertical),  'ColFloat')
         
-        iutils_testing.show(widget, __name__)
+        
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

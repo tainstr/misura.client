@@ -8,6 +8,7 @@ from misura.client.widgets.active import *
 from misura.client import units
 from misura.client.clientconf import settings
 from . import builder
+import new
 
 
 def _export(loaded, get_column_func,
@@ -170,13 +171,15 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.tableObj = tableObj
         self.rows = []
         self.header = []
-        self.visible = []
+        self.visible_headers = []  # visible headers
+        self.visible_data = []  # visible data rows
         self.unit = 'None'
         self.csunit = 'None'
         self.precision = 'None'
         self.up()
 
     def rowCount(self, index=QtCore.QModelIndex()):
+        #TODO: Take care of row visibility
         if self.rotated:
             return len(self.header)
         return len(self.rows)
@@ -242,7 +245,8 @@ class aTableModel(QtCore.QAbstractTableModel):
     def validate(self):
         """Validate model consistency"""
         N = len(self.header)
-        v = len(self.visible) == N
+        v = len(self.visible_headers) == N
+        v = v and (len(self.visible_rows) == len(self.rows))
         if v and self.unit:
             v = len(self.unit) == N
         if v and self.precision != 'None':
@@ -265,7 +269,8 @@ class aTableModel(QtCore.QAbstractTableModel):
             if self.csunit == 'None' or len(self.csunit) != len(self.unit):
                 self.csunit = self.unit[:]
         self.precision = self.tableObj.prop.get('precision', 'None')
-        self.visible = self.tableObj.prop.get(
+        self.visible_data = [1] * len(self.rows)
+        self.visible_headers = self.tableObj.prop.get(
             'visible', [1] * len(self.header))
         v = self.validate()
         if validate and not v:
@@ -371,29 +376,68 @@ class aTableModel(QtCore.QAbstractTableModel):
 
     _menu_funcs = []  # Keep references for partial functions
 
-    def make_visibility_action(self, menu, col, name=False):
+    def make_visibility_action(self, menu, col, orientation, name=False):
         if not name:
-            name = self.header[col][0]
+            name = self.headerData(col, orientation)
+
         act = menu.addAction(name)
-        f = functools.partial(self.change_visibility, col)
+        f = functools.partial(self.change_visibility, col, orientation)
         act.triggered.connect(f)
         act.setCheckable(True)
-        act.setChecked(self.visible[col])
+        if orientation == QtCore.Qt.Horizontal:
+            act.setChecked(self.visible_cols[col])
+        else:
+            act.setChecked(self.visible_rows[col])
         self._menu_funcs.append(f)
         return act
 
-    def change_visibility(self, col, status=True):
+    @property
+    def visible_cols(self):
+        if self.rotated:
+            return self.visible_data
+        else:
+            return self.visible_headers
+
+    @visible_cols.setter
+    def visible_cols(self, new):
+        if self.rotated:
+            self.visible_data = new
+        else:
+            self.visible_headers = new
+
+    @property
+    def visible_rows(self):
+        if self.rotated:
+            return self.visible_headers
+        else:
+            return self.visible_data
+
+    @visible_rows.setter
+    def visible_rows(self, new):
+        if self.rotated:
+            self.visible_headers = new
+        else:
+            self.visible_data = new
+
+    def change_visibility(self, col, orientation, status=True):
         """Hide/show `col` according to `status`"""
-        self.visible[col] = status
+        if orientation == QtCore.Qt.Horizontal:
+            self.visible_cols[col] = status
+        else:
+            self.visible_rows[col] = status
         self.tableObj.table.update_visible_columns()
 
-    def make_add_columns_menu(self, menu):
+    def make_add_columns_menu(self, menu, orientation):
         """Adds a submenu allowing to choose visible/hidden columns"""
         m = menu.addMenu(_('More'))
-        for col, vis in enumerate(self.visible):
+        if orientation == QtCore.Qt.Vertical:
+            v = self.visible_rows
+        else:
+            v = self.visible_cols
+        for col, vis in enumerate(v):
             if vis:
                 continue
-            self.make_visibility_action(m, col)
+            self.make_visibility_action(m, col, orientation)
         return m
 
     def set_as_perpendicular_header(self, col):
@@ -412,13 +456,13 @@ class aTableModel(QtCore.QAbstractTableModel):
         act.setChecked(self.perpendicular_header_col == col)
         return act
 
-    def make_header_menu(self, col):
+    def make_header_menu(self, col, orientation):
         """Build table header context menu for `col`"""
         self.validate()
         self._menu_funcs = []
         menu = QtGui.QMenu(self.tableObj)
-        self.make_visibility_action(menu, col, name=_('Visible'))
-        self.make_add_columns_menu(menu)
+        self.make_visibility_action(menu, col, orientation, name=_('Visible'))
+        self.make_add_columns_menu(menu, orientation)
         self.make_unit_menu(menu, col)
         self.make_perpendicular_header_action(menu, col)
         return menu
@@ -430,7 +474,7 @@ class aTableModel(QtCore.QAbstractTableModel):
     def visible_indexes(self):
         """Return a list of visible column indexes"""
         r = []
-        for i, v in enumerate(self.visible):
+        for i, v in enumerate(self.visible_cols):
             if v:
                 r.append(i)
         return r
@@ -478,9 +522,10 @@ class aTableView(QtGui.QTableView):
         if self.tableObj.readonly:
             self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
 
-        for h in (self.horizontalHeader(), self.verticalHeader()):
+        for h, d in ((self.horizontalHeader(), QtCore.Qt.Horizontal), 
+                     (self.verticalHeader(), QtCore.Qt.Vertical)):
             h.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-            h.customContextMenuRequested.connect(self.showHeaderMenu)
+            h.customContextMenuRequested.connect(functools.partial(self.showHeaderMenu, h, d))
             h.setMovable(True)
 
         self.connect(
@@ -514,18 +559,18 @@ class aTableView(QtGui.QTableView):
         act_zoom.slider.valueChanged.connect(self.set_zoom)
         menu_zoom.addAction(act_zoom)
         self.model().make_visible_units_action(menu)
-        self.model().make_add_columns_menu(menu)
+        self.model().make_add_columns_menu(menu, QtCore.Qt.Horizontal)
 
         # View local aggregation
         if self.tableObj.prop.get('aggregate', ''):
             self.make_aggregation_menu(index, menu)
 
         menu.popup(self.mapToGlobal(pt))
-        
+
     def make_rotation_action(self, menu):
         self.act_rotate = menu.addAction(_('Rotate'), self.rotate)
         self.act_rotate.setCheckable(True)
-        self.act_rotate.setChecked(self.rotated)       
+        self.act_rotate.setChecked(self.rotated)
 
     def make_aggregation_menu(self, index, menu):
         if self.model().data(index) is None:
@@ -608,20 +653,19 @@ class aTableView(QtGui.QTableView):
 
         return dev, t, targets_map
 
-    def showHeaderMenu(self, pt):
-        h = self.main_header
+    def showHeaderMenu(self, header, orientation, pt):
         coord = pt.x()
-        if self.rotated:
+        if orientation==QtCore.Qt.Vertical:
             coord = pt.y()
-        column = h.logicalIndexAt(coord)
+        column = header.logicalIndexAt(coord)
         # show menu about the column
-        menu = self.model().make_header_menu(column)
+        menu = self.model().make_header_menu(column, orientation)
+        if not menu:
+            logging.debug('No menu for column', column, orientation)
+            return False
         self.make_rotation_action(menu)
         menu.addAction(_('Export'), self.export)
-        if not menu:
-            logging.debug('No menu for column', column)
-            return False
-        menu.popup(h.mapToGlobal(pt))
+        menu.popup(header.mapToGlobal(pt))
 
     def export(self):
         """Export to CSV file"""
@@ -636,6 +680,7 @@ class aTableView(QtGui.QTableView):
         table_model_export(loaded, get_column_func, model, h)
 
     def addRow(self, pos=0):
+        #TODO: rotation-aware
         model = self.curveModel
         new = model.emptyRow()
         i = self.currentIndex()
@@ -666,7 +711,8 @@ class aTableView(QtGui.QTableView):
         return True
 
     def update_visible_columns(self):
-        for i, v in enumerate(self.model().visible):
+        # FIXME: CONSIDER ROTATON in visibility check!!!
+        for i, v in enumerate(self.model().visible_cols):
             self.setColumnHidden(i, not v)
 
     def resize_height(self):
@@ -675,7 +721,6 @@ class aTableView(QtGui.QTableView):
         h = self.main_header.height()
         for i in range(self.model().rowCount()):
             h += self.rowHeight(i)
-        # self.setMinimumHeight(h)
         return h
 
     def set_zoom(self, val):
@@ -692,6 +737,7 @@ class aTableView(QtGui.QTableView):
         self.model().rotated = not self.model().rotated
         self.act_rotate.setChecked(self.model().rotated)
         self.up()
+        self.update_visible_columns()
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
 
