@@ -3,12 +3,15 @@
 from functools import partial
 import os
 
+import numpy as np
+
 from .. import _
 from misura.client.widgets.active import *
 from misura.client import units
 from misura.client.clientconf import settings
 from . import builder
 import new
+from dns.opcode import STATUS
 
 
 def _export(loaded, get_column_func,
@@ -162,7 +165,7 @@ class aTablePointDelegate(QtGui.QItemDelegate):
 
 class aTableModel(QtCore.QAbstractTableModel):
     view_units = True
-    rotated = False
+    _rotated = False
     perpendicular_header_col = -1
     sigOutdated = QtCore.pyqtSignal()
 
@@ -173,6 +176,8 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.header = []
         self.visible_headers = []  # visible headers
         self.visible_data = []  # visible data rows
+        self.cumsum_visible_data = [99]
+        self.cumsum_visible_headers = [99]
         self.unit = 'None'
         self.csunit = 'None'
         self.precision = 'None'
@@ -181,8 +186,8 @@ class aTableModel(QtCore.QAbstractTableModel):
     def rowCount(self, index=QtCore.QModelIndex()):
         #TODO: Take care of row visibility
         if self.rotated:
-            return len(self.header)
-        return len(self.rows)
+            return self.cumsum_visible_cols[-1]
+        return self.cumsum_visible_rows[-1]
 
     def columnCount(self, index=QtCore.QModelIndex()):
         if self.rotated:
@@ -213,7 +218,7 @@ class aTableModel(QtCore.QAbstractTableModel):
             return 0
         if role != QtCore.Qt.DisplayRole:
             return
-        row = index.row()
+        row = self.cumsum_visible_rows.index(index.row()+1)
         col = index.column()
         if self.rotated:
             a = col
@@ -227,11 +232,13 @@ class aTableModel(QtCore.QAbstractTableModel):
         if self.rotated and orientation != QtCore.Qt.Vertical:
             if self.perpendicular_header_col < 0:
                 return
-            return self.format_data(self.perpendicular_header_col, section)
+            return self.format_data(self.perpendicular_header_col, 
+                                    self.cumsum_visible_rows.index(section+1))
         elif not self.rotated and orientation != QtCore.Qt.Horizontal:
             if self.perpendicular_header_col < 0:
                 return
-            return self.format_data(self.perpendicular_header_col, section)
+            return self.format_data(self.perpendicular_header_col, 
+                                    self.cumsum_visible_cols.index(section+1))
 
         label = self.header[section][0]
         unit = False
@@ -272,6 +279,10 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.visible_data = [1] * len(self.rows)
         self.visible_headers = self.tableObj.prop.get(
             'visible', [1] * len(self.header))
+        # Refresh cumsum
+        self.visible_rows = self.visible_rows
+        self.visible_cols = self.visible_cols
+        print self.cumsum_visible_data, self.cumsum_visible_headers
         v = self.validate()
         if validate and not v:
             self.tableObj.update_option()
@@ -397,13 +408,31 @@ class aTableModel(QtCore.QAbstractTableModel):
             return self.visible_data
         else:
             return self.visible_headers
+        
+    @property
+    def cumsum_visible_cols(self):
+        if self.rotated:
+            return self.cumsum_visible_data
+        else:
+            return self.cumsum_visible_headers
 
     @visible_cols.setter
     def visible_cols(self, new):
+        print 'BBBBBBBB', new
         if self.rotated:
             self.visible_data = new
+            self.cumsum_visible_data = list(np.cumsum(new))
         else:
             self.visible_headers = new
+            self.cumsum_visible_headers = list(np.cumsum(new))
+            
+    def set_visible_col(self, col, status):
+        if self.rotated:
+            self.visible_data[col] = status 
+            self.cumsum_visible_data = list(np.cumsum(self.visible_data))
+        else:
+            self.visible_headers[col] = status
+            self.cumsum_visible_headers = list(np.cumsum(self.visible_headers))
 
     @property
     def visible_rows(self):
@@ -412,27 +441,60 @@ class aTableModel(QtCore.QAbstractTableModel):
         else:
             return self.visible_data
 
+    @property
+    def cumsum_visible_rows(self):
+        if self.rotated:
+            return self.cumsum_visible_headers
+        else:
+            return self.cumsum_visible_data
+
     @visible_rows.setter
     def visible_rows(self, new):
+        print 'AAAAAAAAAA', new
         if self.rotated:
             self.visible_headers = new
+            self.cumsum_visible_headers = list(np.cumsum(new))
         else:
             self.visible_data = new
+            self.cumsum_visible_data = list(np.cumsum(new))
+     
+    def set_visible_row(self, row, status):
+        if self.rotated:
+             self.visible_headers[row] = status 
+             self.cumsum_visible_headers = list(np.cumsum(self.visible_headers))
+        else:
+            self.visible_data[row] = status
+            self.cumsum_visible_data = list(np.cumsum(self.visible_data))
+            
+    @property
+    def rotated(self):
+        return self._rotated
+     
+    @rotated.setter       
+    def rotated(self, new):
+        a = self.cumsum_visible_headers
+        self.cumsum_visible_headers = self.cumsum_visible_data
+        self.cumsum_visible_data = a
+        self._rotated = new
 
     def change_visibility(self, col, orientation, status=True):
         """Hide/show `col` according to `status`"""
         if orientation == QtCore.Qt.Horizontal:
-            self.visible_cols[col] = status
+            self.set_visible_col(col, status)
+            self.tableObj.table.update_visible_columns()
         else:
-            self.visible_rows[col] = status
-        self.tableObj.table.update_visible_columns()
+            self.set_visible_row(col, status)
+            QtCore.QAbstractTableModel.reset(self)
+            
+        
 
-    def make_add_columns_menu(self, menu, orientation):
+    def make_visibility_menu(self, menu, orientation):
         """Adds a submenu allowing to choose visible/hidden columns"""
-        m = menu.addMenu(_('More'))
         if orientation == QtCore.Qt.Vertical:
+            m = menu.addMenu(_('More rows'))
             v = self.visible_rows
         else:
+            m = menu.addMenu(_('More columns'))
             v = self.visible_cols
         for col, vis in enumerate(v):
             if vis:
@@ -462,7 +524,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         self._menu_funcs = []
         menu = QtGui.QMenu(self.tableObj)
         self.make_visibility_action(menu, col, orientation, name=_('Visible'))
-        self.make_add_columns_menu(menu, orientation)
+        self.make_visibility_menu(menu, orientation)
         self.make_unit_menu(menu, col)
         self.make_perpendicular_header_action(menu, col)
         return menu
@@ -559,8 +621,8 @@ class aTableView(QtGui.QTableView):
         act_zoom.slider.valueChanged.connect(self.set_zoom)
         menu_zoom.addAction(act_zoom)
         self.model().make_visible_units_action(menu)
-        self.model().make_add_columns_menu(menu, QtCore.Qt.Horizontal)
-
+        self.model().make_visibility_menu(menu, QtCore.Qt.Horizontal)
+        self.model().make_visibility_menu(menu, QtCore.Qt.Vertical)
         # View local aggregation
         if self.tableObj.prop.get('aggregate', ''):
             self.make_aggregation_menu(index, menu)

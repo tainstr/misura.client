@@ -37,6 +37,26 @@ class aTable(unittest.TestCase):
         self.assertEqual(model.headerData(1, QtCore.Qt.Horizontal),  'ColInt')
         self.assertEqual(model.headerData(2, QtCore.Qt.Horizontal),  'ColFloat')
         
+        # The view should take care of column visibility
+        self.assertTrue(model.visible_headers[0])
+        model.set_visible_col(0, 0)
+        self.assertFalse(model.cumsum_visible_headers[0])
+        self.assertEqual(model.columnCount(), 3)
+        self.assertEqual(model.headerData(0, QtCore.Qt.Horizontal),  'ColStr')
+        model.set_visible_col(0, 1)
+        self.assertTrue(model.cumsum_visible_headers[0])
+        
+        # The model should take care of row visibility
+        model.set_visible_row(0, 0)
+        self.assertFalse(model.cumsum_visible_data[0])
+        # One row less
+        self.assertEqual(model.rowCount(), 0)
+        # Nothing left
+        self.assertEqual(model.headerData(0, QtCore.Qt.Vertical),  None)
+        model.set_visible_row(0, 1)
+        self.assertTrue(model.cumsum_visible_data[0])
+        
+        
         # Perp header
         self.assertEqual(model.headerData(0, QtCore.Qt.Vertical),  None)
         model.perpendicular_header_col = 0
