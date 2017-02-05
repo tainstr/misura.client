@@ -24,7 +24,34 @@ class aTable(unittest.TestCase):
         self.root.sete('test', option.ao({}, 'test', 'Table', [
                        [('ColStr', 'String'), ('ColInt', 'Integer'), ('ColFloat', 'Float')], ['pippo', 1, 0.5]])['test'])
         widget = self.wgGen()
-
+        view = widget.table
+        model = view.model()
+        self.assertFalse(model.rotated)
+        
+        #Shape
+        self.assertEqual(model.rowCount(), 1)
+        self.assertEqual(model.columnCount(), 3)
+        
+        # Hor header
+        self.assertEqual(model.headerData(0, QtCore.Qt.Horizontal),  'ColStr')
+        self.assertEqual(model.headerData(1, QtCore.Qt.Horizontal),  'ColInt')
+        self.assertEqual(model.headerData(2, QtCore.Qt.Horizontal),  'ColFloat')
+        
+        # Perp header
+        self.assertEqual(model.headerData(0, QtCore.Qt.Vertical),  None)
+        model.perpendicular_header_col = 0
+        self.assertEqual(model.headerData(0, QtCore.Qt.Vertical),  'pippo')
+        
+        # Check rotation
+        model.rotated = True
+        self.assertEqual(model.rowCount(), 3)
+        self.assertEqual(model.columnCount(), 1)
+        self.assertEqual(model.headerData(0, QtCore.Qt.Horizontal),  'pippo')
+        
+        self.assertEqual(model.headerData(0, QtCore.Qt.Vertical),  'ColStr')
+        self.assertEqual(model.headerData(1, QtCore.Qt.Vertical),  'ColInt')
+        self.assertEqual(model.headerData(2, QtCore.Qt.Vertical),  'ColFloat')
+        
         iutils_testing.show(widget, __name__)
 
 if __name__ == "__main__":

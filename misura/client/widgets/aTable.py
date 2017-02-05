@@ -508,9 +508,7 @@ class aTableView(QtGui.QTableView):
 
         menu.addAction(_('Update'), self.tableObj.get)
         menu.addAction(_('Export'), self.export)
-        self.act_rotate = menu.addAction(_('Rotate'), self.rotate)
-        self.act_rotate.setCheckable(True)
-        self.act_rotate.setChecked(self.rotated)
+        self.make_rotation_action(menu)
         menu_zoom = menu.addMenu(_('Zoom'))
         act_zoom = ZoomAction(menu_zoom)
         act_zoom.slider.valueChanged.connect(self.set_zoom)
@@ -523,6 +521,11 @@ class aTableView(QtGui.QTableView):
             self.make_aggregation_menu(index, menu)
 
         menu.popup(self.mapToGlobal(pt))
+        
+    def make_rotation_action(self, menu):
+        self.act_rotate = menu.addAction(_('Rotate'), self.rotate)
+        self.act_rotate.setCheckable(True)
+        self.act_rotate.setChecked(self.rotated)       
 
     def make_aggregation_menu(self, index, menu):
         if self.model().data(index) is None:
@@ -613,6 +616,7 @@ class aTableView(QtGui.QTableView):
         column = h.logicalIndexAt(coord)
         # show menu about the column
         menu = self.model().make_header_menu(column)
+        self.make_rotation_action(menu)
         menu.addAction(_('Export'), self.export)
         if not menu:
             logging.debug('No menu for column', column)
