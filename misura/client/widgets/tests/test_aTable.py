@@ -64,16 +64,41 @@ class aTable(unittest.TestCase):
         
         iutils_testing.show(widget, __name__)
         
+        
+    def test_rotation(self):
+        rows = [['pippo'+str(i), i, i*100] for i in range(20)]
+        tab = [[('ColStr', 'String'), ('ColInt', 'Integer'), ('ColFloat', 'Float')]]+rows
+        self.root.sete('test', option.ao({}, 'test', 'Table', tab)['test'])
+        widget = self.wgGen()
+        view = widget.table
+        model = view.model()
+        self.assertFalse(model.rotated)
+        
+        # Check rotation
+        model.rotated = False
+        self.assertEqual(model.rowCount(), 20)
+        print len(model.rows)
+        self.assertEqual(model.columnCount(), 3)
+        self.assertEqual(model.headerData(0, QtCore.Qt.Vertical),  None)
+        model.perpendicular_header_col = 0
+        self.assertEqual(model.headerData(0, QtCore.Qt.Vertical),  'pippo0')
+        self.assertEqual(model.headerData(1, QtCore.Qt.Vertical),  'pippo1')
+        
+        self.assertEqual(model.headerData(0, QtCore.Qt.Horizontal),  'ColStr')
+        self.assertEqual(model.headerData(1, QtCore.Qt.Horizontal),  'ColInt')
+        self.assertEqual(model.headerData(2, QtCore.Qt.Horizontal),  'ColFloat')
+        
         # Check rotation
         model.rotated = True
         self.assertEqual(model.rowCount(), 3)
-        self.assertEqual(model.columnCount(), 1)
-        self.assertEqual(model.headerData(0, QtCore.Qt.Horizontal),  'pippo')
+        self.assertEqual(model.columnCount(), 20)
+        
+        self.assertEqual(model.headerData(0, QtCore.Qt.Horizontal),  'pippo0')
+        self.assertEqual(model.headerData(1, QtCore.Qt.Horizontal),  'pippo1')
         
         self.assertEqual(model.headerData(0, QtCore.Qt.Vertical),  'ColStr')
         self.assertEqual(model.headerData(1, QtCore.Qt.Vertical),  'ColInt')
-        self.assertEqual(model.headerData(2, QtCore.Qt.Vertical),  'ColFloat')
-        
+        self.assertEqual(model.headerData(2, QtCore.Qt.Vertical),  'ColFloat')       
         
 
 if __name__ == "__main__":
