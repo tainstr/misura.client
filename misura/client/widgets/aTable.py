@@ -224,7 +224,6 @@ class aTableModel(QtCore.QAbstractTableModel):
     def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
         if role != QtCore.Qt.DisplayRole:
             return
-        print 'headerData', section, orientation
         if self.rotated:
             if orientation == QtCore.Qt.Horizontal:
                 if self.perpendicular_header_col < 0:

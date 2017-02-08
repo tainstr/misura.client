@@ -40,21 +40,15 @@ class aTable(unittest.TestCase):
         # The view should take care of column visibility
         self.assertTrue(model.visible_headers[0])
         model.set_visible_col(0, 0)
-        self.assertFalse(model.cumsum_visible_headers[0])
         self.assertEqual(model.columnCount(), 3)
         self.assertEqual(model.headerData(0, QtCore.Qt.Horizontal),  'ColStr')
         model.set_visible_col(0, 1)
-        self.assertTrue(model.cumsum_visible_headers[0])
         
-        # The model should take care of row visibility
         model.set_visible_row(0, 0)
-        self.assertFalse(model.cumsum_visible_data[0])
-        # One row less
-        self.assertEqual(model.rowCount(), 0)
+        self.assertEqual(model.rowCount(), 1)
         # Nothing left
         self.assertEqual(model.headerData(0, QtCore.Qt.Vertical),  None)
         model.set_visible_row(0, 1)
-        self.assertTrue(model.cumsum_visible_data[0])
         
         
         # Perp header

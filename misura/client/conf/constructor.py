@@ -107,15 +107,20 @@ def orgSections(prop_dict, configuration_level=5):
 class OptionsGroup(QtGui.QGroupBox):
     def __init__(self, wg, children, parent=None):
         QtGui.QGroupBox.__init__(self, parent=parent)
-        self.setTitle(wg.prop.get('group', wg.label))
         self.wg = wg
         self.children = children
         self.more = QtGui.QPushButton("+")
         self.more.setMaximumWidth(30)
         self.more.clicked.connect(self.hide_show)
         self.setFlat(False)
-        self.setStyleSheet("""QGroupBox { background-color: transparent; border: 1px solid gray; border-radius: 5px; }
+        title = wg.prop.get('group', False)
+        if title:
+            self.setTitle(title)
+            self.setStyleSheet("""QGroupBox { background-color: transparent; border: 1px solid gray; border-radius: 0px; }
         QGroupBox::title { subcontrol-position: top center; padding: 0 5px; }""")
+        else:
+            self.setStyleSheet("""QGroupBox { background-color: transparent; border: 0px solid gray; border-radius: 0px; }
+        QGroupBox::title { subcontrol-position: top center; padding: 0 0px; }""")
         out = QtGui.QWidget(self)
         lay = QtGui.QHBoxLayout()
         lay.addWidget(wg.label_widget)
