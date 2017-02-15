@@ -69,16 +69,20 @@ class VersionMenu(QtGui.QMenu):
     plotChanged = QtCore.pyqtSignal(str, str)
     current_plot_id = False
     doc = False
+    _proxy = False
 
-    def __init__(self, doc, parent=None):
+    def __init__(self, doc, proxy=False, parent=None):
         QtGui.QMenu.__init__(self, parent=parent)
         self.setTitle(_('Version'))
         self.doc = doc
+        self._proxy = proxy
         self.menuAction().hovered.connect(self.redraw)
 
     @property
     def proxy(self):
         # TODO: submenu for each proxy in doc
+        if self._proxy:
+            return self._proxy
         if not self.doc:
             return False
         return self.doc.proxy
@@ -215,6 +219,7 @@ class VersionMenu(QtGui.QMenu):
     def save_version(self, version=False):
         """Save configuration in current version"""
         # Try to create a new version
+        print 'save_version', version
         if not version:
             version = self.proxy.get_version()
         if version == '':
@@ -223,6 +228,7 @@ class VersionMenu(QtGui.QMenu):
                     self, _("Not saved"), _("Cannot overwrite original version"))
                 return False
             return True
+        print 'save_version', version
         version_name, version_date = self.proxy.get_versions()[version]
         self.doc.save_version_and_plot(version_name)
         self.current_plot_id = version_name
@@ -263,3 +269,17 @@ class VersionMenu(QtGui.QMenu):
         else:
             QtGui.QMessageBox.information(
                 self, _("Signature check succeeded"), _("Test data is genuine."))
+            
+class MultiVersionMenu(QtGui.QMenu):
+    def __init__(self, doc, parent=None):
+        QtGui.QMenu.__init__(self, parent=parent)
+        self.setTitle(_('Version'))
+        self.doc = doc
+        self.menuAction().hovered.connect(self.redraw)
+    
+    def redraw(self):
+        self.clear()
+        for fn, proxy in self.doc.proxies.iteritems():
+            m = VersionMenu(self.doc, proxy, self)
+            m.setTitle(os.path.basename(fn))
+            self.addMenu(m)

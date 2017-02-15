@@ -8,7 +8,7 @@ from misura.canon.plugin.domains import node, nodes
 from ..filedata import DatasetEntry
 from .. import axis_selection
 import numpy as np
-
+import veusz.document as document
 from PyQt4 import QtGui
 
 ism = isinstance
@@ -144,8 +144,9 @@ class QuickOps(object):
         # Remove and exit if no plot is associated
         if not self.model().plots['dataset'].has_key(node_path):
             if remove_dataset:
-                self.doc.deleteDataset(node_path)
-                self.doc.setModified()
+                op = document.OperationDatasetDelete(node_path)
+                self.doc.applyOperation(op)
+                
 
             return True
 
@@ -197,7 +198,8 @@ class QuickOps(object):
             obj.parent.removeChild(obj.name)
         # Finally, delete dataset
         if remove_dataset:
-            self.doc.deleteDataset(node_path)
+            op = document.OperationDatasetDelete(node_path)
+            self.doc.applyOperation(op)
             logging.debug('deleted', node_path)
 
         # Recursive call over derived datasets

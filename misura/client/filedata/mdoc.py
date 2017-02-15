@@ -44,10 +44,14 @@ class MisuraDocument(document.Document):
             logging.debug('Closing decoder', k)
             d.close()
         self.decoders = {}
+        for p in self.proxies.itervalues():
+            p.flush()
+            p.close()
 
     def __init__(self, filename=False, proxy=False, root=False):
         document.Document.__init__(self)
         self.cache = {}  # File-system cache
+        self.proxies = {}
         self.proxy = False
         self.proxy_filename = False
         self.header = []
@@ -69,7 +73,8 @@ class MisuraDocument(document.Document):
         else:
             up = False
             return
-
+        if self.proxy_filename:
+            self.proxies[self.proxy_filename] = self.proxy
         self.create_proxy_decoders(self.proxy, '0:')
 
     def create_proxy_decoders(self, proxy, prefix=False):
@@ -351,9 +356,8 @@ class MisuraDocument(document.Document):
             yield name, ds
     
     def save_version_and_plot(self, version, vsz_text=False):
-        proxies = {} # filename: (fileproxy)
         plots = set([])  # filename where plot is already saved
-        
+        proxies = {}
         for name, ds in self.iter_data_and_cache():
             if not ds.linked or not os.path.exists(ds.linked.filename):
                 logging.debug('Skipping unlinked dataset', name, ds.linked)
@@ -369,8 +373,11 @@ class MisuraDocument(document.Document):
             proxy = proxies.get(vfn, False)
             # Ensure conf is saved into proper version
             if proxy is False:
-                proxy = getFileProxy(vfn, version=None)
+                proxy = self.proxies.get(vfn, False)
+                if proxy is False:
+                    proxy = getFileProxy(vfn, version=None)
                 proxies[vfn] = proxy
+                self.proxies[vfn] = proxy
                 # Create a new version or get same version
                 proxy.create_version(version, overwrite=True)
                 # Load proper version
@@ -387,9 +394,6 @@ class MisuraDocument(document.Document):
                 time_data = self.get_cache(time_name).data
             logging.debug('Writing dataset', name)
             proxy.save_data(name, ds.data, time_data, opt=ds.m_opt)
-        for proxy in proxies.itervalues():
-            proxy.flush()
-            proxy.close()
         return True
 
     def save(self, filename, mode='vsz'):

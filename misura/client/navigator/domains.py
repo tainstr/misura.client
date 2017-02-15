@@ -18,6 +18,7 @@ from .. import _
 from ..filedata import MisuraDocument
 from ..filedata import DatasetEntry
 from ..filedata import getFileProxy
+from ..fileui import VersionMenu
 
 
 
@@ -192,6 +193,10 @@ class DataNavigatorDomain(NavigatorDomain):
         menu.addAction(_('Reload'), self.reloadFile)
         menu.addAction(_('Recalculate metadata'), self.recalculate_metadata)
         menu.addAction(_('Close'), self.closeFile)
+        proxy = self.doc.proxies.get(node.linked.params.filename, False)
+        if proxy:
+            self.versions = VersionMenu(self.doc, proxy=proxy, parent=menu)
+            menu.addMenu(self.versions) 
         self.add_configuration(menu, node)
         if len(self.data_tables):
             tab_menu = menu.addMenu('Tables')

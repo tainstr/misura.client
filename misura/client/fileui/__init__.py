@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Graphical Interface classes for Misura HDF File Format"""
 
-from version import VersionMenu
+from version import VersionMenu, MultiVersionMenu
 from log import OfflineLog
 from summary import SummaryView
 from minimage import MiniImage, ImageDialog

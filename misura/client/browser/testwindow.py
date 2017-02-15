@@ -138,7 +138,7 @@ class TestWindow(acquisition.MainWindow):
         self.actStandard = self.myMenuBar.measure.addAction(
             _('Re-evaluate standards'), self.re_standard)
         if not self.menuVersions:
-            self.menuVersions = fileui.VersionMenu(self.fixedDoc)
+            self.menuVersions = fileui.VersionMenu(self.fixedDoc, self.fixedDoc.proxy)
             self.menuVersions.versionChanged.connect(partial(self.slot_version_changed))
             
         self.myMenuBar.measure.addMenu(self.menuVersions)
