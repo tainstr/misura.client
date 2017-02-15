@@ -65,6 +65,7 @@ class aNumber(unittest.TestCase):
         w = self.wgGen()
         self.assertEqual(w.current, 0)
         self.assertFalse(w.slider)
+        iutils_testing.show(w, __name__)
 
     def test_float(self):
         self.root.sete('Test', option.ao({}, 'Test', 'Float')['Test'])

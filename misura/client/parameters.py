@@ -39,7 +39,7 @@ logging.debug('pathArt', pathArt)
 locale = QtCore.QLocale.system().name()
 locale = str(locale.split('_')[0]).lower()
 
-MAX = 10**10
+MAX = 10**22
 MIN = -MAX
 
 max_curve_len = 3000

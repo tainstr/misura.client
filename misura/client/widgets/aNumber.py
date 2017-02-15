@@ -9,6 +9,7 @@ import math
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 
+from traceback import print_exc
 
 class FocusableSlider(QtGui.QSlider):
     zoom = QtCore.pyqtSignal(bool)
@@ -44,6 +45,86 @@ class FocusableSlider(QtGui.QSlider):
         return QtGui.QSlider.mouseDoubleClickEvent(self, ev)
 
 
+class ScientificSpinbox(QtGui.QDoubleSpinBox):
+    scientific_decimals = 8
+    double = True
+    flexibleChanged = QtCore.pyqtSignal(object)
+    float_decimals = 0
+    def __init__(self, double=True, scientific_decimals=8, parent=None):
+        QtGui.QDoubleSpinBox.__init__(self, parent=parent)
+        self.scientific_decimals = scientific_decimals
+        self.double=double
+        if not self.double:
+            self.setDecimals(0)
+        else:
+            self.setDecimals(1000)
+            self.float_decimals = 2
+        self.valueChanged.connect(self.reemit)
+        
+    def reemit(self, value):
+        if not self.double:
+            value = int(value)
+        self.flexibleChanged.emit(value)
+
+    def textFromValue(self, value):
+        l = 0
+        if value != 0:
+            l = abs(math.log(abs(value), 10))
+        if l > self.scientific_decimals:
+            pre = '{:.' + str(self.scientific_decimals) + 'e}'
+        else:
+            pre = '{:.' + str(self.float_decimals) + 'f}'
+        if self.double:
+            text = pre.format(value).replace('.', self.locale().decimalPoint())
+        else:
+            text = str(int(value))
+        print 'textFromValue', value, text, l
+        return text
+
+    def valueFromText(self, text):
+        if not self.double:
+            return int(text)
+        text = text.replace(self.locale().groupSeparator(), 
+                            self.locale().decimalPoint())
+        ok = True
+        try:
+            v = float(text.replace(self.locale().decimalPoint(), '.'))
+        except:
+            print_exc()
+            ok = False
+        if not ok:
+            v, ok = self.locale().toFloat(text)
+        if not ok:
+            v = 0
+        print 'valueFromText', text, ok, v
+        return v
+
+    def validate(self, text, pos):
+        if not self.double:
+            try:
+                int(text)
+                return (QtGui.QValidator.Acceptable, text, pos)
+            except:
+                return (QtGui.QValidator.Invalid, text, pos)
+        v, ok = self.locale().toFloat(text)
+        if not ok:
+            try:
+                v = float(text)
+                ok = True
+            except:
+                pass
+        if not ok:
+            t = text.lower().replace(self.locale().decimalPoint(), '.')
+            if t.endswith('e') or t.endswith('e-') or t.endswith('e+') or text == '':
+                ok = True
+                return (QtGui.QValidator.Intermediate, text, pos)
+        if not ok:
+            print 'Invalid', text, v, ok
+            return (QtGui.QValidator.Invalid, text, pos)
+        print 'Valid', text
+        return (QtGui.QValidator.Acceptable, text, pos)
+
+
 class aNumber(ActiveWidget):
     zoom_factor = 10.
     zoomed = False
@@ -67,12 +148,9 @@ class aNumber(ActiveWidget):
         # Identify float type from type or current/max/min/step
         if self.type == 'Float' or type(0.1) in [type(self.current), type(min_value), type(max_value), type(step)]:
             self.double = True
-            self.sValueChanged = 'valueChanged(double)'
-            self.spinbox = QtGui.QDoubleSpinBox(parent=self)
         else:
             self.double = False
-            self.sValueChanged = 'valueChanged(int)'
-            self.spinbox = QtGui.QSpinBox(parent=self)
+        self.spinbox = ScientificSpinbox(double=self.double, parent=self)
         self.spinbox.setKeyboardTracking(False)
         self.lay.addWidget(self.spinbox)
         self.setRange(min_value, max_value, step)
@@ -85,9 +163,7 @@ class aNumber(ActiveWidget):
             if self.slider:
                 self.connect(
                     self.slider, QtCore.SIGNAL('valueChanged(int)'), self.sliderPush)
-#               self.connect(self.slider, QtCore.SIGNAL('pause(bool)'), self.update)
-            self.connect(
-                self.spinbox, QtCore.SIGNAL(self.sValueChanged), self.boxPush)
+            self.spinbox.flexibleChanged.connect(self.boxPush)
         self.update(minmax=False)
 
     def set_error(self, error=None):
@@ -101,8 +177,9 @@ class aNumber(ActiveWidget):
             return False
         template = u'{}'
         if self.double:
-            p = self.precision if self.precision > 0 else 1    
-            dc = extend_decimals(error, default=0, extend_by=p)    
+            p = self.precision if self.precision > 0 else 1
+            dc = extend_decimals(error, default=0, extend_by=p).replace(
+                '.', self.locale().decimalPoint())
             template = u'{:.' + str(dc) + u'f}'
         self.spinbox.setSuffix(u' \u00b1 ' + template.format(error))
         return True
@@ -193,14 +270,13 @@ class aNumber(ActiveWidget):
         cur = self.adapt2gui(self.current)
         try:
             if self.double:
-                p = self.precision if self.precision > 0 else 1    
+                p = self.precision if self.precision > 0 else 1
                 dc = extend_decimals(cur, default=0, extend_by=p)
-                self.spinbox.setDecimals(dc)
+                self.spinbox.float_decimals = dc
             else:
                 cur = int(cur)
             self.setRange(self.min, self.max, self.step)
-# print 'aNumber.update',
-# self.handle,cur,self.current,self.spinbox.maximum(),self.spinbox.minimum()
+            #print 'aNumber.update',self.handle,cur,self.current
             self.spinbox.setValue(cur)
 #           self.setRange(self.min, self.max, self.step)
             if self.slider:
@@ -213,6 +289,7 @@ class aNumber(ActiveWidget):
                 self.slider.blockSignals(False)
 
     def setRange(self, m=None, M=None, step=0):
+        #TODO: All this part might be moved into ScientificSpinbox
         step = self.adapt2gui(step)
         cur = self.adapt2gui(self.current)
         self.max, self.min = None, None
@@ -254,7 +331,7 @@ class aNumber(ActiveWidget):
             step = step / d
 #       print 'Setting range',m,M,step
         if self.double:
-            self.divider = 10.**self.spinbox.decimals()
+            self.divider = 10.**self.spinbox.float_decimals
         else:
             step = int(step)
             m = int(m)
