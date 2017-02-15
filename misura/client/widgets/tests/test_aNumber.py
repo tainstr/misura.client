@@ -82,7 +82,7 @@ class aNumber(unittest.TestCase):
 
     def test_Properties(self):
         self.root.sete(
-            'Test', option.ao({}, 'Test', 'Float', current=120, unit='second')['Test'])
+            'Test', option.ao({}, 'Test', 'Float', current=120, unit='second', precision=4)['Test'])
         w = self.wgGen()
         w.lay.addWidget(w.label_widget)
         iutils_testing.show(w, __name__)

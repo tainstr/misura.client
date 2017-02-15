@@ -47,6 +47,7 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
     double = True
     flexibleChanged = QtCore.pyqtSignal(object)
     float_decimals = 0
+    precision = -1
     def __init__(self, double=True, scientific_decimals=8, parent=None):
         QtGui.QDoubleSpinBox.__init__(self, parent=parent)
         self.scientific_decimals = scientific_decimals
@@ -64,15 +65,21 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
         self.flexibleChanged.emit(value)
 
     def textFromValue(self, value):
+        if self.double:
+            p = self.precision if self.precision > 0 else 1
+            dc = extend_decimals(value, default=p, extend_by=p)
+            self.float_decimals = dc
         l = 0
         if value != 0:
             l = abs(math.log(abs(value), 10))
+        pre = False
         if l > self.scientific_decimals:
             pre = '{:.' + str(self.scientific_decimals) + 'e}'
-        else:
+        elif self.double:
             pre = '{:.' + str(self.float_decimals) + 'f}'
-        if self.double:
+        if pre:
             text = pre.format(value).replace('.', self.locale().decimalPoint())
+            print 'textFromValue', value, self.float_decimals, self.precision
         else:
             text = str(int(value))
         return text
@@ -144,6 +151,7 @@ class aNumber(ActiveWidget):
         else:
             self.double = False
         self.spinbox = ScientificSpinbox(double=self.double, parent=self)
+        self.spinbox.precision = self.precision
         self.spinbox.setKeyboardTracking(False)
         self.lay.addWidget(self.spinbox)
         self.setRange(min_value, max_value, step)
@@ -173,7 +181,7 @@ class aNumber(ActiveWidget):
             p = self.precision if self.precision > 0 else 1
             dc = extend_decimals(error, default=0, extend_by=p).replace(
                 '.', self.locale().decimalPoint())
-            template = u'{:.' + str(dc) + u'f}'
+            template = u'{:.' + str(dc) + u'f}'.replace('.', self.locale().decimalPoint())
         self.spinbox.setSuffix(u' \u00b1 ' + template.format(error))
         return True
 
@@ -262,11 +270,7 @@ class aNumber(ActiveWidget):
         # Translate server-side value into client-side units
         cur = self.adapt2gui(self.current)
         try:
-            if self.double:
-                p = self.precision if self.precision > 0 else 1
-                dc = extend_decimals(cur, default=0, extend_by=p)
-                self.spinbox.float_decimals = dc
-            else:
+            if not self.double:
                 cur = int(cur)
             self.setRange(self.min, self.max, self.step)
             #print 'aNumber.update',self.handle,cur,self.current

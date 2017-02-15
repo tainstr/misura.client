@@ -29,6 +29,12 @@ def extend_decimals(cur, default=2, extend_by=2):
         dc = int(abs(dc))
         base = max(int(dc), default)
         return base + extend_by
+    d = abs(cur-int(cur))
+    l = 0
+    if d>0:
+        l = int(round(abs(math.log(d, 10)),0))+2
+    if l<default:
+        return l
     return default
 
 
@@ -335,9 +341,9 @@ class LabelUnit(QtGui.QLabel):
             self.clicked.emit()
 
     def mousePressEvent(self, event):
-        if event.button() == QtCore.Qt.RightButton:
+        if event.button() == QtCore.Qt.LeftButton:
             self.start_drag()
-        elif self.menu and event.button() == QtCore.Qt.LeftButton:
+        elif self.menu and event.button() == QtCore.Qt.RightButton:
             self.show_menu(event)
         return QtGui.QLabel.mousePressEvent(self, event)
 
