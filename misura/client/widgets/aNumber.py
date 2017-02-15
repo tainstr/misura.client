@@ -29,19 +29,16 @@ class FocusableSlider(QtGui.QSlider):
         return True
 
     def mousePressEvent(self, ev):
-        logging.debug('mousePressEvent')
         self.set_paused(True)
         return QtGui.QSlider.mousePressEvent(self, ev)
 
     def mouseReleaseEvent(self, ev):
-        logging.debug('mouseReleaseEvent')
         self.set_paused(False)
         return QtGui.QSlider.mouseReleaseEvent(self, ev)
 
     def mouseDoubleClickEvent(self, ev):
         self.zoomed = 1 ^ self.zoomed
         self.zoom.emit(self.zoomed)
-        logging.debug('mouseDoubleClickEvent', self.zoomed)
         return QtGui.QSlider.mouseDoubleClickEvent(self, ev)
 
 
@@ -78,7 +75,6 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
             text = pre.format(value).replace('.', self.locale().decimalPoint())
         else:
             text = str(int(value))
-        print 'textFromValue', value, text, l
         return text
 
     def valueFromText(self, text):
@@ -96,7 +92,6 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
             v, ok = self.locale().toFloat(text)
         if not ok:
             v = 0
-        print 'valueFromText', text, ok, v
         return v
 
     def validate(self, text, pos):
@@ -119,9 +114,7 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
                 ok = True
                 return (QtGui.QValidator.Intermediate, text, pos)
         if not ok:
-            print 'Invalid', text, v, ok
             return (QtGui.QValidator.Invalid, text, pos)
-        print 'Valid', text
         return (QtGui.QValidator.Acceptable, text, pos)
 
 
