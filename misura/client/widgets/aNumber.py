@@ -102,6 +102,8 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
         return v
 
     def validate(self, text, pos):
+        if text == '':
+            return (QtGui.QValidator.Intermediate, text, pos)
         if not self.double:
             try:
                 int(text)
@@ -117,7 +119,7 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
                 pass
         if not ok:
             t = text.lower().replace(self.locale().decimalPoint(), '.')
-            if t.endswith('e') or t.endswith('e-') or t.endswith('e+') or text == '':
+            if t.endswith('e') or t.endswith('e-') or t.endswith('e+'):
                 ok = True
                 return (QtGui.QValidator.Intermediate, text, pos)
         if not ok:
