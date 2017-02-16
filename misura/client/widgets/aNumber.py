@@ -79,7 +79,6 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
             pre = '{:.' + str(self.float_decimals) + 'f}'
         if pre:
             text = pre.format(value).replace('.', self.locale().decimalPoint())
-            print 'textFromValue', value, self.float_decimals, self.precision
         else:
             text = str(int(value))
         return text
@@ -181,8 +180,7 @@ class aNumber(ActiveWidget):
         template = u'{}'
         if self.double:
             p = self.precision if self.precision > 0 else 1
-            dc = extend_decimals(error, default=0, extend_by=p).replace(
-                '.', self.locale().decimalPoint())
+            dc = extend_decimals(error, default=0, extend_by=p)
             template = u'{:.' + str(dc) + u'f}'.replace('.', self.locale().decimalPoint())
         self.spinbox.setSuffix(u' \u00b1 ' + template.format(error))
         return True

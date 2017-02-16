@@ -6,6 +6,9 @@ import collections
 import threading
 import math
 from traceback import format_exc
+
+import numpy as np
+
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from misura.canon.csutil import lockme
@@ -23,6 +26,8 @@ from misura.client.parameters import MAX, MIN
 
 def extend_decimals(cur, default=2, extend_by=2):
     """Find out how many decimals to enable in editing for float value `num`"""
+    if np.isnan(cur):
+        return 0
     cur = float(cur)
     if abs(cur) < 1 and abs(cur) > 1e-32:
         dc = math.log(abs(1. / cur), 10)
