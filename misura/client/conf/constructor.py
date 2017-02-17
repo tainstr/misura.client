@@ -151,7 +151,7 @@ class OptionsGroup(QtGui.QGroupBox):
 class Section(QtGui.QGroupBox):
     """Form builder for a list of options"""
 
-    def __init__(self, server, remObj, prop_list, title='Group', parent=None, context='Option'):
+    def __init__(self, server, remObj, prop_list, title='Group', color='gray', parent=None, context='Option'):
         QtGui.QGroupBox.__init__(self, parent)
         self.setTitle(title)
         prop_list.sort(prop_sorter)
@@ -160,9 +160,9 @@ class Section(QtGui.QGroupBox):
         self.remObj = remObj
         self.path = remObj._Method__name
         self.setStyleSheet("""QGroupBox { background-color: transparent; 
-        border: 1px solid gray; border-radius: 5px; 
+        border: 1px solid %s; border-radius: 5px; 
         margin-top: 10px; margin-bottom: 10px; }
-        QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0px 5px; }""")
+        QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0px 5px; }""" % (color, ))
         self.setCheckable(True)
         self.clicked.connect(self.enable_disable)
         self.lay = QtGui.QFormLayout()
@@ -282,11 +282,11 @@ class SectionBox(QtGui.QWidget):
             else:
                 config_list.append(opt)
 
-        self.status_section = Section(server, remObj, status_list,  title=_('Status'),
+        self.status_section = Section(server, remObj, status_list,  title=_('Status'), color='red',
                                       parent=None, context=context)
-        self.results_section = Section(server, remObj, results_list, title=_('Results'),
+        self.results_section = Section(server, remObj, results_list, title=_('Results'), color='green',
                                        parent=None, context=context)
-        self.config_section = Section(server, remObj, config_list, title=_('Configuration'),
+        self.config_section = Section(server, remObj, config_list, title=_('Configuration'), color='gray',
                                       parent=None, context=context)
         
         self.sections = [self.config_section, self.status_section, self.results_section]

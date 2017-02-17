@@ -173,7 +173,8 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         # ...
         menu.addSeparator()
         # Export to PDF
-        menu.addAction('Export', self.slotFileExport)
+        menu.addAction('Export Page', self.slotPageExport)
+        menu.addAction('Export All', self.slotDocExport)
         # menu.addAction('Save', self.save_to_file)
         menu.exec_(qt4.QCursor.pos())
 
@@ -206,9 +207,21 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         self.w.show()
 
     dirname_export = False
-    filename = False
+    filename = ''
+    exdialog = False
+    def slotDocExport(self):
+        """Export the graph."""
+        if self.exdialog:
+            self.exdialog.hide()
+            self.exdialog.close()
+            del self.exdialog
+        from veusz.dialogs.export import ExportDialog
+        dialog = ExportDialog(self, self.document, self.filename)
+        self.exdialog= dialog
+        dialog.show()
+        
 
-    def slotFileExport(self):
+    def slotPageExport(self):
         """Copied from MainWindow. TODO: make this more modular in veusz!"""
         # check there is a page
         if self.document.getNumberPages() == 0:
