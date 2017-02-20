@@ -33,6 +33,8 @@ class ImageReference(utils.OperationWrapper, veusz.widgets.ImageFile):
         if self._dec is False:
             from .. import filedata
             self._dec = filedata.DataDecoder()
+        self._dec.contour_only = self.settings.contour
+        self._dec.contour_width = self.settings.penWidth
         return self._dec
 
     @classmethod
@@ -59,8 +61,16 @@ class ImageReference(utils.OperationWrapper, veusz.widgets.ImageFile):
         s.add(setting.Str('codec', 'JPG',
                           descr='Image codec',
                           usertext='Image codec',
-                          ),
-              10)
+                          ))
+        s.add(setting.BoolSwitch('contour', False,
+                          descr='Contour only',
+                          usertext='Contour only',
+                          settingstrue = ['penWidth'],
+                          ))
+        s.add(setting.Int('penWidth', 0,
+                          descr='Pen width',
+                          usertext='Contour width',
+                          ))
 
     def updateCachedImage(self):
         """Take the image from the Misura file, at the desired dataset and time"""

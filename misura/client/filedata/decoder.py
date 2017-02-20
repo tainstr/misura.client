@@ -3,6 +3,7 @@
 """Interfaces for local and remote file access"""
 
 from misura.canon.logger import get_module_logging
+from math import sqrt
 logging = get_module_logging(__name__)
 from PyQt4 import QtGui, QtCore
 from time import sleep, time
@@ -16,11 +17,12 @@ from misura.canon import bitmap
 from misura.canon import reference
 import proxy
 
+
 MAX = 10**5
 MIN = -10**5
 
 
-def draw_profile(x, y, margin=50):
+def draw_profile(x, y, margin=50, contour_only=False, pen_width=0):
     """Draw an x,y profile onto a QImage."""
     x = x - min(x)
     y = y - min(y)
@@ -32,23 +34,36 @@ def draw_profile(x, y, margin=50):
     lst.append(QtCore.QPointF(x[0], h))
     lst.append(QtCore.QPointF(x[0], y[0]))
 
-    scene = QtGui.QGraphicsScene()
-    prf = QtGui.QGraphicsPathItem()
-    prf.setBrush(QtGui.QBrush(QtCore.Qt.black))
     # Create a painter path
     qpath = QtGui.QPainterPath()
     qpath.addPolygon(QtGui.QPolygonF(lst))
     qpath.setFillRule(QtCore.Qt.WindingFill)
-    # Add the path to the scene
-    prf.setPath(qpath)
-    scene.addItem(prf)
-    scene.setSceneRect(0, 0, w, h)
+
     pix = QtGui.QImage(w, h, QtGui.QImage.Format_ARGB32_Premultiplied)
     p = QtGui.QPainter(pix)
     p.setRenderHint(QtGui.QPainter.Antialiasing)
+    
+    # Only contour
+    pen = QtGui.QPen(QtCore.Qt.black)
+    pen.setJoinStyle(QtCore.Qt.RoundJoin)
+    pen.setCapStyle(QtCore.Qt.RoundCap)
+    pen.setWidth(3)
+    
+    if contour_only:
+        if pen_width <= 0:
+            pen_width = int((0.01) * sqrt(h**2 + w**2))
+            pen_width = max(pen_width, 10)
+        pen.setWidth(pen_width)
+        p.setBrush(QtGui.QBrush(QtCore.Qt.transparent))
+    else:
+        p.setBrush(QtGui.QBrush(QtCore.Qt.black))
+    
+    p.setPen(pen)
+    # Fill background
     r = pix.rect()
     p.fillRect(r, QtCore.Qt.white)
-    scene.render(p)
+    # Add profile
+    p.drawPath(qpath)
     p.end()
     return pix
 
@@ -68,6 +83,8 @@ class DataDecoder(QtCore.QThread):
     comps = set(('JPG', 'PNG'))
     prefix = '0:'
     _len = 0
+    contour_only = False
+    contour_width = 0
 
     def __init__(self, parent=None, maxWidth=100):
         QtCore.QThread.__init__(self, parent)
@@ -110,7 +127,8 @@ class DataDecoder(QtCore.QThread):
                 self.datapath, '_reference_class')
 #            self.ext = self.proxy.get_node_attr(self.datapath, 'type')
             self.ext = self.refClassName
-            logging.debug('DataDecoder.setDataPath', datapath, self.refClassName, self.ext)
+            logging.debug(
+                'DataDecoder.setDataPath', datapath, self.refClassName, self.ext)
             self.refclass = getattr(reference, self.refClassName)
 
         self.emit(QtCore.SIGNAL('reset()'))
@@ -220,18 +238,19 @@ class DataDecoder(QtCore.QThread):
                 pix.loadFromData(dat, self.comp)
 # 			pix.loadFromData(QtCore.QByteArray(dat),'JPG')
             return t, pix
-        # FIXME: how to detect misura compression? Different Ext? Or different ReferenceClass?
+        # FIXME: how to detect misura compression? Different Ext? Or different
+        # ReferenceClass?
         elif self.ext == 'ImageM3':
             logging.debug('decompressing', seq)
             dat = bitmap.decompress(dat)
             qimg = QtGui.QImage()
-            qimg.loadFromData(dat,'BMP')
+            qimg.loadFromData(dat, 'BMP')
             return t, qimg
         # Writing a profile onto an image
         elif self.ext == 'Profile':
             logging.debug('Profile', seq)
             ((w, h), x, y) = dat
-            return t, draw_profile(x, y)
+            return t, draw_profile(x, y, contour_only=self.contour_only, pen_width=self.contour_width)
 
         logging.debug('Format not recognized', self.ext)
         return False

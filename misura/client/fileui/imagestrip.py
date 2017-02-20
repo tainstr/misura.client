@@ -66,6 +66,7 @@ class ImageStrip(QtGui.QWidget):
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
         self.menu.addAction(_('Change length'), self.chLen)
         self.menu.addAction(_('Change rows'), self.chRows)
+        self.menu.addAction(_('Style'), self.chStyle)
         self.actIndex = self.menu.addAction(_('Step by index'), self.by_index)
         self.actIndex.setCheckable(True)
         self.actTime = self.menu.addAction(_('Step by time'), self.by_time)
@@ -147,6 +148,38 @@ class ImageStrip(QtGui.QWidget):
         if n[1]:
             self.rows = n[0]
             self.setLen(self.n)
+            
+    def chStyle(self):
+        w = self.decoder.contour_width
+        c = self.decoder.contour_only
+        
+        dia = QtGui.QDialog()
+        lay = QtGui.QFormLayout()
+        #w = QtGui.QWidget()
+        #w.setLayout(lay)
+        
+        wg_only = QtGui.QCheckBox()
+        wg_only.setChecked(c)
+        wg_width = QtGui.QSpinBox()
+        wg_width.setRange(0, 100)
+        wg_width.setValue(w)
+        ok = QtGui.QPushButton(_("Ok"))
+        canc = QtGui.QPushButton(_("Cancel"))
+        lay.addRow(_("Contour only: "), wg_only)
+        lay.addRow(_("Contour width: "), wg_width)
+        lay.addRow(canc, ok)
+        ok.pressed.connect(dia.accept)
+        canc.pressed.connect(dia.reject)
+        
+        
+        dia.setLayout(lay)
+        r = dia.exec_()
+        if r == QtGui.QDialog.Rejected:
+            return False
+        self.decoder.contour_only = wg_only.checkState()
+        self.decoder.contour_width = wg_width.value()
+        self.decoder.cached_profiles = {}
+        return True
 
     def by_index(self):
         val, st = QtGui.QInputDialog.getInt(
