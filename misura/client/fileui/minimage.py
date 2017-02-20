@@ -56,6 +56,7 @@ class MiniImage(QtGui.QWidget):
         self.menu.addAction(_('Next'), self.next)
         self.menu.addAction(_('Previous'), self.prev)
         self.menu.addAction(_('Save'), self.save_frame)
+        self.menu.addAction(_('To Clipboard'), self.copy_to_clipboard)
         self.meta_menu = self.menu.addMenu(_('Labels'))
         # Slider for image navigation
         self.slider = QtGui.QScrollBar(parent=self)
@@ -79,6 +80,9 @@ class MiniImage(QtGui.QWidget):
         saved_file = os.path.join(self.saveDir, str(self.idx)) + '.jpg'
         self.img.save(saved_file, 'JPG', 25)
         return saved_file
+    
+    def copy_to_clipboard(self):
+        QtGui.qApp.clipboard().setImage(self.img)
 
     def empty(self):
         """Set the image as empty"""
