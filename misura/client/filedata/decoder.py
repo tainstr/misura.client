@@ -61,7 +61,7 @@ def draw_profile(x, y, margin=50, contour_only=False, pen_width=0):
     p.setPen(pen)
     # Fill background
     r = pix.rect()
-    p.fillRect(r, QtCore.Qt.white)
+    p.fillRect(r, QtCore.Qt.transparent)
     # Add profile
     p.drawPath(qpath)
     p.end()
