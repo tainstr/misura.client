@@ -77,8 +77,8 @@ class MiniImage(QtGui.QWidget):
         if not self.saveDir:
             self.saveDir = QtGui.QFileDialog.getExistingDirectory(
                 self, "Images destination folder", "/tmp")
-        saved_file = os.path.join(self.saveDir, str(self.idx)) + '.jpg'
-        self.img.save(saved_file, 'JPG', 25)
+        saved_file = os.path.join(self.saveDir, str(self.idx)) + '.png'
+        self.img.save(saved_file, 'PNG', 25)
         return saved_file
     
     def copy_to_clipboard(self):
