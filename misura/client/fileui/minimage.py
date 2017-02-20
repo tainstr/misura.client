@@ -275,14 +275,27 @@ class MiniImage(QtGui.QWidget):
         mimeData = QtCore.QMimeData()
         ds = self.doc.data.get('0:kiln/T')
         T = ds.data[self.doc_idx]
+        # Text copy
         mimeData.setData(
             "text/plain", 'point:{}:{}:{}'.format(self.base_dataset_path, self.t, T))
+        # Image copy
         pix = self.lbl_img.pixmap()
         ba = QtCore.QByteArray()
         buf = QtCore.QBuffer(ba)
         buf.open(QtCore.QIODevice.WriteOnly)
         pix.save(buf, 'PNG')
         mimeData.setData("image/png", ba)
+        ba1 = QtCore.QByteArray()
+        buf1 = QtCore.QBuffer(ba1)
+        buf1.open(QtCore.QIODevice.WriteOnly)
+        pix.save(buf1, 'BMP')
+        mimeData.setData("image/bmp", ba1) 
+        # File copy
+        name = '{}{}.png'.format(self.base_dataset_path.replace('/','_').replace(':','_'), self.idx)
+        name = os.path.join(self.decoder.tmpdir, name)
+        pix.save(name, 'PNG')
+        mimeData.setData("text/uri-list", "file:///"+name)
+        
         mimeData.setImageData(pix)
         drag.setMimeData(mimeData)
         drag.setPixmap(pix)
