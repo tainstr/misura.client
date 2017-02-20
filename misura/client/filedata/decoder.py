@@ -22,12 +22,25 @@ MAX = 10**5
 MIN = -10**5
 
 
-def draw_profile(x, y, margin=50, contour_only=False, pen_width=0):
-    """Draw an x,y profile onto a QImage."""
-    x = x - min(x)
-    y = y - min(y)
-    w = max(x)
-    h = max(y) + margin
+def draw_profile(x, y, margin=(20, 50, 5, 5), contour_only=False, pen_width=0):
+    """Draw an x,y profile onto a QImage.
+    margin: upper, bottom, left, right"""
+
+    
+    if contour_only and pen_width<=0:
+        h = max(y)-min(y)
+        w = max(x)-min(y)
+        pen_width = int((0.01) * sqrt(h**2 + w**2))
+        pen_width = max(pen_width, 10)
+    else:
+        pen_width = 3
+        
+    m_up, m_btm, m_left, m_right = margin
+    x = x - min(x) + m_left + pen_width
+    y = y - min(y) + m_up + pen_width
+    w = max(x) + m_right + pen_width
+    h = max(y) + m_btm + pen_width
+    
     lst = list(QtCore.QPointF(ix, y[i]) for i, ix in enumerate(x))
     # Close the polygon
     lst.append(QtCore.QPointF(x[-1], h))
@@ -48,13 +61,9 @@ def draw_profile(x, y, margin=50, contour_only=False, pen_width=0):
     pen = QtGui.QPen(QtCore.Qt.black)
     pen.setJoinStyle(QtCore.Qt.RoundJoin)
     pen.setCapStyle(QtCore.Qt.RoundCap)
-    pen.setWidth(3)
+    pen.setWidth(pen_width)
     
     if contour_only:
-        if pen_width <= 0:
-            pen_width = int((0.01) * sqrt(h**2 + w**2))
-            pen_width = max(pen_width, 10)
-        pen.setWidth(pen_width)
         p.setBrush(QtGui.QBrush(QtCore.Qt.transparent))
     else:
         p.setBrush(QtGui.QBrush(QtCore.Qt.black))

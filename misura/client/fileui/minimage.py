@@ -291,7 +291,7 @@ class MiniImage(QtGui.QWidget):
         pix.save(buf1, 'BMP')
         mimeData.setData("image/bmp", ba1) 
         # File copy
-        name = '{}{}.png'.format(self.base_dataset_path.replace('/','_').replace(':','_'), self.idx)
+        name = '{}_{}.png'.format(self.base_dataset_path.replace('/','_').replace(':',''), self.idx)
         name = os.path.join(self.decoder.tmpdir, name)
         pix.save(name, 'PNG')
         mimeData.setData("text/uri-list", "file:///"+name)
