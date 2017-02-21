@@ -417,13 +417,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         """Build a menu from a MisuraProxy or ConfigurationProxy"""
         if not menu:
             menu = QtGui.QMenu()
-        uid = proxy.instrument.measure['uid']
+        uid = proxy.instrument_obj.measure['uid']
         linked = False
         for ln in getUsedPrefixes(self.doc).values(): # LinkedFiles
             root = getattr(ln, 'conf', False)
             if not root: 
                 continue
-            ins = proxy.instrument
+            ins = proxy.instrument_obj
             if not ins:
                 logging.debug('Configuration does not have an active instrument!') 
                 continue

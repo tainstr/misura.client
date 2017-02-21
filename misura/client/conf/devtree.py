@@ -72,13 +72,14 @@ class Item(object):
         return idx, node
 
 
-def recursiveModel(base, parent=False, model=False):
+def recursiveModel(base, parent=False, model=False, force=False):
     if parent == False:
         parent = Item()
         model = base.rmodel()
         parent._model = model
+        print model
     # Caching management
-    if model != base._rmodel:
+    if (model != base._rmodel) or (not base._recursiveModel) or force:
         base._rmodel = model
     else:
         return base._recursiveModel
@@ -89,7 +90,7 @@ def recursiveModel(base, parent=False, model=False):
             continue
         item = Item(parent, path, i)
         obj = base.child(path)
-        item = recursiveModel(obj, item, model[path])
+        item = recursiveModel(obj, item, model[path], force=force)
         parent.children.append(item)
         # was: name
         parent.names.append(path)
@@ -109,13 +110,14 @@ class ServerModel(QtCore.QAbstractItemModel):
     def setNcolumns(self, val):
         self.ncolumns = val
 
-    def refresh(self):
+    def refresh(self, force=False):
         self.item = Item(idx=0)
-        tree = recursiveModel(self.server)
+        if force:
+            self.server.dump_model()
+        tree = recursiveModel(self.server, force=force)
 #		print tree.children
         tree.parent = self.item
         self.item.children.append(tree)
-#		print len(self.item)
         self.emit(QtCore.SIGNAL('modelReset()'))
 
     def index_path(self, path):
@@ -241,7 +243,7 @@ class ServerView(QtGui.QTreeView):
         return path
 
     def update(self):
-        self.model().refresh()
+        self.model().refresh(force=True)
         self.expandToDepth(0)
 
     def showContextMenu(self, pt):

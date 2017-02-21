@@ -175,11 +175,15 @@ class DataNavigatorDomain(NavigatorDomain):
     def configure(self, node):
         """Show node configuration panel"""
         path = node.path.split(':')[-1]
-        configuration_proxy = node.linked.conf
+        #win = self.configuration_windows.get(path, False)
+        #if win:
+        #    win.show()
+        #    return 
+        cp = node.linked.conf
         if '/' in path:
-            configuration_proxy = configuration_proxy.toPath(path)
-        win = conf.TreePanel(configuration_proxy, select=configuration_proxy)
-        win.setWindowTitle('Configuration tree from: %s' % configuration_proxy['name'])
+            cp = cp.toPath(path)
+        win = conf.TreePanel(cp, select=cp)
+        win.setWindowTitle('Configuration tree from: %s' % cp['name'])
         win.show()
         # Keep a reference for Qt
         self.configuration_windows[path] = win

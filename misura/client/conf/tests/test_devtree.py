@@ -8,6 +8,8 @@ from misura.client.tests import iutils_testing
 from misura.client.conf import devtree
 from misura.client import filedata
 
+from misura.canon.plugin import dataimport
+
 app = False
 
 nativem4 = os.path.join(iutils_testing.data_dir, 'measure.h5')
@@ -40,6 +42,18 @@ class ServerModel(unittest.TestCase):
 
     def test_init(self):
         mod = devtree.ServerModel(self.server)
+        
+    def test_add_child(self):
+        mod = devtree.ServerModel(self.server)
+        base = dataimport.base_dict()
+        base['name']['current'] = 'pippo'
+        n0 = len(mod.item.children[0].children[1].children)
+        self.server.instrument.add_child('new', base)
+        self.assertIn('new', self.server.instrument.children)
+        mod.refresh()
+        n1 = len(mod.item.children[0].children[1].children)
+        self.assertEqual(n1,n0+1)
+        self.assertIn('new', self.server.instrument.children)
 
 
 if __name__ == "__main__":

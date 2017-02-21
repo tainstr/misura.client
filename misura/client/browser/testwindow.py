@@ -146,7 +146,7 @@ class TestWindow(acquisition.MainWindow):
     def slot_version_changed(self):
         """Proxy version changed. Need to refresh all ConfigurationInterface objects"""
         self.server = self.fixedDoc.proxy.conf
-        self.remote = self.server.instrument
+        self.remote = self.server.instrument_obj
         self.add_measure()
         self.add_sumtab()
         self.add_table()
