@@ -570,8 +570,14 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.set_label()
         self.lay.addWidget(self.bmenu)
         
+    def update_aggregate(self):
+        r = self.remObj.update_aggregate(self.handle)
+        if r:
+            self.get()
+        
     def build_aggregation_menu(self, menu):
         menu.clear()
+        menu.addAction(_('Update'), self.update_aggregate)
         aggregation = self.prop.get('aggregate', "")
         logging.debug('Build aggregation menu:', self.handle, aggregation)
         self._menu_map = {}
