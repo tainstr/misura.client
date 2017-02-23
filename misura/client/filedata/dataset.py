@@ -51,6 +51,7 @@ class MisuraDataset(datasets.Dataset):
 
     def __init__(self, data=[], linked=False):
         datasets.Dataset.__init__(self, data=data, linked=linked)
+        self.m_opt = False
 # 		assert linked!=False
         self.m_keep = True
         """Save on commit"""
@@ -65,7 +66,7 @@ class MisuraDataset(datasets.Dataset):
         self.m_var = ''
         """Variable name"""
         self.m_percent = False
-        """Flag which indicate if the dataset has been converted to percentile."""
+        """Flag which indicate if the dataset has been converted to percentage."""
         self.m_initialDimension = None
         """Initial dimension configured for the dataset."""
         self.m_update = False
@@ -75,13 +76,15 @@ class MisuraDataset(datasets.Dataset):
         self.old_unit = None
         """Original measurement unit"""
         self.tags = set([])
-        self.m_opt = False
+        
         
     @property
     def m_percent(self):
         return self.attr['m_percent']
     @m_percent.setter
     def m_percent(self, nval):
+        if self.m_opt and nval:
+            self.m_opt['csunit'] = 'percent'
         self.attr['m_percent'] = nval
         
     @property
@@ -96,6 +99,8 @@ class MisuraDataset(datasets.Dataset):
         return self.attr['unit']
     @unit.setter
     def unit(self, nval):
+        if self.m_opt and nval:
+            self.m_opt['csunit'] = nval
         self.attr['unit'] = nval
         
     @property
@@ -104,13 +109,6 @@ class MisuraDataset(datasets.Dataset):
     @old_unit.setter
     def old_unit(self, nval):
         self.attr['old_unit'] = nval
-        
-#     @property
-#     def m_opt(self):
-#         return self.attr['m_opt']
-#     @m_opt.setter
-#     def m_opt(self, nval):
-#         self.attr['m_opt'] = nval
         
     @property
     def m_update(self):

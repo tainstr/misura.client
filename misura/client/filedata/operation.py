@@ -267,7 +267,8 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
                    m_update=True, p=0,
                    linked_file=False, reference_sample=False,
                    rule_unit=lambda *a: False,
-                   unit=False):
+                   unit=False,
+                   opt=False):
     # TODO: cleaun-up all this proliferation of *_dataset_names!!!
     #logging.debug('create_dataset', prefixed_dataset_name,
     #              pure_dataset_name, hdf_dataset_name, variable_name)
@@ -276,6 +277,14 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
         unit = dataset_measurement_unit(
             hdf_dataset_name, fileproxy, data, variable_name)
     ds = MisuraDataset(data=data, linked=linked_file)
+    unit = str(unit) if unit else unit
+    if opt:
+        ds.m_opt = opt
+        ds.old_unit = opt.get('unit', unit)
+        ds.unit = opt.get('csunit', ds.old_unit)
+    else:
+        ds.unit = unit
+        ds.old_unit = unit
     ds.m_name = prefixed_dataset_name
     ds.m_pos = p
     ds.m_smp = reference_sample
@@ -283,8 +292,6 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     ds.m_col = pure_dataset_name
     ds.m_update = m_update
     ds.m_conf = fileproxy.conf
-    ds.unit = str(unit) if unit else unit
-    ds.old_unit = ds.unit
 
     # Read additional metadata
     if len(data) > 0 and prefixed_dataset_name[-2:] not in ('_t', '_T', ':t'):
@@ -718,12 +725,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             ds = create_dataset(self.proxy,
                                 data, pcol, col, col0, m_var, m_update, p,
                                 linked_file=self.LF, reference_sample=self.refsmp,
-                                rule_unit=self.rule_unit)
+                                rule_unit=self.rule_unit, 
+                                opt = opt)
         if ds is False:
             logging.debug('No dataset created for', col0)
             return False
-        if opt:
-            ds.m_opt = opt
         # Count the dataset
         if len(ds.data) > 0:
             names.append(pcol)

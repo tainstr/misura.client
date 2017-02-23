@@ -303,7 +303,7 @@ class MisuraDocument(document.Document):
                 val = obj[opt]
                 from_unit = obj.getattr(opt, 'unit')
                 to_unit = ds.unit
-                # Percentile scaling is active
+                # Percentage scaling is active
                 if getattr(ds, 'm_percent', False):
                     val *= 100. / ds.m_initialDimension
                 # Perform unit conversion
