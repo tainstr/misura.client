@@ -131,7 +131,8 @@ class OptionsGroup(QtGui.QGroupBox):
         glay = QtGui.QVBoxLayout()
         glay.addWidget(out)
         glay.addWidget(children)
-        self.setLayout(glay)     
+        self.setLayout(glay)
+        
         
     def expand(self):
         self.children.show()
@@ -150,7 +151,6 @@ class OptionsGroup(QtGui.QGroupBox):
         
 class Section(QtGui.QGroupBox):
     """Form builder for a list of options"""
-
     def __init__(self, server, remObj, prop_list, title='Group', color='gray', parent=None, context='Option'):
         QtGui.QGroupBox.__init__(self, parent)
         self.setTitle(title)
@@ -174,6 +174,15 @@ class Section(QtGui.QGroupBox):
         self.groupsMap = {}
         for prop in prop_list:
             self.build(prop)
+            
+    def hide_frame(self):
+        self.setStyleSheet("""QGroupBox { background-color: transparent; 
+        border: 0px solid gray; border-radius: 0px; 
+        margin-top: 0px; margin-bottom: 0px; }
+        """)
+        self.setTitle('')
+        self.setChecked(True)
+        self.setCheckable(False)
 
     def enable_disable(self, status=True):
         if status:
@@ -191,6 +200,8 @@ class Section(QtGui.QGroupBox):
         self.setChecked(True)
 
     def collapse(self):
+        if not self.isCheckable():
+            return False
         for w in self.groupsMap.itervalues():
             w.hide()
         for w in self.widgetsMap.itervalues():
@@ -198,6 +209,7 @@ class Section(QtGui.QGroupBox):
             w.label_widget.hide()
         self.setMaximumHeight(40)
         self.setChecked(False)
+        return True
 
             
     def expand_children(self):
@@ -297,13 +309,15 @@ class SectionBox(QtGui.QWidget):
         self.widgetsMap.update(self.config_section.widgetsMap)
 
         lens = [len(sec.widgetsMap) > 0 for sec in self.sections]
-        # Just one active section:
+        # None active!
         if sum(lens) < 1:
             return
+        # Just one active section:
         if sum(lens) == 1:
             i = lens.index(True)
             sec = self.sections[i]
             self.lay.addWidget(sec)
+            sec.hide_frame()
             return
 
         def add_section(sec):
