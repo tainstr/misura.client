@@ -341,10 +341,12 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.buttonBar.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
         self.main_layout.addWidget(self.buttonBar)
         
-    def toggle_plot(self, *a):
+    def toggle_plot(self, visible):
         sz = self.sizes()
-        if sz[-1] == 0:
+        if sum(sz[-3:]) == 0 or visible:
             sz[-1] = 500
+            sz[-2] = 200
+            sz[-3] = 500
             self.bPlot.setChecked(True)
             self.setSizes(sz)
         else:
