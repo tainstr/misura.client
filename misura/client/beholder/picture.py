@@ -499,6 +499,20 @@ class ViewerPicture(QtGui.QGraphicsView):
             self.processor.toggle_run(False)
 
         self.sampleProcessor.toggle_run(do=self.processor.isRunning())
+        self.update_cursor()
+        
+    def mouseDoubleClickEvent(self, event): 
+        self.toggle()
+        self.update_cursor()
+        
+    def enterEvent(self, event):
+        self.update_cursor()
+        
+    def update_cursor(self):
+        if self.processor.stream:
+            self.viewport().setCursor(QtCore.Qt.ArrowCursor)
+        else:
+            self.viewport().setCursor(QtCore.Qt.BusyCursor)
 
     def contextMenuEvent(self, event):
         item = self.itemAt(event.pos())
