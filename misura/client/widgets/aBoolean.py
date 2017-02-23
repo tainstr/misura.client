@@ -10,14 +10,20 @@ class aBoolean(ActiveWidget):
     def __init__(self, server, path,  prop, parent=None):
         ActiveWidget.__init__(self, server, path,  prop, parent)
         self.chk = QtGui.QCheckBox(_('False'), parent=parent)
+        self.chk.setCheckable(True)
         self.lay.addWidget(self.chk)
         # Cause immediate update after complete init
         self.emit(QtCore.SIGNAL('selfchanged()'))
         if self.readonly:
-            self.chk.setCheckable(False)
+            self.connect(
+                self.chk,  QtCore.SIGNAL('clicked()'), self.readonly_set)
         else:
             self.connect(
                 self.chk,  QtCore.SIGNAL('stateChanged(int)'), self.set)
+            
+    def readonly_set(self):
+        logging.debug('Attempt to change a readonly boolean', self.handle, self.current)
+        self.chk.setChecked(self.adapt(self.current))
 
     def adapt(self, val):
         if val in [0, '0', 'False', False, QtCore.Qt.Unchecked]:
