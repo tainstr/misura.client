@@ -92,11 +92,11 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         ds = self.doc.data[fields['d']]
         Ts = self.doc.data[fields['T']]
-        # Convert to percentile, if possible
+        # Convert to percent, if possible
         self.inidim = getattr(ds, 'm_initialDimension', False)
         if not getattr(ds, 'm_percent', False):
             if self.inidim:
-                ds = units.percentile_conversion(ds, 'To Percent', auto=False)
+                ds = units.percentage_conversion(ds, 'To Percent', auto=False)
         T = Ts.data
         # Cut away any cooling
         while max(T) != T[-1]:

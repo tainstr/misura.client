@@ -10,7 +10,7 @@ import os
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import utils
-import PercentilePlugin
+import PercentPlugin
 from .. import units
 
 default_curves = ['T', 'P', 'S', 'h', 'Vol', 'd', 'err']
@@ -131,8 +131,8 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.apply_ops('PlotDataset:Associate')
         return True
 
-    def auto_percentile(self, ds, dsn, gname, ax_name):
-        """Find if the dataset ds should be converted to percentile based on other datasets sharing the same Y ax."""
+    def auto_percent(self, ds, dsn, gname, ax_name):
+        """Find if the dataset ds should be converted to percentage based on other datasets sharing the same Y ax."""
         g = self.doc.resolveFullWidgetPath(gname)
         tree = get_plotted_tree(g)
         dslist = tree['axis'].get(g.path + '/' + ax_name, [])
@@ -162,7 +162,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         # A conversion should happen
         logging.debug('CONVERTING', cvt, pc)
         self.ops.append(document.OperationToolsPlugin(
-            PercentilePlugin.PercentilePlugin(),
+            PercentPlugin.PercentPlugin(),
             {
                 'ds': dsn,
                 'propagate': False,
@@ -236,7 +236,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
             gname = g.path
 
-            self.auto_percentile(ds, y, gname, ax_name)
+            self.auto_percent(ds, y, gname, ax_name)
 
             self.initCurve(name=cname, xData=x, yData=y,
                            yAxis=ax_name, axisLabel=ax_lbl, graph=gname)

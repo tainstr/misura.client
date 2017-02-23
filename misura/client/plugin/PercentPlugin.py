@@ -4,7 +4,6 @@
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import veusz.plugins as plugins
-from PyQt4 import QtGui, QtCore
 import veusz.document as document
 import utils
 
@@ -12,19 +11,19 @@ from misura.client.iutils import get_plotted_tree
 from .. import units
 
 
-class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
+class PercentPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
-    """Convert to percentile value"""
+    """Convert to percentage value"""
     # tuple of strings to build position on menu
-    menu = ('Misura', 'Percentile')
+    menu = ('Misura', 'Percentage')
     # internal name for reusing plugin later
-    name = 'Percentile'
+    name = 'Percentage'
     # string which appears in status bar
-    description_short = 'Convert to/from percentile values'
+    description_short = 'Convert to/from percentage values'
 
     # string goes in dialog box
     description_full = (
-        'Convert to percentile values, given an initial dimension')
+        'Convert to percentage values, given an initial dimension')
 
     def __init__(self, ds='', propagate=False, action='Invert', auto=True):
         """Define input fields for plugin."""
@@ -51,8 +50,8 @@ class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             raise plugins.DatasetPluginException(
                 'Dataset not found' + fields['ds'])
 
-        action = units.percentile_action(ds, fields['action'])
-        ds1 = units.percentile_conversion(ds, action, fields['auto'])
+        action = units.percent_action(ds, fields['action'])
+        ds1 = units.percent_conversion(ds, action, fields['auto'])
         ds = ds1
         self.ops.append(document.OperationDatasetSet(fields['ds'], ds))
         #self.ops.append(document.OperationDatasetSetVal(fields['ds'], 'data',slice(None,None),ds1.data[:]))
@@ -60,11 +59,11 @@ class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.apply_ops()
         logging.debug('Converted %s %s using initial dimension %.2f.' % (
             fields['ds'], fields['action'], ds.m_initialDimension))
-# 		QtGui.QMessageBox.information(None,'Percentile output',
+# 		QtGui.QMessageBox.information(None,'Percentage output',
 # 				'Converted %s %s using initial dimension %.2f.' % (fields['ds'], msg, ds.m_initialDimension))
 
         # updating all dependent datapoints
-        convert_func = units.percentile_func(ds, action, fields['auto'])
+        convert_func = units.percent_func(ds, action, fields['auto'])
         utils.convert_datapoint_units(convert_func, fields['ds'], self.doc)
 
         if not fields['propagate']:
@@ -83,16 +82,16 @@ class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         if fields['ds'] in cvt:
             cvt.remove(fields['ds'])
         act = 'To Percent' if ds.m_percent else 'To Absolute'
-        # Create a non-propagating percentile operation for each dataset found
+        # Create a non-propagating percentage operation for each dataset found
         for nds in cvt:
             ncur = getattr(self.doc.data[nds], 'm_percent', None)
             if ncur == ds.m_percent:
                 continue
-            logging.debug('Really propagating percentile to', nds)
+            logging.debug('Really propagating percentage to', nds)
             fields = {
                 'ds': nds, 'propagate': False, 'action': act, 'auto': True}
             self.ops.append(
-                document.OperationToolsPlugin(PercentilePlugin(), fields))
+                document.OperationToolsPlugin(PercentPlugin(), fields))
         # Update axis labels
         old = units.symbols.get(ds.old_unit, False)
         new = units.symbols.get(ds.unit, False)
@@ -102,7 +101,7 @@ class PercentilePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 lbl = ax.settings.label.replace(old, new)
                 self.toset(ax, 'label', lbl)
         # Apply everything
-        self.apply_ops('Percentile: Propagate')
+        self.apply_ops('Percentage: Propagate')
 
 
-plugins.toolspluginregistry.append(PercentilePlugin)
+plugins.toolspluginregistry.append(PercentPlugin)

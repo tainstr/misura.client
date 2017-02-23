@@ -12,7 +12,7 @@ from copy import copy
 
 class InitialDimensionPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
-    """Convert to percentile value"""
+    """Set the initial dimension for percentage conversions"""
     # tuple of strings to build position on menu
     menu = ('Misura', 'Initial dimension')
     # internal name for reusing plugin later
@@ -64,7 +64,7 @@ class InitialDimensionPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             raise plugins.DatasetPluginException(
                 'Dataset not found' + fields['ds'])
         out = numpy.array(ds.data)
-        # If data was converted to percentile, convert back to real numbers
+        # If data was converted to percentage, convert back to real numbers
         percent = getattr(ds, 'm_percent', False)
         if percent:
             out = out * ds.m_initialDimension / 100.

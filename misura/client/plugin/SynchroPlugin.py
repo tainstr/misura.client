@@ -4,10 +4,9 @@
 import veusz.plugins as plugins
 import veusz.document as document
 import numpy as np
-from PyQt4 import QtGui, QtCore
 import copy
 import utils
-from misura.client.plugin.cuvrve_label import CurveLabel
+from misura.client.plugin.curve_label import CurveLabel
 
 def get_nearest_index(data, value):
     dst = np.abs(data - value)

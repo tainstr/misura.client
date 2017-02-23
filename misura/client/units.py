@@ -338,7 +338,7 @@ def get_from_unit(ds, to_unit):
     if not from_unit or to_unit in ['None', '', None, False]:
         raise plugins.DatasetPluginException(
             'Selected dataset does not have a measurement unit.')
-    # Implicit To-From percentile conversion
+    # Implicit To-From percentage conversion
     from_group = known_units[from_unit]
     to_group = known_units[to_unit]
     if from_group != to_group:
@@ -361,10 +361,10 @@ def convert_func(ds, to_unit):
     from_unit, to_unit, from_group, to_group = get_from_unit(ds, to_unit)
     func = Converter.convert_func(from_unit, to_unit)
     ret = func
-    # If groups differ, concatenate a percentile conversion to func
+    # If groups differ, concatenate a percentage conversion to func
     if from_group != to_group:
-        action = percentile_action(ds, 'Invert')
-        pfunc = percentile_func(ds, action)
+        action = percent_action(ds, 'Invert')
+        pfunc = percent_func(ds, action)
         ret = lambda out: func(pfunc(out))
     return ret
 
@@ -394,8 +394,8 @@ def convert(ds, to_unit):
     return ds1
 
 
-def percentile_action(ds, action='Invert'):
-    """Autodetect percentile conversion action to be performed"""
+def percent_action(ds, action='Invert'):
+    """Autodetect percentage conversion action to be performed"""
     cur = getattr(ds, 'm_percent', False)
     # invert action
     if action == 'Invert':
@@ -403,11 +403,11 @@ def percentile_action(ds, action='Invert'):
             action = 'To Absolute'
         else:
             action = 'To Percent'
-    logging.debug('percentile_action', action)
+    logging.debug('percent_action', action)
     return action
 
 
-def percentile_func(ds, action='To Absolute', auto=True):
+def percent_func(ds, action='To Absolute', auto=True):
     """Returns the function used to convert dataset `ds` to percent or back to absolute"""
     ini = getattr(ds, 'm_initialDimension', False)
     # Auto initial dimension
@@ -427,10 +427,10 @@ def percentile_func(ds, action='To Absolute', auto=True):
     return func
 
 
-def percentile_conversion(ds, action='Invert', auto=True):
+def percent_conversion(ds, action='Invert', auto=True):
     ds = copy(ds)
-    action = percentile_action(ds, action)
-    func = percentile_func(ds, action, auto)
+    action = percent_action(ds, action)
+    func = percent_func(ds, action, auto)
     out = func(np.array(ds.data))
 
     # Evaluate if the conversion is needed

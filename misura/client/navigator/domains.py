@@ -513,12 +513,12 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
         self.mainwindow.showDialog(d)
 
     @node
-    def convertPercentile(self, node=False):
-        """Invoke the percentile plugin on the current entry"""
+    def convertPercent(self, node=False):
+        """Invoke the percentage plugin on the current entry"""
         n = self.doc.datasetName(node.ds)
         from misura.client import plugin
-        p = plugin.PercentilePlugin(ds=n, propagate=True)
-        d = PluginDialog(self.mainwindow, self.doc, p, plugin.PercentilePlugin)
+        p = plugin.PercentPlugin(ds=n, propagate=True)
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.PercentPlugin)
         self.mainwindow.showDialog(d)
 
     @node
@@ -534,12 +534,12 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
             self.mainwindow, self.doc, p, plugin.UnitsConverterTool)
         self.mainwindow.showDialog(d)
 
-    def add_percentile(self, menu, node):
-        """Add percentile conversion action"""
+    def add_percent(self, menu, node):
+        """Add percentage conversion action"""
         self.act_percent = menu.addAction(
             _('Set Initial Dimension'), self.setInitialDimension)
         self.act_percent = menu.addAction(
-            _('Percentile'), self.convertPercentile)
+            _('Percentage'), self.convertPercent)
         self.act_percent.setCheckable(True)
         self.act_percent.setChecked(node.m_percent)
 
@@ -564,7 +564,7 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
 
     def add_dataset_menu(self, menu, node):
         menu.addSeparator()
-        self.add_percentile(menu, node)
+        self.add_percent(menu, node)
         self.add_unit(menu, node)
 
 
