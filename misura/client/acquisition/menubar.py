@@ -20,7 +20,8 @@ from PyQt4 import QtGui, QtCore
 class MenuBar(QtGui.QMenuBar):
 
     """Main acquisition menus"""
-
+    quitClient = QtCore.pyqtSignal()
+    
     def __init__(self, server=False, parent=None):
         QtGui.QMenuBar.__init__(self, parent)
         self.remote = False
@@ -260,10 +261,9 @@ class MenuBar(QtGui.QMenuBar):
 
         if self.fixedDoc:
             self.measure.addSeparator()
-            self.measure.addAction(_('Save to file'))
-            self.measure.addAction(_('Close'))
+            self.measure.addAction(_('Close'), self.quitClient.emit)
         else:
-            self.measure.addAction(_('Quit Client'))
+            self.measure.addAction(_('Quit Client'), self.quitClient.emit)
         self.measure.setEnabled(True)
 
         # SETTINGS Menu
