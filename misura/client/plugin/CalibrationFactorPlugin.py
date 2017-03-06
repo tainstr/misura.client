@@ -96,7 +96,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.inidim = getattr(ds, 'm_initialDimension', False)
         if not getattr(ds, 'm_percent', False):
             if self.inidim:
-                ds = units.percentage_conversion(ds, 'To Percent', auto=False)
+                ds = units.percent_conversion(ds, 'To Percent', auto=False)
         T = Ts.data
         # Cut away any cooling
         while max(T) != T[-1]:

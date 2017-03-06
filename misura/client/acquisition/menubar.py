@@ -261,9 +261,9 @@ class MenuBar(QtGui.QMenuBar):
 
         if self.fixedDoc:
             self.measure.addSeparator()
-            self.measure.addAction(_('Close'), self.quitClient.emit)
+            self.measure.addAction(_('Close'), self.quit)
         else:
-            self.measure.addAction(_('Quit Client'), self.quitClient.emit)
+            self.measure.addAction(_('Quit Client'), self.quit)
         self.measure.setEnabled(True)
 
         # SETTINGS Menu
@@ -298,6 +298,10 @@ class MenuBar(QtGui.QMenuBar):
 
         for act, cf in self.lstActions:
             act.setCheckable(True)
+            
+    def quit(self):
+        print 'QUIT'
+        self.quitClient.emit()
 
     def appendGlobalConf(self):
         self.objects['mconf'] = functools.partial(conf.MConf, self.server)

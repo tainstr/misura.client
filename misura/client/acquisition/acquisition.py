@@ -139,15 +139,16 @@ class MainWindow(QtGui.QMainWindow):
         self.showMaximized()
         
     
-    def add_menubar(self):
+    def add_menubar(self, setInstrument=True):
         if self.myMenuBar:
             self.myMenuBar.clear_windows()
             self.myMenuBar.close()
             del self.myMenuBar
         self.myMenuBar = MenuBar(server=self.server, parent=self)
-        if self.remote and self.server:
+        if self.remote and self.server and setInstrument:
             self.myMenuBar.setInstrument(self.remote, self.server)  
-        self.setMenuBar(self.myMenuBar) 
+        self.setMenuBar(self.myMenuBar)
+        self.myMenuBar.quitClient.connect(self.close)
         
         
     def add_statusbar(self):
@@ -344,17 +345,15 @@ class MainWindow(QtGui.QMainWindow):
     def pending_task_hidden(self):
         self.tasks_dock.hide()
 
-
-
     def closeEvent(self, ev):
+        self.clean_interface()
         if not self.fixedDoc:
             registry.toggle_run(False)
             self.tasks.close()
         else:
             self.fixedDoc.proxy.close()
-        ret = super(MainWindow, self).closeEvent(ev)
-        iutils.app.quit()
-        return ret
+        ev.accept()
+    
 
     _blockResetFileProxy = False    
 
@@ -580,10 +579,15 @@ class MainWindow(QtGui.QMainWindow):
     def clean_interface(self, remote=False):
         self._blockResetFileProxy = True
         self.instrumentDock.hide()
-        name = self.remote['devpath']
-        self.name = name
-        logging.debug('Setting remote ', remote, self.remote, name)
-        title = _('Misura Acquisition: %s (%s)') %  (name, self.remote['comment'])
+        self.remote = remote
+        self.name = 'unknown'
+        title = 'Misura Acquisition - Waiting'
+        if self.remote:
+            name = self.remote['devpath']
+            self.name = name
+            logging.debug('Setting remote ', remote, self.remote, name)
+            title = _('Misura Acquisition: %s (%s)') %  (name, self.remote['comment'])
+    
         self.setWindowTitle(title)
         self.tray_icon.setToolTip(title)
         pid = self.instrument_pid()
@@ -600,10 +604,10 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.qApp.processEvents()
 
         self.tasks.job(1, pid, 'Preparing menus')
-        self.remote = remote
-        self.myMenuBar.close()
-        self.myMenuBar = MenuBar(server=self.server, parent=self)
-        self.setMenuWidget(self.myMenuBar)
+        self.add_menubar(setInstrument=False)
+        #self.myMenuBar.close()
+        #self.myMenuBar = MenuBar(server=self.server, parent=self)
+        #self.setMenuWidget(self.myMenuBar)
         logging.debug('Done menubar')
 
         # Remove any remaining subwindow

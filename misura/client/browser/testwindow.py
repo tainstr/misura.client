@@ -179,7 +179,7 @@ class TestWindow(acquisition.MainWindow):
             if len(crumbs) > len(most_commons):
                 self.measureTab.refresh_nodes(paths)
                 return True
-
+            
             if len(crumbs) == len(most_commons):
                 crumbs.pop(-1)
 
