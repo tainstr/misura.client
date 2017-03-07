@@ -126,26 +126,6 @@ safe.append(imp)
 document.CommandInterface.safe_commands = safe
 document.CommandInterface.SetDataVal = set_data_val
 
-
-def set_data_attr(self, dsname, attrname, val):
-    """Set dataset attribute `attrname` to `val`"""
-    logging.debug('setting attr', dsname, attrname, val)
-    ds = self.document.data.get(dsname, False)
-    if ds is False:
-        logging.debug('set_data_attr: dataset not found!', dsname)
-        return
-    setattr(ds, attrname, val)
-    op = document.OperationDatasetSet(dsname, ds)
-    self.document.applyOperation(op)
-
-# Add the SetDataAttr command to the CommandInterface class
-imp = 'SetDataAttr'
-safe = list(document.CommandInterface.safe_commands)
-safe.append(imp)
-document.CommandInterface.safe_commands = safe
-document.CommandInterface.SetDataAttr = set_data_attr
-
-
 class MisuraInterface(CustomInterface, QtCore.QObject):
 
     """MainWindow methods useful for misura specific widgets and actions"""
