@@ -127,7 +127,7 @@ def not_interpolated(proxy, col, startt, endt):
         data[0][:] -= s
         s = 0
     if s > startt:
-        d = s - startt
+        d = int(s - startt)
 
         apt = np.linspace(0, d - 1, d)
         vals = np.ones(d) * data[0][1]
