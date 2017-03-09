@@ -31,7 +31,7 @@ def from_argv():
     import sys
     import getopt
     import logging
-    logging.debug('from argv', sys.argv)
+    logging.debug('from argv %s', (sys.argv))
     opts, args = getopt.getopt(sys.argv[1:], 'h:p:u:w:')
     r = {'-h': 'localhost', '-p': 3880,
          '-u': 'admin', '-w': 'admin'}

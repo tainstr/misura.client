@@ -13,7 +13,9 @@ import xmlrpclib
 from xmlrpclib import ServerProxy, ProtocolError, SafeTransport
 import Cookie
 
-from misura.canon.logger import Log as logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
+
 from mproxy import MisuraProxy, reconnect, urlauth, dataurl, remote_dbdir
 from wake_on_lan import wake_on_lan
 
