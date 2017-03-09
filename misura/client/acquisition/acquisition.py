@@ -22,6 +22,7 @@ from .. import widgets, beholder
 from .. import fileui, filedata
 from .. import misura3
 from .. import connection
+from ..livelog import LiveLog
 from .. import iutils
 from .. import parameters
 from ..clientconf import confdb
@@ -377,7 +378,7 @@ class MainWindow(QtGui.QMainWindow):
             self.logDock.setWidget(
                 fileui.OfflineLog(self.fixedDoc.proxy, self.logDock))
         else:
-            self.logDock.setWidget(connection.LiveLog(self.logDock))
+            self.logDock.setWidget(LiveLog(self.logDock))
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.logDock)
         
         

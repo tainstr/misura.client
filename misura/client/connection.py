@@ -11,7 +11,7 @@ import socket
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from network import wake_on_lan
-
+from livelog import LiveLog
 
 def addrConnection(addr, user=False, password=False, mac=False):
     if False in [user, password]:
@@ -228,71 +228,3 @@ class ConnectionStatus(QtGui.QWidget):
         else:
             self.addr.setText('Connected Server: ' + str(network.manager.addr))
 
-from time import strftime, time
-from datetime import datetime
-
-
-class LiveLog(QtGui.QTextEdit):
-    _max_character_length = 1e6
-
-    def __init__(self, parent=None):
-        QtGui.QTextEdit.__init__(self, parent)
-        self.total_text_length = 0
-        self.setReadOnly(True)
-        self.setLineWrapMode(self.NoWrap)
-        self.current_buf = []
-        self.label = _('Log')
-        self.menu = QtGui.QMenu(self)
-        self.menu.addAction('Update now', self.slotUpdate)
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.connect(
-            self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
-        if registry != None:
-            self.connect(registry, QtCore.SIGNAL('log()'), 
-                         self.slotUpdate, 
-                         QtCore.Qt.QueuedConnection)
-        self.slotUpdate()
-        self.setFont(QtGui.QFont('TypeWriter',  7, 50, False))
-
-    def slotUpdate(self):
-        logging.debug('LiveLog.slotUpdate')
-        if registry == None:
-            logging.debug('No registry')
-            return
-        buf = registry.log_buf
-
-        if buf == self.current_buf:
-            logging.debug('No new log')
-            return
-
-        txt = ''
-        for line in buf:
-            if type(line) != type([]):
-                continue
-            if len(line) < 2:
-                continue
-            if line in self.current_buf:
-                continue
-            st = datetime.fromtimestamp(line[0]).strftime('%X')
-            p = line[1]
-            fmsg = line[3]
-            txt += '[%s!%-2i] %s\n' % (st, p,  fmsg)
-        txt = txt.rstrip('\n')
-        self.append(txt)
-        self.total_text_length += len(txt)
-
-        if self.total_text_length > self._max_character_length:
-            txt = self.toPlainText()
-            txt = txt[-3000:]
-            self.setPlainText(txt)
-            self.moveCursor(QtGui.QTextCursor.End)
-            self.total_text_length = len(txt)
-
-        self.current_buf = buf[:]
-
-    def update(self):
-        logging.debug('LiveLog.update')
-        registry.updateLog()
-
-    def showMenu(self, pt):
-        self.menu.popup(self.mapToGlobal(pt))
