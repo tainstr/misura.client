@@ -53,6 +53,8 @@ def draw_profile(x, y, margin=(20, 50, 5, 5), contour_only=False, pen_width=0):
     qpath.setFillRule(QtCore.Qt.WindingFill)
 
     pix = QtGui.QImage(w, h, QtGui.QImage.Format_ARGB32)
+    # Clear memory (Qt bug)
+    pix.fill(QtCore.Qt.transparent)
     #QtGui.QImage.Format_ARGB32_Premultiplied
     p = QtGui.QPainter(pix)
     p.setRenderHint(QtGui.QPainter.Antialiasing)
