@@ -61,7 +61,7 @@ class KidRegistry(QtCore.QThread):
         self.manager = False
         self.should_update_doc = True
 
-    @lockme
+    @lockme()
     def set_manager(self, man=None):
         old_stream = self.stream
         self.stream = False
@@ -97,7 +97,7 @@ class KidRegistry(QtCore.QThread):
 
         return self.taskswg.tasks
 
-    @lockme
+    @lockme()
     def set_doc(self, doc=False):
         """Install new document `doc`"""
         if not doc and self.doc:
@@ -109,7 +109,7 @@ class KidRegistry(QtCore.QThread):
             self.connect(self, QtCore.SIGNAL('update()'), self.doc.update)
 
 # FIXME: should be locked. It was unlocked for performance, but SHOULD BE LOCKED
-#   @lockme
+#   @lockme()
     def register(self, w):
         """Register Active object `w`"""
         if w.type == 'Button':
@@ -129,7 +129,7 @@ class KidRegistry(QtCore.QThread):
         return kid
 
 # FIXME: should be locked. It was unlocked for performance, but SHOULD BE LOCKED
-#   @lockme
+#   @lockme()
     def unregister(self, widget):
         """Removes a widget from the registry."""
         if not widget.prop:
@@ -144,7 +144,7 @@ class KidRegistry(QtCore.QThread):
                 if self.times.has_key(key_id):
                     del self.times[key_id]
 
-    @lockme
+    @lockme()
     def clear(self):
         """Removes all registered objects."""
         self.rid = {}
@@ -178,7 +178,7 @@ class KidRegistry(QtCore.QThread):
             request.append((kid, self.times.get(kid, 0)))
         return request
 
-    @lockme
+    @lockme()
     def update_all(self):
         """Update registered objects."""
         updated = []
@@ -219,7 +219,7 @@ class KidRegistry(QtCore.QThread):
             for w in ws:
                 w.emit(QtCore.SIGNAL('changed()'))
 
-    @lockme
+    @lockme()
     def updateLog(self):
         r = self.obj.search_log(self.log_time)
         if r is None:

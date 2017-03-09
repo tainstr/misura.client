@@ -262,12 +262,12 @@ class Active(object):
         self._check_flags(*args)
         return rem
 
-    @lockme
+    @lockme()
     def get(self, *args):
         return self._call_function_then_emitchanged_and_checkflags(
             self.remObj.get, *args)
 
-    @lockme
+    @lockme()
     def soft_get(self, *args):
         self._call_function_then_emitchanged_and_checkflags(
             self.remObj.soft_get, *args)
@@ -435,7 +435,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         self._win = win
         win.show()
 
-    @lockme
+    @lockme()
     def closeEvent(self, event):
         self.menu_timer.stop()
         return super(ActiveWidget, self).closeEvent(event)

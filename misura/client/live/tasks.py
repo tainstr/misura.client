@@ -48,7 +48,7 @@ class RemoteTasks(QtGui.QWidget):
             finally:
                 self.progress = False
 
-    @lockme
+    @lockme()
     def set_server(self, server):
         if not server:
             return False
@@ -149,7 +149,7 @@ class LocalTasks(QtGui.QWidget):
         if self.log.isVisible():
             self.log.append(msg)
 
-    @lockme
+    @lockme()
     def _jobs(self, tot, pid='Operation', abort = lambda *a, **k: 0):
         """Initialize a new progress bar for job `pid` having total steps `tot`."""
         wg = self.prog.get(pid)
@@ -183,7 +183,7 @@ class LocalTasks(QtGui.QWidget):
         """Thread-safe call for _jobs()"""
         self.emit(QtCore.SIGNAL('jobs(int,QString,PyQt_PyObject)'), tot, pid, abort)
 
-    @lockme
+    @lockme()
     def _job(self, step, pid='Operation', label=''):
         """Progress job `pid` to `step`, and display `label`. A negative step causes the bar to progress by 1."""
         wg = self.prog.get(pid, False)
@@ -205,7 +205,7 @@ class LocalTasks(QtGui.QWidget):
         self.emit(QtCore.SIGNAL('job(int,QString,QString)'),
                   step, pid, label)
 
-    @lockme
+    @lockme()
     def _done(self, pid='Operation'):
         """Complete job `pid`"""
         wg = self.prog.get(pid, False)
@@ -265,7 +265,7 @@ class Tasks(QtGui.QTabWidget):
             self.removeTab(2)
             self.removeTab(0)
 
-    @lockme
+    @lockme()
     def set_server(self, server):
         server = server.copy()
         server.connect()

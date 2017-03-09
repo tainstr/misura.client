@@ -235,7 +235,7 @@ class MisuraProxy(common_proxy.CommonProxy):
         self._dtime = self.remObj.time() - time()
         return oldname
 
-    @lockme
+    @lockme()
     def to_root(self):
         """Locked call for _to_root."""
         return self._to_root()
@@ -254,7 +254,7 @@ class MisuraProxy(common_proxy.CommonProxy):
             self.remObj = getattr(self.remObj, p)
         self._Method__name = self.remObj._Method__name
 
-    @lockme
+    @lockme()
     def connect(self):
         oldname = self._to_root()
         # Restore object path's
@@ -284,7 +284,7 @@ class MisuraProxy(common_proxy.CommonProxy):
     def _remoteNames(self):
         return self._remoteDict.get(self._Method__name, [])
 
-    @lockme
+    @lockme()
     def paste(self, obj):
         """Paste foreign MisuraProxy settings into current instance"""
         oldsmart = obj._smartnaming  # remember smartnaming status
@@ -327,7 +327,7 @@ class MisuraProxy(common_proxy.CommonProxy):
     def __nonzero__(self):
         return 1
 
-    @lockme
+    @lockme()
     def describe(self, *args):
         if self._refresh_interval <= 0:
             return self.remObj.describe(*args)
@@ -341,7 +341,7 @@ class MisuraProxy(common_proxy.CommonProxy):
             self._ctime = time()
         return self._desc[self._Method__name]
 
-    @lockme
+    @lockme()
     def info(self, key):
         """Pretty print information about `key`"""
         logging.debug('Option:', key)
@@ -349,7 +349,7 @@ class MisuraProxy(common_proxy.CommonProxy):
         for k, v in e.iteritems():
             logging.debug('\t', k, ':', v)
 
-    @lockme
+    @lockme()
     def lastlog(self):
         """Retrieve log messages near the last remote procedure call"""
         t = self._ctime + self._dtime
@@ -357,7 +357,7 @@ class MisuraProxy(common_proxy.CommonProxy):
         return r
 
     @reconnect
-    @lockme
+    @lockme()
     def get(self, key):
         """Cached get function"""
         t = time()
@@ -377,7 +377,7 @@ class MisuraProxy(common_proxy.CommonProxy):
         return self.get(key)
 
     @reconnect
-    @lockme
+    @lockme()
     def __setitem__(self, key, val):
         self._refresh_last[self._Method__name][key] = 0
         self._ctime = time()
@@ -398,7 +398,7 @@ class MisuraProxy(common_proxy.CommonProxy):
         else:
             return object.__setattr__(self, key, val)
 
-    @lockme
+    @lockme()
     def _has_key(self, path):
         r = self.remObj.has_key(path)
         return r
@@ -419,7 +419,7 @@ class MisuraProxy(common_proxy.CommonProxy):
                     return self.get(path)
         return self.child(path)
 
-    @lockme
+    @lockme()
     def toPath(self, lst):
         """Returns a copy of the object at the path expressed in list/string lst"""
         if type(lst) == type(''):
@@ -450,13 +450,13 @@ class MisuraProxy(common_proxy.CommonProxy):
         return obj
 
     @reconnect
-    @lockme
+    @lockme()
     def __call__(self, *args, **kwargs):
         self._ctime = time()
         return self.remObj.__call__(*args, **kwargs)
 
     @reconnect
-    @lockme
+    @lockme()
     def call(self, path, *args, **kwargs):
         self._ctime = time()
         f = getattr(self.remObj, path)

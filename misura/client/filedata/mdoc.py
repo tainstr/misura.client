@@ -154,7 +154,7 @@ class MisuraDocument(document.Document):
         self.proxy = self.proxy.copy()
         self.proxy.connect()
 
-    @lockme
+    @lockme()
     def reloadData(self, update=True):
         # Clear all previous datasets, in order to avoid duplicates
         self.zerotime = None
@@ -227,7 +227,7 @@ class MisuraDocument(document.Document):
 
     auto_changeset = 0
 
-    @lockme
+    @lockme()
     def update(self, proxy=False):
         if not self.up:
             return []

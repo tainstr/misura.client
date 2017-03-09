@@ -137,7 +137,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             return True
         return False
 
-    @lockme
+    @lockme()
     def pause(self, do=True):
         logging.debug('Set paused', do)
         self.paused = do
@@ -167,7 +167,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             self.changeset = self.doc.changeset
         return self._plots
 
-    @lockme
+    @lockme()
     def refresh(self, force=False):
         if not force:
             if self.paused:
@@ -231,7 +231,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         else:
             return self.tree
 
-    @lockme
+    @lockme()
     def rowCount(self, parent):
         node = self.nodeFromIndex(parent)
         if node is False:
@@ -277,7 +277,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             return QtGui.QBrush(xy)
         return void
 
-    @lockme
+    @lockme()
     def data(self, index, role=QtCore.Qt.DisplayRole):
         if not index.isValid():
             return void
@@ -323,7 +323,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
                     return str(node.ds.data[self.idx])
         return void
 
-    @lockme
+    @lockme()
     def index(self, row, column, parent=voididx):
         parent = self.nodeFromIndex(parent)
         if not (isinstance(parent, DatasetEntry) or isinstance(parent, NodeEntry)):
@@ -342,7 +342,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         idx = self.createIndex(row, column, child.model_path)
         return idx
 
-    @lockme
+    @lockme()
     def parent(self, child):
         child = self.nodeFromIndex(child)
         if not (isinstance(child, DatasetEntry) or isinstance(child, NodeEntry)):
