@@ -87,7 +87,7 @@ class ImportParamsMisura(base.ImportParamsBase):
         'version': -1,  # means latest
         'reduce': False,
         'reducen': 1000,
-        'time_interval': 2,  # interpolation interval for time coord
+        'time_interval': 1,  # interpolation interval for time coord
         'rule_exc': clientconf.rule_exc,
         'rule_inc': clientconf.rule_inc,
         'rule_load': clientconf.rule_load,

@@ -33,12 +33,24 @@ def tearDownModule():
 
 class ViewerControl(unittest.TestCase):
     N = 1
+    
+    @classmethod
+    def setUpClass(cls):
+        from misura import utils_testing as ut
+        ut.parallel(1)
+        from misura.client.iutils import initApp
+        cls.app = initApp()
+        
 
     def setUp(self):
-        self.root = None#ut.dummyServer(Hsm)
+        from misura import utils_testing as ut
+        self.root = ut.dummyServer(Hsm)
         instr = self.root.hsm
         instr['nSamples'] = self.N
         self.rem = sim_camera.SimCamera(parent=self.root)
+        self.rem.doc = False
+        self.rem._readLevel = 5
+        self.rem._writeLevel = 5
 # 		self.rem.encoder['react']='Strictly Follow'
         self.rem.encoder['react'] = 'No Follow'
         self.rem.create_video()
@@ -71,13 +83,15 @@ class ViewerControl(unittest.TestCase):
 
         enc.x['motor'] = [self.motH['fullpath'], 'default', False]
         enc.x['align'] = 1
-        enc.x.motor.setattr(
-            'streamerPos', 'options', [self.rem['fullpath'], 'default', 'xPos'])
+        self.motH.setattr('streamerPos', 'options', 
+                            [self.rem['fullpath'], 'default', 'xPos'])
+        self.motH.map_role_dev('streamerPos')
 
         enc.y['motor'] = [self.motV['fullpath'], 'default', False]
         enc.y['align'] = 1
-        enc.y.motor(
-            'streamerPos', 'options', [self.rem['fullpath'], 'default', 'yPos'])
+        self.motV.setattr('streamerPos', 'options', 
+            [self.rem['fullpath'], 'default', 'yPos'])
+        self.motV.map_role_dev('streamerPos')
 
         enc.focus['motor'] = [self.motF['fullpath'], 'default', False]
         enc.angle['motor'] = [self.motA['fullpath'], 'default', False]
@@ -115,7 +129,7 @@ class ViewerControl(unittest.TestCase):
         self.check_control('left', wg1)
 
         obj.show()
-        appQtGui.qApp.exec_()
+        self.app.exec_()
 
         obj.delControl('left')
         self.assertEqual(obj.controls['left'], None)

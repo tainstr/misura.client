@@ -128,6 +128,7 @@ def initApp(name='misura', org="Expert System Solutions", domain="expertsystemso
     app.setStyleSheet(stylesheet)
     if client:
         initClient()
+    return app
 
 app_closed = False
 
