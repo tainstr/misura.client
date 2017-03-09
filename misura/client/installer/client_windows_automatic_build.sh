@@ -68,7 +68,7 @@ rm -rf "$CANON_LINK"
 ln -s "$CANON_DIR" "$CANON_LINK"
 
 mkdir "$DISTRIBUTION_DIR"
-pyinstaller -y "$SPEC_FILE"
+pyinstaller -y --clean --win-private-assemblies "$SPEC_FILE"
 
 if [ $? -ne 0 ]; then
 	echo "Error building Misura4 package."
