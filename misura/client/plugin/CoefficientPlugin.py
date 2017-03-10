@@ -21,7 +21,8 @@ class CoefficientPlugin(plugins.DatasetPlugin):
     description_full = (
         'Calculate a coefficient between a fixed start value and any subsequent value in a curve')
 
-    def __init__(self, ds_x='', ds_y='', start=50., percent=0., reconfigure='Stop', smooth=5, smode='X and Y', ds_out='coeff'):
+    def __init__(self, ds_x='', ds_y='', start=50., percent=0., factor=1., 
+                 reconfigure='Stop', smooth=5, smode='X and Y', ds_out='coeff'):
         """Define input fields for plugin."""
         self.fields = [
             plugins.FieldDataset('ds_x', 'X Dataset', default=ds_x),
@@ -29,6 +30,8 @@ class CoefficientPlugin(plugins.DatasetPlugin):
             plugins.FieldFloat('start', 'Starting X value', default=start),
             plugins.FieldFloat(
                 'percent', descr='Initial dimension', default=percent),
+            plugins.FieldFloat(
+                'factor', descr='Divide by', default=factor),
             plugins.FieldCombo('reconfigure', descr='When cooling is found', items=[
                                'Restart', 'Stop'], default=reconfigure),
             plugins.FieldInt('smooth', 'Smoothing Window', default=smooth),
@@ -72,8 +75,8 @@ class CoefficientPlugin(plugins.DatasetPlugin):
 
         i = numpy.where(x > start)[0][0]
         j = None
+        
         # Define the end of calc
-
         j = numpy.where(x == x.max())[0][0]
         ymax = y[j]
         xmax = x[j]
@@ -85,12 +88,12 @@ class CoefficientPlugin(plugins.DatasetPlugin):
             if smode == 'X and Y':
                 x[i:j] = SmoothDatasetPlugin.smooth(x[i:j], smooth, 'hanning')
 
-        xstart = x[i]
-        ystart = y[i] or 1
+        xstart = start
+        ystart = y[i-30:i+30].mean() or 1
 
-        out = self.calculate_coefficient(
+        out = calculate_coefficient(
             x, y, xstart, ystart, initial_dimension, getattr(_yds, 'm_percent', False))
-        out[:i + 1] = numpy.nan
+        out[:i+1] = numpy.nan
 
         # TODO: multiple ramps
         # Detect the maximum temperature
@@ -100,23 +103,25 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         else:
             restart_index = numpy.where(x == x.max())[0][0]
 
-            out[restart_index:] = self.calculate_coefficient(x[restart_index:], y[restart_index:],
+            out[restart_index:] = calculate_coefficient(x[restart_index:], y[restart_index:],
                                                              x[restart_index],  y[restart_index],
                                                              initial_dimension, getattr(_yds, 'm_percent', False))
             out[restart_index:][x[restart_index:] > x[restart_index] - 1] = numpy.nan
-
+        # Apply factor
+        out /= fields['factor']
         # Smooth output curve
         if smooth > 0 and smode == 'Output':
             out[i:j] = SmoothDatasetPlugin.smooth(out[i:j], smooth, 'hanning')
         self.ds_out.update(data=out)
         return [self.ds_out]
 
-    def calculate_coefficient(self, x_dataset, y_dataset, x_start, y_start, initial_dimension, is_percent):
-        denominator = 100
-        if not is_percent:
-            denominator = (initial_dimension + y_start)
+def calculate_coefficient(x_dataset, y_dataset, x_start, y_start, 
+                          initial_dimension, is_percent):
+    denominator = initial_dimension or 100.
+    if not is_percent:
+        denominator = (initial_dimension + y_start)
 
-        return (y_dataset - y_start) / (x_dataset - x_start) / denominator
+    return (y_dataset - y_start) / (x_dataset - x_start) / denominator
 
 
 # add plugin classes to this list to get used
