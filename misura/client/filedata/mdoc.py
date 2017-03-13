@@ -321,9 +321,9 @@ class MisuraDocument(document.Document):
         self.emit(QtCore.SIGNAL('updated()'))
         return k
     
-    def save_plot(self, proxy, version, page=0, name=False, text=False):
+    def save_plot(self, proxy, plot_id, page=0, name=False, text=False):
         if not name:
-            name = version
+            name = plot_id
         if not text:
             text = cStringIO.StringIO()
             self.saveToFile(text)
@@ -340,7 +340,7 @@ class MisuraDocument(document.Document):
             logging.debug('Failed rendering')
             render = False
         r = proxy.save_plot(
-            text, plot_id=version, title=name, render=render, render_format='jpg')
+            text, plot_id=plot_id, title=name, render=render, render_format='jpg')
         os.remove(tmp)
         return r, text
     
@@ -355,7 +355,7 @@ class MisuraDocument(document.Document):
             logging.debug('Saving cached dataset', name)
             yield name, ds
     
-    def save_version_and_plot(self, version, vsz_text=False):
+    def save_version_and_plot(self, version_name, vsz_text=False):
         plots = set([])  # filename where plot is already saved
         proxies = {}
         for name, ds in self.iter_data_and_cache():
@@ -370,21 +370,30 @@ class MisuraDocument(document.Document):
             if (not conf or not conf.has_key(node.name())) and not is_local:
                 logging.debug('Skipping invalid dataset:', name, node.name())
                 continue
-            proxy = proxies.get(vfn, False)
+            proxy, proxy_version = proxies.get(vfn, (False, version_name))
             # Ensure conf is saved into proper version
             if proxy is False:
                 proxy = self.proxies.get(vfn, False)
                 if proxy is False:
                     proxy = getFileProxy(vfn, version=None)
-                proxies[vfn] = proxy
                 self.proxies[vfn] = proxy
-                # Create a new version or get same version
-                proxy.create_version(version, overwrite=True)
-                # Load proper version
+                # Use pre-existing version_name
+                version_id = proxy.get_version_by_name(version_name)
+                # Otherwise use latest loaded version
+                if not version_id:
+                    vid = proxy.get_version()
+                    # Keep current version when possible
+                    if vid!='':
+                        proxy_version = proxy.get_versions().get(vid, (version_name,))[0]
+                        print 'AAAAAAAAAAAA', proxy_version
+                # Create a new version or load existing one
+                version_id = proxy.create_version(proxy_version, overwrite=True)
+                # Load proper conf version
                 proxy.save_conf(node.linked.conf.tree())
+                proxies[vfn] = proxy, proxy_version
             if vfn not in plots:
                 #TODO: detect current page
-                r, vsz_text = self.save_plot(proxy, version, text=vsz_text)
+                r, vsz_text = self.save_plot(proxy, version_name, text=vsz_text)
                 plots.add(vfn)
             if name[-2:]=='_t':
                 time_name = 't'
@@ -399,9 +408,9 @@ class MisuraDocument(document.Document):
     def save(self, filename, mode='vsz'):
         """Override Document.save to include version and plot"""
         r = document.Document.save(self, filename, mode)
-        version = get_version_name(filename)
+        version_name = get_version_name(filename)
         vsz_text = open(filename, 'rb').read()
-        r = self.save_version_and_plot(version, vsz_text)
+        r = self.save_version_and_plot(version_name, vsz_text)
         return r        
         
                 

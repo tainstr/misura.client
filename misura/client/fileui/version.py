@@ -54,7 +54,7 @@ class PlotSubMenu(QtGui.QMenu):
 
     def event(self, ev):
         """Tooltip preview handling"""
-        if ev.type() == QtCore.QEvent.ToolTip:
+        if ev.type() == QtCore.QEvent.ToolTip and self.activeAction():
             QtGui.QToolTip.showText(
                 ev.globalPos(), self.activeAction().toolTip())
         else:
@@ -216,20 +216,20 @@ class VersionMenu(QtGui.QMenu):
             self.load_latest_plot()
         self.versionChanged.emit(v)
 
-    def save_version(self, version=False):
+    def save_version(self, version_id=False):
         """Save configuration in current version"""
         # Try to create a new version
-        print 'save_version', version
-        if not version:
-            version = self.proxy.get_version()
-        if version == '':
+        logging.debug('save_version', version_id)
+        if not version_id:
+            version_id = self.proxy.get_version()
+        if version_id == '':
             if not self.new_version():
                 QtGui.QMessageBox.critical(
                     self, _("Not saved"), _("Cannot overwrite original version"))
                 return False
             return True
-        print 'save_version', version
-        version_name, version_date = self.proxy.get_versions()[version]
+        logging.debug('save_version', version_id)
+        version_name, version_date = self.proxy.get_versions()[version_id]
         self.doc.save_version_and_plot(version_name)
         self.current_plot_id = version_name
         self.current = self.proxy.get_version()
