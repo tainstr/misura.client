@@ -108,7 +108,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
                                                              initial_dimension, getattr(_yds, 'm_percent', False))
             out[restart_index:][x[restart_index:] > x[restart_index] - 1] = numpy.nan
         # Apply factor
-        out /= fields['factor']
+        out /= fields.get('factor', 1.)
         # Smooth output curve
         if smooth > 0 and smode == 'Output':
             out[i:j] = SmoothDatasetPlugin.smooth(out[i:j], smooth, 'hanning')
