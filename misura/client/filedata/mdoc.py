@@ -6,6 +6,7 @@ import tempfile
 from pickle import loads, dumps
 import os
 import cStringIO
+import tempfile
 
 from PyQt4 import QtCore
 
@@ -330,7 +331,7 @@ class MisuraDocument(document.Document):
             text = text.getvalue()
     
         ci = document.CommandInterface(self)
-        tmp = 'tmp_veusz_render.jpg'
+        tmp = tempfile.mktemp('.jpg')
         mx = len(self.basewidget.children)-1
         if page>mx:
             page = mx
@@ -385,7 +386,6 @@ class MisuraDocument(document.Document):
                     # Keep current version when possible
                     if vid!='':
                         proxy_version = proxy.get_versions().get(vid, (version_name,))[0]
-                        print 'AAAAAAAAAAAA', proxy_version
                 # Create a new version or load existing one
                 version_id = proxy.create_version(proxy_version, overwrite=True)
                 # Load proper conf version
