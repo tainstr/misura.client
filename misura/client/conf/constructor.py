@@ -272,7 +272,7 @@ RESULT_SEC = 2
 class SectionBox(QtGui.QWidget):
     """Divide section into Status, Configuration and Results toolboxes."""
     sigScrollTo = QtCore.pyqtSignal(int, int)
-
+    
     def __init__(self, server, remObj, prop_list, parent=None, context='Option'):
         QtGui.QWidget.__init__(self, parent=parent)
         self.lay = QtGui.QVBoxLayout()
@@ -340,9 +340,6 @@ class SectionBox(QtGui.QWidget):
         self.lay.addStretch(1)
         self.reorder()
 
-    _last_status = False
-    
-    
     def get_status(self):
         status = [True,True,True]
         # Hide everything
@@ -362,20 +359,18 @@ class SectionBox(QtGui.QWidget):
     def reorder(self):
         # return
         w = None
-        st = self.server.has_key('isRunning') and self.server['isRunning']
+        isRunning = self.server.has_key('isRunning') and self.server['isRunning']
         status = self.get_status()
         # Select what to show
-        if st:
-            status[STATUS_SEC] = True
+        if isRunning:
             status[CONFIG_SEC] = False
-        elif self._last_status:
+            status[STATUS_SEC] = True
             status[RESULT_SEC] = True
         else:
-            status[CONFIG_SEC] = not status[RESULT_SEC]
+            status[CONFIG_SEC] = True
+            status[RESULT_SEC] = True
             status[STATUS_SEC] = False
         self.set_status(status)
-
-        self._last_status = status
 
     def highlight_option(self, handle):
         for sec in [self.config_section, self.status_section, self.results_section]:
@@ -489,7 +484,7 @@ class Interface(QtGui.QTabWidget):
             self.sectionsMap[self._prev_section].set_status(self._prev_section_status)
 
     def reorder(self):
-        # Switch toolbox currentIndexes"
+        """Switch toolbox currentIndexes"""
         for sec in self.sectionsMap.itervalues():
             sec.reorder()
 

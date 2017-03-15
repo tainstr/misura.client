@@ -95,7 +95,6 @@ class MeasureInfo(QtGui.QTabWidget):
         self.insertTab(i, self.results, _('Navigator'))
 
     def refreshSamples(self, *foo):
-        print 'REFRESH SAMPLES'
         nsmp = self.nobj.current
         if self.nsmp == nsmp and self.nodeViews and self.nodes and self.count() > 2:
             logging.debug('NO CHANGE in samples number', self.nsmp, nsmp)
@@ -140,7 +139,6 @@ class MeasureInfo(QtGui.QTabWidget):
         # Remove all node tabs
         for nodevi in self.nodeViews.itervalues():
             i = self.indexOf(nodevi)
-            print 'REMOVE NODEVI', i, nodevi, nodevi.remObj['fullpath']
             if i < 0:
                 continue
             self.removeTab(i)
@@ -149,7 +147,6 @@ class MeasureInfo(QtGui.QTabWidget):
             nodes = self.nodes
         if not nodes:
             nodes = self.get_samples()
-        print 'REFRESH NODES', nodes, self.nodes
         if not nodes:
             return False
         self.nodes = []
