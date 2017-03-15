@@ -36,7 +36,6 @@ class KidRegistry(QtCore.QThread):
     """Signal emitted when connection errors counter changes."""
     connection_error_count = 0
     max_connection_errors = 0
-    max_log_buf = 15000
 
     def __init__(self):
         QtCore.QThread.__init__(self)
@@ -220,7 +219,7 @@ class KidRegistry(QtCore.QThread):
                 w.emit(QtCore.SIGNAL('changed()'))
 
     @lockme()
-    def updateLog(self):
+    def update_log(self):
         r = self.obj.search_log(self.log_time)
         if r is None:
             return False
@@ -228,9 +227,7 @@ class KidRegistry(QtCore.QThread):
         if ltime <= self.log_time:
             return True
         self.log_time = ltime
-        self.log_buf += buf
-        if len(self.log_buf)>self.max_log_buf:
-            self.log_buf = self.log_buf[self.max_log_buf:]
+        self.log_buf = buf
         for entry in buf:
             self.emit(QtCore.SIGNAL('logMessage(int, QString)'), entry[1], entry[-1])
         self.emit(QtCore.SIGNAL('log()'))
@@ -286,7 +283,7 @@ class KidRegistry(QtCore.QThread):
         if r:
             r = self.update_all() is not False
         if r:
-            r = self.updateLog() is not False
+            r = self.update_log() is not False
         return r
 
     def run(self):

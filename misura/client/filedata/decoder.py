@@ -319,11 +319,10 @@ class DataDecoder(QtCore.QThread):
         return t, dat
 
     def run(self):
-        """Runs the decoding in a separate process"""
+        """Runs the decoding in a separate thread"""
         if self.proxy is False:
             logging.debug('No proxy defined')
             return
-#		self.proxy.close()
         fp = self.proxy.copy()
         fp.connect()
 

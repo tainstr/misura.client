@@ -109,7 +109,7 @@ class LiveLog(QtGui.QTableView):
 
     def update(self):
         logging.debug('LiveLog.update')
-        registry.updateLog()
+        registry.update_log()
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))
