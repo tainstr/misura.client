@@ -15,7 +15,7 @@ from livelog import LiveLog
 
 def addrConnection(addr, user=False, password=False, mac=False):
     if False in [user, password]:
-        user, password = confdb.getUserPassword(addr)
+        user, password = confdb.get_from_key('recent_server', addr)[1:3]
     lw = LoginWindow(addr, user, password, globalconn=False)
     try:
         login = lw.tryLogin(user, password, mac)
