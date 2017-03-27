@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
 import threading
-import tempfile
 from pickle import loads, dumps
+import tempfile
 import os
 import cStringIO
-import tempfile
 from traceback import format_exc
 
 from PyQt4 import QtCore
@@ -23,6 +22,7 @@ from model import DocumentModel
 from misura.canon.csutil import lockme
 from .. import units
 from ..clientconf import confdb
+from .. import parameters as params
 from misura.client.axis_selection import get_best_x_for
 
 MAX = 10**5
@@ -330,19 +330,24 @@ class MisuraDocument(document.Document):
             text = cStringIO.StringIO()
             self.saveToFile(text)
             text = text.getvalue()
-    
-        ci = document.CommandInterface(self)
-        tmp = tempfile.NamedTemporaryFile(suffix='.jpg')
+        
+        ci = document.CommandInterface(self)   
+        tmp = os.path.join(params.pathTmp, 'export.jpg')
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        # Touch the file
+        open(tmp, 'w').close()
         mx = len(self.basewidget.children)-1
         if page>mx:
             page = mx
-        ci.Export(tmp.name, page=page)
-        render = open(tmp.name, 'rb').read()
+        ci.Export(tmp, page=page)
+        render = open(tmp, 'rb').read()
         if not len(render):
             logging.debug('Failed rendering')
             render = False
         r = proxy.save_plot(
             text, plot_id=plot_id, title=name, render=render, render_format='jpg')
+        os.remove(tmp)
         return r, text
     
     def iter_data_and_cache(self):

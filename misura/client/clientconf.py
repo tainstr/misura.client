@@ -525,7 +525,7 @@ cf = str(settings.value('/Configuration'))
 if cf == '' or not os.path.exists(cf):
     confdb = ConfDb(params.pathConf)
 elif os.path.exists(cf):
-    params.pathConf = cf
+    params.set_pathConf(cf)
     confdb = ConfDb(path=cf)
 settings.setValue('/Configuration', confdb.path)
 #activate_plugins(confdb)

@@ -1,10 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-
 import sys
 import os
-from time import time
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from PyQt4 import QtCore
@@ -26,11 +24,20 @@ def determine_path(root=False):
             root = os.path.realpath(root)
         return os.path.dirname(os.path.abspath(root))
 
+pathConf = ''
+pathTmp = ''
+def set_pathConf(newval):
+    global pathConf, pathTmp
+    pathConf = newval
+    pathTmp = os.path.join(os.path.dirname(pathConf), 'tmp')
+    if not os.path.exists(pathTmp):
+        os.makedirs(pathTmp)
+
 # Percorso dell'eseguibile
 pathClient = determine_path()
 logging.debug('pathClient', pathClient)
 # Percorso utilizzato per immagazzinare la configurazione del client
-pathConf = os.path.expanduser("~/MisuraData/conf.sqlite")
+set_pathConf(os.path.expanduser("~/MisuraData/conf.sqlite"))
 pathLang = os.path.join(pathClient, 'i18n')
 logging.debug('pathLang', pathLang)
 pathArt = os.path.join(pathClient, 'art')
@@ -49,3 +56,4 @@ experimental3to4 = True
 maxImageCacheSize = 25
 
 debug = True
+
