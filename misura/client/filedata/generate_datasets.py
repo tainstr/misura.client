@@ -44,14 +44,14 @@ def new_dataset_operation(original_dataset, data, name, label, path, unit='volt'
     new_dataset.attr = dict({}, **original_dataset.attr)
     new_dataset.tags = set([])
     new_dataset.data = plugins.numpyCopyOrNone(data)
+    new_dataset.m_opt = opt
     new_dataset.m_var = name
     new_dataset.m_pos = 2
     new_dataset.m_col = new_dataset.m_var
     new_dataset.old_unit = old_unit
     new_dataset.unit = unit
-    new_dataset.m_percent = False
     new_dataset.m_label = _(label)
-    new_dataset.m_opt = opt
+    
     prefix = original_dataset.linked.prefix
     if not path.startswith(prefix):
         path = prefix + path.lstrip('/')

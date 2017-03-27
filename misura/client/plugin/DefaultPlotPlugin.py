@@ -50,7 +50,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 y.append(ds)
                 x.append(timeds)
             else:
-                print 'NO TIMEDS FOUND FOR', ds     
+                logging.debug('NO TIMEDS FOUND FOR', ds)     
         return x, y
                 
     def get_temperature_datasets(self, names, graph):
@@ -74,15 +74,15 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         """Create page and graph if missing"""
         try:
             self.doc.resolveFullWidgetPath(graph)
-            print 'GRAPH OK', graph
+            logging.debug('GRAPH OK', graph)
             return False
         except:
             pass
-        print 'GRAPH MISSING', graph
+        logging.debug('GRAPH MISSING', graph)
         vgraph = graph.split('/')
         page = vgraph[1][:-2]
         has_grid = vgraph[-2] == 'grid'
-        print 'MakeDefaultPlot', page, has_grid, graph
+        logging.debug('MakeDefaultPlot', page, has_grid, graph)
         istime = graph.endswith('/time') or graph.endswith('_time')
         istemp = graph.endswith('/temp') or graph.endswith('_temp')
         self.ops.append(
@@ -97,7 +97,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         return True
           
     def plot_on_graph(self, names, graph):
-        print 'plot_on_graph', graph, len(names)
+        logging.debug('plot_on_graph', graph, len(names))
         self.create_graph(graph)
         if graph.endswith('/temp'):
             x, y = self.get_temperature_datasets(names, graph)
@@ -106,7 +106,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         
         result = PlotDatasetPlugin().apply(
             self.cmd, {'x': x, 'y': y, 'currentwidget': graph})
-        print 'Done plot_on_graph', graph
+        logging.debug('Done plot_on_graph', graph)
         self.created.append(graph)
         return result
         

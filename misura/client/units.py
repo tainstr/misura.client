@@ -206,9 +206,9 @@ hsymbols.update({'micron': u'\u03bcm', 'micron^2': u'\u03bcm²', 'micron^3': u'\
 
 # Create a dictionary unit:dimension
 known_units = {}
-for d, u in from_base.iteritems():
-    for v in u.iterkeys():
-        known_units[v] = d
+for domain, definitions in from_base.iteritems():
+    for unit_name in definitions.iterkeys():
+        known_units[unit_name] = domain
 
 # TODO: resolve composed units; eg: A/B, A*B/C, etc
 
@@ -381,16 +381,6 @@ def convert(ds, to_unit):
     out = func(np.array(ds1.data))
     ds1.data = plugins.numpyCopyOrNone(out)
     ds1.unit = to_unit
-    ds1.m_percent = to_group == 'part'
-
-    ini = getattr(ds, 'm_initialDimension', 0)
-    old_unit = getattr(ds, 'old_unit', from_unit)
-    old_group = known_units.get(old_unit, None)
-    if ini and (old_group == to_group == from_group) and 'part' != to_group:
-        ini1 = func(ini)
-        ds.m_initialDimension = ini1
-        ds1.m_initialDimension = ini1
-        logging.debug('converting m_initialDimension', ini, ini1)
     return ds1
 
 
@@ -416,14 +406,15 @@ def percent_func(ds, action='To Absolute', auto=True):
             raise plugins.DatasetPluginException('Selected dataset does not have an initial dimension set. \
         Please first run "Initial dimension..." tool. {}{}{}'.format(action, ds.m_col, ds.m_initialDimension))
         ds.m_initialDimension = np.array(ds.data[:5]).mean()
-
+    
+    ini = ds.m_initialDimension
     if action == 'To Absolute':
-        u = getattr(ds, 'unit', 'percent')
         # If current dataset unit is not percent, convert to
+        u = getattr(ds, 'unit', 'percent')
         convert_func = Converter.convert_func(u, 'percent')
-        func = lambda out: convert_func(out * ds.m_initialDimension / 100.)
+        func = lambda out: convert_func(out * ini / 100.)
     elif action == 'To Percent':
-        func = lambda out: 100. * out / ds.m_initialDimension
+        func = lambda out: 100. * out / ini
     return func
 
 
@@ -436,12 +427,10 @@ def percent_conversion(ds, action='Invert', auto=True):
     # Evaluate if the conversion is needed
     # based on the current status and the action requested by the user
     if action == 'To Absolute':
-        ds.m_percent = False
         u = getattr(ds, 'unit', 'percent')
         ds.unit = getattr(ds, 'old_unit', False)
         ds.old_unit = u
     elif action == 'To Percent':
-        ds.m_percent = True
         ds.old_unit = getattr(ds, 'unit', False)
         ds.unit = 'percent'
     ds.data = plugins.numpyCopyOrNone(out)

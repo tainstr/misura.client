@@ -43,7 +43,6 @@ class TestCurveOperationPlugin(unittest.TestCase):
         doc = document.Document()
         insertData(doc, {'ds_x': ds_x, 'ds_y': ds_y})
         ds = doc.data['ds_y']
-        ds.m_percent = self.set_y_percent
         doc.setData('ds_y', ds)
         fields = {'ds_x': 'ds_x', 'ds_y': 'ds_y', 'start':start, 'percent':percent, 'reconfigure': reconfigure, 'smooth': smooth, 'smode':smode, 'ds_out': ds_out}
         p = CoefficientPlugin(**fields)

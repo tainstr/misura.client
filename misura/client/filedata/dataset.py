@@ -1,9 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Libreria per il plotting semplice durante l'acquisizione."""
+import collections
+from __builtin__ import property
+
 from veusz import datasets
 from misura.canon import option
-import collections
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
+from .. import units
+
 
 
 class Sample(object):
@@ -65,8 +71,6 @@ class MisuraDataset(datasets.Dataset):
         """Column name"""
         self.m_var = ''
         """Variable name"""
-        self.m_percent = False
-        """Flag which indicate if the dataset has been converted to percentage."""
         self.m_initialDimension = None
         """Initial dimension configured for the dataset."""
         self.m_update = False
@@ -76,16 +80,6 @@ class MisuraDataset(datasets.Dataset):
         self.old_unit = None
         """Original measurement unit"""
         self.tags = set([])
-        
-        
-    @property
-    def m_percent(self):
-        return self.attr['m_percent']
-    @m_percent.setter
-    def m_percent(self, nval):
-        if self.m_opt and nval:
-            self.m_opt['csunit'] = 'percent'
-        self.attr['m_percent'] = nval
         
     @property
     def m_label(self):
@@ -105,10 +99,29 @@ class MisuraDataset(datasets.Dataset):
         
     @property
     def old_unit(self):
-        return self.attr['old_unit']
+        if not self.m_opt:
+            return self.attr['old_unit']
+        return self.m_opt.get('unit', self.attr['old_unit'])
+    
     @old_unit.setter
     def old_unit(self, nval):
-        self.attr['old_unit'] = nval
+        if not self.m_opt:
+            self.attr['old_unit'] = nval
+        else:
+            self.attr['old_unit'] = self.m_opt['unit'] 
+        
+    @property
+    def m_percent(self):
+        # TThis is natively a part ds
+        if self.old_unit in ('None', None):
+            return False
+        if self.unit in units.from_base['part']:
+            return True
+        return False
+    
+    @m_percent.setter 
+    def m_percent(self, nval):
+        logging.error('read-only m_percent', nval)
         
     @property
     def m_update(self):
@@ -119,10 +132,27 @@ class MisuraDataset(datasets.Dataset):
         
     @property
     def m_initialDimension(self):
-        return self.attr['m_initialDimension']
+        ini = self.attr['m_initialDimension']
+        if not ini:
+            return None
+        # Convert initial dimension to the current unit
+        u = getattr(self, 'unit', 'percent')
+        ou = getattr(self, 'old_unit', u)
+        ini1 =  units.Converter.convert(ou, u,  ini)
+        logging.debug('Convert initialdim from ', ou, u, ini, ini1)
+        return ini1
+    
     @m_initialDimension.setter
     def m_initialDimension(self, nval):
-        self.attr['m_initialDimension'] = nval
+        if nval is None:
+            self.attr['m_initialDimension'] = nval
+            return None
+        # Convert initial dimension to the original unit
+        u = getattr(self, 'unit', 'percent')
+        ou = getattr(self, 'old_unit', u)
+        ini1 = units.Converter.convert(u, ou,  nval)
+        self.attr['m_initialDimension'] = ini1
+        logging.debug('Convert initialdim to ', u, ou, nval, ini1)
         
     @property
     def m_keep(self):

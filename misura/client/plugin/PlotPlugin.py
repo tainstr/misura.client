@@ -143,7 +143,6 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             ds.m_initialDimension = getattr(ds.parent.ds,
                                             'm_initialDimension',
                                             None)
-            ds.m_percent = getattr(ds.parent.ds, 'm_percent', None)
 
         pc = getattr(ds, 'm_percent', None)
         if pc is None:

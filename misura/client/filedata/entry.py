@@ -557,10 +557,6 @@ class DatasetEntry(NodeEntry):
     def m_percent(self):
         return getattr(self.ds, 'm_percent', False)
 
-    @m_percent.setter
-    def m_percent(self, b):
-        self.ds.m_percent = b
-
     @property
     def linked(self):
         """Recursive upward search for a linked file"""
