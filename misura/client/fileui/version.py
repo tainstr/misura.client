@@ -189,10 +189,15 @@ class VersionMenu(QtGui.QMenu):
             logging.debug('Found version', v, info)
             p = functools.partial(self.load_version, v)
             vermenu = self.addMenu(' - '.join(info))
+            vmact = vermenu.menuAction()
             act = vermenu.addAction(_('Load version'), p)
             act.setCheckable(True)
             if v == self.current:
                 act.setChecked(True)
+                vmact.setCheckable(True)
+                vmact.setChecked(True)
+            else:
+                vmact.setCheckable(False)
             # Keep in memory
             self.loadActs.append((p, act))
             if v:
