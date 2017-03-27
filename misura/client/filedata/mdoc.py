@@ -7,6 +7,7 @@ from pickle import loads, dumps
 import os
 import cStringIO
 import tempfile
+from traceback import format_exc
 
 from PyQt4 import QtCore
 
@@ -407,10 +408,14 @@ class MisuraDocument(document.Document):
 
     def save(self, filename, mode='vsz'):
         """Override Document.save to include version and plot"""
-        r = document.Document.save(self, filename, mode)
-        version_name = get_version_name(filename)
-        vsz_text = open(filename, 'rb').read()
-        r = self.save_version_and_plot(version_name, vsz_text)
+        try:
+            r = document.Document.save(self, filename, mode)
+            version_name = get_version_name(filename)
+            vsz_text = open(filename, 'rb').read()
+            r = self.save_version_and_plot(version_name, vsz_text)
+        except:
+            logging.critical(format_exc())
+            raise
         return r        
         
                 
