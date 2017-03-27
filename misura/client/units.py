@@ -375,6 +375,7 @@ def convert(ds, to_unit):
     # In case ds derived from a plugin, return the original plugin dataset
 #     ds = getattr(ds0, 'pluginds', ds0)
     from_unit, to_unit, from_group, to_group = get_from_unit(ds, to_unit)
+    logging.debug('Convert', from_unit, to_unit, ds)
     func = convert_func(ds, to_unit)
 
     ds1 = copy(ds)

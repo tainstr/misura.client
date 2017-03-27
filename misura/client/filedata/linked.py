@@ -46,7 +46,7 @@ class LinkedMisuraFile(base.LinkedFileBase):
         if self.instr:
             params.append('uid=' + repr(self.instr.measure['uid']))
         for key in self.params.defaults.keys():
-            if not key in ['prefix', 'version', 'uid', 'filename']:
+            if not key in ['prefix', 'uid', 'filename']:
                 params.append(key + "=" + repr(getattr(self.params, key)))
 
         fileobj.write('ImportMisura(%s)\n' % (', '.join(params)))
