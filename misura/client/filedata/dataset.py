@@ -133,13 +133,15 @@ class MisuraDataset(datasets.Dataset):
     @property
     def m_initialDimension(self):
         ini = self.attr['m_initialDimension']
+        if self.m_opt:
+            ini = self.m_opt.get('initialDimension', ini)
+            self.attr['m_initialDimension'] = ini
         if not ini:
             return None
         # Convert initial dimension to the current unit
         u = getattr(self, 'unit', 'percent')
         ou = getattr(self, 'old_unit', u)
         ini1 =  units.Converter.convert(ou, u,  ini)
-        logging.debug('Convert initialdim from ', ou, u, ini, ini1)
         return ini1
     
     @m_initialDimension.setter
@@ -152,7 +154,8 @@ class MisuraDataset(datasets.Dataset):
         ou = getattr(self, 'old_unit', u)
         ini1 = units.Converter.convert(u, ou,  nval)
         self.attr['m_initialDimension'] = ini1
-        logging.debug('Convert initialdim to ', u, ou, nval, ini1)
+        if self.m_opt:
+            self.m_opt['initialDimension'] = ini1
         
     @property
     def m_keep(self):

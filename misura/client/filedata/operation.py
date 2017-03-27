@@ -232,17 +232,6 @@ def assign_label(ds, col0):
             ds.old_unit = opt["csunit"]
 
 
-def assign_node_attributes(proxy, ds, hdf_dataset_name):
-    """Try to read column metadata from node attrs"""
-    for meta in ['percent', 'initialDimension']:
-        val = 0
-        if proxy.has_node_attr(hdf_dataset_name, meta):
-            val = proxy.get_node_attr(hdf_dataset_name, meta)
-            if type(val) == type([]):
-                val = 0
-        setattr(ds, 'm_' + meta, val)
-
-
 def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
     # Get meas. unit
     u = 'None'
@@ -283,6 +272,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
         ds.old_unit = opt.get('unit', unit)
         ds.unit = opt.get('csunit', ds.old_unit)
     else:
+        logging.debug('No OPT')
         ds.unit = unit
         ds.old_unit = unit
     ds.m_name = prefixed_dataset_name
@@ -296,14 +286,13 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     # Read additional metadata
     if len(data) > 0 and prefixed_dataset_name[-2:] not in ('_t', '_T', ':t'):
         logging.debug('Reading metadata',  hdf_dataset_name)
-        assign_node_attributes(fileproxy, ds, hdf_dataset_name)
         assign_sample_to_dataset(
             ds, linked_file, reference_sample, hdf_dataset_name)
         # Units conversion
         nu = rule_unit(hdf_dataset_name)
         if unit and nu:
             ds = units.convert(ds, nu[0])
-            logging.debug('New dataset unit', ds.unit, ds.old_unit)
+            logging.debug('New dataset unit', ds.unit, ds.old_unit, nu[0])
     elif prefixed_dataset_name.endswith('_t'):
         ds.m_opt = option.ao(
             {}, variable_name, 'Float', 0, 'Time', unit=ds.unit)[variable_name]
@@ -779,12 +768,14 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         sub_map = {}  # Local dataset mapping: main :-> (locals, )
 
         # First import cycle
+        logging.debug('PRIMARY IMPORT')
         for p, col0 in enumerate(['t'] + available):
             self._dataset_import(
                 p, col0, time_sequence, availds, names, error_map, sub_map0)
 
         # Error import cycle
         p = 0
+        logging.debug('ERROR DS IMPORT')
         for main_pcol, error_name in error_map.items():
             m = from_column(main_pcol)
             m.pop(-1)
@@ -811,6 +802,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # Create sub-time dataset. Should be done after the import finishes!
         overall_dataset_names = set(
             self.outdatasets.keys() + self._doc.data.keys() + self._doc.cache.keys())
+        logging.debug('SUBORDERED DS IMPORT')
         for pcol, sub_time_sequence in sub_map0.iteritems():
             subds = self.create_local_datasets(
                 pcol, sub_time_sequence, time_sequence, dataset_names=overall_dataset_names)
@@ -822,6 +814,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 sub_map[pcol] = subds
                 
         # Error association cycle
+        logging.debug('ERROR ASSOCIATION')
         for main_name, error_name in error_map.iteritems():
             # Remove any subordered T,t dataset
             for sub_ds in sub_map.get(error_name, []):
