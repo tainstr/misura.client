@@ -332,18 +332,17 @@ class MisuraDocument(document.Document):
             text = text.getvalue()
     
         ci = document.CommandInterface(self)
-        tmp = tempfile.mktemp('.jpg')
+        tmp = tempfile.NamedTemporaryFile(suffix='.jpg')
         mx = len(self.basewidget.children)-1
         if page>mx:
             page = mx
-        ci.Export(tmp, page=page)
-        render = open(tmp, 'rb').read()
+        ci.Export(tmp.name, page=page)
+        render = open(tmp.name, 'rb').read()
         if not len(render):
             logging.debug('Failed rendering')
             render = False
         r = proxy.save_plot(
             text, plot_id=plot_id, title=name, render=render, render_format='jpg')
-        os.remove(tmp)
         return r, text
     
     def iter_data_and_cache(self):
