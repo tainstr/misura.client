@@ -6,6 +6,8 @@ import veusz.document as document
 import numpy
 import SmoothDatasetPlugin
 
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__file__)
 
 class CoefficientPlugin(plugins.DatasetPlugin):
 
@@ -89,7 +91,10 @@ class CoefficientPlugin(plugins.DatasetPlugin):
                 x[i:j] = SmoothDatasetPlugin.smooth(x[i:j], smooth, 'hanning')
 
         xstart = start
-        ystart = y[i-30:i+30].mean() or 1
+        d = 15
+        pre = max((0, i-d))
+        post = min(i+d, len(y)-1)
+        ystart = y[pre:post].mean() or 1
 
         out = calculate_coefficient(
             x, y, xstart, ystart, initial_dimension, getattr(_yds, 'm_percent', False))
