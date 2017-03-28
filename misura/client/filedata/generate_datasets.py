@@ -177,8 +177,8 @@ def table_to_datasets(proxy, opt, doc):
         for idx in value_idxes:
             name = column_names[idx]
             sub_path = base_path + '/' + name
-            datasets[sub_path] = (
-                tab[idx], name, opt['name'] + ' - ' + name, None, opt)
+            datasets[sub_path] = (tab[idx], name, opt['name'] + ' - ' + name, 
+                                  None, opt)
         add_tT(base_path)
     add_datasets_to_doc(datasets, doc)
     return True

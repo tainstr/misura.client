@@ -88,27 +88,49 @@ class MisuraDataset(datasets.Dataset):
     def m_label(self, nval):
         self.attr['label'] = nval
         
+    def _get_unit(self, name, alt=None):
+        """Get proper unit based on Table column,if
+        dataset represents a column in the table"""
+        u = self.m_opt.get(name, alt)
+        if not self.m_opt['type']=='Table' or u==alt or isinstance(u, basestring):
+            return u
+        #FIXME: Ineffective, see design issue FLTD-348
+        i = self.m_opt.get('column', -1)
+        return u[i]
+    
+    def _set_unit(self, name, nval):
+        """Set proper unit based on Table column,if
+        dataset represents a column in the table"""
+        u = self.m_opt.get(name, None)
+        if not self.m_opt['type']=='Table' or u==None or isinstance(u, basestring):
+            self.m_opt[name] = nval 
+            return 
+        #FIXME: Ineffective, see design issue FLTD-348
+        i = self.m_opt.get('column', -1)
+        self.m_opt[name][i] = nval
+                
+        
     @property
     def unit(self):
         return self.attr['unit']
     @unit.setter
     def unit(self, nval):
         if self.m_opt and nval:
-            self.m_opt['csunit'] = nval
+            self._set_unit('csunit', nval)
         self.attr['unit'] = nval
         
     @property
     def old_unit(self):
         if not self.m_opt:
             return self.attr['old_unit']
-        return self.m_opt.get('unit', self.attr['old_unit'])
+        return self._get_unit('unit', alt=self.attr['old_unit'])
     
     @old_unit.setter
     def old_unit(self, nval):
         if not self.m_opt:
             self.attr['old_unit'] = nval
         else:
-            self.attr['old_unit'] = self.m_opt['unit'] 
+            self.attr['old_unit'] = self._get_unit('unit') 
         
     @property
     def m_percent(self):
