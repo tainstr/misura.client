@@ -88,6 +88,7 @@ class ImportParamsMisura(base.ImportParamsBase):
         'reduce': False,
         'reducen': 1000,
         'time_interval': 1,  # interpolation interval for time coord
+        'time_unit': 'second', # Convert time datasets to this unit
         'rule_exc': clientconf.rule_exc,
         'rule_inc': clientconf.rule_inc,
         'rule_load': clientconf.rule_load,
@@ -699,7 +700,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             logging.debug('Not loading:', col0, m_update)
             pass
         elif col == 't':
-            data = time_sequence
+            data = units.Converter.convert('second', self.params.time_unit, time_sequence)
         elif ('Event' not in attr) and (type != 'Table') and (len(data) == 0) and not is_local and not is_error:
             logging.debug('Loading data', col0)
             data = interpolated(self.proxy, col0, time_sequence)
@@ -756,7 +757,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # Get time sequence
         time_sequence = self.get_time_sequence(self.instrobj)
         if time_sequence is False:
-            logging.debug('No time_sequence! Aborting.', 
+            logging.error('No time_sequence! Aborting.', 
                           self.instrobj.measure['elapsed'])
             return []
 
@@ -862,5 +863,4 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         hdf_names = map(
             lambda name: ("/" + name.lstrip(self.prefix) + "$"), hdf_names)
         LF.params.rule_load = '\n'.join(hdf_names)
-        print '\n'.join(names)
         return names
