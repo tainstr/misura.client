@@ -402,10 +402,12 @@ class MisuraDocument(document.Document):
                 plots.add(vfn)
             if name[-2:]=='_t':
                 time_name = 't'
-                time_data = ds.data
+                time_ds = ds
             else:
                 time_name = get_best_x_for(name, ds.linked.prefix, self.data.keys()+self.cache.keys(), '_t')
-                time_data = self.get_cache(time_name).data
+                time_ds = self.get_cache(time_name)
+            # Ensure time is in seconds
+            time_data = units.Converter.convert(time_ds.unit, 'second', time_ds.data)
             logging.debug('Writing dataset', name)
             proxy.save_data(name, ds.data, time_data, opt=ds.m_opt)
         return True
