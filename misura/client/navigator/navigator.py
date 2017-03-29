@@ -113,6 +113,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.set_status()
         self.doc.signalModified.connect(self.refresh_model)
+        self.doc.sigConfProxyModified.connect(self.update_view)
         self.mod.sigPageChanged.connect(self.ensure_sync_of_view_and_model)
         if self.ncols>1:
             self.setColumnWidth(0, 400)
