@@ -43,7 +43,7 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
         """
         self.ops = []
         self.doc = interface.document
-        # raise DatasetPluginException if there are errors
+        
         ds = interface.document.data.get(fields['ds'], False)
         if not ds:
             raise plugins.DatasetPluginException(
@@ -56,7 +56,11 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
         # Update DataPoints
         convert_func = units.convert_func(ds, fields['convert'])
         utils.convert_datapoint_units(convert_func, fields['ds'], self.doc)
-
+        
+        # Update file-wise time unit if ds is the time dataset
+        if ds.linked and fields['ds']==ds.linked.prefix+'t':
+            ds.linked.params.time_unit = ds1.unit
+            
         ####
         # PROPAGATION
         if not fields['propagate']:
