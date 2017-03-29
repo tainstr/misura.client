@@ -432,9 +432,14 @@ class Interface(QtGui.QTabWidget):
 
     _prev_section = False
     _prev_section_status = False
+    _rebuilding = False
     def rebuild(self, prop_dict=False, force=False, redraw=False):
         """Rebuild the full widget"""
         # Cache previous status
+        if self._rebuilding:
+            self._rebuilding = False
+            return
+        self._rebuilding = True
         if self.sectionsMap:
             i = self.currentIndex()
             self._prev_section = self.sectionsMap.keys()[i]
@@ -449,6 +454,7 @@ class Interface(QtGui.QTabWidget):
             if len(d) == 0 and not (force or redraw):
                 logging.debug(
                     'Interface.rebuild not needed: options are equal.')
+                self._rebuilding = True
                 return
             prop_dict = self.remObj.describe()
             # If a prop_dict was set, just pick currently defined options
@@ -458,6 +464,7 @@ class Interface(QtGui.QTabWidget):
         if not prop_dict:
             logging.critical('Impossible to get object description',
                              self.remObj._Method__name)
+            self._rebuilding = True
             return
         self.clear()
         self.sections = orgSections(prop_dict, self.remObj._readLevel)
@@ -482,6 +489,8 @@ class Interface(QtGui.QTabWidget):
         if self._prev_section and self._prev_section in self.sectionsMap:
             self.show_section(self._prev_section)
             self.sectionsMap[self._prev_section].set_status(self._prev_section_status)
+            
+        self._rebuilding = True
 
     def reorder(self):
         """Switch toolbox currentIndexes"""
