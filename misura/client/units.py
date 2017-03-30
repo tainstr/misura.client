@@ -405,7 +405,7 @@ def percent_func(ds, action='To Absolute', auto=True):
     if not ini:
         if not auto or action != 'To Percent':
             raise plugins.DatasetPluginException('Selected dataset does not have an initial dimension set. \
-        Please first run "Initial dimension..." tool. {}{}{}'.format(action, ds.m_col, ds.m_initialDimension))
+        Please first run "Initial dimension..." tool. {}{}'.format(action, ds))
         ds.m_initialDimension = np.array(ds.data[:5]).mean()
     
     ini = ds.m_initialDimension

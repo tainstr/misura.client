@@ -47,8 +47,10 @@ class PercentPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         # raise DatasetPluginException if there are errors
         ds = interface.document.data.get(fields['ds'], False)
         if not ds:
-            raise plugins.DatasetPluginException(
-                'Dataset not found' + fields['ds'])
+            raise plugins.DatasetPluginException('Dataset not found' + fields['ds'])
+        if isinstance(ds, document.datasets.Dataset1DPlugin):
+            logging.error('Cannot convert to percent a derived dataset. Please convert the source.')
+            return False
 
         action = units.percent_action(ds, fields['action'])
         ds1 = units.percent_conversion(ds, action, fields['auto'])

@@ -137,8 +137,8 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         tree = get_plotted_tree(g)
         dslist = tree['axis'].get(g.path + '/' + ax_name, [])
 
-        is_derived = hasattr(ds, 'ds') and isinstance(ds.ds,
-                                                      document.datasets.Dataset1DPlugin)
+        is_derived = getattr(ds, 'ds', ds) 
+        is_derived = isinstance(is_derived, document.datasets.Dataset1DPlugin)
         if is_derived:
             ds.m_initialDimension = getattr(ds.parent.ds,
                                             'm_initialDimension',
