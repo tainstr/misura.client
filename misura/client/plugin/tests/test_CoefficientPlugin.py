@@ -69,8 +69,8 @@ class TestCurveOperationPlugin(unittest.TestCase):
         out = self.do(x, yp, percent=inidim)[0].data
         self.assertTrue(np.isnan(out[:52]).all())
         delta = teor*10**-8
-        self.assertAlmostEqual(out[52:-1].std(), 0, delta = delta*10**-2)
-        self.assertAlmostEqual(out[52:-1].mean(), teor, delta = delta)
+        self.assertAlmostEqual(out[52:-1].std(), 0, delta = 1e-7)
+        self.assertAlmostEqual(out[52:-1].mean(), teor, delta = 1e-7)
         
         
 

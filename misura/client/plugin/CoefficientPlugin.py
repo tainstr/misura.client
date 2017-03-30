@@ -3,7 +3,7 @@
 """Tools and plugins for Veusz, providing Misura Thermal Analysis functionality"""
 import veusz.plugins as plugins
 import veusz.document as document
-import numpy
+import numpy as np
 import SmoothDatasetPlugin
 
 from misura.canon.logger import get_module_logging
@@ -24,7 +24,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         'Calculate a coefficient between a fixed start value and any subsequent value in a curve')
 
     def __init__(self, ds_x='', ds_y='', start=50., percent=0., factor=1., 
-                 reconfigure='Stop', smooth=5, smode='X and Y', ds_out='coeff'):
+                 reconfigure='Stop', smooth=5, smode='X and Y', linearize=150, ds_out='coeff'):
         """Define input fields for plugin."""
         self.fields = [
             plugins.FieldDataset('ds_x', 'X Dataset', default=ds_x),
@@ -39,6 +39,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
             plugins.FieldInt('smooth', 'Smoothing Window', default=smooth),
             plugins.FieldCombo('smode', descr='Apply Smoothing to', items=[
                                'X and Y', 'Y alone', 'Output'], default=smode),
+            plugins.FieldInt('linearize', 'Linearization window', default=linearize),
             plugins.FieldDataset(
                 'ds_out', 'New output dataset name', default=ds_out),
         ]
@@ -75,11 +76,11 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         x = xds.data
         y = yds.data
 
-        i = numpy.where(x > start)[0][0]
+        i = np.where(x > start)[0][0]
         j = None
         
         # Define the end of calc
-        j = numpy.where(x == x.max())[0][0]
+        j = np.where(x == x.max())[0][0]
         ymax = y[j]
         xmax = x[j]
 
@@ -96,22 +97,23 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         post = min(i+d, len(y)-1)
         ystart = y[pre:post].mean() or 1
 
-        out = calculate_coefficient(
-            x, y, xstart, ystart, initial_dimension, getattr(_yds, 'm_percent', False))
-        out[:i+1] = numpy.nan
+        out = calculate_coefficient(x, y, xstart, ystart, initial_dimension, 
+                                    getattr(_yds, 'm_percent', False), 
+                                    linearize=fields.get('linearize', 0))
+        out[:i+d] = np.nan
 
         # TODO: multiple ramps
         # Detect the maximum temperature
         # and start a new coefficient point
         if recon == 'Stop':
-            out[j:] = numpy.nan
+            out[j:] = np.nan
         else:
-            restart_index = numpy.where(x == x.max())[0][0]
+            restart_index = np.where(x == x.max())[0][0]
 
             out[restart_index:] = calculate_coefficient(x[restart_index:], y[restart_index:],
                                                              x[restart_index],  y[restart_index],
                                                              initial_dimension, getattr(_yds, 'm_percent', False))
-            out[restart_index:][x[restart_index:] > x[restart_index] - 1] = numpy.nan
+            out[restart_index:][x[restart_index:] > x[restart_index] - 1] = np.nan
         # Apply factor
         out /= fields.get('factor', 1.)
         # Smooth output curve
@@ -121,12 +123,26 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         return [self.ds_out]
 
 def calculate_coefficient(x_dataset, y_dataset, x_start, y_start, 
-                          initial_dimension, is_percent):
+                          initial_dimension, is_percent, linearize=0):
     denominator = initial_dimension or 100.
     if not is_percent:
         denominator = (initial_dimension + y_start)
 
-    return (y_dataset - y_start) / (x_dataset - x_start) / denominator
+    out =  (y_dataset - y_start) / (x_dataset - x_start) / denominator
+    if not linearize:
+        return out
+    post = out[linearize:2*linearize]
+    print out
+    print len(out), len(post), linearize, len(np.arange(linearize))
+    factors, res, rank, sing, rcond = np.polyfit(np.arange(linearize)+linearize, post, deg=1, full=True)
+    func = np.poly1d(factors)
+    pre = func(np.arange(linearize))
+    print factors
+    print pre
+    print out[:linearize]
+    out[:linearize] = pre
+    return out
+    
 
 
 # add plugin classes to this list to get used
