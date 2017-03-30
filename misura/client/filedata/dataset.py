@@ -134,7 +134,7 @@ class MisuraDataset(datasets.Dataset):
         
     @property
     def m_percent(self):
-        # TThis is natively a part ds
+        # This is natively a part ds
         if self.old_unit in ('None', None):
             return False
         if self.unit in units.from_base['part']:

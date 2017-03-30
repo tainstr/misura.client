@@ -76,6 +76,12 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         x = xds.data
         y = yds.data
 
+        # Remove/guess initial_dimension if an m_percent flag exists
+        if not getattr(_yds, 'm_percent', True):
+            initial_dimension = getattr(_yds, 'm_initialDimension', initial_dimension)
+        elif getattr(_yds, 'm_percent', None) is True:
+            initial_dimension = 0
+            
         i = np.where(x > start)[0][0]
         j = None
         
@@ -125,21 +131,20 @@ class CoefficientPlugin(plugins.DatasetPlugin):
 def calculate_coefficient(x_dataset, y_dataset, x_start, y_start, 
                           initial_dimension, is_percent, linearize=0):
     denominator = initial_dimension or 100.
+    if not initial_dimension:
+        is_percent = True
     if not is_percent:
         denominator = (initial_dimension + y_start)
 
     out =  (y_dataset - y_start) / (x_dataset - x_start) / denominator
     if not linearize:
         return out
-    post = out[linearize:2*linearize]
-    print out
-    print len(out), len(post), linearize, len(np.arange(linearize))
-    factors, res, rank, sing, rcond = np.polyfit(np.arange(linearize)+linearize, post, deg=1, full=True)
+    linearize = int(min((linearize, len(out)/4.)))
+    end = min(3*linearize, len(out)/2.)
+    post = out[linearize:end]
+    factors, res, rank, sing, rcond = np.polyfit(np.arange(len(post))+linearize, post, deg=1, full=True)
     func = np.poly1d(factors)
     pre = func(np.arange(linearize))
-    print factors
-    print pre
-    print out[:linearize]
     out[:linearize] = pre
     return out
     

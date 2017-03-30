@@ -37,8 +37,6 @@ class TestCurveOperationPlugin(unittest.TestCase):
 
     """Tests the CurveOperationPlugin."""
     
-    set_y_percent = False
-    
     def do(self, ds_x, ds_y, start=50., percent=0., reconfigure='Continue', smooth=5, smode='X and Y', ds_out='coeff'):
         doc = document.Document()
         insertData(doc, {'ds_x': ds_x, 'ds_y': ds_y})
@@ -58,19 +56,20 @@ class TestCurveOperationPlugin(unittest.TestCase):
         teor = 10 ** -4
         # Absolute expansion
         y = x * teor * inidim
+
+        out = self.do(x, y, percent=inidim)[0].data
+        self.assertTrue(np.isnan(out[:51]).all())
+        self.assertAlmostEqual(out[51+15:-1].std(), 0, delta = 4e-7)
+        self.assertAlmostEqual(out[51+15:-1].mean(), teor, delta = 1e-5)
+          
+        #######################  
         # Percent expansion
         yp = 100 * y / inidim
-        
-        out = self.do(x, y, percent=inidim)[0].data
-        print out
-        self.assertTrue(np.isnan(out[:51]).all())
-        
-        self.set_y_percent = True
-        out = self.do(x, yp, percent=inidim)[0].data
+        out = self.do(x, yp, percent=0)[0].data
         self.assertTrue(np.isnan(out[:52]).all())
         delta = teor*10**-8
-        self.assertAlmostEqual(out[52:-1].std(), 0, delta = 1e-7)
-        self.assertAlmostEqual(out[52:-1].mean(), teor, delta = 1e-7)
+        self.assertAlmostEqual(out[51+15:-1].std(), 0, delta = 4e-7)
+        self.assertAlmostEqual(out[51+15:-1].mean(), teor, delta = 1e-5)
         
         
 
