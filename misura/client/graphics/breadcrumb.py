@@ -4,7 +4,8 @@
 from functools import partial
 
 from misura.client.iutils import calc_plot_hierarchy
-
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from PyQt4 import QtGui, QtCore
 
 
@@ -62,7 +63,7 @@ class Breadcrumb(QtGui.QWidget):
         self.doc = plot.doc
         # Connect plot sigPageChanged to set_page
         self.update()
-        self.doc.signalModified.connect(self.update)
+        self.doc.model.sigPageChanged.connect(self.update)
 
     def clear(self):
         while True:
@@ -77,15 +78,22 @@ class Breadcrumb(QtGui.QWidget):
     def update(self):
         p = self.plot.plot.getPageNumber()
         if p>len(self.doc.basewidget.children)-1:
+            logging.error('Non-existent page requested', p)
             return False
+        
         page = self.doc.basewidget.children[p]
         if page == self.page:
+            logging.debug('No update needed', p, self.page.name)
             return False
+        
         self.clear()
         self.page = page
         hierarchy, level, page_idx = calc_plot_hierarchy(self.doc, page)
+        
         if level < 0:
+            logging.debug('Below-zero level requested', level)
             return False
+        
         crumbs = hierarchy[level][page_idx][-2]
         self.crumbs = []
         # Create crumb widgets

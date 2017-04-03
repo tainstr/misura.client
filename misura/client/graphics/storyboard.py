@@ -77,7 +77,7 @@ class Storyboard(QtGui.QWidget):
         # Connect plot sigPageChanged to set_page
         self.update_page_image()
         self.update()
-        self.doc.signalModified.connect(self.update)
+        self.doc.model.sigPageChanged.connect(self.update)
 
     def clear(self):
         while True:
