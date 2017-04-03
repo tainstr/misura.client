@@ -263,6 +263,9 @@ def most_involved_node(involved_plots, doc, exclude=':kiln'):
     # Collect all involved datasets
     involved = []
     for inp in involved_plots:
+        # 'plot' entry is created by get_plotted_tree
+        # Add to involved all datasets involved in all curves plotted
+        # in the involved_plots
         involved += doc.model.plots['plot'].get(inp, [])
     # Find the common ancestor
     involved = [inv.split('/') for inv in involved]
@@ -271,33 +274,36 @@ def most_involved_node(involved_plots, doc, exclude=':kiln'):
     max_len = max(lengths)
     best_count = -1
     crumbs = []
-    most_commons = []
+    # Groups of most common names sorted by depth
+    most_commons = [] 
     best = False
-    ordered = []
     for i in range(max_len):
         # Exclude the last element
         if len(crumbs) >= max_len : #-1:
             break
-        # Keep only ancestors
-        best_involved = filter(
-            lambda inv: len(inv) > i+1, best_involved)
+        # Keep only longer than current depth (i)
+        best_involved = filter(lambda inv: len(inv) > i+1, 
+                               best_involved)
+        # Then keep only common anchestors
         if crumbs:
-            best_involved = filter(
-                lambda inv: inv[:len(crumbs)] == crumbs, best_involved)
-
+            best_involved = filter(lambda inv: inv[:len(crumbs)] == crumbs, 
+                                   best_involved)
+        
+        # Names of the current depth (i) across all involved datasets
         level = [inv[i] for inv in best_involved]
         level = filter(lambda el: exclude not in el, level)
-                
+        
+        # Find the most common name for the current depth (i)
         j = -1
         mc = []
+        best = False
         for m, count in collections.Counter(level).most_common():
-            if count < j:
-                break
+            if count > j:
+                best = m
             j = count
             mc.append(m)
-        if not mc:
+        if not best:
             break
-        best = mc[0]
         most_commons.append(mc)
         # Stop if the count decreases
         if count < best_count:
@@ -305,7 +311,7 @@ def most_involved_node(involved_plots, doc, exclude=':kiln'):
         best_count = count
         crumbs.append(best)
         
-    print 'most_common', most_commons
+    #print 'most_common', involved_plots, crumbs, most_commons
     return crumbs, most_commons
 
 
@@ -315,7 +321,7 @@ def calc_plot_hierarchy(doc, page_obj, exclude=':kiln/'):
     hierarchy = defaultdict(list)
 
     for page, page_plots in pages.iteritems():
-        crumbs = most_involved_node(page_plots, doc)[0]
+        crumbs = most_involved_node(page_plots, doc, exclude=exclude)[0]
         notes = doc.resolveFullWidgetPath(page).settings.notes
         hierarchy[len(crumbs)].append((page, page_plots, crumbs, notes))
 
