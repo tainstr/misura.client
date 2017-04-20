@@ -204,6 +204,8 @@ class DataDecoder(QtCore.QThread):
     def get_time(self, t):
         if self.ext == 'Profile':
             f = self.proxy.get_time_profile
+        elif self.ext == 'CumulativeProfile':
+            f = self.proxy.get_time_cumulative_profile
         else:
             f = self.proxy.get_time_image
         # Compatibility with absolute-time datasets
@@ -259,8 +261,8 @@ class DataDecoder(QtCore.QThread):
             qimg.loadFromData(dat, 'BMP')
             return t, qimg
         # Writing a profile onto an image
-        elif self.ext == 'Profile':
-            logging.debug('Profile', seq)
+        elif self.ext in ('Profile', 'CumulativeProfile'):
+            logging.debug(self.ext, seq)
             ((w, h), x, y) = dat
             return t, draw_profile(x, y, contour_only=self.contour_only, pen_width=self.contour_width)
 
@@ -309,7 +311,7 @@ class DataDecoder(QtCore.QThread):
         if self.zerotime < 0:
             self.zerotime = self.proxy.get_node_attr('/conf', 'zerotime')
         t, dat = self.data[seq]
-        if self.ext == 'img':
+        if self.ext == 'Image':
             self.emit(QtCore.SIGNAL('readyImage(QImage)'), dat)
         self.emit(QtCore.SIGNAL('readyFrame()'))
         logging.debug('found data', self.zerotime, t)

@@ -508,9 +508,9 @@ class DatasetEntry(NodeEntry):
 
         vars = ','.join(self.vars)
         if pm.plugin.name == 'Coefficient':
-            v = 'Coeff(%i,%s\degC) ' % (pm.fields['start'], vars)
+            v = 'Coeff(%i,%s{\deg}C) ' % (pm.fields['start'], vars)
         elif pm.plugin.name == 'Derive':
-            v = 'Der(%i\deg,%s)' % (pm.fields['order'], vars)
+            v = 'Der(%i{\deg},%s)' % (pm.fields['order'], vars)
         else:
             v = getattr(ds, 'm_var', vars)
         return v

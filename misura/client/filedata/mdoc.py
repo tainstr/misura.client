@@ -82,7 +82,7 @@ class MisuraDocument(document.Document):
     def create_proxy_decoders(self, proxy, prefix=False):
         """Create one decoder for each relevant dataset in proxy"""
         dec = proxy.header(
-            ['Binary', 'Profile', 'Image', 'ImageM3', 'ImageBMP'])
+            ['Binary', 'Profile', 'CumulativeProfile', 'Image', 'ImageM3', 'ImageBMP'])
         logging.debug('FOUND FOLDERS', dec)
         proxy_path = proxy.get_path() + ':'
         if not prefix:

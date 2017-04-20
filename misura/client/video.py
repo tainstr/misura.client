@@ -78,7 +78,7 @@ def export(sh, frame='/hsm/sample0/frame',
 # 		print 'exporting {:.2f} {} {:.0f}'.format(100.*i/N,i,t)
         if isinstance(ref, reference.Binary):
             im = cv.imdecode(np.frombuffer(img, dtype='uint8'), 1)
-        elif isinstance(ref, reference.Profile):
+        elif isinstance(ref, reference.Profile) or isinstance(ref, reference.CumulativeProfile):
             # Blank image
             im = np.ones((hMax, wMax), np.uint8) * 255
             # Color black area contained in path
