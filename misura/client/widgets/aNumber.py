@@ -170,9 +170,9 @@ class aNumber(ActiveWidget):
 
     def set_error(self, error=None):
         if error is None:
-            error = self.prop.get('error', None)
-            if error and self.remObj.has_key(error):
-                error = self.remObj.get(error)
+            err = self.prop.get('error', None)
+            if err and self.remObj.has_key(err):
+                err = self.remObj.get(err)
         self.error = error
         if error is None:
             self.spinbox.setSuffix('')
