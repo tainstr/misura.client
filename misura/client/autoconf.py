@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Auto configuration script for standard Misura4 full-optional"""
+from traceback import print_exc
 
 
 ##################
@@ -8,33 +9,44 @@
 ##################
 
 # Camera serials
-left_cam_serial = 's61443500'
-right_cam_serial = 's61443503'
-flex_cam_serial = 's61450503'
-micro_cam_serial = 's191447500'
+left_cam_serial = 's61628520'
+right_cam_serial = 's61608506'
+flex_cam_serial = 's61628529'
+micro_cam_serial = 's191628503'
 
 # Motor boards
+# board_microfocus_path = 'idx0'
+# board_left_xy_path = 'idx0/board1'
+# board_left_angk_path = 'idx0/board2'
+# board_right_xy_path = 'idx0/board3'
+# board_right_ang_path = 'idx0/board4'
 board_microfocus_path = 'idx0'
-board_left_xy_path = 'idx0/board1'
-board_left_angk_path = 'idx0/board2'
-board_right_xy_path = 'idx0/board3'
-board_right_ang_path = 'idx0/board4'
+board_left_xy_path = 'idx0/board3'
+board_left_angk_path = 'idx0/board4'
+board_right_xy_path = 'idx0/board2'
+board_right_ang_path = 'idx0/board1'
 
-# TEST
-left_cam_serial = 'simcam0'
-right_cam_serial = 'simcam1'
-flex_cam_serial = 'simcam2'
-micro_cam_serial = 'simcam3'
+
+tacontroller = '192.1.200.20:2020' # False
 
 ##################
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from exceptions import RuntimeError
 
+def speed(motor):
+    if motor['sloPe'] <= 8000:
+        motor['sloPe'] = 8000
+    if motor['Rate'] <= 3000:
+        motor['Rate'] = 3000    
+
 def send_to_zero(motor):
-    print 'sending to zero:', motor['fullpath']
+    print 'sending to zero:', motor['fullpath'], motor['sloPe'], motor['Rate']
+    speed(motor)
     motor['micro'] = 'lower step'
+    
     print motor['limits']
+    
     motor.wait(60)
     if motor['goingTo']!=0:
         logging.error('goingTo!=0 after send_to_zero',motor['goingTo'])
@@ -46,19 +58,22 @@ def send_to_zero(motor):
 
 def board_send_to_zero(board):
     motors = board['motors']
+    print 'board_send_to_zero', motors, board.list()
     for dev in board.devices:
         if dev['devpath'] in motors:
             send_to_zero(dev)
             continue
-        board_send_to_zero(dev)
+        elif dev['devpath'] in ['X', 'Y']:
+            print 'skipping disabled motor', dev['fullpath']
+        else:
+            print 'send_to_zero child board', dev['fullpath']
+            board_send_to_zero(dev)
     return False
 
 
 def motor_find_limits(motor, name):
-    if motor['sloPe'] == 8000:
-        motor['sloPe'] = 3000
-    if motor['Rate'] == 800:
-        motor['Rate'] = 2000
+    print 'motor_find_limits', motor['fullpath'], name, motor['sloPe'], motor['Rate']
+    speed(motor)
     motor['name'] = name
     motor['micro'] = 'both ends'
     print motor['limits']
@@ -89,6 +104,8 @@ def board_find_limits(board, xname=False, yname=False):
 
 
 def starting_position(motor, steps, config_name):
+    print 'starting_position', motor['sloPe'], motor['Rate']
+    speed(motor)
     motor['goingTo'] = steps
     motor.wait(60)
     if motor['position']!=steps:
@@ -140,28 +157,42 @@ class FirstSetupWizard(object):
         self.right_y = self.board_right_xy.Y
         self.right_ang = self.board_right_ang.X
         
-        
+    
+    def camera_names(self):
+        m = self.server
         # Camera names
-        assert len(m.beholder.list()) == 4, 'Wrong camera identification'
-        self.left_cam = toPath(m.beholder, left_cam_serial)
-        self.left_cam['name'] = 'Left'
-        self.left_cam['autocrop'] = 'Never'
-        self.left_cam['clock'] = 26
-        self.left_cam.save('default')
-        self.right_cam = toPath(m.beholder, right_cam_serial)
-        self.right_cam['name'] = 'Right'
-        self.right_cam['autocrop'] = 'Never'
-        self.right_cam['clock'] = 26
-        self.right_cam.save('default')
-        self.flex_cam = toPath(m.beholder, flex_cam_serial)
-        self.flex_cam['name'] = 'Flex'
-        self.flex_cam['autocrop'] = 'Never'
-        self.flex_cam['clock'] = 26
-        self.flex_cam.save('default')
-        self.micro_cam = toPath(m.beholder, micro_cam_serial)
-        self.micro_cam['name'] = 'Microscope'
-        self.micro_cam['clock'] = 92
-        self.micro_cam.save('default')
+        try:
+            self.left_cam = toPath(m.beholder, left_cam_serial)
+            self.left_cam['name'] = 'Left'
+            self.left_cam['autocrop'] = 'Never'
+            self.left_cam['clock'] = 26
+            self.left_cam.save('default')
+        except:
+            print_exc()
+            
+        try:
+            self.right_cam = toPath(m.beholder, right_cam_serial)
+            self.right_cam['name'] = 'Right'
+            self.right_cam['autocrop'] = 'Never'
+            self.right_cam['clock'] = 26
+            self.right_cam.save('default')
+        except:
+            print_exc()
+        try:
+            self.flex_cam = toPath(m.beholder, flex_cam_serial)
+            self.flex_cam['name'] = 'Flex'
+            self.flex_cam['autocrop'] = 'Never'
+            self.flex_cam['clock'] = 26
+            self.flex_cam.save('default')
+        except:
+            print_exc()
+        try:
+            self.micro_cam = toPath(m.beholder, micro_cam_serial)
+            self.micro_cam['name'] = 'Microscope'
+            self.micro_cam['clock'] = 92
+            self.micro_cam.save('default')
+        except:
+            print_exc()
     
     def configure_motors(self):
         assert len(self.server.morla.list()) == 1, 'Motion board detection failed'
@@ -205,6 +236,12 @@ class FirstSetupWizard(object):
         
     def configure_limits(self):
         # Safety zero positioning
+        self.board_microfocus['motors'] = 'X,Y'
+        self.board_left_xy['motors'] = 'X,Y'
+        self.board_left_angk['motors'] = 'X,Y'
+        self.board_right_xy['motors'] = 'X,Y'
+        self.board_right_ang['motors'] = 'X'
+        
         board_send_to_zero(self.board_microfocus)
         board_find_limits(self.board_microfocus, 'Focus', 'Microscope')
     
@@ -265,6 +302,7 @@ class FirstSetupWizard(object):
     ######
     def configure_cameras(self):
         print 'Configure cameras'
+        self.camera_names()
         m = self.server
         m.beholder['servedClasses'] = ['']
         m.beholder.save('default')
@@ -311,35 +349,48 @@ class FirstSetupWizard(object):
     
     def configure_encoders(self):
         print 'Configure encoders'
+        self.camera_names()
         for cam in self.server.beholder.devices:
             cam.encoder.focus.motor = self.m_focus
             cam.encoder.focus.save('default')
+            
+        try:
+            self.micro_cam.encoder.y.motor = self.m_micro
+            self.micro_cam.encoder.y.save('default')
+        except:
+            print_exc()
+        
+        try:
+            self.flex_cam.encoder.y.motor = self.m_micro
+            self.flex_cam.encoder.y.save('default')
+        except:
+            print_exc()
     
-        self.micro_cam.encoder.y.motor = self.m_micro
-        self.micro_cam.encoder.y.save('default')
+        try:
+            self.left_cam.encoder.x.motor = self.left_x
+            self.left_cam.encoder.x.align = -2
+            self.left_cam.encoder.x.save('default')
+            self.left_cam.encoder.y.motor = self.left_y
+            self.left_cam.encoder.y.save('default')
+        
+            self.left_cam.encoder.angle.motor = self.left_ang
+            self.left_cam.encoder.angle.save('default')
+        except:
+            print_exc()
     
-        self.flex_cam.encoder.y.motor = self.m_micro
-        self.flex_cam.encoder.y.save('default')
-    
-        self.left_cam.encoder.x.motor = self.left_x
-        self.left_cam.encoder.x.align = -2
-        self.left_cam.encoder.x.save('default')
-    
-        self.left_cam.encoder.y.motor = self.left_y
-        self.left_cam.encoder.y.save('default')
-    
-        self.left_cam.encoder.angle.motor = self.left_ang
-        self.left_cam.encoder.angle.save('default')
-    
-        self.right_cam.encoder.x.motor = self.right_x
-        self.right_cam.encoder.x.align = 2
-        self.right_cam.encoder.x.save('default')
-    
-        self.right_cam.encoder.y.motor = self.right_y
-        self.right_cam.encoder.y.save('default')
-    
-        self.right_cam.encoder.angle.motor = self.right_ang
-        self.right_cam.encoder.angle.save('default')
+
+        try:
+            self.right_cam.encoder.x.motor = self.right_x
+            self.right_cam.encoder.x.align = 2
+            self.right_cam.encoder.x.save('default')
+        
+            self.right_cam.encoder.y.motor = self.right_y
+            self.right_cam.encoder.y.save('default')
+        
+            self.right_cam.encoder.angle.motor = self.right_ang
+            self.right_cam.encoder.angle.save('default')
+        except:
+            print_exc()
     
     def process_tc_reader(self, dev):
         """Identify TC Reader device"""
@@ -355,18 +406,16 @@ class FirstSetupWizard(object):
             dev['name'] = 'Termostat'
             dev['input'] = 23
             dev.save('default')
-            self.tc_termostat = dev    
-    
-    def configure_kiln(self):
-        print 'Configure kiln'
+            self.tc_termostat = dev 
+            
+    def configure_epack(self):
+        """Configure the system for ePack device"""
         m = self.server
         assert len(m.smaug.list()) == 3, 'Wrong number of thermal control devices'
-    #	m.smaug['servedClasses']=['Eurotherm_ePack', 'DatExel']
         m.smaug['epack'] = '10.0.8.88:502'
         m.smaug['rescan']
         m.smaug.save('default')
-        m.kiln.motor = self.m_flash
-        m.kiln['motorStatus'] = 2
+
         
         for dev in m.smaug.devices:
             if dev['mro'][0] == 'DatExel':
@@ -391,7 +440,32 @@ class FirstSetupWizard(object):
         m.kiln.setattr('P', 'options', [pw, 'default', 'power'])
         m.kiln.setattr('powerSwitch', 'options', [pw, 'default', 'enabled'])
     
-        m.kiln.save('default')
+    def configure_tacontroller(self):
+        """Configure system for TAController device"""
+        m.smaug['socket'] = tacontroller
+        m.smaug['rescan']
+        m.smaug.save('default')   
+        ta = getattr(m.smaug, tacontroller.replace('.', '').replace(':',''))
+        ta['name'] = 'TAController'
+        ta.save('default')
+        ta = ta['fullpath']
+        m.kiln.setattr('Ts', 'options', [ta, 'default', 'T'])
+        m.kiln.setattr('Tk', 'options', [ta, 'default', 'TFurnace'])
+        m.kiln.setattr('Te', 'options', [ta, 'default', 'RT'])
+        m.kiln.setattr('P', 'options', [ta, 'default', 'power'])
+            
+    
+    def configure_kiln(self):
+        print 'Configure kiln'
+        m = self.server
+        m.kiln.motor = self.m_flash
+        m.kiln['motorStatus'] = 2
+        
+        if not tacontroller:
+            self.configure_epack()
+        else:
+            self.configure_tacontroller()
+        m.kiln.save('default') 
         
     def do(self, argv=False):
         """Full setup"""
@@ -425,4 +499,4 @@ if __name__ == '__main__':
     """
     m = from_argv()
     fsw = FirstSetupWizard(m)
-    fsw.do(argv[1])
+    fsw.do(argv[-1])
