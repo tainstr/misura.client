@@ -94,17 +94,18 @@ class PresetManager(aChooser):
 
     def user_is_not_sure(self, message):
         answer = QtGui.QMessageBox.warning(
-            self, "Are you sure?", message, QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
+            self, _("Are you sure?"), message, QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
 
         return answer == QtGui.QMessageBox.No
 
     def redraw(self, *args, **kwargs):
-        """Overload per introdurre la voce speciale +Add al termine della lista"""
+        """Append +Add at the end of choices"""
         # First calls standard redraw
-        aChooser.redraw(self, *args, **kwargs)
+        r = aChooser.redraw(self, *args, **kwargs)
         # Then adds +Add special entry
         self.combo.blockSignals(True)
-        self.combo.addItem('+Add')
+        if r:
+            self.combo.addItem('+Add')
         if self.combo.count() <= 1:
             self.connect(
                 self.combo, QtCore.SIGNAL('highlighted(int)'), self.add)
