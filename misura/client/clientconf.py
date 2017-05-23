@@ -65,6 +65,10 @@ ao(default_desc, 'logsize', **{'name': 'Size of each log file', 'current':
 ao(default_desc, 'lognumber', **{'name': 'Max number of logfiles to be kept',
                                  'current': 50, 'min': 0, 'type': 'Integer', 'parent': 'logdir'})
 
+ao(default_desc, 'templates', **{'name': 'Templates directory',
+                              'current': os.path.expanduser("~/MisuraData/templates"),
+                              'type': 'FilePath'})
+
 
 u = [[k, v] for k, v in units.user_defaults.iteritems()]
 ao(default_desc, 'units', 'Table', [
@@ -112,6 +116,7 @@ rule_style = [[('Rule', 'String'), ('Range', 'String'), ('Scale', 'Float'),
               ['/kiln/T$', '', 1, 'red', '', '']
               ]
 ao(default_desc, 'rule_style', 'Table', rule_style, 'Formatting')
+
 
 ao(default_desc, 'm3', 'Section', 'Data import', 'Data import')
 ao(default_desc, 'm3_enable', 'Boolean', True, 'Enable Misura 3 database interface')
@@ -295,6 +300,13 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         
         self.emit(QtCore.SIGNAL('load()'))
         
+        for key in ['logdir', 'templates']:
+            if not os.path.exists(self[key]):
+                logging.debug('Creating configured directory', key, self[key])
+                try:
+                    os.makedirs(self[key])
+                except:
+                    logging.error(format_exc())
         
         
         self.reset_rules()

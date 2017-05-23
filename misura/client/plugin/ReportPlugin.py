@@ -19,6 +19,12 @@ from utils import OperationWrapper
 from report_plugin_utils import wr, render_meta
 from veusz.document.operations import OperationWidgetDelete
 
+from misura.client.clientconf import confdb
+
+shape_names = {'m4': ('Sintering', 'Softening', 'Sphere', 'HalfSphere', 'Melting'),
+               'm3': ('m3_Sintering', 'm3_Softening', 'm3_Sphere', 'm3_HalfSphere', 'm3_Melting'),
+               'cen': ('cen_Sintering', 'cen_Deformation', 'cen_Emisphere', 'cen_Flow'),
+               }
 
 class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
     menu = ('Misura','Create Sample Report')
@@ -28,15 +34,27 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
     description_short = 'Create Report for Misura sample'
     # text to appear in dialog box
     description_full = 'Create a Report page for a Misura sample'
+    templates = {}
     def __init__(self, sample=None, template_file_name='default.vsz', measure_to_plot='d'):
         """Make list of fields."""
+        
+        
+        self.templates = {}
+        for path in (params.pathArt, confdb['templates']):
+            for fn in os.listdir(path):
+                if not fn.endswith('.vsz'):
+                    continue
+                if not fn.startswith('report_'):
+                    continue
+                self.templates[fn] = path
+        
         self.fields = [
             FieldMisuraNavigator(
                 "sample", descr="Target sample:", depth='sample', default=sample),
-            plugins.FieldText(
-                'measure_to_plot', 'Measure to plot', default=measure_to_plot),
-            plugins.FieldText(
-                'template_file_name', 'Template filename', default=template_file_name),
+            plugins.FieldText('measure_to_plot', 'Measure to plot', 
+                              default=measure_to_plot),
+            plugins.FieldCombo('template_file_name', 'Template filename', 
+                               default=template_file_name, items=self.templates.keys()),
         ]
 
     def apply(self, command_interface, fields):
@@ -75,12 +93,26 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
             pass
         measure = instr.measure
         sample = getattr(instr, smp_name)
-
-        d = os.path.join(params.pathArt, fields['template_file_name'])
+        
+        tpath = self.templates.get(fields['template_file_name'], False)
+        if not tpath:
+            d = fields['template_file_name']
+        else:
+            d = os.path.join(tpath, fields['template_file_name'])
         logo = os.path.join(params.pathArt, 'logo.png')
         tpl = open(d, 'rb').read().replace("u'report'", "u'{}'".format(report_path[1:]))
         command_interpreter.run(tpl)
-
+        
+        std = 'm4'
+        if 'Standard: Misura 4' in tpl:
+            std = 'm4'
+        elif 'Standard: Misura 3' in tpl:
+            std = 'm3'
+        elif 'Standard: CEN/TS' in tpl:
+            std = 'cen' 
+        
+        shapes = shape_names[std]
+        
         page = doc.resolveFullWidgetPath(report_path)
         # Substitutions
         tc = kiln['curve']
@@ -119,26 +151,27 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
             page.getChild('logo'), 'filename', logo)
 
         msg = ''
-
+        
         should_draw_shapes = True
-
-        for sh in ('Sintering', 'Softening', 'Sphere', 'HalfSphere', 'Melting'):
+        
+        for sh in shapes:
             if not sample.has_key(sh):
                 should_draw_shapes = False
 
         if should_draw_shapes:
-            for sh in ('Sintering', 'Softening', 'Sphere', 'HalfSphere', 'Melting'):
+            for sh in shapes:
                 pt = sample[sh]
+                shn = sample.gete(sh)['name']
                 if pt['time'] in ['None', None, '']:
                     msg += 'None\\\\'
-                    self.toset(page.getChild('lbl_' + sh), 'label', sh + ', ?')
+                    self.toset(page.getChild('lbl_' + sh), 'label', shn + ', ?')
                     continue
                 image_reference = {'dataset': smp_path + '/profile',
                                    'filename': test.params.filename,
                                    'target': pt['time']}
                 self.dict_toset(page.getChild(sh), image_reference)
                 T = '%.2f{{\\deg}}C' % pt['temp']
-                self.toset(page.getChild('lbl_' + sh), 'label', sh + ', ' + T)
+                self.toset(page.getChild('lbl_' + sh), 'label', shn + ', ' + T)
                 msg += T + '\\\\'
             self.toset(page.getChild('shapes'), 'label', msg)
 
@@ -148,8 +181,8 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
             self.toset(page.getChild('lbl_initial'), 'label',
                        'Initial, %.2f{{\\deg}}C' % T)
 
-            self.toset(page.getChild('standard'), 'label', wr(
-                'Standard', sample['preset'], 50))
+            #self.toset(page.getChild('standard'), 'label', wr(
+            #    'Standard', sample['preset'], 50))
 
         # Thermal cycle plotting
         from ..procedure.thermal_cycle import ThermalCyclePlot
