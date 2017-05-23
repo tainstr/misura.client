@@ -62,8 +62,9 @@ class Plot(VeuszPlot):
 
     def idx_connect(self):
         """Reconnect index line motion events"""
-        wg = self.doc.resolveFullWidgetPath('/temperature/temp/idx')
-        wg.settings.get('xPos').setOnModified(self.move_line_temp)
+        # CANNOT work with heating/cooling! 
+        #wg = self.doc.resolveFullWidgetPath('/temperature/temp/idx')
+        #wg.settings.get('xPos').setOnModified(self.move_line_temp)
         wg = self.doc.resolveFullWidgetPath('/time/time/idx')
         wg.settings.get('xPos').setOnModified(self.move_line_time)
 
@@ -211,9 +212,9 @@ class Plot(VeuszPlot):
         if seq < 0:
             seq = self.idx
         for g, dsn in (('/time/time/', '0:t'), ('/temperature/temp/', '0:kiln/T')):
-            logging.debug(self.document.data.keys())
             ds = self.document.data[dsn]
             if seq >= len(ds.data):
+                logging.debug('Skipping red bar', g, dsn, seq, len(ds.data))
                 return
             xval = ds.data[seq]
             xax = self.document.resolveFullWidgetPath(g + 'x')
@@ -221,7 +222,7 @@ class Plot(VeuszPlot):
             rg = xax.getPlottedRange()
             # Calc relative position with respect to X axis
             rel = (xval - rg[0]) / (rg[1] - rg[0])
-            logging.debug('Red bar relative position:',
+            logging.debug('Red bar relative position:', g, dsn, seq,
                           rel, xval, rg, xax.autorange, xax.plottedrange)
             self.cmd.To(g + 'idx')
             self.cmd.Set('xPos', rel)

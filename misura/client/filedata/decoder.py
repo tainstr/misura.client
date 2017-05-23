@@ -191,7 +191,6 @@ class DataDecoder(QtCore.QThread):
 
     def __len__(self):
         if self.isRunning():
-            logging.debug('decoder running', self._len)
             return self._len
         r = 0
         try:

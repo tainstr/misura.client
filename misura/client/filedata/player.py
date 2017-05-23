@@ -67,7 +67,8 @@ class FilePlayer(QtCore.QThread):
         self.idx = idx
 
     def set_idx(self, idx=-1):
-        logging.debug('FilePlay.set_idx', idx)
+        #logging.debug('FilePlay.set_idx', idx)
+        return
         if not self.doc:
             logging.debug('NO DOC')
             return

@@ -154,7 +154,6 @@ class MiniImage(QtGui.QWidget):
             self.lbl_info.hide()
             return False
         p = self.base_dataset_path
-        logging.debug('update_info', p)
 
         # Document-based index
         idx = csutil.find_nearest_val(self.doc.data['0:t'].data, self.t)
@@ -220,7 +219,6 @@ class MiniImage(QtGui.QWidget):
         self.update_info()
 
     def zoom(self, width=0):
-        logging.debug('zooming')
         if not width:
             width = self.defaultWidth
         width = min(width, self.maxWidth)

@@ -33,7 +33,7 @@ logging = get_module_logging(__name__)
 class MisuraDocument(document.Document):
 
     """Extended Veusz document with connectivity to a single Misura test file, local or remote"""
-    up = True
+    up = False
     zerotime = None
     interval = 1  # Update interval
     instrument_name = False
@@ -69,11 +69,13 @@ class MisuraDocument(document.Document):
         if proxy:
             self.proxy = proxy
             self.proxy_filename = proxy.get_path()
+            self.up = True
         elif filename:
             self.proxy = getFileProxy(filename)
             self.proxy_filename = filename
+            self.up = False
         else:
-            up = False
+            self.up = False
             return
         if self.proxy_filename:
             self.proxies[self.proxy_filename] = self.proxy
