@@ -242,11 +242,16 @@ class VersionMenu(QtGui.QMenu):
 
     def new_version(self):
         """Create a new version"""
-        name, st = QtGui.QInputDialog.getText(
-            self, _('Version name'), _('Choose a name for this version'))
+        qid = QtGui.QInputDialog(self)
+        qid.setInputMode(0)
+        qid.setWindowTitle(_('Version name'))
+        qid.setLabelText(_('Choose a name for this version'))
+        qid.setInputMethodHints(QtCore.Qt.ImhEmailCharactersOnly)
+        st = qid.exec_()
         if not st:
             return False
-        self.proxy.create_version(unicode(name))
+        name = qid.textValue()
+        self.proxy.create_version(unicode(name).encode('ascii', 'replace'))
         self.save_version()
         return True
 
