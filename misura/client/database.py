@@ -10,6 +10,7 @@ from misura.client import _
 from misura.canon import csutil, indexer
 
 
+
 file_column = 0
 serial_column = 1
 uid_column = 2
@@ -283,13 +284,32 @@ class DatabaseWidget(QtGui.QWidget):
         self.resize(QtGui.QApplication.desktop().screen().rect().width(
         ) / 2, QtGui.QApplication.desktop().screen().rect().height() / 2)
 
-    def rebuild(self):
+    def _rebuild(self):
+        from .live import registry
+        self.remote.tasks = registry.tasks
         self.remote.rebuild()
         self.up()
+        
+    def rebuild(self):
+        from .widgets import RunMethod
+        r = RunMethod(self._rebuild)
+        r.pid = 'Rebuilding database'
+        r.abort = self.remote.abort
+        QtCore.QThreadPool.globalInstance().start(r)        
 
-    def refresh(self):
+    def _refresh(self):
+        from .live import registry
+        self.remote.tasks = registry.tasks
         self.remote.refresh()
         self.up()
+        
+    def refresh(self):
+        from .widgets import RunMethod
+        r = RunMethod(self._refresh)
+        r.pid = 'Refreshing database'
+        r.abort = self.remote.abort
+        QtCore.QThreadPool.globalInstance().start(r)
+        
 
     def up(self):
         logging.debug('DATABASEWIDGET UP')
