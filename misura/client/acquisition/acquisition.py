@@ -92,6 +92,7 @@ class MainWindow(QtGui.QMainWindow):
     server = False
     remote = False
     myMenuBar = False
+    plotboardDock = False
 
     @property
     def tasks(self):

@@ -203,6 +203,16 @@ class MenuBar(QtGui.QMenuBar):
             w.hide()
             self.windows.pop(key)
             
+    def add_view_plotboard(self):
+        if self.parent().plotboardDock is False:
+            return False
+        self.windows['plotboardDock'] = self.parent().plotboardDock
+        self.showPlotBoardWindow = functools.partial(self.hideShow, 'plotboardDock')
+        act = self.view_menu.addAction(_('Plots Board Window'), self.showPlotBoardWindow)
+        act.setCheckable(True)
+        act.setChecked(self.parent().plotboardDock.isVisible())
+        self.lstActions.append((act, 'plotboardDock'))     
+        return True      
 
     def setInstrument(self, remote, server):
         self.clear_windows()
@@ -256,6 +266,8 @@ class MenuBar(QtGui.QMenuBar):
         self.showLogWindow = functools.partial(self.hideShow, 'logDock')
         act = self.view_menu.addAction(_('Log Window'), self.showLogWindow)
         self.lstActions.append((act, 'logDock'))
+        
+        self.add_view_plotboard()
 
         self.measure.addAction(_('Reload data'), self.reload_data)
 

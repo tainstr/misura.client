@@ -132,7 +132,8 @@ class TestWindow(acquisition.MainWindow):
         self.plotboard = Storyboard(self)
         self.plotboard.set_plot(self.summaryPlot)
         self.plotboardDock.setWidget(self.plotboard)
-        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.plotboardDock)        
+        self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.plotboardDock) 
+        self.myMenuBar.add_view_plotboard()       
         
     def create_version_plot_menus(self):
         self.actStandard = self.myMenuBar.measure.addAction(
