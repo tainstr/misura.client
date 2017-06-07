@@ -114,19 +114,20 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 continue
             # Absolute time translations
             if t > conf['zerotime'] / 2:
+                logging.debug('Absolute time translation', t, conf['zerotime'])
                 t -= conf['zerotime']
             # Temperature plotting
             basename = smpe.path.replace('/', ':') + '_'
             val = T if 'temp' in cur.split('/') else t
-            print 'Selected value based on ', cur, val
+            logging.debug('Selected value based on ', shape, cur, val, pt,t, T)
             f = {'currentwidget': cur,
                  'axis': 'X',
                  'val': val,
                  'text': txt,
                  'basename': basename + shape,
                  'target': vds,
-                 'search': 'None',
-                 'searchRange': 25
+                 'search': 'Nearest (Fixed X)',
+                 'searchRange': 5
                  }
             self.ops.append(
                 document.OperationToolsPlugin(InterceptPlugin(), f))
