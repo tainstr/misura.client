@@ -105,8 +105,16 @@ def read_data(proxy, col):
     """Read `col` node from `proxy`"""
     data0 = np.array(proxy.col(col, (0, None)))
     # FIXME: now superfluous?
-    data = data0.view(np.float64).reshape((len(data0), 2))
-    data = data[np.isfinite(data[:, 1])]
+    # FixedTimeArray
+    if data0.shape[1] == 1:
+        t0 = proxy.get_node_attr(col, 't0')
+        dt = proxy.get_node_attr(col, 'dt')
+        n = data0.shape[0]
+        t = np.linspace(t0, t0+n*dt, n)
+        return np.array([t, data0[:,0]]).transpose()
+    else:
+        data = data0.view(np.float64).reshape((len(data0), 2))
+        data = data[np.isfinite(data[:, 1])]
     return data
 
 
@@ -518,7 +526,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # Will list only Array-type descending from /summary
         cached = ['/summary/' + el.split(':')[-1]
                   for el in self._doc.cache.keys()]
-        header = self.proxy.header(['Array'], '/summary') + cached
+        header = self.proxy.header(['Array', 'FixedTimeArray'], '/summary') + cached
         autoload = []
         excluded = []
         logging.debug('got header', len(header))

@@ -744,7 +744,7 @@ class MainWindow(QtGui.QMainWindow):
             self._finishFileProxy(doc)
 
     def refresh_header(self):
-        self.server.storage.test.live.header(['Array'], False, True)
+        self.server.storage.test.live.header(['Array', 'FixedTimeArray'], False, True)
 
 
     def get_live_file_or_retry_later(self, retry, recursion):

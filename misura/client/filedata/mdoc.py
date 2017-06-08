@@ -267,7 +267,7 @@ class MisuraDocument(document.Document):
         # New time point in time units
         nt = [units.Converter.convert('second', tu, elp)]
         k = []
-        header = self.proxy.header(['Array'], '/summary')
+        header = self.proxy.header(['Array', 'FixedTimeArray'], '/summary')
         for h in header[:]:
             r = confdb.rule_dataset(h, latest=True)
             if r:
