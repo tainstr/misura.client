@@ -149,7 +149,8 @@ class Active(object):
             'ReadOnly' in self.attr) or (write_level < self.writeLevel)
         self.hard = 'Hard' in self.attr
         self.hot = 'Hot' in self.attr
-        self.label = _(self.name)    
+        self.label = _(self.name)
+        return self.prop
         
 
     def isVisible(self):
@@ -235,7 +236,6 @@ class Active(object):
             logging.debug('Not setting',self.handle, repr(val))
             return True
         out = self.remObj.set(self.handle,  val)
-        logging.debug('Active.set', self.handle, repr(val), out, self.current)
         return self.get()
 
     def set_raw(self, val):

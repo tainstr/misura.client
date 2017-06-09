@@ -7,6 +7,7 @@ from misura.client.parameters import MAX, MIN
 from misura.client.widgets.active import ActiveWidget, extend_decimals
 import math
 from misura.canon.logger import get_module_logging
+from misura.canon import option
 logging = get_module_logging(__name__)
 
 from traceback import print_exc
@@ -125,9 +126,30 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
             return (QtGui.QValidator.Invalid, text, pos)
         return (QtGui.QValidator.Acceptable, text, pos)
 
+class SpinboxAction(QtGui.QWidgetAction):
+    def __init__(self, label, current=0, minimum=0, maximum=100, callback=lambda *a: 0, parent=None):
+        QtGui.QWidgetAction.__init__(self, parent)
+        
+        self.label = QtGui.QLabel(label)
+        self.spinbox = ScientificSpinbox()
+        self.spinbox.setValue(current)
+        self.spinbox.setMinimum(minimum)
+        self.spinbox.setMaximum(maximum)
+        self.spinbox.editingFinished.connect(callback)
+        
+        self.w = QtGui.QWidget()
+        lay = QtGui.QVBoxLayout()
+        lay.addWidget(self.label)
+        lay.addWidget(self.spinbox)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(0)
+        self.w.setLayout(lay)
+        self.setDefaultWidget(self.w)
+        
+    
 
 class aNumber(ActiveWidget):
-    zoom_factor = 10.
+    zoom_factor = 1.
     zoomed = False
     precision = -1
     error = None
@@ -137,7 +159,7 @@ class aNumber(ActiveWidget):
         min_value = self.prop.get('min', None)
         max_value = self.prop.get('max', None)
         step = self.prop.get('step', False)
-
+        
         self.precision = self.prop.get('precision', -1)
         self.divider = 1.
         # If max/min are defined, create the slider widget
@@ -167,6 +189,45 @@ class aNumber(ActiveWidget):
                     self.slider, QtCore.SIGNAL('valueChanged(int)'), self.sliderPush)
             self.spinbox.flexibleChanged.connect(self.boxPush)
         self.update(minmax=False)
+        self.build_range_menu()
+        
+    def build_range_menu(self):
+        self.range_menu = None
+        if None in (self.min, self.max):
+            return False
+        self.range_menu = self.emenu.addMenu(_('Range'))
+        self.range_min = SpinboxAction(_('Min'), self.min, maximum=self.max, 
+                                       callback=self.set_range_minimum, parent=self)
+        self.range_menu.addAction(self.range_min)
+        self.range_max = SpinboxAction(_('Max'), self.max, minimum=self.min, 
+                                       callback=self.set_range_maximum, parent=self)
+        self.range_menu.addAction(self.range_max)
+        self.range_step = SpinboxAction(_('Step'), self.step, minimum=0, maximum=(self.max-self.min)/3., 
+                                       callback=self.set_range_step, parent=self)
+        self.range_menu.addAction(self.range_step)
+        return True
+        
+                
+    def set_range_minimum(self):
+        val = self.range_min.spinbox.value()
+        print('MIN', val)
+        self.prop['min'] = val
+        self.min = val
+        self.setRange(self.min, self.max, self.step)
+        
+    def set_range_maximum(self):
+        val = self.range_max.spinbox.value()
+        print('MAX', val)
+        self.prop['max'] = val
+        self.max = val
+        self.setRange(self.min, self.max, self.step)
+        
+    def set_range_step(self):
+        val = self.range_step.spinbox.value()
+        print('MAX', val)
+        self.prop['step'] = val
+        self.step = val
+        self.setRange(self.min, self.max, self.step)
 
     def set_error(self, error=None):
         if error is None:
@@ -242,6 +303,10 @@ class aNumber(ActiveWidget):
 
     def setZoom(self, val):
         """Enable/disable zooming"""
+        if val:
+            self.zoom_factor = 10.
+        else:
+            self.zoom_factor = 1.
         self.setRange(self.min, self.max, self.step)
         if self.slider:
             if self.slider.zoomed:
@@ -273,9 +338,8 @@ class aNumber(ActiveWidget):
             if not self.double:
                 cur = int(cur)
             self.setRange(self.min, self.max, self.step)
-            #print 'aNumber.update',self.handle,cur,self.current
+            print 'aNumber.update',self.handle,cur,self.current
             self.spinbox.setValue(cur)
-#           self.setRange(self.min, self.max, self.step)
             if self.slider:
                 self.slider.setValue(int(cur * self.divider))
         except:
@@ -293,17 +357,6 @@ class aNumber(ActiveWidget):
         if m != None and M != None:
             m = self.adapt2gui(m)
             M = self.adapt2gui(M)
-            if not step:
-                step = abs(M - m) / 100.
-            if self.double:
-                m = float(m)
-                M = float(M)
-            else:
-                m = int(m)
-                M = int(M)
-                step = int(step)
-                if step == 0:
-                    step = 1
             self.min, self.max = m, M
         else:
             if M == None:
@@ -320,32 +373,34 @@ class aNumber(ActiveWidget):
                     m = -2147483647
             else:
                 self.min = m
-            step = cur / 10.
         if self.slider and self.slider.zoomed:
             d = abs(M - m) / self.zoom_factor
             m = max((cur - d, m))
             M = min((cur + d, M))
-            step = step / d
-#       print 'Setting range',m,M,step
         if self.double:
             self.divider = 10.**self.spinbox.float_decimals
+            m = float(m)
+            M = float(M)
         else:
             step = int(step)
             m = int(m)
             M = int(M)
-        if step == 0:
-            step = 1
+            self.divider = 1
         self.spinbox.setRange(m, M)
         self.step = step
-        self.divider = 1
-        self.spinbox.setSingleStep(step * self.divider)
-#       print 'aNumber.setRange',self.handle,min,max,step,cur
+        self.spinbox.setSingleStep(step)
+        print 'aNumber.setRange',self.handle,m,M,step,cur, self.divider
         if self.slider:
-            self.slider.setMaximum(M * self.divider)
-            self.slider.setMinimum(m * self.divider)
-            self.slider.setSingleStep(step * self.divider)
-            self.slider.setPageStep(step * 2 * self.divider)
-
+            if step == 0:
+                step = self.divider*abs(M-m)/100.
+            step /= self.zoom_factor
+            if not self.double:
+                step= int(step)
+            self.slider.blockSignals(True)
+            self.slider.setRange(m * self.divider, M * self.divider)
+            self.slider.setPageStep(step * 5 * self.divider)
+            self.slider.setValue(cur*self.divider)
+            self.slider.blockSignals(False)
 
 class aNumberAction(QtGui.QWidgetAction):
 
@@ -364,3 +419,5 @@ class aNumberAction(QtGui.QWidgetAction):
     def showEvent(self, event):
         self.wdg.get()
         return QtGui.QWidgetAction.showEvent(self, event)
+    
+
