@@ -73,12 +73,21 @@ class aNumber(unittest.TestCase):
         self.assertEqual(w.current, 0)
         self.assertFalse(w.slider)
 
-    def test_MIN_MAX(self):
+    def test_MIN_MAX_int(self):
         self.root.sete(
             'Test', option.ao({}, 'Test', 'Integer', 5, min=-10,  max=10)['Test'])
         w = self.wgGen()
         self.assertEqual(w.current, 5)
         self.assertTrue(w.slider)
+        iutils_testing.show(w, __name__)
+        
+    def test_MIN_MAX_dbl(self):
+        self.root.sete(
+            'Test', option.ao({}, 'Test', 'Float', 5, min=-10,  max=10)['Test'])
+        w = self.wgGen()
+        self.assertEqual(w.current, 5)
+        self.assertTrue(w.slider)
+        iutils_testing.show(w, __name__)
 
     def test_Properties(self):
         self.root.sete(

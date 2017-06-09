@@ -4,7 +4,6 @@ import functools
 from time import time
 import collections
 import threading
-import math
 from traceback import format_exc
 
 import numpy as np
@@ -28,19 +27,18 @@ def extend_decimals(cur, default=2, extend_by=2):
     """Find out how many decimals to enable in editing for float value `num`"""
     if np.isnan(cur):
         return 0
-    cur = float(cur)
-    if abs(cur) < 1 and abs(cur) > 1e-32:
-        dc = math.log(abs(1. / cur), 10)
-        dc = int(abs(dc))
-        base = max(int(dc), default)
-        return base + extend_by
-    d = abs(cur-int(cur))
-    l = 0
-    if d>0:
-        l = int(round(abs(math.log(d, 10)),0))+2
-    if l<default:
-        return l
-    return default
+    cur = abs(float(cur))
+    n = 0
+    lim = 10**(-default)
+    while n<default:
+        d = cur-int(cur)
+        print('BBBBBB', n, d, lim, cur)
+        if d<=lim:
+            break
+        cur *= 10
+        n+=1
+        print('CCCCCC', n)
+    return n
 
 
 def getRemoteDev(server, devpath):
