@@ -66,7 +66,6 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
         p = self.precision if self.precision >= 0 else 0
         dc = extend_decimals(self.value(), default=p, extend_by=p)
         self.float_decimals = dc 
-        print('AAAAAAAAAAAA', self.precision, p, self.float_decimals, self.value())
         
     def set_precision(self, p):
         self.precision=p
@@ -143,6 +142,7 @@ class SpinboxAction(QtGui.QWidgetAction):
         self.label = QtGui.QLabel(label)
         self.spinbox = ScientificSpinbox(double=double)
         self.spinbox.setValue(current)
+        self.spinbox.set_precision(4)
         self.spinbox.setMinimum(minimum)
         self.spinbox.setMaximum(maximum)
         self.spinbox.setSingleStep(step)

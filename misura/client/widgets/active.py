@@ -32,12 +32,10 @@ def extend_decimals(cur, default=2, extend_by=2):
     lim = 10**(-default)
     while n<default:
         d = cur-int(cur)
-        print('BBBBBB', n, d, lim, cur)
         if d<=lim:
             break
         cur *= 10
         n+=1
-        print('CCCCCC', n)
     return n
 
 

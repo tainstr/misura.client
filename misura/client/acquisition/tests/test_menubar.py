@@ -17,6 +17,7 @@ class Parent(QtGui.QWidget):
     graphWin = False
     tableWin = False
     logDock = False
+    plotboardDock = False
 
     def setInstrument(self, instrument): self.ins = instrument
 
