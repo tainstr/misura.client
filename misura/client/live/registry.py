@@ -213,11 +213,14 @@ class KidRegistry(QtCore.QThread):
                 self.system_kid_changed.emit(kid)
         return updated
 
-    def force_redraw(self):
-        for kid, ws in self.rid.items():
-            for w in ws:
+    def force_redraw(self, kids=False):
+        if kids is False:
+            kids = self.kid.keys()
+        # Update all
+        for kid in kids:
+            for w in self.rid.get(kid, []):
                 w.emit(QtCore.SIGNAL('changed()'))
-
+                w.emit(QtCore.SIGNAL('changedOption()'))
     @lockme()
     def update_log(self):
         r = self.obj.search_log(self.log_time)

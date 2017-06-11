@@ -43,7 +43,7 @@ class PresetManager(aChooser):
         else:
             self.combo.setCurrentIndex(self.prevIdx)
             r = False
-        self.redraw()
+        self.changed_option()
         return r
 
     def remove(self):
@@ -54,7 +54,7 @@ class PresetManager(aChooser):
         self.combo.setCurrentIndex(0)
         self.remObj.call(self.remove_handle,
                          self.adapt2srv(i))
-        self.redraw()
+        self.changed_option()
 
     def save_current(self):
         if self.user_is_not_sure("Overwrite \"%s\" preset?" % self.combo.currentText()):
@@ -72,7 +72,7 @@ class PresetManager(aChooser):
             if self.user_is_not_sure("Overwrite \"%s\" preset?" % new_name):
                 return False
         r = self.remObj.call(self.save_handle, new_name)
-        self.redraw()
+        self.changed_option()
         return r
         
         
@@ -83,7 +83,7 @@ class PresetManager(aChooser):
         if not st:
             return False
         self.remObj.call(self.rename_handle, str(new_name))
-        self.redraw()
+        self.changed_option()
         self.current = False
         self.get()
         return True
@@ -98,10 +98,10 @@ class PresetManager(aChooser):
 
         return answer == QtGui.QMessageBox.No
 
-    def redraw(self, *args, **kwargs):
+    def changed_option(self, *args, **kwargs):
         """Append +Add at the end of choices"""
         # First calls standard redraw
-        r = aChooser.redraw(self, *args, **kwargs)
+        r = aChooser.changed_option(self, *args, **kwargs)
         # Then adds +Add special entry
         self.combo.blockSignals(True)
         if r:

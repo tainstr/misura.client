@@ -16,7 +16,7 @@ class aChooser(ActiveWidget):
         self.combo = QtGui.QComboBox(parent=self)
         self._options = []
         self._values = []
-        self.redraw(reget=False)
+        self.changed_option(reget=False)
         self.lay.addWidget(self.combo)
         self.connect(
             self.combo,  QtCore.SIGNAL('currentIndexChanged(int)'), self.try_set)
@@ -25,21 +25,21 @@ class aChooser(ActiveWidget):
         """Update the widget anytime the mouse enters its area.
         This must be overridden in one-shot widgets, like buttons."""
         if self.type == 'FileList':
-            self.redraw()
+            self.changed_option()
         else:
             self.get()
-            self.redraw()
+            self.changed_option()
         return ActiveWidget.enterEvent(self, event)
 
     def try_set(self, idx):
         result = self.set(idx)
         new_idx = self.adapt2gui(result)
         if new_idx != idx:
-            self.redraw()
+            self.changed_option()
 
-    def redraw(self, reget=True):
+    def changed_option(self, reget=True):
         # Get new property
-        self.prop = self.remObj.gete(self.handle)
+        super(aChooser, self).changed_option()
         opt = self.prop.get('options', [])
         vals = self.prop.get('values', opt)
         if opt == self._options or vals == self._values:

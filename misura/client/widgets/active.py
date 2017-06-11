@@ -192,11 +192,17 @@ class Active(object):
         self.emit(QtCore.SIGNAL('changed'), self.current)
         self.emit(QtCore.SIGNAL('changed()'))
         self.emitOptional()
-#       print 'emitChanged', self.label
 
-#    def emitSelfChanged(self, nval):
-#        """Called from diff threads"""
-#        self.emit(QtCore.SIGNAL('selfchanged'), nval)
+    def emitRedraw(self):
+        """Perform an hard-reset of the widget"""
+        self.emit(QtCore.SIGNAL('redraw()'))
+        
+    def redraw(self):
+        pass
+    
+    def changed_option(self):
+        self.update_option()
+        
 
     def emitError(self, msg):
         msg = self.tr(msg)
@@ -299,6 +305,10 @@ class ActiveObject(Active, QtCore.QObject):
             self, QtCore.SIGNAL('selfchanged'), self._get, QtCore.Qt.QueuedConnection)
         self.connect(
             self, QtCore.SIGNAL('selfchanged()'), self._get, QtCore.Qt.QueuedConnection)
+        self.connect(
+            self, QtCore.SIGNAL('redraw()'), self.redraw, QtCore.Qt.QueuedConnection)
+        self.connect(
+            self, QtCore.SIGNAL('changedOption()'), self.changed_option, QtCore.Qt.QueuedConnection)
 
     def emit(self, *a, **k):
         try:
@@ -387,7 +397,7 @@ class ActiveWidget(Active, QtGui.QWidget):
     """Auto-hide menu button"""
     get_on_enter = True
     """Update on mouse enter"""
-
+    
     def __init__(self, server, remObj, prop, parent=None, context='Option'):
         Active.__init__(self, server, remObj, prop, context)
         QtGui.QWidget.__init__(self, parent)
@@ -395,11 +405,28 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self._win_map = {}
+        self.label = self.tr(self.name)
         self.lay = QtGui.QHBoxLayout()
         self.lay.setContentsMargins(0, 0, 0, 0)
         self.lay.setSpacing(0)
         self.setLayout(self.lay)
-        self.label = self.tr(self.name)
+        self.redraw()
+        
+    def clear_layout(self, lay=None):
+        if lay is None:
+            lay=self.lay
+        while True:
+            w = lay.takeAt(0)
+            if not w:
+                break
+            w1 = w.widget()
+            if w1 is None:
+                self.clear_layout(w.layout())
+            else:
+                w1.deleteLater()
+            
+    def redraw(self):
+        self.clear_layout()
         self.label_widget = LabelWidget(self)  # Info label
         self.emenu = QtGui.QMenu(self)
         self.presets_menu = QtGui.QMenu(_('Presets'), parent=self)
@@ -418,6 +445,10 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.menu_timer.setInterval(500)
         self.connect(self.menu_timer, QtCore.SIGNAL(
             'timeout()'), self.do_hide_menu, QtCore.Qt.QueuedConnection)
+        self.connect(
+            self, QtCore.SIGNAL('redraw()'), self.redraw, QtCore.Qt.QueuedConnection)
+        self.connect(
+            self, QtCore.SIGNAL('changedOption()'), self.changed_option, QtCore.Qt.QueuedConnection)        
         
     def new_window(self):
         """Displays a copy of the widget in a new window"""

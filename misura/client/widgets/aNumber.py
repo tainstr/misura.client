@@ -55,13 +55,16 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
     def __init__(self, double=True, scientific_decimals=8, parent=None):
         QtGui.QDoubleSpinBox.__init__(self, parent=parent)
         self.scientific_decimals = scientific_decimals
-        self.double=double
+        self.set_double(double)
+        self.valueChanged.connect(self.reemit)
+        
+    def set_double(self, val):
+        self.double = val
         if not self.double:
             self.setDecimals(0)
         else:
             self.setDecimals(1000)
-            self.float_decimals = 2
-        self.valueChanged.connect(self.reemit)
+            self.float_decimals = 2      
         
     def update_float_decimals(self):
         p = self.precision if self.precision >= 0 else 0
@@ -165,29 +168,32 @@ class aNumber(ActiveWidget):
     zoomed = False
     precision = -1
     error = None
-
+    slider_class = FocusableSlider
+    spinbox = False
+    slider = False
+    
     def __init__(self, server, remObj, prop, parent=None, slider_class=FocusableSlider):
+        self.slider_class = slider_class
         ActiveWidget.__init__(self, server, remObj, prop, parent)
+        
+        
+    def changed_option(self):
+        self.precision = self.prop.get('precision', -1)
+        self.divider = 1.
+        # Initializing
+        if not self.spinbox:
+            return 
         min_value = self.prop.get('min', None)
         max_value = self.prop.get('max', None)
         step = self.prop.get('step', False)
-        
-        self.precision = self.prop.get('precision', -1)
-        self.divider = 1.
-        # If max/min are defined, create the slider widget
-        self.slider = False
-        if None not in [max_value, min_value]:
-            self.slider = slider_class(QtCore.Qt.Horizontal, parent=self)
-            self.slider.zoom.connect(self.setZoom)
-            self.lay.addWidget(self.slider)
-        # Identify float type from type or current/max/min/step
-        if self.type == 'Float' or type(0.1) in [type(self.current), type(min_value), type(max_value), type(step)]:
+        if self.type == 'Float' or type(0.1) in [type(self.current), 
+                                                 type(min_value),
+                                                 type(max_value),
+                                                 type(step)]:
             self.double = True
         else:
             self.double = False
-        self.spinbox = ScientificSpinbox(double=self.double, parent=self)
-        self.spinbox.setKeyboardTracking(False)
-        self.lay.addWidget(self.spinbox)
+        self.spinbox.set_double(self.double)
         self.setRange(min_value, max_value, step)
         # Connect signals
         if self.readonly:
@@ -202,6 +208,24 @@ class aNumber(ActiveWidget):
         self.update(minmax=False)
         self.spinbox.set_precision(self.precision)
         self.build_range_menu()
+        
+    def redraw(self):
+        # Create the layout
+        print 'REDRAW', self.handle
+        super(aNumber, self).redraw()
+        # If max/min are defined, create the slider widget
+        if None not in [self.prop.get('min', None), self.prop.get('max', None)]:
+            self.slider = self.slider_class(QtCore.Qt.Horizontal, parent=self)
+            self.slider.zoom.connect(self.setZoom)
+            self.lay.addWidget(self.slider)
+            
+        self.spinbox = ScientificSpinbox(parent=self)
+        self.spinbox.setKeyboardTracking(False)
+        self.lay.addWidget(self.spinbox)
+        
+        self.changed_option()
+        
+
         
     def build_range_menu(self):
         self.range_menu = None

@@ -42,4 +42,4 @@ class aFileList(aChooser):
         from ..live import registry
         self.transfer.set_tasks(registry.tasks)
         self.transfer.start()
-        self.redraw()
+        self.changed_option()

@@ -16,10 +16,10 @@ class ThermalCycleChooser(PresetManager):
                                remove_handle='delete_cycle',
                                rename_handle='rename_cycle')
 
-    def redraw(self, *args, **kwargs):
+    def changed_option(self, *args, **kwargs):
         """Overload per introdurre la voce speciale +Add al termine della lista"""
         # First calls standard redraw
-        aChooser.redraw(self, *args, **kwargs)
+        aChooser.changed_option(self, *args, **kwargs)
         # Then adds +Add special entry
         self.combo.blockSignals(True)
         if self.table:
@@ -43,4 +43,4 @@ class ThermalCycleChooser(PresetManager):
             self.remObj['thermalCycle'] = str(name)
         else:
             self.combo.setCurrentIndex(self.prevIdx)
-        self.redraw()
+        self.changed_option()
