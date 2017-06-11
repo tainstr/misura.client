@@ -48,6 +48,8 @@ locale = str(locale.split('_')[0]).lower()
 
 MAX = 10**22
 MIN = -MAX
+MAXINT = 2147483647
+MININT = -2147483647
 
 max_curve_len = 3000
 

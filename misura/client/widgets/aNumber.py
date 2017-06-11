@@ -3,7 +3,7 @@
 from .. import _
 from PyQt4 import QtCore, QtGui
 from traceback import format_exc
-from misura.client.parameters import MAX, MIN
+from misura.client.parameters import MAX, MIN, MAXINT, MININT
 from misura.client.widgets.active import ActiveWidget, extend_decimals
 import math
 from misura.canon.logger import get_module_logging
@@ -12,6 +12,7 @@ import numpy as np
 logging = get_module_logging(__name__)
 
 from traceback import print_exc
+
 
 class FocusableSlider(QtGui.QSlider):
     zoom = QtCore.pyqtSignal(bool)
@@ -253,6 +254,7 @@ class aNumber(ActiveWidget):
     def set_precision(self):
         self.precision = self.range_precision.spinbox.value()
         self.spinbox.set_precision(self.precision)
+        self.set_tooltip()
 
     def set_error(self, error=None):
         if error is None:
@@ -341,6 +343,7 @@ class aNumber(ActiveWidget):
         self.setRange(self.min, self.max, self.step)
 
     def update(self, minmax=True):
+        self.set_tooltip()
         if self.slider and self.slider.paused:
             return False
         # Block remote updates while editing
@@ -391,14 +394,14 @@ class aNumber(ActiveWidget):
                 if self.double:
                     M = MAX
                 else:
-                    M = 2147483647
+                    M = MAXINT
             else:
                 self.max = M
             if m == None:
                 if self.double:
                     m = MIN
                 else:
-                    m = -2147483647
+                    m = MININT
             else:
                 self.min = m
         if self.slider and self.slider.zoomed:
@@ -431,6 +434,24 @@ class aNumber(ActiveWidget):
             self.slider.setPageStep(step * 5 * self.divider)
             self.slider.setValue(cur*self.divider)
             self.slider.blockSignals(False)
+        self.set_tooltip()
+            
+    def set_tooltip(self):
+        mx, mn = 'inf', '-inf'
+        if self.max and ((self.double and self.max<MAX) or (self.max<MAXINT)):
+            mx = self.spinbox.textFromValue(self.max)
+        if self.min and ((self.double and self.min>MIN) or (self.min>MININT)):
+            mn = self.spinbox.textFromValue(self.min)
+        tp = _('Range: {} >> {}\nStep: {}\n').format(mn, mx, self.step)
+        tp += _('Precision: {}').format(self.precision)
+        if self.slider:
+            tp += _(' Zoom: {}').format(self.zoom_factor*self.slider.zoomed)
+        err = self.prop.get('error', None)
+        if err:
+            tp += _('Error: {}').format(err)
+        if self.slider:
+            self.slider.setToolTip(tp)
+        self.spinbox.setToolTip(tp)
 
 class aNumberAction(QtGui.QWidgetAction):
 
