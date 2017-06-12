@@ -267,13 +267,19 @@ class MainWindow(QtGui.QMainWindow):
         f.setPointSizeF(f.pointSizeF() * 1.2)
         label.setFont(f)
 
-    def notify(self, level, msg):
+    def notify_status(self, level, msg):
+        """Notify single message into the statusbar"""
+        if level<confdb['lognotify']:
+            return False
+        self.updateStatusbar(msg)
+        return True
+    
+    def notify_tray(self, level, msgs):
+        """Notify messages into the systray"""
         if level<confdb['lognotify']:
             return False
         self.tray_icon.show()
-        self.tray_icon.showMessage('Misura Server', msg, msecs=level*50)
-        self.updateStatusbar(msg)
-        return True
+        self.tray_icon.showMessage('Misura Server', msgs, msecs=level*50)
 
     def focus_logging(self):
         self.logDock.show()
@@ -339,7 +345,8 @@ class MainWindow(QtGui.QMainWindow):
 
         registry.taskswg.show_signal.connect(self.pending_task_shown)
         registry.taskswg.hide_signal.connect(self.pending_task_hidden)
-        self.connect(registry, QtCore.SIGNAL('logMessage(int, QString)'), self.notify)
+        self.connect(registry, QtCore.SIGNAL('logMessage(int, QString)'), self.notify_status)
+        self.connect(registry, QtCore.SIGNAL('logMessages(int, QString)'), self.notify_tray)
 
     def pending_task_shown(self):
         self.tasks_dock.show()

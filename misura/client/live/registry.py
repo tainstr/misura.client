@@ -7,11 +7,14 @@ logging = get_module_logging(__name__)
 from time import sleep, time
 from cPickle import loads
 import threading
+import collections 
 from traceback import format_exc
+
 from misura.canon import option
 from misura.canon.csutil import lockme, profile
 from misura.client.network import manager as net
 from misura.client import _
+
 from PyQt4 import QtGui, QtCore
 from tasks import Tasks
 
@@ -219,7 +222,6 @@ class KidRegistry(QtCore.QThread):
         # Update all
         for kid in kids:
             for w in self.rid.get(kid, []):
-                w.emit(QtCore.SIGNAL('changed()'))
                 w.emit(QtCore.SIGNAL('changedOption()'))
     @lockme()
     def update_log(self):
@@ -231,8 +233,16 @@ class KidRegistry(QtCore.QThread):
             return True
         self.log_time = ltime
         self.log_buf = buf
-        for entry in buf:
-            self.emit(QtCore.SIGNAL('logMessage(int, QString)'), entry[1], entry[-1])
+        # Remove duplicate messages
+        buf = set([(e[1], e[-1]) for e in buf])
+        bylev = collections.defaultdict(str)
+        # Emit one-by-one (for statusbar)
+        for lev, msg in buf:
+            self.emit(QtCore.SIGNAL('logMessage(int, QString)'), lev, msg)
+            bylev[lev]+='\n'+msg
+        # Emit collectively (for systray)
+        for lev, msg in bylev.items():
+            self.emit(QtCore.SIGNAL('logMessages(int, QString)'), lev, msg)
         self.emit(QtCore.SIGNAL('log()'))
         return True
 
