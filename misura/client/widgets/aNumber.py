@@ -409,7 +409,7 @@ class aNumber(ActiveWidget):
         step = self.adapt2gui(step)
         cur = self.adapt2gui(self.current)
         self.max, self.min = None, None
-        if m != None and M != None:
+        if m != None and M != None and m!=M:
             m = self.adapt2gui(m)
             M = self.adapt2gui(M)
             self.min, self.max = m, M
@@ -448,14 +448,14 @@ class aNumber(ActiveWidget):
             if step==0:
                 step=1
         self.spinbox.setSingleStep(step)
-        #print 'aNumber.setRange',self.handle,m,M,step,cur, self.divider
+        
         if self.slider:
             self.divider = 10**(2+abs(np.log10(step)))
             self.slider.blockSignals(True)
             #print 'aNumber.setRange slider',m,M,step,cur, self.divider
-            self.slider.setRange(m * self.divider, M * self.divider)
-            self.slider.setSingleStep(step * self.divider)
-            self.slider.setPageStep(step * 5 * self.divider)
+            self.slider.setRange(int(m * self.divider), int(M * self.divider))
+            self.slider.setSingleStep(int(step * self.divider))
+            self.slider.setPageStep(int(step * 5 * self.divider))
             self.slider.setValue(cur*self.divider)
             self.slider.blockSignals(False)
         self.set_tooltip()
