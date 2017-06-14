@@ -120,7 +120,7 @@ ao(default_desc, 'rule_style', 'Table', rule_style, 'Formatting')
 
 ao(default_desc, 'm3', 'Section', 'Data import', 'Data import')
 ao(default_desc, 'm3_enable', 'Boolean', True, 'Enable Misura 3 database interface')
-ao(default_desc, 'm3_plugins', 'TextArea', '', 'Import plugins by name')
+ao(default_desc, 'm3_plugins', 'TextArea', 'thegram', 'Import plugins by name')
 
 
 ao(default_desc, 'recent_server', 'Table', attr=['Hidden'], current=[[('Address', 'String'),('User', 'String'), ('Password','String'), ('MAC', 'String'),('Serial', 'String'), ('Name', 'String')], ])
