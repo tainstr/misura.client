@@ -28,6 +28,7 @@ class ThermalCyclePlot(VeuszPlot):
 
         # Temperature
         cmd.To(graph)
+        cmd.Set('topMargin', '0cm')
         cmd.Add('xy', name=T)
         cmd.Add('axis', name=aT, direction='vertical')
         cmd.Set(aT + '/autoRange', '+10%')
@@ -58,7 +59,12 @@ class ThermalCyclePlot(VeuszPlot):
         cmd.Set(R + '/thinfactor', 2)
         cmd.Set(R + '/PlotLine/color', 'blue')
         cmd.Set(R + '/MarkerFill/color', 'blue')
-
+        
+        # Remove title
+        cmd.To(graph)
+        cmd.To('..')
+        cmd.Remove('title')
+        
         if with_progress:
             cmd.To(graph)
             cmd.Add('line', name='bar')
