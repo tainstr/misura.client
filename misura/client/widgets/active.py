@@ -31,7 +31,7 @@ def extend_decimals(cur, default=2, extend_by=2):
     n = 0
     lim = 10**(-default)
     while n<default:
-        d = cur-int(cur)
+        d = abs(cur-round(cur, 0))
         if d<=lim:
             break
         cur *= 10

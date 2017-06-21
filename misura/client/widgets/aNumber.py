@@ -67,7 +67,7 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
             self.float_decimals = 2      
         
     def update_float_decimals(self):
-        p = self.precision if self.precision >= 0 else 0
+        p = self.precision if self.precision >= 0 else 2
         dc = extend_decimals(self.value(), default=p, extend_by=p)
         self.float_decimals = dc 
         
@@ -228,17 +228,17 @@ class aNumber(ActiveWidget):
 
         
     def build_range_menu(self):
-        self.range_menu = None
-        if None in (self.min, self.max):
-            return False
         self.range_menu = self.emenu.addMenu(_('Range'))
-        self.range_min = SpinboxAction(_('Min'), self.min, maximum=self.max, 
+        mx = self.max or 0
+        mn  = self.min or 0
+        st = self.step or 0
+        self.range_min = SpinboxAction(_('Min'), mn, maximum=mx, 
                                        callback=self.set_range_minimum, parent=self)
         self.range_menu.addAction(self.range_min)
-        self.range_max = SpinboxAction(_('Max'), self.max, minimum=self.min, 
+        self.range_max = SpinboxAction(_('Max'), mx, minimum=mn, 
                                        callback=self.set_range_maximum, parent=self)
         self.range_menu.addAction(self.range_max)
-        self.range_step = SpinboxAction(_('Step'), self.step, minimum=0, maximum=(self.max-self.min)/3., 
+        self.range_step = SpinboxAction(_('Step'), st, minimum=0, maximum=(mx-mn)/3., 
                                        callback=self.set_range_step, parent=self)
         self.range_menu.addAction(self.range_step)
         self.range_zoom = SpinboxAction(_('Zoom'), self.zoom_factor, minimum=1., maximum=1e8, 
