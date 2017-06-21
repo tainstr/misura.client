@@ -17,19 +17,21 @@ class ThermalCycleChooser(PresetManager):
                                rename_handle='rename_cycle')
 
     def changed_option(self, *args, **kwargs):
-        """Overload per introdurre la voce speciale +Add al termine della lista"""
+        """Overload to introduce special item +Add at the end of the list."""
         # First calls standard redraw
-        aChooser.changed_option(self, *args, **kwargs)
+        r = aChooser.changed_option(self, *args, **kwargs)
+        if not self.table:
+            return r
         # Then adds +Add special entry
         self.combo.blockSignals(True)
-        if self.table:
+        if r:
             self.combo.addItem('+Add')
-            if self.combo.count() <= 1:
-                self.connect(
-                    self.combo, QtCore.SIGNAL('highlighted(int)'), self.add)
-            else:
-                self.disconnect(
-                    self.combo, QtCore.SIGNAL('highlighted(int)'), self.add)
+        if self.combo.count() <= 1:
+            self.connect(
+                self.combo, QtCore.SIGNAL('highlighted(int)'), self.add)
+        else:
+            self.disconnect(
+                self.combo, QtCore.SIGNAL('highlighted(int)'), self.add)
         self.combo.blockSignals(False)
 
     def add(self, *args):
