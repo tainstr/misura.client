@@ -98,7 +98,8 @@ class aTablePointDelegate(QtGui.QItemDelegate):
             wg = QtGui.QDoubleSpinBox(parent)
             wg.setRange(MIN, MAX)
             val = float(mod.data(index))
-            dc = extend_decimals(val, default=0, extend_by=p + 2)
+            if p==0: p=2
+            dc = extend_decimals(val, p)
             wg.setDecimals(dc)
         elif colType == 'Integer':
             wg = QtGui.QSpinBox(parent)
@@ -203,7 +204,7 @@ class aTableModel(QtCore.QAbstractTableModel):
             p = self.precision
             if hasattr(p, '__len__'):
                 p = p[col]
-            dc = extend_decimals(val, default=0, extend_by=p)
+            dc = extend_decimals(val, p)
             ps = '{:.' + str(dc) + 'f}'
             val = ps.format(val)
         return val
