@@ -63,7 +63,10 @@ class ThermalCyclePlot(VeuszPlot):
         # Remove title
         cmd.To(graph)
         cmd.To('..')
-        cmd.Remove('title')
+        try:
+            cmd.Remove('title')
+        except:
+            logging.debug('No title to be removed')
         
         if with_progress:
             cmd.To(graph)
