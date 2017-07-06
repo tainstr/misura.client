@@ -226,6 +226,7 @@ class MiniImage(QtGui.QWidget):
         self.curWidth = width
         pix = QtGui.QPixmap.fromImage(self.img)
         pix = pix.scaledToWidth(width)
+        self.lbl_img.clear()
         self.lbl_img.setPixmap(pix)
 
     def zoomIn(self):
