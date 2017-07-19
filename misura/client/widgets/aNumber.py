@@ -115,7 +115,7 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
         return v
 
     def validate(self, text, pos):
-        if text == '':
+        if text in ('', '-', '+'):
             return (QtGui.QValidator.Intermediate, text, pos)
         if not self.double:
             try:
@@ -140,15 +140,18 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
         return (QtGui.QValidator.Acceptable, text, pos)
 
 class SpinboxAction(QtGui.QWidgetAction):
-    def __init__(self, label, current=0, minimum=0, maximum=100, step=1, double=True, callback=lambda *a: 0, parent=None):
+    def __init__(self, label, current=0, minimum=None, maximum=None, step=1, 
+                 double=True, callback=lambda *a: 0, parent=None):
         QtGui.QWidgetAction.__init__(self, parent)
-        
+        if minimum is None:
+            minimum = MIN if double else MININT
+        if maximum is None:
+            maximum = MAX if double else MAXINT
         self.label = QtGui.QLabel(label)
         self.spinbox = ScientificSpinbox(double=double)
+        self.spinbox.setRange(minimum, maximum)
         self.spinbox.setValue(current)
         self.spinbox.set_precision(4)
-        self.spinbox.setMinimum(minimum)
-        self.spinbox.setMaximum(maximum)
         self.spinbox.setSingleStep(step)
         self.spinbox.editingFinished.connect(callback)
         
@@ -161,7 +164,6 @@ class SpinboxAction(QtGui.QWidgetAction):
         self.w.setLayout(lay)
         self.setDefaultWidget(self.w)
         
-    
 
 class aNumber(ActiveWidget):
     zoom_factor = 1.
@@ -211,7 +213,6 @@ class aNumber(ActiveWidget):
         
     def redraw(self):
         # Create the layout
-        print 'REDRAW', self.handle
         super(aNumber, self).redraw()
         # If max/min are defined, create the slider widget
         if None not in [self.prop.get('min', None), self.prop.get('max', None)]:
@@ -228,14 +229,16 @@ class aNumber(ActiveWidget):
 
         
     def build_range_menu(self):
+        #TODO: update ranges when unit changes!!!
         self.range_menu = self.emenu.addMenu(_('Range'))
         mx = self.max or 0
         mn  = self.min or 0
         st = self.step or 0
-        self.range_min = SpinboxAction(_('Min'), mn, maximum=mx, 
+        logging.debug('Build range menu', self.handle, mx, mn,st,self.precision, self.zoom_factor)
+        self.range_min = SpinboxAction(_('Min'), mn, maximum=mx or None, 
                                        callback=self.set_range_minimum, parent=self)
         self.range_menu.addAction(self.range_min)
-        self.range_max = SpinboxAction(_('Max'), mx, minimum=mn, 
+        self.range_max = SpinboxAction(_('Max'), mx, minimum=mn or None, 
                                        callback=self.set_range_maximum, parent=self)
         self.range_menu.addAction(self.range_max)
         self.range_step = SpinboxAction(_('Step'), st, minimum=0, maximum=(mx-mn)/3., 
