@@ -48,7 +48,7 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
             self.ops.append(document.OperationWidgetAdd(wg, 'grid', name='grid'))
             self.apply_ops(descr='MakeDefaultPlot: Grid')
             wg = wg.getChild('grid')
-            self.toset(wg, 'topMargin', '0.5cm')
+            self.toset(wg, 'topMargin', '16pt')
         return wg 
     
     def make_title(self, page_wg, title):
