@@ -46,13 +46,16 @@ class Storyboard(QtGui.QWidget):
         self.controls = QtGui.QWidget(self)
         clay = QtGui.QVBoxLayout()
         self.controls.setLayout(clay)
-        levelUp = QtGui.QPushButton('Up')
+        levelUp = QtGui.QPushButton()
+        levelUp.setIcon(QtGui.QIcon.fromTheme('go-up'))
         levelUp.clicked.connect(self.slot_up)
         clay.addWidget(levelUp)
-        levelHome = QtGui.QPushButton('Home')
+        levelHome = QtGui.QPushButton()
+        levelHome.setIcon(QtGui.QIcon.fromTheme('go-home'))
         levelHome.clicked.connect(self.slot_home)
         clay.addWidget(levelHome)
-        levelDown = QtGui.QPushButton('Down')
+        levelDown = QtGui.QPushButton()
+        levelDown.setIcon(QtGui.QIcon.fromTheme('go-down'))
         levelDown.clicked.connect(self.slot_down)
         clay.addWidget(levelDown)
         self.controls.setMaximumWidth(75)
@@ -72,6 +75,7 @@ class Storyboard(QtGui.QWidget):
         self.update()
 
     def set_plot(self, plot):
+        logging.debug('set_plot', plot)
         self.plot = plot
         self.doc = plot.doc
         # Connect plot sigPageChanged to set_page
@@ -106,6 +110,13 @@ class Storyboard(QtGui.QWidget):
         if page not in self.doc.basewidget.children:
             logging.debug('PAGE DOES NOT EXISTS', page.name)
             return False
+        
+        if page.name in self.cache:
+            lbl, changeset = self.cache[page.name]
+            if changeset>=self.doc.changeset:
+                logging.debug('Not updating page', changeset, self.doc.changeset)
+                return False
+            
         pageNum = self.doc.basewidget.children.index(page)
         fp = self.fpath(page)
         logging.debug('writing page to', fp)
@@ -133,7 +144,7 @@ class Storyboard(QtGui.QWidget):
             lbl.setMenu(menu)
 
         else:
-            lbl = self.cache[page.name]
+            lbl, changeset = self.cache[page.name]
 
         # Replace the icon
         logging.debug('loading page from', fp)
@@ -142,7 +153,8 @@ class Storyboard(QtGui.QWidget):
         size = QtCore.QSize(200, 100)
         pix = icon.pixmap(size)
         lbl.setIconSize(pix.size())
-        self.cache[page.name] = lbl
+        self.cache[page.name] = lbl, self.doc.changeset
+        return True
 
     def update(self, *args, **kwargs):
         force = kwargs.get('force', False)
@@ -154,14 +166,17 @@ class Storyboard(QtGui.QWidget):
             p = N - 1
             # return False
         page = self.doc.basewidget.children[p]
-        no_change = page == self.page and self.level_modifier == self._level_modifier and self.parent_modifier == self._parent_modifier 
+        no_change = page == self.page and self.level_modifier == self._level_modifier and self.parent_modifier == self._parent_modifier
         if no_change and not force:
-            logging.debug('Storyboard.update: no change', page.name, self.page.name)
+            logging.debug('Storyboard.update: no change',
+                          page.name, self.page.name)
             return False
         if no_change and force:
             logging.debug('FORCING UPDATE!!!')
         self.clear()
+        oldpage = False
         if self.page:
+            oldpage = self.page
             self.update_page_image()
         if page == self.page:
             self._level_modifier = self.level_modifier
@@ -171,7 +186,8 @@ class Storyboard(QtGui.QWidget):
             self.level_modifier = 0
 
         self.page = page
-        self.update_page_image()
+        if self.page != oldpage:
+            self.update_page_image()
         hierarchy, level, page_idx = calc_plot_hierarchy(self.doc, page)
         if level < 0:
             logging.debug('Storyboard.update: negative level requested')
@@ -192,12 +208,13 @@ class Storyboard(QtGui.QWidget):
                 lambda wg: wg.name == page_name, self.doc.basewidget.children)[0]
             fp = self.fpath(page)
             if not os.path.exists(fp):
+                logging.debug('Non existing page icon', page_name, fp)
                 self.update_page_image(page)
-            lbl = self.cache[page_name]
+            lbl = self.cache[page_name][0]
             txt = '/'.join([''] + crumbs)
             if notes:
                 notes = textwrap.fill(notes, 25, break_long_words=False)
-                txt+='\n'+notes
+                txt += '\n' + notes
             lbl.setText(txt)
             self.lay.addWidget(lbl)
             lbl.show()
