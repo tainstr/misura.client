@@ -33,10 +33,10 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         if y is not None:
             self.ops.append(document.OperationWidgetDelete(y))
         props = {'rightMargin': '1.5cm', 'leftMargin': '1.5cm',
-                 'bottomMargin': '1.5cm', 'topMargin': '1.5cm'}
+                 'bottomMargin': '1.5cm', 'topMargin': '16pt'}
         self.dict_toset(g, props)
         self.toset(g.getChild('x'), 'label', label)
-        self.toset(g, 'topMargin', '1.5cm')
+        self.toset(g, 'topMargin', '16pt')
 
     
     def create_page_and_grid(self, page):
@@ -48,27 +48,29 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
             self.ops.append(document.OperationWidgetAdd(wg, 'grid', name='grid'))
             self.apply_ops(descr='MakeDefaultPlot: Grid')
             wg = wg.getChild('grid')
+            self.toset(wg, 'topMargin', '0.5cm')
         return wg 
     
-    def make_title(self, graph, title):
-        page_wg = graph.parent.parent
-        if not page_wg.hasChild('grid'):
-            page_wg = graph.parent
+    def make_title(self, page_wg, title):
+        if self.fields.get('grid', False):
+            page_wg = page_wg.parent
         self.ops.append(
                 (document.OperationWidgetAdd(page_wg, 'label', name='title')))
         self.apply_ops(descr='MakeDefaultPlot: Title')
-        props = {'xPos': 0.1, 'yPos': 0.96, 'label': title}
-        self.dict_toset(page_wg.getChild('title'), props)
+        props = {'xPos': 0.1, 'yPos': 1, 'label': title, 'alignVert': 'top'}
+        label=page_wg.getChild('title')
+        self.dict_toset(label, props)
         self.dict_toset(page_wg, {'notes': title})
+        self.ops.append(document.OperationWidgetMove(label.path,page_wg.path,0))
         return True
 
     def create_page_temperature(self, page):
         wg = self.create_page_and_grid(page)
         self.ops.append(document.OperationWidgetAdd(wg, 'graph', name='temp'))
         self.apply_ops(descr='MakeDefaultPlot: Graph Temperature')
-        graph = wg.getChild('temp')
         title = self.fields.get('title', False) or 'By Temperature'
-        self.make_title(graph, title)
+        self.make_title(wg, title)
+        graph = wg.getChild('temp')
         self.adjust_graph(graph, u'Temperature (°C)')
 
     def create_page_time(self, page):
@@ -76,9 +78,9 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         self.ops.append(
             (document.OperationWidgetAdd(wg, 'graph', name='time')))
         self.apply_ops(descr='MakeDefaultPlot: Graph Time')
-        graph = wg.getChild('time')
         title = self.fields.get('title', False) or 'By time'
-        self.make_title(graph, title)
+        self.make_title(wg, title)
+        graph = wg.getChild('time')
         self.adjust_graph(graph, 'Time (s)')
 
 

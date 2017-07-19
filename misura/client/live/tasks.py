@@ -152,7 +152,7 @@ class LocalTasks(QtGui.QWidget):
     @lockme()
     def _jobs(self, tot, pid='Operation', abort = lambda *a, **k: 0):
         """Initialize a new progress bar for job `pid` having total steps `tot`."""
-        wg = self.prog.get(pid)
+        wg = self.prog.get(pid, False)
         if wg:
             wg.pb.setRange(0, tot)
             if not self.isVisible():

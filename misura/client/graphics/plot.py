@@ -38,7 +38,7 @@ class Plot(VeuszPlot):
         self.idx = 0
         for g in ['/time/time', '/temperature/temp']:
             self.cmd.To(g)
-            self.cmd.Set('topMargin', '0.1cm')
+            self.cmd.Set('topMargin', '16pt')
             self.cmd.Add('line', name='idx')
             self.cmd.To('idx')
             self.cmd.Set('mode', 'length-angle')
