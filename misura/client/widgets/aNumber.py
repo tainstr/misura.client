@@ -271,6 +271,7 @@ class aNumber(ActiveWidget):
         self.step = val
         self.setRange(self.min, self.max, self.step)
         
+        
     def set_zoom_factor(self):
         if not self.slider:
             return
@@ -453,7 +454,8 @@ class aNumber(ActiveWidget):
         self.spinbox.setSingleStep(step)
         
         if self.slider:
-            self.divider = 10**(2+abs(np.log10(step)))
+            self.divider = 10.**(-abs(np.log10(step)))
+            logging.debug('Slider:', m, M, step, self.divider)
             self.slider.blockSignals(True)
             #print 'aNumber.setRange slider',m,M,step,cur, self.divider
             self.slider.setRange(int(m * self.divider), int(M * self.divider))
