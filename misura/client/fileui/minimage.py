@@ -159,10 +159,7 @@ class MiniImage(QtGui.QWidget):
         idx = csutil.find_nearest_val(self.doc.data['0:t'].data, self.t)
         self.doc_idx = idx
         for k in self.meta.keys():
-            if k == 'T':
-                p1 = '0:kiln/' + k
-            else:
-                p1 = '0:' + p[1:] + '/' + k
+            p1 = '0:' + p[1:] + '/' + k
             ds = self.doc.data.get(p1, None)
             if ds is None:
                 logging.debug('update_info: no target dataset was found', k, p1)
@@ -272,7 +269,9 @@ class MiniImage(QtGui.QWidget):
     def start_drag(self):
         drag = QtGui.QDrag(self)
         mimeData = QtCore.QMimeData()
-        ds = self.doc.data.get('0:kiln/T')
+        ds = self.doc.data.get('0:kiln/Ts', False)
+        if ds is False:
+            ds = self.doc.data.get('0:kiln/T')
         T = ds.data[self.doc_idx]
         # Text copy
         mimeData.setData(

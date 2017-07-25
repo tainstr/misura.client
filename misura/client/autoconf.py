@@ -449,10 +449,12 @@ class FirstSetupWizard(object):
         ta['name'] = 'TAController'
         ta.save('default')
         ta = ta['fullpath']
+        m.kiln.setattr('customRegulator', 'options', [ta, 'default'])
         m.kiln.setattr('Ts', 'options', [ta, 'default', 'T'])
         m.kiln.setattr('Tk', 'options', [ta, 'default', 'TFurnace'])
         m.kiln.setattr('Te', 'options', [ta, 'default', 'RT'])
         m.kiln.setattr('P', 'options', [ta, 'default', 'power'])
+        
             
     
     def configure_kiln(self):

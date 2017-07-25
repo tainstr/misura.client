@@ -177,7 +177,10 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 
             self.dict_toset(page.getChild('initial'), {'dataset': smp_path + '/profile',
                                                        'filename': test.params.filename, 'target': 0})
-            T = doc.data[test.prefix + 'kiln/T'].data[0]
+            T = doc.data.get(test.prefix + smp_path[1:] + '/T', False)
+            if T is False:
+                T = doc.data.get(test.prefix + 'kiln/T')
+            T = T.data[0]
             self.toset(page.getChild('lbl_initial'), 'label',
                        'Initial, %.2f{{\\deg}}C' % T)
 
@@ -191,7 +194,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         p0 = test.prefix+sample['fullpath'][1:]
         cf = {'graph': graph, 'xT': p0+'reportxT',
               'yT': p0+'reportyT', 'xR': p0+'reportxR', 'yR': p0+'reportyR'}
-        ThermalCyclePlot.setup(command_interface, with_progress=False, **cf)
+        ThermalCyclePlot.setup(command_interface, with_progress=False, topMargin='4.7cm', **cf)
         tc = clean_curve(tc, events=False)
         ThermalCyclePlot.importCurve(command_interface, tc, **cf)
         cf = {'Label/font': 'Bitstream Vera Sans', 'Label/size': '6pt',
