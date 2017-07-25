@@ -19,7 +19,8 @@ class ThermalCyclePlot(VeuszPlot):
               T='tc', R='tc1',
               xT='x', yT='y', aT='y',
               xR='x1', yR='y1', aR='y1',
-              with_progress=True):
+              with_progress=True,
+              topMargin='0cm'):
         """Setup a ThermalCyclePlot on `graph` destination"""
         cmd.SetData(xT, [])
         cmd.SetData(yT, [])
@@ -28,7 +29,7 @@ class ThermalCyclePlot(VeuszPlot):
 
         # Temperature
         cmd.To(graph)
-        cmd.Set('topMargin', '0cm')
+        cmd.Set('topMargin', topMargin)
         cmd.Add('xy', name=T)
         cmd.Add('axis', name=aT, direction='vertical')
         cmd.Set(aT + '/autoRange', '+10%')
