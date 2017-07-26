@@ -36,6 +36,7 @@ from ..confwidget import RecentMenu, ClientConf
 from .. import iutils
 from ..live import Tasks
 from . import plot
+from . import veuszplot
 
 
 setting.transient_settings['unsafe_mode'] = True
