@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Designer per il ciclo termico."""
+"""Thermal cycle designer"""
 from traceback import format_exc
 
 from misura.canon.logger import get_module_logging

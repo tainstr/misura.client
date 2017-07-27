@@ -12,6 +12,7 @@ from ..confwidget import RecentMenu
 from .. import parameters as params
 from misura.client.helpmenu import HelpMenu
 from . import windows
+from .. import iniconf
 
 from PyQt4 import QtGui, QtCore
 
@@ -282,7 +283,6 @@ class MenuBar(QtGui.QMenuBar):
         self.settings.clear()
         self.showInstrumentConf = functools.partial(self.hideShow, 'iconf')
         act = self.settings.addAction(_('Instrument'), self.showInstrumentConf)
-#       self.objects['iconf']=functools.partial(conf.Interface, self.server,  self.remote)
         self.objects['iconf'] = functools.partial(
             conf.TreePanel, self.remote, None, self.remote)
         self.lstActions.append((act, self.remote))
@@ -321,6 +321,15 @@ class MenuBar(QtGui.QMenuBar):
         act = self.settings.addAction(_('Global'), self.showMConf)
         act.setCheckable(True)
         self.lstActions.append((act, 'mconf'))
+        if self.server and not self.fixedDoc and self.server._readLevel>=5:
+            self.settings.addAction(_('Export configuration'), self.export_configuration)
+            self.settings.addAction(_('Import configuration'), self.import_configuration)
+            
+    def export_configuration(self):
+        iniconf.export_configuration(self.server, self)
+        
+    def import_configuration(self):
+        iniconf.import_configuration(self.server, self)
 
     def addDevConf(self, obj, role):
         #       self.objects[obj]=functools.partial(conf.Interface, self.server, obj)
