@@ -1,7 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Save/restore full instrument configuration using single INI file. """
-import ConfigParser
+try:
+    import configparser
+except:
+    import ConfigParser as configparser
 import ast
 import os
 
@@ -53,7 +56,7 @@ def list_serialized_devices(srv):
     
 metasection = '***METASECTION***'
 def save(srv, file_path='ini.ini'):
-    conf = ConfigParser.SafeConfigParser()
+    conf = configparser.SafeConfigParser()
     conf.optionxform = str
     parse_obj(srv, conf)
     conf.add_section(metasection)
@@ -68,7 +71,7 @@ def restore(srv, file_path='ini.ini', serials=None):
         ini.replace(old, new)
     f1 = file_path+'.tmp'
     open(f1, 'w').write(ini)
-    conf = ConfigParser.SafeConfigParser()
+    conf = configparser.SafeConfigParser()
     conf.optionxform = str
     conf.read(f1)
     for sec in conf.sections():
@@ -147,7 +150,7 @@ class SerialNumberReplacer(QtGui.QDialog):
         self.combos.append(c)
         
     def do(self):
-        conf = ConfigParser.SafeConfigParser()
+        conf = configparser.SafeConfigParser()
         conf.optionxform = str
         conf.read(self.filename)
         
