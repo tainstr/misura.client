@@ -46,3 +46,9 @@ class ThermalCycleChooser(PresetManager):
         else:
             self.combo.setCurrentIndex(self.prevIdx)
         self.changed_option()
+        
+    def save_as(self, *a, **k):
+        if self.table is not False:
+            crv = self.table.curve()
+            self.remObj.set('curve', crv)
+        return PresetManager.save_as(self, *a, **k)

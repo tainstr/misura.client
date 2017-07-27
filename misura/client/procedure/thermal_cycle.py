@@ -311,11 +311,11 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.buttons = QtGui.QHBoxLayout()
         self.buttonBar.setLayout(self.buttons)
 
-        self.bRead = QtGui.QPushButton("Read")
+        self.bRead = QtGui.QPushButton(_('Read'))
         self.connect(self.bRead, QtCore.SIGNAL('clicked(bool)'), self.refresh)
         self.buttons.addWidget(self.bRead)
 
-        self.bApp = QtGui.QPushButton("Apply")
+        self.bApp = QtGui.QPushButton(_('Apply'))
         self.connect(self.bApp, QtCore.SIGNAL('clicked(bool)'), self.apply)
         self.buttons.addWidget(self.bApp)
         self.tcc = widgets.ThermalCycleChooser(
