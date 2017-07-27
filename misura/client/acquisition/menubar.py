@@ -321,8 +321,8 @@ class MenuBar(QtGui.QMenuBar):
         act = self.settings.addAction(_('Global'), self.showMConf)
         act.setCheckable(True)
         self.lstActions.append((act, 'mconf'))
+        self.settings.addAction(_('Export configuration'), self.export_configuration)
         if self.server and not self.fixedDoc and self.server._readLevel>=5:
-            self.settings.addAction(_('Export configuration'), self.export_configuration)
             self.settings.addAction(_('Import configuration'), self.import_configuration)
             
     def export_configuration(self):
