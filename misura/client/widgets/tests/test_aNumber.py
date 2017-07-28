@@ -61,21 +61,21 @@ class aNumber(unittest.TestCase):
         return w
 
     def test_integer(self):
-        self.root.sete('Test', option.ao({}, 'Test', 'Integer')['Test'])
+        self.root.sete('Test', option.ao({}, 'Test', 'Integer', 0, 'Integer',)['Test'])
         w = self.wgGen()
         self.assertEqual(w.current, 0)
         self.assertFalse(w.slider)
         iutils_testing.show(w, __name__)
 
     def test_float(self):
-        self.root.sete('Test', option.ao({}, 'Test', 'Float')['Test'])
+        self.root.sete('Test', option.ao({}, 'Test', 'Float', 0, 'Float')['Test'])
         w = self.wgGen()
         self.assertEqual(w.current, 0)
         self.assertFalse(w.slider)
 
     def test_MIN_MAX_int(self):
         self.root.sete(
-            'Test', option.ao({}, 'Test', 'Integer', 59298, min=0,  max=59298, step=388)['Test'])
+            'Test', option.ao({}, 'Test',  'Integer', 59298, 'Integer bounds', min=0,  max=59298, step=388)['Test'])
         w = self.wgGen()
         self.assertEqual(w.current, 59298)
         self.assertTrue(w.slider)
@@ -83,22 +83,30 @@ class aNumber(unittest.TestCase):
         
     def test_MIN_MAX_dbl(self):
         self.root.sete(
-            'Test', option.ao({}, 'Test', 'Float', 5, min=-10,  max=10)['Test'])
+            'Test', option.ao({}, 'Test', 'Float', 5, 'Float bounds', min=-10,  max=10)['Test'])
         w = self.wgGen()
         self.assertEqual(w.current, 5)
+        self.assertTrue(w.slider)
+        iutils_testing.show(w, __name__)
+        
+    def test_MIN_MAX_small_dbl(self):
+        self.root.sete(
+            'Test', option.ao({},'Test', 'Float',  0, 'Small float bounds', min=0,  max=1)['Test'])
+        w = self.wgGen()
+        self.assertEqual(w.current, 0)
         self.assertTrue(w.slider)
         iutils_testing.show(w, __name__)
 
     def test_Properties(self):
         self.root.sete(
-            'Test', option.ao({}, 'Test', 'Float', current=120, unit='second', precision=4)['Test'])
+            'Test', option.ao({}, 'Test', 'Float', 120, 'Properties', unit='second', precision=4)['Test'])
         w = self.wgGen()
         w.lay.addWidget(w.label_widget)
         iutils_testing.show(w, __name__)
 
     def test_units(self):
         self.root.sete(
-            'Test', option.ao({}, 'Test', 'Float', units='second')['Test'])
+            'Test', option.ao({}, 'Test', 'Float', 0,  'Units', units='second')['Test'])
         w = self.wgGen()
         self.assertEqual(w.current, 0)
         self.assertFalse(w.slider)
