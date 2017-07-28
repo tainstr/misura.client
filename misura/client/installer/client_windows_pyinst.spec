@@ -61,18 +61,18 @@ for name in ['icons/*.png','icons/*.ico','icons/*.svg','examples/*.vsz',
 
 # misura4 specific data dirs
 
-def add_binaries(fdir):
+def add_binaries(fdir, ddir):
     for fname in os.listdir(fdir):
         source_path=os.path.join(fdir,fname)
         installed_path=os.path.join(ddir,fname)
         if os.path.isdir(source_path):
-            add_binaries(source_path)
+            add_binaries(source_path, os.path.join(ddir, fname))
         else:
             binaries.append( (installed_path,source_path,'DATA') )
         
 for ddir in ['art','i18n','ui']:
     fdir=os.path.join(cli,ddir)
-    add_binaries(fdir)
+    add_binaries(fdir, ddir)
 
 print 'BINARIES', binaries
 
