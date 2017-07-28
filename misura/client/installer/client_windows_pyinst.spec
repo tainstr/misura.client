@@ -61,7 +61,7 @@ for name in ['icons/*.png','icons/*.ico','icons/*.svg','examples/*.vsz',
 
 # misura4 specific data dirs
 
-def add_binaries(fdir)
+def add_binaries(fdir):
     for fname in os.listdir(fdir):
         source_path=os.path.join(fdir,fname)
         installed_path=os.path.join(ddir,fname)
@@ -73,6 +73,8 @@ def add_binaries(fdir)
 for ddir in ['art','i18n','ui']:
 	fdir=os.path.join(cli,ddir)
     add_binaries(fdir)
+
+print 'BINARIES', binaries
 
 Analyses.append( (a,'misura4', os.path.join('build','graphics.exe')) )
 
