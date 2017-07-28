@@ -439,7 +439,7 @@ def theme_icon(name, ext='.svg'):
     if QtGui.QIcon.hasThemeIcon(name):
         return QtGui.QIcon.fromTheme(name)
     p = os.path.join(params.pathIcons, name+ext)
-    return QtGui.QIcon.params(p)
+    return QtGui.QIcon(p)
 
 
 def with_waiting_mouse_cursor(function_to_call):
