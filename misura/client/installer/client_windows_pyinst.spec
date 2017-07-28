@@ -71,7 +71,7 @@ def add_binaries(fdir):
             binaries.append( (installed_path,source_path,'DATA') )
         
 for ddir in ['art','i18n','ui']:
-	fdir=os.path.join(cli,ddir)
+    fdir=os.path.join(cli,ddir)
     add_binaries(fdir)
 
 print 'BINARIES', binaries
