@@ -149,6 +149,19 @@ class SerialNumberReplacer(QtGui.QDialog):
         self.layout().addWidget(c, r, 1)
         self.combos.append(c)
         
+        # Search a matching serial
+        found = 0
+        for i, (new_serial, new_name, new_fp) in enumerate(self.new_serials):
+            if new_fp == fp:
+                c.setCurrentIndex(i)
+                break
+            if new_serial == serial:
+                c.setCurrentIndex(i)
+                found = 1
+            if new_name == name and not found:
+                c.setCurrentIndex(i)
+                
+        
     def do(self):
         conf = configparser.SafeConfigParser()
         conf.optionxform = str
