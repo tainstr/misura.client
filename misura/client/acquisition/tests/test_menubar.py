@@ -31,6 +31,7 @@ class MenuBar(unittest.TestCase):
 
     def setUp(self):
         self.root = server.MainServer(plug='misura.droid.instrument.Instrument')
+        self.root._readLevel = 5
         self.remote_instrument = self.root.instruments[0]
         self.remote_instrument.parent = lambda: self.root
         self.remote_instrument.server = self.root
