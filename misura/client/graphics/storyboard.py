@@ -11,6 +11,8 @@ from veusz import document
 from misura.client.iutils import calc_plot_hierarchy
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
+from misura.client import _
+from ..iutils import theme_icon
 from PyQt4 import QtGui, QtCore
 from veusz.document.operations import OperationWidgetDelete
 
@@ -47,15 +49,15 @@ class Storyboard(QtGui.QWidget):
         clay = QtGui.QVBoxLayout()
         self.controls.setLayout(clay)
         levelUp = QtGui.QPushButton()
-        levelUp.setIcon(QtGui.QIcon.fromTheme('go-up'))
+        levelUp.setIcon(theme_icon('go-up'))
         levelUp.clicked.connect(self.slot_up)
         clay.addWidget(levelUp)
         levelHome = QtGui.QPushButton()
-        levelHome.setIcon(QtGui.QIcon.fromTheme('go-home'))
+        levelHome.setIcon(theme_icon('go-home'))
         levelHome.clicked.connect(self.slot_home)
         clay.addWidget(levelHome)
         levelDown = QtGui.QPushButton()
-        levelDown.setIcon(QtGui.QIcon.fromTheme('go-down'))
+        levelDown.setIcon(theme_icon('go-down'))
         levelDown.clicked.connect(self.slot_down)
         clay.addWidget(levelDown)
         self.controls.setMaximumWidth(75)
@@ -136,11 +138,13 @@ class Storyboard(QtGui.QWidget):
             list_children_func = functools.partial(
                 self.slot_list_children, page.name)
             del_func = functools.partial(self.slot_delete_page, page.name)
+            export_func = functools.partial(self.slot_export_page, pageNum)
             lbl.clicked.connect(show_func)
             menu = QtGui.QMenu()
-            menu.addAction('Show', show_func)
-            menu.addAction('List children', list_children_func)
-            menu.addAction('Delete', del_func)
+            menu.addAction(_('Show'), show_func)
+            menu.addAction(_('List children'), list_children_func)
+            menu.addAction(_('Delete'), del_func)
+            menu.addAction(_('Export'), export_func)
             lbl.setMenu(menu)
 
         else:
@@ -245,3 +249,6 @@ class Storyboard(QtGui.QWidget):
                 p = i
                 break
         self.update(force=True)
+        
+    def slot_export_page(self, page_num):
+        self.plot.plot.slotPageExport(page_num=page_num)

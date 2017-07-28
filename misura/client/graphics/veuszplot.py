@@ -221,7 +221,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         dialog.show()
         
 
-    def slotPageExport(self):
+    def slotPageExport(self, page_num=-1):
         """Copied from MainWindow. TODO: make this more modular in veusz!"""
         # check there is a page
         if self.document.getNumberPages() == 0:
@@ -282,18 +282,20 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
 
             filename = fd.selectedFiles()[0]
 
-            self.doExport(filename, validextns, chosenextns)
+            self.doExport(filename, validextns, chosenextns, page_num)
 
     @with_busy_cursor
-    def doExport(self, filename, validextns, chosenextns):
+    def doExport(self, filename, validextns, chosenextns, page_num=-1):
         ext = os.path.splitext(filename)[1][1:]
         if (ext not in validextns) and (ext not in chosenextns):
             filename += "." + chosenextns[0]
-
+        
+        if page_num<0:
+            page_num=self.getPageNumber()
         export = document.Export(
             self.document,
             filename,
-            self.getPageNumber(),
+            page_num,
             bitmapdpi=setdb['export_DPI'],
             pdfdpi=setdb['export_DPI_PDF'],
             antialias=setdb['export_antialias'],
