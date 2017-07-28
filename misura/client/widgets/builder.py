@@ -16,7 +16,7 @@ def build(server, remObj, prop, parent=None):
     # FIXME: horrible! change package layout to fix this!
     from aBoolean import aBoolean
     from aButton import aButton
-    from aChooser import aChooser, async_aChooser
+    from aChooser import aChooser, async_aChooser, FurnacePositionChooser
     from aDict import aDict
     from aMeta import aMeta
     from aMaterial import aMaterial
@@ -52,7 +52,7 @@ def build(server, remObj, prop, parent=None):
         elif T == 'Boolean':
             obj = aBoolean(*arg)
         elif T in ['Chooser', 'Menu', 'FileList']:
-            choosers = {'motorStatus': async_aChooser}
+            choosers = {'motorStatus': FurnacePositionChooser}
             chooser = choosers.get(prop['handle'], aChooser)
             obj = chooser(*arg)
         elif T == 'Preset':

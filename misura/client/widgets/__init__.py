@@ -9,7 +9,7 @@ from .. import _
 from active import Active, ActiveObject, ActiveWidget, info_dialog, RunMethod
 from aBoolean import aBoolean,  aBooleanAction
 from aButton import aButton
-from aChooser import aChooser, async_aChooser
+from aChooser import aChooser, async_aChooser, FurnacePositionChooser
 from aDict import aDict
 from aMeta import aMeta
 from aMaterial import aMaterial

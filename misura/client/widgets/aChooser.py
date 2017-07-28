@@ -109,3 +109,47 @@ class async_aChooser(aChooser):
 
         QtCore.QTimer.singleShot(0, lambda: self.remObj.set(self.handle, val))
         return self.get()
+
+class FurnacePositionChooser(async_aChooser):
+    def __init__(self, server, path, prop, parent=None):
+        self.btn_open = QtGui.QPushButton()
+        self.btn_open.setIcon(QtGui.QIcon.fromTheme('go-right'))
+        self.btn_open.clicked.connect(self.go_open)
+        self.btn_open.setMaximumWidth(50)
+        
+        self.btn_close = QtGui.QPushButton()
+        self.btn_close.setIcon(QtGui.QIcon.fromTheme('go-left'))
+        self.btn_close.clicked.connect(self.go_close)
+        self.btn_close.setMaximumWidth(50)
+        
+        self.btn_pause = QtGui.QPushButton()
+        self.btn_pause.setIcon(QtGui.QIcon.fromTheme('media-playback-pause'))
+        self.btn_pause.clicked.connect(self.go_pause)
+        self.btn_pause.setMaximumWidth(50)
+        
+        async_aChooser.__init__(self, server, path, prop, parent=parent)
+
+        
+    def go_open(self):
+        QtCore.QTimer.singleShot(0, lambda: self.remObj.set(self.handle, 0))
+    
+    def go_close(self):
+        QtCore.QTimer.singleShot(0, lambda: self.remObj.set(self.handle, 1))
+        
+    def go_pause(self):
+        self.remObj.set(self.handle, 3)
+            
+    def changed_option(self, *a, **k):
+        r = async_aChooser.changed_option(self, *a, **k)
+        if self.current!=-1:
+            if self.lay.indexOf(self.btn_open)==-1 or self.lay.indexOf(self.btn_open)==-1:
+                self.lay.addWidget(self.btn_open)
+                self.lay.insertWidget(0, self.btn_close)
+                self.lay.insertWidget(1, self.btn_pause)
+            self.btn_open.show()
+            self.btn_close.show()
+        else:
+            self.btn_open.hide()
+            self.btn_close.hide()
+        return r
+    
