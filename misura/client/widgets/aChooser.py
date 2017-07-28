@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from .. import _
+from ..iutils import theme_icon
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from PyQt4 import QtGui, QtCore
@@ -113,17 +114,17 @@ class async_aChooser(aChooser):
 class FurnacePositionChooser(async_aChooser):
     def __init__(self, server, path, prop, parent=None):
         self.btn_open = QtGui.QPushButton()
-        self.btn_open.setIcon(QtGui.QIcon.fromTheme('go-right'))
+        self.btn_open.setIcon(theme_icon('go-right'))
         self.btn_open.clicked.connect(self.go_open)
         self.btn_open.setMaximumWidth(50)
         
         self.btn_close = QtGui.QPushButton()
-        self.btn_close.setIcon(QtGui.QIcon.fromTheme('go-left'))
+        self.btn_close.setIcon(theme_icon('go-left'))
         self.btn_close.clicked.connect(self.go_close)
         self.btn_close.setMaximumWidth(50)
         
         self.btn_pause = QtGui.QPushButton()
-        self.btn_pause.setIcon(QtGui.QIcon.fromTheme('media-playback-pause'))
+        self.btn_pause.setIcon(theme_icon('media-playback-pause'))
         self.btn_pause.clicked.connect(self.go_pause)
         self.btn_pause.setMaximumWidth(50)
         
