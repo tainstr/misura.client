@@ -4,7 +4,7 @@
 from misura.client.fileui import html
 from misura.client.fileui import template
 from PyQt4 import QtGui, QtCore
-from ...canon import csutil
+from ...canon import csutil, reference
 
 def create_images_report(decoder,
                          measure,
@@ -13,23 +13,37 @@ def create_images_report(decoder,
                          characteristic_shapes,
                          standard='Misura4',
                          output = False,
+                         startTemp=0,
+                         step=1,
                          jobs=lambda *x: None,
                          job=lambda *x: None,
                          done=lambda *x: None):
-
+    Tpath = decoder.datapath.split('/')
+    Tpath[-1]='T'
+    Tpath = '/'.join(Tpath)
+    # Get index of startTemp in sample/T dataset
+    idx0, t0, T0 = decoder.proxy.rises(Tpath, startTemp)
+    # Get index of start time in sample/profile
+    #idx0 = decoder.proxy.get_time(decoder.datapath, t0)
+    idx0 = decoder.get_time(t0)
     total_number_of_images = len(decoder)
     all_images_data = []
     last_temperature = -100
     image_count = 1
     jobs(3, 'Creating images report')
-    jobs(total_number_of_images, 'Decoding')
-    for i in range(total_number_of_images):
+    print 'UUUUUUUUU',total_number_of_images, idx0, step, (total_number_of_images-idx0+1)/step
+    jobs((total_number_of_images-idx0+1)/step, 'Decoding')
+    v = range(idx0, total_number_of_images)
+    if idx0!=0:
+        v=[0]+v
+    for i in v:
         time, qimage = decoder.get_data(i)
         image_number = i + 1
-        temperature_index = csutil.find_nearest_val(time_data, time)
-        image_temperature = int(temperature_data[temperature_index])
-
-        if abs(last_temperature - int(image_temperature)) >= 1:
+        image_temperature = decoder.proxy.col_at_time(Tpath, time, True)[1]
+        # Take first image then discard anything until startTemp
+        if image_temperature<startTemp and image_count==2:
+            continue
+        if abs(last_temperature - int(image_temperature)) >= step:
             image_data = byte_array_from(qimage)
             all_images_data.append([image_data,
                                     image_count,
@@ -37,7 +51,7 @@ def create_images_report(decoder,
                                     csutil.from_seconds_to_hms(int(time))])
             last_temperature = image_temperature
             image_count += 1
-        job(i, 'Decoding')
+        job(i-idx0, 'Decoding')
     done('Decoding')
     job(1, 'Creating images report', 'Creating report structure')
     characteristic_temperatures = {}

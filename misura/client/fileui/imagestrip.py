@@ -9,6 +9,9 @@ from misura.client.fileui import htmlreport
 from misura.client import _
 from misura.client.widgets import RunMethod
 from misura.client.live import registry
+from misura.client import conf
+
+from misura.canon import option
 
 standards = ('Misura4', 'Misura3', 'CEN/TS')
 
@@ -46,6 +49,27 @@ def get_shapes(sample, standard):
     return ret
 
 
+def export_images_option_dialog(parent, max_temp):
+        opts = {}
+        option.ao(
+            opts, 'standard', 'Chooser', standards[0], name=_("Standard for characteristic shapes"),
+                  options=standards)
+        option.ao(
+            opts, 'start', 'Integer', name=_("Discard images below temperature"),
+                  unit='celsius', current=0, min=0, max=max_temp+1, step=1)
+        option.ao(
+            opts, 'step', 'Float', name=_("Temperature stepping"),
+                  unit='celsius', current=1, min=0, max=50, step=0.1)
+        configuration_proxy = option.ConfigurationProxy(
+            {'self': opts})
+        temperature_dialog = conf.InterfaceDialog(
+            configuration_proxy, configuration_proxy, opts, parent=parent)
+        temperature_dialog.setWindowTitle(_('Image export options'))
+        if temperature_dialog.exec_():
+            return configuration_proxy
+        return False
+
+
 class ImageStrip(QtGui.QWidget):
 
     """Image strip"""
@@ -77,36 +101,38 @@ class ImageStrip(QtGui.QWidget):
         self.menu.addAction(_("Render video"), self.render_video)
 
     def export_images(self):
-        # TODO: use time/index stepping
-        standard, ok = QtGui.QInputDialog.getItem(self,
-                                                  _('Choose standard to show'),
-                                                  _('Standard'),
-                                                  standards)
-        if not ok:
-            return
-
         output_filename = QtGui.QFileDialog.getSaveFileName(self,
                                                             _('Save Report'),
                                                             '',
                                                             '*.html')
         if not output_filename:
             return
-
+        
+        
         instrument_name = self.decoder.datapath.split('/')[1]
         sample_name = self.decoder.datapath.split('/')[2]
 
         instrument = getattr(self.decoder.proxy.conf, instrument_name)
         sample = getattr(instrument, sample_name)
+        Tpath = '0:'+sample['fullpath'][1:]+'T'
+        temperature_data = self.doc.data.get(Tpath).data
+        opts = export_images_option_dialog(self, max(self.doc.data.get('0:kiln/T').data))
+        if not opts:
+            return
+        
 
-        characteristic_shapes = get_shapes(sample, standard)
+
+        characteristic_shapes = get_shapes(sample, opts['standard'])
         
         thread = RunMethod(htmlreport.create_images_report, 
             self.decoder,
             instrument.measure,
             self.doc.data['0:t'].data,
-            self.doc.data.get('0:kiln/T').data,
+            temperature_data,
             characteristic_shapes,
-            standard=standard,
+            startTemp=opts['start'],
+            step=opts['step'],
+            standard=opts['standard'],
             output = output_filename,
             jobs = registry.tasks.jobs,
             job = registry.tasks.job,
