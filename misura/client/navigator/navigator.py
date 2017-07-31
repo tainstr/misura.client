@@ -29,6 +29,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     tasks = None
     convert = QtCore.pyqtSignal(str)
     converter = False
+    doc = False
     
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=set([filedata.dstats.loaded]), cols=1):
         QtGui.QTreeView.__init__(self, parent)
@@ -418,9 +419,19 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         """Build a menu from a MisuraProxy or ConfigurationProxy"""
         if not menu:
             menu = QtGui.QMenu()
-        uid = proxy.instrument_obj.measure['uid']
-        linked = False
-        for ln in getUsedPrefixes(self.doc).values(): # LinkedFiles
+        # In live, out-of-test, doc is not defined:
+        if not self.doc:
+            menu.clear()
+            for domain in self.domains:
+                domain.build_nodoc_menu(menu, proxy)
+            return menu
+        ins = proxy.instrument_obj
+        uid = ins.measure['uid']
+        prefix = '0:'
+        used_prefixes = []
+        if self.doc:
+            used_prefixes = getUsedPrefixes(self.doc).values()
+        for ln in used_prefixes: # LinkedFiles
             root = getattr(ln, 'conf', False)
             if not root: 
                 continue
@@ -429,15 +440,15 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 logging.debug('Configuration does not have an active instrument!') 
                 continue
             if ins.measure['uid'] == uid:
-                linked = ln
+                prefix = ln.prefix
                 break
-        if not ins:
+        if self.doc and not ins:
             logging.error('Cannot find a LinkedFile for configuration', proxy)
             return False
         # Use instrument node where measure node is asked for
         if proxy['devpath'] =='measure':
             proxy = proxy.parent()
-        node_path =  linked.prefix + proxy['fullpath'][1:-1]
+        node_path =  prefix + proxy['fullpath'][1:-1]
         node = self.doc.model.tree.traverse(node_path)
         if not node:
             logging.debug('Node not found while building menu', node_path)

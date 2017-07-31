@@ -182,15 +182,23 @@ class DataNavigatorDomain(NavigatorDomain):
         cp = node.linked.conf
         if '/' in path:
             cp = cp.toPath(path)
-        win = conf.TreePanel(cp, select=cp)
-        win.setWindowTitle('Configuration tree from: %s' % cp['name'])
+        self.configure_proxy(cp, path)
+        
+    def configure_proxy(self, proxy, path=False):
+        if not path:
+            path = proxy['fullpath']
+        win = conf.TreePanel(proxy, select=proxy)
+        win.setWindowTitle('Configuration tree from: %s' % proxy['name'])
         win.show()
         # Keep a reference for Qt
-        self.configuration_windows[path] = win
+        self.configuration_windows[path] = win     
 
     def add_configuration(self, menu, node):
         if node.linked and hasattr(node.linked, 'conf'):
             menu.addAction(_('Configure'), self.configure)
+            
+    def add_nodoc_menu(self, menu, proxy):
+        menu.addAction(_('Configure'), functools.partial(self.configure_proxy, proxy))
 
     def add_file_menu(self, menu, node):
         menu.addAction(_('View'), self.viewFile)
