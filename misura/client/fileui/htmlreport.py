@@ -12,6 +12,7 @@ def create_images_report(decoder,
                          temperature_data,
                          characteristic_shapes,
                          standard='Misura4',
+                         output = False,
                          jobs=lambda *x: None,
                          job=lambda *x: None,
                          done=lambda *x: None):
@@ -20,6 +21,8 @@ def create_images_report(decoder,
     all_images_data = []
     last_temperature = -100
     image_count = 1
+    jobs(3, 'Creating images report')
+    jobs(total_number_of_images, 'Decoding')
     for i in range(total_number_of_images):
         time, qimage = decoder.get_data(i)
         image_number = i + 1
@@ -34,7 +37,9 @@ def create_images_report(decoder,
                                     csutil.from_seconds_to_hms(int(time))])
             last_temperature = image_temperature
             image_count += 1
-
+        job(i, 'Decoding')
+    done('Decoding')
+    job(1, 'Creating images report', 'Creating report structure')
     characteristic_temperatures = {}
 
     for shape in characteristic_shapes.keys():
@@ -45,17 +50,21 @@ def create_images_report(decoder,
                                         5,
                                         characteristic_temperatures,
                                         jobs,
-                                        job)
+                                        job,
+                                        done)
 
     substitutions_hash = {"$LOGO$": base64_logo(),
                           "$code$": measure['uid'],
                           "$title$": measure['name'],
                           "$date$": measure['date'],
                           "$IMAGES_TABLE$": images_table_html }
-
-    done('Creating images report...')
-
-    return template.convert(images_template_text(), substitutions_hash)
+    
+    job(2, 'Creating images report', 'Writing report to' + output)
+    output_html = template.convert(images_template_text(), substitutions_hash)
+    with open(output, 'w') as output_file:
+        output_file.write(output_html)
+    done('Creating images report')
+    return True
 
 def to_int(float_or_none_string):
     if float_or_none_string == 'None':

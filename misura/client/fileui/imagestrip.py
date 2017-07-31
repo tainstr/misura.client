@@ -7,6 +7,8 @@ from PyQt4 import QtGui, QtCore
 from minimage import MiniImage
 from misura.client.fileui import htmlreport
 from misura.client import _
+from misura.client.widgets import RunMethod
+from misura.client.live import registry
 
 standards = ('Misura4', 'Misura3', 'CEN/TS')
 
@@ -84,7 +86,7 @@ class ImageStrip(QtGui.QWidget):
             return
 
         output_filename = QtGui.QFileDialog.getSaveFileName(self,
-                                                            'Save Report',
+                                                            _('Save Report'),
                                                             '',
                                                             '*.html')
         if not output_filename:
@@ -97,18 +99,23 @@ class ImageStrip(QtGui.QWidget):
         sample = getattr(instrument, sample_name)
 
         characteristic_shapes = get_shapes(sample, standard)
-
-        output_html = htmlreport.create_images_report(
+        
+        thread = RunMethod(htmlreport.create_images_report, 
             self.decoder,
             instrument.measure,
             self.doc.data['0:t'].data,
             self.doc.data.get('0:kiln/T').data,
             characteristic_shapes,
-            standard=standard
+            standard=standard,
+            output = output_filename,
+            jobs = registry.tasks.jobs,
+            job = registry.tasks.job,
+            done = registry.tasks.done
         )
+        thread.pid = 'Creating images report'
+        QtCore.QThreadPool.globalInstance().start(thread)
 
-        with open(output_filename, 'w') as output_file:
-            output_file.write(output_html)
+
 
     def render_video(self):
         # TODO: use time/index stepping

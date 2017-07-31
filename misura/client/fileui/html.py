@@ -4,10 +4,10 @@
 import base64
 
 def encode(data):
-	return base64.b64encode(data)
+    return base64.b64encode(data)
 
 def embed(data, type):
-	return "<img src='data:image/%s;base64,%s' alt=''>" % (type, encode(data))
+    return "<img src='data:image/%s;base64,%s' alt=''>" % (type, encode(data))
 
 def embed_with_labels(data,
                       image_number,
@@ -26,16 +26,17 @@ def table_from(images,
                images_per_line=5,
                characteristic_temperatures={},
                jobs=lambda *x: None,
-               job=lambda *x: None):
-
-        jobs(len(images), 'Creating images report...')
+               job=lambda *x: None,
+               done=lambda *x: None):
+        
+        jobs(len(images), 'Adding images')
         html = "<table><tr>"
         labels = {}
         for key in characteristic_temperatures.keys():
                 labels[characteristic_temperatures[key]] = key + '<br/><br/'
 
         for index, image in enumerate(images):
-                job(index, 'Creating images report...')
+                job(index, 'Adding images')
 
                 current_image_temperature = int(image[2])
 
@@ -49,8 +50,8 @@ def table_from(images,
                                                                 label)
                 if (index + 1) % images_per_line == 0:
                         html = html + "</tr><tr>"
-
+        done('Adding images')
         return html + "</tr></table>"
 
 def encode_image(image_file_name):
-	return encode(open(image_file_name).read())
+    return encode(open(image_file_name).read())
