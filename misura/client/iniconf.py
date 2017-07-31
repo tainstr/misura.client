@@ -68,7 +68,7 @@ def restore(srv, file_path='ini.ini', serials=None):
     serials = serials or []
     ini = open(file_path, 'r').read()
     for (old,new) in serials:
-        ini.replace(old, new)
+        ini = ini.replace(old, new)
     f1 = file_path+'.tmp'
     open(f1, 'w').write(ini)
     conf = configparser.SafeConfigParser()
