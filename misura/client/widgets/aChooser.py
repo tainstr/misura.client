@@ -113,14 +113,14 @@ class async_aChooser(aChooser):
 
 class FurnacePositionChooser(async_aChooser):
     def __init__(self, server, path, prop, parent=None):
-        self.btn_open = QtGui.QPushButton(u"\U0001F513")
-        #self.btn_open.setIcon(theme_icon('go-next'))
+        self.btn_open = QtGui.QPushButton()#u"\U0001F513")
+        self.btn_open.setIcon(theme_icon('go-next'))
         
         self.btn_open.clicked.connect(self.go_open)
         self.btn_open.setMaximumWidth(50)
         
-        self.btn_close = QtGui.QPushButton(u"\U0001F512")
-        #self.btn_close.setIcon(theme_icon('go-previous'))
+        self.btn_close = QtGui.QPushButton()#u"\U0001F512")
+        self.btn_close.setIcon(theme_icon('go-previous'))
         self.btn_close.clicked.connect(self.go_close)
         self.btn_close.setMaximumWidth(50)
         
