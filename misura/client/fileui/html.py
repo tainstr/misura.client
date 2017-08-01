@@ -26,9 +26,9 @@ def table_from(images,
                type='gif',
                images_per_line=5,
                characteristic_temperatures={},
-               jobs=lambda *x: None,
-               job=lambda *x: None,
-               done=lambda *x: None,
+               jobs=lambda *x, **k: None,
+               job=lambda *x, **k: None,
+               done=lambda *x, **k: None,
                check_abort=lambda: False,
                do_abort=lambda: False):
         

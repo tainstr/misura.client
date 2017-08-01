@@ -80,7 +80,7 @@ def create_images_report(decoder,
         
         job(i-idx0, 'Decoding')
     done('Decoding')
-    job(1, 'Creating images report', 'Creating report structure')
+    job(2, 'Creating images report', 'Creating report structure')
     characteristic_temperatures = {}
 
     for shape in characteristic_shapes.keys():
