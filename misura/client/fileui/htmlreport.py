@@ -1,56 +1,83 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import numpy as np
 
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 from misura.client.fileui import html
 from misura.client.fileui import template
 from PyQt4 import QtGui, QtCore
-from ...canon import csutil, reference
+from ...canon import csutil
+
 
 def create_images_report(decoder,
                          measure,
-                         time_data,
-                         temperature_data,
                          characteristic_shapes,
-                         standard='Misura4',
                          output = False,
                          startTemp=0,
                          step=1,
                          jobs=lambda *x: None,
                          job=lambda *x: None,
-                         done=lambda *x: None):
+                         done=lambda *x: None,
+                         check_abort=lambda: False,
+                         do_abort=lambda: 0):
     Tpath = decoder.datapath.split('/')
     Tpath[-1]='T'
     Tpath = '/'.join(Tpath)
     # Get index of startTemp in sample/T dataset
     idx0, t0, T0 = decoder.proxy.rises(Tpath, startTemp)
     # Get index of start time in sample/profile
-    #idx0 = decoder.proxy.get_time(decoder.datapath, t0)
     idx0 = decoder.get_time(t0)
     total_number_of_images = len(decoder)
     all_images_data = []
-    last_temperature = -100
     image_count = 1
-    jobs(3, 'Creating images report')
-    print 'UUUUUUUUU',total_number_of_images, idx0, step, (total_number_of_images-idx0+1)/step
-    jobs((total_number_of_images-idx0+1)/step, 'Decoding')
+    jobs(3, 'Creating images report', abort=do_abort)
+    jobs(total_number_of_images-idx0+1, 'Decoding', abort=do_abort)
     v = range(idx0, total_number_of_images)
     if idx0!=0:
         v=[0]+v
-    for i in v:
+    last_temperature = int(T0)
+    i=0
+    i0=-1
+    time=0
+    step_sign=1
+    while i<total_number_of_images:
+        if check_abort():
+            logging.debug('Export aborted')
+            done('Decoding')
+            return False
+        
+        if image_count>1:
+            last_temperature+=step_sign*step
+            i, nt, nT = decoder.proxy.nearest(Tpath, last_temperature)
+            print 'new T', i, nt, nT
+            # If going backward, try inverting the time
+            if nt<=time:
+                step_sign*=-1
+                logging.debug('Inverted step sign:', step_sign)
+                last_temperature+=2*step_sign*step
+                i, nt, nT = decoder.proxy.nearest(Tpath, last_temperature)
+                # If time is still backward, means there are no more points
+                if nt<=time:
+                    logging.debug('End decoding: no more increments')
+                    break
+            i = decoder.get_time(nt)
+            
+        if i<=i0:
+            logging.debug('No more images', i0, i)
+            break
         time, qimage = decoder.get_data(i)
-        image_number = i + 1
-        image_temperature = decoder.proxy.col_at_time(Tpath, time, True)[1]
-        # Take first image then discard anything until startTemp
-        if image_temperature<startTemp and image_count==2:
-            continue
-        if abs(last_temperature - int(image_temperature)) >= step:
-            image_data = byte_array_from(qimage)
-            all_images_data.append([image_data,
-                                    image_count,
-                                    image_temperature,
-                                    csutil.from_seconds_to_hms(int(time))])
-            last_temperature = image_temperature
-            image_count += 1
+        i0=i
+
+        nt, image_temperature = decoder.proxy.col_at_time(Tpath, time, True)
+        
+        image_data = byte_array_from(qimage)
+        all_images_data.append([image_data,
+                                image_count,
+                                image_temperature,
+                                csutil.from_seconds_to_hms(int(time))])
+        image_count += 1
+        
         job(i-idx0, 'Decoding')
     done('Decoding')
     job(1, 'Creating images report', 'Creating report structure')
@@ -65,8 +92,11 @@ def create_images_report(decoder,
                                         characteristic_temperatures,
                                         jobs,
                                         job,
-                                        done)
-
+                                        done,
+                                        check_abort,
+                                        do_abort)
+    if images_table_html is False:
+        return False
     substitutions_hash = {"$LOGO$": base64_logo(),
                           "$code$": measure['uid'],
                           "$title$": measure['name'],

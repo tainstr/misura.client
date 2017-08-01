@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 import base64
 
 def encode(data):
@@ -27,15 +28,21 @@ def table_from(images,
                characteristic_temperatures={},
                jobs=lambda *x: None,
                job=lambda *x: None,
-               done=lambda *x: None):
+               done=lambda *x: None,
+               check_abort=lambda: False,
+               do_abort=lambda: False):
         
-        jobs(len(images), 'Adding images')
+        jobs(len(images), 'Adding images', abort=do_abort)
         html = "<table><tr>"
         labels = {}
         for key in characteristic_temperatures.keys():
                 labels[characteristic_temperatures[key]] = key + '<br/><br/'
 
         for index, image in enumerate(images):
+                if check_abort():
+                    logging.debug('Export aborted')
+                    done('Adding images')
+                    return False
                 job(index, 'Adding images')
 
                 current_image_temperature = int(image[2])

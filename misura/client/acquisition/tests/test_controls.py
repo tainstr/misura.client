@@ -63,7 +63,7 @@ class Controls(unittest.TestCase):
         class DummtTasks():
 
             @classmethod
-            def jobs(self, n, msg):
+            def jobs(self, n, msg, *a, **k):
                 return True
 
             @classmethod

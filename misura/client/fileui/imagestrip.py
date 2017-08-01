@@ -114,8 +114,6 @@ class ImageStrip(QtGui.QWidget):
 
         instrument = getattr(self.decoder.proxy.conf, instrument_name)
         sample = getattr(instrument, sample_name)
-        Tpath = '0:'+sample['fullpath'][1:]+'T'
-        temperature_data = self.doc.data.get(Tpath).data
         opts = export_images_option_dialog(self, max(self.doc.data.get('0:kiln/T').data))
         if not opts:
             return
@@ -123,25 +121,30 @@ class ImageStrip(QtGui.QWidget):
 
 
         characteristic_shapes = get_shapes(sample, opts['standard'])
-        
+        self.export_aborted = False
+
         thread = RunMethod(htmlreport.create_images_report, 
             self.decoder,
             instrument.measure,
-            self.doc.data['0:t'].data,
-            temperature_data,
             characteristic_shapes,
             startTemp=opts['start'],
             step=opts['step'],
-            standard=opts['standard'],
             output = output_filename,
             jobs = registry.tasks.jobs,
             job = registry.tasks.job,
-            done = registry.tasks.done
+            done = registry.tasks.done,
+            check_abort=self.check_abort_export,
+            do_abort=self.do_abort_export,
         )
         thread.pid = 'Creating images report'
+        thread.abort = self.do_abort_export
         QtCore.QThreadPool.globalInstance().start(thread)
+    
+    def do_abort_export(self):
+        self.export_aborted = True
 
-
+    def check_abort_export(self):
+        return self.export_aborted
 
     def render_video(self):
         # TODO: use time/index stepping
