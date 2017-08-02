@@ -16,9 +16,9 @@ def create_images_report(decoder,
                          output = False,
                          startTemp=0,
                          step=1,
-                         jobs=lambda *x: None,
-                         job=lambda *x: None,
-                         done=lambda *x: None,
+                         jobs=lambda *x, **k: None,
+                         job=lambda *x, **k: None,
+                         done=lambda *x, **k: None,
                          check_abort=lambda: False,
                          do_abort=lambda: 0):
     Tpath = decoder.datapath.split('/')
