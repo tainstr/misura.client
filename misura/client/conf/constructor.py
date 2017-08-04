@@ -571,7 +571,7 @@ class Interface(QtGui.QTabWidget):
         self.clear()
         self.sectionsMap = {}
         self._deleted = True
-        self.interface.blockSignals(True)
+        self.blockSignals(True)
 
     def update(self):
         """Cause all widgets to re-register for an update"""
