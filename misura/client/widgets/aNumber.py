@@ -173,6 +173,7 @@ class aNumber(ActiveWidget):
     slider_class = FocusableSlider
     spinbox = False
     slider = False
+    range_menu = False
     
     def __init__(self, server, remObj, prop, parent=None, slider_class=FocusableSlider):
         self.slider_class = slider_class
@@ -182,8 +183,10 @@ class aNumber(ActiveWidget):
     def changed_option(self):
         self.precision = self.prop.get('precision', -1)
         self.divider = 1.
+        self.current = self.prop.get('current')
         # Initializing
         if not self.spinbox:
+            self.update(minmax=False)
             return 
         min_value = self.prop.get('min', None)
         max_value = self.prop.get('max', None)
@@ -230,7 +233,10 @@ class aNumber(ActiveWidget):
         
     def build_range_menu(self):
         #TODO: update ranges when unit changes!!!
-        self.range_menu = self.emenu.addMenu(_('Range'))
+        if not self.range_menu:
+            self.range_menu = self.emenu.addMenu(_('Range'))
+        else:
+            self.range_menu.clear()
         mx = self.max or 0
         mn  = self.min or 0
         st = self.step or 0
