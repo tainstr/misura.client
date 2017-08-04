@@ -6,9 +6,11 @@ logging = get_module_logging(__name__)
 import functools
 import os
 import collections
+import threading
 
 from misura.canon import option
 from misura.canon.option import sorter, prop_sorter
+from misura.canon.csutil import lockme
 
 from .. import _
 from .. import widgets
@@ -400,6 +402,7 @@ class Interface(QtGui.QTabWidget):
 
     def __init__(self, server, remObj=False, prop_dict=False, parent=None, context='Option', fixed=False):
         QtGui.QTabWidget.__init__(self, parent)
+        self._lock = threading.Lock()
         self.server = server
         if remObj is False:
             remObj = server
@@ -432,14 +435,14 @@ class Interface(QtGui.QTabWidget):
 
     _prev_section = False
     _prev_section_status = False
-    _rebuilding = False
+    _deleted  = False
+    @lockme()
     def rebuild(self, prop_dict=False, force=False, redraw=False):
         """Rebuild the full widget"""
-        # Cache previous status
-        if self._rebuilding:
-            self._rebuilding = False
-            return
-        self._rebuilding = True
+        logging.debug('Interface.rebuild',id(self),self.remObj['fullpath'], prop_dict, force, redraw)
+        if self._deleted:
+            logging.debug('Interface.rebuild: deleted')
+            return 
         if self.sectionsMap:
             i = self.currentIndex()
             self._prev_section = self.sectionsMap.keys()[i]
@@ -454,7 +457,6 @@ class Interface(QtGui.QTabWidget):
             if len(d) == 0 and not (force or redraw):
                 logging.debug(
                     'Interface.rebuild not needed: options are equal.')
-                self._rebuilding = True
                 return
             prop_dict = self.remObj.describe()
             # If a prop_dict was set, just pick currently defined options
@@ -464,7 +466,6 @@ class Interface(QtGui.QTabWidget):
         if not prop_dict:
             logging.critical('Impossible to get object description',
                              self.remObj._Method__name)
-            self._rebuilding = True
             return
         self.clear()
         self.sections = orgSections(prop_dict, self.remObj._readLevel)
@@ -489,8 +490,6 @@ class Interface(QtGui.QTabWidget):
         if self._prev_section and self._prev_section in self.sectionsMap:
             self.show_section(self._prev_section)
             self.sectionsMap[self._prev_section].set_status(self._prev_section_status)
-            
-        self._rebuilding = True
 
     def reorder(self):
         """Switch toolbox currentIndexes"""
@@ -565,11 +564,14 @@ class Interface(QtGui.QTabWidget):
             return
         for wg in self.sectionsMap.itervalues():
             wg.close()
-            wg.destroy()
+            wg.deleteLater()
         for i in range(self.count()):
             logging.debug('remove tab', i)
             self.removeTab(self.currentIndex())
         self.clear()
+        self.sectionsMap = {}
+        self._deleted = True
+        self.interface.blockSignals(True)
 
     def update(self):
         """Cause all widgets to re-register for an update"""
@@ -633,4 +635,11 @@ class InterfaceDialog(QtGui.QDialog):
         self.ok.setDefault(True)
         lay.addWidget(self.ok)
 
-        self.connect(self.ok, QtCore.SIGNAL('clicked()'), self.accept)
+        self.connect(self.ok, QtCore.SIGNAL('clicked()'), self.ok_clicked)
+        
+    def ok_clicked(self):
+        self.interface.close()
+        self.interface.hide()
+        self.interface.deleteLater()
+        
+        self.accept()

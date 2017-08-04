@@ -161,7 +161,8 @@ class MeasureInfo(QtGui.QTabWidget):
                 logging.debug('Missing node object', n)
                 continue
             wg = self.nodeViews.get(n, False)
-            if not wg:
+            if wg is False:
+                logging.debug('MeasureInfo.refresh_nodes: creating nodeView', n)
                 wg = conf.Interface(
                     self.server, node, node.describe(), parent=None)
             j = c + i
