@@ -439,7 +439,6 @@ class Interface(QtGui.QTabWidget):
     @lockme()
     def rebuild(self, prop_dict=False, force=False, redraw=False):
         """Rebuild the full widget"""
-        logging.debug('Interface.rebuild',id(self),self.remObj['fullpath'], prop_dict, force, redraw)
         if self._deleted:
             logging.debug('Interface.rebuild: deleted')
             return 

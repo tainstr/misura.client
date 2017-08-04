@@ -136,6 +136,10 @@ class MisuraDocument(document.Document):
             return False
         ds = loads(open(filename, 'rb').read())
         ds.document = self
+        # Restore correct linked instances
+        if ds.linked and ds.linked.filename:
+            p = getUsedPrefixes(self)
+            ds.linked = p[ds.linked.filename]
         return ds
 
     def load_rule(self, filename, rule, **kw):

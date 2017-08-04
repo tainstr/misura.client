@@ -67,7 +67,7 @@ def get_linked(doc, params, create=True):
     params.prefix = prefix
     LF = linked.LinkedMisuraFile(params)
     LF.prefix = prefix
-    logging.debug('get_linked', prefix)
+    logging.debug('get_linked', prefix, params.filename)
     LF.conf = False
     return LF
 
@@ -465,6 +465,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         fp = getattr(doc, 'proxy', False)
         logging.debug('FILENAME', self.filename, type(fp), fp)
         if fp is False or not fp.isopen():
+            logging.debug('Opening a new file proxy', self.filename)
             self.proxy = getFileProxy(
                 self.filename, version=self.params.version)
         else:
@@ -477,10 +478,13 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         self.params.version = LF.version
         # Redefine LF.conf if empty
         if not LF.conf:
+            logging.debug('Redefining LF.conf')
             conf = self.proxy.conf  # ConfigurationProxy
             LF.conf = conf
         else:
+            logging.debug('Found LF.conf', LF.conf)
             conf = LF.conf
+            self.proxy.conf = LF.conf
         conf.doc = doc
         conf.filename = self.params.filename
         instr = conf['runningInstrument']
