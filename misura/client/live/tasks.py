@@ -293,6 +293,8 @@ class Tasks(QtGui.QTabWidget):
         if self.update_active() or self.user_show:
             self.show()
             self.show_signal.emit()
+            n = max(len(self.progress), len(self.tasks))
+            self.setMinimumHeight(n*50+100)
         else:
             self.hide()
             self.hide_signal.emit()
