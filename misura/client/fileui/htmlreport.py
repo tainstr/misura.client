@@ -103,12 +103,17 @@ def create_images_report(decoder,
                           "$date$": measure['date'],
                           "$IMAGES_TABLE$": images_table_html }
     
-    job(2, 'Creating images report', 'Writing report to' + output)
+    job(2, 'Creating images report', 'Writing report to ' + str(output))
     output_html = template.convert(images_template_text(), substitutions_hash)
-    with open(output, 'w') as output_file:
-        output_file.write(output_html)
+    if output:
+        r = False
+        with open(output, 'w') as output_file:
+            output_file.write(output_html)
+            r = True
+    else:
+        r = output_html
     done('Creating images report')
-    return True
+    return r
 
 def to_int(float_or_none_string):
     if float_or_none_string == 'None':
