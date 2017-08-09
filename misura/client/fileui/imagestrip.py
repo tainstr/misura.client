@@ -82,6 +82,7 @@ class ImageStrip(QtGui.QWidget):
 
     def __init__(self, n=5, parent=None):
         QtGui.QWidget.__init__(self, parent)
+        self._extrusion = []
         self.lay = QtGui.QGridLayout()
         self.setLayout(self.lay)
         self.n = n
@@ -101,7 +102,11 @@ class ImageStrip(QtGui.QWidget):
         self.actTime = self.menu.addAction(_('Step by time'), self.by_time)
         self.actTime.setCheckable(True)
         self.menu.addAction(_("Export Images"), self.export_images)
-        self.menu.addAction(_("Render video"), self.render_video)
+        from misura.client import video, extrusion
+        if video.cv:
+            self.menu.addAction(_("Render video"), self.render_video)
+        if extrusion.pg:
+            self.menu.addAction(_("3D Extrusion"), self.render_extrusion)
 
     def export_images(self):
         output_filename = QtGui.QFileDialog.getSaveFileName(self,
@@ -154,6 +159,12 @@ class ImageStrip(QtGui.QWidget):
         from misura.client import video
         v = video.VideoExporter(self.decoder.proxy, self.decoder.datapath)
         v.exec_()
+        
+    def render_extrusion(self):
+        from misura.client import extrusion
+        w = extrusion.extrude(self.decoder.proxy, self.decoder.datapath)
+        w.show()
+        self._extrusion.append(w)
 
     def set_doc(self, doc, datapath=False):
         logging.debug('ImageStrip.set_doc', doc, datapath)
