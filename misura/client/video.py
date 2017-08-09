@@ -36,7 +36,9 @@ def export(sh, frame='/hsm/sample0/frame',
            prog=False,
            acquisition_start_temperature=20,
            Tstep=0,
-           tstep=0):
+           tstep=0,
+           centerx=False,
+           centery=False):
     """Base video export function"""
     if cv is False:
         logging.debug('No OpenCV library')
@@ -91,6 +93,10 @@ def export(sh, frame='/hsm/sample0/frame',
             ((w, h), x, y) = img
             x -= x_translation
             y -= y_translation
+            if centerx:
+                x += np.uint16(wMax/2. - int(x.mean()))
+            if centery:
+                y += np.uint16(hMax/2. - int(y.mean()))
             # Avoid black-white inversion
             x = np.concatenate(([0,       0], x, [wMax,  wMax,    0]))
             y = np.concatenate(([hMax, y[0]], y, [y[-1], hMax, hMax]))
@@ -165,6 +171,8 @@ ao(opts, 'startTemp', 'Float', 0, _('Start temperature'))
 ao(opts, 'fps', 'Integer', 50, _('Framerate'), min=1, max=100, step=1, unit='hertz')
 ao(opts, 'Tstep', 'Float', 0, _('Temperature steps'), min=0, max=50, step=1, unit='celsius')
 ao(opts, 'tstep', 'Float', 0, _('Time steps'), min=0, max=600, step=1, unit='second')
+ao(opts, 'centerx', 'Boolean', False, _('Center X coord'))
+ao(opts, 'centery', 'Boolean', False, _('Center Y coord'))
 ao(opts, 'codec', 'Chooser', 'X264', _('Output video codec'), options=['X264', 'XVID', 'MJPG'])
 
 
@@ -179,7 +187,7 @@ class VideoExporter(QtGui.QDialog):
         self.sh = sh
         
         src = src.split('/')
-        exts = ('profile', 'frame')
+        exts = ('profile', 'frame', 'filteredProfile')
         ext = 0
         if src[-1] in exts:
             ext = exts.index(src.pop(-1))
@@ -192,7 +200,6 @@ class VideoExporter(QtGui.QDialog):
             ropts['ext']['current'] = ext
         if 'Linux' in platform.platform():
             ropts.pop('codec')
-
                 
         self.cfg = ConfigurationProxy({'self': ropts})
         self.wg = conf.Interface(self.cfg, self.cfg, ropts)
@@ -231,7 +238,9 @@ class VideoExporter(QtGui.QDialog):
                output=out, framerate=self.cfg['fps'], prog=prog,
                acquisition_start_temperature=self.cfg['startTemp'],
                Tstep=self.cfg['Tstep'],
-               tstep=self.cfg['tstep'])
+               tstep=self.cfg['tstep'],
+               centerx=self.cfg['centerx'],
+               centery=self.cfg['centery'])
         self.done(0)
 
     def cancel(self):
