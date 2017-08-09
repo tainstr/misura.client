@@ -200,10 +200,13 @@ class ImageStrip(QtGui.QWidget):
         wg_width = QtGui.QSpinBox()
         wg_width.setRange(0, 100)
         wg_width.setValue(w)
+        wg_closed = QtGui.QCheckBox()
+        wg_closed.setChecked(self.decoder.contour_closed)
         ok = QtGui.QPushButton(_("Ok"))
         canc = QtGui.QPushButton(_("Cancel"))
         lay.addRow(_("Contour only: "), wg_only)
         lay.addRow(_("Contour width: "), wg_width)
+        lay.addRow(_("Draw sample holder: "), wg_closed)
         lay.addRow(canc, ok)
         ok.pressed.connect(dia.accept)
         canc.pressed.connect(dia.reject)
@@ -213,8 +216,9 @@ class ImageStrip(QtGui.QWidget):
         r = dia.exec_()
         if r == QtGui.QDialog.Rejected:
             return False
-        self.decoder.contour_only = wg_only.checkState()
+        self.decoder.contour_only = bool(wg_only.checkState())
         self.decoder.contour_width = wg_width.value()
+        self.decoder.contour_closed = bool(wg_closed.checkState())
         self.decoder.cached_profiles = {}
         return True
 
@@ -267,7 +271,6 @@ class ImageStrip(QtGui.QWidget):
         self.connect(
             self.labels[-1], QtCore.SIGNAL('set_time(float)'), self.emitSetTime)
         self.set_idx()
-
         return True
     
     def slot_zoom_changed(self, width=0):

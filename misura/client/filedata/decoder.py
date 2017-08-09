@@ -22,7 +22,8 @@ MAX = 10**5
 MIN = -10**5
 
 
-def draw_profile(x, y, margin=(20, 50, 5, 5), contour_only=False, pen_width=0):
+def draw_profile(x, y, margin=(20, 50, 5, 5), contour_only=False, pen_width=0,
+                 closed=True):
     """Draw an x,y profile onto a QImage.
     margin: upper, bottom, left, right"""
 
@@ -43,9 +44,10 @@ def draw_profile(x, y, margin=(20, 50, 5, 5), contour_only=False, pen_width=0):
     
     lst = list(QtCore.QPointF(ix, y[i]) for i, ix in enumerate(x))
     # Close the polygon
-    lst.append(QtCore.QPointF(x[-1], h))
-    lst.append(QtCore.QPointF(x[0], h))
-    lst.append(QtCore.QPointF(x[0], y[0]))
+    if closed:
+        lst.append(QtCore.QPointF(x[-1], h))
+        lst.append(QtCore.QPointF(x[0], h))
+        lst.append(QtCore.QPointF(x[0], y[0]))
 
     # Create a painter path
     qpath = QtGui.QPainterPath()
@@ -97,6 +99,7 @@ class DataDecoder(QtCore.QThread):
     _len = 0
     contour_only = False
     contour_width = 0
+    contour_closed = True
 
     def __init__(self, parent=None, maxWidth=100):
         QtCore.QThread.__init__(self, parent)
@@ -126,7 +129,11 @@ class DataDecoder(QtCore.QThread):
         self.queue = []
         if datapath:
             self.datapath = datapath
-
+        
+        if self.datapath and '/hsm/' in self.datapath:
+            self.contour_closed = True
+        else:
+            self.contour_closed = False
         # Clear old tmpdir
         if self.tmpdir:
             shutil.rmtree(self.tmpdir)
@@ -263,7 +270,8 @@ class DataDecoder(QtCore.QThread):
         elif self.ext in ('Profile', 'CumulativeProfile'):
             logging.debug(self.ext, seq)
             ((w, h), x, y) = dat
-            return t, draw_profile(x, y, contour_only=self.contour_only, pen_width=self.contour_width)
+            return t, draw_profile(x, y, contour_only=self.contour_only, pen_width=self.contour_width,
+                                   closed=self.contour_closed)
 
         logging.debug('Format not recognized', self.ext)
         return False
