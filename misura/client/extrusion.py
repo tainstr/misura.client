@@ -1,17 +1,20 @@
+
+import numpy as np
+from misura.canon.indexer import SharedFile
+from misura.canon.reference import get_node_reference
+
 try:
     import pyqtgraph as pg
     import pyqtgraph.opengl as gl
 except:
     pg = False
     gl = False
-import numpy as np
-from misura.canon.indexer import SharedFile
-from misura.canon.reference import get_node_reference
-
 
 STEPS = np.array([0.0, 0.33, 0.66, 1.0])
 CLRS =           ['b', 'r', 'y', 'w']
-clrmp = pg.ColorMap(STEPS, np.array([pg.colorTuple(pg.Color(c)) for c in CLRS]))
+
+if pg:
+    clrmp = pg.ColorMap(STEPS, np.array([pg.colorTuple(pg.Color(c)) for c in CLRS]))
 
 #TODO: add decoding
 def read_file(profile, start=3500, end=-1, max_layers = 1000, cut=0):
@@ -92,6 +95,32 @@ def plot3d(xs,ys,zs, colors, start=0, end=-1, step=1):
     ##w.pan(0,0,0)
     return w
 
+def surface3d(xs,ys,zs, colors, start=0, end=-1, step=1):
+    w = gl.GLViewWidget()
+    nx, ny, nz = [], [], []
+    for i, x in enumerate(xs):
+        sampled_x = x[start:end:step]
+        sampled_y = ys[i][start:end:step]-ys[i][0]
+        z = np.ones(len(sampled_x))*zs[i]
+        nx.append(sampled_x)
+        ny.append(sampled_y)
+        nz.append(z)
+        
+    verts = [np.array([nx[0], ny[0], nz[0]]).transpose()]
+    faces = []
+    for i in range(1, len(nx)):
+        nverts = np.array([nx[i], ny[i], nz[i]]).transpose()
+        nfaces = []
+        #TODO
+    
+        plt = plot_line(sampled_x,sampled_y, z, color=colors[i] )
+        w.addItem(plt)
+    #add_grids(w)
+    ax = gl.GLAxisItem()
+    
+    w.addItem(ax)
+    ##w.pan(0,0,0)
+    return w
 def extrude(f, data_path, cut=0):
     prf = get_node_reference(f, data_path)
     #prf = get_node_reference(f, '/hsm/sample0/profile')
