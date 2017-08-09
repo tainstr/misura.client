@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Video export tools"""
+from misura.canon.option import ao, ConfigurationProxy
+from copy import deepcopy
+from . import conf
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import numpy as np
@@ -31,17 +34,20 @@ def export(sh, frame='/hsm/sample0/frame',
            framerate=50.0,
            fourcc=default_fourcc,
            prog=False,
-           acquisition_start_temperature=20):
+           acquisition_start_temperature=20,
+           Tstep=0,
+           tstep=0):
     """Base video export function"""
     if cv is False:
         logging.debug('No OpenCV library')
         return False
     if not output.lower().endswith('.avi'):
         output += '.avi'
-    if T:
-        nT = sh.col(T, raw=True)
-        tT = nT.cols.t
-        vT = nT.cols.v
+
+    nT = sh.col(T, raw=True)
+    tT = nT.cols.t
+    vT = nT.cols.v
+    
     roi = frame.split('/')[:-1]
     roi.append('roi')
     roi = '/'.join(roi)
@@ -71,7 +77,7 @@ def export(sh, frame='/hsm/sample0/frame',
     ti = 0
     if prog:
         prog.setMaximum(N-i)
-
+    pg = 0
     while i < N:
         # Get image
         t, img = ref[i]
@@ -103,21 +109,64 @@ def export(sh, frame='/hsm/sample0/frame',
             break
         # Get T
         ti = csutil.find_nearest_val(tT, t, seed=ti)
-        cv.putText(im, "T: {:.1f}C".format(
-            vT[ti]), (10, hMax - 10), fontFace=cv.FONT_HERSHEY_DUPLEX, fontScale=1, color=(0, 0, 255))
+        Ti = vT[ti]
+        cv.putText(im, "T: {:.1f}C".format(Ti), 
+                   (10, hMax - 10), 
+                   fontFace=cv.FONT_HERSHEY_DUPLEX, 
+                   fontScale=1, 
+                   color=(0, 0, 255))
+        
         # Write frame
         out.write(im)
-        i += 1
+        # Calculate next frame
+        nt = -1
+        if Tstep>0:
+            Ti += Tstep
+            j = csutil.find_nearest_val(vT, Ti, seed=ti)
+            if j<=i:
+                Tstep*=-1
+                logging.debug('Inverting search direction', Tstep)
+                Ti += 2*Tstep
+                j = csutil.find_nearest_val(vT, Ti, seed=ti)
+                if j<=i:
+                    logging.debug('No more temperature rise', Tstep)
+                    break
+            nt = tT[j]
+        elif tstep>0:
+            nt = tT[ti]+tstep
+          
+        # Get frame index at time nt
+        if nt>0:
+            j = ref.get_time(nt) 
+            if j<=i:
+                break 
+            i = j
+        else:
+            # just take next frame
+            i += 1
         if prog:
             QtGui.qApp.processEvents()
-            if i > 1 and prog.value() == 0:
+            if pg>1 and prog.value() == 0:
                 logging.debug('Export cancelled at frame', i)
                 break
-            prog.setValue(i-i0)
+            pg = i-i0
+            prog.setValue(pg)
+           
 
     logging.debug('releasing', output)
     out.release()
     return True
+
+opts = {}
+ao(opts, 'src', 'String', '', _('Sample source'))
+ao(opts, 'T', 'String', '', _('Temperature source'))
+ao(opts, 'ext', 'Chooser', 'profile', _('Rendering source'), options=['profile', 'frame'])
+ao(opts, 'startTemp', 'Float', 0, _('Start temperature'))
+ao(opts, 'fps', 'Integer', 50, _('Framerate'), min=1, max=100, step=1, unit='hertz')
+ao(opts, 'Tstep', 'Float', 0, _('Temperature steps'), min=0, max=50, step=1, unit='celsius')
+ao(opts, 'tstep', 'Float', 0, _('Time steps'), min=0, max=600, step=1, unit='second')
+ao(opts, 'codec', 'Chooser', 'X264', _('Output video codec'), options=['X264', 'XVID', 'MJPG'])
+
 
 
 class VideoExporter(QtGui.QDialog):
@@ -135,52 +184,19 @@ class VideoExporter(QtGui.QDialog):
         if src[-1] in exts:
             ext = exts.index(src.pop(-1))
         src = '/'.join(src)
-        
-        self.src = QtGui.QLineEdit()
-        self.src.setText(src)
-        self.lay.addRow(_("Sample source"), self.src)
-
-        self.ext = QtGui.QComboBox()
-        self.ext.addItem("profile")
-        self.ext.addItem("frame")
-        self.ext.setCurrentIndex(ext)
-        self.lay.addRow(_("Rendering source"), self.ext)
-
-# self.meta=QtGui.QListWidget()
-# for k in ['Sintering','Softening','Sphere','HalfSphere','Melting']:
-# it=QtGui.QListWidgetItem(k)
-# it.setCheckState(0)
-# self.meta.addItem(it)
-##		self.lay.addRow(_("Render metadata"),self.meta)
-##
-# self.vals=QtGui.QListWidget()
-# for k in ['T','Vol','h']:
-# it=QtGui.QListWidgetItem(k)
-# it.setCheckState(0)
-# self.vals.addItem(it)
-##		self.lay.addRow(_("Render values"),self.vals)
-
+        T = src + '/T'
+        ropts = deepcopy(opts)
+        ropts['src']['current'] = src
+        ropts['T']['current'] = T
+        if ext:
+            ropts['ext']['current'] = ext
         if 'Linux' in platform.platform():
-            self.frm = QtGui.QComboBox()
-            self.frm.addItem('X264')
-            self.frm.addItem('XVID')
-            self.frm.addItem('MJPG')
-            self.frm.setCurrentIndex(0)
-            self.lay.addRow(_("Output Video Codec"), self.frm)
-        else:
-            self.frm = False
+            ropts.pop('codec')
 
-        self.fps = QtGui.QDoubleSpinBox()
-        self.fps.setMinimum(1)
-        self.fps.setMaximum(100)
-        self.fps.setValue(50)
-        self.lay.addRow(_("Framerate"), self.fps)
-
-        self.acquisition_start_temperature = QtGui.QSpinBox()
-        self.acquisition_start_temperature.setMinimum(1)
-        self.acquisition_start_temperature.setMaximum(2000)
-        self.acquisition_start_temperature.setValue(20)
-        self.lay.addRow(_("Start acquisition at temperature"), self.acquisition_start_temperature)
+                
+        self.cfg = ConfigurationProxy({'self': ropts})
+        self.wg = conf.Interface(self.cfg, self.cfg, ropts)
+        self.lay.addRow(self.wg)
 
         self.out = QtGui.QLineEdit()
         self.out.setText(sh.get_path() + '.avi')
@@ -192,31 +208,36 @@ class VideoExporter(QtGui.QDialog):
         self.btn_ok.pressed.connect(self.export)
         self.btn_ko = QtGui.QPushButton("Cancel")
         self.btn_ko.pressed.connect(self.cancel)
+        self.btn_ko.setEnabled(False)
         self.lay.addRow(self.btn_ko, self.btn_ok)
         self.prog = False
 
     def export(self):
         """Start export thread"""
+        self.btn_ko.setEnabled(True)
         prog = QtGui.QProgressBar()
         self.lay.addRow(_('Rendering:'), prog)
-        src = str(self.src.text())
-        ext = str(self.ext.currentText())
-        if self.frm:
-            frm = str(self.frm.currentText())
+        src = str(self.cfg['src'])
+        ext = str(self.cfg['ext'])
+        if 'frm' in self.cfg:
+            frm = str(self.cfg['frm'])
             fourcc = cv.VideoWriter_fourcc(*frm)
         else:
             fourcc = default_fourcc
         out = str(self.out.text())
-        fps = self.fps.value()
         self.prog = prog
-        export(self.sh, frame=src + '/' + ext, fourcc=fourcc,
-               output=out, framerate=fps, prog=prog,
-               acquisition_start_temperature=self.acquisition_start_temperature.value())
+        export(self.sh, frame=src + '/' + ext, T=self.cfg['T'], 
+               fourcc=fourcc,
+               output=out, framerate=self.cfg['fps'], prog=prog,
+               acquisition_start_temperature=self.cfg['startTemp'],
+               Tstep=self.cfg['Tstep'],
+               tstep=self.cfg['tstep'])
         self.done(0)
 
     def cancel(self):
         """Interrupt export thread"""
         logging.debug('Cancel clicked!', self.prog)
+        self.btn_ko.setEnabled(False)
         if self.prog:
             self.prog.setValue(0)
 
