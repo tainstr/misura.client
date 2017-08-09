@@ -93,6 +93,9 @@ class ImageStrip(QtGui.QWidget):
         self.menu.addAction(_('Change length'), self.chLen)
         self.menu.addAction(_('Change rows'), self.chRows)
         self.menu.addAction(_('Style'), self.chStyle)
+        self.uniform_zoom = self.menu.addAction(_('Uniform zoom'), self.slot_zoom_changed)
+        self.uniform_zoom.setCheckable(True)
+        self.uniform_zoom.setChecked(True)
         self.actIndex = self.menu.addAction(_('Step by index'), self.by_index)
         self.actIndex.setCheckable(True)
         self.actTime = self.menu.addAction(_('Step by time'), self.by_time)
@@ -149,8 +152,6 @@ class ImageStrip(QtGui.QWidget):
     def render_video(self):
         # TODO: use time/index stepping
         from misura.client import video
-        # pt = '/' + \
-        #    node.path.replace(node.linked.prefix, '').replace('summary', '')
         v = video.VideoExporter(self.decoder.proxy, self.decoder.datapath)
         v.exec_()
 
@@ -258,6 +259,7 @@ class ImageStrip(QtGui.QWidget):
             row = i % self.rows
             col = i / self.rows
             lbl = MiniImage(self.doc, datapath, parent=self)
+            lbl.zoomChanged.connect(self.slot_zoom_changed)
             self.lay.addWidget(lbl, row, col)
             self.labels.append(lbl)
             lbl.metaChanged.connect(self.route_meta_changed)
@@ -266,6 +268,15 @@ class ImageStrip(QtGui.QWidget):
             self.labels[-1], QtCore.SIGNAL('set_time(float)'), self.emitSetTime)
         self.set_idx()
 
+        return True
+    
+    def slot_zoom_changed(self, width=0):
+        if not self.uniform_zoom.isChecked() and width!=0:
+            return False
+        if width==0:
+            width = self.labels[0].curWidth
+        for lbl in self.labels:
+            lbl.zoom(width)
         return True
 
     def emitSetTime(self, t):

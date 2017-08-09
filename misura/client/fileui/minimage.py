@@ -24,8 +24,9 @@ class MiniImage(QtGui.QWidget):
     """Current metadata for label"""
     metaChanged = QtCore.pyqtSignal(object)
     """Emitted when meta label changes keys. Emits new list of keys."""
+    zoomChanged = QtCore.pyqtSignal(float)
 
-    def __init__(self, doc, datapath=False, curWidth=100, maxWidth=600, minWidth=100, slider=False, parent=None):
+    def __init__(self, doc, datapath=False, curWidth=100, maxWidth=600, minWidth=15, slider=False, parent=None):
         QtGui.QWidget.__init__(self, parent=parent)
         self.lay = QtGui.QVBoxLayout()
         self.lay.setContentsMargins(0, 0, 0, 0)
@@ -220,11 +221,14 @@ class MiniImage(QtGui.QWidget):
             width = self.defaultWidth
         width = min(width, self.maxWidth)
         width = max(width, self.minWidth)
-        self.curWidth = width
+        
         pix = QtGui.QPixmap.fromImage(self.img)
         pix = pix.scaledToWidth(width)
         self.lbl_img.clear()
         self.lbl_img.setPixmap(pix)
+        if self.curWidth!=width:
+            self.curWidth = width
+            self.zoomChanged.emit(self.curWidth)
 
     def zoomIn(self):
         self.zoom(self.curWidth * 1.1)
