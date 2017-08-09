@@ -16,7 +16,9 @@ CLRS =           ['b', 'r', 'y', 'w']
 if pg:
     clrmp = pg.ColorMap(STEPS, np.array([pg.colorTuple(pg.Color(c)) for c in CLRS]))
 
-#TODO: add decoding
+#TODO: parametrize start, end, max_layers
+#TODO: step by time/temperature
+#TODO: write temperature labels
 def read_file(profile, start=3500, end=-1, max_layers = 1000, cut=0):
     xs = []
     ys = []
@@ -90,7 +92,6 @@ def plot3d(xs,ys,zs, colors, start=0, end=-1, step=1):
         w.addItem(plt)
     #add_grids(w)
     ax = gl.GLAxisItem()
-    
     w.addItem(ax)
     ##w.pan(0,0,0)
     return w
@@ -106,21 +107,33 @@ def surface3d(xs,ys,zs, colors, start=0, end=-1, step=1):
         ny.append(sampled_y)
         nz.append(z)
         
-    verts = [np.array([nx[0], ny[0], nz[0]]).transpose()]
+    verts = np.array([nx[0], ny[0], nz[0]]).transpose()
     faces = []
+    fcolors = []
+    vcolors = [colors[0]]*len(verts)
+    vi = 0
     for i in range(1, len(nx)):
         nverts = np.array([nx[i], ny[i], nz[i]]).transpose()
-        nfaces = []
-        #TODO
+        vj = len(verts)
+        for j, v in enumerate(nverts):
+            if j<len(nverts)-1:
+                faces += [[vi+j, vj+j, vj+j+1],
+                          [vi+j, vi+j+1, vj+j+1]]
+                
+                fcolors += [colors[i]]*2
+        verts = np.concatenate((verts, nverts))
+        vcolors += [colors[i]]*len(nverts)
+        vi = vj
     
-        plt = plot_line(sampled_x,sampled_y, z, color=colors[i] )
-        w.addItem(plt)
+    mesh = gl.MeshData(verts, np.array(faces), faceColors=fcolors, vertexColors=vcolors)
+    plt = gl.GLMeshItem(meshdata=mesh, drawFaces=True, drawEdges=False)
+    
+    w.addItem(plt)
     #add_grids(w)
     ax = gl.GLAxisItem()
-    
     w.addItem(ax)
-    ##w.pan(0,0,0)
     return w
+
 def extrude(f, data_path, cut=0):
     prf = get_node_reference(f, data_path)
     #prf = get_node_reference(f, '/hsm/sample0/profile')
@@ -129,10 +142,9 @@ def extrude(f, data_path, cut=0):
     return w
     
 if __name__=='__main__':
-    test_path = '/home/daniele/Sviluppo/3d/cube.h5'
     test_path = '/home/daniele/MisuraData/hsm/BORAX powder 10 C min.h5'
     data_path = '/hsm/sample0/profile'
-    cut = 0
+    cut = 200
     #test_path = '/home/daniele/MisuraData/horizontal/profiles/System Interbau 80 1400.h5'
     #data_path = '/horizontal/sample0/Right/profile'
     app=pg.QtGui.QApplication([])
