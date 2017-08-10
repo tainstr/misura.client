@@ -23,19 +23,28 @@ def path_analysis(cls, x, y, analyzer, sample):
     return path.analyze(analyzer, sample)
 
 
-def write_results(proxy, refs, out, t, fp, ver, sample):
+def write_results(proxy, refs, out, t, fp, ver, sample, smp_def):
     for key, val in out.items():
-        #TODO: add undefined keys to sample definition
+        # Import new definitions
         if not key in sample:
-            logging.debug('key is not defined in sample', key)
-            continue
+            found = False
+            for d in smp_def:
+                if d.has_key('handle') and d['handle']==key:
+                    d['kid']=fp+key
+                    logging.debug('Defining new result option',d)
+                    sample.add_option(**d)
+                    found = True
+                    break
+            if not found:
+                logging.debug('Result is undefined', key)
+                continue
+                    
         ref = refs.get(key, False)
         if ref is False:
             opt = sample.gete(key)
             cls = get_reference(opt)
             folder = ver+fp
             ref = cls(proxy, folder=folder, opt=opt, with_summary=True)
-            
             # Create summary dataset also
             logging.debug('Creating node reference', ref.folder)
             # Delete previous and recreate
@@ -43,6 +52,7 @@ def write_results(proxy, refs, out, t, fp, ver, sample):
             refs[key] = ref
             
         ref.commit([(t, val)])
+        ref.interpolate()
     return refs
             
 
@@ -55,10 +65,10 @@ def postanalysis(proxy, analyzer, sample, dataset='profile'):
     refs = {}
     ver = proxy.get_version()
     for i in range(N):
-        print 'Analyze profile',i
+        print 'Analyze profile',round(100*i/N,2)
         t, ((w, h), x, y) = profile[i]
         st, out = path_analysis(path_class, x, y, analyzer, sample)
-        refs = write_results(proxy, refs, out, t, fp, ver, sample)
+        refs = write_results(proxy, refs, out, t, fp, ver, sample, path_class.smp_def)
     
     proxy.flush()
     return True
