@@ -5,7 +5,11 @@ from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from misura.canon.reference import get_reference, get_node_reference
 # TODO: move to morphometrix package
-from misura.analyzer import PathShape, PathBorder
+try:
+    from misura.analyzer import PathShape, PathBorder
+    enabled=True
+except:
+    enabled=False
 
 
 def path_analysis(cls, x, y, analyzer, sample):
@@ -60,12 +64,15 @@ def postanalysis(proxy, analyzer, sample, dataset='profile'):
     return True
 
 if __name__=='__main__':
-    test_path = '/home/daniele/MisuraData/hsm/BORAX powder 10 C min.h5'
-    data_path = '/hsm/sample0/profile'
+    #test_path = '/home/daniele/MisuraData/hsm/BORAX powder 10 C min.h5'
+    #data_path = '/hsm/sample0'
 
-    #test_path = '/home/daniele/MisuraData/horizontal/profiles/System Interbau 80 1400.h5'
-    #data_path = '/horizontal/sample0/Right/profile'
+    test_path = '/home/daniele/MisuraData/horizontal/profiles/System Interbau 80 1400.h5'
+    data_path = '/horizontal/sample0/Right'
     from misura.canon.indexer import SharedFile
     f = SharedFile(test_path)
     f.load_conf()
-    postanalysis(f, f.conf.hsm.sample0.analyzer, f.conf.hsm.sample0)
+    smp = f.conf.toPath(data_path)
+    postanalysis(f, smp.analyzer, smp)
+    
+    

@@ -6,9 +6,11 @@ from misura.canon.reference import get_node_reference
 try:
     import pyqtgraph as pg
     import pyqtgraph.opengl as gl
+    enabled=True
 except:
     pg = False
     gl = False
+    enabled=False
 
 STEPS = np.array([0.0, 0.33, 0.66, 1.0])
 CLRS =           ['b', 'r', 'y', 'w']

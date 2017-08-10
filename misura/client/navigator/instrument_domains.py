@@ -87,8 +87,11 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
             return True
         menu.addAction(_('Open storyboard'), self.show_storyboard)
         menu.addAction(_('Render video'), self.render)
-        menu.addAction(_('3D Extrusion'), self.extrude)
-        menu.addAction(_('Post-analysis'), self.postanalysis)
+        from misura.client import extrusion, postanalysis
+        if extrusion.enabled:
+            menu.addAction(_('3D Extrusion'), self.extrude)
+        if postanalysis.enabled:
+            menu.addAction(_('Post-analysis'), self.postanalysis)
         return True
         
     def add_group_menu(self, menu, node):
@@ -96,8 +99,11 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
         if spl[-1] in dilatometer_subsamples:
             menu.addAction(_('Open storyboard'), self.show_storyboard)
             menu.addAction(_('Render video'), self.render)
-            menu.addAction(_('3D Extrusion'), self.extrude)
-            menu.addAction(_('Post-analysis'), self.postanalysis)
+            from misura.client import extrusion, postanalysis
+            if extrusion.enabled:
+                menu.addAction(_('3D Extrusion'), self.extrude)
+            if postanalysis.enabled:
+                menu.addAction(_('Post-analysis'), self.postanalysis)
         return True
       
 class MicroscopeSampleNavigatorDomain(ImageAnalysisNavigatorDomain):
