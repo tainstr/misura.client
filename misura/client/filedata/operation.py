@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Libreria per il plotting semplice durante l'acquisizione."""
+"""Import a Misura h5 file or remote live test into Veusz document."""
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from exceptions import BaseException
