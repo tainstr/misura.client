@@ -15,9 +15,93 @@ from .. import axis_selection
 
 ism = isinstance
 
+dilatometer_subsamples = ('Right', 'Left', 'Center','Height','Base')
+
+class ImageAnalysisNavigatorDomain(NavigatorDomain):
+    def __init__(self, *a, **k):
+        super(ImageAnalysisNavigatorDomain, self).__init__(*a, **k)
+        self.storyboards = {}
+        self.extrusions = {}
+        
+    @node
+    def show_storyboard(self, node):
+        obj = self.storyboards.get(node.path, False)
+        if obj:
+            obj.show()
+            return True
+        obj = ImageSlider()
+        obj.set_doc(self.doc)
+        path = '{}/profile'.format(node.path)
+        logging.debug('Storyboard path', path)
+        obj.setPath(path)
+        self.storyboards[node.path] = obj
+        obj.show()
+        
+    @node
+    def render(self, node=False):
+        """Render video from `node`"""
+        from misura.client import video
+        sh = getFileProxy(node.linked.filename)
+        pt = '/' + \
+            node.path.replace(node.linked.prefix, '').replace('summary', '')
+        v = video.VideoExporter(sh, pt)
+        v.exec_()
+        sh.close()
+        
+    @node
+    def extrude(self, node=False):
+        """Build profile extrusion on `node`"""
+        if node.path in self.extrusions:
+            self.extrusions[node.path].show()
+            return True
+        if not node.linked:
+            logging.debug('No linked file for node', node.path)
+            return False
+        proxy = self.doc.proxies.get(node.linked.filename, False)
+        if not proxy:
+            logging.debug('No opened file for node', node.path)
+            return False
+        from misura.client import extrusion
+        w = extrusion.extrude(proxy, node.model_path+'/profile')
+        w.show()
+        self.extrusions[node.path] = w
+        return True
+        
+    @node
+    def postanalysis(self, node=False):
+        """Repeat image analysis on `node`"""
+        if not node.linked:
+            logging.debug('No linked file for node', node.path)
+            return False
+        proxy = self.doc.proxies.get(node.linked.filename, False)
+        if not proxy:
+            logging.debug('No opened file for node', node.path)
+            return False
+        sample = node.get_configuration()
+        analyzer = sample.analyzer
+        from misura.client import postanalysis
+        postanalysis.postanalysis(proxy, analyzer, sample)
+        
+    def add_sample_menu(self, menu, node):
+        if node.path.split('/')[-1] in dilatometer_subsamples:
+            return True
+        menu.addAction(_('Open storyboard'), self.show_storyboard)
+        menu.addAction(_('Render video'), self.render)
+        menu.addAction(_('3D Extrusion'), self.extrude)
+        menu.addAction(_('Post-analysis'), self.postanalysis)
+        return True
+        
+    def add_group_menu(self, menu, node):
+        spl = node.path.split('/')
+        if spl[-1] in dilatometer_subsamples:
+            menu.addAction(_('Open storyboard'), self.show_storyboard)
+            menu.addAction(_('Render video'), self.render)
+            menu.addAction(_('3D Extrusion'), self.extrude)
+            menu.addAction(_('Post-analysis'), self.postanalysis)
+        return True
       
-class MicroscopeSampleNavigatorDomain(NavigatorDomain):
-    storyboards = {}
+class MicroscopeSampleNavigatorDomain(ImageAnalysisNavigatorDomain):
+    
     
     def check_node(self, node):
         if not node:
@@ -39,17 +123,6 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
         p = plugin.ReportPlugin(node, 'report_hsm.vsz', 'Vol')
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
         self.mainwindow.showDialog(d)   
-        
-    @node
-    def render(self, node=False):
-        """Render video from `node`"""
-        from misura.client import video
-        sh = getFileProxy(node.linked.filename)
-        pt = '/' + \
-            node.path.replace(node.linked.prefix, '').replace('summary', '')
-        v = video.VideoExporter(sh, pt)
-        v.exec_()
-        sh.close()
         
     @node
     def viscosity(self, node=False):
@@ -97,20 +170,6 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
         d = PluginDialog(self.mainwindow, self.doc, p, cls)
         self.mainwindow.showDialog(d)
         
-    @node
-    def show_storyboard(self, node):
-        obj = self.storyboards.get(node.path, False)
-        if obj:
-            obj.show()
-            return True
-        obj = ImageSlider()
-        obj.set_doc(self.doc)
-        path = '{}/profile'.format(node.path)
-        logging.debug('Storyboard path', path)
-        obj.setPath(path)
-        self.storyboards[node.path] = obj
-        obj.show()
-        
             
     def add_sample_menu(self, menu, node):
         j = 0
@@ -121,9 +180,9 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
             menu.addAction(_('Surface tension'), self.surface_tension)
         menu.addAction(_('Viscosity'), self.viscosity)
         menu.addAction(_('Show Characteristic Points'), self.showPoints)
-        menu.addAction(_('Open storyboard'), self.show_storyboard)
         menu.addAction(_('Report'), self.hsm_report)
-        menu.addAction(_('Render video'), self.render)
+        # Add generic image analysis entries
+        ImageAnalysisNavigatorDomain.add_sample_menu(self, menu, node)
         return True
     
     def add_dataset_menu(self, menu, node):
@@ -131,7 +190,7 @@ class MicroscopeSampleNavigatorDomain(NavigatorDomain):
             menu.addAction(_('Show Characteristic Points'), self.showPoints)
         return True
     
-class DilatometerNavigatorDomain(NavigatorDomain):
+class DilatometerNavigatorDomain(ImageAnalysisNavigatorDomain):
     @node
     def calibration(self, node=False):
         """Call the CalibrationFactorPlugin on the current node"""
