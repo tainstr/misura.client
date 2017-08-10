@@ -24,7 +24,10 @@ def path_analysis(cls, x, y, analyzer, sample):
 
 
 def write_results(proxy, refs, out, t, fp, ver, sample, smp_def):
+    undef = set()
     for key, val in out.items():
+        if key in undef:
+            continue
         # Import new definitions
         if not key in sample:
             found = False
@@ -37,6 +40,7 @@ def write_results(proxy, refs, out, t, fp, ver, sample, smp_def):
                     break
             if not found:
                 logging.debug('Result is undefined', key)
+                undef.add(key)
                 continue
                     
         ref = refs.get(key, False)
@@ -54,8 +58,6 @@ def write_results(proxy, refs, out, t, fp, ver, sample, smp_def):
         ref.commit([(t, val)])
         ref.interpolate()
     return refs
-            
-
 
 def postanalysis(proxy, analyzer, sample, dataset='profile'):
     fp = sample['fullpath']
@@ -65,11 +67,12 @@ def postanalysis(proxy, analyzer, sample, dataset='profile'):
     refs = {}
     ver = proxy.get_version()
     for i in range(N):
-        print 'Analyze profile',round(100*i/N,2)
+        print 'Analyze profile',round(100.*i/N,2)
         t, ((w, h), x, y) = profile[i]
         st, out = path_analysis(path_class, x, y, analyzer, sample)
         refs = write_results(proxy, refs, out, t, fp, ver, sample, path_class.smp_def)
-    
+    logging.debug('Saving configuration')
+    proxy.save_conf(sample.root.tree())
     proxy.flush()
     return True
 
