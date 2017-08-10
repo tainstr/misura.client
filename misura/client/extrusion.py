@@ -1,6 +1,6 @@
 
 import numpy as np
-from misura.canon.indexer import SharedFile
+
 from misura.canon.reference import get_node_reference
 
 try:
@@ -15,6 +15,8 @@ CLRS =           ['b', 'r', 'y', 'w']
 
 if pg:
     clrmp = pg.ColorMap(STEPS, np.array([pg.colorTuple(pg.Color(c)) for c in CLRS]))
+
+
 
 #TODO: parametrize start, end, max_layers
 #TODO: step by time/temperature
@@ -33,25 +35,31 @@ def read_file(profile, start=3500, end=-1, max_layers = 1000, cut=0):
     step = max(n//max_layers,1)
     tot = n//step
     level_step = 255./tot
-    fz = 0.0009
+    fz = 0.6
     z = -fz*tot/2
-    
+    maxWidth = 0
+    maxHeight = 0
     for i in range(start, end, step):
         print 'Processing', z, c, tot
         t, ((w,h), x, y) = profile[i]
-        x = x.astype(np.float32)/700
-        y = y.astype(np.float32)/700
+        x = x.astype(np.float32)
+        y = y.astype(np.float32)
         if cut:
             x=x[cut:-cut]
             y=y[cut:-cut]
         x-=x.mean()
+        mW = max(x)-min(x)
+        if mW>maxWidth:
+            maxWidth = mW
+        mH = max(y) - min(y)
+        if mH>maxHeight:
+            maxHeight = mH
         xs.append(x)
         ys.append(-y)
         zs.append(-z)
         col = list(clrmp.map(1.*c/tot))
-        col[-1] = int(200-(col[0]+col[1]+col[2])/4)
+        col[-1] = int(255-(col[0]+col[1]+col[2])/4)
         colors.append(col)
-        #colors.append(col)
         # Should be calc depending on shot height
         z+=fz
         c+=1
@@ -64,8 +72,7 @@ def plot_line(x,y,z, color='w'):
     p=np.array([z,x,y])
     p=p.transpose() 
     C=pg.glColor(color)
-    #plt = gl.GLScatterPlotItem(pos=p, color=C, size =2.5)
-    plt = gl.GLLinePlotItem(pos=p, color=C, width =1.5, antialias=True)
+    plt = gl.GLLinePlotItem(pos=p, color=C, width=0.5, antialias=True)
     return plt
 
 def add_grids(view):
@@ -89,14 +96,16 @@ def plot3d(xs,ys,zs, colors, start=0, end=-1, step=1):
         sampled_y = ys[i][start:end:step]-ys[i][0]
         z = np.ones(len(sampled_x))*zs[i]
         plt = plot_line(sampled_x,sampled_y, z, color=colors[i] )
+        plt.scale(0.005,0.005,0.005)
         w.addItem(plt)
+        
     #add_grids(w)
     ax = gl.GLAxisItem()
     w.addItem(ax)
-    ##w.pan(0,0,0)
     return w
 
-def surface3d(xs,ys,zs, colors, start=0, end=-1, step=1):
+def mesh3d(xs,ys,zs, colors, start=0, end=-1, step=1):
+    #Extremely slow. Frequent crashes.
     w = gl.GLViewWidget()
     nx, ny, nz = [], [], []
     for i, x in enumerate(xs):
@@ -134,7 +143,24 @@ def surface3d(xs,ys,zs, colors, start=0, end=-1, step=1):
     w.addItem(ax)
     return w
 
+def surface3d(xs,ys,zs, colors, start=0, end=-1, step=1):
+    w = gl.GLViewWidget()
+    for i, x in enumerate(xs):
+        sampled_x = x[start:end:step]
+        sampled_y = ys[i][start:end:step]-ys[i][0]
+        z = np.ones(len(sampled_x))*zs[i]
+        plt = plot_line(sampled_x,sampled_y, z, color=colors[i] )
+        w.addItem(plt)
+    #add_grids(w)
+    ax = gl.GLAxisItem()
+    w.addItem(ax)
+    ##w.pan(0,0,0)
+    return w
+
 def extrude(f, data_path, cut=0):
+    data_path = data_path.split(':')[-1]
+    if not data_path.startswith('/'):
+        data_path = '/'+data_path
     prf = get_node_reference(f, data_path)
     #prf = get_node_reference(f, '/hsm/sample0/profile')
     xs,ys,zs, colors = read_file(prf, cut=cut)
@@ -148,6 +174,7 @@ if __name__=='__main__':
     #test_path = '/home/daniele/MisuraData/horizontal/profiles/System Interbau 80 1400.h5'
     #data_path = '/horizontal/sample0/Right/profile'
     app=pg.QtGui.QApplication([])
+    from misura.canon.indexer import SharedFile
     f = SharedFile(test_path)
     w = extrude(f, data_path)
     w.show()
