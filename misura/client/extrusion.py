@@ -64,6 +64,8 @@ def read_file(profile, startTime=10, endTime=-1, maxLayers=500, cut=0,
     
     # Color calculation
     delta = tot
+    minT = 0
+    maxT = 0
     if T is not False:
         mi, mt, minT = T.outfile.min(T.path, 
                                      start_time=startTime, 
@@ -113,7 +115,7 @@ def read_file(profile, startTime=10, endTime=-1, maxLayers=500, cut=0,
         # Should be calc depending on shot height
         z += fz
         c += 1
-    return xs, ys, zs, colors
+    return xs, ys, zs, colors, minT, maxT
 
 
 def plot_line(x, y, z, color='w'):
@@ -231,7 +233,7 @@ def extrude(f, data_path, config={'cut':0}):
     prf = get_node_reference(f, data_path)
     T = '/'.join(data_path.split('/')[:-1])+'/T'
     T = get_node_reference(f, T)
-    xs, ys, zs, colors = read_file(prf, T=T, **config)
+    xs, ys, zs, colors, minT, maxT = read_file(prf, T=T, **config)
     w = plot3d(xs, ys, zs, colors)
     return w
 
@@ -260,7 +262,7 @@ def deferred_extrusion(f, dataPath, config={}, aborted=[False],
         if thread.result is None:
             logging.error('No Extrusion result!')
             return
-        xs, ys, zs, colors = thread.result
+        xs, ys, zs, colors, minT, maxT = thread.result
         if xs is False:
             logging.info('Invalid Extrusion result. Aborted?')
             return
@@ -280,6 +282,7 @@ ao(opts, 'endTime', 'Float', -1, _('End time'), min=-1)
 ao(opts, 'maxLayers', 'Integer', 500, _('Max layers'), max=2000, min=10)
 ao(opts, 'cut', 'Integer', 0, _('Remove points from start/end'), min=0)
 
+#TODO: add startTemp, endTemp and update one/another as a function
 
 class ExtrusionRender(QtGui.QWidget):
     render_thread = False
@@ -293,7 +296,9 @@ class ExtrusionRender(QtGui.QWidget):
         ropts['dataPath']['current'] = data_path
         self.cfg = ConfigurationProxy({'self': ropts})
         self.wg = conf.Interface(self.cfg, self.cfg, opts)
+        self.labelT = QtGui.QLabel()
         self.btn_ok = QtGui.QPushButton(_('Render'))
+        self.wg.sectionsMap['Main'].layout().addWidget(self.labelT)
         self.wg.sectionsMap['Main'].layout().addWidget(self.btn_ok)
         self.wg.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.wg.setMaximumWidth(300)
@@ -318,6 +323,8 @@ class ExtrusionRender(QtGui.QWidget):
         self.render_widget.setMinimumHeight(600)
         self.render_widget.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.lay.addWidget(self.render_widget)
+        minT, maxT = self.render_thread.result[-2:]
+        self.labelT.setText(u'Temperature range:\n {:.1f}°C - {:.1f}°C'.format(minT, maxT))
 
 
 if __name__ == '__main__':
