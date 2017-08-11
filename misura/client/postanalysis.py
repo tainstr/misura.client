@@ -10,6 +10,7 @@ try:
     enabled = True
 except:
     enabled = False
+    logging.debug('Post-analysis disabled: no morphometrix package.')
 
 
 def path_analysis(cls, x, y, analyzer, sample):

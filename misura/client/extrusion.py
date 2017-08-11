@@ -25,7 +25,8 @@ if pg:
 # TODO: parametrize start, end, max_layers
 # TODO: step by time/temperature
 # TODO: write temperature labels
-def read_file(profile, start=3500, end=-1, max_layers=1000, cut=0, 
+def read_file(profile, start_time=10, end_time=-1, max_layers=1000, cut=0, 
+                T=False,
                 aborted=[False],
                 jobs=lambda *x, **k: 0,
                 job=lambda *x, **k: 0,
@@ -34,7 +35,12 @@ def read_file(profile, start=3500, end=-1, max_layers=1000, cut=0,
     ys = []
     zs = []
     colors = []
-
+    start = 0
+    if start_time>0:
+        start = profile.get_time(start_time)
+    end = -1
+    if end_time>0:
+        end = profile.get_time(end_time)
     c = 0.
     n = len(profile)
     if end < 0:
@@ -42,13 +48,37 @@ def read_file(profile, start=3500, end=-1, max_layers=1000, cut=0,
     n = end - start + 1
     step = max(n // max_layers, 1)
     tot = n // step
-    level_step = 255. / tot
     fz = 0.6
     z = -fz * tot / 2
     maxWidth = 0
     maxHeight = 0
+    
+    # Color calculation
+    delta = tot
+    if T is not False:
+        mi, mt, minT = T.outfile.min(T.path, 
+                                     start_time=start_time, 
+                                     end_time=end_time)
+        Mi, Mt, maxT = T.outfile.max(T.path, 
+                                     start_time=start_time, 
+                                     end_time=end_time)
+        delta = maxT-minT
+        
+    def get_color(c, t):
+        if T is False:
+            pos = 1. * c / delta
+        else:
+            mi = T.get_time(t)
+            pos = (T[mi][1]-minT)/delta
+            print pos, T[mi][1], minT, delta
+        col = list(clrmp.map(pos))
+        # Adjust transparency to reduce bightness of saturated colors
+        col[-1] = int(255 - (col[0] + col[1] + col[2]) / 5)
+        return col
+        
     def abort():
         aborted[0] = True
+        
     jobs((end-start), 'Extrusion', abort=abort)
     for i in range(start, end, step):
         if aborted[0]:
@@ -70,9 +100,7 @@ def read_file(profile, start=3500, end=-1, max_layers=1000, cut=0,
         xs.append(x)
         ys.append(-y)
         zs.append(-z)
-        col = list(clrmp.map(1. * c / tot))
-        col[-1] = int(255 - (col[0] + col[1] + col[2]) / 4)
-        colors.append(col)
+        colors.append(get_color(c,t))
         # Should be calc depending on shot height
         z += fz
         c += 1
@@ -192,7 +220,9 @@ def extrude(f, data_path, cut=0):
     if not data_path.startswith('/'):
         data_path = '/' + data_path
     prf = get_node_reference(f, data_path)
-    xs, ys, zs, colors = read_file(prf, cut=cut)
+    T = '/'.join(data_path.split('/')[:-1])+'/T'
+    T = get_node_reference(f, T)
+    xs, ys, zs, colors = read_file(prf, cut=cut, T=T)
     w = plot3d(xs, ys, zs, colors)
     return w
 
@@ -208,11 +238,12 @@ def deferred_extrusion(f, data_path, cut=0, aborted=[False],
     if not data_path.startswith('/'):
         data_path = '/' + data_path
     prf = get_node_reference(f, data_path)
-    
+    T = '/'.join(data_path.split('/')[:-1])+'/T'
+    T = get_node_reference(f, T)
     def abort():
         aborted[0]=True
 
-    thread = widgets.RunMethod(read_file, prf, cut=cut, aborted=aborted, jobs=jobs, job=job, done=done)
+    thread = widgets.RunMethod(read_file, prf, T=T, cut=cut, aborted=aborted, jobs=jobs, job=job, done=done)
     
     thread.pid = 'Extrusion'
     thread.abort = abort
@@ -239,8 +270,9 @@ if __name__ == '__main__':
     test_path = '/home/daniele/MisuraData/hsm/BORAX powder 10 C min.h5'
     data_path = '/hsm/sample0/profile'
     cut = 200
-    #test_path = '/home/daniele/MisuraData/horizontal/profiles/System Interbau 80 1400.h5'
-    #data_path = '/horizontal/sample0/Right/profile'
+    test_path = '/home/daniele/MisuraData/horizontal/profiles/System Interbau 80 1400.h5'
+    data_path = '/horizontal/sample0/Right/profile'
+    cut = 0
     app = pg.QtGui.QApplication([])
     from misura.canon.indexer import SharedFile
     f = SharedFile(test_path)
