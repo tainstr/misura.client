@@ -23,6 +23,7 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
         super(ImageAnalysisNavigatorDomain, self).__init__(*a, **k)
         self.storyboards = {}
         self.threads = {}
+        self.extrusions = {}
         
     @node
     def show_storyboard(self, node):
@@ -52,6 +53,9 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
     @node
     def extrude(self, node=False):
         """Build profile extrusion on `node`"""
+        if node.path in self.extrusions:
+            self.extrusions[node.path].show()
+            return True
         if not node.linked:
             logging.debug('No linked file for node', node.path)
             return False
@@ -60,9 +64,9 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
             logging.debug('No opened file for node', node.path)
             return False
         from misura.client import extrusion
-        th = extrusion.deferred_extrusion(proxy, node.model_path+'/profile')
-        self.threads[node.path+'|extrude'] = th
-        th.notifier.connect(th.notifier, QtCore.SIGNAL('widget_ready()'), lambda: th.widget.show())
+        wg = extrusion.ExtrusionRender(proxy, node.model_path+'/profile')
+        self.extrusions[node.path] = wg
+        wg.show()
         return True
         
     @node
