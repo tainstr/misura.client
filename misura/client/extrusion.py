@@ -218,12 +218,10 @@ def plot3d(xs, ys, zs, colors,
            job=lambda *x, **k: 0,
            done=lambda *x, **k: 0):
 
-    w = gl.GLViewWidget()
-
     def abort():
         aborted[0] = True
     jobs(len(xs), 'Extrusion', abort=abort)
-
+    objects = []
     for i, x in enumerate(xs):
         if aborted[0]:
             logging.debug('Estrusion aborted')
@@ -232,13 +230,13 @@ def plot3d(xs, ys, zs, colors,
         z = np.ones(len(x)) * zs[i]
         plt = plot_line(x, -ys[i], -z, color=colors[i])
         plt.scale(0.005, 0.005, 0.005)
-        w.addItem(plt)
+        objects.append(plt)
 
     # add_grids(w)
     ax = gl.GLAxisItem()
-    w.addItem(ax)
+    objects.append(ax)
     done('Extrusion')
-    return w
+    return objects
 
 
 def extrude(f, data_path, config={'cut': 0}):
@@ -278,7 +276,7 @@ def deferred_extrusion(prf, T, config={}, aborted=[False],
             logging.info('Invalid Extrusion result. Aborted?')
             return
         w = plot3d(xs, ys, zs, colors)
-        thread.widget = w
+        thread.objects = w
         thread.notifier.emit(QtCore.SIGNAL('widget_ready()'))
 
     thread.notifier.connect(
@@ -293,7 +291,8 @@ ao(opts, 'dataPath', 'String', '', _('Profile source'))
 ao(opts, 'startTime', 'Float', 0, _('Start time'), min=0, max=36000, unit='second')
 ao(opts, 'endTime', 'Float', -1, _('End time'), min=-1, max=36000, unit='second')
 ao(opts, 'maxLayers', 'Integer', 500, _('Max layers'), max=2000, min=10)
-ao(opts, 'cut', 'Integer', 0, _('Remove points from start/end'), min=0)
+ao(opts, 'cut', 'Integer', 0, _('Remove points from start/end'), min=0, step=1)
+ao(opts, 'animation', 'Float', 0, _('Animation'), min=0, step=1, unit='second')
 ao(opts, 'reset', 'Boolean', False, _('Reset scene'))
 
 
@@ -349,6 +348,7 @@ class ExtrusionRender(QtGui.QWidget):
         super(ExtrusionRender, self).__init__(parent=parent)
         self.setWindowTitle(_('3D Sample Profile Extrusion'))
         self.shared_file = shared_file
+        self.timer = QtCore.QTimer()
         self.lay = QtGui.QHBoxLayout()
         self.setLayout(self.lay)
         ropts = deepcopy(opts)
@@ -419,10 +419,12 @@ class ExtrusionRender(QtGui.QWidget):
     def refresh(self):
         if self.refreshing:
             return False
+        self.timer.stop()
         self.refreshing = True
         config = self.cfg.asdict()
         config.pop('dataPath')
         config.pop('reset')
+        config.pop('animation')
         self.render_thread = deferred_extrusion(
             self.ref_profile, self.ref_T, config,
             jobs=registry.tasks.jobs,
@@ -439,7 +441,12 @@ class ExtrusionRender(QtGui.QWidget):
             opts = self.render_widget.opts
             self.render_widget.hide()
             self.render_widget.deleteLater()
-        self.render_widget = self.render_thread.widget
+        
+        self.render_widget = gl.GLViewWidget()
+        if not self.cfg['animation']:
+            map(self.render_widget.addItem, self.render_thread.objects)
+        else:
+            self.animate()
         # self.render_widget.show()
         self.render_widget.setMinimumWidth(800)
         self.render_widget.setMinimumHeight(600)
@@ -458,6 +465,20 @@ class ExtrusionRender(QtGui.QWidget):
             self.render_widget.pan(c.x(), c.y(), c.z(), relative=False)
         
         self.refreshing = False
+        
+    def _addItem(self):
+        if not len(self.render_thread.objects):
+            self.timer.stop()
+        else:
+            self.render_widget.addItem(self.render_thread.objects.pop(0))  
+                  
+    def animate(self):
+        dt = int(self.cfg['animation']*1000./len(self.render_thread.objects))
+        if dt==0:
+            dt=1
+        self.timer.timeout.connect(self._addItem)
+        self.timer.start(dt)
+        
 
 
 if __name__ == '__main__':
