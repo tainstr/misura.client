@@ -80,7 +80,12 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
         sample = node.get_configuration()
         analyzer = sample.analyzer
         from misura.client import postanalysis
-        postanalysis.postanalysis(proxy, analyzer, sample)
+        from misura.client.live import registry 
+        t = registry.tasks
+        th = postanalysis.deferred_postanalysis(proxy, analyzer, sample,
+                                           jobs=t.jobs,
+                                           job=t.job,
+                                           done=t.done)
         
     def add_sample_menu(self, menu, node):
         if node.path.split('/')[-1] in dilatometer_subsamples:
