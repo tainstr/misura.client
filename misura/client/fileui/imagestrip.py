@@ -162,7 +162,9 @@ class ImageStrip(QtGui.QWidget):
         
     def render_extrusion(self):
         from misura.client import extrusion
-        w = extrusion.extrude(self.decoder.proxy, self.decoder.datapath)
+        w = extrusion.ExtrusionRender(self.decoder.proxy, self.decoder.datapath)
+        w.wg.widgetsMap['startTime'].set(self.labels[0].t)
+        print 111111111, len(self.labels),self.labels[0].t
         w.show()
         self._extrusion.append(w)
 
@@ -302,7 +304,8 @@ class ImageStrip(QtGui.QWidget):
     def set_time(self, t):
         """Find the nearest index to time `t` and set myself on that idx"""
         logging.debug('ImageStrip.setTime', t)
-        idx = self.decoder.get_time(self.decoder.datapath)
+        idx = self.decoder.get_time(t)
+        self.t = t
         logging.debug('ImageStrip.setTime: idx', idx)
         return self.set_idx(idx)
 
