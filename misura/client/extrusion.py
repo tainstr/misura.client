@@ -1,9 +1,16 @@
-
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+"""Render 3D extrusion by overlapping all profiles"""
+from copy import deepcopy
 import numpy as np
 
 from misura.canon.reference import get_node_reference
+from misura.canon.option import ao, ConfigurationProxy
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
+
+from misura.client import widgets, conf, _
+
 try:
     import pyqtgraph as pg
     import pyqtgraph.opengl as gl
@@ -13,6 +20,8 @@ except:
     gl = False
     enabled = False
     logging.debug('Disabled 3D: no pyqtgraph')
+    
+from PyQt4 import QtCore, QtGui
 
 STEPS = np.array([0.0, 0.33, 0.66, 1.0])
 CLRS = ['b', 'r', 'y', 'w']
@@ -25,7 +34,7 @@ if pg:
 # TODO: parametrize start, end, max_layers
 # TODO: step by time/temperature
 # TODO: write temperature labels
-def read_file(profile, start_time=10, end_time=-1, max_layers=1000, cut=0, 
+def read_file(profile, startTime=10, endTime=-1, maxLayers=500, cut=0, 
                 T=False,
                 aborted=[False],
                 jobs=lambda *x, **k: 0,
@@ -36,17 +45,17 @@ def read_file(profile, start_time=10, end_time=-1, max_layers=1000, cut=0,
     zs = []
     colors = []
     start = 0
-    if start_time>0:
-        start = profile.get_time(start_time)
+    if startTime>0:
+        start = profile.get_time(startTime)
     end = -1
-    if end_time>0:
-        end = profile.get_time(end_time)
+    if endTime>0:
+        end = profile.get_time(endTime)
     c = 0.
     n = len(profile)
     if end < 0:
         end += n
     n = end - start + 1
-    step = max(n // max_layers, 1)
+    step = max(n // maxLayers, 1)
     tot = n // step
     fz = 0.6
     z = -fz * tot / 2
@@ -57,11 +66,11 @@ def read_file(profile, start_time=10, end_time=-1, max_layers=1000, cut=0,
     delta = tot
     if T is not False:
         mi, mt, minT = T.outfile.min(T.path, 
-                                     start_time=start_time, 
-                                     end_time=end_time)
+                                     start_time=startTime, 
+                                     end_time=endTime)
         Mi, Mt, maxT = T.outfile.max(T.path, 
-                                     start_time=start_time, 
-                                     end_time=end_time)
+                                     start_time=startTime, 
+                                     end_time=endTime)
         delta = maxT-minT
         
     def get_color(c, t):
@@ -215,26 +224,25 @@ def plot3d(xs, ys, zs, colors, start=0, end=-1, step=1,
     return w
 
 
-def extrude(f, data_path, cut=0):
+def extrude(f, data_path, config={'cut':0}):
     data_path = data_path.split(':')[-1]
     if not data_path.startswith('/'):
         data_path = '/' + data_path
     prf = get_node_reference(f, data_path)
     T = '/'.join(data_path.split('/')[:-1])+'/T'
     T = get_node_reference(f, T)
-    xs, ys, zs, colors = read_file(prf, cut=cut, T=T)
+    xs, ys, zs, colors = read_file(prf, T=T, **config)
     w = plot3d(xs, ys, zs, colors)
     return w
 
-def deferred_extrusion(f, data_path, cut=0, aborted=[False],
+def deferred_extrusion(f, dataPath, config={}, aborted=[False],
                  jobs=lambda *x, **k: 0,
                  job=lambda *x, **k: 0,
                  done=lambda *x, **k: 0):
     """Run data collection in a separate thread and emit signal when GL widget is ready"""
-    from PyQt4 import QtCore
-    from misura.client import widgets
+
     
-    data_path = data_path.split(':')[-1]
+    data_path = dataPath.split(':')[-1]
     if not data_path.startswith('/'):
         data_path = '/' + data_path
     prf = get_node_reference(f, data_path)
@@ -243,7 +251,7 @@ def deferred_extrusion(f, data_path, cut=0, aborted=[False],
     def abort():
         aborted[0]=True
 
-    thread = widgets.RunMethod(read_file, prf, T=T, cut=cut, aborted=aborted, jobs=jobs, job=job, done=done)
+    thread = widgets.RunMethod(read_file, prf, T=T, aborted=aborted, jobs=jobs, job=job, done=done, **config)
     
     thread.pid = 'Extrusion'
     thread.abort = abort
@@ -265,6 +273,52 @@ def deferred_extrusion(f, data_path, cut=0, aborted=[False],
     
     return thread
 
+opts = {}
+ao(opts, 'dataPath', 'String', '', _('Profile source'))
+ao(opts, 'startTime', 'Float', 0, _('Start time'))
+ao(opts, 'endTime', 'Float', -1, _('End time'), min=-1)
+ao(opts, 'maxLayers', 'Integer', 500, _('Max layers'), max=2000, min=10)
+ao(opts, 'cut', 'Integer', 0, _('Remove points from start/end'), min=0)
+
+
+class ExtrusionRender(QtGui.QWidget):
+    render_thread = False
+    render_widget = False
+    def __init__(self, shared_file, data_path, parent=None):
+        super(ExtrusionRender, self).__init__(parent=parent)
+        self.shared_file = shared_file
+        self.lay = QtGui.QHBoxLayout()
+        self.setLayout(self.lay )
+        ropts = deepcopy(opts)
+        ropts['dataPath']['current'] = data_path
+        self.cfg = ConfigurationProxy({'self': ropts})
+        self.wg = conf.Interface(self.cfg, self.cfg, opts)
+        self.btn_ok = QtGui.QPushButton(_('Render'))
+        self.wg.sectionsMap['Main'].layout().addWidget(self.btn_ok)
+        self.wg.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.wg.setMaximumWidth(300)
+        self.lay.addWidget(self.wg)
+        self.btn_ok.clicked.connect(self.refresh)
+        
+    def refresh(self):
+        config = self.cfg.asdict()
+        data_path = config.pop('dataPath')
+        self.render_thread = deferred_extrusion(self.shared_file, data_path, config)
+        self.render_thread.connect(self.render_thread.notifier, 
+                                   QtCore.SIGNAL('widget_ready()'), 
+                                   self.replace_widget)
+    
+    def replace_widget(self):
+        if self.render_widget:
+            self.render_widget.hide()
+            self.render_widget.deleteLater()
+        self.render_widget = self.render_thread.widget
+        #self.render_widget.show()
+        self.render_widget.setMinimumWidth(800)
+        self.render_widget.setMinimumHeight(600)
+        self.render_widget.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+        self.lay.addWidget(self.render_widget)
+
 
 if __name__ == '__main__':
     test_path = '/home/daniele/MisuraData/hsm/BORAX powder 10 C min.h5'
@@ -276,6 +330,7 @@ if __name__ == '__main__':
     app = pg.QtGui.QApplication([])
     from misura.canon.indexer import SharedFile
     f = SharedFile(test_path)
-    w = extrude(f, data_path)
+    w = ExtrusionRender(f, data_path)
+    #w = extrude(f, data_path)
     w.show()
     pg.QtGui.QApplication.exec_()

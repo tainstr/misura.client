@@ -12,6 +12,7 @@ from traceback import format_exc
 
 from misura.canon import option
 from misura.canon.csutil import lockme, profile
+from misura.canon.plugin.dataimport import NullTasks
 from misura.client.network import manager as net
 from misura.client import _
 
@@ -27,7 +28,7 @@ class KidRegistry(QtCore.QThread):
     stream = False
     interval = 1
     """Update interval (s)"""
-    tasks = False
+    tasks = False #NullTasks()
     """Local tasks dialog"""
     taskswg = False
     system_kids = set(['/isRunning'])
@@ -95,7 +96,7 @@ class KidRegistry(QtCore.QThread):
     def tasks(self):
         """Return local tasks widget"""
         if self.taskswg is False:
-            return False
+            return NullTasks()
 
         return self.taskswg.tasks
 
