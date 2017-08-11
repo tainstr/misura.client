@@ -9,6 +9,7 @@ from misura.canon.option import ao, ConfigurationProxy
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from misura.client import widgets, conf, _
+from misura.client.live import registry
 
 try:
     import pyqtgraph as pg
@@ -378,19 +379,27 @@ class ExtrusionRender(QtGui.QWidget):
         T = '/'.join(data_path.split('/')[:-1]) + '/T'
         self.ref_T = get_node_reference(self.shared_file, T)
 
+        mintime = self.ref_profile[0][0]
+        maxtime = self.ref_profile[-1][0]
+        
         st = self.cfg['startTime']
         et = self.cfg['endTime']
         if key == 'endTime':
             et = new
         elif key == 'startTime':
             st = new
-        mintime = self.ref_profile[0][0]
-        maxtime = self.ref_profile[-1][0]
+        if et<0:
+            et = maxtime
+            
+        if key!='endTime':
+            self.cfg['endTime'] = et
+            
         self.cfg.setattr('startTime', 'min', mintime)
-        self.cfg.setattr('startTime', 'max', et if et > 0 else maxtime)
+        self.cfg.setattr('startTime', 'max', et)
         self.wg.widgetsMap['startTime'].update_option()
         self.wg.widgetsMap['startTime'].changed_option()
         self.cfg.setattr('endTime', 'max', maxtime)
+        
         self.wg.widgetsMap['endTime'].update_option()
         self.wg.widgetsMap['endTime'].changed_option()
 
@@ -415,7 +424,10 @@ class ExtrusionRender(QtGui.QWidget):
         config.pop('dataPath')
         config.pop('reset')
         self.render_thread = deferred_extrusion(
-            self.ref_profile, self.ref_T, config)
+            self.ref_profile, self.ref_T, config,
+            jobs=registry.tasks.jobs,
+            job=registry.tasks.job,
+            done=registry.tasks.done )
         self.render_thread.connect(self.render_thread.notifier,
                                    QtCore.SIGNAL('widget_ready()'),
                                    self.replace_widget)
