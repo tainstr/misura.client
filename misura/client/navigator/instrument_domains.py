@@ -12,6 +12,7 @@ from ..filedata import getFileProxy
 from ..fileui import ImageSlider
 from .. import axis_selection
 
+from PyQt4 import QtCore
 
 ism = isinstance
 
@@ -21,7 +22,7 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
     def __init__(self, *a, **k):
         super(ImageAnalysisNavigatorDomain, self).__init__(*a, **k)
         self.storyboards = {}
-        self.extrusions = {}
+        self.threads = {}
         
     @node
     def show_storyboard(self, node):
@@ -51,9 +52,6 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
     @node
     def extrude(self, node=False):
         """Build profile extrusion on `node`"""
-        if node.path in self.extrusions:
-            self.extrusions[node.path].show()
-            return True
         if not node.linked:
             logging.debug('No linked file for node', node.path)
             return False
@@ -62,9 +60,9 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
             logging.debug('No opened file for node', node.path)
             return False
         from misura.client import extrusion
-        w = extrusion.extrude(proxy, node.model_path+'/profile')
-        w.show()
-        self.extrusions[node.path] = w
+        th = extrusion.deferred_extrusion(proxy, node.model_path+'/profile')
+        self.threads[node.path+'|extrude'] = th
+        th.notifier.connect(th.notifier, QtCore.SIGNAL('widget_ready()'), lambda: th.widget.show())
         return True
         
     @node
@@ -86,6 +84,7 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
                                            jobs=t.jobs,
                                            job=t.job,
                                            done=t.done)
+        self.threads[node.path+'|postanalysis'] = th
         
     def add_sample_menu(self, menu, node):
         if node.path.split('/')[-1] in dilatometer_subsamples:

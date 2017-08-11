@@ -68,6 +68,7 @@ def info_dialog(text, title='Info', parent=None):
 class RunMethod(QtCore.QRunnable):
     runnables = []
     step = 2
+    emit_result = True
 
     def __init__(self, func, *args, **kwargs):
         QtCore.QRunnable.__init__(self)
@@ -83,9 +84,16 @@ class RunMethod(QtCore.QRunnable):
         self.running = False
         self.done = False
         self.abort = self._abort
+        self.result = None
         
     def _abort(self):
         self.error = 'Aborted'
+        
+    def emit(self, *a, **k):
+        return self.notifier.emit(*a, **k)
+    
+    def connect(self, *a, **k):
+        return self.notifier.connect(*a, **k)
 
     def run(self):
         self.running = True
@@ -94,10 +102,11 @@ class RunMethod(QtCore.QRunnable):
             'RunMethod.run', self.func, self.args, self.kwargs)
         registry.tasks.job(1, self.pid, self.pid)
         try:
-            r = self.func(*self.args, **self.kwargs)
-            logging.debug('RunMethod.run result', r)
+            self.result = self.func(*self.args, **self.kwargs)
+            logging.debug('RunMethod.run done')
             self.notifier.emit(QtCore.SIGNAL('done()'))
-            self.notifier.emit(QtCore.SIGNAL('done(PyQt_PyObject)'), r)
+            if self.emit_result:
+                self.notifier.emit(QtCore.SIGNAL('done(PyQt_PyObject)'), self.result)
         except:
             self.error = format_exc()
             logging.debug('RunMethod.run error', self.error)
