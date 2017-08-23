@@ -111,7 +111,8 @@ class DatabaseHeader(QtGui.QHeaderView):
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.show_menu)
         self.menu = QtGui.QMenu(self)
-        self.cols = {}
+        self.setMovable(True)
+        
 
     def show_menu(self, pt):
         QtGui.qApp.processEvents()
@@ -324,16 +325,20 @@ class DatabaseWidget(QtGui.QWidget):
             if hh.isSectionHidden(i):
                 continue
             self.qfilter.addItem(_(sh[i]), h)
+        
+        hh = self.table.horizontalHeader()
+        for logical, visual in ((name_column, 0),
+                                (incremental_id_column, 1), 
+                                (serial_column, 2)):
+            vi = hh.visualIndex(logical)
+            if 0<vi!=visual:
+                hh.moveSection(vi, visual)
 
-        self.table.horizontalHeader().moveSection(name_column, 0)
-        self.table.horizontalHeader().moveSection(incremental_id_column, 1)
-        self.table.horizontalHeader().moveSection(serial_column, 2)
-
-        self.table.horizontalHeader().hideSection(id_column)
-        self.table.horizontalHeader().hideSection(uid_column)
-        self.table.horizontalHeader().hideSection(verify_column)
-        self.table.horizontalHeader().hideSection(file_column)
-        self.table.horizontalHeader().hideSection(flavour_column)
+        hh.hideSection(id_column)
+        hh.hideSection(uid_column)
+        hh.hideSection(verify_column)
+        hh.hideSection(file_column)
+        hh.hideSection(flavour_column)
 
         self.table.resizeColumnToContents(name_column)
         # name_column =
