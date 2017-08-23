@@ -459,9 +459,9 @@ class aNumber(ActiveWidget):
                 step=1
         self.spinbox.setSingleStep(step)
         
-        if self.slider:
+        if self.slider and step:
             self.divider = 10.**(-np.log10(step))
-            logging.debug('Slider:', m, M, step, self.divider)
+            logging.debug('Slider:', self.handle, m, M, step, self.divider)
             self.slider.blockSignals(True)
             #print 'aNumber.setRange slider',m,M,step,cur, self.divider
             self.slider.setRange(int(m * self.divider), int(M * self.divider))
