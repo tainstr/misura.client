@@ -257,6 +257,20 @@ def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
             u = 'celsius'
     return u
 
+def resolve_unit(ds, opt, default):
+    if not opt:
+        logging.debug('No OPT', ds.name)
+        ds.unit = default
+        ds.old_unit = default
+        return False
+    ds.m_opt = opt
+    obj, io = option.resolve_role(ds.m_conf, opt)
+    io = io or opt
+    #io = opt
+    ds.old_unit = io.get('unit', default)
+    ds.unit = io.get('csunit', ds.old_unit)
+    return True
+       
 
 def create_dataset(fileproxy, data, prefixed_dataset_name,
                    pure_dataset_name,
@@ -275,15 +289,6 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
         unit = dataset_measurement_unit(
             hdf_dataset_name, fileproxy, data, variable_name)
     ds = MisuraDataset(data=data, linked=linked_file)
-    unit = str(unit) if unit else unit
-    if opt:
-        ds.m_opt = opt
-        ds.old_unit = opt.get('unit', unit)
-        ds.unit = opt.get('csunit', ds.old_unit)
-    else:
-        logging.debug('No OPT')
-        ds.unit = unit
-        ds.old_unit = unit
     ds.m_name = prefixed_dataset_name
     ds.m_pos = p
     ds.m_smp = reference_sample
@@ -291,6 +296,14 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     ds.m_col = pure_dataset_name
     ds.m_update = m_update
     ds.m_conf = fileproxy.conf
+    unit = str(unit) if unit else unit
+    if opt:
+        resolve_unit(ds, opt, unit)
+    else:
+        logging.debug('No OPT')
+        ds.unit = unit
+        ds.old_unit = unit
+
 
     # Read additional metadata
     if len(data) > 0 and prefixed_dataset_name[-2:] not in ('_t', '_T', ':t'):
