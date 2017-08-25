@@ -440,6 +440,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.emenu = QtGui.QMenu(self)
         self.presets_menu = QtGui.QMenu(_('Presets'), parent=self)
         self.presets_menu.aboutToShow.connect(self.build_presets_menu)
+        self.compare_menu = QtGui.QMenu(_('Compare'), parent=self)
+        self.compare_menu.aboutToShow.connect(self.build_compare_menu)
         self.build_extended_menu()
         self.connect(self, QtCore.SIGNAL('destroyed()'),
                      self.unregister, QtCore.Qt.QueuedConnection)
@@ -593,6 +595,7 @@ class ActiveWidget(Active, QtGui.QWidget):
             self.agg_menu.menuAction().hovered.connect(functools.partial(self.build_aggregation_menu, self.agg_menu))
         if self.remObj.compare_presets is not None:
             self.emenu.addMenu(self.presets_menu)
+        self.emenu.addMenu(self.compare_menu)
         self.nav_menu = self.emenu.addMenu(_('Navigator'))
         #self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
         # Units button
@@ -620,20 +623,29 @@ class ActiveWidget(Active, QtGui.QWidget):
         builder.build_recursive_aggregation_menu(self.remObj.root, self.remObj, aggregation, 
                                          {self.remObj['fullpath']: self.handle}, menu, self._menu_map, self._win_map)
 
-
-    def build_presets_menu(self):
-        self.presets = {}
-        self.presets_menu.clear()
-        comparison = self.remObj.compare_presets(self.handle)
-        for preset, val in comparison.iteritems():
-            if preset == '***current***':
+    def _build_values_menu(self, comparison, container, menu):
+        menu.clear()
+        for name, val in comparison.iteritems():
+            if name == '***current***':
                 continue
             value = repr(val)
             value = (value[:15] + '..') if len(value) > 15 else value
-            label = '{}: {}'.format(preset, value)
+            label = '{}: {}'.format(name, value)
             p = functools.partial(self.set_raw, val)
-            self.presets_menu.addAction(label, p)
-            self.presets[preset] = (p, val)
+            menu.addAction(label, p)
+            container[name] = (p, val)
+            
+    def build_presets_menu(self):
+        self.presets = {}
+        comparison = self.remObj.compare_presets(self.handle)
+        self._build_values_menu(comparison, self.presets, self.presets_menu)
+
+            
+    def build_compare_menu(self):
+        self.compare = {}
+        comparison = self.remObj.compare_option(self.handle)
+        self._build_values_menu(comparison, self.compare, self.compare_menu)
+        
 
     def isVisible(self):
         try:
