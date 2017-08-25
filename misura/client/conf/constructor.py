@@ -105,15 +105,30 @@ def orgSections(prop_dict, configuration_level=5):
         sections[spl[0]].append(prop)
     return sections
 
+class ClickableLabel(QtGui.QLabel):
+    clicked = QtCore.pyqtSignal()
+    right_clicked = QtCore.pyqtSignal()
+        
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            self.clicked.emit()
+        else: 
+            self.right_clicked.emit()
+        return QtGui.QLabel.mousePressEvent(self, event)
+
 
 class OptionsGroup(QtGui.QGroupBox):
     def __init__(self, wg, children, parent=None):
         QtGui.QGroupBox.__init__(self, parent=parent)
         self.wg = wg
         self.children = children
-        self.more = QtGui.QPushButton("+")
+        self.more = ClickableLabel("+")
         self.more.setMaximumWidth(30)
         self.more.clicked.connect(self.hide_show)
+        self.more.right_clicked.connect(self.show_menu)
+        self.menu = QtGui.QMenu()
+        self.compare_menu = self.menu.addMenu(_('Compare'))
+        self.compare_menu.aboutToShow.connect(self.build_compare_menu)
         self.setFlat(False)
         title = wg.prop.get('group', False)
         if title:
@@ -150,6 +165,23 @@ class OptionsGroup(QtGui.QGroupBox):
             self.collapse()
         else:
             self.expand()
+            
+    def show_menu(self):
+        self.menu.popup(self.mapToGlobal(self.more.pos()))
+        
+    def build_compare_menu(self):
+        self.comparisons = {}
+        self.compare_menu.clear()
+        wm = self.children.widgetsMap.copy()
+        wm[self.wg.handle] = self.wg
+        comparison = self.wg.remObj.compare_option(*wm.keys())
+        set_func = lambda keyvals: [wm[k].set_raw(v) for k,v in keyvals]
+        widgets.active.build_values_menu(comparison, self.comparisons, self.compare_menu, set_func)
+        
+class ChildSection(QtGui.QWidget):
+    def __init__(self, *a, **k):
+        super(QtGui.QWidget, self).__init__(*a, **k)
+        self.widgetsMap={}
         
 class Section(QtGui.QGroupBox):
     """Form builder for a list of options"""
@@ -229,12 +261,15 @@ class Section(QtGui.QGroupBox):
         if parent_widget is False:
             return False
         self.widgetsMap[prop['handle']] = parent_widget
+        if main_widget!=self:
+            main_widget.widgetsMap[prop['handle']] = parent_widget
+            
         # No children: just add the option and return
         if len(prop.get('children', [])) == 0:
             parent_layout.addRow(parent_widget.label_widget, parent_widget)
             return True
         # Widget hosting the children form
-        children = QtGui.QWidget(parent_widget)
+        children = ChildSection(parent_widget)
         children_lay = QtGui.QFormLayout()
         children.setLayout(children_lay)
         # Add the parent option plus the expansion button

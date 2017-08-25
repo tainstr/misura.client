@@ -64,6 +64,37 @@ def info_dialog(text, title='Info', parent=None):
     dial.resize(400, 400)
     dial.exec_()
 
+def text_value(val):
+    value = repr(val)
+    value = (value[:15] + '..') if len(value) > 15 else value
+    return value    
+
+def build_values_menu(comparison, container, menu, set_func):
+    menu.clear()
+    for name, vals in comparison.iteritems():
+        if name == '***current***':
+            continue
+            
+        if len(vals)==1:
+            val = vals.items()[0][1]
+            value = text_value(val)
+            label = '{}:{}'.format(name, value)
+            p = functools.partial(set_func, val)
+            menu.addAction(label, p)
+            container[name] = (p, val)
+        else:
+            sub = menu.addMenu(name)
+            p = functools.partial(set_func, vals.items())
+            sub.addAction('Apply all', p)
+            container[name] = (p, None)
+            for key, val in vals.items():
+                value = text_value(val)
+                label = '{}:{}'.format(key, value)
+                p = functools.partial(set_func, ((key, val)))
+                sub.addAction(label, p)
+                container[name+':'+key] = (p, key, val)                
+            
+
 
 class RunMethod(QtCore.QRunnable):
     runnables = []
@@ -623,28 +654,17 @@ class ActiveWidget(Active, QtGui.QWidget):
         builder.build_recursive_aggregation_menu(self.remObj.root, self.remObj, aggregation, 
                                          {self.remObj['fullpath']: self.handle}, menu, self._menu_map, self._win_map)
 
-    def _build_values_menu(self, comparison, container, menu):
-        menu.clear()
-        for name, val in comparison.iteritems():
-            if name == '***current***':
-                continue
-            value = repr(val)
-            value = (value[:15] + '..') if len(value) > 15 else value
-            label = '{}: {}'.format(name, value)
-            p = functools.partial(self.set_raw, val)
-            menu.addAction(label, p)
-            container[name] = (p, val)
             
     def build_presets_menu(self):
         self.presets = {}
         comparison = self.remObj.compare_presets(self.handle)
-        self._build_values_menu(comparison, self.presets, self.presets_menu)
+        build_values_menu(comparison, self.presets, self.presets_menu, self.set_raw)
 
             
     def build_compare_menu(self):
         self.compare = {}
         comparison = self.remObj.compare_option(self.handle)
-        self._build_values_menu(comparison, self.compare, self.compare_menu)
+        build_values_menu(comparison, self.compare, self.compare_menu, self.set_raw)
         
 
     def isVisible(self):
