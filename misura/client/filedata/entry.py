@@ -298,7 +298,9 @@ class NodeEntry(object):
         if not self.linked:
             return False
         path = self.conf_path
-        configuration_proxy = self.linked.conf
+        configuration_proxy = getattr(self.linked, 'conf')
+        if not configuration_proxy:
+            return False
         
         if len(path)>1:
             configuration_proxy = configuration_proxy.toPath(path)
