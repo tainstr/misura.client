@@ -55,7 +55,9 @@ def get_item_icon(plotwg, node):
     """Get line style icon or a merged line style + marker style icon"""
     is_test_node = node.parent and not node.parent.parent
     if is_test_node:
-        instrument = node.linked.instrument
+        instrument = getattr(node.linked, 'instrument', False)
+        if not instrument:
+            return void
         return QtGui.QIcon(os.path.join(parameters.pathArt, 'small_' + instrument + '.svg'))
 
     if not plotwg:
