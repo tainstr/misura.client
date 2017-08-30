@@ -801,3 +801,4 @@ class aTable(ActiveWidget):
             return
         self.table.up()
         self.resize_height()
+        self.set_enabled()

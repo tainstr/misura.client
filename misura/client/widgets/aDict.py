@@ -80,3 +80,4 @@ class aDict(ActiveWidget):
                         sb, QtCore.SIGNAL('valueChanged(double)'), self.set)
                 self.map[key] = sb
                 self.lay.addWidget(sb)
+        self.set_enabled()

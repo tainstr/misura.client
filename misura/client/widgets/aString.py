@@ -23,6 +23,7 @@ class aString(ActiveWidget):
         self.connect(self.browser,   QtCore.SIGNAL(self.signal), self.text_updated)
         self.lay.addWidget(self.browser)
         self.emit(QtCore.SIGNAL('selfchanged()'))
+        self.set_enabled()
 
     def adapt(self, val):
         """Enforce unicode everywhere"""

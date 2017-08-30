@@ -15,6 +15,7 @@ class aMaterial(aString):
         matlist = QtGui.QPushButton('...')
         self.lay.addWidget(matlist)
         self.connect(matlist, QtCore.SIGNAL('clicked()'), self.listMaterials)
+        self.set_enabled()
 
     def listMaterials(self):
         mats = self.server.storage.listMaterials()

@@ -213,6 +213,7 @@ class aNumber(ActiveWidget):
         self.update(minmax=False)
         self.spinbox.set_precision(self.precision)
         self.build_range_menu()
+        self.set_enabled()
         
     def redraw(self):
         # Create the layout

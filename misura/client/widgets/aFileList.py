@@ -21,6 +21,7 @@ class aFileList(aChooser):
         self.lay.addWidget(self.bSend)
         self.prevIdx = 0
         self.transfer = False
+        self.set_enabled()
 
     def send(self, *args):
         """Upload local file"""

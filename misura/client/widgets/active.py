@@ -332,6 +332,9 @@ class Active(object):
         Called during automatic synchronization cycles (like live.KidRegistry)."""
         self.get()
         self.update()
+        
+    def set_enabled(self,enabled=None):
+        return
 
 
 class ActiveObject(Active, QtCore.QObject):
@@ -437,6 +440,7 @@ class ActiveWidget(Active, QtGui.QWidget):
     """Auto-hide menu button"""
     get_on_enter = True
     """Update on mouse enter"""
+    enable_check = False
     
     def __init__(self, server, remObj, prop, parent=None, context='Option'):
         Active.__init__(self, server, remObj, prop, context)
@@ -577,6 +581,16 @@ class ActiveWidget(Active, QtGui.QWidget):
         else:
             logging.debug('NO navigator defined', self.remObj._navigator)
             self.emenu.removeAction(self.nav_menu.menuAction())
+            
+    def set_enabled(self, enabled=None):
+        if enabled is None:
+            enabled = self.prop.get('flags',{'enabled':True}).get('enabled', True)
+        enabled = bool(enabled)
+        for i in range(self.layout().count()):
+            wg = self.layout().itemAt(i).widget()
+            if wg not in (self.label, self.enable_check, 0):
+                wg.setEnabled(enabled)
+    
         
     def build_extended_menu(self):
         # Extended menu
@@ -592,11 +606,14 @@ class ActiveWidget(Active, QtGui.QWidget):
                 self.flags[key] = act
                 if key == 'enabled':
                     encheck = QtGui.QCheckBox(self)
+                    encheck.setToolTip(_('Is option enabled?'))
                     encheck.setChecked(val * 2)
+                    encheck.stateChanged.connect(self.set_enabled)
                     self.connect(
                         encheck, QtCore.SIGNAL('stateChanged(int)'), self.set_flags)
                     self.lay.addWidget(encheck)
                     self.enable_check = encheck
+                    self.set_enabled(val)
 
         # Units sub-menu
         self.units = {}

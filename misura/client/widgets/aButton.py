@@ -14,6 +14,7 @@ class aButton(ActiveWidget):
         self.button = QtGui.QPushButton(self.tr(self.name))
         self.connect(self.button,  QtCore.SIGNAL('pressed()'), self.async_get)
         self.lay.addWidget(self.button)
+        self.set_enabled()
         self.connect(
             self, QtCore.SIGNAL('changed()'), self.show_msg, QtCore.Qt.QueuedConnection)
 

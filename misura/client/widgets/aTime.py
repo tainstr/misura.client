@@ -41,6 +41,7 @@ class aTime(ActiveWidget):
         dt.setMSecsSinceEpoch(self.adapt2gui(self.current))
         self.twg.setDateTime(dt)
         self.twg.blockSignals(False)
+        self.set_enabled()
 
     def edited(self, qdt=None):
         if qdt is None:
@@ -55,29 +56,29 @@ class aDelay(aTime):
 
     def __init__(self, *a, **k):
         aTime.__init__(self, *a, **k)
-        self.enable_check()
+        self.is_delay_enabled()
 
     def get(self, *a, **k):
         """Propagate edits when delayStart is disabled, so remote value can be read again."""
-        if self.enable_check():
+        if self.is_delay_enabled():
             self.current = self.twg.dateTime().toMSecsSinceEpoch() / 1000.
         aTime.get(self, *a, **k)
 
     def enterEvent(self, event):
         """Mouse enter event should fire only if delayStart is disabled."""
-        if self.enable_check():
+        if self.is_delay_enabled():
             return
         return aTime.enterEvent(self, event)
 
     def focusInEvent(self, event):
-        self.enable_check()
+        self.is_delay_enabled()
         return aTime.focusInEvent(self, event)
 
     def focusOutEvent(self, event):
-        self.enable_check()
+        self.is_delay_enabled()
         return aTime.focusOutEvent(self, event)
 
-    def enable_check(self):
+    def is_delay_enabled(self):
         en = self.remObj['delayStart']
         if en:
             self.twg.setReadOnly(True)

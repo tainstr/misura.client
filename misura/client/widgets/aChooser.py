@@ -17,8 +17,8 @@ class aChooser(ActiveWidget):
         self.combo = QtGui.QComboBox(parent=self)
         self._options = []
         self._values = []
-        self.changed_option(reget=False)
         self.lay.addWidget(self.combo)
+        self.changed_option(reget=False)
         self.connect(
             self.combo,  QtCore.SIGNAL('currentIndexChanged(int)'), self.try_set)
 
@@ -70,6 +70,7 @@ class aChooser(ActiveWidget):
         self._values = vals
         # Restore signals
         self.combo.blockSignals(False)
+        self.set_enabled()
         return True
 
     def adapt2srv(self, idx):

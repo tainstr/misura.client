@@ -21,6 +21,7 @@ class aMeta(ActiveWidget):
         self.setAcceptDrops(True)
         self.label_widget.setAcceptDrops(True)
         self.lbl.setAcceptDrops(True)
+        self.set_enabled()
 
     def update(self):
         msg = ''

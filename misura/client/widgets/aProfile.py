@@ -48,6 +48,7 @@ class aProfile(ActiveWidget):
         self.profile = Profile(self)
         self.lay.addWidget(self.profile)
         self.emit(QtCore.SIGNAL('selfchanged()'))
+        self.set_enabled()
 
     def set(self, *foo, **kfoo):
         """Override set() method in order to avoid forbidden write operations"""

@@ -30,6 +30,7 @@ class ScriptEditor(QtGui.QDialog):
         self.lay.addWidget(self.area)
 
         self.connect(self, QtCore.SIGNAL('accepted()'), self.save)
+        self.set_enabled()
 
     @property
     def current(self):

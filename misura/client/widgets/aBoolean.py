@@ -12,6 +12,7 @@ class aBoolean(ActiveWidget):
         self.chk = QtGui.QCheckBox(_('False'), parent=parent)
         self.chk.setCheckable(True)
         self.lay.addWidget(self.chk)
+        self.set_enabled()
         # Cause immediate update after complete init
         self.emit(QtCore.SIGNAL('selfchanged()'))
         if self.readonly:

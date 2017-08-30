@@ -19,8 +19,9 @@ class aProgress(ActiveWidget):
         # If max/min are defined, create the slider widget
         self.bar = QtGui.QProgressBar(self)
         self.bar.setMinimum(0)
-        self.update(get=False)
         self.lay.addWidget(self.bar)
+        self.update(get=False)
+        
 
     def adapt(self, val):
         return int(val)
@@ -39,6 +40,7 @@ class aProgress(ActiveWidget):
             self.bar.reset()
         else:
             self.bar.setEnabled(True)
+        self.set_enabled()
 
 
 class RoleProgress(ActiveWidget):
@@ -117,3 +119,4 @@ class RoleProgress(ActiveWidget):
             # Log line
             txt = self.log.toPlainText() + _('Started: ') + txt + '\n'
             self.log.setPlainText(txt)
+        self.set_enabled()

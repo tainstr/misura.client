@@ -33,6 +33,7 @@ class ThermalCycleChooser(PresetManager):
             self.disconnect(
                 self.combo, QtCore.SIGNAL('highlighted(int)'), self.add)
         self.combo.blockSignals(False)
+        self.set_enabled()
 
     def add(self, *args):
         name, ok = QtGui.QInputDialog.getText(self, _("Save as..."),
