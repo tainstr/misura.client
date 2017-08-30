@@ -125,6 +125,9 @@ class RunMethod(QtCore.QRunnable):
     
     def connect(self, *a, **k):
         return self.notifier.connect(*a, **k)
+    
+    def job(self,n,msg=False):
+        registry.tasks.job(n, self.pid, msg or self.pid)
 
     def run(self):
         self.running = True
