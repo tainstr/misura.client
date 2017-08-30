@@ -79,17 +79,26 @@ fi
 
 rm -rf $CANON_LINK
 
+# copy partial packages
 cp -r "$DISTRIBUTION_DIR/configuration/"* $OUTPUT_MISURA4_DIR
 cp -r "$DISTRIBUTION_DIR/browser/"* $OUTPUT_MISURA4_DIR
 cp -r "$DISTRIBUTION_DIR/acquisition/"* $OUTPUT_MISURA4_DIR
 
+# copy compiled packages
+python -m compileall $CODE_BASE/thegram/thegram
+cp -r "$CODE_BASE/thegram/thegram" "$OUTPUT_MISURA4_DIR"
+# remove sources
+find "$OUTPUT_MISURA4_DIR/thegram" -name \*.py -exec rm {}
+
 # hack to make svg icons work also on Windows Vista
 cp C:/Python27/Lib/site-packages/PyQt4/plugins/imageformats/qsvg4.dll "$OUTPUT_MISURA4_DIR/qt4_plugins/imageformats/"
+
 # hack in case of Anaconda python distribution
 CONDADIR=`which conda`
 CONDADIR=`dirname "$CONDADIR"`
 CONDADIR=`dirname "$CONDADIR"`
 cp "$CONDADIR"/Library/bin/mkl_* "$OUTPUT_MISURA4_DIR/"
+
 rm -f $BUILD_IN_PROGRSS_FILE
 echo "OK" > $LAST_BUILD_STATUS_FILE
 
