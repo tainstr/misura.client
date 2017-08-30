@@ -15,6 +15,7 @@ from misura.canon.csutil import lockme
 from .. import _
 from .. import widgets
 from ..configuration_check import recursive_configuration_check, render_wiring
+from .. import iutils
 
 from PyQt4 import QtGui, QtCore, QtSvg
 
@@ -105,7 +106,7 @@ def orgSections(prop_dict, configuration_level=5):
         sections[spl[0]].append(prop)
     return sections
 
-class ClickableLabel(QtGui.QLabel):
+class ClickableLabel(QtGui.QPushButton):
     clicked = QtCore.pyqtSignal()
     right_clicked = QtCore.pyqtSignal()
         
@@ -114,7 +115,7 @@ class ClickableLabel(QtGui.QLabel):
             self.clicked.emit()
         else: 
             self.right_clicked.emit()
-        return QtGui.QLabel.mousePressEvent(self, event)
+        return QtGui.QPushButton.mousePressEvent(self, event)
 
 
 class OptionsGroup(QtGui.QGroupBox):
@@ -122,7 +123,8 @@ class OptionsGroup(QtGui.QGroupBox):
         QtGui.QGroupBox.__init__(self, parent=parent)
         self.wg = wg
         self.children = children
-        self.more = ClickableLabel("+")
+        self.more = ClickableLabel()
+        self.more.setIcon(iutils.theme_icon('add'))
         self.more.setMaximumWidth(30)
         self.more.clicked.connect(self.hide_show)
         self.more.right_clicked.connect(self.show_menu)
@@ -153,11 +155,11 @@ class OptionsGroup(QtGui.QGroupBox):
         
     def expand(self):
         self.children.show()
-        self.more.setText('-')
+        self.more.setIcon(iutils.theme_icon('list-remove'))
         
     def collapse(self):
         self.children.hide()
-        self.more.setText('+')                         
+        self.more.setIcon(iutils.theme_icon('add'))                         
         
     def hide_show(self):
         """Hide or show option's children"""
