@@ -88,7 +88,7 @@ cp -r "$DISTRIBUTION_DIR/acquisition/"* $OUTPUT_MISURA4_DIR
 python -m compileall $CODE_BASE/thegram/thegram
 cp -r "$CODE_BASE/thegram/thegram" "$OUTPUT_MISURA4_DIR"
 # remove sources
-find "$OUTPUT_MISURA4_DIR/thegram" -name \*.py -exec rm {}
+find "$OUTPUT_MISURA4_DIR/thegram" -name \*.py -type f -delete
 
 # hack to make svg icons work also on Windows Vista
 cp C:/Python27/Lib/site-packages/PyQt4/plugins/imageformats/qsvg4.dll "$OUTPUT_MISURA4_DIR/qt4_plugins/imageformats/"
