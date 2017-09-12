@@ -40,14 +40,13 @@ class ThermalCurveTable(QtGui.QTableView):
             m.addAction(_('Insert point'), self.newRow)
             m.addAction(_('Insert checkpoint'), self.newCheckpoint)
             m.addAction(_('Insert natural cooling'), self.newCool)
+
             if self.motor_is_available(remote):
                 m.addAction(_('Insert movement'), self.newMove)
-            m.addAction(_('Insert control transition'), self.newThermocoupleControlTransition)
-    #       a=m.addAction(_('Insert parametric heating'), self.newParam)
-    #       a.setEnabled(False)
+            if self.flash_is_available(remote):
+                m.addAction(_('Insert control transition'), self.newThermocoupleControlTransition)
             m.addAction(_('Remove current row'), self.delRow)
             m.addSeparator()
-            # self.curveModel.mode_ramp(0)
 
 
 
@@ -55,9 +54,12 @@ class ThermalCurveTable(QtGui.QTableView):
         self.menu.setEnabled(enabled)
         edit_trigger = QtGui.QTableView.AllEditTriggers if enabled else QtGui.QTableView.NoEditTriggers
         self.setEditTriggers(edit_trigger)
-
+        
+    def flash_is_available(self, kiln):
+        return kiln.has_key('flash') and kiln['flash']
+    
     def motor_is_available(self, kiln):
-        return not (kiln["motor"][0] == "None")
+        return self.flash_is_available(kiln) and not (kiln["motor"][0] == "None") 
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))
