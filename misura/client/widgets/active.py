@@ -645,8 +645,11 @@ class ActiveWidget(Active, QtGui.QWidget):
             self.agg_menu = self.emenu.addMenu(_('Aggregation'))
             self.agg_menu.menuAction().hovered.connect(functools.partial(self.build_aggregation_menu, self.agg_menu))
         if self.remObj.compare_presets is not None:
+            # ONLY if online
             self.emenu.addMenu(self.presets_menu)
-        self.emenu.addMenu(self.compare_menu)
+        else:
+            # ONLY if offline
+            self.emenu.addMenu(self.compare_menu)
         self.nav_menu = self.emenu.addMenu(_('Navigator'))
         #self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
         # Units button
