@@ -169,7 +169,6 @@ class Active(object):
         self.remObj = remObj
         self.path = remObj._Method__name
         self.context = context
-        
         self.update_option(prop)
 
         # Update the widget whenever the manager gets reconnected
@@ -453,9 +452,16 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self._win_map = {}
         self.label = self.tr(self.name)
+
         self.lay = QtGui.QHBoxLayout()
         self.lay.setContentsMargins(0, 0, 0, 0)
         self.lay.setSpacing(0)
+        self.readonly_label = QtGui.QLabel('')
+        self.readonly_label.setAlignment(QtCore.Qt.AlignCenter|QtCore.Qt.AlignVCenter)
+        self.readonly_label.setMinimumWidth(50)
+        self.readonly_label.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.readonly_label.setStyleSheet("border: 1px solid grey")
+        self.readonly_label.hide()
         self.setLayout(self.lay)
         self.redraw()
         
@@ -471,7 +477,10 @@ class ActiveWidget(Active, QtGui.QWidget):
                 self.clear_layout(w.layout())
             else:
                 w1.deleteLater()
-            
+        self.lay.addWidget(self.readonly_label)
+        
+     
+             
     def redraw(self):
         self.clear_layout()
         self.label_widget = LabelWidget(self)  # Info label
@@ -591,7 +600,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         enabled = bool(enabled)
         for i in range(self.layout().count()):
             wg = self.layout().itemAt(i).widget()
-            if wg not in (self.label, self.enable_check, 0):
+            if wg not in (self.label, self.enable_check, 0, None):
                 wg.setEnabled(enabled)
     
         

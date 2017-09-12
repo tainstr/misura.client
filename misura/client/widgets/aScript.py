@@ -20,7 +20,9 @@ class ScriptEditor(QtGui.QDialog):
         self.menu = QtGui.QMenuBar(self)
         self.menu.setMinimumHeight(25)
         self.menu.addAction(_('Validate'), self.validate)
-        self.menu.addAction(_('Save'), self.save)
+        act = self.menu.addAction(_('Save'), self.save)
+        if self.active.readonly:
+            act.setEnabled(False)
         self.area = QtGui.QTextEdit()
         self.area.setReadOnly(False)
         self.area.setPlainText(self.active.adapt2gui(self.active.current))
@@ -30,7 +32,6 @@ class ScriptEditor(QtGui.QDialog):
         self.lay.addWidget(self.area)
 
         self.connect(self, QtCore.SIGNAL('accepted()'), self.save)
-        self.set_enabled()
 
     @property
     def current(self):
@@ -60,8 +61,12 @@ class ScriptEditor(QtGui.QDialog):
 
     def save(self):
         """Saves the current version of the script remotely."""
+        if self.active.readonly:
+            logging.error('Script is readonly. Cannot save.', self.active.handle)
+            return False
         self.active.set(self.current)
         self.area.setPlainText(self.active.adapt2gui(self.active.current))
+        return True
 
 
 class aScript(ActiveWidget):
@@ -70,9 +75,11 @@ class aScript(ActiveWidget):
 
     def __init__(self, server, path,  prop, parent=None):
         ActiveWidget.__init__(self, server, path,  prop, parent)
-        self.button = QtGui.QPushButton(_("Edit"), self)
+        txt = _('View') if self.readonly else _('Edit')
+        self.button = QtGui.QPushButton(txt, self)
         self.connect(self.button, QtCore.SIGNAL('clicked()'), self.show_editor)
         self.lay.addWidget(self.button)
+        self.set_enabled()
 
     def show_editor(self):
         e = ScriptEditor(self)

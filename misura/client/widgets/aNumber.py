@@ -204,12 +204,19 @@ class aNumber(ActiveWidget):
         if self.readonly:
             if self.slider:
                 self.slider.setEnabled(False)
+                self.slider.hide()
             self.spinbox.setReadOnly(True)
+            self.spinbox.hide()
+            self.readonly_label.show()
         else:
             if self.slider:
                 self.connect(
                     self.slider, QtCore.SIGNAL('valueChanged(int)'), self.sliderPush)
             self.spinbox.flexibleChanged.connect(self.boxPush)
+            self.readonly_label.hide()
+            self.spinbox.show()
+            if self.slider:
+                self.slider.show()
         self.update(minmax=False)
         self.spinbox.set_precision(self.precision)
         self.build_range_menu()
@@ -229,6 +236,7 @@ class aNumber(ActiveWidget):
         self.lay.addWidget(self.spinbox)
         
         self.changed_option()
+        self.lay.addStretch()
         
 
         
@@ -414,6 +422,7 @@ class aNumber(ActiveWidget):
             self.spinbox.blockSignals(False)
             if self.slider:
                 self.slider.blockSignals(False)
+        self.readonly_label.setText(self.spinbox.text())
 
     def setRange(self, m=None, M=None, step=0):
         #TODO: All this part might be moved into ScientificSpinbox

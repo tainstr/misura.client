@@ -45,9 +45,14 @@ class aString(ActiveWidget):
             self.browser.setText(self.adapt(self.current))
         if self.readonly:
             self.browser.setReadOnly(True)
+            self.browser.hide()
+            self.readonly_label.show()
         else:
             self.browser.setReadOnly(False)
+            self.browser.show()
+            self.readonly_label.hide()
         self.connect(self.browser,   QtCore.SIGNAL(self.signal), self.text_updated)
+        self.readonly_label.setText(self.browser.text())
 
     def text_updated(self, *foo):
         if self.extended:
