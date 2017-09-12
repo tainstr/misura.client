@@ -54,6 +54,7 @@ class LoginWindow(QtGui.QDialog):
         self.pwdLbl = QtGui.QLabel(_('Password') + ':')
         self.user = QtGui.QLineEdit(user)
         self.password = QtGui.QLineEdit(password)
+        self.password.setEchoMode(QtGui.QLineEdit.Password)
         self.ckSave = QtGui.QCheckBox(_('Save login'), self)
         from misura.client import iutils
         self.ckSave.setCheckState(2 * confdb['saveLogin'])
