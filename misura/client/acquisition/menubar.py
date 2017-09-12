@@ -282,30 +282,31 @@ class MenuBar(QtGui.QMenuBar):
         # SETTINGS Menu
         self.settings.clear()
         self.showInstrumentConf = functools.partial(self.hideShow, 'iconf')
-        act = self.settings.addAction(_('Instrument'), self.showInstrumentConf)
-        self.objects['iconf'] = functools.partial(
-            conf.TreePanel, self.remote, None, self.remote)
-        self.lstActions.append((act, self.remote))
+        if self.server._readLevel>=4:
+            act = self.settings.addAction(_('Instrument'), self.showInstrumentConf)
+            self.objects['iconf'] = functools.partial(
+                conf.TreePanel, self.remote, None, self.remote)
+            self.lstActions.append((act, self.remote))
 
-        # DEVICES SubMenu
-        self.devices = self.settings.addMenu(_('Devices'))
-        self.connect(
-            self.devices, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
+            # DEVICES SubMenu
+            self.devices = self.settings.addMenu(_('Devices'))
+            self.connect(
+                self.devices, QtCore.SIGNAL('aboutToShow()'), self.updateActions)
         
-        #FIXME: devices are empty in browser!
-        paths = self.remote['devices']
+            #FIXME: devices are empty in browser!
+            paths = self.remote['devices']
 
-        for path in paths:
-            role, path = path
-            lst = self.server.searchPath(path)
-            if lst is False:
-                logging.debug('Undefined path for role', role, path)
-                continue
-            obj = self.server.toPath(lst)
-            if obj is None:
-                logging.debug('Path not found')
-                continue
-            self.addDevConf(obj, role)
+            for path in paths:
+                role, path = path
+                lst = self.server.searchPath(path)
+                if lst is False:
+                    logging.debug('Undefined path for role', role, path)
+                    continue
+                obj = self.server.toPath(lst)
+                if obj is None:
+                    logging.debug('Path not found')
+                    continue
+                self.addDevConf(obj, role)
         self.appendGlobalConf()
 
         for act, cf in self.lstActions:
@@ -316,15 +317,17 @@ class MenuBar(QtGui.QMenuBar):
         self.quitClient.emit()
 
     def appendGlobalConf(self):
+        self.settings.addAction(_('Export configuration'), self.export_configuration)
+        if self.server._readLevel<4:
+            return 
+        if self.server and not self.fixedDoc:
+            self.settings.addAction(_('Import configuration'), self.import_configuration)
         self.objects['mconf'] = functools.partial(conf.MConf, self.server)
         self.showMConf = functools.partial(self.hideShow, 'mconf')
         act = self.settings.addAction(_('Global'), self.showMConf)
         act.setCheckable(True)
         self.lstActions.append((act, 'mconf'))
-        self.settings.addAction(_('Export configuration'), self.export_configuration)
-        if self.server and not self.fixedDoc and self.server._readLevel>=5:
-            self.settings.addAction(_('Import configuration'), self.import_configuration)
-            
+           
     def export_configuration(self):
         iniconf.export_configuration(self.server, self)
         
@@ -332,11 +335,13 @@ class MenuBar(QtGui.QMenuBar):
         iniconf.import_configuration(self.server, self)
 
     def addDevConf(self, obj, role):
-        #       self.objects[obj]=functools.partial(conf.Interface, self.server, obj)
+        if self.server._readLevel<4:
+            return False
         self.objects[obj] = functools.partial(conf.TreePanel, obj, None, obj)
         f = functools.partial(self.hideShow, obj)
         act = self.devices.addAction('%s (%s)' % (role, obj['name']), f)
         self.lstActions.append((act, obj))
+        return True
 
     def updateActions(self):
         for act, key in self.lstActions:
