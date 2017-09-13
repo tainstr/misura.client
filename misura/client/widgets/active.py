@@ -373,6 +373,8 @@ class LabelUnit(QtGui.QLabel):
         #self.setMaximumWidth(30)
         self.setMinimumSize(0,0)
         self.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        self.setAlignment(QtCore.Qt.AlignCenter|QtCore.Qt.AlignVCenter)
+        self.setStyleSheet("margin-left: 5px; margin-right: 5px;")
 
     def sizeHint(self):
         r = QtGui.QLabel.sizeHint(self)
@@ -460,7 +462,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.readonly_label.setAlignment(QtCore.Qt.AlignCenter|QtCore.Qt.AlignVCenter)
         self.readonly_label.setMinimumWidth(50)
         self.readonly_label.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        self.readonly_label.setStyleSheet("border: 1px solid grey")
+        self.readonly_label.setStyleSheet("border: 1px solid grey; margin-left: 5px; margin-right: 5px; padding-left: 5px; padding-right: 5px;")
         self.readonly_label.hide()
         self.setLayout(self.lay)
         self.redraw()
@@ -667,7 +669,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.bmenu.setSizePolicy(
             QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.bmenu.clicked.connect(self.update_menu)
-        if not self.unit:
+        if not self.unit or self.type.startswith('Role'):
             self.bmenu.hide()
         self.set_label()
         self.lay.addWidget(self.bmenu)
