@@ -716,6 +716,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 else:
                     logging.error(
                         'Cannot map dataset to option', col, col0, pcol, mcol)
+            if opt is None:
+                logging.debug('Cannot retrieve option definition', col)
+                return False
             attr = opt.get('attr', [])
             type = opt.get('type', 'Float')
             if attr in ['', 'None', None, False, 0]:
