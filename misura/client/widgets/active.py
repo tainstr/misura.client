@@ -460,10 +460,16 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.lay.setSpacing(0)
         self.readonly_label = QtGui.QLabel('')
         self.readonly_label.setAlignment(QtCore.Qt.AlignCenter|QtCore.Qt.AlignVCenter)
-        self.readonly_label.setMinimumWidth(50)
+        self.readonly_label.setMinimumWidth(100)
         self.readonly_label.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        self.readonly_label.setStyleSheet("border: 1px solid grey; margin-left: 5px; margin-right: 5px; padding-left: 5px; padding-right: 5px;")
+        self.readonly_label.setStyleSheet("border: 1px solid grey; \
+                                            margin-left: 5px; margin-right: 5px; \
+                                            padding-left: 5px; padding-right: 5px;")
         self.readonly_label.hide()
+        self.readonly_label.setWordWrap(True)
+        self.readonly_label.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|
+                                                    QtCore.Qt.TextSelectableByMouse|
+                                                    QtCore.Qt.LinksAccessibleByMouse)
         self.setLayout(self.lay)
         self.redraw()
         
