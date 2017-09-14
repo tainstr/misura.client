@@ -6,7 +6,7 @@ import sys
 from .. import widgets
 from PyQt4 import QtGui, QtCore
 
-from .messages import validate_start_acquisition
+from .messages import initial_sample_dimension
 
 class DelayedStart(QtGui.QDialog):
 
@@ -73,7 +73,7 @@ class DelayedStart(QtGui.QDialog):
         self.ins = getattr(self.server, self.server['lastInstrument'])
         if self.eng.current:
             if not self.engaged:
-                r = validate_start_acquisition(self.ins, parent=self)
+                r = initial_sample_dimension(self.ins, parent=self)
                 if not r:
                     self.eng.set(False)
                     return False

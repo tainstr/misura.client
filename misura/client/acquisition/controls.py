@@ -10,7 +10,7 @@ from misura.canon.csutil import unlockme
 from .. import widgets, _
 from ..live import registry
 
-from .messages import StartedFinishedNotification, validate_start_acquisition
+from .messages import StartedFinishedNotification, initial_sample_dimension, ValidationDialog
 
 from PyQt4 import QtGui, QtCore
 qm = QtGui.QMessageBox
@@ -202,12 +202,6 @@ class Controls(QtGui.QToolBar):
         self.measureTab = self.mDock.widget()
         self.measureTab.setCurrentIndex(0)
 
-        confirmation = QtGui.QMessageBox.warning(self, "Start test",
-                       "Do you confirm test's start?",
-                       QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
-        if confirmation != QtGui.QMessageBox.Yes:
-            return
-
         self.measureTab.checkCurve()
         if not self.validate():
             return False
@@ -215,6 +209,12 @@ class Controls(QtGui.QToolBar):
             self.warning(
                 _('Already running'), _('Acquisition is already running. Nothing to do.'))
             return False
+        
+        confirmation = ValidationDialog(self.server, self).exec_()
+        if not confirmation:
+            return
+        
+        
         self.isRunning = True
         self._async(self._start)
         self.show_prog(_("Starting new test"))
@@ -274,7 +274,7 @@ class Controls(QtGui.QToolBar):
 
     def validate(self):
         """Show a confirmation dialog immediately before starting a new test"""
-        return validate_start_acquisition(self.remote, parent=self)
+        return initial_sample_dimension(self.remote, parent=self)
 
 
 

@@ -1,5 +1,6 @@
 from PyQt4 import QtGui
 from .. import _
+from .. import widgets
 
 class StartedFinishedNotification():
 
@@ -23,7 +24,7 @@ class StartedFinishedNotification():
         QtGui.QMessageBox.warning(self.parent, message, message)
 
 
-def validate_start_acquisition(instrument, parent=None):
+def initial_sample_dimension(instrument, parent=None):
     """Show a confirmation dialog immediately before starting a new test"""
     # TODO: generalize
     if instrument['devpath'] in ['horizontal', 'vertical', 'flex']:
@@ -34,3 +35,49 @@ def validate_start_acquisition(instrument, parent=None):
             return False
         instrument.sample0['initialDimension'] = val
     return True
+   
+        
+
+class ValidationDialog(QtGui.QDialog):
+    def __init__(self, server, parent=None):
+        super(ValidationDialog, self).__init__(parent)
+        self.setWindowTitle(_('Review and confirm'))
+        self.server = server
+        
+        opt = self.server.gete('validate')
+        self.table = widgets.build(server, server, opt)
+        
+        
+        self.btn_update = QtGui.QPushButton(_('Update'))
+        self.btn_update.clicked.connect(self.update)
+        self.btn_cancel = QtGui.QPushButton(_('Cancel'))
+        self.btn_start = QtGui.QPushButton(_('Start'))
+        
+        
+        self.btn_cancel.clicked.connect(self.reject)
+        self.btn_start.clicked.connect(self.start)
+        
+        self.setLayout(QtGui.QVBoxLayout())
+        self.layout().addWidget(self.table)
+        self.layout().addWidget(self.btn_update)
+        self.layout().addWidget(self.btn_cancel)
+        self.layout().addWidget(self.btn_start)
+        self.update()
+
+    def update(self):
+        self.table.update()
+        vals = self.server['validate'][1:]
+        rows = []
+        ok = True
+        print 'BBBBBBBB', vals
+        for (status, msg, path) in self.table.current[1:]:
+            print 'AAAAAAAAAA', status, msg, path
+            ok = ok*status
+        self.btn_start.setEnabled(ok) 
+        return ok
+        
+    def start(self):
+        if self.update():
+            self.done()
+            
+        
