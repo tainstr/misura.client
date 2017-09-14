@@ -16,10 +16,10 @@ from livelog import LiveLog
 def auto_address(addr):
     if not addr.startswith('https://'):
         addr = 'https://'+addr
-    if not addr.endswith('/RPC'):
-        if not addr.endswith(':3880'):
-            addr += ':3880'
-        addr += '/RPC'
+        if not addr.endswith('/RPC'):
+            if not addr.endswith(':3880'):
+                addr += ':3880'
+            addr += '/RPC'
     return addr
 
 def addrConnection(addr, user=False, password=False, mac=False):
