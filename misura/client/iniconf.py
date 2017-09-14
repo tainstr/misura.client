@@ -29,9 +29,12 @@ def dump_preset(obj, keys, fp, preset, conf):
         entry = entry['_entry']
         if not tosave(entry):
             continue
-        val = repr(entry['current'])
-        logging.debug('Setting: ', preset, fp+k , val, val)
-        conf.set(cpreset, fp+k , val)
+        for key, val in entry.iteritems():
+            if key in ('name', 'handle', 'type', 'factory_default', 'kid'):
+                continue
+            val = repr(val)
+            logging.debug('Setting: ', preset, fp+k+'.'+key , val)
+            conf.set(cpreset, fp+k+'.'+key , val)
         
 
 def parse_obj(obj, conf):
@@ -83,10 +86,11 @@ def restore(srv, file_path='ini.ini', serials=None):
         for opt in conf.options(sec):
             val = conf.get(sec, opt)
             val = ast.literal_eval(val)
+            opt, key = opt.split('.')
             fp = opt.split('/')
             opt = fp.pop(-1)
             fp = '/'.join(fp)
-            logging.debug('Setting', fp, opt,'to', val)
+            logging.debug('Setting', fp, opt, key, 'to', val)
             
             obj = srv.toPath(fp)
             if obj is None:
@@ -95,7 +99,7 @@ def restore(srv, file_path='ini.ini', serials=None):
             
             if msec not in obj.listPresets():
                 obj.save(msec)
-            obj.set_to_preset(opt, msec, val)
+            obj.set_to_preset(opt, msec, val, key)
     #os.remove(f1)
             
 def export_configuration(srv, parent=None):
