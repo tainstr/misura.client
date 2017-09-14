@@ -45,6 +45,7 @@ class ValidationDialog(QtGui.QDialog):
         self.server = server
         
         opt = self.server.gete('validate')
+        opt['attr'].remove('Hidden')
         self.table = widgets.build(server, server, opt)
         
         
