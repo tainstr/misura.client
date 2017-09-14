@@ -8,6 +8,7 @@ import numpy as np
 from .. import _
 from misura.client.widgets.active import *
 from misura.client import units
+from misura.client import iutils
 from misura.client.clientconf import settings
 from . import builder
 
@@ -189,10 +190,14 @@ class aTableModel(QtCore.QAbstractTableModel):
         if self.rotated:
             return len(self.rows)
         return len(self.header)
-
-    def format_data(self, col, row):
+    
+    def raw_value(self, col, row):
         row = self.rows[row]
         val = row[col]
+        return val
+    
+    def format_data(self, col, row):
+        val = self.raw_value(col, row)
         if val is None:
             return None
         # handle conversion from option unit to client-side unit
@@ -212,14 +217,28 @@ class aTableModel(QtCore.QAbstractTableModel):
     def data(self, index, role=QtCore.Qt.DisplayRole):
         if not index.isValid() or not (0 <= index.row() <= self.rowCount()):
             return 0
-        if role != QtCore.Qt.DisplayRole:
-            return
         row = index.row()
         col = index.column()
         if self.rotated:
             a = col
             col = row
             row = a
+        if role == QtCore.Qt.DecorationRole:
+            print 'DECO', col, row, self.header[col]
+            if self.header[col][1]!='Boolean':
+                return
+            if self.raw_value(col, row):
+                icon = iutils.theme_icon('dialog-ok')
+                print 'OK ICON', icon
+            else:
+                icon = iutils.theme_icon('edit-delete')
+                print 'KO ICON', icon
+            return icon.pixmap(32,32)
+            
+        if role != QtCore.Qt.DisplayRole:
+            return
+        if self.header[col][1]=='Boolean':
+            return
         return self.format_data(col, row)
 
     def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
