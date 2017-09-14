@@ -173,6 +173,10 @@ class MenuBar(QtGui.QMenuBar):
             self.actRestart.setEnabled(True)
             self.settings.setEnabled(True)
         logging.debug('lstInstruments', self.lstInstruments)
+        if self.server._readLevel<4:
+            self.removeAction(self.settings.menuAction())
+            self.settings.setEnabled(False)
+            
 
     def get_window(self, key):
         d = self.windows.get(key, False)
