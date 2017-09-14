@@ -13,7 +13,17 @@ logging = get_module_logging(__name__)
 from network import wake_on_lan
 from livelog import LiveLog
 
+def auto_address(addr):
+    if not addr.startswith('https://'):
+        addr = 'https://'+addr
+    if not addr.endswith('/RPC'):
+        if not addr.endswith(':3880'):
+            addr += ':3880'
+        addr += '/RPC'
+    return addr
+
 def addrConnection(addr, user=False, password=False, mac=False):
+    addr = auto_address(addr)
     if False in [user, password]:
         user, password = confdb.get_from_key('recent_server', addr)[1:3]
     lw = LoginWindow(addr, user, password, globalconn=False)
