@@ -1,6 +1,10 @@
-from PyQt4 import QtGui
 from .. import _
 from .. import widgets
+
+from PyQt4 import QtGui
+
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 class StartedFinishedNotification():
 
@@ -79,6 +83,8 @@ class ValidationDialog(QtGui.QDialog):
         
     def start(self):
         if self.update():
-            self.done()
+            self.accept()
+        else:
+            logging.error('Cannot start: validation failed!')
             
         

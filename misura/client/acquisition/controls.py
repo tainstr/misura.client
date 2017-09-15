@@ -212,7 +212,8 @@ class Controls(QtGui.QToolBar):
         
         confirmation = ValidationDialog(self.server, self).exec_()
         if not confirmation:
-            return
+            logging.debug('Test start was aborted')
+            return False
         
         
         self.isRunning = True
