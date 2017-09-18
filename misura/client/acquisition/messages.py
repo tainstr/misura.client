@@ -46,16 +46,19 @@ class ValidationDialog(QtGui.QDialog):
     def __init__(self, server, parent=None):
         super(ValidationDialog, self).__init__(parent)
         self.setWindowTitle(_('Review and confirm'))
+        self.setMinimumWidth(400)
         self.server = server
         
         opt = self.server.gete('validate')
         opt['attr'].remove('Hidden')
         self.table = widgets.build(server, server, opt)
-        
+        self.label = QtGui.QLabel(_('A new test will start. Do you confirm?'))
         
         self.btn_update = QtGui.QPushButton(_('Update'))
         self.btn_update.clicked.connect(self.update)
         self.btn_cancel = QtGui.QPushButton(_('Cancel'))
+        self.btn_cancel.setDefault(False)
+        self.btn_cancel.setFocus(False)
         self.btn_start = QtGui.QPushButton(_('Start'))
         
         
@@ -63,6 +66,7 @@ class ValidationDialog(QtGui.QDialog):
         self.btn_start.clicked.connect(self.start)
         
         self.setLayout(QtGui.QVBoxLayout())
+        self.layout().addWidget(self.label)
         self.layout().addWidget(self.table)
         self.layout().addWidget(self.btn_update)
         self.layout().addWidget(self.btn_cancel)
@@ -74,10 +78,23 @@ class ValidationDialog(QtGui.QDialog):
         vals = self.server['validate'][1:]
         rows = []
         ok = True
-        print 'BBBBBBBB', vals
+        
         for (status, msg, path) in self.table.current[1:]:
-            print 'AAAAAAAAAA', status, msg, path
             ok = ok*status
+            
+        # Default button
+        self.btn_start.setDefault(ok)
+        self.btn_start.setFocus(ok)
+        # Hide unrelevant buttons
+        if len(vals):
+            self.table.show()
+            self.btn_update.show()
+            self.btn_update.setDefault(not ok)
+            self.btn_update.setFocus(not ok)
+        else:
+            self.table.hide()
+            self.btn_update.hide()
+            
         self.btn_start.setEnabled(ok) 
         return ok
         
