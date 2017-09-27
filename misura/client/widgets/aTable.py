@@ -224,15 +224,12 @@ class aTableModel(QtCore.QAbstractTableModel):
             col = row
             row = a
         if role == QtCore.Qt.DecorationRole:
-            print 'DECO', col, row, self.header[col]
             if self.header[col][1]!='Boolean':
                 return
             if self.raw_value(col, row):
                 icon = iutils.theme_icon('dialog-ok')
-                print 'OK ICON', icon
             else:
                 icon = iutils.theme_icon('edit-delete')
-                print 'KO ICON', icon
             return icon.pixmap(32,32)
             
         if role != QtCore.Qt.DisplayRole:
