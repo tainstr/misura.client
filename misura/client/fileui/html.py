@@ -26,7 +26,6 @@ def table_from(images,
                type='gif',
                images_per_line=5,
                characteristic_temperatures={},
-               step=1,
                jobs=lambda *x, **k: None,
                job=lambda *x, **k: None,
                done=lambda *x, **k: None,
@@ -36,17 +35,24 @@ def table_from(images,
         jobs(len(images), 'Adding images', abort=do_abort)
         html = "<table><tr>"
         labels = {}
-        for key in characteristic_temperatures.keys():
-                labels[characteristic_temperatures[key] // step] = key 
+        for name, temp in characteristic_temperatures.items():
+                labels[temp] = name 
                 
-        for index, image in enumerate(images):
+        Tpre = -3000
+        for i, image in enumerate(images):
                 if check_abort():
                     logging.debug('Export aborted')
                     done('Adding images')
                     return False
-                job(index, 'Adding images')
+                job(i, 'Adding images')
                 
-                label = labels.pop(image[2]//step, '') + '<br/><br/>'
+                T=image[2]
+                Tnext = T+3000
+                label = ''
+                if i<len(images)-1:
+                    Tnext = images[i+1][2]
+                    
+                label = get_label(Tpre, T, Tnext, labels) + '<br/><br/>'
 
                 html = html + "<td>%s</td>" % embed_with_labels(image[0],
                                                                 image[1],
@@ -54,13 +60,20 @@ def table_from(images,
                                                                 image[3],
                                                                 type,
                                                                 label)
-                if (index + 1) % images_per_line == 0:
+                if (i + 1) % images_per_line == 0:
                         html = html + "</tr><tr>"
+                
+                Tpre = image[2]
         done('Adding images')
         return html + "</tr></table>"
 
 def encode_image(image_file_name):
     return encode(open(image_file_name).read())
 
-
+def get_label(Tpre, T, Tnext, labels):
+    for LT, name in labels.items():
+        dt=abs(T-LT)
+        if abs(T-Tpre)>dt and abs(Tnext-T)>dt:
+            return labels.pop(LT)
+    return ''
     
