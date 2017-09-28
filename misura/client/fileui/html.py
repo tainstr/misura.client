@@ -72,6 +72,8 @@ def encode_image(image_file_name):
 
 def get_label(Tpre, T, Tnext, labels):
     for LT, name in labels.items():
+        if LT is None:
+            continue
         dt=abs(T-LT)
         if abs(T-Tpre)>dt and abs(Tnext-T)>dt:
             return labels.pop(LT)
