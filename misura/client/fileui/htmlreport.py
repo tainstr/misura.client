@@ -84,12 +84,13 @@ def create_images_report(decoder,
     characteristic_temperatures = {}
 
     for shape in characteristic_shapes.keys():
-        characteristic_temperatures[shape] = to_int(characteristic_shapes[shape]['temp'])
+        characteristic_temperatures[shape] = float_or_none(characteristic_shapes[shape]['temp'])
 
     images_table_html = html.table_from(all_images_data,
                                         'png',
                                         5,
                                         characteristic_temperatures,
+                                        step,
                                         jobs,
                                         job,
                                         done,
@@ -107,6 +108,8 @@ def create_images_report(decoder,
     output_html = template.convert(images_template_text(), substitutions_hash)
     if output:
         r = False
+        if not output.lower().endswith('.html'):
+            output += '.html'
         with open(output, 'w') as output_file:
             output_file.write(output_html)
             r = True
@@ -115,10 +118,10 @@ def create_images_report(decoder,
     done('Creating images report')
     return r
 
-def to_int(float_or_none_string):
+def float_or_none(float_or_none_string):
     if float_or_none_string == 'None':
         return None
-    return int(float_or_none_string)
+    return float_or_none_string
 
 def byte_array_from(qimage):
     image_data = QtCore.QByteArray()

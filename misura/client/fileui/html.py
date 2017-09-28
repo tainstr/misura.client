@@ -26,6 +26,7 @@ def table_from(images,
                type='gif',
                images_per_line=5,
                characteristic_temperatures={},
+               step=1,
                jobs=lambda *x, **k: None,
                job=lambda *x, **k: None,
                done=lambda *x, **k: None,
@@ -36,18 +37,16 @@ def table_from(images,
         html = "<table><tr>"
         labels = {}
         for key in characteristic_temperatures.keys():
-                labels[characteristic_temperatures[key]] = key + '<br/><br/'
-
+                labels[characteristic_temperatures[key] // step] = key 
+                
         for index, image in enumerate(images):
                 if check_abort():
                     logging.debug('Export aborted')
                     done('Adding images')
                     return False
                 job(index, 'Adding images')
-
-                current_image_temperature = int(image[2])
-
-                label = labels.get(current_image_temperature, '<br/><br/>')
+                
+                label = labels.pop(image[2]//step, '') + '<br/><br/>'
 
                 html = html + "<td>%s</td>" % embed_with_labels(image[0],
                                                                 image[1],
@@ -62,3 +61,6 @@ def table_from(images,
 
 def encode_image(image_file_name):
     return encode(open(image_file_name).read())
+
+
+    
