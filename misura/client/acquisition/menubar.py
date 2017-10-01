@@ -13,7 +13,7 @@ from .. import parameters as params
 from misura.client.helpmenu import HelpMenu
 from . import windows
 from .. import iniconf
-
+from .. import widgets
 from PyQt4 import QtGui, QtCore
 
 
@@ -326,11 +326,13 @@ class MenuBar(QtGui.QMenuBar):
             return 
         if self.server and not self.fixedDoc:
             self.settings.addAction(_('Import configuration'), self.import_configuration)
+            self.settings.addAction('Send update package', self.update_server)
         self.objects['mconf'] = functools.partial(conf.MConf, self.server)
         self.showMConf = functools.partial(self.hideShow, 'mconf')
         act = self.settings.addAction(_('Global'), self.showMConf)
         act.setCheckable(True)
         self.lstActions.append((act, 'mconf'))
+        
            
     def export_configuration(self):
         iniconf.export_configuration(self.server, self)
@@ -365,3 +367,24 @@ class MenuBar(QtGui.QMenuBar):
     def reload_data(self):
         self.parent().uid = False
         self.parent().resetFileProxy()
+        
+    def update_server(self):
+        self.pkg = widgets.aFileList(self.server, self.server.support, 
+                          self.server.support.gete('packages'), parent=self)
+        self.pkg.hide()
+        if self.pkg.send(): 
+            self.pkg.transfer.dlFinished.connect(self._apply_update_server)
+        
+    def _apply_update_server(self, *a):
+        logging.info('Apply server update', self.pkg.transfer.outfile)
+        btn = widgets.aButton(self.server, self.server.support,
+                                self.server.support.gete('applyExe'), parent=self)
+        btn.hide()
+        btn.get()
+        btn.show_msg()
+        self.server.restart()
+        logging.debug('Closing the client while server restarts.')
+        self.quit()
+        
+        
+

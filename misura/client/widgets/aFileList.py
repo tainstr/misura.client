@@ -29,12 +29,12 @@ class aFileList(aChooser):
             parent=self, caption=_("Upload File"))
         if len(n) == 0 or not os.path.exists(n):
             logging.debug('File Upload Aborted')
-            return
+            return False
         if os.path.basename(n) in self.prop['options']:
             # TODO: allow to overwrite....
             QtGui.QMessageBox.warning(self, _('Overwriting file'), _(
                 'A file with the same name already exists.\nPlease choose a different one.'))
-            return
+            return False
         url = self.remObj.conn_addr + \
             self.remObj['fullpath'][:-1]  # remove trailing /
         logging.debug('Transfer target:', repr(url), n, self.handle)
@@ -43,4 +43,9 @@ class aFileList(aChooser):
         from ..live import registry
         self.transfer.set_tasks(registry.tasks)
         self.transfer.start()
+        self.transfer.dlFinished.connect(self._after_send)
+        return n
+    
+    def _after_send(self, *a):
+        self.set(self.adapt2gui(str(self.transfer.outfile)))
         self.changed_option()
