@@ -106,14 +106,14 @@ class RoleIO(ActiveWidget):
         else:
             path = self.server.searchPath(opt[0])
             obj = self.server.toPath(opt[0])
-            logging.debug('RoleIO search', opt[0], path, obj)
+            #logging.debug('RoleIO search', opt[0], path, obj)
         fu = False
         # Is update needed?
         if self.value:
             if hasattr(self.value, 'prop'):
                 kid = opt[0] + opt[-1]
                 if kid == self.value.prop['kid']:
-                    logging.debug('RoleIO: no update', kid)
+                    #logging.debug('RoleIO: no update', kid)
                     return
                 fu = self.value.force_update
             # Remove old widget

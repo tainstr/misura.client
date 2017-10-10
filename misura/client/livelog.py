@@ -95,7 +95,6 @@ class LiveLog(QtGui.QTableView):
         
         
     def slotUpdate(self):
-        logging.debug('LiveLog.slotUpdate')
         if registry == None:
             logging.debug('No registry')
             return
@@ -108,7 +107,6 @@ class LiveLog(QtGui.QTableView):
  
 
     def update(self):
-        logging.debug('LiveLog.update')
         registry.update_log()
 
     def showMenu(self, pt):
