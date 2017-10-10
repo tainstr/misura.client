@@ -178,7 +178,7 @@ class OptionsGroup(QtGui.QGroupBox):
         wm[self.wg.handle] = self.wg
         comparison = self.wg.remObj.compare_option(*wm.keys())
         set_func = lambda keyvals: [wm[k].set_raw(v) for k,v in keyvals]
-        widgets.active.build_values_menu(comparison, self.comparisons, self.compare_menu, set_func)
+        widgets.active.build_option_menu(comparison, self.comparisons, self.compare_menu, set_func)
         
 class ChildSection(QtGui.QWidget):
     def __init__(self, *a, **k):

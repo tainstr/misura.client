@@ -69,12 +69,25 @@ def text_value(val):
     value = (value[:15] + '..') if len(value) > 15 else value
     return value    
 
-def build_values_menu(comparison, container, menu, set_func):
+def build_presets_menu(comparison, container, menu, set_func):
     menu.clear()
-    for name, vals in comparison.iteritems():
+    for name, val in comparison.items():
         if name == '***current***':
             continue
+        print('build_presets_menu', name, val)
+        value = text_value(val)
+        label = '{}:{}'.format(name, value)
+        p = functools.partial(set_func, val)
+        menu.addAction(label, p)
+        container[name] = (p, val)
+         
             
+def build_option_menu(comparison, container, menu, set_func):
+    menu.clear()
+    for name, vals in comparison.items():
+        if name == '***current***':
+            continue
+        print('build_option_menu', name, vals)
         if len(vals)==1:
             val = vals.items()[0][1]
             value = text_value(val)
@@ -92,9 +105,7 @@ def build_values_menu(comparison, container, menu, set_func):
                 label = '{}:{}'.format(key, value)
                 p = functools.partial(set_func, ((key, val)))
                 sub.addAction(label, p)
-                container[name+':'+key] = (p, key, val)                
-            
-
+                container[name+':'+key] = (p, key, val) 
 
 class RunMethod(QtCore.QRunnable):
     runnables = []
@@ -664,9 +675,9 @@ class ActiveWidget(Active, QtGui.QWidget):
         if self.remObj.compare_presets is not None:
             # ONLY if online
             self.emenu.addMenu(self.presets_menu)
-        else:
-            # ONLY if offline
-            self.emenu.addMenu(self.compare_menu)
+        #else:
+        #    # ONLY if offline
+        self.emenu.addMenu(self.compare_menu)
         self.nav_menu = self.emenu.addMenu(_('Navigator'))
         #self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
         # Units button
@@ -698,13 +709,13 @@ class ActiveWidget(Active, QtGui.QWidget):
     def build_presets_menu(self):
         self.presets = {}
         comparison = self.remObj.compare_presets(self.handle)
-        build_values_menu(comparison, self.presets, self.presets_menu, self.set_raw)
+        build_presets_menu(comparison, self.presets, self.presets_menu, self.set_raw)
 
             
     def build_compare_menu(self):
         self.compare = {}
         comparison = self.remObj.compare_option(self.handle)
-        build_values_menu(comparison, self.compare, self.compare_menu, self.set_raw)
+        build_option_menu(comparison, self.compare, self.compare_menu, self.set_raw)
         
 
     def isVisible(self):
