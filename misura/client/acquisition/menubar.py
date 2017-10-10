@@ -149,7 +149,7 @@ class MenuBar(QtGui.QMenuBar):
                 logging.debug('missing handler', name)
                 continue
             f = functools.partial(self.parent().setInstrument, obj, preset=name)
-            icon = QtGui.QIcon(os.path.join(params.pathArt, 'small_' + title + '.svg'))
+            icon = QtGui.QIcon(os.path.join(params.pathArt, 'small_' + name + '.svg'))
             act = self.instruments.addAction(icon, title.capitalize(), f)
             self.func.append(f)
             self.lstInstruments.append((act, title))
@@ -157,11 +157,11 @@ class MenuBar(QtGui.QMenuBar):
             presets = filter(lambda preset: preset not in ['default', 'factory_default'], obj.listPresets())
             for preset in presets:
                 f = functools.partial(self.parent().setInstrument, preset=preset, remote=obj)
-                title = ' '.join(preset.split('_'))
-                icon = QtGui.QIcon(os.path.join(params.pathArt, 'small_' + title + '.svg'))
-                act = self.instruments.addAction(icon, title.capitalize(), f)
+                name = ' '.join(preset.split('_'))
+                icon = QtGui.QIcon(os.path.join(params.pathArt, 'small_' + name + '.svg'))
+                act = self.instruments.addAction(icon, name.capitalize(), f)
                 self.func.append(f)
-                self.lstInstruments.append((act, title))
+                self.lstInstruments.append((act, name))
 
 
         self.appendGlobalConf()

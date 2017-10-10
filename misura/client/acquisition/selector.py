@@ -37,7 +37,7 @@ class InstrumentSelector(QtGui.QWidget):
             inlist = server['instruments']
 
         for (title, name) in inlist:
-            if title.lower() == 'kiln' and server._writeLevel < 4:
+            if name.lower() == 'kiln' and server._writeLevel < 4:
                 continue
             instrument_enabled_option = 'eq_' + name
             if server.has_key(instrument_enabled_option):
@@ -59,7 +59,7 @@ class InstrumentSelector(QtGui.QWidget):
 
             button = add_button(self,
                                 current_instrument_layout,
-                                os.path.join(params.pathArt, title + '.svg'),
+                                os.path.join(params.pathArt, name + '.svg'),
                                 title,
                                 200,
                                 0,
