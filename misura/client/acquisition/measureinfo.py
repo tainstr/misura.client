@@ -89,8 +89,8 @@ class MeasureInfo(QtGui.QTabWidget):
         if i >= 0:
             self.removeTab(i)
         i = self.statusView is not False
-        i += self.thermalCycleView.isVisible()
-        i += 1
+        i += self.indexOf(self.measureView)>0
+        i += self.indexOf(self.thermalCycleView)>0
         self.results = results
         if self.fixedDoc or registry.values.get('/isRunning', False):
             self.insertTab(i, self.results, _('Navigator'))
@@ -152,7 +152,7 @@ class MeasureInfo(QtGui.QTabWidget):
             return False
         self.nodes = []
         self.menus = []
-        c = self.count()
+        c = self.count()+1
         for i, n in enumerate(nodes):
             if n in self.nodes:
                 continue
