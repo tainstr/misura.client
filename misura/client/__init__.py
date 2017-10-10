@@ -6,10 +6,11 @@ API_NAMES = ["QDate", "QDateTime", "QString",
 API_VERSION = 2
 for name in API_NAMES:
     sip.setapi(name, API_VERSION)
-from parameters import determine_path
+from .parameters import determine_path
 
 from PyQt4 import QtCore
-import network, os
+from . import network
+import os
 
 
 def _(text, disambiguation=None, context='misura'):
