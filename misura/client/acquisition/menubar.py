@@ -376,7 +376,9 @@ class MenuBar(QtGui.QMenuBar):
             self.pkg.transfer.dlFinished.connect(self._apply_update_server)
         
     def _apply_update_server(self, *a):
-        logging.info('Apply server update', self.pkg.transfer.outfile)
+        self.server.support['packages'] = os.path.basename(self.pkg.transfer.outfile)
+        logging.info('Apply server update', self.server.support['packages'], self.pkg.transfer.outfile)
+        
         btn = widgets.aButton(self.server, self.server.support,
                                 self.server.support.gete('applyExe'), parent=self)
         btn.hide()
