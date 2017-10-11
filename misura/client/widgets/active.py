@@ -508,6 +508,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.presets_menu.aboutToShow.connect(self.build_presets_menu)
         self.compare_menu = QtGui.QMenu(_('Compare'), parent=self)
         self.compare_menu.aboutToShow.connect(self.build_compare_menu)
+        self.compare_group_menu = QtGui.QMenu(_('Compare group'), parent=self)
+        self.compare_group_menu.aboutToShow.connect(self.build_compare_group_menu)
         self.build_extended_menu()
         self.connect(self, QtCore.SIGNAL('destroyed()'),
                      self.unregister, QtCore.Qt.QueuedConnection)
@@ -678,6 +680,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         #else:
         #    # ONLY if offline
         self.emenu.addMenu(self.compare_menu)
+        if len(self.prop.get('children', [])):
+            self.emenu.addMenu(self.compare_group_menu)
         self.nav_menu = self.emenu.addMenu(_('Navigator'))
         #self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
         # Units button
@@ -713,9 +717,16 @@ class ActiveWidget(Active, QtGui.QWidget):
 
             
     def build_compare_menu(self):
+        """Populate option comparison menu"""
         self.compare = {}
         comparison = self.remObj.compare_option(self.handle)
         build_option_menu(comparison, self.compare, self.compare_menu, self.set_raw)
+        
+    def build_compare_group_menu(self):
+        """Populate option group comparison menu"""
+        self.compare_group = {}
+        comparison = self.remObj.compare_option(self.handle, *self.prop['children'].keys())
+        build_option_menu(comparison, self.compare_group, self.compare_group_menu, self.set_raw)
         
 
     def isVisible(self):
