@@ -288,7 +288,7 @@ class Active(object):
         """Set a new value `val` to server. Convert val into server units."""
         val = self.adapt2srv(val)
         if val == self.current:
-            logging.debug('Not setting',self.handle, repr(val))
+            logging.debug('Not setting',self.handle, repr(val), repr(self.current))
             return True
         out = self.remObj.set(self.handle,  val)
         return self.get()
@@ -656,7 +656,6 @@ class ActiveWidget(Active, QtGui.QWidget):
             un = self.emenu.addMenu(_('Units'))
             kgroup, f, p = units.get_unit_info(u, units.from_base)
             same = units.from_base.get(kgroup, {u: lambda v: v}).keys()
-            logging.debug( kgroup, same)
             for u1 in same:
                 p = functools.partial(self.set_unit, u1)
                 act = un.addAction(_(u1), p)

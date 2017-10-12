@@ -230,7 +230,6 @@ user_defaults = {'length': 'micron',
 
 
 def get_unit_info(unit, units):
-    logging.debug('get_unit_info', unit)
     p = unit.split('^')
     u = p[0]
     if len(p) == 2:

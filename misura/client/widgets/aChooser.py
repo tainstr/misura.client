@@ -106,7 +106,6 @@ class async_aChooser(aChooser):
         """Set a new value `val` to server. Convert val into server units."""
         val = self.adapt2srv(val)
         if val == self.current:
-            logging.debug('Not setting', self.handle, repr(val))
             return True
 
         QtCore.QTimer.singleShot(0, lambda: self.remObj.set(self.handle, val))

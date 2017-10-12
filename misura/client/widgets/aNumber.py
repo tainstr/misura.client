@@ -249,7 +249,6 @@ class aNumber(ActiveWidget):
         mx = self.max or 0
         mn  = self.min or 0
         st = self.step or 0
-        logging.debug('Build range menu', self.handle, mx, mn,st,self.precision, self.zoom_factor)
         self.range_min = SpinboxAction(_('Min'), mn, maximum=mx or None, 
                                        callback=self.set_range_minimum, parent=self)
         self.range_menu.addAction(self.range_min)
@@ -471,7 +470,6 @@ class aNumber(ActiveWidget):
         
         if self.slider and step:
             self.divider = 10.**(-np.log10(step))
-            logging.debug('Slider:', self.handle, m, M, step, self.divider)
             self.slider.blockSignals(True)
             #print 'aNumber.setRange slider',m,M,step,cur, self.divider
             self.slider.setRange(int(m * self.divider), int(M * self.divider))
