@@ -67,6 +67,7 @@ def dataset_curve_name(ds, dsn):
     return curve_name, ax_name, ax_label
 
 
+
 class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
     """Plot Misura datasets."""

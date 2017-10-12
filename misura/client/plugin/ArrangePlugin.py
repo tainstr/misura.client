@@ -3,6 +3,7 @@
 """Arrange curves and axes"""
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
+import veusz.document as document
 import veusz.plugins as plugins
 import veusz.utils
 from misura.client.iutils import get_plotted_tree
@@ -22,45 +23,72 @@ defvars = {'Line Style': ('PlotLine/style', 'm_style', 'solid'),
            }
 # http://stackoverflow.com/a/4382138/1645874
 kelly_colors = [
-    '#000000', # black
-    '#c10020', # vivid red
-    '#00538a', # strong blue
-    '#007d34', # vivid green
-    '#ff6800', # vivid orange
-    '#803e75', # strong purple
-    '#a6bdd7', # very light blue
-    
-    '#f6768e', # strong purplish pink
-    '#53377a', # strong violet
-    '#ff7a5c', # strong yellowish pink
-    
-    '#ff8e00', # vivid orange yellow
-    '#b32851', # strong purplish red
-    '#f4c800', # vivid greenish yellow
-    '#7f180d', # strong reddish brown
-    '#93aa00', # vivid yellowish green
-    '#593315', # deep yellowish brown
-    '#f13a13', # vivid reddish orange
-    '#232c16', # dark olive green
-    '#ffb300', # vivid yellow
-    
-    '#cea262', # grayish yellow
-    '#817066', # medium gray
-    ]
+    '#000000',  # black
+    '#c10020',  # vivid red
+    '#00538a',  # strong blue
+    '#007d34',  # vivid green
+    '#ff6800',  # vivid orange
+    '#803e75',  # strong purple
+    '#a6bdd7',  # very light blue
+
+    '#f6768e',  # strong purplish pink
+    '#53377a',  # strong violet
+    '#ff7a5c',  # strong yellowish pink
+
+    '#ff8e00',  # vivid orange yellow
+    '#b32851',  # strong purplish red
+    '#f4c800',  # vivid greenish yellow
+    '#7f180d',  # strong reddish brown
+    '#93aa00',  # vivid yellowish green
+    '#593315',  # deep yellowish brown
+    '#f13a13',  # vivid reddish orange
+    '#232c16',  # dark olive green
+    '#ffb300',  # vivid yellow
+
+    '#cea262',  # grayish yellow
+    '#817066',  # medium gray
+]
+
 
 def find_unused_color(used):
     idx = 0
     color = kelly_colors[idx]
-    while color in used:            
+    while color in used:
         logging.debug('color is used', color)
         idx += 1
-        if idx>=len(kelly_colors):
+        if idx >= len(kelly_colors):
             logging.error('Exausted free colors!')
             color = '#000000'
         else:
             color = kelly_colors[idx]
     logging.debug('found color', color)
     return color
+
+
+persistent_styles = ('PlotLine/color', 'MarkerFill/color', 'MarkerLine/color',
+                     'PlotLine/style', 'marker', 'markerSize', 'thinfactor')
+
+
+def save_plot_style_in_dataset_attr(plot, cmd):
+    """Save plot style information into dataset attributes upon plot creation/destruction"""
+    dsname = plot.settings['yData']
+    for attr in persistent_styles:
+        val = plot.settings.getFromPath(attr.split('/')).get()
+        cmd.SetDataAttr(dsname, plot.path+'|'+attr, val)
+        print 'SAVE ATTR', dsname, attr, val
+
+
+def get_plot_style_from_dataset_attr(plot, ds):
+    """Read plot style attributes from dataset ds"""
+    props = {}
+    for attr in persistent_styles:
+        val = ds.attr.get(plot.path+'|'+attr, None)
+        if val is None:
+            continue
+        props[attr] = val
+    print 'GOT SAVED STYLES', props
+    return props
+
 
 class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
@@ -96,26 +124,37 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             if not axp.startswith(graph) or ax.settings.direction != 'vertical':
                 axes.remove(axp)
             # Normalize colors to their html #code
-            axcolors[ax.name] = str(QtGui.QColor(ax.settings.Line.color).name())
+            axcolors[ax.name] = str(QtGui.QColor(
+                ax.settings.Line.color).name())
             
+        # Read saved colors in all existing datasets and exclude them
+        dataset_colors = []
+        for ds in self.doc.data.values():
+            # Skip unloaded datasets
+            if not len(ds.data):
+                continue
+            c = ds.attr.get('PlotLine/color', None)
+            if c is not None:
+                dataset_colors.append(c)
+
         # Total axes for repositioning
         if len(axes) > 1:
             tot = 1. / (len(axes) - 1)
         else:
             tot = 0
-        
+
         for idx, axpath in enumerate(axes):
             ax = self.doc.resolveFullWidgetPath(axpath)
             other_ax_colors = axcolors.copy()
             other_ax_colors.pop(ax.name)
-            used = other_ax_colors.values()
-            
+            used = other_ax_colors.values() + dataset_colors
+
             color = '#000000'
             if self.fields['dataset'] == 'Line Color':
                 if hasattr(ax, 'm_auto'):
                     color = axcolors[ax.name]
                     logging.debug('m_auto override', color)
-                elif len(axes)>1:
+                elif len(axes) > 1:
                     # Generate html color for this idx
                     color = find_unused_color(used)
 
@@ -140,12 +179,14 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         # Get y dataset
         y = obj.settings['yData']
         if not self.doc.data.has_key(y):
-            logging.error('No y dataset found - skipping invisible curve', plotpath, y)
+            logging.error(
+                'No y dataset found - skipping invisible curve', plotpath, y)
             return False
-        
-        # Flag passed by PlotPlugin to operate exclusively on currently plotted curves
+
+        # Flag passed by PlotPlugin to operate exclusively on currently plotted
+        # curves
         plotted_dataset_names = self.fields.get('plotted_dataset_names', False)
-        
+
         if not plotted_dataset_names or y in plotted_dataset_names:
             color = axcolors[obj.settings.yAxis]
             props = {'PlotLine/color': color,
@@ -165,7 +206,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             props['marker'] = veusz.utils.MarkerCodes[iax]
         elif self.fields['dataset'] == 'Line Style':
             props['PlotLine/style'] = lineStyles[iax]
-        
+
         # Set the unused style component to default
         #uvar, um_var, udefvar = defvars[unused_formatting_opt]
         #props[uvar] = udefvar
@@ -181,12 +222,17 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         elif m_var == 'm_style':
             outvar = lineStyles[idx]
         elif m_var == 'm_color':
-            #FIXME: remove this! should inherit somehow.
+            # FIXME: remove this! should inherit somehow.
             outvar = colorize(idx, LR, LG, LB)
         props[var] = outvar
 
-        self.dict_toset(obj, props, preserve = True)
-        return True
+        # Update with any property saved in dataset attr
+        print 'PRE-STYLE', y, plotpath, props
+        props.update(get_plot_style_from_dataset_attr(obj, self.doc.data[y]))
+        print 'POST-STYLE', y, plotpath, props
+        
+        self.dict_toset(obj, props, preserve=True)
+        return obj
 
     def apply(self, cmd, fields):
         """Do the work of the plugin.
@@ -223,9 +269,10 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         var, m_var, defvar = defvars[fields['sample']]
         LR, LG, LB = colorLevels(len(smps))
         for plotpath in tree['plot']:
-            self.arrange_curve(
+            plot = self.arrange_curve(
                 plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formatting_opt)
-
+            save_plot_style_in_dataset_attr(plot, self.cmd)
         self.apply_ops()
+
 
 plugins.toolspluginregistry.append(ArrangePlugin)

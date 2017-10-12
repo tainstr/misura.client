@@ -146,8 +146,6 @@ class QuickOps(object):
             if remove_dataset:
                 op = document.OperationDatasetDelete(node_path)
                 self.doc.applyOperation(op)
-                
-
             return True
 
         plots = self.model().plots['dataset'][node_path]
@@ -159,7 +157,7 @@ class QuickOps(object):
         remax = []
         # Collect objects which refers to xData or yData
         remobj = []
-        # Remove associated plots
+        # Remember to remove associated plots
         for p in plots:
             p = self.doc.resolveFullWidgetPath(p)
             g = p.parent
@@ -192,6 +190,14 @@ class QuickOps(object):
                     if obj not in remplot + remax + remobj:
                         remobj.append(obj)
 
+        # Save the style of the last plot it appears as yData
+        # into the dataset. On replot, this style will be recovered
+        from misura.client import plugin
+        for plot in remplot:
+            if plot.settings['yData'] != node_path:
+                continue
+            plugin.save_plot_style_in_dataset_attr(plot, self.cmd)
+            break
         # Remove object and unreferenced axes
         for obj in remplot + remax + remobj:
             logging.debug('Removing obj', obj.name, obj.path)
