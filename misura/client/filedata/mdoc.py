@@ -19,7 +19,7 @@ from operation import OperationMisuraImport, ImportParamsMisura, getUsedPrefixes
 from proxy import getFileProxy
 from decoder import DataDecoder
 from model import DocumentModel
-from misura.canon.csutil import lockme
+from misura.canon.csutil import lockme, incremental_filename
 from .. import units
 from ..clientconf import confdb
 from .. import parameters as params
@@ -113,10 +113,17 @@ class MisuraDocument(document.Document):
             self.create_proxy_decoders(proxy, linked.prefix)
 
     def add_cache(self, ds, name, overwrite=True):
-        if not overwrite and (name in self.cache):
-            return False
-        filename = os.path.join(
-            self.cache_dir, '{}.dat'.format(len(self.cache)))
+        """Writes the dataset `ds` onto an filesystem cache. 
+        The caller must empty `ds` from any data in order to free memory"""
+        if name in self.cache:
+            if not overwrite:
+                return False
+            filename = self.cache[name]
+        else:
+            filename = os.path.join(
+                self.cache_dir, '{}.dat'.format(len(self.cache)))
+            filename = incremental_filename(filename)
+        
         self.cache[name] = filename
         if hasattr(ds, 'document'):
             del ds.document
