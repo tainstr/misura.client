@@ -197,7 +197,6 @@ class QuickOps(object):
             if plot.settings['yData'] != node_path:
                 continue
             plugin.save_plot_style_in_dataset_attr(plot, self.cmd)
-            break
         # Remove object and unreferenced axes
         for obj in remplot + remax + remobj:
             logging.debug('Removing obj', obj.name, obj.path)
