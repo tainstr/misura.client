@@ -246,7 +246,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                 logging.debug('Loaded configuration', self.desc)
                 loaded=True
             except:
-                logging.error(format_exc())
+                logging.error('Loading configuration from', self.path, format_exc())
         if not loaded:
             logging.debug('Recreating client configuration')
             for key, val in default_desc.iteritems():
@@ -256,6 +256,9 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         # Apply authorization level
         option.ConfigurationProxy._readLevel = self['authLevel']
         option.ConfigurationProxy._writeLevel = self['authLevel']
+        if os.path.exists(self['database']):
+            logging.debug('Found default database', self['database'])
+            self.mem_database(self['database'], '')
             
     def migrate_desc(self):
         """Migrate saved newdesc to current hard-coded configuration structure default_desc"""
