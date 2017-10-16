@@ -169,11 +169,6 @@ def images_template_text():
                 width: 150px;
             }
 
-            td.number {
-                text-align: center;
-                font-weight: bold;
-            }
-
             td b {
                 color: blue;
             }
@@ -185,6 +180,7 @@ def images_template_text():
             .time {
                 float: right;
                 margin-right: 0px;
+                font-weight: bold;
             }
 
             a:link {
@@ -205,6 +201,39 @@ def images_template_text():
             a:active {
                 color: #555;
                 text-decoration: underline;
+            }
+            #menu {
+              position: fixed;
+              right: 10px;
+              top: 10px;
+              width: 8em;
+            }
+            #menu {
+              overflow: hidden;
+              background-color: #002d62;
+            }
+            
+            #menu a {
+              float: left;
+              display: block;
+              color: #f2f2f2;
+              text-align: center;
+              padding: 14px 16px;
+              text-decoration: none;
+              font-size: 17px;
+            }
+            
+            #menu a:hover {
+              background-color: #0297d7;
+              color: black;
+            }
+
+            @media print
+            {    
+                .no-print, .no-print *
+                {
+                    display: none !important;
+                }
             }
         </style>
     </head>
