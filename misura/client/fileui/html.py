@@ -74,7 +74,7 @@ def table_from(images,
                 label += '<br/><br/>'
                 
                 T_anchor = ''
-                if i%step==0:
+                if step and i%step==0:
                     T_anchor = Tr
                     T_anchors.append('<a href="#{}">{}</a>'.format(T_anchor,T_anchor))
                 

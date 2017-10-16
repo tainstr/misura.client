@@ -19,39 +19,23 @@ class Html(unittest.TestCase):
 		self.assertEqual(expected_html, html.embed("any data", "gif"))
 
 	def test_table_no_inages(self):
-		expected_html = "<table><tr></tr></table>"
+		expected_html = '<table><tr><div id="menu" class="no-print"></div></tr></table>'
 
 		self.assertEqual(expected_html, html.table_from([]))
 
 	def test_table_with_one_image(self):
 		image_html = "<img src='data:image/gif;base64,YW55IGRhdGE=' alt=''>"
-		expected_html = "<table>\
-<tr><td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr><tr>\
-<td class='number'>56</td></tr><tr>\
-<td><div class='temperature'>4&deg;C</div><div class='time'>00:10</div></td></tr>\
-</table></td></tr></table>" % image_html
+		expected_html = '<table><tr><td><table><tr><td align=\'center\'><b><br/><br/></b></td></tr><tr><td><img src=\'data:image/gif;base64,YW55IGRhdGE=\' alt=\'\'></td></tr><tr><td><div class=\'temperature\'>4.0&deg;C</div><div class=\'time\'>00:10</div></td></tr></table></td>\n<div id="menu" class="no-print"></div></tr></table>'
 
 		self.assertEqual(expected_html, html.table_from([['any data', 56, 4, '00:10']]))
 
-	def test_table_with_six_images(self):
-		image_html = "<img src='data:image/gif;base64,YW55IGRhdGE=' alt=''>"
 
-		expected_html = "<table><tr>\
-<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
-<tr><td class='number'>1</td></tr><tr><td><div class='temperature'>10&deg;C</div><div class='time'>a time 1</div></td></tr></table></td>\
-<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
-<tr><td class='number'>2</td></tr><tr><td><div class='temperature'>20&deg;C</div><div class='time'>a time 2</div></td></tr></table></td>\
-<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
-<tr><td class='number'>3</td></tr><tr><td><div class='temperature'>30&deg;C</div><div class='time'>a time 3</div></td></tr></table></td>\
-<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
-<tr><td class='number'>4</td></tr><tr><td><div class='temperature'>40&deg;C</div><div class='time'>a time 4</div></td></tr></table></td>\
-<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
-<tr><td class='number'>5</td></tr><tr><td><div class='temperature'>50&deg;C</div><div class='time'>a time 5</div></td></tr></table></td>\
-</tr>\
-<tr>\
-<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td>%s</td></tr>\
-<tr><td class='number'>6</td></tr><tr><td><div class='temperature'>60&deg;C</div><div class='time'>a time 6</div></td></tr></table></td>\
-</tr></table>" % (image_html, image_html, image_html, image_html, image_html, image_html)
+
+
+	def test_table_with_six_images(self):
+
+
+		expected_html =  '<table><tr><td><table><tr><td align=\'center\'><b><br/><br/></b></td></tr><tr><td><img src=\'data:image/gif;base64,YW55IGRhdGE=\' alt=\'\'></td></tr><tr><td><div class=\'temperature\'>10.0&deg;C</div><div class=\'time\'>a time 1</div></td></tr></table></td>\n<td><table><tr><td align=\'center\'><b><br/><br/></b></td></tr><tr><td><img src=\'data:image/gif;base64,YW55IGRhdGE=\' alt=\'\'></td></tr><tr><td><div class=\'temperature\'>20.0&deg;C</div><div class=\'time\'>a time 2</div></td></tr></table></td>\n<td><table><tr><td align=\'center\'><b><br/><br/></b></td></tr><tr><td><img src=\'data:image/gif;base64,YW55IGRhdGE=\' alt=\'\'></td></tr><tr><td><div class=\'temperature\'>30.0&deg;C</div><div class=\'time\'>a time 3</div></td></tr></table></td>\n<td><table><tr><td align=\'center\'><b><br/><br/></b></td></tr><tr><td><img src=\'data:image/gif;base64,YW55IGRhdGE=\' alt=\'\'></td></tr><tr><td><div class=\'temperature\'>40.0&deg;C</div><div class=\'time\'>a time 4</div></td></tr></table></td>\n<td><table><tr><td align=\'center\'><b><br/><br/></b></td></tr><tr><td><img src=\'data:image/gif;base64,YW55IGRhdGE=\' alt=\'\'></td></tr><tr><td><div class=\'temperature\'>50.0&deg;C</div><div class=\'time\'>a time 5</div></td></tr></table></td></tr><tr>\n<td><table><tr><td align=\'center\'><b><br/><br/></b></td></tr><tr><td><img src=\'data:image/gif;base64,YW55IGRhdGE=\' alt=\'\'></td></tr><tr><td><div class=\'temperature\'>60.0&deg;C</div><div class=\'time\'>a time 6</div></td></tr></table></td>\n<div id="menu" class="no-print"></div></tr></table>'
 
 		data = [
 			 ['any data', 1, 10, 'a time 1'],
@@ -62,7 +46,9 @@ class Html(unittest.TestCase):
 			 ['any data', 6, 60, 'a time 6']
 		]
 
-		self.assertEqual(expected_html, html.table_from(data))
+		self.assertEqual(expected_html, html.table_from(data)) 
+
+
 
 	def test_base64_from_image_file(self):
 		image_file_name = os.path.dirname(os.path.abspath(__file__)) +  "/images/ta-logo.gif"
@@ -77,16 +63,16 @@ class Html(unittest.TestCase):
 		time = "01:14"
 		image_html = "<img src='data:image/gif;base64,YW55IGRhdGE=' alt=''>"
 
-		actual_image_html = html.embed_with_labels("any data", 456, temperature, time)
+		actual_image_html = html.embed_with_labels("any data", temperature, time)
 
-		expected_image_html = "<table>\
-<tr><td align='center'><b></b></td></tr>\
-<tr><td><img src='data:image/gif;base64,YW55IGRhdGE=' alt=''></td></tr>\
-<tr><td class='number'>456</td></tr><tr>\
-<td><div class='temperature'>22&deg;C</div><div class='time'>01:14</div></td>\
-</tr></table>"
+		expected_image_html = "<table><tr><td align='center'><b></b></td></tr><tr><td><img src='data:image/gif;base64,YW55IGRhdGE=' alt=''></td></tr><tr><td><div class='temperature'>22&deg;C</div><div class='time'>01:14</div></td></tr></table>"
 
 		self.assertEqual(expected_image_html, actual_image_html)
+
+
+
+ 
+
 
 
 

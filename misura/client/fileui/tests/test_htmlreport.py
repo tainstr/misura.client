@@ -69,17 +69,13 @@ $IMAGES_TABLE$"
                                                         })
 
 
-        expected_images_html_table = "<table><tr><td>\
-<table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td><img src='data:image/png;base64,Nzg5' alt=''></td></tr>\
-<tr><td class='number'>1</td></tr><tr><td><div class='temperature'>220.1&deg;C</div><div class='time'>0:00:01</div></td></tr></table></td>\
-<td><table><tr><td align='center'><b><br/><br/></b></td></tr><tr><td><img src='data:image/png;base64,Nzg5' alt=''></td></tr><tr><td class='number'>2</td></tr>\
-<tr><td><div class='temperature'>220.1&deg;C</div><div class='time'>0:00:01</div></td></tr></table></td></tr></table>"
-        expected_report = "%s\n%s\n%s\n%s\n%s" % ("a base 64 logo",
-            "an id",
-            "a name",
-            "a date",
-            expected_images_html_table)
+        expected_report = 'a base 64 logo\nan id\na name\na date\n<table><tr><td><table><tr><td align=\'center\'><b><br/><br/></b></td></tr><tr><td><img src=\'data:image/png;base64,Nzg5\' alt=\'\'></td></tr><tr><td><div class=\'temperature\'>220.1&deg;C</div><div class=\'time\'>0:00:01</div></td></tr></table></td>\n<td><table><tr><td align=\'center\'><b><br/><br/></b></td></tr><tr><td><img src=\'data:image/png;base64,Nzg5\' alt=\'\'></td></tr><tr><td><div class=\'temperature\'>220.1&deg;C</div><div class=\'time\'>0:00:01</div></td></tr></table></td>\n<div id="menu" class="no-print"></div></tr></table>'
         self.assertEqual(expected_report, actual_report)
+
+ 
+
+                                    
+
 
 
 if __name__ == "__main__":
