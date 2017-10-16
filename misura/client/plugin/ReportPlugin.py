@@ -170,7 +170,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
                                    'filename': test.params.filename,
                                    'target': pt['time']}
                 self.dict_toset(page.getChild(sh), image_reference)
-                T = '%.2f{{\\deg}}C' % pt['temp']
+                T = '%i{{\\deg}}C' % round(pt['temp'], 0)
                 self.toset(page.getChild('lbl_' + sh), 'label', shn + ', ' + T)
                 msg += T + '\\\\'
             self.toset(page.getChild('shapes'), 'label', msg)

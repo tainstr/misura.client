@@ -108,10 +108,10 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             t = pt['time']
             T = pt['temp']
             shape_name = str(fields['text']).replace('$shape$', remove_prefix(shape))
-            txt = u'%s - %s °C' % (shape_name, pt['temp'])
             if t in [0, None, 'None'] or T in [0, None, 'None']:
                 logging.debug('Shape not found:', shape)
                 continue
+            txt = u'%s - %i °C' % (shape_name, round(float(T),0))
             # Absolute time translations
             if t > conf['zerotime'] / 2:
                 logging.debug('Absolute time translation', t, conf['zerotime'])
@@ -119,7 +119,6 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             # Temperature plotting
             basename = smpe.path.replace('/', ':') + '_'
             val = T if 'temp' in cur.split('/') else t
-            val = round(val, 0)
             logging.debug('Selected value based on ', shape, cur, val, pt,t, T)
             f = {'currentwidget': cur,
                  'axis': 'X',
