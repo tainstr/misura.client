@@ -50,27 +50,44 @@ def export(sh, frame='/hsm/sample0/frame',
     tT = nT.cols.t
     vT = nT.cols.v
     
-    roi = frame.split('/')[:-1]
-    roi.append('roi')
-    roi = '/'.join(roi)
-    roi = sh.col(roi, raw=True)
-    x = roi.cols.x
-    y = roi.cols.y
-    w = roi.cols.w
-    h = roi.cols.h
-    # Translate to 0
-    x_translation = min(x)
-    y_translation = min(y)
-    x -= x_translation
-    y -= y_translation
-    print 'translations', x_translation, y_translation
-    # Max dimension (video resolution)
-    wMax = int(max(x + w))
-    hMax = int(max(y + h))
-    out = cv.VideoWriter(output, fourcc, framerate, (wMax, hMax))
+    
     ref = reference.get_node_reference(sh, frame)
     N = sh.len(frame)
     
+    # If dynamic roi is found
+    roi = frame.split('/')[:-1]
+    roi.append('roi')
+    roi = '/'.join(roi)
+    if sh.has_node(roi):
+        roi = sh.col(roi, raw=True)
+        x = roi.cols.x
+        y = roi.cols.y
+        w = roi.cols.w
+        h = roi.cols.h
+        # Translate to 0
+        x_translation = min(x)
+        y_translation = min(y)
+        x -= x_translation
+        y -= y_translation
+        logging.debug('translations', x_translation, y_translation)
+        # Max dimension (video resolution)
+        wMax = int(max(x + w))
+        hMax = int(max(y + h))
+    else: 
+        # No dynamic roi - take first frame
+        t, img = ref[0]
+        ((w,h), x, y) = img
+        x_translation = min(x)
+        y_translation = min(y)
+        logging.debug('first frame', w,h, max(x), x_translation, max(y), y_translation)
+        wMax = (max(x)-x_translation) +50
+        x_translation += 25
+        
+        hMax = (max(y)-y_translation) +50
+        y_translation -= 25
+
+    logging.debug('Max resolution', wMax, hMax)    
+    out = cv.VideoWriter(output, fourcc, framerate, (wMax, hMax))
     index_acquisition_T = csutil.find_nearest_val(vT, acquisition_start_temperature, seed=0)
     i = i0 = csutil.find_nearest_val(ref,
                                 tT[index_acquisition_T],
