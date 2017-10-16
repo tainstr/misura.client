@@ -119,6 +119,7 @@ class ShapesPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             # Temperature plotting
             basename = smpe.path.replace('/', ':') + '_'
             val = T if 'temp' in cur.split('/') else t
+            val = round(val, 2)
             logging.debug('Selected value based on ', shape, cur, val, pt,t, T)
             f = {'currentwidget': cur,
                  'axis': 'X',
