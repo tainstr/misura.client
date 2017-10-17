@@ -2,9 +2,11 @@ from .. import _
 from .. import widgets
 
 from PyQt4 import QtGui
-
+from misura.canon import option
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
+
+
 
 class StartedFinishedNotification():
 
@@ -31,16 +33,57 @@ class StartedFinishedNotification():
 def initial_sample_dimension(instrument, parent=None):
     """Show a confirmation dialog immediately before starting a new test"""
     # TODO: generalize
+    opts = 0
+    wg = QtGui.QWidget()
+    wg.setLayout(QtGui.QGridLayout())
+    root = instrument.root
+    # Check measurement name
+    m = instrument['mro'][0]
+    if instrument.measure['name'] in ['measure', m]:
+        w = widgets.build(root, 
+                      instrument.measure, 
+                      instrument.measure.gete('name'))
+        wg.layout().addWidget(w.label_widget, opts, 0)
+        wg.layout().addWidget(w, opts, 1)        
+        opts += 1
+    # Check initial dimension
     if instrument['devpath'] in ['horizontal', 'vertical', 'flex']:
-        val, st = QtGui.QInputDialog.getDouble(parent, _("Confirm initial sample dimension"),
-                                               _("Initial dimension (micron)"),
-                                               instrument.sample0['initialDimension'])
-        if not st:
-            return False
-        instrument.sample0['initialDimension'] = val
-    return True
-   
+        w = widgets.build(root, 
+                      instrument.sample0, 
+                      instrument.sample0.gete('initialDimension'))
+        wg.layout().addWidget(w.label_widget, opts, 0)
+        wg.layout().addWidget(w, opts, 1)
+        opts += 1
         
+    if not opts:
+        return True
+    
+    label = QtGui.QLabel(_('Please review these important configurations:'))
+    dia, btn_start, btn_cancel = create_widgets_dialog([label, wg])
+    btn_start.clicked.connect(dia.accept)
+    btn_start.setDefault(True)
+    btn_start.setFocus(True)
+    btn_cancel.clicked.connect(dia.reject)
+    if dia.exec_():
+        return True
+    return False
+   
+
+def create_widgets_dialog(widget_list, dia=False):
+    if dia is False:
+        dia = QtGui.QDialog()
+    dia.setLayout(QtGui.QVBoxLayout())
+    for wg in widget_list:
+        dia.layout().addWidget(wg)
+    
+    btn_cancel = QtGui.QPushButton(_('Cancel'))
+    btn_cancel.setDefault(False)
+    btn_cancel.setFocus(False)
+    btn_start = QtGui.QPushButton(_('Start test'))    
+    dia.layout().addWidget(btn_cancel)
+    dia.layout().addWidget(btn_start)
+    
+    return dia, btn_start, btn_cancel
 
 class ValidationDialog(QtGui.QDialog):
     def __init__(self, server, parent=None):
@@ -56,21 +99,16 @@ class ValidationDialog(QtGui.QDialog):
         
         self.btn_update = QtGui.QPushButton(_('Update'))
         self.btn_update.clicked.connect(self.update)
-        self.btn_cancel = QtGui.QPushButton(_('Cancel'))
-        self.btn_cancel.setDefault(False)
-        self.btn_cancel.setFocus(False)
-        self.btn_start = QtGui.QPushButton(_('Start'))
         
+        
+        foo, self.btn_start, self.btn_cancel = create_widgets_dialog([self.label, 
+                                                            self.table, 
+                                                            self.btn_update], 
+                                                           dia=self)
         
         self.btn_cancel.clicked.connect(self.reject)
         self.btn_start.clicked.connect(self.start)
         
-        self.setLayout(QtGui.QVBoxLayout())
-        self.layout().addWidget(self.label)
-        self.layout().addWidget(self.table)
-        self.layout().addWidget(self.btn_update)
-        self.layout().addWidget(self.btn_cancel)
-        self.layout().addWidget(self.btn_start)
         self.update()
 
     def update(self):
