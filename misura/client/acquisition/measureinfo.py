@@ -85,6 +85,7 @@ class MeasureInfo(QtGui.QTabWidget):
     nsmp = 0
 
     def set_results(self, results):
+        current = self.currentIndex()
         i = self.indexOf(self.results)
         if i >= 0:
             self.removeTab(i)
@@ -94,6 +95,7 @@ class MeasureInfo(QtGui.QTabWidget):
         self.results = results
         if self.fixedDoc or registry.values.get('/isRunning', False):
             self.insertTab(i, self.results, _('Navigator'))
+        self.setCurrentIndex(current)
 
     def refreshSamples(self, *foo):
         nsmp = self.nobj.current
@@ -102,6 +104,7 @@ class MeasureInfo(QtGui.QTabWidget):
             return False
         self.nsmp = nsmp
         self.blockSignals(True)
+        current = self.currentIndex()
         self.clear()
         
         if not self.fixedDoc:
@@ -119,6 +122,7 @@ class MeasureInfo(QtGui.QTabWidget):
             self.thermalCycleView.hide()
         self.set_results(self.results)
         self.refresh_nodes()
+        self.setCurrentIndex(current)
         self.blockSignals(False)
         return True
 
@@ -143,7 +147,7 @@ class MeasureInfo(QtGui.QTabWidget):
             if i < 0:
                 continue
             self.removeTab(i)
-
+        
         if not nodes:
             nodes = self.nodes
         if not nodes:
@@ -199,6 +203,7 @@ class MeasureInfo(QtGui.QTabWidget):
 
         # Update isRunning widget
         self.statusView.widgets['/isRunning']._get(is_running)
+        
         
         self.set_results(self.results)
 
