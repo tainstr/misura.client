@@ -80,11 +80,13 @@ def export(sh, frame='/hsm/sample0/frame',
         x_translation = min(x)
         y_translation = min(y)
         logging.debug('first frame', w,h, max(x), x_translation, max(y), y_translation)
-        wMax = (max(x)-x_translation) +50
-        x_translation += 25
-        
-        hMax = (max(y)-y_translation) +50
-        y_translation -= 25
+        dx = (max(x)-min(x))+50
+        dy = (max(y)-min(y))+50
+        d = max((dx, dy))
+        wMax = hMax = d
+        x_translation -= 25
+        y_translation -= max((50, d/3))
+        y_translation = max((0, y_translation))
 
     logging.debug('Max resolution', wMax, hMax)    
     out = cv.VideoWriter(output, fourcc, framerate, (wMax, hMax))
