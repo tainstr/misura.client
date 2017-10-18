@@ -318,7 +318,8 @@ class aNumber(ActiveWidget):
     def setOrientation(self, direction):
         if not self.slider:
             return
-        sp = [QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed]
+        sp = [QtGui.QSizePolicy.MinimumExpanding, 
+              QtGui.QSizePolicy.Maximum]
         if direction == QtCore.Qt.Horizontal:
             lay = QtGui.QHBoxLayout()
             self.slider.setOrientation(QtCore.Qt.Horizontal)

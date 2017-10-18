@@ -407,7 +407,7 @@ class ViewerPicture(QtGui.QGraphicsView):
             if name  == 'y' or (name == 'x' and not self.instrument_is_flex()):
                 slider = widgets.MotorSlider(
                     self.server, obj, parent=self.parent)
-                slider.spinbox.hide()
+                slider.layout().removeWidget(slider.spinbox)    #.hide()
                 self.parent.setControl(slider, cpos[name])
                 self.motor_ctrl[name] = slider
 

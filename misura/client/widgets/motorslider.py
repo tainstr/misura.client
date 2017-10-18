@@ -26,8 +26,8 @@ class MotorSlider(aNumber):
             self.slider.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
             self.connect(self.slider, QtCore.SIGNAL(
                 'customContextMenuRequested(QPoint)'), self.showMenu)
-        self.label_widget.setSizePolicy(
-            QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Maximum)
+        self.label_widget.setSizePolicy(QtGui.QSizePolicy.Maximum, 
+                                        QtGui.QSizePolicy.Maximum)
         self.menu = QtGui.QMenu()
         self.spinact = QtGui.QWidgetAction(self.menu)
         self.spinact.setDefaultWidget(self.spinbox)
