@@ -8,6 +8,9 @@ except:
 import ast
 import os
 
+from .live import registry
+from .widgets import RunMethod
+
 from PyQt4 import QtGui, QtCore, uic
 
 from misura.canon.logger import get_module_logging
@@ -67,7 +70,9 @@ def save(srv, file_path='ini.ini'):
     conf.set(metasection, 'serials', repr(g))
     conf.write(open(file_path, 'w'))
     
-def restore(srv, file_path='ini.ini', serials=None):
+def restore(srv, file_path='ini.ini', serials=None, override=[], jobs=lambda *a: 1, 
+            job=lambda *a: 1,
+            done=lambda *a: 1):
     serials = serials or []
     ini = open(file_path, 'r').read()
     for (old,new) in serials:
@@ -77,6 +82,16 @@ def restore(srv, file_path='ini.ini', serials=None):
     conf = configparser.SafeConfigParser()
     conf.optionxform = str
     conf.read(f1)
+    
+    for sec, key, val in override:
+        conf.set(sec, key, repr(val))
+        
+    jname = 'Import configuration from \n'+str(f1)  
+    print conf._sections.values()[0]
+    tot = sum(map(lambda sec: len(sec.keys()), conf._sections.values()))
+    jobs(tot, jname)
+        
+    i = 0
     for sec in conf.sections():
         if sec==metasection:
             continue
@@ -84,6 +99,8 @@ def restore(srv, file_path='ini.ini', serials=None):
         if sec=='__default__':
             msec = 'default'
         for opt in conf.options(sec):
+            job(i, jname)
+            i+=1
             val = conf.get(sec, opt)
             val = ast.literal_eval(val)
             opt, key = opt.split('.')
@@ -100,7 +117,8 @@ def restore(srv, file_path='ini.ini', serials=None):
             if msec not in obj.listPresets():
                 obj.save(msec)
             obj.set_to_preset(opt, msec, val, key)
-    #os.remove(f1)
+            
+    done(jname)
             
 def export_configuration(srv, parent=None):
     filename = QtGui.QFileDialog.getSaveFileName(parent, 
@@ -182,6 +200,26 @@ class SerialNumberReplacer(QtGui.QDialog):
         self.combos = []
         for (serial, name, fp) in self.old_serials:
             self.add_serial_selector(serial, name, fp)
+        
+        r = self.layout().rowCount()+1
+        serial = '' 
+        if conf.has_option('__default__', '/eq_sn.current'):
+            serial = '({})'.format(ast.literal_eval(conf.get('__default__', '/eq_sn.current')))
+        lbl = QtGui.QLabel(_('Serial: {}'.format(serial)))
+        lbl.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
+        self.layout().addWidget(lbl, r, 0)
+        self.instrument_serial_number = QtGui.QLineEdit(self.srv['eq_sn'])
+        self.layout().addWidget(self.instrument_serial_number, r, 1)
+
+        r = self.layout().rowCount()+1
+        serial = '' 
+        if conf.has_option('__default__', '/kiln/ksn.current'):
+            serial = '({})'.format(ast.literal_eval(conf.get('__default__', '/kiln/ksn.current')))
+        lbl = QtGui.QLabel(_('Kiln Serial: {}'.format(serial)))
+        lbl.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
+        self.layout().addWidget(lbl, r, 0)
+        self.kiln_serial_number = QtGui.QLineEdit(self.srv.kiln['ksn'])
+        self.layout().addWidget(self.kiln_serial_number, r, 1)
            
         self.btn_apply = QtGui.QPushButton(_('Apply'))
         self.btn_apply.clicked.connect(self.apply)
@@ -191,6 +229,10 @@ class SerialNumberReplacer(QtGui.QDialog):
         
     def apply(self):
         logging.debug('APPLY')
+        self.srv['eq_sn'] = self.instrument_serial_number.text()
+        self.srv.kiln['ksn'] = self.kiln_serial_number.text()
+        override =[('__default__', '/eq_sn.current', self.srv['eq_sn']),
+                   ('__default__', '/kiln/ksn.current', self.srv.kiln['ksn'])]
         serials = []
         for i, c in enumerate(self.combos):
             c = self.combos[i]
@@ -199,7 +241,11 @@ class SerialNumberReplacer(QtGui.QDialog):
             serials.append((self.old_serials[i][2],
                             str(new_serial)))
         logging.debug('SERIALS', serials)
-        restore(self.srv, self.filename, serials)
+        
+        r = RunMethod(restore, self.srv, self.filename, serials, override,
+                registry.tasks.jobs, registry.tasks.job, registry.tasks.done)
+        r.pid = 'Import configuration'
+        r.do()
         self.done(0)
         
             

@@ -161,6 +161,9 @@ class RunMethod(QtCore.QRunnable):
         self.runnables.remove(self)
         self.done = True
         self.running = False
+        
+    def do(self):
+        QtCore.QThreadPool.globalInstance().start(self)
 
 
 
