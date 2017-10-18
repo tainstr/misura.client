@@ -164,7 +164,6 @@ class ImageStrip(QtGui.QWidget):
         from misura.client import extrusion
         w = extrusion.ExtrusionRender(self.decoder.proxy, self.decoder.datapath)
         w.wg.widgetsMap['startTime'].set(self.labels[0].t)
-        print 111111111, len(self.labels),self.labels[0].t
         w.show()
         self._extrusion.append(w)
 
@@ -175,9 +174,11 @@ class ImageStrip(QtGui.QWidget):
         self.t = 0
         self.rows = 1
         self.decoder = doc.decoders.get(datapath, False)
-        self.set_idx(0)
+        
         self.setLen(self.n)
-
+        self.set_idx(0)
+        
+        
         if self.decoder:
             self.connect(self.decoder, QtCore.SIGNAL('reset()'), self.setLen)
 
@@ -265,7 +266,8 @@ class ImageStrip(QtGui.QWidget):
             n = self.n
         self.n = n
         for lbl in self.labels:
-            lbl.close()
+            lbl.hide()
+            lbl.deleteLater()
             del lbl
         self.labels = []
         if self.decoder:
