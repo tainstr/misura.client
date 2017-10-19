@@ -8,4 +8,7 @@ Issues](https://www.quantifiedcode.com/api/v1/project/b880d05dee3d4a9484f3896ae4
 User interface for live acquisition, offline data processing and plot
 editing.
 
+To install misura client and all its dependencies, execute `setup_client_from_scratch.sh`. Currently tested in Ubuntu 16.04 64bit.
+
+For complete documentation, refer to:
 http://misura.readthedocs.io

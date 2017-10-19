@@ -72,9 +72,9 @@ class MenuBar(QtGui.QMenuBar):
         self.actLogout = self.connectTo.addAction(_('Logout'), self.logout)
         self.actLogout.setEnabled(False)
         self.actShutdown = self.connectTo.addAction(
-            _('Shutdown'), self.shutdown)
+            _('Shutdown electronics'), self.shutdown)
         self.actShutdown.setEnabled(False)
-        self.actRestart = self.connectTo.addAction(_('Restart'), self.restart)
+        self.actRestart = self.connectTo.addAction(_('Restart Server'), self.restart)
         self.actRestart.setEnabled(False)
 
     def set_browser_mode(self):
@@ -237,7 +237,7 @@ class MenuBar(QtGui.QMenuBar):
         self.measure.clear()
         if not self.fixedDoc:
             self.measure.addAction(
-                _('Initialize New Test'), self.parent().init_instrument)
+                _('Repeat initialization'), self.parent().init_instrument)
             self.measure.addAction(
                 _('Delayed start'), self.parent().delayed_start)
         # TODO: Share windows definitions with mainwin?

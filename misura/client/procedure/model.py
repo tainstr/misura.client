@@ -67,7 +67,7 @@ class ThermalCurveModel(QtCore.QAbstractTableModel):
         self.dat = []
         self.row_modes = []
         header = []
-        for s in ['Time', 'Temperature', 'Heating Rate', 'Duration']:
+        for s in ['Time (min)', u'Temperature (°C)', u'Heating Rate (°C/min)', 'Duration (min)']:
             header.append(_(s))
         self.header = header
         self.is_live = is_live

@@ -60,6 +60,7 @@ def initial_sample_dimension(instrument, parent=None):
     
     label = QtGui.QLabel(_('Please review these important configurations:'))
     dia, btn_start, btn_cancel = create_widgets_dialog([label, wg])
+    dia.setWindowTitle(_('Review test configuration'))
     btn_start.clicked.connect(dia.accept)
     btn_start.setDefault(True)
     btn_start.setFocus(True)

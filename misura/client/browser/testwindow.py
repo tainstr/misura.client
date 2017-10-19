@@ -137,7 +137,7 @@ class TestWindow(acquisition.MainWindow):
         
     def create_version_plot_menus(self):
         self.actStandard = self.myMenuBar.measure.addAction(
-            _('Re-evaluate standards'), self.re_standard)
+            _('Re-calculate metadata'), self.re_standard)
         if not self.menuVersions:
             self.menuVersions = fileui.VersionMenu(self.fixedDoc, self.fixedDoc.proxy)
             self.menuVersions.versionChanged.connect(partial(self.slot_version_changed))
