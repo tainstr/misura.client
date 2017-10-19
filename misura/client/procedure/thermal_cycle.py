@@ -175,7 +175,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
 
         thermal_cycle_options = {}
         for opt in ('onKilnStopped', 'kilnBeforeStart', 'kilnAfterEnd', 'duration',
-                    'coolingBelowTemp', 'coolingAfterTime', 'postDeformation', 'tcmix'):
+                    'coolingBelowTemp', 'coolingAfterTime', 'afterShape', 'postDeformation', 'tcmix'):
             if not active_instrument.measure.has_key(opt):
                 logging.debug('Measure has no option', opt)
                 continue
@@ -184,6 +184,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             self.thermal_cycle_optionsWidget = conf.Interface(
                 active_instrument.root, active_instrument.measure, thermal_cycle_options, parent=self, fixed=True)
             self.main_layout.addWidget(self.thermal_cycle_optionsWidget)
+        
         self.main_layout.addWidget(self.plot)
         self.setSizes([1, 1, 1, 500, 200, 0])
 
