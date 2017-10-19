@@ -50,6 +50,8 @@ class ThermalCycleChooser(PresetManager):
         
     def save_as(self, *a, **k):
         if self.table is not False:
-            crv = self.table.curve()
-            self.remObj.set('curve', crv)
+            self.remObj['curve'] = self.table.curve()
+        else:
+            logging.debug('No table set')
         return PresetManager.save_as(self, *a, **k)
+        

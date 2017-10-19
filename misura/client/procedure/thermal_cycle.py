@@ -13,7 +13,7 @@ from ..network.mproxy import MisuraProxy
 from .. import conf
 
 from plot import ThermalCyclePlot
-from table import ThermalCurveTable
+from table import ThermalCurveTable, flash_is_available, motor_is_available
 import veusz.utils
 from misura.client import iutils
 from misura.canon import option
@@ -120,12 +120,16 @@ class ThermalCycleDesigner(QtGui.QSplitter):
                 _('Insert checkpoint'), self.table.newCheckpoint)
             self.editMenu.addAction(
                 _('Insert natural cooling'), self.table.newCool)
-            self.editMenu.addAction(_('Insert movement'), self.table.newMove)
-            self.editMenu.addAction(
-                _('Insert control transition'), self.table.newThermocoupleControlTransition)
-            a = self.editMenu.addAction(
-                'Insert parametric heating', self.table.newParam)
-            a.setEnabled(False)
+            
+            if motor_is_available(self.remote):
+                self.editMenu.addAction(_('Insert movement'), self.table.newMove)
+            
+            if flash_is_available(self.remote):
+                self.editMenu.addAction(
+                    _('Insert control transition'), self.table.newThermocoupleControlTransition)
+            #a = self.editMenu.addAction(
+            #    'Insert parametric heating', self.table.newParam)
+            #a.setEnabled(False)
             self.editMenu.addAction('Remove current row', self.table.delRow)
             self.templatesMenu = menuBar.addMenu(_('Templates'))
 
@@ -163,6 +167,8 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             "dataChanged(QModelIndex,QModelIndex)"), self.replot)
         self.connect(self.model, QtCore.SIGNAL(
             "dataChanged(QModelIndex,QModelIndex)"), self.check_if_saved)
+        self.tcc.savedAs.connect(self.check_if_saved)
+        
         self.addTable()
 
         self.main_layout.addWidget(self.table)
@@ -225,7 +231,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
                   unit='celsius', current=1000, min=0, max=1800, step=0.1)
         option.ao(
             steps_options, 'stasisDuration', 'Float', name=_("Stasis Duration"),
-                  unit='seconds', current=600, step=1)
+                  unit='second', current=600, step=1)
         option.ao(steps_options, 'numberOfSteps', 'Integer',
                   name=_("Number of Steps"), current=10, step=1)
         option.ao(
@@ -277,8 +283,9 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         self.plot.setCurve(crv)
         self.synchronize_progress_bar_to_table()
         
-    def check_if_saved(self):
+    def check_if_saved(self, *a):
         if False in [self.bApp, self.bRead, self.tcc]:
+            # Read-only mode
             return True, True
         tbcurve = []
         for row in self.model.curve(events=True):
@@ -295,7 +302,10 @@ class ThermalCycleDesigner(QtGui.QSplitter):
                 "color:" + (';' if remote_equals else 'red;'))
         saved_equals = True 
         if self.remote.has_key('savedCurve'):
-            saved_equals = tbcurve == self.remote.get('savedCurve')
+            saved_equals = ( tbcurve == self.remote.get('savedCurve') )
+        print 'cli',tbcurve
+        print 'rem', self.remote.get('curve')
+        print 'saved',self.remote.get('savedCurve')
         if saved_equals:
             self.tcc.setStyleSheet("border-color: ; border-style: ; border-width: 0px;" )
         else:

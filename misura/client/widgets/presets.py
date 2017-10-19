@@ -8,6 +8,12 @@ from PyQt4 import QtGui
 
 
 class PresetManager(aChooser):
+    
+    saved = QtCore.pyqtSignal(str)
+    savedAs = QtCore.pyqtSignal(str)
+    renamed = QtCore.pyqtSignal(str, str)
+    removed = QtCore.pyqtSignal(str)
+    
 
     def __init__(self, remObj, parent=None, context='Option',
                  preset_handle='preset', save_handle='save', 
@@ -52,16 +58,17 @@ class PresetManager(aChooser):
 
         i = self.combo.currentIndex()
         self.combo.setCurrentIndex(0)
-        self.remObj.call(self.remove_handle,
-                         self.adapt2srv(i))
+        name= self.adapt2srv(i)
+        self.remObj.call(self.remove_handle, name)
         self.changed_option()
+        self.removed.emit(str(name))
 
     def save_current(self):
         if self.user_is_not_sure("Overwrite \"%s\" preset?" % self.combo.currentText()):
             return False
-
-        r = self.remObj.call(self.save_handle,
-                         self.adapt2srv(self.combo.currentIndex()))
+        name = self.adapt2srv(self.combo.currentIndex())
+        r = self.remObj.call(self.save_handle, name)
+        self.saved.emit(str(name))
         return r
     
     def save_as(self):
@@ -72,7 +79,9 @@ class PresetManager(aChooser):
             if self.user_is_not_sure("Overwrite \"%s\" preset?" % new_name):
                 return False
         r = self.remObj.call(self.save_handle, new_name)
+        self.remObj[self.handle] = new_name
         self.changed_option()
+        self.savedAs.emit(str(new_name))
         return r
         
         
@@ -86,6 +95,7 @@ class PresetManager(aChooser):
         self.changed_option()
         self.current = False
         self.get()
+        self.renamed.emit(self.current, str(new_name))
         return True
 
     def user_renames(self, title='Rename'):
@@ -115,7 +125,7 @@ class PresetManager(aChooser):
         self.combo.blockSignals(False)
 
     def set(self, *args):
-        """Overload per filtrare la voce speciale +Add"""
+        """Overload to filter special entry +Add"""
         if self.combo.currentText() == '+Add':
             self.add()
         else:
