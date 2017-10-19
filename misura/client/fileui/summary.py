@@ -20,10 +20,11 @@ class SummaryModel(QtCore.QAbstractTableModel):
     _rowCount = 0
     _columnCount = 0
     _loaded = []
+    auto_load = True
 
     def __init__(self, *a, **k):
         QtCore.QAbstractTableModel.__init__(self, *a, **k)
-        self.auto_load = True
+
 
     def set_doc(self, doc):
         self.doc = doc
@@ -35,9 +36,7 @@ class SummaryModel(QtCore.QAbstractTableModel):
     def set_loaded(self, loaded):
         if set(loaded) != set(self._loaded):
             self._loaded = loaded
-            #self.emit(QtCore.SIGNAL('headerDataChanged(int,int,int)'),
-            #         QtCore.Qt.Horizontal, 0, len(loaded))
-            self.emit(QtCore.SIGNAL('modelReset()'))
+            self.endResetModel()
             return True
         return False
 
@@ -53,23 +52,30 @@ class SummaryModel(QtCore.QAbstractTableModel):
         logging.debug('SummaryView.refresh')
         self.model.refresh()
         self.update()
+        
+    def get_loaded(self):
+        ldd = []
+        for k, ds in self.doc.data.iteritems():
+            if len(ds) > 0:
+                ldd.append(k) 
+        if self.auto_load:
+            self.set_loaded(ldd)
+        return ldd       
 
     def update(self):
         r = False
         # New rows length
         start = self._rowCount
-        end = self.rowCount(QtCore.QModelIndex())
-        # New header (lists all loaded columns/non-zero)
-        if self.auto_load:
-            ldd = []
-            for k, ds in self.doc.data.iteritems():
-                if len(ds) > 0:
-                    ldd.append(k)
-            self.set_loaded(ldd)
+        self.get_loaded()
+        end = max([0]+[len(self.doc.data[k].data) for k in self._loaded])
         # Update length
-        if start != end:
-            self.emit(QtCore.SIGNAL('rowsInserted(QModelIndex,int,int)'),
-                      self.index(0, 0), start, end)
+        if end > start:
+            logging.debug('SummaryModel.update: inserting rows', start, end)
+            self.beginInsertRows(self.index(0, 0), start, end)
+            self._rowCount = end
+            self.endInsertRows()
+            # Maybe a qt bug: this does not work without endResetModel
+            self.endResetModel()
         return r
 
     def columnCount(self, parent):
@@ -103,11 +109,11 @@ class SummaryModel(QtCore.QAbstractTableModel):
     def rowCount(self, parent):
         if not self.doc:
             return 0
+        self.get_loaded()
         if len(self._loaded) == 0:
             return 0
         if not self.doc.data.has_key(self._loaded[0]):
             return 0
-        self._rowCount = max([len(self.doc.data[k].data) for k in self._loaded])
         return self._rowCount
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
@@ -195,7 +201,9 @@ class SummaryView(QtGui.QTableView):
         self.model().refresh()
 
     def update(self):
-        self.model().update()
+        if self.isVisible():
+            logging.debug('UPDATE SIGNAL RECEIVED')
+            self.model().update()
 
     def showEvent(self, event):
         self.update()

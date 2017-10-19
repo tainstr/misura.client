@@ -296,7 +296,6 @@ class Converter(object):
             self.from_client = lambda val: val
         else:
             group = known_units[csunit]
-            print 'group,unit', group, unit, csunit
             cfb = from_base[group][csunit]  # client-to-base
             ctb = to_base[group][self.csunit]  # client-to-base
             # How to manage different groups?
