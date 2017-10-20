@@ -102,72 +102,20 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         menuBar = QtGui.QMenuBar(self)
         menuBar.setNativeMenuBar(False)
         self.main_layout.addWidget(menuBar)
-
+        self.menuBar = menuBar
+        self.fileMenu = self.menuBar.addMenu(_('File'))
+        self.fileMenu.addAction(_('Export to CSV'), self.exportCSV)
+        
         is_live = isinstance(remote, MisuraProxy) or force_live
 
         self.table = ThermalCurveTable(remote, self, is_live=is_live)
         self.table.doubleClicked.connect(self.set_mode_of_cell)
         self.model = self.table.model()
-
-        if is_live:
-            self.fileMenu = menuBar.addMenu(_('File'))
-            self.fileMenu.addAction(_('Import from CSV'), self.loadCSV)
-            self.fileMenu.addAction(_('Export to CSV'), self.exportCSV)
-            self.fileMenu.addAction(_('Clear table'), self.clearTable)
-            self.editMenu = menuBar.addMenu(_('Edit'))
-            self.editMenu.addAction(_('Insert point'), self.table.newRow)
-            self.editMenu.addAction(
-                _('Insert checkpoint'), self.table.newCheckpoint)
-            self.editMenu.addAction(
-                _('Insert natural cooling'), self.table.newCool)
-            
-            if motor_is_available(self.remote):
-                self.editMenu.addAction(_('Insert movement'), self.table.newMove)
-            
-            if flash_is_available(self.remote):
-                self.editMenu.addAction(
-                    _('Insert control transition'), self.table.newThermocoupleControlTransition)
-            #a = self.editMenu.addAction(
-            #    'Insert parametric heating', self.table.newParam)
-            #a.setEnabled(False)
-            self.editMenu.addAction('Remove current row', self.table.delRow)
-            self.templatesMenu = menuBar.addMenu(_('Templates'))
-
-            self.templatesMenu.addAction(
-                    veusz.utils.action.getIcon('m4.single-ramp'), 
-                    _('Single Ramp'), 
-                    self.single_ramp_template)
-            self.templatesMenu.addAction(
-                    veusz.utils.action.getIcon('m4.steps'), 
-                    _('Steps'), 
-                    self.steps_template)
-            self.templatesMenu.addAction(
-                    veusz.utils.action.getIcon('m4.single-ramp'), 
-                    _('Maximize speed'), 
-                    self.fast_template)
-            self.addButtons()
-
-            self.progress = widgets.ActiveObject(self.remote.parent,
-                                                 self.remote,
-                                                 self.remote.gete('segmentProgress'),
-                                                 parent=self)
-            self.progress.register()
-
-            self.connect(self.progress,
-                         QtCore.SIGNAL('changed'),
-                         self.progress_changed)
-
-            self.connect(self.table,
-                         QtCore.SIGNAL('pressed(QModelIndex)'),
-                         self.synchronize_progress_bar_to_table)
-
-
         self.plot = ThermalCyclePlot()
-        self.connect(self.model, QtCore.SIGNAL(
-            "dataChanged(QModelIndex,QModelIndex)"), self.replot)
-        self.connect(self.model, QtCore.SIGNAL(
-            "dataChanged(QModelIndex,QModelIndex)"), self.check_if_saved)
-        self.tcc.savedAs.connect(self.check_if_saved)
+        
+        if is_live:
+            self.set_editable()
+            
         
         self.addTable()
 
@@ -187,7 +135,63 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         
         self.main_layout.addWidget(self.plot)
         self.setSizes([1, 1, 1, 500, 200, 0])
+        
+    def set_editable(self):
+        self.fileMenu.addAction(_('Import from CSV'), self.loadCSV)
+        self.fileMenu.addAction(_('Clear table'), self.clearTable)
+        self.editMenu = self.menuBar.addMenu(_('Edit'))
+        self.editMenu.addAction(_('Insert point'), self.table.newRow)
+        self.editMenu.addAction(
+            _('Insert checkpoint'), self.table.newCheckpoint)
+        self.editMenu.addAction(
+            _('Insert natural cooling'), self.table.newCool)
+        
+        if motor_is_available(self.remote):
+            self.editMenu.addAction(_('Insert movement'), self.table.newMove)
+        
+        if flash_is_available(self.remote):
+            self.editMenu.addAction(
+                _('Insert control transition'), self.table.newThermocoupleControlTransition)
+        #a = self.editMenu.addAction(
+        #    'Insert parametric heating', self.table.newParam)
+        #a.setEnabled(False)
+        self.editMenu.addAction('Remove current row', self.table.delRow)
+        self.templatesMenu = self.menuBar.addMenu(_('Templates'))
 
+        self.templatesMenu.addAction(
+                veusz.utils.action.getIcon('m4.single-ramp'), 
+                _('Single Ramp'), 
+                self.single_ramp_template)
+        self.templatesMenu.addAction(
+                veusz.utils.action.getIcon('m4.steps'), 
+                _('Steps'), 
+                self.steps_template)
+        self.templatesMenu.addAction(
+                veusz.utils.action.getIcon('m4.single-ramp'), 
+                _('Maximize speed'), 
+                self.fast_template)
+        
+        self.addButtons()
+
+        self.progress = widgets.ActiveObject(self.remote.parent,
+                                             self.remote,
+                                             self.remote.gete('segmentProgress'),
+                                             parent=self)
+        self.progress.register()
+
+        self.connect(self.progress,
+                     QtCore.SIGNAL('changed'),
+                     self.progress_changed)
+
+        self.connect(self.table,
+                     QtCore.SIGNAL('pressed(QModelIndex)'),
+                     self.synchronize_progress_bar_to_table)
+        self.tcc.savedAs.connect(self.check_if_saved)
+        self.connect(self.model, QtCore.SIGNAL(
+            "dataChanged(QModelIndex,QModelIndex)"), self.replot)
+        self.connect(self.model, QtCore.SIGNAL(
+            "dataChanged(QModelIndex,QModelIndex)"), self.check_if_saved)
+        
     def progress_changed(self, current_segment_progress):
         self.plot.set_progress(get_progress_time_for(current_segment_progress,
                                                      self.remote))

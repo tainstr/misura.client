@@ -84,7 +84,6 @@ class BaseHeight(Overlay):
         h = self.current.get('h', 0)/self.umpx
         x = x[i]  # +rx-cx
         y = y[i]  # +ry-cy
-        print('AAAAAAAAAA', x, y, w, h, self.umpx)
         self.base.setLine(x, y, x + w, y)
         self.height.setLine(x, y, x, y - h)
         self.setTransformOriginPoint(x, y)
