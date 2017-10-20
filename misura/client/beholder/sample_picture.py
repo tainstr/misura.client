@@ -125,14 +125,14 @@ class SamplePicture(QtGui.QGraphicsItem):
         self.label = self.pixItem.label
         self.overlays.append(self.label)
         # TODO: distinguish instrument overlays based on mro!
-
+        umpx = smp.analyzer['umpx']
         # Shape-specific
         if self.is_hsm:
             self.points = shape.SamplePoints(parentItem)
             self.overlays.append(self.points)
-            self.baseHeight = shape.BaseHeight(parentItem)
+            self.baseHeight = shape.BaseHeight(parentItem, umpx=umpx)
             self.overlays.append(self.baseHeight)
-            self.circle = shape.CircleFit(parentItem)
+            self.circle = shape.CircleFit(parentItem, umpx=umpx)
             self.overlays.append(self.circle)
         else:
             self.referenceLine = border.ReferenceLine(parentItem, startLine=True)

@@ -69,7 +69,7 @@ class BaseHeight(Overlay):
     def unscale(self, factor):
         Overlay.unscale(self, factor)
         self.base.setPen(self.pen)
-        self.height.setPen(self.pen)      
+        self.height.setPen(self.pen)     
 
     def up(self):
         if self.moving:
@@ -80,12 +80,13 @@ class BaseHeight(Overlay):
         cx, cy, cw, ch = self.current.get('crop', [rx, ry, rw, rh])
         i = self.current.get('iA', 0)
         a = self.current.get('angle', 0)
-        w = self.current.get('w', 0)
-        h = self.current.get('h', 0)
+        w = self.current.get('w', 0)/self.umpx
+        h = self.current.get('h', 0)/self.umpx
         x = x[i]  # +rx-cx
         y = y[i]  # +ry-cy
-        self.base.setLine(x, y, x + w / self.umpx, y)
-        self.height.setLine(x, y, x, y - h / self.umpx)
+        print('AAAAAAAAAA', x, y, w, h, self.umpx)
+        self.base.setLine(x, y, x + w, y)
+        self.height.setLine(x, y, x, y - h)
         self.setTransformOriginPoint(x, y)
         self.setRotation(a)
         return True
