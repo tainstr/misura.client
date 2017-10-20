@@ -136,6 +136,8 @@ class MenuBar(QtGui.QMenuBar):
         else:
             inslist = self.server['instruments']
         for (title, name) in inslist:
+            if name == 'kiln' and self.server._readLevel<4:
+                continue
             opt = 'eq_' + name
             if self.server.has_key(opt):
                 if not self.server[opt]:
