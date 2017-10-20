@@ -163,7 +163,7 @@ class MainWindow(QtGui.QMainWindow):
             idb, QtCore.SIGNAL('selectedFile(QString,int)'), self.open_file)
 
     def new_database(self, path):
-        self.open_database(path, new=True, browser=self)
+        self.open_database(path, new=True)
 
     def open_server(self, addr):
         idb = getRemoteDatabaseWidget(addr)
