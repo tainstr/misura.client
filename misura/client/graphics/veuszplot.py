@@ -323,6 +323,9 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         self.update_page()
         return r
     
+    def doPick(self, mouse_position):
+        plugin.InterceptPlugin.clicked_curve(mouse_position, self.parent())
+    
 
 
 
@@ -377,6 +380,7 @@ class VeuszPlot(QtGui.QWidget):
         if not doc:
             doc = filedata.MisuraDocument()
         self.document = doc
+        self._document = self.document
         self.cmd = document.CommandInterface(self.document)
         self.ci = document.CommandInterpreter(self.document)
         self.plot = VeuszPlotWindow(self.document, self)

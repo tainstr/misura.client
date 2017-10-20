@@ -41,8 +41,8 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plugins.FieldText('text', 'Label text', default=text),
         ]
 
-    @classmethod
-    def clicked_curve(self, mouse_position, main_window):
+    @staticmethod
+    def clicked_curve(mouse_position, main_window):
         plot = main_window.plot
 
         pickinfo = veusz.widgets.PickInfo()
