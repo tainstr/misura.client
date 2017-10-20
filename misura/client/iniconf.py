@@ -30,7 +30,7 @@ def dump_preset(obj, keys, fp, preset, conf):
         if entry is None:
             continue
         entry = entry['_entry']
-        if not tosave(entry):
+        if not tosave(entry, ['ReadOnly']):
             continue
         for key, val in entry.iteritems():
             if key in ('name', 'handle', 'type', 'factory_default', 'kid'):
