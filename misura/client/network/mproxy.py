@@ -253,6 +253,8 @@ class MisuraProxy(common_proxy.CommonProxy):
                 continue
             self.remObj = getattr(self.remObj, p)
         self._Method__name = self.remObj._Method__name
+        self._parent = False
+        
 
     @lockme()
     def connect(self):
@@ -298,7 +300,6 @@ class MisuraProxy(common_proxy.CommonProxy):
         self.mac = obj.mac
         self._reg = obj._reg
         self._Method__name = obj.remObj._Method__name
-        self._parent = obj.parent()
         self._remoteDict = obj._remoteDict
         self._refresh_interval = obj._refresh_interval
         self._cache = obj._cache
@@ -437,12 +438,18 @@ class MisuraProxy(common_proxy.CommonProxy):
     def from_column(self, col0):
         return common_proxy.from_column(col0, self.root)
 
-    def parent(self):
+    def parent(self, reset=False):
         """Get the parent object handling this one"""
-        if not self._parent:
+        if (self._parent!=False) and (not reset):
+            return self._parent
+        mn = self._Method__name.split('/')[:-1]
+        while mn[-1]=='':
+            mn.pop(-1)
+        if not len(mn):
             return False
-        obj = self._parent.copy()
-        return obj
+        self._parent = self.root.toPath(mn)
+        return self._parent
+
 
     def child(self, name):
         obj = self.toPath([name])
