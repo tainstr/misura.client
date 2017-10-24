@@ -328,7 +328,8 @@ class MenuBar(QtGui.QMenuBar):
             return 
         if self.server and not self.fixedDoc:
             self.settings.addAction(_('Import configuration'), self.import_configuration)
-            self.settings.addAction('Send update package', self.update_server)
+            self.settings.addAction(_('Send update package'), self.update_server)
+            self.settings.addAction(_('Verify all motor limits'), self.check_motor_limits)
         self.objects['mconf'] = functools.partial(conf.MConf, self.server)
         self.showMConf = functools.partial(self.hideShow, 'mconf')
         act = self.settings.addAction(_('Global'), self.showMConf)
@@ -389,6 +390,19 @@ class MenuBar(QtGui.QMenuBar):
         self.server.restart()
         logging.debug('Closing the client while server restarts.')
         self.quit()
+        
+    def check_motor_limits(self):
+        from .. import autoconf
+        w = autoconf.FirstSetupWizard(self.server)
+        w.read_serials()
+        return
+        r = widgets.RunMethod(w.configure_limits)
+        r.pid = 'Checking motor limits'
+        r.abort = w.abort
+        r.do()
+        
+        self._motor_limits_check = r
+        
         
         
 
