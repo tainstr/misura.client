@@ -67,7 +67,8 @@ class FirstSetupWizard(object):
                  jobs=lambda *a: jlog(a),
                  job=lambda *a: jlog(a),
                  done=lambda *a: jlog(a)):
-
+        self.aborted = False
+        
         self.tc_hitemp = None
         self.tc_termostat = None
         self.power_out = None
@@ -181,18 +182,23 @@ class FirstSetupWizard(object):
             print_exc()
             
     def wait(self, timeout, m):
+        jn = 'Waiting motor {}, {}'.format(m['name'], m['fullpath'])
+        self.jobs(100, jn)
         t = time()
         while m['moving'] and not self.aborted:
-            if time() - t > timeout:
+            dt = time()-t
+            if dt > timeout:
                 logging.error('Motor timed out')
                 break
             p = m['position']
             sleep(0.1)
             logging.debug('waiting', p)
+            self.job(int(100*dt/timeout), jn)
         m.wait(0.1)
         r = not m['moving']
         if not r:
             logging.error('Timed out while waiting for', m['fullpath'])
+        self.done(jn)
         return r
     
     def send_to_zero(self, motor):
@@ -251,9 +257,11 @@ class FirstSetupWizard(object):
         # High speed motors
         self.m_micro['Rate'] = 3000
         self.m_micro['sloPe'] = 8000
+        self.m_micro.save('default')
         self.m_flash['Rate'] = 2000
-        self.m_flash['sloPe'] = 100000
-
+        self.m_flash['sloPe'] = 10000
+        self.m_flash.save('default')
+        
         # Angulars  in full power
         self.left_ang['mOde'] = 2
         self.left_x['mOde'] = 2
@@ -314,7 +322,6 @@ class FirstSetupWizard(object):
         self.board_left_angk['motors'] = 'X,Y'
         self.board_right_xy['motors'] = 'X,Y'
         self.board_right_ang['motors'] = 'X'
-        
 
         self.job(1, jn, 'Sending to zero all motors')
         self.board_send_to_zero(self.board_microfocus)
@@ -322,12 +329,12 @@ class FirstSetupWizard(object):
         self.board_find_limits(self.board_microfocus, 'Focus M1', 'HSM-Flex M2')
         self.job(3, jn, 'Finding Left X/Y limits')
         self.board_find_limits(self.board_left_xy, 'Left X M7', 'Left Y M8')
-        self.job(4, jn, 'Finding Left Angle/Kiln limits')
-        self.board_find_limits(self.board_left_angk, 'Left Angle M9', 'Kiln M3')
+        self.job(4, jn, 'Finding Right Angle limits')
+        self.board_find_limits(self.board_right_ang, 'Right Angle M4')
         self.job(5, jn, 'Finding Right X/Y limits')
         self.board_find_limits(self.board_right_xy, 'Right X M5', 'Right Y M6')
-        self.job(6, jn, 'Finding Right Angle limits')
-        self.board_find_limits(self.board_right_ang, 'Right Angle M4')
+        self.job(6, jn, 'Finding Left Angle/Kiln limits')
+        self.board_find_limits(self.board_left_angk, 'Left Angle M9', 'Kiln M3')
         self.done(jn)
 
     def starting_position(self, motor, steps, config_name, job=1, jobname='Starting position'):

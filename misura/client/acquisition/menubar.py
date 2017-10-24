@@ -14,6 +14,7 @@ from misura.client.helpmenu import HelpMenu
 from . import windows
 from .. import iniconf
 from .. import widgets
+from ..live import registry
 from PyQt4 import QtGui, QtCore
 
 
@@ -116,8 +117,11 @@ class MenuBar(QtGui.QMenuBar):
         return True
 
     def restart(self):
+        
         QtGui.QMessageBox.information(self, _('Restart Down'),
-                                      'Server is restarting:\n %r' % self.server.restart())
+                                      'Server is restarting:\n %r' % self.server.restart(1))
+        self.quit()
+        
 
     def getConnection(self, srv):
         LoginWindow(srv.addr, srv.user, srv.password, srv.mac, parent=self).exec_()
@@ -393,9 +397,10 @@ class MenuBar(QtGui.QMenuBar):
         
     def check_motor_limits(self):
         from .. import autoconf
-        w = autoconf.FirstSetupWizard(self.server)
+        w = autoconf.FirstSetupWizard(self.server, jobs=registry.tasks.jobs, 
+                                      job=registry.tasks.job, done=registry.tasks.done)
         w.read_serials()
-        return
+        w.set_objects()
         r = widgets.RunMethod(w.configure_limits)
         r.pid = 'Checking motor limits'
         r.abort = w.abort
