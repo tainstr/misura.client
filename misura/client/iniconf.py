@@ -70,6 +70,22 @@ def save(srv, file_path='ini.ini'):
     conf.set(metasection, 'serials', repr(g))
     conf.write(open(file_path, 'w'))
     
+def rescan_enumerated(conf, srv):
+    # Enumerated options
+    done = 0
+    for key in ('tacontrollers', 'epack'):
+        kkey = '/smaug/{}.current'.format(key)
+        if not conf.has_option('default', kkey):
+            continue
+        val = conf.get('__default__', kkey)
+        logging.debug('Setting enumerated option', kkey, val)
+        srv.smaug[key] = val
+        done += 1
+    if done:
+        r = srv.smaug.rescan()
+        logging.debug('Rescan', r)
+        
+    
 def restore(srv, file_path='ini.ini', serials=None, override=[], jobs=lambda *a: 1, 
             job=lambda *a: 1,
             done=lambda *a: 1):
@@ -86,10 +102,14 @@ def restore(srv, file_path='ini.ini', serials=None, override=[], jobs=lambda *a:
     for sec, key, val in override:
         conf.set(sec, key, repr(val))
         
+    rescan_enumerated(conf, srv)
+        
     jname = 'Import configuration from \n'+str(f1)  
     print conf._sections.values()[0]
     tot = sum(map(lambda sec: len(sec.keys()), conf._sections.values()))
     jobs(tot, jname)
+    
+
         
     i = 0
     for sec in conf.sections():
