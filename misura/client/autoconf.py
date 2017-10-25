@@ -229,6 +229,8 @@ class FirstSetupWizard(object):
             return False
         logging.error('found steps: {}'.format(motor['steps']))
         self.send_to_zero(motor)
+        # Set to microstepping
+        motor['mOde'] =3
         motor.save('default')
         return True
 
@@ -264,17 +266,16 @@ class FirstSetupWizard(object):
         self.m_flash['Rate'] = 2000
         self.m_flash['sloPe'] = 10000
         self.m_flash.save('default')
-        
-        # Angulars  in full power
-        self.left_ang['mOde'] = 2
-        self.left_x['mOde'] = 2
-        self.right_ang['mOde'] = 2
-        self.right_x['mOde'] = 2
 
         print 'Initialization Order'
-
-        order = lambda *lst: '\n'.join([dev['fullpath'][:-1]
-                                        for dev in lst] + ['#END'])
+        
+        def order(*lst):
+            r = ''
+            for dev in lst:
+                r+='/'.join(dev['fullpath'].split('/')[2:-1])+'\n'
+            r += '#END'
+            return r
+        
         m = self.server.morla
 
         orderZero = order(self.m_micro, self.m_focus,
@@ -344,7 +345,6 @@ class FirstSetupWizard(object):
         if self.aborted:
             logging.error('Aborted: skipping starting_position', motor['fullpath'], config_name)
         self.job(job, jobname, 'Starting position', motor['fullpath'], config_name)
-        print 'starting_position', motor['sloPe'], motor['Rate']
         speed(motor)
         motor['goingTo'] = steps
         self.wait(60, motor)
@@ -365,21 +365,21 @@ class FirstSetupWizard(object):
 
         logging.debug('Horizontal motors')
         self.starting_position(
-            self.left_x, self.left_x['steps'] / 2, 'horizontal', 2, jn)
+            self.left_x, self.left_x['steps'] / 3, 'horizontal', 2, jn)
         self.starting_position(
-            self.right_x, self.right_x['steps'] / 2, 'horizontal', 3, jn)
+            self.right_x, self.right_x['steps'] / 3, 'horizontal', 3, jn)
         self.starting_position(
-            self.left_y, self.left_y['steps'] / 10, 'horizontal')
+            self.left_y, self.left_y['steps'] / 4, 'horizontal')
         self.starting_position(
             self.right_y, self.right_y['steps'] / 4, 'horizontal', 4, jn)
 
         logging.debug('Vertical motors')
         self.starting_position(
-            self.left_x, self.left_x['steps'], 'vertical', 5, jn)
+            self.left_x, self.left_x['steps']/2, 'vertical', 5, jn)
         self.starting_position(
             self.left_ang, self.left_ang['steps'], 'vertical', 6, jn)
         self.starting_position(
-            self.right_x, self.right_x['steps'], 'vertical', 7, jn)
+            self.right_x, self.right_x['steps']/2, 'vertical', 7, jn)
         self.starting_position(
             self.right_ang, self.right_ang['steps'], 'vertical', 8, jn)
         self.starting_position(
@@ -389,8 +389,12 @@ class FirstSetupWizard(object):
 
         logging.debug('Flex motors')
         self.starting_position(
-            self.m_micro, self.m_micro['steps'] / 2, 'flex', 11, jn)
-
+            self.m_micro, self.m_micro['steps'] *5/6, 'flex', 11, jn)
+        self.starting_position(
+            self.left_y, self.left_y['steps'] / 6, 'flex')
+        self.starting_position(
+            self.right_y, self.right_y['steps'] / 6, 'flex', 4, jn)
+        
         self.done(jn)
 
     def configure_baudrates(self):
@@ -440,7 +444,7 @@ class FirstSetupWizard(object):
         # Samples association
         # Microscope camera
         m.hsm['nSamples'] = 1
-        self.micro_cam['name'] = 'Left'
+        self.micro_cam['name'] = 'Microscope'
         self.micro_cam['smp0'] = [m.hsm.sample0['fullpath'], 'default']
         self.micro_cam.save('default')
 
@@ -454,10 +458,10 @@ class FirstSetupWizard(object):
         # Vertical
         m.vertical['nSamples'] = 1
         self.left_cam['name'] = 'Height'
-        self.left_cam['smp0'] = m.vertical.sample0.Base
+        self.left_cam['smp0'] = m.vertical.sample0.Height
         self.left_cam.save('vertical')
         self.right_cam['name'] = 'Base'
-        self.right_cam['smp0'] = m.vertical.sample0.Height
+        self.right_cam['smp0'] = m.vertical.sample0.Base
         self.right_cam.save('vertical')
         
         # Flex
@@ -486,6 +490,7 @@ class FirstSetupWizard(object):
             print_exc()
 
         try:
+            self.flex_cam.encoder['invert'] = 'Anticlockwise'
             self.flex_cam.encoder.y.motor = self.m_micro
             self.flex_cam.encoder.y.save('default')
         except:
@@ -515,6 +520,8 @@ class FirstSetupWizard(object):
             self.right_cam.encoder.angle.save('default')
         except:
             print_exc()
+            
+        
 
     def process_tc_reader(self, dev):
         """Identify TC Reader device"""
