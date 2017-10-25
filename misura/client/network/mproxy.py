@@ -443,7 +443,7 @@ class MisuraProxy(common_proxy.CommonProxy):
         if (self._parent!=False) and (not reset):
             return self._parent
         mn = self._Method__name.split('/')[:-1]
-        while mn[-1]=='':
+        while len(mn) and mn[-1]=='':
             mn.pop(-1)
         if not len(mn):
             return False
