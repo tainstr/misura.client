@@ -112,6 +112,7 @@ class MenuBar(QtGui.QMenuBar):
                                       _('Shutdown failed with the following error:\n {!r}').format((status, msg))
                                       )
             return False
+        self.quit()
         msg = _('Server is shutting down.\nPlease close any client window and shutdown power interruptor in 30 seconds.\nReply: \n %r') % msg
         QtGui.QMessageBox.information(self, _('Shutting Down'), msg)
         return True
@@ -147,9 +148,6 @@ class MenuBar(QtGui.QMenuBar):
                 if not self.server[opt]:
                     logging.debug('Disabled instrument', opt, self.server[opt])
                     continue
-            elif not params.debug:
-                logging.debug('Skipping unknown instrument', name)
-                continue
             obj = getattr(self.server, name, False)
             if not obj:
                 logging.debug('missing handler', name)
