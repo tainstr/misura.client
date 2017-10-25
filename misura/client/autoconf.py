@@ -191,7 +191,7 @@ class FirstSetupWizard(object):
                 logging.error('Motor timed out')
                 break
             p = m['position']
-            sleep(0.1)
+            sleep(0.2)
             logging.debug('waiting', p)
             self.job(int(100*dt/timeout), jn)
         m.wait(0.1)
@@ -202,7 +202,7 @@ class FirstSetupWizard(object):
         return r
     
     def send_to_zero(self, motor):
-        print 'sending to zero:', motor['fullpath'], motor['sloPe'], motor['Rate']
+        logging.debug('sending to zero:', motor['fullpath'], motor['sloPe'], motor['Rate'])
         speed(motor)
         motor['micro'] = 'lower step'
         print motor['limits']
@@ -212,13 +212,15 @@ class FirstSetupWizard(object):
         if motor['goingTo'] != 0:
             logging.error('goingTo!=0 after send_to_zero', motor['goingTo'])
             return False
-        if motor['position'] == 0:
+        if motor['position'] != 0:
             logging.error('position!=0 after send_to_zero', motor['goingTo'])
             return False
         return True
     
-    def motor_find_limits(self, motor, name):
-        print 'motor_find_limits', motor['fullpath'], name, motor['sloPe'], motor['Rate']
+    def motor_find_limits(self, motor, name=False):
+        if not name:
+            name = motor['name']
+        logging.debug('motor_find_limits', motor['fullpath'], name, motor['sloPe'], motor['Rate'])
         speed(motor)
         motor['name'] = name
         motor['micro'] = 'both ends'
@@ -231,6 +233,7 @@ class FirstSetupWizard(object):
         return True
 
     def board_send_to_zero(self, board):
+        """Recursive send to zero board and children"""
         motors = board['motors']
         print 'board_send_to_zero', motors, board.list()
         for dev in board.devices:
@@ -353,6 +356,7 @@ class FirstSetupWizard(object):
         self.wait(60, motor)
 
     def configure_starting_positions(self):
+        #TODO: migrate to set_to_preset
         jn = 'Configuring starting positions'
         self.jobs(12, jn)
         logging.debug('Microscope motors')
@@ -455,6 +459,18 @@ class FirstSetupWizard(object):
         self.right_cam['name'] = 'Base'
         self.right_cam['smp0'] = m.vertical.sample0.Height
         self.right_cam.save('vertical')
+        
+        # Flex
+        m.flex['nSamples'] = 1
+        self.left_cam['name'] = 'Left'
+        self.left_cam['smp0'] = m.flex.sample0.Left
+        self.left_cam.save('flex')
+        self.right_cam['name'] = 'Right'
+        self.right_cam['smp0'] = m.flex.sample0.Right
+        self.right_cam.save('flex')  
+        self.flex_cam['name'] = 'Flex'
+        self.flex_cam['smp0'] = m.flex.sample0.Center
+        self.flex_cam.save('flex')     
 
     def configure_encoders(self):
         print 'Configure encoders'
