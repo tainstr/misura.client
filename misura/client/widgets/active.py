@@ -69,17 +69,29 @@ def text_value(val):
     value = (value[:15] + '..') if len(value) > 15 else value
     return value    
 
-def build_presets_menu(comparison, container, menu, set_func):
+def build_presets_menu(comparison, container, menu, set_func, set_to_preset_func):
     menu.clear()
     for name, val in comparison.items():
         if name == '***current***':
             continue
-        print('build_presets_menu', name, val)
+        logging.debug('build_presets_menu', name, val)
         value = text_value(val)
         label = '{}:{}'.format(name, value)
         p = functools.partial(set_func, val)
         menu.addAction(label, p)
         container[name] = (p, val)
+        
+    if len(comparison)>1:
+        val = comparison['***current***']
+        presets = set(comparison.keys())
+        presets.remove('***current***')
+        presets = list(presets)
+        p0 = lambda preset: set_to_preset_func(preset, val)
+        p = functools.partial(map, p0, presets)
+        menu.addAction(_('Copy current to all'), p)
+        container['**applyall**'] = (p, val, p0)       
+        
+        
          
             
 def build_option_menu(comparison, container, menu, set_func):
@@ -715,7 +727,9 @@ class ActiveWidget(Active, QtGui.QWidget):
     def build_presets_menu(self):
         self.presets = {}
         comparison = self.remObj.compare_presets(self.handle)
-        build_presets_menu(comparison, self.presets, self.presets_menu, self.set_raw)
+        set_to_preset_func = functools.partial(self.remObj.set_to_preset, self.handle)
+        build_presets_menu(comparison, self.presets, self.presets_menu, self.set_raw, 
+                           set_to_preset_func)
 
             
     def build_compare_menu(self):
