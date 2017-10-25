@@ -375,14 +375,17 @@ class ViewerPicture(QtGui.QGraphicsView):
         """Re-init samples, resetting regions of interest."""
         r=self.remote.init_samples()
 
-    def instrument_is_flex(self):
-        return self.server['lastInstrument'] == 'flex'
+    def hide_x_controls(self):
+        r = self.server['lastInstrument'] == 'flex'
+        if not r:
+            return r
+        if self.server._readLevel>=4:
+            return False
+        return True
 
     def add_motion_actions(self, menu):
         """Create menu actions for motion control"""
         cpos = {'x': 'bottom', 'y': 'left'}
-#       if self.inv!=0:
-#           cpos={'x':'left','y':'bottom'}
         self.motor_ctrl = {}
 
         def add_coord(name):
@@ -403,12 +406,13 @@ class ViewerPicture(QtGui.QGraphicsView):
             submenu = menu.addMenu(_(name.capitalize()))
             act = widgets.MotorSliderAction(self.server, obj, submenu)
             submenu.addAction(act)
-            align=enc['align']
-            if name  == 'y' or (name == 'x' and not self.instrument_is_flex()):
+            align = enc['align']
+            invc = (align > 0 and name=='x') or (align < 0 and name == 'y' )
+            if name  == 'y' or (name == 'x' and not self.hide_x_controls()):
                 slider = widgets.MotorSlider(
                     self.server, obj, parent=self.parent)
                 slider.layout().removeWidget(slider.spinbox)    #.hide()
-                self.parent.setControl(slider, cpos[name])
+                self.parent.setControl(slider, cpos[name], inversion=invc)
                 self.motor_ctrl[name] = slider
 
             act = widgets.aBooleanAction(
