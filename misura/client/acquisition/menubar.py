@@ -332,11 +332,47 @@ class MenuBar(QtGui.QMenuBar):
             self.settings.addAction(_('Import configuration'), self.import_configuration)
             self.settings.addAction(_('Send update package'), self.update_server)
             self.settings.addAction(_('Verify all motor limits'), self.check_motor_limits)
+            self.settings.addAction(_('Save camera/motor conf'), self.save_camera_config)
         self.objects['mconf'] = functools.partial(conf.MConf, self.server)
         self.showMConf = functools.partial(self.hideShow, 'mconf')
         act = self.settings.addAction(_('Global'), self.showMConf)
         act.setCheckable(True)
         self.lstActions.append((act, 'mconf'))
+        
+    def save_camera_config(self):
+        """Save all cameras configurations and related motors"""
+        msg = []
+        i = 0
+        for role, path in self.remote['devices']:
+            if not path.startswith('/beholder/'):
+                continue
+            cam = self.server.toPath(path)
+            if cam['preset'] == 'factory_default':
+                r = 'New '
+                r += cam.save('default')
+            else:
+                r = cam.save()
+            msg.append((role, path, r))
+            i += 1
+            for enc in cam.encoder.devices:
+                path = enc['motor'][0]
+                if path in ('None', '', None, False):
+                    continue
+                mot = self.server.toPath(path)
+                if mot['preset']=='factory_default':
+                    r = 'New '
+                    r += mot.save('default')
+                else:
+                    r = mot.save()
+                msg.append((role+' encoder '+ enc['devpath'], path, r))
+                i += 1
+                
+        r = map(lambda e: '{}, {}: {}'.format(*e), msg)
+        r = '\n'.join(r)
+        msg = widgets.informative_message_box(r, self)
+        msg.setText(_('Saved {} configurations').format(i))
+        msg.setStyleSheet("width:500px;");
+        msg.exec_()       
         
            
     def export_configuration(self):
