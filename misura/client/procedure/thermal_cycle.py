@@ -276,9 +276,12 @@ class ThermalCycleDesigner(QtGui.QSplitter):
     def enable(self, enabled):
         self.table.enable(enabled)
         try:
-            self.buttonBar.setEnabled(enabled)
+            self.bApp.setEnabled(enabled)
+            self.bRead.setEnabled(enabled)
+            self.tcc.setEnabled(enabled)
             self.fileMenu.setEnabled(enabled)
             self.editMenu.setEnabled(enabled)
+            self.templatesMenu.setEnabled(enabled)
         except:
             logging.debug(format_exc())
 

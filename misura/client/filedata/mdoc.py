@@ -11,6 +11,7 @@ from traceback import format_exc
 from PyQt4 import QtCore
 
 import veusz.document as document
+import veusz.plugins as vsplugins
 
 from misura.canon.logger import get_module_logging
 from misura.canon.plugin import default_plot_rules
@@ -24,6 +25,7 @@ from .. import units
 from ..clientconf import confdb
 from .. import parameters as params
 from misura.client.axis_selection import get_best_x_for
+from misura.client.filedata.dataset import MisuraDataset
 
 MAX = 10**5
 MIN = -10**5
@@ -52,6 +54,7 @@ class MisuraDocument(document.Document):
 
     def __init__(self, filename=False, proxy=False, root=False):
         document.Document.__init__(self)
+        self.no_update = set([]) # Skip those datasets
         self.cache = {}  # File-system cache
         self.proxies = {}
         self.proxy = False
@@ -304,6 +307,8 @@ class MisuraDocument(document.Document):
         # Avoid firing individual updates
         self.suspendUpdates()
         for col in self.data.keys():
+            if col in self.no_update:
+                continue
             ds = self.data[col]
             if len(ds.data) == 0:
                 continue
@@ -316,6 +321,9 @@ class MisuraDocument(document.Document):
                 # Ask last point
                 obj, opt = root.from_column(ds.m_col)
                 val = obj[opt]
+                if val is None:
+                    self.no_update.add(col)
+                    continue
                 from_unit = obj.getattr(opt, 'unit')
                 to_unit = ds.unit
                 # Percentage scaling is active
