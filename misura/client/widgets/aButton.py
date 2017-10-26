@@ -4,6 +4,20 @@ from misura.client.widgets.active import *
 from .. import _
 from PyQt4 import QtGui
 
+def informative_message_box(r, parent=None, limit=200):
+    r1 = r
+    more = False
+    if len(str(r)) > limit:
+        more = True
+        r = r[:limit-10] + '...'
+    msg = QtGui.QMessageBox(parent=parent)
+    msg.setWindowTitle(_('Operation Result'))
+    msg.setWindowFlags(QtCore.Qt.Dialog)
+    msg.setInformativeText(str(r))
+    if more:
+        msg.setDetailedText(r1)
+    
+    return msg  
 
 class aButton(ActiveWidget):
     get_on_enter = False
@@ -25,19 +39,10 @@ class aButton(ActiveWidget):
             r = _('Done')
         elif r is False:
             r = _('Failed')
-        r1 = r
-        more = False
-        if len(str(r)) > 200:
-            more = True
-            r = r[:190] + '...'
-        msg = QtGui.QMessageBox(parent=self)
-        msg.setWindowTitle(_('Operation Result'))
+        msg = informative_message_box(r, self)
         msg.setText(_('Result for option "{}"').format(self.prop['name']))
-        msg.setInformativeText(str(r))
-        if more:
-            msg.setDetailedText(r1)
-        return msg
-
+        
+        
     def show_msg(self):
         """Display informative messagebox"""
         msgBox = self._msgBox()

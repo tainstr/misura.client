@@ -8,7 +8,7 @@ from misura.canon.logger import Log as logging
 from .. import _
 from active import Active, ActiveObject, ActiveWidget, info_dialog, RunMethod
 from aBoolean import aBoolean,  aBooleanAction
-from aButton import aButton
+from aButton import aButton, informative_message_box
 from aChooser import aChooser, async_aChooser, FurnacePositionChooser
 from aDict import aDict
 from aMeta import aMeta
