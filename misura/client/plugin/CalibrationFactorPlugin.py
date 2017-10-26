@@ -105,6 +105,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             if self.inidim:
                 ds = units.percent_conversion(ds, 'To Percent', auto=False)
         T = Ts.data
+        self.T = T
         # Cut away any cooling
         while max(T) != T[-1]:
             i = np.where(T == max(T))[0]
@@ -161,12 +162,11 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         name = fields['std'].replace(' ', '_')
         p = fields['d'] + '/' + name
         Tds = self.doc.data[fields['T']]
-        T = Tds.data
         old_unit = getattr(self.ds, 'old_unit', 'percent')
         # Fitting
 #		f=np.poly1d((self.slope,0))
         f = np.poly1d((self.quad, self.slope, 0))
-        df = f(T)
+        df = f(self.T)
         df += start_value - df[start_index]
         # TODO: define new derived datasets for these
         dsf = copy(Tds)
@@ -185,7 +185,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             document.OperationDatasetSet(p + '_fit', dsf))
 
         # Evaluate std fit over regular T
-        d = self.f(T)
+        d = self.f(self.T)
         # Translate zero so it matches the fit
         d -= d[start_index] - df[start_index]
         dsd = copy(Tds)
