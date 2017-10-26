@@ -371,7 +371,6 @@ class MenuBar(QtGui.QMenuBar):
         r = '\n'.join(r)
         msg = widgets.informative_message_box(r, self)
         msg.setText(_('Saved {} configurations').format(i))
-        msg.setStyleSheet("width:500px;");
         msg.exec_()       
         
            
