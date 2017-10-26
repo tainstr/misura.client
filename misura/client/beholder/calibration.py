@@ -141,7 +141,15 @@ class CalibrationTool(QtGui.QDialog):
         return sqrt((self.x1 - self.x2) ** 2 + (self.y1 - self.y2) ** 2)
 
     def ok(self):
+        
         self.remote['Analysis_umpx'] = self.factor
+        presets = self.remote.gete('preset')['options']
+        for preset in presets:
+            if preset.startswith('*'): 
+                continue
+            logging.debug('Setting Analysis_umpx factor to preset', preset, self.factor)
+            self.remote.set_to_preset('Analysis_umpx', preset, self.factor)
+        
         self.cleanUp()
         self.done(0)
 
