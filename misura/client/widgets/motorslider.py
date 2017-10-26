@@ -35,8 +35,12 @@ class MotorSlider(aNumber):
         self.labelact.setDefaultWidget(self.label_widget)
         self.menu.addAction(self.spinact)
         self.menu.addAction(self.labelact)
-        self.cfact = self.menu.addAction(_('Configure'), self.hide_show)
-        self.cfact.setCheckable(True)
+        if self.server._readLevel>=4:
+            self.cfact = self.menu.addAction(_('Configure'), self.hide_show)
+            self.cfact.setCheckable(True)
+            if self.remObj['preset']!='factory_default':
+                self.save_act = self.menu.addAction(_('Save as {}').format(self.remObj['preset']), self.save_preset)
+            
         self.cf = False
 
     def hide_show(self):
@@ -48,6 +52,11 @@ class MotorSlider(aNumber):
             self.cf.show()
         else:
             self.cf.hide()
+            
+    def save_preset(self):
+        self.remObj.set_to_preset(self.handle, 
+                                   self.remObj['preset'], 
+                                   self.remObj['goingTo'])
 
     def showMenu(self, pt):
         if self.cf:
