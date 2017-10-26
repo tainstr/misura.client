@@ -41,6 +41,7 @@ class aButton(ActiveWidget):
             r = _('Failed')
         msg = informative_message_box(r, self)
         msg.setText(_('Result for option "{}"').format(self.prop['name']))
+        return msg
         
         
     def show_msg(self):
