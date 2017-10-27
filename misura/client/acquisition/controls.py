@@ -315,8 +315,6 @@ class MotionControls(QtGui.QToolBar):
             self.add_focus(obj)
 
     def add_focus(self, obj):
-        #       slider=widgets.MotorSlider(self.server,obj,self.parent())
-        slider = widgets.build(self.server, obj, obj.gete('goingTo'))
-        slider.lay.insertWidget(0, slider.label_widget)
-        slider.label_widget.setText('    Focus:')
+        slider=widgets.MotorSlider(self.server,obj,self.parent())
+        slider.lay.insertWidget(0, QtGui.QLabel(_('    Focus:')))
         self.addWidget(slider)
