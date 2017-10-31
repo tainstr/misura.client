@@ -324,11 +324,13 @@ class SectionBox(QtGui.QWidget):
 
         for opt in prop_list:
             attr = opt.get('attr', False)
+            if ('Config' in attr):
+                config_list.append(opt)
             if not attr and opt['type'] == 'Meta':
                 results_list.append(opt)
             elif ('History' in attr and 'Runtime' not in attr) or ('Result' in attr):
                 results_list.append(opt)
-            elif ('Runtime' in attr) or ('ReadOnly' in attr) or opt['type'] == 'ReadOnly':
+            elif ('Runtime' in attr) or ('ReadOnly' in attr) or opt['type'] == 'ReadOnly' or ('Status' in attr):
                 status_list.append(opt)
             else:
                 config_list.append(opt)
