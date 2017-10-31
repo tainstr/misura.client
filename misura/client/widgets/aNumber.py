@@ -7,7 +7,6 @@ from misura.client.parameters import MAX, MIN, MAXINT, MININT
 from misura.client.widgets.active import ActiveWidget, extend_decimals
 import math
 from misura.canon.logger import get_module_logging
-from misura.canon import option
 import numpy as np
 logging = get_module_logging(__name__)
 
@@ -17,6 +16,7 @@ from traceback import print_exc
 class FocusableSlider(QtGui.QSlider):
     zoom = QtCore.pyqtSignal(bool)
     pause = QtCore.pyqtSignal(bool)
+    wheel = QtCore.pyqtSignal(QtGui.QWheelEvent)
 
     def __init__(self, *a, **kw):
         QtGui.QSlider.__init__(self, *a, **kw)
@@ -44,6 +44,11 @@ class FocusableSlider(QtGui.QSlider):
         self.zoomed = 1 ^ self.zoomed
         self.zoom.emit(self.zoomed)
         return QtGui.QSlider.mouseDoubleClickEvent(self, ev)
+    
+    def wheelEvent(self, e):
+        self.wheel.emit(e)
+        return super(FocusableSlider, self).wheelEvent(e)
+        
 
 
 class ScientificSpinbox(QtGui.QDoubleSpinBox):
@@ -174,6 +179,7 @@ class aNumber(ActiveWidget):
     spinbox = False
     slider = False
     range_menu = False
+    step_changed = QtCore.pyqtSignal(float)
     
     def __init__(self, server, remObj, prop, parent=None, slider_class=FocusableSlider):
         self.slider_class = slider_class
@@ -238,12 +244,11 @@ class aNumber(ActiveWidget):
         self.changed_option()
         self.lay.addStretch()
         
-
-        
     def build_range_menu(self):
         #TODO: update ranges when unit changes!!!
         if not self.range_menu:
             self.range_menu = self.emenu.addMenu(_('Range'))
+            self.range_menu.aboutToShow.connect(self.update_range_menu)
         else:
             self.range_menu.clear()
         mx = self.max or 0
@@ -255,7 +260,8 @@ class aNumber(ActiveWidget):
         self.range_max = SpinboxAction(_('Max'), mx, minimum=mn or None, 
                                        callback=self.set_range_maximum, parent=self)
         self.range_menu.addAction(self.range_max)
-        self.range_step = SpinboxAction(_('Step'), st, minimum=0, maximum=(mx-mn)/3., 
+        stm = max(((mx-mn)/3., st))
+        self.range_step = SpinboxAction(_('Step'), st, minimum=0, maximum=stm, 
                                        callback=self.set_range_step, parent=self)
         self.range_menu.addAction(self.range_step)
         self.range_zoom = SpinboxAction(_('Zoom'), self.zoom_factor, minimum=1., maximum=1e8, 
@@ -265,7 +271,13 @@ class aNumber(ActiveWidget):
                                              double=False, callback=self.set_precision, parent=self)
         self.range_menu.addAction(self.range_precision)
         return True
-        
+    
+    def update_range_menu(self):
+        self.range_min.spinbox.setValue(self.min)
+        self.range_max.spinbox.setValue(self.max)
+        self.range_step.spinbox.setValue(self.step)
+        self.range_zoom.spinbox.setValue(self.zoom_factor)
+        self.range_precision.spinbox.setValue(self.precision)
                 
     def set_range_minimum(self):
         val = self.range_min.spinbox.value()
@@ -284,7 +296,6 @@ class aNumber(ActiveWidget):
         self.prop['step'] = val
         self.step = val
         self.setRange(self.min, self.max, self.step)
-        
         
     def set_zoom_factor(self):
         if not self.slider:
@@ -400,7 +411,7 @@ class aNumber(ActiveWidget):
             # FIXME: These two lines causes incredible slowdown!
             # self.prop=self.remObj.gete(self.handle)
             # self.current=self.prop['current']
-            if not self.slider or not self.slider.zoomed:
+            if not self.slider.zoomed:
                 self.setRange(self.prop.get('min', None),
                           self.prop.get('max', None),
                           self.prop.get('step', False))
@@ -424,6 +435,7 @@ class aNumber(ActiveWidget):
                 self.slider.blockSignals(False)
         self.readonly_label.setText(self.spinbox.text())
 
+    
     def setRange(self, m=None, M=None, step=0):
         #TODO: All this part might be moved into ScientificSpinbox
         step = self.adapt2gui(step)
@@ -458,27 +470,43 @@ class aNumber(ActiveWidget):
         else:
             m = int(m)
             M = int(M)
-        self.spinbox.setRange(m, M)
+        
         self.step = step
         if step==0:
-            step=abs(M-m)/100.
+            if (M-m)<MAXINT/2:
+                step=abs(M-m)/100.
+            else:
+                step = 1
         step /= self.zoom_factor
         if not self.double:
             step=int(step)
             if step==0:
                 step=1
+                
+        self.spinbox.setRange(m, M)
         self.spinbox.setSingleStep(step)
         
+        ir = lambda a: int(round(a, 0))
         if self.slider and step:
             self.divider = 10.**(-np.log10(step))
-            self.slider.blockSignals(True)
-            #print 'aNumber.setRange slider',m,M,step,cur, self.divider
-            self.slider.setRange(int(m * self.divider), int(M * self.divider))
-            self.slider.setSingleStep(int(step * self.divider))
-            self.slider.setPageStep(int(step * 5 * self.divider))
-            self.slider.setValue(cur*self.divider)
-            self.slider.blockSignals(False)
+            
+            #self.slider.blockSignals(True)
+            
+            #print('aNumber.setRange slider',self.prop['kid'], m,M,step,cur, self.divider)
+            
+            self.slider.setRange(ir(m * self.divider), ir(M * self.divider))
+            self.slider.setSingleStep(ir(step * self.divider))
+            self.slider.setPageStep(ir(step * 5 * self.divider))
+            self.slider.setValue(ir(cur*self.divider))
+            
+            #print('aNumber slider', self.prop['kid'], self.slider.singleStep(), self.slider.pageStep(), self.slider.value(), 
+            #      self.slider.minimum(), self.slider.maximum() )
+            
+            #self.slider.blockSignals(False)
+        
+        print('aNumber spinbox', self.prop['kid'], self.spinbox.singleStep(), self.spinbox.minimum(), self.spinbox.maximum())
         self.set_tooltip()
+        self.step_changed.emit(self.step)
             
     def set_tooltip(self):
         mx, mn = 'inf', '-inf'

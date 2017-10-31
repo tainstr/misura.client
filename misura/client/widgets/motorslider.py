@@ -26,6 +26,7 @@ class MotorSlider(aNumber):
             self.slider.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
             self.connect(self.slider, QtCore.SIGNAL(
                 'customContextMenuRequested(QPoint)'), self.showMenu)
+            self.slider.wheel.connect(self.slot_slider_wheel)
         self.label_widget.setSizePolicy(QtGui.QSizePolicy.Maximum, 
                                         QtGui.QSizePolicy.Maximum)
         self.menu = QtGui.QMenu()
@@ -42,7 +43,13 @@ class MotorSlider(aNumber):
                 self.save_act = self.menu.addAction(_('Save as {}').format(self.remObj['preset']), self.save_preset)
             
         self.cf = False
-
+        
+    def slot_slider_wheel(self, e):
+        print('WHEEL', e.globalX(), e.globalY(), e.delta())
+        print('step', self.step, self.divider)
+        print('singleStep', self.slider.singleStep(), self.slider.pageStep())
+        
+    
     def hide_show(self):
         """Hide/show configuration dialog"""
         from .. import conf
@@ -56,7 +63,7 @@ class MotorSlider(aNumber):
     def save_preset(self):
         self.remObj.set_to_preset(self.handle, 
                                    self.remObj['preset'], 
-                                   self.remObj['goingTo'])
+                                   self.remObj[self.handle])
 
     def showMenu(self, pt):
         if self.cf:
@@ -92,9 +99,6 @@ class MotorSlider(aNumber):
             return r
         # If 'position' argument was not passed,
         # force pos_obj to re-register itself
-        step = 1
-        if self.slider:
-            step = self.slider.singleStep()
         if s is None:
             self.pos_obj.register()
             s = self.position  # keep old value
@@ -105,7 +109,7 @@ class MotorSlider(aNumber):
         elif self.current == s or d == 0:
             self.started = s
             d = 0
-        if d <= 5 * step:
+        if d <= 5 * self.step:
             self.started = s
             s = 100
         else:

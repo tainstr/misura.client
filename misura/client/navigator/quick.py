@@ -199,6 +199,7 @@ class QuickOps(object):
             plugin.save_plot_style_in_dataset_attr(plot, self.cmd)
         # Remove object and unreferenced axes
         for obj in remplot + remax + remobj:
+            if not obj: continue
             logging.debug('Removing obj', obj.name, obj.path)
             obj.parent.removeChild(obj.name)
         # Finally, delete dataset
