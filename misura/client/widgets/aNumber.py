@@ -7,6 +7,7 @@ from misura.client.parameters import MAX, MIN, MAXINT, MININT
 from misura.client.widgets.active import ActiveWidget, extend_decimals
 import math
 from misura.canon.logger import get_module_logging
+from misura.canon.csutil import lockme
 import numpy as np
 logging = get_module_logging(__name__)
 
@@ -169,6 +170,7 @@ class SpinboxAction(QtGui.QWidgetAction):
         self.w.setLayout(lay)
         self.setDefaultWidget(self.w)
         
+ir = lambda a: int(round(a, 0))
 
 class aNumber(ActiveWidget):
     zoom_factor = 1.
@@ -426,7 +428,7 @@ class aNumber(ActiveWidget):
             #print 'aNumber.update',self.handle,cur,self.current
             self.spinbox.setValue(cur)
             if self.slider:
-                self.slider.setValue(int(cur * self.divider))
+                self.slider.setValue(ir(cur * self.divider))
         except:
             logging.debug(format_exc())
         finally:
@@ -435,7 +437,7 @@ class aNumber(ActiveWidget):
                 self.slider.blockSignals(False)
         self.readonly_label.setText(self.spinbox.text())
 
-    
+    @lockme()
     def setRange(self, m=None, M=None, step=0):
         #TODO: All this part might be moved into ScientificSpinbox
         step = self.adapt2gui(step)
@@ -486,11 +488,10 @@ class aNumber(ActiveWidget):
         self.spinbox.setRange(m, M)
         self.spinbox.setSingleStep(step)
         
-        ir = lambda a: int(round(a, 0))
         if self.slider and step:
             self.divider = 10.**(-np.log10(step))
-            
-            #self.slider.blockSignals(True)
+            s = self.slider.signalsBlocked()
+            self.slider.blockSignals(True)
             
             #print('aNumber.setRange slider',self.prop['kid'], m,M,step,cur, self.divider)
             
@@ -502,9 +503,9 @@ class aNumber(ActiveWidget):
             #print('aNumber slider', self.prop['kid'], self.slider.singleStep(), self.slider.pageStep(), self.slider.value(), 
             #      self.slider.minimum(), self.slider.maximum() )
             
-            #self.slider.blockSignals(False)
+            self.slider.blockSignals(s)
         
-        print('aNumber spinbox', self.prop['kid'], self.spinbox.singleStep(), self.spinbox.minimum(), self.spinbox.maximum())
+        #print('aNumber spinbox', self.prop['kid'], self.spinbox.singleStep(), self.spinbox.minimum(), self.spinbox.maximum())
         self.set_tooltip()
         self.step_changed.emit(self.step)
             
