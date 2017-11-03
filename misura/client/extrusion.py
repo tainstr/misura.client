@@ -12,8 +12,11 @@ from misura.client import widgets, conf, _
 from misura.client.live import registry
 
 try:
+    import OpenGL
+    OpenGL.ERROR_ON_COPY = False
     import pyqtgraph as pg
     import pyqtgraph.opengl as gl
+    from OpenGL_accelerate.numpy_formathandler import NumpyHandler
     enabled = True
 except:
     pg = False
@@ -136,7 +139,9 @@ def read_file(profile, startTime=10, endTime=-1, maxLayers=500, cut=0, deplete=1
 def plot_line(x, y, z, color='w'):
     # first line
     p = np.array([z, x, y])
-    p = p.transpose()
+    h = NumpyHandler()
+    h.ERROR_ON_COPY = 0
+    p = h.asArray(p.transpose().astype(np.float16))
     C = pg.glColor(color)
     plt = gl.GLLinePlotItem(pos=p, color=C, width=0.5, antialias=True)
     return plt
