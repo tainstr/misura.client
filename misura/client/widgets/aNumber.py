@@ -437,7 +437,7 @@ class aNumber(ActiveWidget):
                 self.slider.blockSignals(False)
         self.readonly_label.setText(self.spinbox.text())
 
-    @lockme()
+    #@lockme()
     def setRange(self, m=None, M=None, step=0):
         #TODO: All this part might be moved into ScientificSpinbox
         step = self.adapt2gui(step)
