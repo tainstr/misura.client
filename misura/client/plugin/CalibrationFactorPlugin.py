@@ -261,18 +261,19 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             factor, res, um, micron)
         self.msg = msg
         self.slope, self.const = slope, const
-        self.fld, self.ds, self.T, self.d, self.sT, self.sd = fields, ds, T, d, sT, sd
+        self.fld, self.ds, self.d, self.sT, self.sd = fields, ds, d, sT, sd
         self.factor, self.res, self.um = factor, res, um
         if fields['label']:
             self.label()
         if fields['add']:
-            self.add_datasets(si, d[0])
+            self.add_datasets(si, ei, d[0])
         self.apply_ops()
         self.doc.model.refresh()
         return factor, res
 
-    def add_datasets(self, start_index, start_value):
+    def add_datasets(self, start_index, end_index, start_value):
         """Add standard and fitted datasets for further evaluations (plotting, etc)"""
+        #TODO: convert these into derived datasets
         # Adding plot data
         fields = self.fld
         name = fields['std'].replace(' ', '_')
@@ -284,6 +285,8 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         f = np.poly1d((self.quad, self.slope, 0))
         df = f(self.T)
         df += start_value - df[start_index]
+        df[:start_index] = None
+        df[end_index:] = None
         # TODO: define new derived datasets for these
         dsf = copy(Tds)
         dsf.attr = dict({}, **Tds.attr)
@@ -304,6 +307,8 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         d = self.f(self.T)
         # Translate zero so it matches the fit
         d -= d[start_index] - df[start_index]
+        d[:start_index] = None
+        d[end_index:] = None
         dsd = copy(Tds)
         dsd.attr = dict({}, **Tds.attr)
         dsd.tags = set([])
