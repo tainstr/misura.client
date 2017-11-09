@@ -283,7 +283,7 @@ class ViewerPicture(QtGui.QGraphicsView):
 
         # Camera configuration option
         self.add_conf_action(self.menu, self.remote, self.fullpath)
-        self.bool_action('Simulation', 'Analysis_Simulation')
+        self.bool_action(_('Analysis'), 'Analysis_Simulation')
 
         # Per-Sample Menu
         self.menus = {}
@@ -297,6 +297,7 @@ class ViewerPicture(QtGui.QGraphicsView):
         #########
         self.amenu = self.menu.addMenu(QtGui.QIcon(os.path.join(parameters.pathArt, 'morphometrics.svg')),
                                        _('Morphometrics'))
+        self.amenu.aboutToShow.connect(self.update_amenu)
 
         # General view entries
         self.roiAct = self.amenu.addAction(_('View Regions'),
@@ -309,16 +310,20 @@ class ViewerPicture(QtGui.QGraphicsView):
 
         roiResetAct = self.amenu.addAction(_('Reset Regions'), self.reset_regions)
         roiResetAct.setCheckable(False)
+        
+        self.analysis_actions = []
 
         self.profileAct = self.amenu.addAction(_('Profile'),
                                                functools.partial(self.over_by_name,
                                                                  'profile'))
         self.profileAct.setCheckable(True)
+        self.analysis_actions.append(self.profileAct)
 
         self.labelAct = self.amenu.addAction(_('Values Label'),
                                              functools.partial(self.over_by_name,
                                                                'label'))
         self.labelAct.setCheckable(True)
+        self.analysis_actions.append(self.labelAct)
 
         # Shape entries
         is_hsm = '/hsm/' in self.remote['smp0'][0]
@@ -327,31 +332,37 @@ class ViewerPicture(QtGui.QGraphicsView):
                                               functools.partial(self.over_by_name,
                                                                 'points'))
             self.pointsAct.setCheckable(True)
+            self.analysis_actions.append(self.pointsAct)
 
             self.baseHeightAct = self.amenu.addAction(_('Base and Height'),
                                                       functools.partial(self.over_by_name,
                                                                         'baseHeight'))
             self.baseHeightAct.setCheckable(True)
+            self.analysis_actions.append(self.baseHeightAct)
 
             self.circleAct = self.amenu.addAction(_('Circle Fitting'),
                                                   functools.partial(self.over_by_name,
                                                                     'circle'))
             self.circleAct.setCheckable(True)
+            self.analysis_actions.append(self.circleAct)
         else:
             self.referenceLineAct = self.amenu.addAction(_('Reference line'),
                                  functools.partial(self.over_by_name,
                                                    'referenceLine'))
             self.referenceLineAct.setCheckable(True)
+            self.analysis_actions.append(self.referenceLineAct)
             
             self.regressionLineAct = self.amenu.addAction(_('Regression line'),
                                  functools.partial(self.over_by_name,
                                                    'regressionLine'))
             self.regressionLineAct.setCheckable(True)
+            self.analysis_actions.append(self.regressionLineAct)
             
             self.filteredProfileAct =self.amenu.addAction(_('Filtered profile'),
                                  functools.partial(self.over_by_name,
                                                    'filteredProfile'))
             self.filteredProfileAct.setCheckable(True)
+            self.analysis_actions.append(self.filteredProfileAct)
 
         # Border entries
         # TODO: Border overlays
@@ -360,6 +371,7 @@ class ViewerPicture(QtGui.QGraphicsView):
         self.calAct = self.amenu.addAction(
             'Pixel Calibration', self.calibration)
         self.calAct.setCheckable(True)
+        self.analysis_actions.append(self.calAct)
         # Remove tool action if modification is not allowed
         if not self.remote.check_write('Analysis_umpx'):
             self.amenu.removeAction(self.calAct)
@@ -370,6 +382,14 @@ class ViewerPicture(QtGui.QGraphicsView):
         self.add_motion_actions(self.mmenu)
         # Other stuff
         self.menu.addAction('Save frame', self.save_frame)
+        
+    def update_amenu(self):
+        """Enable analysis menu actions only if an analysis is really running"""
+        for act in self.analysis_actions:
+            # Ignore already checked entries
+            if act.isChecked():
+                continue
+            act.setEnabled(self.remote['Analysis_Simulation'])
 
     def reset_regions(self):
         """Re-init samples, resetting regions of interest."""
