@@ -9,7 +9,7 @@ import utils
 
 from misura.client.iutils import get_plotted_tree
 from .. import units
-
+from .UnitsConverterTool import update_unit_axis_labels
 
 class PercentPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
@@ -56,13 +56,10 @@ class PercentPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         ds1 = units.percent_conversion(ds, action, fields['auto'])
         ds = ds1
         self.ops.append(document.OperationDatasetSet(fields['ds'], ds))
-        #self.ops.append(document.OperationDatasetSetVal(fields['ds'], 'data',slice(None,None),ds1.data[:]))
 
         self.apply_ops()
         logging.debug('Converted %s %s using initial dimension %.2f.' % (
             fields['ds'], fields['action'], ds.m_initialDimension))
-# 		QtGui.QMessageBox.information(None,'Percentage output',
-# 				'Converted %s %s using initial dimension %.2f.' % (fields['ds'], msg, ds.m_initialDimension))
 
         # updating all dependent datapoints
         convert_func = units.percent_func(ds, action, fields['auto'])
@@ -74,12 +71,12 @@ class PercentPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         cvt = []
         tree = get_plotted_tree(self.doc.basewidget)
         upax = []
-        for axp, dslist in tree['axis'].iteritems():
+        for ax_path, dslist in tree['axis'].iteritems():
             if not fields['ds'] in dslist:
                 continue
             logging.debug('Propagating to', cvt)
             cvt += dslist
-            upax.append(axp)
+            upax.append(ax_path)
         cvt = list(set(cvt))
         if fields['ds'] in cvt:
             cvt.remove(fields['ds'])
@@ -94,16 +91,11 @@ class PercentPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 'ds': nds, 'propagate': False, 'action': act, 'auto': True}
             self.ops.append(
                 document.OperationToolsPlugin(PercentPlugin(), fields))
-        # Update axis labels
-        old = units.symbols.get(ds.old_unit, False)
-        new = units.symbols.get(ds.unit, False)
-        if old and new:
-            for ax in upax:
-                ax = self.doc.resolveFullWidgetPath(ax)
-                lbl = ax.settings.label.replace(old, new)
-                self.toset(ax, 'label', lbl)
+            
+        update_unit_axis_labels(self, ds, upax)
         # Apply everything
         self.apply_ops('Percentage: Propagate')
+
 
 
 plugins.toolspluginregistry.append(PercentPlugin)

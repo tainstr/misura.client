@@ -9,6 +9,21 @@ import utils
 from .. import units
 from misura.client.iutils import get_plotted_tree
 
+def update_unit_axis_labels(pluging_obj, ds, axis_paths):
+    # Update axis labels
+    old = units.symbols.get(ds.old_unit, False)
+    new = units.symbols.get(ds.unit, False)
+    if old and new:
+        for ax_path in axis_paths:
+            ax = pluging_obj.doc.resolveFullWidgetPath(ax_path)
+            old_lbl = ax.settings.label
+            if '({%})' in old_lbl or old_lbl.endswith('{%}'):
+                lbl = old_lbl.replace('%', new)
+            else:
+                lbl = old_lbl.replace(old, new)
+            if lbl!=old_lbl:
+                pluging_obj.toset(ax, 'label', lbl)
+                logging.debug('Replaxed axis label', ax_path, old_lbl, lbl)
 
 class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
 
@@ -69,12 +84,12 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
         cvt = []
         tree = get_plotted_tree(self.doc.basewidget)
         upax = []
-        for axp, dslist in tree['axis'].iteritems():
+        for ax_path, dslist in tree['axis'].iteritems():
             if not fields['ds'] in dslist:
                 continue
             logging.debug('Propagating to', cvt)
             cvt += dslist
-            upax.append(axp)
+            upax.append(ax_path)
         # If time dataset, propagate to all time datasets
         if ds.m_var == 't':
             for k, nds in self.doc.data.iteritems():
@@ -83,6 +98,10 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
                 if getattr(nds, 'm_var', False) != 't':
                     continue
                 cvt.append(k)
+        
+
+            
+            
         cvt = list(set(cvt))
         # Create a non-propagating unit conversion operation for each dataset
         # found
@@ -97,14 +116,8 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
                 'ds': nds, 'propagate': False, 'convert': fields['convert']}
             self.ops.append(
                 document.OperationToolsPlugin(UnitsConverterTool(), fields))
-        # Update axis labels
-        old = units.symbols.get(ds.unit, False)
-        new = units.symbols.get(fields['convert'], False)
-        if old and new:
-            for ax in upax:
-                ax = self.doc.resolveFullWidgetPath(ax)
-                lbl = ax.settings.label.replace(old, new)
-                self.toset(ax, 'label', lbl)
+        
+        update_unit_axis_labels(self, ds, upax)
 
         # Apply everything
         self.apply_ops('UnitsConverterTool: Propagate')
