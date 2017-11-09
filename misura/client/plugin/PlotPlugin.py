@@ -59,7 +59,9 @@ def dataset_curve_name(ds, dsn):
         curve_name = unicode(dsname + ' - ' + fileName)
     bounded_name = bounded_axes.get(instrument_name, {}).get(dsvar, dsvar)
     ax_label = bounded_name
-    unit = ds.unit or getattr(getattr(ds, 'parent', False), 'unit', False)
+    unit = ds.unit
+    if not unit:
+        unit = getattr(getattr(ds, 'parent', False), 'unit', False)
     if unit:
         u = units.symbols.get(unit, unit)
         ax_label += ' ({{{}}})'.format(u)

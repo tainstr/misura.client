@@ -195,6 +195,13 @@ class NodeEntry(object):
             return False
 
         return getattr(self.ds, 'unit', False)
+    
+    @property
+    def attr(self):
+        if not self.ds:
+            return False
+
+        return getattr(self.ds, 'attr', False)        
 
     @property
     def data(self):
@@ -513,6 +520,8 @@ class DatasetEntry(NodeEntry):
             v = 'Coeff(%i,%s{\deg}C) ' % (pm.fields['start'], vars)
         elif pm.plugin.name == 'Derive':
             v = 'Der(%i{\deg},%s)' % (pm.fields['order'], vars)
+        elif pm.plugin_name == 'Viscosity':
+            v = 'Viscosity({})'.format(vars)
         else:
             v = getattr(ds, 'm_var', vars)
         return v

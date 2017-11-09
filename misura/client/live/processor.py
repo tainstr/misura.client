@@ -142,7 +142,8 @@ class SampleProcessor(QtCore.QThread):
             for i, smp in enumerate(samples):
                 if first:
                     smp.connect()
-                r = smp.multiget(list(self.opt - set(['roi', 'crop'])))
+                keys = list(self.opt - set(['roi', 'crop']))
+                r = smp.multiget(keys)
                 if not r:
                     continue
 #                   logging.debug('Live update failed: multiget returned', r, self.opt)

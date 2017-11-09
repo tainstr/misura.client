@@ -5,6 +5,7 @@ import veusz.plugins as plugins
 import veusz.document as document
 import numpy as np
 import SmoothDatasetPlugin
+from utils import MisuraPluginDataset1D
 
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__file__)
@@ -57,7 +58,10 @@ class CoefficientPlugin(plugins.DatasetPlugin):
             raise plugins.DatasetPluginException(
                 'Input and output datasets cannot be the same.')
         # make a new dataset with name in fields['ds_out']
-        self.ds_out = plugins.Dataset1D(fields['ds_out'])
+        #self.ds_out = plugins.Dataset1D(fields['ds_out'])
+        self.ds_out = MisuraPluginDataset1D(fields['ds_out'])
+        self.ds_out.unit = '-'
+        self.ds_out.old_unit = '-'
         # return list of datasets
         return [self.ds_out]
 
@@ -70,7 +74,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         start = fields['start']
         initial_dimension = fields['percent']
 
-        xds = helper.getDataset(fields['ds_x'])
+        xds = helper._doc.data[fields['ds_x']]
         yds = helper.getDataset(fields['ds_y'])
         _yds = helper._doc.data.get(fields['ds_y'])
         x = xds.data
@@ -126,6 +130,10 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         if smooth > 0 and smode == 'Output':
             out[i:j] = SmoothDatasetPlugin.smooth(out[i:j], smooth, 'hanning')
         self.ds_out.update(data=out)
+        u = xds.attr['unit']
+        u = '-' if not u else '1/'+u
+        self.ds_out.unit = u
+        self.ds_out.old_unit = u
         return [self.ds_out]
 
 def calculate_coefficient(x_dataset, y_dataset, x_start, y_start, 

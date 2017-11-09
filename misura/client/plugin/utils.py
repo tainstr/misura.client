@@ -158,3 +158,23 @@ class OperationWrapper(plugins.OperationWrapper):
         if not dryrun:
             self.ops.append(op)
         return op
+    
+from misura.client.filedata.dataset import AbstractMisuraDataset
+from veusz import dialogs
+class MisuraPluginDataset1D(plugins.Dataset1D, AbstractMisuraDataset):
+    def __init__(self, *a, **k):
+        plugins.Dataset1D.__init__(self, *a, **k)
+        AbstractMisuraDataset.__init__(self)
+        
+    def _makeVeuszDataset(self, manager):
+        ds = plugins.Dataset1D._makeVeuszDataset(self, manager)
+        # define a new derived class on the fly
+        derived_class = type('Misura'+ds.__class__.__name__, (ds.__class__, AbstractMisuraDataset), {})
+        dialogs.recreate_register[derived_class] = dialogs._lazy_recreate_plugin
+        #FIXME: will not work with few dataset classes
+        ds1 = derived_class(manager, self)
+        ds1.attr = self.attr
+        return ds1
+        
+        
+

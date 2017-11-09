@@ -51,12 +51,10 @@ class Sample(object):
 
     def has_key(self, key):
         return self.conf.has_key(key)
-
-
-class MisuraDataset(datasets.Dataset):
-
-    def __init__(self, data=[], linked=False):
-        datasets.Dataset.__init__(self, data=data, linked=linked)
+        
+class AbstractMisuraDataset(object):
+    def __init__(self, linked=False):
+        self.attr = {'label': ''}
         self.m_opt = False
 # 		assert linked!=False
         self.m_keep = True
@@ -89,7 +87,7 @@ class MisuraDataset(datasets.Dataset):
         self.attr['label'] = nval
         
     def _get_unit(self, name, alt=None):
-        """Get proper unit based on Table column,if
+        """Get proper unit based on Table column, if
         dataset represents a column in the table"""
         u = self.m_opt.get(name, alt)
         if not self.m_opt['type']=='Table' or u==alt or isinstance(u, basestring):
@@ -219,4 +217,7 @@ class MisuraDataset(datasets.Dataset):
         """Object type"""
         return self.__class__.__name__
            
-        
+class MisuraDataset(datasets.Dataset, AbstractMisuraDataset):
+    def __init__(self, data=[], linked=False):
+        datasets.Dataset.__init__(self, data=data, linked=linked)
+        AbstractMisuraDataset.__init__(self, linked=linked)

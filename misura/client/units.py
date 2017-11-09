@@ -185,6 +185,8 @@ symbols = {'micron': '{\mu}m', 	'nanometer': 'nm', 	'millimeter': 'mm',
            'millivolt': 'mV',
            'ohm': '\Omega', 'milliohm': 'm\Omega', 'megaohm': 'M\Omega',
            'volt/second': 'V/s',
+           '1/second': '1/s',
+           '1/celsius': '{\deg}C^-1', '1/fahrenheit': '{\deg}F^-1', '1/kelvin': '{\deg}K^-1',
            }
 
 # HTML symbols for Qt
@@ -201,6 +203,8 @@ hsymbols.update({'micron': u'\u03bcm', 'micron^2': u'\u03bcm²', 'micron^3': u'\
                  'm^2/s': u'm²s⁻¹',
                  'mm^2/s': u'mm²s⁻¹',
                  'ohm': u'\u03A9', 'milliohm': u'm\u03A9', 'megaohm': u'M\u03A9',
+                 '1/second': u'1/s', 
+                 '1/celsius': u'°C⁻¹', '1/fahrenheit': u'°F⁻¹', '1/kelvin': u'°K⁻¹'
                  })
 
 

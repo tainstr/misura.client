@@ -4,6 +4,7 @@
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import veusz.plugins as plugins
+from . import utils
 import numpy as np
 
 # Known points
@@ -46,11 +47,11 @@ def viscosity_calc(temperatures, known_temperatures, known_viscosities):
     A = (g2 - g1 + ((V1 - V2) * T0)) / (T2 - T1)
     B = (T1 - T0) * (V1 - A)
 
-    print 'VFT', A, B, T0
+    logging.debug('VFT', A, B, T0)
     # Apply VFT
     output = A + B / (temperatures - T0)
     canc=np.where(temperatures < T0+1)[0]
-    print 'Cancelling',T0, min(temperatures), max(temperatures), canc, temperatures
+    logging.debug('Cancelling',T0, min(temperatures), max(temperatures), canc, temperatures)
     if len(canc):
         output[canc] = np.nan
     return output
@@ -100,9 +101,7 @@ class ViscosityPlugin(plugins.DatasetPlugin):
             raise plugins.DatasetPluginException('Invalid output dataset name')
         # make a new dataset with name in fields['ds_out']
         logging.debug('DSOUT', fields)
-        self.ds_out = plugins.Dataset1D(fields['ds_out'])
-        self.ds_out.unit = 'poise'
-
+        self.ds_out = utils.MisuraPluginDataset1D(fields['ds_out'])
         # return list of datasets
         return [self.ds_out]
 
@@ -124,6 +123,8 @@ class ViscosityPlugin(plugins.DatasetPlugin):
         
         self.ds_out.update(data=output)
         self.ds_out.unit = 'poise'
+        self.ds_out.old_unit = 'poise'
+        self.ds_out.label = 'Viscosity'
         return [self.ds_out]
 
 # add plugin classes to this list to get used
