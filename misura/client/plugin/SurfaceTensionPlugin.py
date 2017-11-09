@@ -129,9 +129,9 @@ class SurfaceTensionPlugin(plugins.DatasetPlugin):
             plugins.FieldDataset(
                 'dilT', u'Sample expansion temperature [blank=as beta] (\u00B0C)', default=default_sample_expansion_temperature),
             plugins.FieldFloat(
-                'ex_start', u'Extrapolate from temperature [0=no] (\u00B0C)', default=ex_start),
+                'ex_start', u'Extrapolate below temperature [0=no] (\u00B0C)', default=ex_start),
             plugins.FieldFloat(
-                'ex_end', u'Extrapolate to temperature [0=no] (\u00B0C)', default=ex_end),
+                'ex_end', u'Extrapolate above temperature [0=no] (\u00B0C)', default=ex_end),
 
             plugins.FieldCombo("dim", descr="Sample expansion dimension", items=[
                                'Linear', 'Volumetric'], default=dim),
@@ -189,6 +189,7 @@ class SurfaceTensionPlugin(plugins.DatasetPlugin):
             raise plugins.DatasetPluginException(
                 'Sample datasets must have same length')
 
+        # Sample expansion data
         dim = fields['dim']
         ex_start = fields['ex_start']
         ex_end = fields['ex_end']
