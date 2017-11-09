@@ -203,7 +203,6 @@ def guessNextName(name):
             v.append(c)
             break
     n.reverse()
-#	print n, v
     n = int(''.join(n))
     name = ''.join(v)
     return name, n, name + str(n + 1)
@@ -350,12 +349,14 @@ def get_plotted_tree(base, m=False):
             m => {'plot': {plotpath: dsname,...},
                       'dataset': {dsname: plotpath,...},
                       'axis':{axispath:[ds0,ds1,...]},
+                      'xaxis':{axispath:[ds0, ds1, ...]},
                       'sample':[smp0,smp1,...]. 
                       'page': [plot names...}"""
     if m is False:
         m = {'plot': OrderedDict(),
              'dataset': OrderedDict(),
              'axis': OrderedDict(),
+             'xaxis': OrderedDict(),
              'sample': [],
              'page': defaultdict(list)}
     for wg in base.children:
@@ -375,10 +376,21 @@ def get_plotted_tree(base, m=False):
             if not m['dataset'].has_key(dsn):
                 m['dataset'][dsn] = []
             m['dataset'][dsn].append(wg.path)
-
             # Fill page: plots map
             page = searchFirstOccurrence(wg, 'page', -1)
             m['page'][page.name].append(wg.path)
+
+            # Save the dataset under its axis key
+            axpath = wg.parent.path + '/' + wg.settings.yAxis
+            if not m['axis'].has_key(axpath):
+                m['axis'][axpath] = []
+            m['axis'][axpath].append(dsn)
+            
+            # Save also x axis
+            xaxpath = wg.parent.path + '/' + wg.settings.xAxis
+            if not m['xaxis'].has_key(xaxpath):
+                m['xaxis'][xaxpath] = []
+            m['xaxis'][xaxpath].append(wg.settings.xData)
 
             # Fill sample map
             if not '/sample' in dsn:
@@ -390,17 +402,11 @@ def get_plotted_tree(base, m=False):
                 continue
             m['sample'].append(smp['fullpath'])
 
-            # Save the dataset under its axis key
-            axpath = wg.parent.path + '/' + wg.settings.yAxis
-            if not m['axis'].has_key(axpath):
-                m['axis'][axpath] = []
-            m['axis'][axpath].append(dsn)
-
         elif wg.typename in ('axis', 'axis-function'):
-            # 			print 'get_plotted_tree found axis',wg.path
             if wg.settings.direction != 'vertical':
-                continue
-            if not m['axis'].has_key(wg.path):
+                if not m['xaxis'].has_key(wg.path):
+                    m['xaxis'][wg.path] = []
+            elif not m['axis'].has_key(wg.path):
                 m['axis'][wg.path] = []
     # Persistent sorting
     for k0 in m.keys():

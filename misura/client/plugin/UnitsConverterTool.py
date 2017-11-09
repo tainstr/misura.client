@@ -9,9 +9,8 @@ import utils
 from .. import units
 from misura.client.iutils import get_plotted_tree
 
-def update_unit_axis_labels(pluging_obj, ds, axis_paths):
+def update_unit_axis_labels(pluging_obj, ds, old, axis_paths):
     # Update axis labels
-    old = units.symbols.get(ds.old_unit, False)
     new = units.symbols.get(ds.unit, False)
     if old and new:
         for ax_path in axis_paths:
@@ -24,6 +23,8 @@ def update_unit_axis_labels(pluging_obj, ds, axis_paths):
             if lbl!=old_lbl:
                 pluging_obj.toset(ax, 'label', lbl)
                 logging.debug('Replaxed axis label', ax_path, old_lbl, lbl)
+            else:
+                logging.debug('Did not replace axis label',ax_path, old_lbl, lbl, old, new)
 
 class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
 
@@ -58,12 +59,13 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
         """
         self.ops = []
         self.doc = interface.document
+        self.apply_fields = fields
         
         ds = interface.document.data.get(fields['ds'], False)
         if not ds:
             raise plugins.DatasetPluginException(
                 'Dataset not found' + fields['ds'])
-        
+        old_unit = units.symbols.get(ds.unit, False)
         ds1 = units.convert(ds, fields['convert'])
         self.ops.append(document.OperationDatasetSet(fields['ds'], ds1))
         self.apply_ops()
@@ -78,49 +80,58 @@ class UnitsConverterTool(utils.OperationWrapper, plugins.ToolsPlugin):
             
         ####
         # PROPAGATION
-        if not fields['propagate']:
-            return
+ 
         # Find all datasets plotted with the same Y axis
         cvt = []
         tree = get_plotted_tree(self.doc.basewidget)
         upax = []
-        for ax_path, dslist in tree['axis'].iteritems():
+        for ax_path, dslist in tree['axis'].items():
             if not fields['ds'] in dslist:
                 continue
             logging.debug('Propagating to', cvt)
             cvt += dslist
             upax.append(ax_path)
-        # If time dataset, propagate to all time datasets
-        if ds.m_var == 't':
+            
+        # Add xaxis
+        for ax_path, dslist in tree['xaxis'].items():
+            if not fields['ds'] in dslist:
+                print('SKIP XAXIS', ax_path, dslist)
+                continue
+            upax.append(ax_path)
+               
+        self.propagate(ds, cvt)
+        
+        update_unit_axis_labels(self, ds, old_unit, upax)
+
+        # Apply everything
+        self.apply_ops('UnitsConverterTool: dependencies')
+        
+    def propagate(self, ds, cvt):
+        if not self.apply_fields['propagate']:
+            return False
+        
+        # If time or temperature dataset, propagate to all time datasets
+        if ds.m_var in ('t', 'T'):
             for k, nds in self.doc.data.iteritems():
-                if k == fields['ds']:
+                if k == self.apply_fields['ds']:
                     continue
-                if getattr(nds, 'm_var', False) != 't':
+                if getattr(nds, 'm_var', False) != ds.m_var:
                     continue
                 cvt.append(k)
-        
-
-            
             
         cvt = list(set(cvt))
         # Create a non-propagating unit conversion operation for each dataset
         # found
         for nds in cvt:
-            if nds == fields['ds']:
+            if nds == self.apply_fields['ds']:
                 continue
             ncur = getattr(self.doc.data[nds], 'unit', False)
             if not ncur:
                 continue
             logging.debug('Really propagating unit conversion to', nds)
             fields = {
-                'ds': nds, 'propagate': False, 'convert': fields['convert']}
+                'ds': nds, 'propagate': False, 'convert': self.apply_fields['convert']}
             self.ops.append(
                 document.OperationToolsPlugin(UnitsConverterTool(), fields))
-        
-        update_unit_axis_labels(self, ds, upax)
-
-        # Apply everything
-        self.apply_ops('UnitsConverterTool: Propagate')
-
 
 plugins.toolspluginregistry.append(UnitsConverterTool)

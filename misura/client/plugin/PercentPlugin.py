@@ -51,7 +51,7 @@ class PercentPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         if isinstance(ds, document.datasets.Dataset1DPlugin):
             logging.error('Cannot convert to percent a derived dataset. Please convert the source.')
             return False
-
+        old_unit = units.symbols.get(ds.unit, False)
         action = units.percent_action(ds, fields['action'])
         ds1 = units.percent_conversion(ds, action, fields['auto'])
         ds = ds1
@@ -92,7 +92,7 @@ class PercentPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             self.ops.append(
                 document.OperationToolsPlugin(PercentPlugin(), fields))
             
-        update_unit_axis_labels(self, ds, upax)
+        update_unit_axis_labels(self, ds, old_unit, upax)
         # Apply everything
         self.apply_ops('Percentage: Propagate')
 
