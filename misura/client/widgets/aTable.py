@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from functools import partial
 import os
+import io
 
 import numpy as np
 
@@ -11,13 +12,16 @@ from misura.client import units
 from misura.client import iutils
 from misura.client.clientconf import settings
 from . import builder
+from wx.tools.XRCed.globals import get_verbose
 
 
 def _export(loaded, get_column_func,
             path='/tmp/misura/m.csv',
-            order=False, sep=';\t', header=False):
-    """Export to csv file `path`, following column order `order`, using separator `sep`,
-    prepending `header`"""
+            order=False, sep=';\t', header=False,
+            get_unit_func=False,
+            get_verbose_func=False):
+    """Export `loaded` column names to csv file `path`, following column order `order`, using separator `sep`,
+    prepending `header`. Use `get_column_func` to retrieve the dataset values for each column name."""
     # Terrible way of reordering!
     logging.debug('ordering', loaded, order)
     if order is not False:
@@ -33,12 +37,27 @@ def _export(loaded, get_column_func,
     if not n:
         logging.debug('No columns to export.')
         return False
-    f = open(path, 'w')
+    f = io.open(path, 'w', encoding="utf-8")
+    # Write custom header
     if header:
         f.write(header + '\n')
-    msg = ('{}' + sep) * len(ordered) + '\n'
+        
+    # Write names header
+    
+    msg = unicode(('{}' + sep) * len(ordered) + '\n')
     ch = [str(h).replace('summary/', '').replace('\n', '_') for h in ordered]
     f.write(msg.format(*ch))
+    
+    # Write optional headers
+    for hfunc in (get_unit_func, get_verbose_func):
+        if not hfunc:
+            continue
+        ch = [unicode(hfunc(h)) for h in ordered]
+        s = msg.format(*ch)
+        f.write(s)
+    
+    
+        
     dat = []
     nmax = 0
     for h in ordered:
@@ -59,7 +78,9 @@ def _export(loaded, get_column_func,
     f.close()
 
 
-def table_model_export(loaded, get_column_func, model, header_view):
+def table_model_export(loaded, get_column_func, model, header_view, 
+                       get_unit_func=False,
+                       get_verbose_func=False):
     """Prepare to export to CSV file"""
     # TODO: produce a header section based on present samples' metadata
     d = settings.value('/FileSaveToDir', os.path.expanduser('~'))
@@ -77,7 +98,12 @@ def table_model_export(loaded, get_column_func, model, header_view):
         if header_view.isSectionHidden(logicalIndex):
             continue
         order[logicalIndex] = header_view.visualIndex(logicalIndex)
-    _export(loaded, get_column_func, path=dest, order=order)
+    _export(loaded, 
+            get_column_func, 
+            path=dest, 
+            order=order, 
+            get_unit_func=get_unit_func,
+            get_verbose_func=get_verbose_func)
 
 
 class aTablePointDelegate(QtGui.QItemDelegate):

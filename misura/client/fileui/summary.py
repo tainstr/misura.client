@@ -9,6 +9,8 @@ from .. import iutils, _
 import re
 
 from misura.client.widgets import table_model_export
+from misura.client import units
+
 # TODO: these functions should be generalized and applied also by the
 # navigator. THey should also present data in hierarchy (not plain).
 from PyQt4 import QtGui, QtCore
@@ -169,7 +171,15 @@ class SummaryHeader(QtGui.QHeaderView):
         model = self.parent().model()
         def get_column_func(name):
             return model.doc.data[name].data
-        table_model_export(model._loaded, get_column_func, model, self)
+        def get_unit_func(name):
+            u = getattr(model.doc.data[name], 'unit', '')
+            return units.hsymbols.get(u, '')
+        def get_verbose_func(name):
+            return getattr(model.doc.data[name], 'm_label', '')
+            
+        table_model_export(model._loaded, get_column_func, model, self, 
+                           get_unit_func,
+                           get_verbose_func)
 
     def show_menu(self, pt):
         self.point = pt
