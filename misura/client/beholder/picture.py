@@ -620,6 +620,10 @@ class ViewerPicture(QtGui.QGraphicsView):
                 'Adaptive Threshold', 'adaptiveThreshold', sample.analyzer, m)
             self.bool_action(
                 'Dynamic Regions', 'autoregion', sample.analyzer, m)
+            if fp.startswith('/hsm/'):
+                self.bool_action('Surface Tension', 
+                                 'sessileEnable', 
+                                 sample.analyzer, m)
 
         self.sampleProcessor.set_samples(samples)
         self.sampleProcessor.toggle_run(do=stream)
