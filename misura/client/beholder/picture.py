@@ -586,6 +586,9 @@ class ViewerPicture(QtGui.QGraphicsView):
     def display_grids(self, *foo):
         for smp_pix in self.samples:
             if self.gridAct.isChecked():
+                if not smp_pix.roi.isVisible():
+                    self.roiAct.setChecked(True)
+                    self.over_by_name('roi')
                 smp_pix.roi.grid.set_enabled(True)
             else:
                 smp_pix.roi.grid.set_enabled(False)
