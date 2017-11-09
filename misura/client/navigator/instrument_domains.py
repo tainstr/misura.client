@@ -142,8 +142,12 @@ class MicroscopeSampleNavigatorDomain(ImageAnalysisNavigatorDomain):
     def viscosity(self, node=False):
         """Execute ViscosityPlugin on `node`"""
         from misura.client import plugin
-        # Get nearest T dataset
-        T=self.xnames(node, page='/temperature')[0]
+        # Default sample T
+        T =node.path+'/T' 
+        # If missing, get nearest T dataset
+        if T not in self.doc.data:
+            logging.debug('Sample temperature dataset is missing', T)
+            T = self.xnames(node, page='/temperature')[0]
         p = plugin.ViscosityPlugin(ds_in=T, ds_out=node.path+'/viscosity')
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.ViscosityPlugin)
         self.mainwindow.showDialog(d)
