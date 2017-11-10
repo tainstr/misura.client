@@ -12,8 +12,6 @@ from misura.client import units
 from misura.client import iutils
 from misura.client.clientconf import settings
 from . import builder
-from wx.tools.XRCed.globals import get_verbose
-
 
 def _export(loaded, get_column_func,
             path='/tmp/misura/m.csv',

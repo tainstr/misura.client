@@ -130,7 +130,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         if smooth > 0 and smode == 'Output':
             out[i:j] = SmoothDatasetPlugin.smooth(out[i:j], smooth, 'hanning')
         self.ds_out.update(data=out)
-        u = xds.attr['unit']
+        u = xds.attr.get('unit', False)
         u = '-' if not u else '1/'+u
         self.ds_out.unit = u
         self.ds_out.old_unit = u
