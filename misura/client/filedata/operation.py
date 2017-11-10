@@ -266,9 +266,12 @@ def resolve_unit(ds, opt, default):
     ds.m_opt = opt
     obj, io = option.resolve_role(ds.m_conf, opt)
     io = io or opt
-    #io = opt
-    ds.old_unit = io.get('unit', default)
     ds.unit = io.get('csunit', ds.old_unit)
+    if ds.unit == 'None':
+        ds.unit = default
+    ds.old_unit = io.get('unit', default)
+    if ds.old_unit == 'None':
+        ds.old_unit = ds.unit
     return True
        
 
