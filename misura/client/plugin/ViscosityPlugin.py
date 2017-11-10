@@ -125,6 +125,7 @@ class ViscosityPlugin(plugins.DatasetPlugin):
         self.ds_out.unit = 'poise'
         self.ds_out.old_unit = 'poise'
         self.ds_out.label = 'Viscosity'
+        self.ds_out.m_var = 'Viscosity'
         return [self.ds_out]
 
 # add plugin classes to this list to get used

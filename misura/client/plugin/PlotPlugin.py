@@ -46,11 +46,17 @@ def dataset_curve_name(ds, dsn):
             sampleName = ds.linked.instr.measure['name']
     dsname = getattr(ds, 'm_name', dsn).replace(
         'summary/', '')
+    if not dsname:
+        dsname = dsn
     instrument_name = dsname.split('/')[0]
     if ':' in instrument_name:
         instrument_name = instrument_name.split(':')[1]
     dsname = dsname.replace("/", ":")
     dsvar = getattr(ds, 'm_var', '')
+    if not dsvar:
+        n = dsn.split('/')
+        if len(n):
+            dsvar = n[-1]
     fileName = '' if ds.linked is None else os.path.basename(
         ds.linked.filename)
     if sampleName:
@@ -59,7 +65,7 @@ def dataset_curve_name(ds, dsn):
         curve_name = unicode(dsname + ' - ' + fileName)
     bounded_name = bounded_axes.get(instrument_name, {}).get(dsvar, dsvar)
     ax_label = bounded_name
-    unit = ds.unit
+    unit = getattr(ds, 'unit', False)
     if not unit:
         unit = getattr(getattr(ds, 'parent', False), 'unit', False)
     if unit:
