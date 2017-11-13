@@ -280,7 +280,7 @@ class aTableModel(QtCore.QAbstractTableModel):
 
         label = self.header[section][0]
         unit = False
-        if self.csunit != 'None' and self.view_units:
+        if self.csunit != 'None' and self.view_units and len(self.csunit)>section:
             u = self.csunit[section]
             unit = units.hsymbols.get(u, False)
         if unit:

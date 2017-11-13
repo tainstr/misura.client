@@ -438,7 +438,8 @@ class SectionBox(QtGui.QWidget):
 class Interface(QtGui.QTabWidget):
 
     """Tabbed interface builder for dictionary of options"""
-
+    first_show = True
+    
     def __init__(self, server, remObj=False, prop_dict=False, parent=None, context='Option', fixed=False):
         QtGui.QTabWidget.__init__(self, parent)
         self._lock = threading.Lock()
@@ -457,7 +458,6 @@ class Interface(QtGui.QTabWidget):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
-        self.first_show = True
 
     def show_section(self, name):
         sections = self.sectionsMap.keys()
