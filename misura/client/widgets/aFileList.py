@@ -49,3 +49,29 @@ class aFileList(aChooser):
     def _after_send(self, *a):
         self.set(self.adapt2gui(str(self.transfer.outfile)))
         self.changed_option()
+        
+    def download(self, filename=False):
+        """Download currently selected file"""
+        if not filename:
+            filename = QtGui.QFileDialog.getSaveFileName(self, 
+                                                     _('Choose a filename where to save current selection'), 
+                                                     self.current)
+        if not filename:
+            logging.debug('Bug report aborted')
+            return False
+        # remove final RPC
+        addr = self.remObj.conn_addr[:-3] + 'conf'
+        url = addr + \
+            self.remObj['fullpath'] + self.handle +'/' + self.current
+        logging.debug('Transfer target:', repr(url), self.current, self.handle)
+        self.transfer = TransferThread(url=url, outfile=filename, parent=self)
+        from ..live import registry
+        self.transfer.set_tasks(registry.tasks)
+        self.transfer.start()   
+        return filename  
+        
+        
+        
+        
+        
+               

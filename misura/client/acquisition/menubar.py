@@ -326,6 +326,7 @@ class MenuBar(QtGui.QMenuBar):
 
     def appendGlobalConf(self):
         self.settings.addAction(_('Export configuration'), self.export_configuration)
+        
         if self.server._readLevel<4:
             return 
         if self.server and not self.fixedDoc:

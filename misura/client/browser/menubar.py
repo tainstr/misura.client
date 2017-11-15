@@ -6,6 +6,8 @@ from ..clientconf import confdb
 from ..confwidget import RecentMenu
 from misura.client.helpmenu import HelpMenu
 
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 class BrowserMenuBar(QtGui.QMenuBar):
     """Browser menus"""
