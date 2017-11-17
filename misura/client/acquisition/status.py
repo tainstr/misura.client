@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
 from .. import widgets
-
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 class Status(QtGui.QWidget):
 
@@ -62,8 +63,12 @@ class Status(QtGui.QWidget):
             self.insert_widget(wg)
 
     def insert_widget(self, wg):
+        if wg is False:
+            logging.debug("Cannot insert widget", wg)
+            return False
         self.widgets[wg.prop['kid']] = wg
         self.lay.addRow(wg.label_widget, wg)
+        return True
 
     def showEvent(self, event):
         for kid, wg in self.widgets.iteritems():
