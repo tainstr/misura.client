@@ -185,6 +185,9 @@ class MisuraProxy(common_proxy.CommonProxy):
             self.password = password
             self.connect()
             self._protect.update(dir(self))
+            
+    def is_live(self):
+        return True
 
     @property
     def conn_addr(self):

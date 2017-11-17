@@ -486,8 +486,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.lay = QtGui.QHBoxLayout()
         self.lay.setContentsMargins(0, 0, 0, 0)
         self.lay.setSpacing(0)
-
         self.setLayout(self.lay)
+        self.label_widget = LabelWidget(self)  # Info label
         self.redraw()
         
     def clear_layout(self, lay=None):
@@ -498,6 +498,7 @@ class ActiveWidget(Active, QtGui.QWidget):
             if not w:
                 break
             w1 = w.widget()
+            w1.hide()
             if w1 is None:
                 self.clear_layout(w.layout())
             else:
@@ -512,14 +513,14 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.readonly_label.setStyleSheet("border: 1px solid grey; \
                                             margin-left: 0px; margin-right: 0px; \
                                             padding-left: 5px; padding-right: 5px;")
-        self.readonly_label.hide()
         self.readonly_label.setWordWrap(True)
         self.readonly_label.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|
                                                     QtCore.Qt.TextSelectableByMouse|
                                                     QtCore.Qt.LinksAccessibleByMouse)
+        self.readonly_label.hide()
         self.lay.addWidget(self.readonly_label)
         
-        self.label_widget = LabelWidget(self)  # Info label
+        
         self.emenu = QtGui.QMenu(self)
         self.presets_menu = QtGui.QMenu(_('Presets'), parent=self)
         self.presets_menu.aboutToShow.connect(self.build_presets_menu)
@@ -554,6 +555,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         lay = QtGui.QVBoxLayout()
         wg = self.__class__(self.server, self.remObj, self.prop, parent=win)
         win.setWindowTitle(self.label)
+        wg.label_widget.show()
         lay.addWidget(wg.label_widget)
         lay.addWidget(wg)
         win.setLayout(lay)
