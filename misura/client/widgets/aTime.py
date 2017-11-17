@@ -29,7 +29,7 @@ class aTime(ActiveWidget):
             # TODO: add calendar widget if not editing.
             self.connect(
                 self.twg,  QtCore.SIGNAL('dateTimeChanged(QDateTime)'), self.edited)
-        if self.server.is_live():
+        if self.server and self.server.is_live():
             t = time()
             s = self.server.time()
             dt = time() - t
