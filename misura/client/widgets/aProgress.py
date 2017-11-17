@@ -13,10 +13,8 @@ from .. import _
 
 class aProgress(ActiveWidget):
 
-    def __init__(self, server, remObj, prop, parent=None):
-        ActiveWidget.__init__(self, server, remObj, prop, parent)
-        m = self.prop.get('max', 1)
-        # If max/min are defined, create the slider widget
+    def redraw(self):
+        super(aProgress, self).redraw()
         self.bar = QtGui.QProgressBar(self)
         self.bar.setMinimum(0)
         self.lay.addWidget(self.bar)
@@ -47,8 +45,8 @@ class RoleProgress(ActiveWidget):
 
     """Global server 'progress' option widget. This is a RoleIO pointing to the real 'Progress'-type option being performed"""
 
-    def __init__(self, server, remObj, prop, parent=None, slider_class=QtGui.QSlider):
-        ActiveWidget.__init__(self, server, remObj, prop, parent)
+    def redraw(self):
+        super(RoleProgress, self).redraw()
         self.setWindowTitle(_('Remote Operation in Progress'))
         # Base widget
         self.bw = QtGui.QWidget(parent=self)

@@ -8,8 +8,8 @@ from aDict import aDict
 
 class aMeta(ActiveWidget):
 
-    def __init__(self, server, path, prop, parent=None):
-        ActiveWidget.__init__(self, server, path, prop, parent)
+    def redraw(self):
+        super(aMeta, self).redraw()
         self.lbl = QtGui.QPushButton('...')
         self.lbl.setFlat(True)
         self.lay.addWidget(self.lbl)

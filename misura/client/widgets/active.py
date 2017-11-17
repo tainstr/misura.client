@@ -486,18 +486,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.lay = QtGui.QHBoxLayout()
         self.lay.setContentsMargins(0, 0, 0, 0)
         self.lay.setSpacing(0)
-        self.readonly_label = QtGui.QLabel('')
-        self.readonly_label.setAlignment(QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
-        self.readonly_label.setMinimumWidth(100)
-        self.readonly_label.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
-        self.readonly_label.setStyleSheet("border: 1px solid grey; \
-                                            margin-left: 5px; margin-right: 5px; \
-                                            padding-left: 5px; padding-right: 5px;")
-        self.readonly_label.hide()
-        self.readonly_label.setWordWrap(True)
-        self.readonly_label.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|
-                                                    QtCore.Qt.TextSelectableByMouse|
-                                                    QtCore.Qt.LinksAccessibleByMouse)
+
         self.setLayout(self.lay)
         self.redraw()
         
@@ -513,12 +502,23 @@ class ActiveWidget(Active, QtGui.QWidget):
                 self.clear_layout(w.layout())
             else:
                 w1.deleteLater()
-        self.lay.addWidget(self.readonly_label)
-        
-     
-             
+    
     def redraw(self):
         self.clear_layout()
+        self.readonly_label = QtGui.QLabel('')
+        self.readonly_label.setAlignment(QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.readonly_label.setMinimumWidth(100)
+        self.readonly_label.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
+        self.readonly_label.setStyleSheet("border: 1px solid grey; \
+                                            margin-left: 5px; margin-right: 5px; \
+                                            padding-left: 5px; padding-right: 5px;")
+        self.readonly_label.hide()
+        self.readonly_label.setWordWrap(True)
+        self.readonly_label.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|
+                                                    QtCore.Qt.TextSelectableByMouse|
+                                                    QtCore.Qt.LinksAccessibleByMouse)
+        self.lay.addWidget(self.readonly_label)
+        
         self.label_widget = LabelWidget(self)  # Info label
         self.emenu = QtGui.QMenu(self)
         self.presets_menu = QtGui.QMenu(_('Presets'), parent=self)
@@ -528,6 +528,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.compare_group_menu = QtGui.QMenu(_('Compare group'), parent=self)
         self.compare_group_menu.aboutToShow.connect(self.build_compare_group_menu)
         self.build_extended_menu()
+        
+        
         self.connect(self, QtCore.SIGNAL('destroyed()'),
                      self.unregister, QtCore.Qt.QueuedConnection)
         self.connect(

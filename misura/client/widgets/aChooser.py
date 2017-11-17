@@ -11,16 +11,17 @@ from misura.client.widgets.active import ActiveWidget
 class aChooser(ActiveWidget):
     tuplelike = False
     """If data passed to combobox are tuple, they must be converted into list an back"""
-
-    def __init__(self, server, path, prop, parent=None):
-        ActiveWidget.__init__(self, server, path,  prop, parent)
+        
+    def redraw(self):
+        super(aChooser, self).redraw()
         self.combo = QtGui.QComboBox(parent=self)
         self._options = []
         self._values = []
         self.lay.addWidget(self.combo)
         self.changed_option(reget=False)
         self.connect(
-            self.combo,  QtCore.SIGNAL('currentIndexChanged(int)'), self.try_set)
+            self.combo,  QtCore.SIGNAL('currentIndexChanged(int)'), self.try_set) 
+               
 
     def enterEvent(self, event):
         """Update the widget anytime the mouse enters its area.

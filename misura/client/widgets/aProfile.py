@@ -43,8 +43,8 @@ class aProfile(ActiveWidget):
 
     """Draws a profile property onto a rectangle."""
 
-    def __init__(self, server, path,  prop, parent=None):
-        ActiveWidget.__init__(self, server, path,  prop, parent)
+    def redraw(self):
+        super(aProfile, self).redraw()
         self.profile = Profile(self)
         self.lay.addWidget(self.profile)
         self.emit(QtCore.SIGNAL('selfchanged()'))

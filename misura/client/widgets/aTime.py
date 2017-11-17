@@ -14,6 +14,9 @@ class aTime(ActiveWidget):
 
     def __init__(self, server, path,  prop, parent=None):
         ActiveWidget.__init__(self, server, path,  prop, parent)
+        
+    def redraw(self):
+        super(aTime, self).redraw()
         self.twg = QtGui.QDateTimeEdit(parent=self)
         self.lay.addWidget(self.twg)
         # Cause immediate update after complete init
@@ -23,9 +26,9 @@ class aTime(ActiveWidget):
             # TODO: add calendar widget if not editing.
             self.connect(
                 self.twg,  QtCore.SIGNAL('dateTimeChanged(QDateTime)'), self.edited)
-        if hasattr(server, 'time'):
+        if hasattr(self.server, 'time'):
             t = time()
-            s = server.time()
+            s = self.server.time()
             dt = time() - t
             self.delta = (t - s) + (dt / 3.)
 

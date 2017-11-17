@@ -817,8 +817,8 @@ class aTableView(QtGui.QTableView):
 class aTable(ActiveWidget):
     table = False
 
-    def __init__(self, server, path, prop,  *a, **kw):
-        ActiveWidget.__init__(self, server, path, prop, *a, **kw)
+    def redraw(self):
+        super(aTable, self).redraw()
         self.table = aTableView(self)
         self.lay.addWidget(self.table)
         self.setSizePolicy(

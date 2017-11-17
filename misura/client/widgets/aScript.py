@@ -73,8 +73,8 @@ class aScript(ActiveWidget):
 
     """Elemento grafico per una proprietà stringa di testo"""
 
-    def __init__(self, server, path,  prop, parent=None):
-        ActiveWidget.__init__(self, server, path,  prop, parent)
+    def redraw(self):
+        super(aScript, self).redraw()
         txt = _('View') if self.readonly else _('Edit')
         self.button = QtGui.QPushButton(txt, self)
         self.connect(self.button, QtCore.SIGNAL('clicked()'), self.show_editor)

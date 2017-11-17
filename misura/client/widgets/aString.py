@@ -10,16 +10,20 @@ class aString(ActiveWidget):
     """Graphical element for interacting with a text string"""
     
     def __init__(self, server, path,  prop, parent=None, extended=False):
+        self.extended = extended
         ActiveWidget.__init__(self, server, path,  prop, parent)
-        if extended:
+    
+    def redraw(self):
+        super(aString, self).redraw()
+        if self.extended:
             self.browser = QtGui.QTextBrowser()
             self.signal = 'textChanged()'
         else:
             self.browser = QtGui.QLineEdit("")
             self.signal = 'textChanged(QString)'
         
+        super(aString, self).redraw()
         self.browser.setReadOnly(self.readonly)
-        self.extended = extended
         self.connect(self.browser,   QtCore.SIGNAL(self.signal), self.text_updated)
         self.lay.addWidget(self.browser)
         self.emit(QtCore.SIGNAL('selfchanged()'))

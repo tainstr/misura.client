@@ -26,6 +26,9 @@ class PresetManager(aChooser):
         self.save_handle = save_handle
         self.remove_handle = remove_handle
         self.rename_handle = rename_handle
+        
+    def redraw(self):
+        super(PresetManager, self).redraw()
         # TODO: make a menu, add Rename, View, etc
         self.presets_button = QtGui.QPushButton('...')
         self.presets_button.setMaximumWidth(40)

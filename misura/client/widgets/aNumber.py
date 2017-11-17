@@ -237,14 +237,15 @@ class aNumber(ActiveWidget):
         if None not in [self.prop.get('min', None), self.prop.get('max', None)]:
             self.slider = self.slider_class(QtCore.Qt.Horizontal, parent=self)
             self.slider.zoom.connect(self.setZoom)
-            self.lay.addWidget(self.slider)
+            
+            self.lay.insertWidget(self.lay.count()-2, self.slider)
             
         self.spinbox = ScientificSpinbox(parent=self)
         self.spinbox.setKeyboardTracking(False)
-        self.lay.addWidget(self.spinbox)
-        
+        self.lay.insertWidget(self.lay.count()-2,self.spinbox)
         self.changed_option()
-        self.lay.addStretch()
+        
+        
         
     def build_range_menu(self):
         #TODO: update ranges when unit changes!!!

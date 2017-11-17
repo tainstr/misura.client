@@ -10,18 +10,19 @@ logging = get_module_logging(__name__)
 
 
 class aFileList(aChooser):
-
-    def __init__(self, *a, **kw):
-        """Widget representing a FileList option type, allowing to upload a new file via the stream interface."""
-        aChooser.__init__(self, *a, **kw)
-        # TODO: make menu and add Download, Delete, Rename,... like in presets.
-        self.bSend = QtGui.QPushButton('Send')
-        self.bSend.setMaximumWidth(40)
-        self.connect(self.bSend, QtCore.SIGNAL('clicked(bool)'), self.send)
-        self.lay.addWidget(self.bSend)
+    
+    def redraw(self):
+        super(aFileList, self).redraw()
+        self.file_actions = QtGui.QPushButton('...')
+        self.file_actions.setMaximumWidth(40)
+        self.file_menu = QtGui.QMenu() 
+        self.file_actions.setMenu(self.file_menu)
+        self.file_menu.addAction(_('Send'), self.send)
+        self.file_menu.addAction(_('Download'), self.download)
+        self.lay.addWidget(self.file_actions)
         self.prevIdx = 0
         self.transfer = False
-        self.set_enabled()
+        self.set_enabled()       
 
     def send(self, *args):
         """Upload local file"""
