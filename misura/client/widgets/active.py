@@ -510,7 +510,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.readonly_label.setMinimumWidth(100)
         self.readonly_label.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Minimum)
         self.readonly_label.setStyleSheet("border: 1px solid grey; \
-                                            margin-left: 5px; margin-right: 5px; \
+                                            margin-left: 0px; margin-right: 0px; \
                                             padding-left: 5px; padding-right: 5px;")
         self.readonly_label.hide()
         self.readonly_label.setWordWrap(True)
