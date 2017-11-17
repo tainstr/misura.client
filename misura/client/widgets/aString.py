@@ -1,14 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from misura.client.widgets.active import *
+from misura.client.widgets.active import QtGui, QtCore, ActiveWidget
 from .. import _
 
 
 class aString(ActiveWidget):
 
     """Graphical element for interacting with a text string"""
-
+    
     def __init__(self, server, path,  prop, parent=None, extended=False):
         ActiveWidget.__init__(self, server, path,  prop, parent)
         if extended:
@@ -16,7 +16,7 @@ class aString(ActiveWidget):
             self.signal = 'textChanged()'
         else:
             self.browser = QtGui.QLineEdit("")
-            self.signal = 'editingFinished()'
+            self.signal = 'textChanged(QString)'
         
         self.browser.setReadOnly(self.readonly)
         self.extended = extended
@@ -58,14 +58,11 @@ class aString(ActiveWidget):
 
     def text_updated(self, *foo):
         if self.extended:
-            val = self.browser.toPlainText()
-            cur = self.browser.textCursor()
+            self.current = self.browser.toPlainText()
         else:
-            val = self.browser.text()
-            cur = False
-        self.set(val)
-        if cur:
-            self.browser.setTextCursor(cur)
+            self.current = self.browser.text()
+        self.remObj.set(self.handle, self.current)
+        
 
     def emitOptional(self):
         #       print 'textEdited(QString)', self.current

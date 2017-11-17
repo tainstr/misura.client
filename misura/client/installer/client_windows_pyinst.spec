@@ -8,7 +8,7 @@ from veusz import utils as vutils
 # Check cv is installed
 import cv2 
 
-console = True
+console = False
 debug = False
 cli=pathClient+'\\'
 bin=cli+'bin\\'

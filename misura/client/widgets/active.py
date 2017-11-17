@@ -470,6 +470,8 @@ class ActiveWidget(Active, QtGui.QWidget):
     """Auto-hide menu button"""
     get_on_enter = True
     """Update on mouse enter"""
+    get_on_leave = True
+    """Update on mouse leave"""
     enable_check = False
     
     def __init__(self, server, remObj, prop, parent=None, context='Option'):
@@ -768,6 +770,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         return QtGui.QWidget.enterEvent(self, event)
 
     def leaveEvent(self, event):
+        if self.get_on_leave:
+            self.get()
         if self.bmenu_hide and not self.unit:
             QtCore.QTimer.singleShot(500, self.do_hide_menu)
         return QtGui.QWidget.leaveEvent(self, event)
