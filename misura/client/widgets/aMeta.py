@@ -1,9 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from .. import _
-from misura.client.widgets.active import *
-from misura.client import units
+from misura.client.widgets.active import QtCore, QtGui, ActiveWidget
 from aDict import aDict
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 
 class aMeta(ActiveWidget):

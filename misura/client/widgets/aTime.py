@@ -1,10 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Date and Time widget"""
+
 from time import time
-from active import *
+from active import QtGui, QtCore, ActiveWidget
 from .. import _
 
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 class aTime(ActiveWidget):
 

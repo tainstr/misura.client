@@ -6,7 +6,8 @@ from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from PyQt4 import QtGui, QtCore
 from misura.client.widgets.active import ActiveWidget
-
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 class aChooser(ActiveWidget):
     tuplelike = False

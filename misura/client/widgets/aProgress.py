@@ -4,6 +4,9 @@
 import sys
 from PyQt4 import QtCore, QtGui
 from traceback import print_exc
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
+
 from misura.client.parameters import MAX, MIN
 from misura.client.widgets.active import ActiveWidget
 

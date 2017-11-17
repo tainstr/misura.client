@@ -1,7 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
-from misura.client.widgets.active import *
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
+from misura.client.widgets.active import QtCore, QtGui, ActiveWidget
 from .. import _
 import highlighter
 
