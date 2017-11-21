@@ -242,7 +242,7 @@ def assign_label(ds, col0):
 
 
 def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
-    # Get meas. unit
+    """Get measurement unit from hdf attribute or guess it for t, T"""
     u = 'None'
     if hdf_dataset_name == 't':
         u = 'second'
@@ -258,6 +258,7 @@ def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
     return u
 
 def resolve_unit(ds, opt, default):
+    """Get unit from RoleIO"""
     if not opt:
         logging.debug('No OPT', ds.name)
         ds.unit = default
@@ -266,7 +267,7 @@ def resolve_unit(ds, opt, default):
     ds.m_opt = opt
     obj, io = option.resolve_role(ds.m_conf, opt)
     io = io or opt
-    ds.unit = io.get('csunit', ds.old_unit)
+    ds.unit = io.get('unit', ds.old_unit)
     if ds.unit == 'None':
         ds.unit = default
     ds.old_unit = io.get('unit', default)
@@ -415,6 +416,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         self._rule_load, self.rule_load = cmp_rule(params.rule_load)
         logging.debug('Load rule', self._rule_load)
         self.rule_unit = clientconf.RulesTable(params.rule_unit)
+        logging.debug('Units rule', self.rule_unit)
 
     @classmethod
     def from_dataset_in_file(cls, dataset_name, linked_filename, **kw):
