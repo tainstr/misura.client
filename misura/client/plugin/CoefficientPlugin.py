@@ -25,7 +25,7 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         'Calculate a coefficient between a fixed start value and any subsequent value in a curve')
 
     def __init__(self, ds_x='', ds_y='', start=50., percent=0., factor=1., 
-                 reconfigure='Stop', smooth=5, smode='X and Y', linearize=150, ds_out='coeff'):
+                 reconfigure='Stop', smooth=5, smode='Output', linearize=150, ds_out='coeff'):
         """Define input fields for plugin."""
         self.fields = [
             plugins.FieldDataset('ds_x', 'X Dataset', default=ds_x),
@@ -79,27 +79,36 @@ class CoefficientPlugin(plugins.DatasetPlugin):
         _yds = helper._doc.data.get(fields['ds_y'])
         x = xds.data
         y = yds.data
-
+        
+        m_percent = getattr(_yds, 'm_percent', None)
         # Remove/guess initial_dimension if an m_percent flag exists
-        if not getattr(_yds, 'm_percent', True):
+        if m_percent is False and initial_dimension<=0:
             initial_dimension = getattr(_yds, 'm_initialDimension', initial_dimension)
-        elif getattr(_yds, 'm_percent', None) is True:
-            initial_dimension = 0
+        elif m_percent is True:
+            initial_dimension = 0 
             
         i = np.where(x > start)[0][0]
         j = None
         
         # Define the end of calc
         j = np.where(x == x.max())[0][0]
-        ymax = y[j]
-        xmax = x[j]
 
+        # If no initial dimension and no % units,
+        # Calculate an ad-hoc initial dimension
+        if m_percent is not True and initial_dimension<=0:
+            m_percent = False # avoid None
+            di = i-10 if i>10 else i
+            dj = i+10 if j-i<10 else j
+            initial_dimension = y[di:dj].mean()
+        
         # Smooth input curves
         if smooth > 0:
             if smode != 'Output':
                 y[i:j] = SmoothDatasetPlugin.smooth(y[i:j], smooth, 'hanning')
             if smode == 'X and Y':
                 x[i:j] = SmoothDatasetPlugin.smooth(x[i:j], smooth, 'hanning')
+                
+
 
         xstart = start
         d = 15
