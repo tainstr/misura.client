@@ -170,15 +170,20 @@ def table_to_datasets(proxy, opt, doc):
         err = None
         if Ecol_name:
             err = tab[Ecol_idx]
-        datasets[base_path] = (tab[idx], opt['handle'], opt['name'], err, opt)
+        opt1 = opt.copy()
+        opt1['unit'] = opt1['unit'][idx]
+        datasets[base_path] = (tab[idx], opt['handle'], opt['name'], err, opt1)
         add_tT(base_path)
     else:
         logging.debug('Generating multi column datasets')
         for idx in value_idxes:
             name = column_names[idx]
             sub_path = base_path + '/' + name
+            
+            if 'unit' in opt1 and isinstance(list, opt1['unit']):
+                opt1['unit'] = opt1['unit'][idx]
             datasets[sub_path] = (tab[idx], name, opt['name'] + ' - ' + name, 
-                                  None, opt)
+                                  None, opt1)
         add_tT(base_path)
     add_datasets_to_doc(datasets, doc)
     return True

@@ -68,6 +68,8 @@ def dataset_curve_name(ds, dsn):
     unit = getattr(ds, 'unit', False)
     if not unit:
         unit = getattr(getattr(ds, 'parent', False), 'unit', False)
+    if isinstance(unit, list):
+        unit=unit[-1]
     if unit:
         u = units.symbols.get(unit, unit)
         ax_label += ' ({{{}}})'.format(u)

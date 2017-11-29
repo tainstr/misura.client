@@ -110,7 +110,11 @@ class AbstractMisuraDataset(object):
         
     @property
     def unit(self):
-        return self.attr['unit']
+        u = self.attr['unit']
+        if isinstance(u, list):
+            u=u[-1]
+        return u
+    
     @unit.setter
     def unit(self, nval):
         if self.m_opt and nval:
