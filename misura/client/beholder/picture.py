@@ -371,7 +371,7 @@ class ViewerPicture(QtGui.QGraphicsView):
         self.calAct = self.amenu.addAction(
             'Pixel Calibration', self.calibration)
         self.calAct.setCheckable(True)
-        self.analysis_actions.append(self.calAct)
+        
         # Remove tool action if modification is not allowed
         if not self.remote.check_write('Analysis_umpx'):
             self.amenu.removeAction(self.calAct)
@@ -385,11 +385,12 @@ class ViewerPicture(QtGui.QGraphicsView):
         
     def update_amenu(self):
         """Enable analysis menu actions only if an analysis is really running"""
+        en = self.remote['Analysis_Simulation']
         for act in self.analysis_actions:
             # Ignore already checked entries
             if act.isChecked():
                 continue
-            act.setEnabled(self.remote['Analysis_Simulation'])
+            act.setEnabled(en)
 
     def reset_regions(self):
         """Re-init samples, resetting regions of interest."""
