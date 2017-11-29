@@ -30,7 +30,7 @@ def dump_preset(obj, keys, fp, preset, conf):
         if entry is None:
             continue
         entry = entry['_entry']
-        if not tosave(entry, ['ReadOnly']):
+        if not tosave(entry, ['ReadOnly', 'Button']):
             continue
         for key, val in entry.iteritems():
             if key in ('name', 'handle', 'type', 'factory_default', 'kid'):
@@ -171,7 +171,13 @@ def make_combo(serials):
     for (serial, name, fp) in serials:
         lbl = 'Name: {}, {}'.format(name, fp)
         c.addItem(lbl, fp)
+    c.addItem('None', '')
     return c
+
+def morla_serial(s):
+    if s.startswith('/morla/'):
+        return s[7:]
+    return s
     
 class SerialNumberReplacer(QtGui.QDialog):
     def __init__(self, filename, srv, parent=None):
@@ -202,6 +208,8 @@ class SerialNumberReplacer(QtGui.QDialog):
                 found = 1
             if new_name == name and not found:
                 c.setCurrentIndex(i)
+            elif not found:
+                c.setCurrentIndex(len(self.new_serials))
                 
         
     def do(self):
@@ -256,10 +264,15 @@ class SerialNumberReplacer(QtGui.QDialog):
         serials = []
         for i, c in enumerate(self.combos):
             c = self.combos[i]
-            new_serial = c.itemData(c.currentIndex())
+            new_serial = str(c.itemData(c.currentIndex()))
+            if not new_serial:
+                continue
+            old_serial = self.old_serials[i][2]
             logging.debug('new_serial', self.old_serials[i][0], new_serial)
-            serials.append((self.old_serials[i][2],
-                            str(new_serial)))
+            serials.append((old_serial, new_serial))
+            if new_serial.startswith('/morla/'):
+                serials.append((morla_serial(old_serial),
+                                morla_serial(new_serial)))
         logging.debug('SERIALS', serials)
         
         r = RunMethod(restore, self.srv, self.filename, serials, override,
