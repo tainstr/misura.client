@@ -21,6 +21,7 @@ def informative_message_box(r, parent=None, limit=200):
 
 class aButton(ActiveWidget):
     get_on_enter = False
+    get_on_leave = False
     """Do not auto-update when mouse enters."""
 
     def __init__(self, server, path,  prop, parent=None):
