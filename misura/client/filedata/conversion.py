@@ -12,7 +12,7 @@ from misura.canon.plugin import default_plot_plugins, default_plot_rules
 from .. import _
 from ..clientconf import confdb
 from .. import widgets
-from .. import plugin
+
 
 from operation import jobs, job, done
 
@@ -86,6 +86,7 @@ def convert_file(caller, path):
 
 def get_default_plot_plugin_class(instrument_name):
     from ..clientconf import confdb
+    from .. import plugin
     plugin_class = default_plot_plugins.get(instrument_name, plugin.DefaultPlotPlugin)
     print 'defaultPlot', plugin_class
     plot_rule_func = default_plot_rules.get(instrument_name, lambda *a: confdb['rule_plot'])

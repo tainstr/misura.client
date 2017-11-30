@@ -20,6 +20,7 @@ class aTime(unittest.TestCase):
     def setUp(self):
         self.root = option.ConfigurationProxy()
         self.root.time = lambda: time() - self.shift
+        self.root.is_live = lambda: True
 
     def wgGen(self, k='val'):
         self.assertTrue(self.root.has_key(k))

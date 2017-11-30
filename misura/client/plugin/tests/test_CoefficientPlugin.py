@@ -37,10 +37,11 @@ class TestCurveOperationPlugin(unittest.TestCase):
 
     """Tests the CurveOperationPlugin."""
     
-    def do(self, ds_x, ds_y, start=50., percent=0., reconfigure='Continue', smooth=5, smode='X and Y', ds_out='coeff'):
+    def do(self, ds_x, ds_y, start=50., percent=0, reconfigure='Continue', smooth=5, smode='X and Y', ds_out='coeff'):
         doc = document.Document()
         insertData(doc, {'ds_x': ds_x, 'ds_y': ds_y})
         ds = doc.data['ds_y']
+        ds.m_percent = percent==0
         doc.setData('ds_y', ds)
         fields = {'ds_x': 'ds_x', 'ds_y': 'ds_y', 'start':start, 'percent':percent, 'reconfigure': reconfigure, 'smooth': smooth, 'smode':smode, 'ds_out': ds_out}
         p = CoefficientPlugin(**fields)
@@ -67,7 +68,6 @@ class TestCurveOperationPlugin(unittest.TestCase):
         yp = 100 * y / inidim
         out = self.do(x, yp, percent=0)[0].data
         self.assertTrue(np.isnan(out[:52]).all())
-        delta = teor*10**-8
         self.assertAlmostEqual(out[51+15:-1].std(), 0, delta = 4e-7)
         self.assertAlmostEqual(out[51+15:-1].mean(), teor, delta = 1e-5)
         
