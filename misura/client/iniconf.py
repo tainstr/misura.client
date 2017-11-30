@@ -102,14 +102,11 @@ def restore(srv, file_path='ini.ini', serials=None, override=[], jobs=lambda *a:
     for sec, key, val in override:
         conf.set(sec, key, repr(val))
         
-    rescan_enumerated(conf, srv)
-        
     jname = 'Import configuration from \n'+str(f1)  
     print conf._sections.values()[0]
     tot = sum(map(lambda sec: len(sec.keys()), conf._sections.values()))
     jobs(tot, jname)
     
-
         
     i = 0
     for sec in conf.sections():
@@ -199,23 +196,31 @@ class SerialNumberReplacer(QtGui.QDialog):
         
         # Search a matching serial
         found = 0
+        N = len(self.new_serials)
         for i, (new_serial, new_name, new_fp) in enumerate(self.new_serials):
+            # Same path
             if new_fp == fp:
                 c.setCurrentIndex(i)
                 break
+            # Same serial
             if new_serial == serial:
                 c.setCurrentIndex(i)
                 found = 1
+            # Same name
             if new_name == name and not found:
                 c.setCurrentIndex(i)
+                found = 1
             elif not found:
-                c.setCurrentIndex(len(self.new_serials))
-                
+                c.setCurrentIndex(N)
+            else:
+                break
         
     def do(self):
         conf = configparser.SafeConfigParser()
         conf.optionxform = str
         conf.read(self.filename)
+        
+        rescan_enumerated(conf, self.srv)
         
         self.old_serials = ast.literal_eval(conf.get(metasection, 'serials'))
         
