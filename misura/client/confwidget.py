@@ -199,13 +199,14 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         self.lay.addWidget(QtGui.QLabel('Recent ' + self.name + 's:'))
 
         self.list = QtGui.QListWidget(self)
-        self.connect(self.list, QtCore.SIGNAL(
-            'itemDoubleClicked(QListWidgetItem *)'), self.select_item)
+        self.list.itemDoubleClicked.connect(self.select_item)
+        self.list.itemSelectionChanged.connect(self.pre_select_item)
         self.connect(self.conf, QtCore.SIGNAL('mem()'), self.redraw)
         self.connect(self.conf, QtCore.SIGNAL('rem()'), self.redraw)
         self.lay.addWidget(self.list)
 
         self.open_button = QtGui.QPushButton(_('Open Selected'), parent=self)
+        self.open_button.setEnabled(False)
         self.connect(
             self.open_button, QtCore.SIGNAL('clicked()'), self.select_item)
         self.lay.addWidget(self.open_button)
@@ -234,15 +235,23 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
             # emitted in select_item
             item.setData(QtCore.Qt.UserRole, sig)
             self.list.addItem(item)
+            
+    def pre_select_item(self, item=False):
+        print('Preselect', item)
+        if not item:
+            item = self.list.currentItem()
+            self.open_button.setEnabled(True)
+        if not item:
+            self.open_button.setEnabled(False)
+            return False
+        return item        
 
     def select_item(self, item=False):
         """Emit the 'select(QString)' signal with the path of the object"""
-        if not item:
-            item = self.list.currentItem()
-        if not item:
-            return
-        
-        self.emit(self.sig_select, item.data(QtCore.Qt.UserRole))
+        item = self.pre_select_item(item)
+        if item:
+            self.emit(self.sig_select, 
+                      item.data(QtCore.Qt.UserRole))
         
 
 class Greeter(QtGui.QWidget):
