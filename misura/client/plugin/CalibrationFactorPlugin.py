@@ -240,27 +240,41 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         T = T[si:ei]
         d = d[si:ei]
         logging.debug('T start, end', start, end)
+
+        # Standard slope
         f = InterpolatedUnivariateSpline(sT, sd, k=2)
         s0 = f(T[0])
-        s_slope = (f(T[-1]) - s0) / (T[-1] - T[0]) # Standard slope
+        s_slope = (f(T[-1]) - s0) / (T[-1] - T[0]) 
         self.f = f
         self.s_slope = s_slope
 
         # Just use to get linearity residuals
-        (quad, slope, const), res, rank, sing, rcond = np.polyfit(
-            T, d, 2, full=True)
+        self.fitting = np.polyfit(T, d, 2, full=True)
+        (quad, slope, const), res, rank, sing, rcond = self.fitting
+        
         self.quad = quad
+        self.slope, self.const = slope, const
+        
+        #self.std_fitting = np.polyfit(d-d[0], d-d[0]-f(T)+f(T[0]), 2, full=True)
+        #self.std_quad, self.std_slope, self.std_const = self.std_fitting[0]
+        
         z_slope = (d[-1] - d[0]) / (T[-1] - T[0]) # Sample slope
         z_const = ds.data[0]
         res = np.sqrt(res[0] / len(T))
         # Convert from percentage to micron
         um = res * self.inidim / 100
         factor = s_slope / z_slope
+        
+        
         micron = u'\u03bcm'
         msg = _('Calibration factor: {} \nStandard deviation: \n    {} %\n    {} {}').format(
             factor, res, um, micron)
+        #msg += _('\nLinear: {} \nSquared: {}'.format(self.std_slope/self.slope,
+        #                                            self.std_quad/self.quad))
+        
         self.msg = msg
-        self.slope, self.const = slope, const
+        logging.debug(msg)
+        
         self.fld, self.ds, self.d, self.sT, self.sd = fields, ds, d, sT, sd
         self.factor, self.res, self.um = factor, res, um
         if fields['label']:
