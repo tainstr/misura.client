@@ -197,8 +197,8 @@ class DatabaseTable(QtGui.QTableView):
         if self.menu_add_to:
             self.menu_add_to.clear()
             for i,tab in enumerate(self.browser.list_tabs()[1:]):
-                open_function = lambda: self.add_to_tab(i+1)
-                self.menu_add_to.addAction(tab.title, open_function) 
+                open_function = functools.partial(self.add_to_tab,i+1)
+                self.menu_add_to.addAction(tab.title, open_function)
         self.menu.popup(self.mapToGlobal(pt))
         
         
