@@ -184,7 +184,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         'Get calibration factor from standard expansion curve')
     preserve = True
 
-    def __init__(self, d='', T='', std='NIST-SRM738', start=50, end=50, label=True, add=True):
+    def __init__(self, d='', T='', std='NIST-SRM738', start=50, end=50, label=True, add=True, idx0=0):
         """Make list of fields."""
 
         self.fields = [
@@ -201,6 +201,8 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 'label', _('Draw calibration label'), default=label),
             plugins.FieldBool(
                 'add', _('Add calibration datasets'), default=add),
+            plugins.FieldFloat(
+                'idx0', descr=_('Start index'), default=idx0),       
         ]
 
     def apply(self, cmd, fields):
@@ -210,7 +212,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         """
         self.ops = []
         self.doc = cmd.document
-
+        idx0 = fields['idx0']
         ds = self.doc.data[fields['d']]
         Ts = self.doc.data[fields['T']]
         # Convert to percent, if possible
@@ -218,13 +220,13 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         if not getattr(ds, 'm_percent', False):
             if self.inidim:
                 ds = units.percent_conversion(ds, 'To Percent', auto=False)
-        T = Ts.data
+        T = Ts.data[idx0:]
         self.T = T
         # Cut away any cooling
         while max(T) != T[-1]:
             i = np.where(T == max(T))[0]
             T = T[:i]
-        d = ds.data[:len(T)]
+        d = ds.data[idx0:len(T)+idx0]
 
         # Standard
         S = standards[fields['std']]
