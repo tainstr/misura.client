@@ -106,8 +106,9 @@ class StorageSync(object):
         self.transfer.dbpath = self.dbpath
         self.transfer.uid = uid
         self.transfer.server = self.server
+        self.transfer.outfile = False
         self.transfer.start()
-
+        
         return True
 
     def exclude_record(self, record):
