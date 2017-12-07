@@ -231,14 +231,10 @@ def assign_label(ds, col0):
         ds.m_label = _("Temperature")
     elif getattr(ds, 'm_opt', False):
         ds.m_label = _(ds.m_opt["name"])
-        if ds.m_opt.has_key('csunit'):
-            ds.old_unit = ds.m_opt["csunit"]
     else:
         ds_object, ds_name = ds.m_conf.from_column(col0)
         opt = ds_object.gete(ds_name)
         ds.m_label = _(opt["name"])
-        if opt.has_key('csunit'):
-            ds.old_unit = opt["csunit"]
 
 
 def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
