@@ -241,9 +241,9 @@ class MenuBar(QtGui.QMenuBar):
         self.measure.clear()
         if not self.fixedDoc:
             self.measure.addAction(
-                _('Repeat initialization'), self.parent().init_instrument)
+                _('Repeat initialization'), parent.init_instrument)
             self.measure.addAction(
-                _('Delayed start'), self.parent().delayed_start)
+                _('Delayed start'), parent.delayed_start)
         # TODO: Share windows definitions with mainwin?
         self.windows['measureDock'] = parent.measureDock
         self.showMeasureDock = functools.partial(self.hideShow, 'measureDock')

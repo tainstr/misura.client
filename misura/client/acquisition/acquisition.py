@@ -125,7 +125,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.area)
         self.setMinimumSize(800, 600)
         self.setWindowTitle(_('Misura Live'))
-        self.add_menubar()
+        self.add_menubar(setInstrument=False)
         
         self.add_statusbar()
         self.add_server_selector()
@@ -379,7 +379,7 @@ class MainWindow(QtGui.QMainWindow):
                 return False
         registry.toggle_run(True)
         self.serverDock.hide()
-        self.add_menubar()
+        self.add_menubar(setInstrument=False)
         self.rem('logDock')
         self.logDock = QtGui.QDockWidget(self.centralWidget())
         self.logDock.setWindowTitle('Log Messages')
