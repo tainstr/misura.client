@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from time import sleep
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from PyQt4 import QtGui, QtCore
 from ..procedure import thermal_cycle
 from .. import conf, widgets, _
 from ..live import registry
-import status
+from . import status
 
 
 class MeasureInfo(QtGui.QTabWidget):
@@ -44,7 +45,7 @@ class MeasureInfo(QtGui.QTabWidget):
 
         self.nobj.register()
         self.connect(self.nobj, QtCore.SIGNAL('changed()'),
-                     self.refreshSamples, QtCore.Qt.QueuedConnection)
+                     self.delayed_refresh_samples, QtCore.Qt.QueuedConnection)
         self.connect(
             self, QtCore.SIGNAL("currentChanged(int)"), self.tabChanged)
         #self.connect(
@@ -98,7 +99,8 @@ class MeasureInfo(QtGui.QTabWidget):
         self.setCurrentIndex(current)
 
     def refreshSamples(self, *foo):
-        nsmp = self.nobj.current
+        nsmp = self.nobj.get()
+        logging.debug('REFRESH SAMPLES', nsmp, self.nsmp)
         if self.nsmp == nsmp and self.nodeViews and self.nodes and self.count() > 2:
             logging.debug('NO CHANGE in samples number', self.nsmp, nsmp)
             return False
@@ -125,9 +127,14 @@ class MeasureInfo(QtGui.QTabWidget):
         self.setCurrentIndex(current)
         self.blockSignals(False)
         return True
+    
+    def delayed_refresh_samples(self, *foo):
+        #sleep(0)
+        self.nodes=[]
+        self.refreshSamples()
 
     def get_samples(self):
-        nsmp = self.nobj.current
+        nsmp = self.nobj.get()
         self.nsmp = nsmp
         paths = []
         p0 = self.remote['fullpath']
@@ -135,13 +142,16 @@ class MeasureInfo(QtGui.QTabWidget):
         for i in range(self.nsmp+1):
             n = 'sample' + str(i)
             if not self.remote.has_child(n):
-                continue
+                logging.debug('get_samples: missing sample nr', n)
+                break
+            logging.debug('Found sample', n)
             sample = getattr(self.remote, n)
             paths.append(p0 + n)
         return paths
 
     def refresh_nodes(self, nodes=[]):
         # Remove all node tabs
+        logging.debug('REFRESH NODES')
         for nodevi in self.nodeViews.itervalues():
             i = self.indexOf(nodevi)
             if i < 0:
@@ -153,12 +163,15 @@ class MeasureInfo(QtGui.QTabWidget):
         if not nodes:
             nodes = self.get_samples()
         if not nodes:
+            logging.debug('No further tabs', nodes)
             return False
         self.nodes = []
         self.menus = []
         c = self.count()+1
+        logging.debug('Inserting nodes', nodes)
         for i, n in enumerate(nodes):
             if n in self.nodes:
+                logging.debug('Node was already added to tab', n)
                 continue
             node = self.server.toPath(n)
             if not node:
@@ -170,9 +183,11 @@ class MeasureInfo(QtGui.QTabWidget):
                 wg = conf.Interface(
                     self.server, node, node.describe(), parent=None)
             j = c + i
+            logging.debug('Inserting tab node', n, j, node)
             self.insertTab(j, wg, node['devpath'].capitalize())
             self.nodeViews[n] = wg
             self.nodes.append(n)
+            logging.debug('Inserted tab node', n, j)
         return True
 
     def show_menu(self, pos):
