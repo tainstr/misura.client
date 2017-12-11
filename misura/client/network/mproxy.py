@@ -257,13 +257,14 @@ class MisuraProxy(common_proxy.CommonProxy):
             self.remObj = getattr(self.remObj, p)
         self._Method__name = self.remObj._Method__name
         self._parent = False
+        return True
         
 
     @lockme()
     def connect(self):
         oldname = self._to_root()
         # Restore object path's
-        self._toMethodName(oldname)
+        return self._toMethodName(oldname)
 
     def _wait(self,  timeout=120):
         """Wait for connection"""
@@ -323,8 +324,8 @@ class MisuraProxy(common_proxy.CommonProxy):
         """Return a copy of this object with a new HTTP connection."""
         if not reconnect:
             reconnect = self
-        obj = self.__class__(
-            self.addr, self.user, self.password, proxy=reconnect)
+        obj = self.__class__(self.addr, self.user, 
+                             self.password, proxy=reconnect)
         obj.paste(self)
         return obj
 
@@ -435,7 +436,9 @@ class MisuraProxy(common_proxy.CommonProxy):
             if lst[0] == 'server':
                 lst.pop(0)
         obj = self.copy()
-        obj._toMethodName(self.separator.join(lst))
+        ok = obj._toMethodName(self.separator.join(lst))
+        if not ok:
+            return None
         return obj
 
     def from_column(self, col0):

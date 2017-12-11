@@ -594,7 +594,6 @@ class Interface(QtGui.QTabWidget):
         return wg
 
     def scroll_to(self, area, x, y):
-        logging.debug('SCROLL_TO', area, x, y)
         area.ensureVisible(x, y - 50)
 
     def close(self):

@@ -207,7 +207,7 @@ class Active(object):
             logging.debug('Active.update_option', self.handle)
         self.prop = prop
         for p in 'current', 'type', 'handle', 'factory_default', 'attr', 'readLevel', 'writeLevel', 'name':
-            setattr(self, p, prop[p])
+            setattr(self, p, prop.get(p, None))
         write_level = getattr(self.remObj, '_writeLevel', 5)
         self.readonly = (self.type == 'ReadOnly') or (
             'ReadOnly' in self.attr) or (write_level < self.writeLevel)
