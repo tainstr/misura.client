@@ -254,7 +254,7 @@ def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
     return u
 
 def resolve_unit(ds, opt, default):
-    """Get unit from RoleIO"""
+    """Get unit from RoleIO option"""
     if not opt:
         logging.debug('No OPT', ds.name)
         ds.unit = default
