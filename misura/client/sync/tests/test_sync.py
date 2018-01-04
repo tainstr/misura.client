@@ -79,6 +79,8 @@ class StorageSync(unittest.TestCase):
         class FakeTransfer:
             def download_uid(*args):
                 pass
+            def start(self):
+                pass
 
         r = self.sync.collect()
         print 'collect', r

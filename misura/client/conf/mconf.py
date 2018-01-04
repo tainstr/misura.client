@@ -90,6 +90,8 @@ class TreePanel(QtGui.QSplitter):
         logging.debug('selecting remote path', path)
         obj = self.remote.toPath(path)
         logging.debug('found object', obj)
+        if obj is None:
+            obj = self.remote.root
         self.select_remote(obj, keepCurrent)
 
     def select_remote(self, obj, keepCurrent=False):
