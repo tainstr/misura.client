@@ -120,12 +120,13 @@ class CoefficientPlugin(plugins.DatasetPlugin):
                                     getattr(_yds, 'm_percent', False), 
                                     linearize=fields.get('linearize', 0))
         out[:i+d] = np.nan
-
+        out[x<start] = np.nan
         # TODO: multiple ramps
         # Detect the maximum temperature
         # and start a new coefficient point
         if recon == 'Stop':
-            out[j:] = np.nan
+            dT = np.concatenate(([1],np.diff(SmoothDatasetPlugin.smooth(x, smooth, 'hanning'))))
+            out[dT<0] = np.nan
         else:
             restart_index = np.where(x == x.max())[0][0]
 
