@@ -736,6 +736,10 @@ class aTableView(QtGui.QTableView):
             return False
         self.make_rotation_action(menu)
         menu.addAction(_('Export'), self.export)
+        menu.addSeparator()
+        if not self.tableObj.readonly:
+            menu.addAction(_('Add row'), self.addRow)
+        
         menu.popup(header.mapToGlobal(pt))
 
     def export(self):
