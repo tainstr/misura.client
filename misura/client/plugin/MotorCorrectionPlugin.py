@@ -44,4 +44,4 @@ class MotorCorrectionPlugin(plugins.ToolsPlugin):
             raise plugins.ToolsPluginException(
                 'misura tests cannot be corrected, as motor movement correction is performed runtime.')
         pass
-plugins.toolspluginregistry.append(MotorCorrectionPlugin)
+#plugins.toolspluginregistry.append(MotorCorrectionPlugin)
