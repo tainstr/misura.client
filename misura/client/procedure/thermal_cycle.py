@@ -410,9 +410,11 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         logging.debug(fname)
         f = open(fname, 'r')
         crv = []
+        t = 0
         for row in f:
             if row[0] == '#':
                 continue
+            row = row.replace(' ', '')
             row = row.replace(',', '.')
             row = row.split(';')
             t = float(row[0])
