@@ -236,6 +236,13 @@ def assign_label(ds, col0):
         opt = ds_object.gete(ds_name)
         ds.m_label = _(opt["name"])
 
+def get_unit_hdf_attr(fileproxy, hdf_dataset_name, unit_attr):
+    u = fileproxy.get_node_attr(hdf_dataset_name, unit_attr)
+    if u in ['', 'None', None, False, 0]:
+        u = False
+    elif hasattr(u, '__iter__'):
+        u = u[-1]
+    return u
 
 def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
     """Get measurement unit from hdf attribute or guess it for t, T"""
@@ -243,11 +250,11 @@ def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
     if hdf_dataset_name == 't':
         u = 'second'
     elif len(data):
-        u = fileproxy.get_node_attr(hdf_dataset_name, 'unit')
-        if u in ['', 'None', None, False, 0]:
-            u = False
-        elif hasattr(u, '__iter__'):
-            u = u[-1]
+        # Detect csunit in saved version
+        u = get_unit_hdf_attr(fileproxy, hdf_dataset_name, 'csunit')
+        if not u:
+            # Try default unit
+            u = get_unit_hdf_attr(fileproxy, hdf_dataset_name, 'unit')
         # Correct missing celsius indication
         if not u and m_var == 'T':
             u = 'celsius'
@@ -263,12 +270,14 @@ def resolve_unit(ds, opt, default):
     ds.m_opt = opt
     obj, io = option.resolve_role(ds.m_conf, opt)
     io = io or opt
-    ds.unit = io.get('unit', ds.old_unit)
-    if ds.unit == 'None':
-        ds.unit = default
-    ds.old_unit = io.get('unit', default)
-    if ds.old_unit == 'None':
-        ds.old_unit = ds.unit
+    original_unit = io.get('unit', ds.old_unit)
+    client_unit = io.get('csunit', original_unit)
+    if client_unit == 'None':
+        client_unit = default
+    if original_unit == 'None':
+        original_unit = client_unit
+    ds.unit = client_unit
+    ds.old_unit = original_unit
     return True
        
 
@@ -313,6 +322,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
         # Units conversion
         nu = rule_unit(hdf_dataset_name)
         if unit and nu:
+            logging.debug('Conveting units:', hdf_dataset_name, unit, nu, ds.unit, ds.old_unit)
             ds = units.convert(ds, nu[0])
             logging.debug('New dataset unit', ds.unit, ds.old_unit, nu[0])
     elif prefixed_dataset_name.endswith('_t'):
