@@ -65,6 +65,9 @@ class TestWindow(acquisition.MainWindow):
         if self.vtoolbar:
             self.vtoolbar.hide()
         self.vtoolbar = self.summaryPlot.plot.createToolbar(self)
+        veusz.utils.addToolbarActions(self.vtoolbar, 
+                                      self.summaryPlot.treeedit.vzactions, 
+                                      ('add.key', 'add.label', 'add.shapemenu'))
         self.vtoolbar.show()
         self.graphWin.show()
         
