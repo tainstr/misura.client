@@ -16,6 +16,7 @@ def create_images_report(decoder,
                          output = False,
                          startTemp=0,
                          step=1,
+                         timeStep=0,
                          jobs=lambda *x, **k: None,
                          job=lambda *x, **k: None,
                          done=lambda *x, **k: None,
@@ -37,10 +38,13 @@ def create_images_report(decoder,
     if idx0!=0:
         v=[0]+v
     last_temperature = int(T0)
+    last_time = t0
     i=0
     i0=-1
     time=0
     step_sign=1
+    # Always take most frequent, non-zero criteria
+    # between step and timeStep
     while i<total_number_of_images:
         if check_abort():
             logging.debug('Export aborted')
@@ -48,29 +52,34 @@ def create_images_report(decoder,
             return False
         
         if image_count>1:
-            last_temperature+=step_sign*step
-            i, nt, nT = decoder.proxy.nearest(Tpath, last_temperature)
-            print 'new T', i, nt, nT
-            # If going backward, try inverting the time
-            if nt<=time:
-                step_sign*=-1
-                logging.debug('Inverted step sign:', step_sign)
-                last_temperature+=2*step_sign*step
+            if step>0:
+                last_temperature+=step_sign*step
                 i, nt, nT = decoder.proxy.nearest(Tpath, last_temperature)
-                # If time is still backward, means there are no more points
+                print 'new T', i, nt, nT
+                # If going backward, try inverting the time
                 if nt<=time:
-                    logging.debug('End decoding: no more increments')
-                    break
+                    step_sign*=-1
+                    logging.debug('Inverted step sign:', step_sign)
+                    last_temperature+=2*step_sign*step
+                    i, nt, nT = decoder.proxy.nearest(Tpath, last_temperature)
+                    # If time is still backward, means there are no more points
+                    if nt<=time:
+                        logging.debug('End decoding: no more increments')
+                        break
+            # Enforce minimum timeStep requirement
+            if nt-last_time<timeStep:
+                nt = last_time+timeStep
+            # Get actual image index
             i = decoder.get_time(nt)
             
         if i<=i0:
             logging.debug('No more images', i0, i)
             break
         time, qimage = decoder.get_data(i)
+        last_time = time
         i0=i
 
         nt, image_temperature = decoder.proxy.col_at_time(Tpath, time, True)
-        
         image_data = byte_array_from(qimage)
         all_images_data.append([image_data,
                                 image_count,

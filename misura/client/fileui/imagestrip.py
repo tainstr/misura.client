@@ -58,8 +58,11 @@ def export_images_option_dialog(parent, max_temp):
             opts, 'start', 'Integer', name=_("Discard images below temperature"),
                   unit='celsius', current=0, min=0, max=max_temp+1, step=1)
         option.ao(
-            opts, 'step', 'Float', name=_("Temperature stepping"),
+            opts, 'step', 'Float', name=_("Minimum Temperature stepping"),
                   unit='celsius', current=1, min=0, max=50, step=0.1)
+        option.ao(
+            opts, 'timeStep', 'Float', name=_("Minimum Time stepping"),
+                  unit='second', current=0, min=0, max=600, step=0.1)
         configuration_proxy = option.ConfigurationProxy(
             {'self': opts})
         temperature_dialog = conf.InterfaceDialog(
@@ -137,6 +140,7 @@ class ImageStrip(QtGui.QWidget):
             characteristic_shapes,
             startTemp=opts['start'],
             step=opts['step'],
+            timeStep = opts['timeStep'],
             output = output_filename,
             jobs = registry.tasks.jobs,
             job = registry.tasks.job,
