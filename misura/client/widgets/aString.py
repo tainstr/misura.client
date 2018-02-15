@@ -1,13 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from time import time
 from misura.client.widgets.active import QtGui, QtCore, ActiveWidget
 from .. import _
 
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 class aString(ActiveWidget):
 
     """Graphical element for interacting with a text string"""
+    editing_pause = 0.5
+    last_edited = 0
     
     def __init__(self, server, path,  prop, parent=None, extended=False):
         self.extended = extended
@@ -42,7 +46,11 @@ class aString(ActiveWidget):
         return unicode(val)
 
     def update(self):
+        if time()-self.last_edited<self.editing_pause:
+            # Avoid updating while editing
+            return
         self.disconnect(self.browser, QtCore.SIGNAL(self.signal), self.text_updated)
+        self.browser.setReadOnly(True)
         val = self.adapt(self.current)
         self.readonly_label.setText(val)
         if self.extended:
@@ -65,9 +73,9 @@ class aString(ActiveWidget):
             self.current = self.browser.toPlainText()
         else:
             self.current = self.browser.text()
+        self.last_edited = time()
         self.remObj.set(self.handle, self.current)
         
 
     def emitOptional(self):
-        #       print 'textEdited(QString)', self.current
         self.emit(QtCore.SIGNAL('textEdited(QString)'), self.current)

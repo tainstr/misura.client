@@ -764,8 +764,7 @@ class ActiveWidget(Active, QtGui.QWidget):
             return False
 
     def enterEvent(self, event):
-        """Update the widget anytime the mouse enters its area.
-        This must be overridden in one-shot widgets, like buttons."""
+        """Update the widget anytime the mouse enters its area."""
         if self.get_on_enter:
             self.get()
         # Show only if label_widget is not visible

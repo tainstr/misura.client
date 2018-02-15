@@ -6,9 +6,11 @@ from traceback import format_exc
 from misura.client.parameters import MAX, MIN, MAXINT, MININT
 from misura.client.widgets.active import ActiveWidget, extend_decimals
 import math
-from misura.canon.logger import get_module_logging
+
 from misura.canon.csutil import lockme
 import numpy as np
+
+from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 
 from traceback import print_exc
