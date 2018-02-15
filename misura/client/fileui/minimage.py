@@ -8,6 +8,11 @@ from ...canon import csutil
 from misura.client import _
 import os
 
+def meta_lbl(opt):
+    opt = opt.replace('summary', '').replace('//', '/').split('/')[-1]
+    if opt.endswith(':t'):
+        return 'Time'
+    return opt
 
 class MiniImage(QtGui.QWidget):
 
@@ -41,9 +46,10 @@ class MiniImage(QtGui.QWidget):
         self.lbl_info = QtGui.QLabel(parent=self)
         self.lay.addWidget(self.lbl_info)
         self.lbl_info.hide()
-        self.meta = {'T': None}
-        self.doc = doc
         logging.debug('datapath', datapath)
+        Tpath = '/'.join(datapath.split('/')[:-1])+'/T'
+        self.meta = {Tpath: None}
+        self.doc = doc
         self.decoder = doc.decoders.get(datapath, False)
         self.img = QtGui.QImage()
         self.curWidth = curWidth
@@ -150,29 +156,38 @@ class MiniImage(QtGui.QWidget):
 
     def update_info(self):
         """Update info label"""
-        if not self.doc.data.has_key('0:t'):
-            logging.debug('No time dataset still')
+        if not len(self.meta):
+            return
+        tk = list(self.meta.keys())[0].split(':')[0]+':t'
+        if not self.doc.data.has_key(tk):
+            logging.debug('No time dataset still', tk)
             self.lbl_info.hide()
             return False
         p = self.base_dataset_path
 
         # Document-based index
-        idx = csutil.find_nearest_val(self.doc.data['0:t'].data, self.t)
+        idx = csutil.find_nearest_val(self.doc.data[tk].data, self.t)
         self.doc_idx = idx
         for k in self.meta.keys():
-            p1 = '0:' + p[1:] + '/' + k
-            ds = self.doc.data.get(p1, None)
+            ds = self.doc.data.get(k, None)
             if ds is None:
-                logging.debug('update_info: no target dataset was found', k, p1)
+                logging.debug('update_info: no target dataset was found', k)
                 self.meta[k] = None
                 continue
             self.meta[k] = ds.data[idx]
 
         msg = ''
         for k, v in self.meta.items():
+            lbl = meta_lbl(k)
             if v is None:
                 continue
-            msg += '{}: {:.2f}\n'.format(k, v)
+            if k.endswith(':t'):
+                m, s = divmod(v, 60.)
+                h, m = divmod(m, 60.)
+                print(v, h,m,s)
+                msg += '{}:{}:{}\n'.format(int(h), int(m), int(s))
+            else:
+                msg += '{}: {:.2f}\n'.format(lbl, v)
         if not len(msg):
             logging.debug('No metadata to update', self.meta)
             self.lbl_info.hide()
@@ -204,7 +219,7 @@ class MiniImage(QtGui.QWidget):
         self.meta_act = []
         for k in self.meta.keys():
             f = functools.partial(self.del_meta, k)
-            a = self.meta_menu.addAction(k, f)
+            a = self.meta_menu.addAction(meta_lbl(k), f)
             self.meta_act.append((a, f))
 
         self.menu.popup(self.mapToGlobal(pt))
@@ -264,7 +279,6 @@ class MiniImage(QtGui.QWidget):
         opt = str(event.mimeData().text())
         if opt.startswith('point:'):
             return
-        opt = opt.replace('summary', '').replace('//', '/').split('/')[-1]
         logging.debug('Adding sample option:', opt)
         self.meta[opt] = 0
         self.update_info()
