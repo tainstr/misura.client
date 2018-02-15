@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """Simple plotting for browser and live acquisition."""
+from base64 import b64encode
+import os
+
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from misura.canon import version as canon_version
@@ -8,7 +11,7 @@ from misura.client import version as client_version
 import veusz.plugins
 import veusz.document as document
 import utils
-
+from misura.client.clientconf import confdb
 
 class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
 
@@ -63,6 +66,20 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         self.dict_toset(page_wg, {'notes': title})
         self.ops.append(document.OperationWidgetMove(label.path,page_wg.path,0))
         return True
+    
+    def add_logo(self, wg):
+        f = confdb['rule_logo']
+        if f and os.path.exists(f):
+            pix = open(f, 'rb').read()
+        else:
+            return False
+        self.ops.append(document.OperationWidgetAdd(wg, 'imagefile', name='logo', 
+                                    filename='{embedded}',
+                                    embeddedImageData=unicode(b64encode(pix)),
+                                    xPos=0.95, yPos=0.05,
+                                    positioning='relative'
+                                    ))
+        return True
 
     def create_page_temperature(self, page):
         wg = self.create_page_and_grid(page)
@@ -71,6 +88,7 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         title = self.fields.get('title', False) or 'By Temperature'
         self.make_title(wg, title)
         graph = wg.getChild('temp')
+        self.add_logo(graph)
         self.adjust_graph(graph, u'Temperature (°C)')
 
     def create_page_time(self, page):
@@ -81,6 +99,7 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         title = self.fields.get('title', False) or 'By time'
         self.make_title(wg, title)
         graph = wg.getChild('time')
+        self.add_logo(graph)
         self.adjust_graph(graph, 'Time (s)')
 
 

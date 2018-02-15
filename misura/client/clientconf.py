@@ -119,6 +119,8 @@ ao(default_desc, 'rule_style', 'Table', rule_style, 'Formatting')
 
 ao(default_desc, 'rule_autoformat', 'Chooser', 'Line Style', 'Differentiate curves on same axis by', options=['Line Style', 'Line Color'])
 
+ao(default_desc, 'rule_logo', **{'name': 'Plot Logo','current': '','type': 'FilePath'})
+
 ao(default_desc, 'm3', 'Section', 'Data import', 'Data import')
 ao(default_desc, 'm3_enable', 'Boolean', True, 'Enable Misura 3 database interface')
 ao(default_desc, 'm3_plugins', 'TextArea', 'thegram', 'Import plugins by name')
