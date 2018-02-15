@@ -9,7 +9,7 @@ import veusz.utils
 from misura.client.iutils import get_plotted_tree
 from misura.client.colors import colorize, colorLevels
 import utils
-
+from misura.client.clientconf import confdb
 from PyQt4 import QtGui
 
 lineStyles = ['solid', 'dashed', 'dotted', 'dash-dot',
@@ -107,7 +107,9 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
     def __init__(self, dataset='Line Color', sample='Line Style', space=False):
         """Make list of fields."""
-
+        if not dataset:
+            sample = confdb['rule_autoformat']
+            dataset = 'Line Color' if sample=='Line Style' else 'Line Style'
         self.fields = [
             plugins.FieldCombo(
                 "dataset", descr="Datasets marking mode:", items=defvars.keys(), default=dataset),
