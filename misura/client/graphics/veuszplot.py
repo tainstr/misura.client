@@ -6,6 +6,7 @@ from functools import partial
 from base64 import b64encode
 
 from misura.canon.logger import get_module_logging
+from wx.lib.agw.flatmenu import GetMRUEntryLabel
 logging = get_module_logging(__name__)
 from veusz import qtall as qt4
 from PyQt4 import QtGui, QtCore
@@ -59,6 +60,10 @@ def process_image_dropEvent(plot_window, drop_event):
         name = unicode(drop_event.mimeData().data("text/plain"))
         name = name.replace(':/',':').replace('/','_')
         cmd.To(graph.path)
+        try:
+            cmd.Remove(name)
+        except:
+            pass
         cmd.Add('imagefile', name=name, autoadd=False)
         cmd.To(name)
         cmd.Set('filename', '{embedded}')
