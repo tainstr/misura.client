@@ -36,6 +36,8 @@ class MotorSlider(aNumber):
         self.labelact.setDefaultWidget(self.label_widget)
         self.menu.addAction(self.spinact)
         self.menu.addAction(self.labelact)
+        self.zoomact = self.menu.addAction('Zoom', self.toggle_zoom)
+        self.zoomact.setCheckable(True)
         if self.server._readLevel>=4:
             self.cfact = self.menu.addAction(_('Configure'), self.hide_show)
             self.cfact.setCheckable(True)
@@ -116,7 +118,14 @@ class MotorSlider(aNumber):
             s = 100 * (1 - abs(self.current - s) / d)
         msg = '%i%%' % abs(s)
         self.label_widget.setText(msg)
+        self.zoomact.setChecked(self.slider.zoomed)
         return r
+    
+    def toggle_zoom(self):
+        logging.debug('Toggle zoom', self.zoom_factor)
+        self.slider.zoomed=not self.slider.zoomed
+        self.setZoom()
+        
 
 
 class MotorSliderAction(QtGui.QWidgetAction):
