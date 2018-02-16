@@ -432,7 +432,7 @@ class ViewerPicture(QtGui.QGraphicsView):
             if name  == 'y' or (name == 'x' and not self.hide_x_controls()):
                 slider = widgets.MotorSlider(
                     self.server, obj, parent=self.parent)
-                slider.layout().removeWidget(slider.spinbox)    #.hide()
+                slider.layout().removeWidget(slider.spinbox)    
                 self.parent.setControl(slider, cpos[name], inversion=invc)
                 self.motor_ctrl[name] = slider
 
@@ -448,8 +448,36 @@ class ViewerPicture(QtGui.QGraphicsView):
 
         for label, name in self.remote.encoder.list():
             add_coord(name)
+            
         self.add_conf_action(menu, self.remote.encoder, txt='Spatial encoder')
-
+        
+    def keyPressEvent(self, e):
+        """Transmit arrow presses to the controls"""
+        c = self.parent.controls['bottom']
+        def increment(c,s):
+            if not c:
+                return
+            slider = c.slider
+            d = s*slider.singleStep()
+            if slider.invertedControls():
+                d*=-1
+            slider.setValue(slider.value()+d)
+        if e.key()==QtCore.Qt.Key_Left:
+            increment(c, -1)
+            return
+        if e.key()==QtCore.Qt.Key_Right:
+            increment(c, +1)
+            return
+        c = self.parent.controls['left']
+        if e.key()==QtCore.Qt.Key_Down:
+            increment(c, -1)
+            return            
+        if e.key()==QtCore.Qt.Key_Up:
+            increment(c, +1)
+            return
+        return QtGui.QWidget.keyPressEvent(self, e)
+        
+    
     def add_imaging_actions(self, menu):
         """Create menu actions for imaging controls"""
         for h in ['exposureTime', 'contrast', 'brightness', 'gamma', 'gain', 'saturation', 'hue']:
