@@ -453,6 +453,8 @@ class ViewerPicture(QtGui.QGraphicsView):
         
     def keyPressEvent(self, e):
         """Transmit arrow presses to the controls"""
+        if e.modifiers():
+            return QtGui.QWidget.keyPressEvent(self, e)
         c = self.parent.controls['bottom']
         def increment(c,s):
             if not c:

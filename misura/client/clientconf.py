@@ -117,7 +117,7 @@ rule_style = [[('Rule', 'String'), ('Range', 'String'), ('Scale', 'Float'),
               ]
 ao(default_desc, 'rule_style', 'Table', rule_style, 'Formatting')
 
-ao(default_desc, 'rule_autoformat', 'Chooser', 'Line Style', 'Differentiate curves on same axis by', options=['Line Style', 'Line Color'])
+ao(default_desc, 'rule_autoformat', 'Chooser', 'Line Color', 'Mark curves sharing same axis by:', options=['Line Style', 'Line Color'])
 
 ao(default_desc, 'rule_logo', **{'name': 'Plot Logo','current': '','type': 'FilePath'})
 
