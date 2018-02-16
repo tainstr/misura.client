@@ -184,8 +184,6 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
     def arrange(self, graphics_names, plotted_dataset_names=False):
         arrange_fields = {'currentwidget': '/time/time',
-                          'dataset': 'Line Color',
-                          'sample': 'Line Style',
                           'space': True,
                           'plotted_dataset_names': plotted_dataset_names}
 

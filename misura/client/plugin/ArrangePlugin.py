@@ -105,26 +105,27 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     description_full = 'Arrange Y Axes and curve colors and marker styles following Misura samples grouping.'
     preserve = True
 
-    def __init__(self, dataset='Line Color', sample='Line Style', space=False):
+    def __init__(self, axis='Line Color', path='Line Style', space=False):
         """Make list of fields."""
-        if not dataset:
-            sample = confdb['rule_autoformat']
-            dataset = 'Line Color' if sample=='Line Style' else 'Line Style'
+        if not axis:
+            axis = confdb['rule_autoformat']
+            path = 'Line Color' if axis=='Line Style' else 'Line Style'
         self.fields = [
             plugins.FieldCombo(
-                "dataset", descr="Datasets marking mode:", items=defvars.keys(), default=dataset),
+                "axis", descr="Mark curves sharing same axis by:", items=defvars.keys(), default=axis),
             plugins.FieldCombo(
-                "sample", descr="Samples marking mode:", items=defvars.keys(), default=sample),
+                "path", descr="Mark curves sharing same path by:", items=defvars.keys(), default=path),
             plugins.FieldBool(
-                "space", descr="Axis positioning:", default=space)
+                "space", descr="Auto axis positioning:", default=space)
         ]
 
     def arrange_axes(self, tree, graph):
         """Adjust Axes colors and positions"""
         axes = sorted(tree['axis'].keys())
         axcolors = {}
-        
-        for axp in axes[:]:
+        axstyles = {}
+        axmarkers = {}
+        for idx, axp in enumerate(axes[:]):
             ax = self.doc.resolveFullWidgetPath(axp)
             if not axp.startswith(graph) or ax.settings.direction != 'vertical':
                 axes.remove(axp)
@@ -132,6 +133,8 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             # Normalize colors to their html #code
             axcolors[ax.name] = str(QtGui.QColor(
                 ax.settings.Line.color).name())
+            axstyles[ax.name] = lineStyles[idx]
+            axmarkers = veusz.utils.MarkerCodes[idx]
             
         dataset_ax_colors = defaultdict(set)
         dataset_colors = set()
@@ -151,6 +154,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             tot = 0
 
         for idx, axpath in enumerate(axes):
+            props = {}
             ax = self.doc.resolveFullWidgetPath(axpath)
             other_ax_colors = axcolors.copy()
             other_ax_colors.pop(ax.name)
@@ -158,7 +162,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             used += list(dataset_colors-dataset_ax_colors[axpath])
             color = '#000000'
             dscolor = dataset_ax_colors[ax.name]
-            if self.fields['dataset'] == 'Line Color':
+            if self.fields['axis'] == 'Line Color':
                 if hasattr(ax, 'm_auto'):
                     color = axcolors[ax.name]
                     logging.debug('m_auto override', color)
@@ -167,12 +171,12 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 elif len(axes) > 1:
                     # Generate html color for this idx
                     color = find_unused_color(used)
-            axcolors[ax.name] = color
-            props = {'Line/color': color,
-                     'Label/color': color,
-                     'TickLabels/color': color,
-                     'MajorTicks/color': color,
-                     'MinorTicks/color': color}
+                axcolors[ax.name] = color
+                props = {'Line/color': color,
+                         'Label/color': color,
+                         'TickLabels/color': color,
+                         'MajorTicks/color': color,
+                         'MinorTicks/color': color}
 
             # Reposition
             if self.fields['space']:
@@ -180,9 +184,10 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
             self.dict_toset(ax, props, preserve=True)
 
-        return axes, axcolors
+        return axes, axcolors, axstyles, axmarkers
 
-    def arrange_curve(self, plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formatting_opt):
+    def arrange_curve(self, plotpath, tree, axes, axcolors, axstyles, axmarkers, 
+                      var, m_var, LR, LG, LB, unused_formatting_opt):
         """Set colors according to axes"""
         obj = self.doc.resolveFullWidgetPath(plotpath)
         # Get y dataset
@@ -194,16 +199,19 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         # Flag passed by PlotPlugin to operate exclusively on currently plotted
         # curves
-        plotted_dataset_names = self.fields.get('plotted_dataset_names', False)
-
-        if not plotted_dataset_names or y in plotted_dataset_names:
-            color = axcolors[obj.settings.yAxis]
-            props = {'color': color, 
-                     'PlotLine/color': color,
-                     'MarkerFill/color': color,
-                     'MarkerLine/color': color}
-        else:
-            props = {}
+        props = {}
+        plotted_dataset_names = self.fields.get('plotted_dataset_names', [])
+        if y in plotted_dataset_names:
+            if self.fields['axis'] == 'Line Color':
+                color = axcolors[obj.settings.yAxis]
+                props = {'color': color, 
+                         'PlotLine/color': color,
+                         'MarkerFill/color': color,
+                         'MarkerLine/color': color}
+            elif self.fields['axis'] == 'Line Style':
+                props = {'PlotLine/style': axstyles[obj.settings.yAxis]}
+            elif self.fields['axis'] == 'Point Marker':
+                props = {'marker': axmarkers[obj.settings.yAxis]}
 
         # Set plot line or marker according to ax index
         yax = obj.parent.getChild(obj.settings.yAxis)
@@ -211,10 +219,10 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             return False
         iax = axes.index(yax.path)
 
-        if self.fields['dataset'] == 'Point Marker':
+        if self.fields['axis'] == 'Point Marker':
             props['PlotLine/style'] = 'solid'
             props['marker'] = veusz.utils.MarkerCodes[iax]
-        elif self.fields['dataset'] == 'Line Style':
+        elif self.fields['axis'] == 'Line Style':
             props['PlotLine/style'] = lineStyles[iax]
 
         # Set the unused style component to default
@@ -252,12 +260,16 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.cmd = cmd
         self.doc = cmd.document
         self.fields = fields
-        if fields['sample'] == fields['dataset']:
+        if not 'axis' in fields:
+            fields['axis'] = confdb['rule_autoformat']
+        if not 'path' in fields:
+            fields['path'] = 'Line Color' if fields['axis']=='Line Style' else 'Line Style'
+        if fields['axis'] == fields['path']:
             raise plugins.ToolsPluginException(
-                'You must choose different markers for Datasets and Samples.')
+                'You must choose different markers for Axis and Path.')
 
         unused_formatting_opt = set(
-            defvars.keys()) - set([fields['sample'], fields['dataset']])
+            defvars.keys()) - set([fields['path'], fields['axis']])
         unused_formatting_opt = list(unused_formatting_opt)[0]
 
         # Search for the graph widget
@@ -272,14 +284,15 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         smps = tree['sample']
 
         # Ax Positioning
-        axes, axcolors = self.arrange_axes(tree, graph)
+        axes, axcolors, axstyles, axmarkers = self.arrange_axes(tree, graph)
         # Set plot colors based on axis colors
-        var, m_var, defvar = defvars[fields['sample']]
+        var, m_var, defvar = defvars[fields['axis']]
         LR, LG, LB = colorLevels(len(smps))
         plots = []
         for plotpath in tree['plot']:
             plot = self.arrange_curve(
-                plotpath, tree, axes, axcolors, var, m_var, LR, LG, LB, unused_formatting_opt)
+                plotpath, tree, axes, axcolors, axstyles, axmarkers, 
+                var, m_var, LR, LG, LB, unused_formatting_opt)
             
             plots.append(plot)
         self.apply_ops()
