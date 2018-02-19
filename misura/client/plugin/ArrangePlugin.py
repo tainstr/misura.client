@@ -10,6 +10,7 @@ from misura.client.iutils import get_plotted_tree
 from misura.client.colors import colorize, colorLevels
 import utils
 from misura.client.clientconf import confdb
+from random import choice
 from PyQt4 import QtGui
 
 lineStyles = ['solid', 'dashed', 'dotted', 'dash-dot',
@@ -23,7 +24,7 @@ defvars = {'Line Style': ('PlotLine/style', 'm_style', 'solid'),
            }
 # http://stackoverflow.com/a/4382138/1645874
 kelly_colors = [
-    '#000000',  # black
+    'black',  # black
     '#c10020',  # vivid red
     '#00538a',  # strong blue
     '#007d34',  # vivid green
@@ -50,19 +51,15 @@ kelly_colors = [
 ]
 
 
-def find_unused_color(used):
-    idx = 0
-    color = kelly_colors[idx]
-    while color in used:
-        logging.debug('color is used', color)
-        idx += 1
-        if idx >= len(kelly_colors):
-            logging.error('Exausted free colors!')
-            color = '#000000'
-        else:
-            color = kelly_colors[idx]
-    logging.debug('found color', color)
-    return color
+def find_unused(u, group):
+    for s in group:
+        if s not in u:
+            logging.debug('found style', s)
+            return s
+        logging.debug('style is used', s)
+    logging.debug('exausted free styles', s)
+    return choice(group)
+
 
 
 persistent_styles = ('PlotLine/color', 'MarkerFill/color', 'MarkerLine/color', 
@@ -91,7 +88,30 @@ def get_plot_style_from_dataset_attr(plot, ds):
         props[attr] = val
     return props
 
+def select_ax_value(axgroup, ax, dsgroup, dsaxgroup, available, name):
+    other= axgroup.copy()
+    other.pop(ax.name)
+    used = other.values()
+    used += list(dsgroup-dsaxgroup[ax.name])
+    saved = list(dsaxgroup[ax.name])
+    if None in saved:
+        saved.remove(None)
+    if None in used:
+        used.remove(None)
+    value = available[0]
+    if hasattr(ax, 'm_auto') and name in ax.m_auto:
+        value = ax.m_auto[name]
+        logging.debug('select_ax_value: m_auto override',ax.name, value, ax.m_auto)
+    elif len(saved):
+        value = list(saved)[0]
+        logging.debug('select_ax_value: saved', ax.name, value)
+    else:
+        value = find_unused(used, available)
+        logging.debug('select_ax_value: unused', ax.name, value)           
+    return value
 
+
+    
 class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
     """Arrange Y Axes and curve colors and marker styles following Misura samples grouping."""
@@ -134,60 +154,86 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             axcolors[ax.name] = str(QtGui.QColor(
                 ax.settings.Line.color).name())
             axstyles[ax.name] = lineStyles[idx]
-            axmarkers = veusz.utils.MarkerCodes[idx]
+            axmarkers[ax.name] = veusz.utils.MarkerCodes[idx]
             
+        # Read saved dataset formats
         dataset_ax_colors = defaultdict(set)
+        dataset_ax_styles = defaultdict(set)
+        dataset_ax_markers = defaultdict(set)
         dataset_colors = set()
+        dataset_styles = set()
+        dataset_markers = set()
         for ds in self.doc.data.values():
             c = ds.attr.get(graph+'|PlotLine/color', None)
             if c is None:
                 continue
             axpath = ds.attr.get(graph+':ax', None)
-            if axpath is not None:
-                dataset_ax_colors[axpath].add(c)
-                dataset_colors.add(c)
+            if axpath is None:
+                continue
+            
+            dataset_ax_colors[axpath].add(c)
+            dataset_colors.add(c)
+            s = ds.attr.get(graph+'|PlotLine/style', None)
+            dataset_styles.add(s)
+            dataset_ax_styles[axpath].add(s)
+            s = ds.attr.get(graph+'|marker', None)
+            dataset_markers.add(s)
+            dataset_ax_markers[axpath].add(s)              
+        
         
         # Total axes for repositioning
         if len(axes) > 1:
             tot = 1. / (len(axes) - 1)
         else:
             tot = 0
-
+        
         for idx, axpath in enumerate(axes):
             props = {}
             ax = self.doc.resolveFullWidgetPath(axpath)
-            other_ax_colors = axcolors.copy()
-            other_ax_colors.pop(ax.name)
-            used = other_ax_colors.values()
-            used += list(dataset_colors-dataset_ax_colors[axpath])
-            color = '#000000'
-            dscolor = dataset_ax_colors[ax.name]
+
+            axcolors[ax.name] = select_ax_value(axcolors, ax, 
+                                             dataset_colors, 
+                                             dataset_ax_colors, 
+                                             kelly_colors, 
+                                             'Line/color')
+            axstyles[ax.name] = select_ax_value(axstyles, ax,
+                                             dataset_styles,
+                                             dataset_ax_styles,
+                                             lineStyles,
+                                             'Line/style')
+            axmarkers[ax.name] = select_ax_value(axmarkers, ax,
+                                              dataset_markers,
+                                              dataset_ax_markers,
+                                              veusz.utils.MarkerCodes,
+                                              'marker')
+                
+                
             if self.fields['axis'] == 'Line Color':
-                if hasattr(ax, 'm_auto'):
-                    color = axcolors[ax.name]
-                    logging.debug('m_auto override', color)
-                elif len(dscolor):
-                    color = list(dscolor)[0]
-                elif len(axes) > 1:
-                    # Generate html color for this idx
-                    color = find_unused_color(used)
-                axcolors[ax.name] = color
-                props = {'Line/color': color,
-                         'Label/color': color,
-                         'TickLabels/color': color,
-                         'MajorTicks/color': color,
-                         'MinorTicks/color': color}
+                value = axcolors[ax.name]
+                props = {'Line/color': value,
+                         'Label/color': value,
+                         'TickLabels/color': value,
+                         'MajorTicks/color': value,
+                         'MinorTicks/color': value}
+                
+            elif self.fields['axis']=='Line Style':
+                props = {'Line/style': axstyles[ax.name]}
+                
+            elif self.fields['axis']=='Point Marker':
+                if not hasattr(ax, 'm_auto'):
+                    ax.m_auto={}
+                ax.m_auto['marker'] = axmarkers[ax.name]
 
             # Reposition
             if self.fields['space']:
                 props['otherPosition'] = idx * tot
 
             self.dict_toset(ax, props, preserve=True)
-
+        
         return axes, axcolors, axstyles, axmarkers
 
     def arrange_curve(self, plotpath, tree, axes, axcolors, axstyles, axmarkers, 
-                      var, m_var, LR, LG, LB, unused_formatting_opt):
+                      smps):
         """Set colors according to axes"""
         obj = self.doc.resolveFullWidgetPath(plotpath)
         # Get y dataset
@@ -201,49 +247,54 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         # curves
         props = {}
         plotted_dataset_names = self.fields.get('plotted_dataset_names', [])
-        if y in plotted_dataset_names:
-            if self.fields['axis'] == 'Line Color':
-                color = axcolors[obj.settings.yAxis]
-                props = {'color': color, 
-                         'PlotLine/color': color,
-                         'MarkerFill/color': color,
-                         'MarkerLine/color': color}
-            elif self.fields['axis'] == 'Line Style':
-                props = {'PlotLine/style': axstyles[obj.settings.yAxis]}
-            elif self.fields['axis'] == 'Point Marker':
-                props = {'marker': axmarkers[obj.settings.yAxis]}
-
-        # Set plot line or marker according to ax index
-        yax = obj.parent.getChild(obj.settings.yAxis)
-        if yax is None:
-            return False
-        iax = axes.index(yax.path)
-
-        if self.fields['axis'] == 'Point Marker':
-            props['PlotLine/style'] = 'solid'
-            props['marker'] = veusz.utils.MarkerCodes[iax]
+        
+        if plotted_dataset_names and (y not in plotted_dataset_names):
+            return obj
+        
+        ###################
+        # AXIS GROUPING
+        if self.fields['axis'] == 'Line Color':
+            color = axcolors[obj.settings.yAxis]
+            props = {'color': color, 
+                     'PlotLine/color': color,
+                     'MarkerFill/color': color,
+                     'MarkerLine/color': color}
         elif self.fields['axis'] == 'Line Style':
-            props['PlotLine/style'] = lineStyles[iax]
-
-        # Set the unused style component to default
-        #uvar, um_var, udefvar = defvars[unused_formatting_opt]
-        #props[uvar] = udefvar
-
-        # Secondary style value
-        ax_datasets = tree['axis'][yax.path]
-        if y in ax_datasets:
-            idx = ax_datasets.index(y)
-        else:
-            idx = len(ax_datasets)
-        if m_var == 'm_marker':
-            outvar = veusz.utils.MarkerCodes[idx]
-        elif m_var == 'm_style':
-            outvar = lineStyles[idx]
-        elif m_var == 'm_color':
-            # FIXME: remove this! should inherit somehow.
-            outvar = colorize(idx, LR, LG, LB)
-        props[var] = outvar
-
+            props = {'PlotLine/style': axstyles[obj.settings.yAxis]}
+        elif self.fields['axis'] == 'Point Marker':
+            props = {'marker': axmarkers[obj.settings.yAxis]}
+        
+        ###################        
+        # PATH GROUPING
+        s= '/'.join(y.split('/')[:-1])
+        other = smps.copy()
+        other.pop(s)
+        used = other.values()
+    
+        def select_path_value(used0, name, available):
+            saved = set()
+            map(saved.update, list(u['saved:'+name] for u in used0))
+            if None in saved:
+                saved.remove(None)
+            used = set()
+            map(used.update, list(u[name] for u in used0))
+            #if len(saved):
+            #    v = list(saved)[0]
+            #else:
+            v = find_unused(used, available)    
+            return v 
+        
+        if self.fields['path']=='Line Color':
+            color = select_path_value(used, 'color', kelly_colors)
+            props.update({'color': color, 
+                     'PlotLine/color': color,
+                     'MarkerFill/color': color,
+                     'MarkerLine/color': color})
+        elif self.fields['path']=='Line Style':
+            props['PlotLine/style'] = select_path_value(used, 'style', lineStyles)
+        elif self.fields['path'] == 'Point Marker':
+            props['marker'] = select_path_value(used, 'marker', veusz.utils.MarkerCodes)
+                
         # Update with any property saved in dataset attr
         props.update(get_plot_style_from_dataset_attr(obj, self.doc.data[y]))
         
@@ -281,20 +332,34 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         graph = gobj.path
         tree = get_plotted_tree(gobj)
-        smps = tree['sample']
 
         # Ax Positioning
         axes, axcolors, axstyles, axmarkers = self.arrange_axes(tree, graph)
+        
+        
         # Set plot colors based on axis colors
-        var, m_var, defvar = defvars[fields['axis']]
-        LR, LG, LB = colorLevels(len(smps))
+        
         plots = []
+        smps = defaultdict(lambda: defaultdict(set))
         for plotpath in tree['plot']:
-            plot = self.arrange_curve(
-                plotpath, tree, axes, axcolors, axstyles, axmarkers, 
-                var, m_var, LR, LG, LB, unused_formatting_opt)
+            plot = self.doc.resolveFullWidgetPath(plotpath)
+            y = plot.settings['yData']
+            s= '/'.join(y.split('/')[:-1])
+            ds = self.doc.data[y]
+            smps[s]['color'].add(plot.settings.PlotLine['color'])
+            smps[s]['style'].add(plot.settings.PlotLine['style'])
+            smps[s]['marker'].add(plot.settings['marker'])
+            smps[s]['saved:color'].add(ds.attr.get(graph+'|PlotLine/color', None))
+            smps[s]['saved:style'].add(ds.attr.get(graph+'|PlotLine/style', None))
+            smps[s]['saved:marker'].add(ds.attr.get(graph+'|marker', None))
             
             plots.append(plot)
+        
+        for plotpath in tree['plot']:
+            plot = self.arrange_curve(
+                plotpath, tree, axes, axcolors, axstyles, axmarkers,
+                smps)
+            
         self.apply_ops()
         
         for plot in plots:
