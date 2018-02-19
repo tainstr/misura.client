@@ -281,19 +281,25 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             #if len(saved):
             #    v = list(saved)[0]
             #else:
-            v = find_unused(used, available)    
+            v = find_unused(used, available)
+            logging.debug('select_path_value found', name, v, used) 
             return v 
         
         if self.fields['path']=='Line Color':
-            color = select_path_value(used, 'color', kelly_colors)
-            props.update({'color': color, 
-                     'PlotLine/color': color,
-                     'MarkerFill/color': color,
-                     'MarkerLine/color': color})
+            v = select_path_value(used, 'color', kelly_colors)
+            props.update({'color': v, 
+                     'PlotLine/color': v,
+                     'MarkerFill/color': v,
+                     'MarkerLine/color': v})
+            smps[s]['color'].add(v)
         elif self.fields['path']=='Line Style':
-            props['PlotLine/style'] = select_path_value(used, 'style', lineStyles)
+            v = select_path_value(used, 'style', lineStyles)
+            props['PlotLine/style'] = v
+            smps[s]['style'].add(v)
         elif self.fields['path'] == 'Point Marker':
-            props['marker'] = select_path_value(used, 'marker', veusz.utils.MarkerCodes)
+            v = select_path_value(used, 'marker', veusz.utils.MarkerCodes)
+            props['marker'] = v
+            smps[s]['marker'].add(v)
                 
         # Update with any property saved in dataset attr
         props.update(get_plot_style_from_dataset_attr(obj, self.doc.data[y]))
