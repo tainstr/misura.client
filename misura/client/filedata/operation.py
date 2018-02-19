@@ -238,9 +238,10 @@ def assign_label(ds, col0):
 
 def get_unit_hdf_attr(fileproxy, hdf_dataset_name, unit_attr):
     u = fileproxy.get_node_attr(hdf_dataset_name, unit_attr)
-    if u in ['', 'None', None, False, 0]:
+    if u in ['', 'None', None, False, 0, []]:
         u = False
     elif hasattr(u, '__iter__'):
+        # FIXME: if it comes from a table, should parse header and take correct idx!
         u = u[-1]
     return u
 
@@ -258,6 +259,7 @@ def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
         # Correct missing celsius indication
         if not u and m_var == 'T':
             u = 'celsius'
+    logging.debug('dataset_measuring_unit', hdf_dataset_name, u)
     return u
 
 def resolve_unit(ds, opt, default):
@@ -276,6 +278,10 @@ def resolve_unit(ds, opt, default):
         client_unit = default
     if original_unit == 'None':
         original_unit = client_unit
+    if hasattr(client_unit, '__iter__'):
+        client_unit = client_unit[-1]
+    if hasattr(client_unit, '__iter__'):
+        original_unit = original_unit[-1]
     ds.unit = client_unit
     ds.old_unit = original_unit
     return True
