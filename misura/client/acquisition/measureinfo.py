@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from time import sleep
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from PyQt4 import QtGui, QtCore

@@ -482,7 +482,7 @@ class ViewerPicture(QtGui.QGraphicsView):
     
     def add_imaging_actions(self, menu):
         """Create menu actions for imaging controls"""
-        for h in ['exposureTime', 'contrast', 'brightness', 'gamma', 'gain', 'saturation', 'hue']:
+        for h in ['exposureTime', 'exposureAbsolute', 'contrast', 'brightness', 'gamma', 'gain', 'saturation', 'hue']:
             if not self.remote.has_key(h):
                 continue
             act = widgets.aNumberAction(
