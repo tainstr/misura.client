@@ -158,6 +158,7 @@ class KidRegistry(QtCore.QThread):
         request = []
         # Force progress update
         cur = self.obj.get('progress')
+        run = self.obj['isRunning']
         if self.progress.progress:
             self.progress.progress.emit(QtCore.SIGNAL('selfchanged'), cur)
         for kid, ws in self.rid.items():
@@ -168,7 +169,7 @@ class KidRegistry(QtCore.QThread):
                 if w == self.progress.progress:
                     continue
                 do = 1
-                if w.force_update:
+                if w.force_update and run:
                     t = -1  # force mapdate to update this value
                 break
             # Just progresses
