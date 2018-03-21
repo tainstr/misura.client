@@ -125,6 +125,10 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.area)
         self.setMinimumSize(800, 600)
         self.setWindowTitle(_('Misura Live'))
+        
+        self.tray_icon = QtGui.QSystemTrayIcon(self)
+        self.tray_icon.setIcon(iutils.theme_icon('icon'))
+        
         self.add_menubar(setInstrument=False)
         
         self.add_statusbar()
@@ -133,7 +137,6 @@ class MainWindow(QtGui.QMainWindow):
         self.reset_file_proxy_timer = QtCore.QTimer()
         self.reset_instrument_timer = QtCore.QTimer()
         self.reset_instrument.connect(self.setInstrument)
-        self.tray_icon = QtGui.QSystemTrayIcon(self)
         self.connect(self.tray_icon, QtCore.SIGNAL('messageClicked()'), self.focus_logging)
         self.setWindowIcon(QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
         if not self.fixedDoc and confdb['autoConnect'] and len(confdb['recent_server']) > 1:
@@ -151,6 +154,7 @@ class MainWindow(QtGui.QMainWindow):
             self.myMenuBar.setInstrument(self.remote, self.server)  
         self.setMenuBar(self.myMenuBar)
         self.myMenuBar.quitClient.connect(self.close)
+        self.tray_icon.setContextMenu(self.myMenuBar.connectTo)
         
         
     def add_statusbar(self):

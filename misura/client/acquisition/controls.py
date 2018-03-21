@@ -9,6 +9,7 @@ from misura.canon.csutil import unlockme
 
 from .. import widgets, _
 from ..live import registry
+from .. import iutils
 
 from .messages import StartedFinishedNotification, initial_sample_dimension, ValidationDialog
 
@@ -136,6 +137,16 @@ class Controls(QtGui.QToolBar):
 
         # Locally remember remote_is_running status
         self.isRunning = remote_is_running
+        tray_icon = self.parent().tray_icon
+        if remote_is_running:
+            ins = remote_server['runningInstrument']
+            tray_icon.setIcon(iutils.theme_icon(ins))
+            tray_icon.setToolTip('Misura is running a {} test'.format(self.remote['comment']))
+        else:
+            tray_icon.setIcon(iutils.theme_icon('icon'))
+            tray_icon.setToolTip('Misura is ready')
+        tray_icon.setContextMenu(self.parent().myMenuBar.measure)
+        tray_icon.show()
         return remote_is_running
 
 

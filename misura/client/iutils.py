@@ -445,6 +445,8 @@ def theme_icon(name, ext='.svg'):
     if QtGui.QIcon.hasThemeIcon(name):
         return QtGui.QIcon.fromTheme(name)
     p = os.path.join(params.pathIcons, name+ext)
+    if not os.path.exists(p):
+        p = os.path.join(params.pathArt, name+ext)
     return QtGui.QIcon(p)
 
 
