@@ -43,27 +43,24 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     description_short = 'Synchronize'
     description_full = 'Synchronize two or more curves so they equals to a reference curve at the requested x-point.'
 
-    def __init__(self,
-                 reference_curve_full_path='/',
-                 translating_curve_1_full_path='/',
-                 translating_curve_2_full_path=None):
-
+    def __init__(self, *paths):
+        
+        logging.debug('SynchroPlugin init', paths)
+        paths = list(paths)
+        if len(paths)<2:
+            paths += ['']*(2-len(paths))
         self.fields = [
             plugins.FieldWidget("reference_curve",
                                 descr="Reference curve:",
                                 widgettypes=set(['xy']),
-                                default=reference_curve_full_path),
-            plugins.FieldWidget("translating_curve_1",
-                                descr="Translating curve 1:",
-                                widgettypes=set(['xy']),
-                                default=translating_curve_1_full_path),
+                                default=paths.pop(0)),
             ]
 
-        if translating_curve_2_full_path:
-            self.fields.append(plugins.FieldWidget("translating_curve_2",
-                                                   descr="Translating curve 2:",
+        for i,p in enumerate(paths):
+            self.fields.append(plugins.FieldWidget("translating_curve_{}".format(i+1),
+                                                   descr="Translating curve {}:".format(i+1),
                                                    widgettypes=set(['xy']),
-                                                   default=translating_curve_2_full_path))
+                                                   default=p))
 
         self.fields = self.fields + [
             plugins.FieldFloat("matching_x_value",
@@ -85,22 +82,23 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         doc = cmd.document
         self.doc = doc
         reference_curve = doc.resolveFullWidgetPath(fields['reference_curve'])
-        translating_curve_1 = doc.resolveFullWidgetPath(fields['translating_curve_1'])
-        check_consistency(reference_curve, translating_curve_1)
+        paths = []
+        message = ''
+        while True:
+            i = len(paths)+1
+            name = 'translating_curve_{}'.format(i)
+            try:
+                crv = doc.resolveFullWidgetPath(fields[name])
+                paths.append( crv )
+                check_consistency(reference_curve, crv)
+                message += '\\\\' + self.synchronize_curves(reference_curve,
+                                              crv,
+                                              fields,
+                                              doc)
+            except:
+                break
 
-        message = self.synchronize_curves(reference_curve,
-                                          translating_curve_1,
-                                          fields,
-                                          doc)
-
-        if fields.has_key('translating_curve_2'):
-            translating_curve_2 = doc.resolveFullWidgetPath(fields['translating_curve_2'])
-            check_consistency(reference_curve, translating_curve_2)
-            message = message + '\\\\' + self.synchronize_curves(reference_curve,
-                                                                 translating_curve_2,
-                                                                 fields,
-                                                                 doc)
-
+        message = message[2:]
         label_name = 'sync_info_' + reference_curve.settings.yData.replace('/', ':')
         add_label_to(reference_curve, message, label_name, doc, self.toset)
         self.apply_ops()

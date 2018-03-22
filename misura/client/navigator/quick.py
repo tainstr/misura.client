@@ -224,12 +224,12 @@ class QuickOps(object):
             self.deleteData(node=n)
 
 
-    def widget_path_for(self, node):
+    def widget_path_for(self, node, prefix=''):
         result = '/'
         full_path = self.doc.model.is_plotted(node.path)
-        if full_path:
-            result = full_path[0]
-
+        for result in full_path:
+            if result.startswith(prefix):
+                return result
         return result
 
     def xnames(self, y, page=False):

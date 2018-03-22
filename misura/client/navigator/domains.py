@@ -380,16 +380,13 @@ class PlottingNavigatorDomain(NavigatorDomain):
     @nodes
     def synchronize(self, nodes=[]):
         from misura.client import plugin
+        page = self.navigator.get_page().path
+        paths = []
+        for node in nodes:
+            paths.append( self.navigator.widget_path_for(node, prefix=page) )
+            
 
-        reference_curve_full_path = self.navigator.widget_path_for(nodes[0])
-        translating_curve_1_full_path = self.navigator.widget_path_for(nodes[1])
-        translating_curve_2_full_path = None
-        if len(nodes) > 2:
-            translating_curve_2_full_path = self.navigator.widget_path_for(nodes[2])
-
-        sync_plugin = plugin.SynchroPlugin(reference_curve_full_path,
-                                           translating_curve_1_full_path,
-                                           translating_curve_2_full_path)
+        sync_plugin = plugin.SynchroPlugin(*paths)
 
         dialog = PluginDialog(self.mainwindow,
                               self.doc,
