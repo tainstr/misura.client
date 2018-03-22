@@ -439,6 +439,10 @@ class Converter(dataimport.Converter):
         # Set first point as zero time
         timecol -= timecol[0]
         ini_area = 0
+        dim = set(['d', 'h', 'w', 'camA', 'camB']).intersection(
+            set(header))
+        ini0 = self.test[m3db.fprv.Inizio_Sint]
+        initialDimension = 0
         # Convert data points
         for i, col in enumerate(header):
             if self.interrupt:
@@ -455,21 +459,33 @@ class Converter(dataimport.Converter):
             if np.isnan(data).all():
                 continue
             # Unit and client-side unit
+            
+            if col == 'h':
+                ini1 = 3000.
+            elif col == 'A':
+                ini1 = ini_area
+            elif col == 'w':
+                ini1 = 2000.
+            elif col in ['d', 'camA', 'camB']:
+                ini1 = ini0 * 100.                
+
             unit = False
             csunit = False
             if col == 'd' or 'Percorso' in col:
+                data = ini1*data / 1000.
+                unit = 'micron'
+            elif 'Percorso' in col:
                 data = data / 1000.
                 unit = 'percent'
-                csunit = 'micron'
-            elif col in ['h', 'soft']:
+            elif col == 'h':
+                data = ini1*data / 100.
+                unit = 'micron'
+            elif col == 'soft':
                 data = data / 100.
                 unit = 'percent'
-                csunit = 'micron'
             elif col == 'A':
-                data *= -1
-                ini_area = data[0]
-                unit = 'percent'
-                csunit = 'micron^2'
+                data = -data[0]*ini_area
+                unit = 'micron^2'
             elif col == 'P':
                 data = data / 10.
                 unit = 'micron'
@@ -481,6 +497,11 @@ class Converter(dataimport.Converter):
                 arrayRef[col] = reference.Array(outFile, '/summary/kiln', kiln_dict[col])
             else:
                 opt = ao({}, col, 'Float', 0, col, attr=['History', 'Hidden'])[col]
+                if col in dim:
+                    opt['percent'] = col not in ['camA', 'camB', 'w']
+                if col in ['d', 'h']:
+                    opt['initialDimension'] = ini1
+                    initialDimension = ini1
                 if unit:
                     opt['unit'] = unit
                 if csunit:
@@ -507,27 +528,6 @@ class Converter(dataimport.Converter):
         self.progress = 20
         # ##
         # ASSIGN INITIAL DIMENSION
-        dim = set(['d', 'h', 'w', 'camA', 'camB']).intersection(
-            set(header))
-        ini0 = self.test[m3db.fprv.Inizio_Sint]
-        initialDimension = 0
-        for d in dim:
-            if not arrayRef.has_key(d):
-                continue
-            if d == 'h':
-                ini1 = 3000.
-            elif d == 'A':
-                ini1 = ini_area
-            elif d == 'w':
-                ini1 = 2000.
-            elif d in ['d', 'camA', 'camB']:
-                ini1 = ini0 * 100.
-            path = arrayRef[d].path
-            outFile.set_attributes(path, attrs={'initialDimension': ini1,
-                                                'percent': d not in ['camA', 'camB', 'w']})
-            # Sets the sample main initial dimension for future storage
-            if d in ['d', 'h']:
-                initialDimension = ini1
         smp['initialDimension'] = initialDimension
         outFile.flush()
 
