@@ -362,6 +362,7 @@ class Converter(dataimport.Converter):
 
         # ##
         # CONFIGURATION
+        serial = hashlib.md5(self.dbpath).hexdigest()[:8]
         tree = deepcopy(tree_dict)
         # Create instrument dict
         instr = m3db.getInstrumentName(self.test[m3db.fprv.Tipo_Prova])
@@ -375,6 +376,7 @@ class Converter(dataimport.Converter):
         instrobj = getattr(tree, instr)
         tree['runningInstrument'] = instr
         tree['lastInstrument'] = instr
+        tree['eq_sn'] = serial
         instrobj['name'] = instr
         # Sample
         smp = instrobj.sample0
@@ -409,7 +411,7 @@ class Converter(dataimport.Converter):
         tree.kiln['Regulation_Kp'] = self.test[m3db.fprv.Pb]
         tree.kiln['Regulation_Ki'] = self.test[m3db.fprv.ti]
         tree.kiln['Regulation_Kd'] = self.test[m3db.fprv.td]
-
+        tree.kiln['ksn'] = serial
         # Create the hierarchy
         create_tree(outFile, tree)
 
@@ -421,6 +423,7 @@ class Converter(dataimport.Converter):
         logging.debug(header, columns, len(rows[0]), instr)
         instr_path = '/' + instr
         smp_path = instr_path + '/sample0'
+        smp_path_T = smp_path+'/T'
 
         # TODO: Check conf node (???)
     # 	if not hasattr(outFile.root,'conf'):
@@ -493,6 +496,12 @@ class Converter(dataimport.Converter):
                 outFile.link(base_path, path)
             ref = arrayRef[col]
             ref.append(np.array([timecol, data]).transpose())
+            
+        # Create sample0/T links
+        for pre in ['','/summary']:
+            if not outFile.has_node(pre+smp_path_T):
+                outFile.link(pre+smp_path_T, '/kiln/T')
+            
         outFile.flush()
 
         self.progress = 20
@@ -555,7 +564,7 @@ class Converter(dataimport.Converter):
                                 'elapsed': elapsed,
                                 'instrument': instr,
                                 'date': tdate,
-                                'serial': hashlib.md5(self.dbpath).hexdigest(),
+                                'serial': serial,
                                 'uid': uid })
         self.progress = 99
         log('Appending to Misura database')
