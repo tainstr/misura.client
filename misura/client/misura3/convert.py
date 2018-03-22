@@ -472,13 +472,13 @@ class Converter(dataimport.Converter):
             unit = False
             csunit = False
             if col == 'd' or 'Percorso' in col:
-                data = ini1*data / 1000.
+                data = ini1*data / 1000./100.
                 unit = 'micron'
             elif 'Percorso' in col:
                 data = data / 1000.
                 unit = 'percent'
             elif col == 'h':
-                data = ini1*data / 100.
+                data = ini1*data / 100./100.
                 unit = 'micron'
             elif col == 'soft':
                 data = data / 100.
