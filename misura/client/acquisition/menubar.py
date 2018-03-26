@@ -240,8 +240,9 @@ class MenuBar(QtGui.QMenuBar):
 
         self.measure.clear()
         if not self.fixedDoc:
-            self.measure.addAction(parent.controls.startAct)
-            self.measure.addAction(parent.controls.stopAct)
+            if parent.controls:
+                self.measure.addAction(parent.controls.startAct)
+                self.measure.addAction(parent.controls.stopAct)
             self.measure.addAction(
                 _('Repeat initialization'), parent.init_instrument)
             self.measure.addAction(
