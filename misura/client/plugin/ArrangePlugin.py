@@ -94,9 +94,9 @@ def select_ax_value(axgroup, ax, dsgroup, dsaxgroup, available, name):
     used = other.values()
     used += list(dsgroup-dsaxgroup[ax.name])
     saved = list(dsaxgroup[ax.name])
-    if None in saved:
+    while None in saved:
         saved.remove(None)
-    if None in used:
+    while None in used:
         used.remove(None)
     value = available[0]
     if hasattr(ax, 'm_auto') and name in ax.m_auto:
@@ -110,7 +110,30 @@ def select_ax_value(axgroup, ax, dsgroup, dsaxgroup, available, name):
         logging.debug('select_ax_value: unused', ax.name, value)           
     return value
 
+def read_rule_style(dsname):
+    m = confdb.rule_style(dsname, latest=True)
+    logging.debug('Apply saved style', dsname,m)
+    if not m:
+        return False, False, False
+    c = m[confdb.RULE_COLOR] or False
+    l = m[confdb.RULE_LINE] or False
+    m = m[confdb.RULE_MARKER] or False
+    
+    return c,l,m
 
+def load_rules(doc, tree):
+    """Load styling rules for involved axes and curves"""
+    rule_by_dataset = {}
+    rule_by_ax = {}
+    for plotpath in tree['plot']:
+        plot = doc.resolveFullWidgetPath(plotpath)
+        y = plot.settings['yData']
+        m = read_rule_style(y)
+        if m:
+            rule_by_dataset[y] = m
+            rule_by_ax[plot.settings['yAxis']] = m
+            
+    return rule_by_dataset, rule_by_ax
     
 class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
@@ -138,8 +161,9 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plugins.FieldBool(
                 "space", descr="Auto axis positioning:", default=space)
         ]
+            
 
-    def arrange_axes(self, tree, graph):
+    def arrange_axes(self, tree, graph, rule_by_ax):
         """Adjust Axes colors and positions"""
         axes = sorted(tree['axis'].keys())
         axcolors = {}
@@ -163,7 +187,9 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         dataset_colors = set()
         dataset_styles = set()
         dataset_markers = set()
+        
         for ds in self.doc.data.values():
+
             c = ds.attr.get(graph+'|PlotLine/color', None)
             if c is None:
                 continue
@@ -207,19 +233,25 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                                               veusz.utils.MarkerCodes,
                                               'marker')
                 
-                
-            if self.fields['axis'] == 'Line Color':
+            # Rule override
+            C,L,M = rule_by_ax.get(ax.name, (0,0,0))
+            if C: axcolors[ax.name] = C
+            if L: axstyles[ax.name] = L
+            if M: axmarkers[ax.name] = M
+            
+            props = {}
+            if self.fields['axis'] == 'Line Color' or C:
                 value = axcolors[ax.name]
-                props = {'Line/color': value,
+                props.update({'Line/color': value,
                          'Label/color': value,
                          'TickLabels/color': value,
                          'MajorTicks/color': value,
-                         'MinorTicks/color': value}
+                         'MinorTicks/color': value})
                 
-            elif self.fields['axis']=='Line Style':
-                props = {'Line/style': axstyles[ax.name]}
+            if self.fields['axis']=='Line Style' or L:
+                props.update({'Line/style': axstyles[ax.name]})
                 
-            elif self.fields['axis']=='Point Marker':
+            if self.fields['axis']=='Point Marker' or M:
                 if not hasattr(ax, 'm_auto'):
                     ax.m_auto={}
                 ax.m_auto['marker'] = axmarkers[ax.name]
@@ -278,9 +310,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 saved.remove(None)
             used = set()
             map(used.update, list(u[name] for u in used0))
-            #if len(saved):
-            #    v = list(saved)[0]
-            #else:
+            
             v = find_unused(used, available)
             logging.debug('select_path_value found', name, v, used) 
             return v 
@@ -300,8 +330,19 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             v = select_path_value(used, 'marker', veusz.utils.MarkerCodes)
             props['marker'] = v
             smps[s]['marker'].add(v)
+        
+        
+        # Apply rules    
+        style_color, style_line, style_marker = read_rule_style(y)
+        for k in props:
+            if style_color and k.endswith('color'):
+                props[k] = style_color
+            if style_line and k.endswith('style'):
+                props[k] = style_line
+            if style_marker and k.endswith('marker'):
+                props[k] = style_marker
                 
-        # Update with any property saved in dataset attr
+        # Override with any property saved in dataset attr
         props.update(get_plot_style_from_dataset_attr(obj, self.doc.data[y]))
         
         self.dict_toset(obj, props, preserve=True)
@@ -338,9 +379,12 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         graph = gobj.path
         tree = get_plotted_tree(gobj)
+        
+        # Load rules:
+        rule_by_dataset, rule_by_ax = load_rules(self.doc, tree)
 
         # Ax Positioning
-        axes, axcolors, axstyles, axmarkers = self.arrange_axes(tree, graph)
+        axes, axcolors, axstyles, axmarkers = self.arrange_axes(tree, graph, rule_by_ax)
         
         
         # Set plot colors based on axis colors

@@ -111,9 +111,10 @@ rule_plot = r'''hsm/sample\d/Vol$
 ^(/summary/)?kiln/T$'''
 ao(default_desc, 'rule_plot', 'TextArea', rule_plot, 'Auto Plot')
 
+
 rule_style = [[('Rule', 'String'), ('Range', 'String'), ('Scale', 'Float'),
                ('Color', 'String'), ('Line', 'String'), ('Marker', 'String')],
-              ['/kiln/T$', '', 1, 'red', '', '']
+              ['/T$', '', 1, 'red', '', '']
               ]
 ao(default_desc, 'rule_style', 'Table', rule_style, 'Formatting')
 
@@ -186,6 +187,10 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     conn = False
     path = ''
     index = False
+    
+    RULE_COLOR = 2
+    RULE_LINE = 3
+    RULE_MARKER = 4
 
     def __init__(self, path=False):
         QtCore.QObject.__init__(self)

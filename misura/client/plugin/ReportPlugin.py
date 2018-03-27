@@ -134,9 +134,6 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         msg += render_meta(measure, inter='\\\\', zt=zt, full=True)
         self.toset(page.getChild('metadata'), 'label', msg)
 
-# 		msg=render_meta(sample,'None')
-# 		self.toset(page.getChild('shapes'),'label',msg)
-
         oname = measure.desc.get('operator', {'current': False})['current']
         if oname:
             self.toset(
