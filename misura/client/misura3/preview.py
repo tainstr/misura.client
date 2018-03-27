@@ -63,8 +63,11 @@ class ImageDecoder(QtCore.QThread):
         if path in self.names:
             return self.images[path]
         pix = QtGui.QImage()
-        img = open(path, 'rb').read()
-        img = bitmap.decompress(img)
+        img0 = open(path, 'rb').read()
+        img = bitmap.decompress(img0)
+        if len(img)<100:
+            logging.debug('empty image', path)
+            return pix
         pix.loadFromData(img, 'BMP')
         pix = pix.scaledToWidth(self.maxWidth)
         self.names.append(path)

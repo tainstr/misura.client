@@ -35,7 +35,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
     # text to appear in dialog box
     description_full = 'Create a Report page for a Misura sample'
     templates = {}
-    def __init__(self, sample=None, template_file_name='default.vsz', measure_to_plot='d'):
+    def __init__(self, sample=None, template_file_name='default.vsz', measure_to_plot='d', image_dataset='profile'):
         """Make list of fields."""
         
         
@@ -53,6 +53,8 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
                 "sample", descr="Target sample:", depth='sample', default=sample),
             plugins.FieldText('measure_to_plot', 'Measure to plot', 
                               default=measure_to_plot),
+            plugins.FieldCombo('image_dataset', 'Image sequence', 
+                              default=image_dataset, items=['profile','frame']),
             plugins.FieldCombo('template_file_name', 'Template filename', 
                                default=template_file_name, items=self.templates.keys()),
         ]
@@ -163,7 +165,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
                     msg += 'None\\\\'
                     self.toset(page.getChild('lbl_' + sh), 'label', shn + ', ?')
                     continue
-                image_reference = {'dataset': smp_path + '/profile',
+                image_reference = {'dataset': smp_path + '/' + fields['image_dataset'],
                                    'filename': test.params.filename,
                                    'target': pt['time']}
                 self.dict_toset(page.getChild(sh), image_reference)
@@ -172,7 +174,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
                 msg += T + '\\\\'
             self.toset(page.getChild('shapes'), 'label', msg)
 
-            self.dict_toset(page.getChild('initial'), {'dataset': smp_path + '/profile',
+            self.dict_toset(page.getChild('initial'), {'dataset': smp_path + '/' + fields['image_dataset'],
                                                        'filename': test.params.filename, 'target': 0})
             T = doc.data.get(test.prefix + smp_path[1:] + '/T', False)
             if T is False:
