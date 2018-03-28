@@ -258,7 +258,6 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 props['otherPosition'] = idx * tot
                 
             # Set saved range
-            print ('AAAAAA', rule)
             if ':' in rule[0]:
                 props['min'], props['max'] = map(lambda s: s if s=='Auto' else float(s), rule[0].split(':'))
             if rule[1]:

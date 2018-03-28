@@ -420,7 +420,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         self.load_rules(params)
 
     def load_rules(self, params):
-        self.rule_exc = False
         self._rule_exc, self.rule_exc = cmp_rule(params.rule_exc)
         logging.debug('Exclude rule', self._rule_exc)
         self._rule_inc, self.rule_inc = cmp_rule(params.rule_inc)
@@ -439,7 +438,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         #rule = '^(/summary/)?' + dataset_name + '$'
         rule = extend_rule(dataset_name + '$', kw.get('version', False))
         p = ImportParamsMisura(filename=linked_filename,
-                               rule_exc=' *',
+                               rule_exc='',
                                rule_load=rule,
                                rule_unit=clientconf.confdb['rule_unit'],
                                **kw)
@@ -457,7 +456,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 rules[i] = extend_rule(rule, version)
         rule = '|'.join(rules)
         p = ImportParamsMisura(filename=linked_filename,
-                               rule_exc=' *',
+                               rule_exc='',
                                rule_load=rule,
                                rule_unit=clientconf.confdb['rule_unit'],
                                **kw)
