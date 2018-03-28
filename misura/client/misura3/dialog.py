@@ -80,6 +80,9 @@ class TestDialog(QtGui.QWidget):
 
         self.doForceData = QtGui.QCheckBox('Force data update', self)
         self.doForceData.setCheckState(2)
+        
+        self.doOpen = QtGui.QCheckBox('Open after import', self)
+        self.doOpen.setCheckState(2)        
 
         self.doForceImages = QtGui.QComboBox(self)
         self.doForceImages.addItem('Require images')
@@ -108,11 +111,14 @@ class TestDialog(QtGui.QWidget):
             glay.addWidget(self.doForceImages, j, 1)
             j += 1
             glay.addWidget(self.doForceData, j, 0)
+            glay.addWidget(self.doOpen, j, 1)
+            j += 1
             glay.addWidget(self.do, j, 1)
         else:
             self.doPreview.hide()
             self.doForceData.hide()
             self.doForceImages.hide()
+            self.doOpen.hide()
         self.lay.addWidget(grid)
 
         self.strip = ImagePreview(self)
@@ -122,8 +128,6 @@ class TestDialog(QtGui.QWidget):
         # import:
         self.fullImport = False
         self.connect(self.table, QtCore.SIGNAL('doubleClicked(QModelIndex)'), self.select)
-#        self.connect( 
-#            self.table, QtCore.SIGNAL('entered(QModelIndex)'), self.select)
         self.connect(
             self.table, QtCore.SIGNAL('clicked(QModelIndex)'), self.preview)
 
@@ -185,20 +189,30 @@ class TestDialog(QtGui.QWidget):
         return getImageCode(prova[0])
         
     def done(self, pid):
-        if pid != self.pid:
+        if not self.converters:
+            if self.progress_timer:
+                self.progress_timer.stop()
+                self.progress_timer = False
             return
-        if self.progress_timer:
-            self.progress_timer.stop()
-            self.progress_timer = False
-        if not self.converter:
+        converter = False
+        for c in self.converters:
+            if pid==c.pid:
+                converter = c
+                
+                break
+        if not converter:
             return
-        if self.converter.progress < 100:
-            logging.error('Conversion aborted', self.converter.outpath)
-            self.converter.interrupt = True
+            
+        self.converters.remove(c)
+        outpath = converter.outpath
+        if converter.progress < 100:
+            logging.error('Conversion aborted', outpath)
+            converter.interrupt = True
             return
-        logging.debug('exported to ', self.outdir)
-        self.emit(QtCore.SIGNAL('imported(QString)'), self.outpath)
-        self.emit(QtCore.SIGNAL('select(QString)'), self.outpath)
+        logging.debug('Conversion ended, exported to:', outpath)
+        if self.doOpen.isChecked():
+            self.emit(QtCore.SIGNAL('imported(QString)'), outpath)
+            self.emit(QtCore.SIGNAL('select(QString)'), outpath)
 
     def convert(self, path):
         path = str(path)
@@ -221,36 +235,41 @@ class TestDialog(QtGui.QWidget):
         elif fi == 2:
             self.img = True
             self.keep_img = False
-        self.pid = 'Converting to misura format: ' + idprove
         
-        self.converter = convert.Converter(dbpath, self.outdir)
-        self.outpath = self.converter.get_outpath(idprove, img=self.img,
-                                             keep_img=self.keep_img)   
+        converter = convert.Converter(dbpath, self.outdir)
+        outpath = converter.get_outpath(idprove, img=self.img,
+                                             keep_img=self.keep_img) 
+        converter.pid = 'Converting to misura format: ' + idprove
         
         self.connect(registry.tasks, QtCore.SIGNAL('sig_done(QString)'), self.done)
-        run = widgets.RunMethod(self.converter.convert, frm=self.format)
+        self.converters.append(converter)
+        run = widgets.RunMethod(converter.convert, frm=self.format)
         run.step = 100        
-        run.pid = self.pid
+        run.pid = converter.pid
         QtCore.QThreadPool.globalInstance().start(run)
         self.progress_timer = QtCore.QTimer(self)
-        self.progress_timer.setInterval(300)
+        self.progress_timer.setInterval(500)
         self.connect(self.progress_timer, QtCore.SIGNAL('timeout()'), self.update_progress)
         self.progress_timer.start()
         
     def update_progress(self):
-        if not self.converter:
+        if not self.converters and self.progress_timer:
+            logging.debug('Ending progress_timer')
             self.progress_timer.stop()
             return
-        registry.tasks.job(self.converter.progress, self.pid)
+        for c in self.converters:
+            registry.tasks.job(c.progress, c.pid)
         QtGui.qApp.processEvents()
 
     def select(self, idx=False):
         """Import selected test/tests"""
         sel = self.table.selectedIndexes()
         done = []
+        self.converters = []
         for idx in sel:
             i = idx.row()
             if i in done:
+                logging.debug('Duplicate row found in selection', i)
                 continue
             done.append(i)
             prova = self.table.curveModel.tests[i]
@@ -278,5 +297,5 @@ class TestDialog(QtGui.QWidget):
         rows = self.cursor.fetchall()
         self.strip.dmodel.setPathData(image_dir, rows)
         self.strip.show()
-        print 'Showing images from',len(rows),image_dir
+        logging.debug('Showing images from',len(rows),image_dir)
 
