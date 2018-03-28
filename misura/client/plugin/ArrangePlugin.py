@@ -114,12 +114,8 @@ def read_rule_style(dsname):
     m = confdb.rule_style(dsname, latest=True)
     logging.debug('Apply saved style', dsname,m)
     if not m:
-        return False, False, False
-    c = m[confdb.RULE_COLOR] or False
-    l = m[confdb.RULE_LINE] or False
-    m = m[confdb.RULE_MARKER] or False
-    
-    return c,l,m
+        return ['','',0,0,0]
+    return m
 
 def load_rules(doc, tree):
     """Load styling rules for involved axes and curves"""
@@ -234,7 +230,8 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                                               'marker')
                 
             # Rule override
-            C,L,M = rule_by_ax.get(ax.name, (0,0,0))
+            rule = rule_by_ax.get(ax.name, ['','',0,0,0])
+            C,L,M = rule[2:] 
             if C: axcolors[ax.name] = C
             if L: axstyles[ax.name] = L
             if M: axmarkers[ax.name] = M
@@ -259,6 +256,14 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             # Reposition
             if self.fields['space']:
                 props['otherPosition'] = idx * tot
+                
+            # Set saved range
+            print ('AAAAAA', rule)
+            if ':' in rule[0]:
+                props['min'], props['max'] = map(lambda s: s if s=='Auto' else float(s), rule[0].split(':'))
+            if rule[1]:
+                props['datascale'] = float(rule[1])
+                
 
             self.dict_toset(ax, props, preserve=True)
         
@@ -333,7 +338,7 @@ class ArrangePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         
         
         # Apply rules    
-        style_color, style_line, style_marker = read_rule_style(y)
+        style_color, style_line, style_marker = read_rule_style(y)[2:]
         for k in props:
             if style_color and k.endswith('color'):
                 props[k] = style_color

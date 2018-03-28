@@ -200,9 +200,6 @@ class DataNavigatorDomain(NavigatorDomain):
         for r in all:
             self.act_rule[r[0] - 1].setChecked(True)
         # Resolve dependencies
-        # inc should disable exc
-        #if self.act_rule[1].isChecked():
-        #    self.act_rule[0].setChecked(False)
         # Plot involves loading
         if self.act_rule[3].isChecked():
             self.act_rule[2].setChecked(True)
@@ -385,60 +382,104 @@ class PlottingNavigatorDomain(NavigatorDomain):
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.ColorizePlugin)
         self.mainwindow.showDialog(d)
 
-
-    @node
-    def save_style(self, node=False):
-        """Save current curve color, style, marker and axis ranges and scale."""
-        # TODO: save_style
-        path = node.path.split(':')[-1]+'$'
-        
-        
-        style = [path]
+    def find_style_row(self, path):
         idx = -1
-        for i, row in enumerate(confdb.rule_style.rows):
+        row = False
+        for i, row in enumerate(confdb.rule_style.tab[1:]):
             if row[0]==path:
                 logging.debug('Overwriting rule', idx, row)
                 idx = i
                 break
+        return idx, row
+
+    @node
+    def save_style(self, node=False, curve=True, axis=True):
+        """Save current curve color, style, marker and axis ranges and scale."""
+        page = self.navigator.get_page().path
+        plotpath = self.navigator.widget_path_for(node, prefix=page)
+        if not len(plotpath) > 1:
+            return False
+        
+        plot = self.doc.resolveFullWidgetPath(plotpath)
+        
+        path = node.path.split(':')[-1]+'$'
+        
+        style = ['', '', '', '', '']
+        if axis and plot.parent.hasChild(plot.settings.yAxis):
+            yaxis = plot.parent.getChild(plot.settings.yAxis)
+            style[confdb.RULE_RANGE] = '{}:{}'.format(yaxis.settings.min, yaxis.settings.max)
+            style[confdb.RULE_SCALE] = yaxis.settings.datascale
+        if curve: 
+            style[confdb.RULE_COLOR] = plot.settings.PlotLine.color
+            style[confdb.RULE_LINE] = plot.settings.PlotLine.style
+            style[confdb.RULE_MARKER] =  plot.settings.marker
+        
+        style =[path]+style
+        
+        idx, row = self.find_style_row(path)
         tab = confdb['rule_style']
         if idx<0:
             tab.append(style)
         else:
             tab[idx+1] = style
         
+        confdb['rule_style'] = tab    
+        logging.debug('Saving new style', tab)   
+        confdb.save()
         confdb._rule_style = False
         
+    @node
+    def save_curve_style(self, node):
+        return self.save_style(node, axis=False)
+
+    @node
+    def save_axis_style(self, node):
+        return self.save_style(node, curve=False)
 
     @node
     def delete_style(self, node=False):
         """Delete style rule."""
-       # TODO: delete_style
-        pass
+        # TODO: delete_style
+        path = node.path.split(':')[-1]+'$'
+        idx, row= self.find_style_row(path)
+        if idx<0:
+            logging.warning('Could not find saved style rule', path)
+            return False
+        tab = confdb['rule_style']
+        r = tab.pop(idx+1)
+        logging.debug('Removed saved style rule', idx, r)
+        confdb['rule_style'] = tab
+        confdb._rule_style = False
+        confdb.save()
+        
 
-    style_menu = False
     def add_styles(self, menu, node):
         """Styles sub menu"""
         plotpath = self.model().is_plotted(node.path)
         if not len(plotpath) > 0:
             return
-        if not self.style_menu:
-            self.style_menu = menu.addMenu(_('Style'))
-        self.style_menu.clear()
+        style_menu = menu.addMenu(_('Style'))
 
         wg = self.doc.resolveFullWidgetPath(plotpath[0])
-        self.act_color = self.style_menu.addAction(
+        self.act_color = style_menu.addAction(
             _('Colorize'), self.colorize)
         self.act_color.setCheckable(True)
-
-        self.act_save_style = self.style_menu.addAction(
-            _('Save style'), self.save_style)
-        self.act_save_style.setCheckable(True)
-        self.act_delete_style = self.style_menu.addAction(
+        
+        act_save_style = style_menu.addAction(
+            _('Save curve and axis style'), self.save_style)
+        act_save_curve_style = style_menu.addAction(
+            _('Save curve style'), self.save_curve_style)
+        act_save_axis_style = style_menu.addAction(
+            _('Save axis style'), self.save_axis_style)
+        act_save_style.setCheckable(True)
+        
+        self.act_delete_style = style_menu.addAction(
             _('Delete style'), self.delete_style)
+        
         if len(wg.settings.Color.points):
             self.act_color.setChecked(True)
         if confdb.rule_style(node.path):
-            self.act_save_style.setChecked(True)
+            act_save_style.setChecked(True)
 
     def build_file_menu(self, menu, node):
         menu.addAction(_('Thermal Legend'), self.thermalLegend)

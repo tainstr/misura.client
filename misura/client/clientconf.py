@@ -184,8 +184,9 @@ class RulesTable(object):
                 elif not latest:
                     return f
         # No match found, or all
-        f = all or False
-        return f
+        if latest=='all':
+            return all
+        return f 
     
     
 
@@ -195,7 +196,8 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     conn = False
     path = ''
     index = False
-    
+    RULE_RANGE = 0
+    RULE_SCALE = 1
     RULE_COLOR = 2
     RULE_LINE = 3
     RULE_MARKER = 4
