@@ -566,7 +566,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         logging.debug('got header', len(header))
         # Match rules
         for h in header[:]:
-            exc = False
             do_exc = bool(self.rule_exc) and bool(self.rule_exc.search(h))
             do_inc = bool(self.rule_inc) and bool(self.rule_inc.search(h))
             do_load = bool(self.rule_load) and bool(self.rule_load.search(h))
@@ -574,7 +573,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             if do_exc:
                 # Force inclusion?
                 if not do_inc:
-                    exc = True
+                    header.remove(h)
+                    excluded.append(h)
+                    continue
             # Force loading?
             if do_load or do_inc:
                 if h.endswith('/T'):
@@ -583,11 +584,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                     header.insert(0, h)
                 else:
                     autoload.append(h)
-                exc = False
-            # Really exclude (no load, no placeholder)
-            if exc:
-                header.remove(h)
-                excluded.append(h)
 
         logging.debug('got autoload', autoload)
         logging.debug('got excluded', len(excluded))

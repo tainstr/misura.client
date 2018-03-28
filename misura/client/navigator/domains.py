@@ -19,6 +19,7 @@ from ..filedata import MisuraDocument
 from ..filedata import DatasetEntry
 from ..filedata import getFileProxy
 from ..fileui import VersionMenu
+from ..clientconf import confdb, rule_suffixes
 
 
 
@@ -29,13 +30,8 @@ class DataNavigatorDomain(NavigatorDomain):
         self.configuration_windows = {}
         self.data_tables = {}
         self.test_windows = {}
-
-    @node
-    def change_rule(self, node=False, act=0):
-        """Change current loading rule"""
-        # TODO: change_rule
-        pass
-
+        
+        
     @node
     def viewFile(self, node=False):
         if not node.linked:
@@ -144,6 +140,82 @@ class DataNavigatorDomain(NavigatorDomain):
             a=node.parent.path, b=node.path, delete=True)
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.OverwritePlugin)
         self.mainwindow.showDialog(d)
+        
+    def activate_rule(self, node, act):
+        line = '\n{}$'.format(node.path.split(':')[-1])
+        rule = 'rule_'+rule_suffixes[act-1]
+        if line in confdb[rule]:
+            logging.warning('Rule already exists: {}\n{}'.format(line, confdb[rule]))
+        else:
+            confdb[rule]+=line
+            logging.warning('Added rule:', rule, line, confdb[rule])
+            
+        
+        # Remove any lower rule
+        o = set(range(1, 5))
+        o.remove(act)
+        for n in o:
+            logging.debug('REMOVING OTHER RULE', n)
+            self.deactivate_rule(node, n)
+        
+        confdb._rule_dataset = False
+        
+        
+    def deactivate_rule(self, node, act):
+        line = '\n{}$'.format(node.path.split(':')[-1])
+        rule = 'rule_'+rule_suffixes[act-1]
+        txt = confdb[rule]
+        if line in txt:
+            confdb[rule] = txt.replace(line, '')
+            logging.debug('Removing rule', rule, line, confdb[rule])
+        else:
+            logging.warning('Error removing load rule', rule, line)
+            return False
+        
+        confdb._rule_dataset = False
+        return True
+
+    @node
+    def change_rule(self, node=False, act=False):
+        """Change current loading rule."""
+        if not act:
+            return False
+        checked = self.act_rule[act-1].isChecked()
+        
+        if checked: 
+            logging.debug('Activating rule', node, act)
+            self.activate_rule(node, act)
+        else:
+            logging.debug('Deactivating rule', node, act)
+            self.deactivate_rule(node, act)
+            
+        confdb.save()
+        self.update_role_actions(node)
+
+    def update_role_actions(self, node):
+        # Find the highest matching rule
+        all = confdb.rule_dataset(node.path, latest='all')
+        if not all:
+            return
+        for r in all:
+            self.act_rule[r[0] - 1].setChecked(True)
+        # Resolve dependencies
+        # inc should disable exc
+        #if self.act_rule[1].isChecked():
+        #    self.act_rule[0].setChecked(False)
+        # Plot involves loading
+        if self.act_rule[3].isChecked():
+            self.act_rule[2].setChecked(True)
+        # Loading involves listing
+        if self.act_rule[2].isChecked():
+            self.act_rule[1].setChecked(True)
+        # Ignore disables load/plot
+        if self.act_rule[0].isChecked():
+            self.act_rule[2].setChecked(False)
+            self.act_rule[3].setChecked(False)
+        
+        
+        
 
     def add_rules(self, menu, node):
         """Add loading rules sub menu"""
@@ -151,24 +223,20 @@ class DataNavigatorDomain(NavigatorDomain):
         self.act_rule = []
         self.func_rule = []
 
-        def gen(name, idx):
-            f = functools.partial(self.change_rule, act=1)
-            act = menu.addAction(_(name), f)
+        def gen(name, trname):
+            f = functools.partial(self.change_rule, act=name)
+            act = menu.addAction(trname, f)
             act.setCheckable(True)
             self.act_rule.append(act)
             self.func_rule.append(f)
 
-        gen('Ignore', 1)
-        gen('Force', 2)
-        gen('Load', 3)
-        gen('Plot', 4)
+        gen(1, _('Ignore'))
+        gen(2, _('Available'))
+        gen(3, _('Load'))
+        gen(4, _('Plot'))
+        
+        self.update_role_actions(node)
 
-        # Find the highest matching rule
-        r = confdb.rule_dataset(node.path, latest=True)
-        if r:
-            r = r[0]
-        if r > 0:
-            self.act_rule[r - 1].setChecked(True)
 
 
     @node
@@ -322,7 +390,24 @@ class PlottingNavigatorDomain(NavigatorDomain):
     def save_style(self, node=False):
         """Save current curve color, style, marker and axis ranges and scale."""
         # TODO: save_style
-        pass
+        path = node.path.split(':')[-1]+'$'
+        
+        
+        style = [path]
+        idx = -1
+        for i, row in enumerate(confdb.rule_style.rows):
+            if row[0]==path:
+                logging.debug('Overwriting rule', idx, row)
+                idx = i
+                break
+        tab = confdb['rule_style']
+        if idx<0:
+            tab.append(style)
+        else:
+            tab[idx+1] = style
+        
+        confdb._rule_style = False
+        
 
     @node
     def delete_style(self, node=False):

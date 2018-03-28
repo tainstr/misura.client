@@ -167,21 +167,29 @@ class RulesTable(object):
             r = re.compile(r.replace('\n', '|'))
             self.rules.append(r)
             self.rows.append(row[1:])
-
+    
+    
     def __call__(self, s, latest=False):
-        """Return the row corresponding to the first rule matching the string `s`"""
+        """Return the row corresponding to the first rule matching the string `s`.
+        latest = 0, 1, 'all'"""
         f = False
+        all = []
         for i, r in enumerate(self.rules):
             if r is False:
                 continue
             if r.search(s):
                 f = self.rows[i]
-                if not latest:
+                if latest == 'all':
+                    all.append(f)
+                elif not latest:
                     return f
-        # No match found
+        # No match found, or all
+        f = all or False
         return f
+    
+    
 
-
+rule_suffixes= ['exc', 'inc', 'load', 'plot']
 class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     _Method__name = 'CONF'
     conn = False
@@ -203,7 +211,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self.default_desc = deepcopy(default_desc)
         self.load(path)
 
-    _rule_style = RulesTable()
+    _rule_style = False
 
     @property
     def rule_style(self):
@@ -212,22 +220,22 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             self._rule_style = RulesTable(self['rule_style'])
         return self._rule_style
 
-    _rule_dataset = RulesTable()
+    _rule_dataset = False
 
     @property
     def rule_dataset(self):
         """A special RulesTable collecting dataset loading behaviors."""
         if not self._rule_dataset:
             tab = [[('header placeholder'), ('retn')],
-                   [self['rule_exc'], 1],  # exclude
-                   [self['rule_inc'], 2],  # create
-                   [self['rule_load'], 3],  # load
                    [self['rule_plot'], 4],  # plot
+                   [self['rule_load'], 3],  # load
+                   [self['rule_inc'], 2],  # create
+                   [self['rule_exc'], 1],  # exclude
                    ]
             self._rule_dataset = RulesTable(tab)
         return self._rule_dataset
 
-    _rule_unit = RulesTable()
+    _rule_unit = False
 
     @property
     def rule_unit(self):
