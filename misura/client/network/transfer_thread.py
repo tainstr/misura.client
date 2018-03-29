@@ -29,6 +29,8 @@ class TransferThread(QtCore.QThread):
     aborted = False
     retry = 30
     chunk = 1024**2
+    size = 0
+    done = 0
 
     def __init__(self, url=False, outfile=False, uid=False, server=False, dbpath=False, post=False, parent=None):
         QtCore.QThread.__init__(self, parent)
@@ -52,6 +54,8 @@ class TransferThread(QtCore.QThread):
 
         self.prefix = 'Download: '
         """Prefix for transfer job in pending tasks"""
+        
+        
 
     @property
     def pid(self):
@@ -142,8 +146,8 @@ class TransferThread(QtCore.QThread):
         self.dlStarted.emit(url, outfile)
         logging.debug('TransferThread.download_url', url)
         req = urllib2.urlopen(url)
-        dim = int(req.info().getheaders('Content-Length')[0])
-        self.dlSize.emit(dim)
+        self.size = int(req.info().getheaders('Content-Length')[0])
+        self.dlSize.emit(self.size)
         # Determine a unique filename
         
         if os.path.exists(outfile):
@@ -151,7 +155,7 @@ class TransferThread(QtCore.QThread):
             logging.info('Renaming output file to unique name')
             
         # FIXME: maximum recursion depth on big files or chunks too little
-        done = 0
+        self.done = 0
         with open(outfile, 'wb') as fp:
             while not self.aborted:
                 #                 sleep(0.1) # Throttle
@@ -159,8 +163,8 @@ class TransferThread(QtCore.QThread):
                 if not chunk:
                     break
                 fp.write(chunk)
-                done += len(chunk)
-                self.dlDone.emit(done)
+                self.done += len(chunk)
+                self.dlDone.emit(self.done)
         # Remove if aborted
         if self.aborted:
             logging.debug(
@@ -217,6 +221,14 @@ class TransferThread(QtCore.QThread):
         # Free uid for remote opening and next download
         server.storage.test.free(uid)
         return outfile
+    
+    @property
+    def isRunning(self):
+        if self.aborted:
+            return False
+        if self.size==self.done:
+            return False
+        return True
 
     def upload(self, url, localfile, post):
         """
@@ -232,10 +244,10 @@ class TransferThread(QtCore.QThread):
         self.dlStarted.emit(url, localfile)
         fp = open(localfile, 'rb')
         fp.seek(0, 2)
-        dim = fp.tell()
+        self.size = fp.tell()
         fp.seek(0)
-        done = 0
-        self.dlSize.emit(dim)
+        self.done = 0
+        self.dlSize.emit(self.size)
         while fp:
             if self.aborted:
                 data = ''
@@ -247,15 +259,15 @@ class TransferThread(QtCore.QThread):
             logging.debug('urlopen', url, opt, remotefile)
             content = urllib2.urlopen(url=url, data=enc).read()
             logging.debug('Transferred chunk', content)
-            done += len(data)
+            self.done += len(data)
             if len(data) == 0:
                 fp.close()
                 fp = False
-            self.dlDone.emit(done)
+            self.dlDone.emit(self.done)
 #             sleep(0.1)
         # Remove if aborted
         if self.aborted:
-            logging.debug('Upload ABORTED at', done)
+            logging.debug('Upload ABORTED at', self.done)
             self.dlAborted.emit(url, localfile)
         self.dlFinished.emit(url, localfile)
 

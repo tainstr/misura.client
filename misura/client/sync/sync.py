@@ -276,7 +276,8 @@ class SyncWidget(QtGui.QTabWidget):
         # Set local tasks manager
         if parent:
             self.transfer.set_tasks(parent.tasks)
-
+        
+        self.transfer.dlFinished.connect(self.download_next)
         self.storage_sync = StorageSync(self.transfer)
         dbpath = confdb['database']
         # Create if missing
@@ -305,12 +306,33 @@ class SyncWidget(QtGui.QTabWidget):
 
 
     def add_sync_table(self, table_name, title):
+        self.download_queue = []
         obj = SyncTable(self.dbpath, table_name, parent=self)
         self.addTab(obj, title)
-        obj.downloadRecord.connect(self.storage_sync.download_record)
+        obj.downloadRecord.connect(self.download_record)
         obj.excludeRecord.connect(self.storage_sync.exclude_record)
         obj.deleteRecord.connect(self.storage_sync.delete_record)
         return obj
+    
+    def download_record(self, *a):
+        """Append new download to the queue"""
+        self.download_queue.append(a)
+        if len(self.download_queue)==1:
+            self.download_next()
+        
+    def download_next(self, *a):
+        """Manage the download queue"""
+        if not self.download_queue:
+            return False
+        logging.debug('download_next on',a)
+        if not self.transfer.isRunning:
+            v = self.download_queue.pop(0)
+            logging.debug('download_next', v)
+            self.storage_sync.download_record(*v)
+            return True
+        else:
+            logging.debug('download_next waiting')
+            return False
 
     def set_server(self, server):
         if not self.dbpath:
