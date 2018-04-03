@@ -110,7 +110,7 @@ class RecentInterface(object):
                 name0 = row[0].replace('//', '/').split('/')[1]
                 name = row[1] + '@' + name
 #               sig='https://%s:%s@%s/RPC' % (row[1],row[2],name0)
-            nsl.append([name, sig])
+            nsl.append([name, sig, row])
         return nsl
 
     def clear_recent(self):
@@ -162,10 +162,11 @@ class RecentMenu(RecentInterface, QtGui.QMenu):
     def redraw(self):
         self.clear()
         nsl = self.getNameSigList()
-        for name, sig in nsl:
+        for name, sig, row in nsl:
             p = functools.partial(
                 self.emit, QtCore.SIGNAL('select(QString)'), sig)
-            self.addAction(name, p)
+            a = self.addAction(name, p)
+            a.setToolTip('\n'.join(row))
         self.addSeparator()
         self.addAction(_("Clear list"), self.clear_recent)
         self.addAction(_("Open") + '...', self.new)
@@ -229,11 +230,12 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         """Updates the list"""
         self.list.clear()
         nsl = self.getNameSigList()
-        for name, sig in nsl:
+        for name, sig, row in nsl:
             item = QtGui.QListWidgetItem(name)
             # Assign to the item userdata the path of the object, which will be
             # emitted in select_item
             item.setData(QtCore.Qt.UserRole, sig)
+            item.setToolTip('\n'.join(row))
             self.list.addItem(item)
             
     def pre_select_item(self, item=False):
