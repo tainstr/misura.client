@@ -108,6 +108,7 @@ class HelpMenu():
             # Update debug values
             self.server.support['libs']
             self.server.support['env']
+            self.server.support['dmesg']
             self.server.support.save('default')
             # Create configuration backup
             self.server.support['doBackup']
@@ -146,6 +147,9 @@ class HelpMenu():
             return False
         if filename.lower().endswith('.zip'):
             filename = filename[:-4]
+        if os.name!='nt':
+            from commands import getstatusoutput as go
+            go('dmesg > "{}/dmesg.log"'.format(self._debug_dir))
         shutil.make_archive(filename, 'zip', self._debug_dir)
         logging.debug('Created archive', filename, self._debug_dir)
         shutil.rmtree(self._debug_dir)
