@@ -181,14 +181,12 @@ class DataDecoder(QtCore.QThread):
             r = fp.len(self.datapath)
             assert r is not None
         except:
-            logging.debug('get_len first pass')
-            traceback.print_exc()
+            logging.debug('get_len first pass', traceback.format_exc())
             fp = fp.copy()
             try:
                 r = fp.len(self.datapath)
             except:
-                logging.debug('get_len second pass')
-                traceback.print_exc()
+                logging.debug('get_len second pass', traceback.format_exc())
                 r = 0
 
         logging.debug('DataDecoder.get_len', r)
@@ -203,8 +201,7 @@ class DataDecoder(QtCore.QThread):
         try:
             r = self.get_len()
         except:
-            logging.debug('Getting __len__', self.datapath)
-            traceback.print_exc()
+            logging.debug('Getting __len__', self.datapath, traceback.format_exc())
         return r
 
     def get_time(self, t):
@@ -244,11 +241,11 @@ class DataDecoder(QtCore.QThread):
         try:
             t, dat = self.refclass.decode(entry)
         except:
-            logging.debug('DataDecoder getting', self.datapath, seq)
-            traceback.print_exc()
+            logging.debug('DataDecoder getting', self.datapath, seq, 
+                          traceback.format_exc())
             return False
         # Direct image conversion
-        if self.ext == 'Image':
+        if self.ext in ['Image','Binary']:
             logging.debug('toQImage', seq)
             # Create a QImage for signalling
             pix = QtGui.QImage()
@@ -289,7 +286,10 @@ class DataDecoder(QtCore.QThread):
             return True
         if seq in self.names:
             return True
-        t, dat = self.get_data(seq, fp)
+        dat = self.get_data(seq, fp)
+        if not dat:
+            return False
+        t, dat = dat
         if not dat:
             return False
         self.names.append(seq)
