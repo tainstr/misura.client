@@ -156,6 +156,7 @@ class SpinboxAction(QtGui.QWidgetAction):
         if maximum is None:
             maximum = MAX if double else MAXINT
         self.label = QtGui.QLabel(label)
+        self.label.setForegroundRole(QtGui.QPalette.BrightText)
         self.spinbox = ScientificSpinbox(double=double)
         self.spinbox.setRange(minimum, maximum)
         self.spinbox.setValue(current)
@@ -227,8 +228,8 @@ class aNumber(ActiveWidget):
             self.spinbox.show()
             if self.slider:
                 self.slider.show()
-        self.update(minmax=False)
         self.spinbox.set_precision(self.precision)
+        self.update(minmax=False)
         self.build_range_menu()
         self.set_enabled()
         
@@ -278,11 +279,11 @@ class aNumber(ActiveWidget):
         return True
     
     def update_range_menu(self):
-        self.range_min.spinbox.setValue(self.min)
-        self.range_max.spinbox.setValue(self.max)
-        self.range_step.spinbox.setValue(self.step)
+        self.range_min.spinbox.setValue(self.min or 0)
+        self.range_max.spinbox.setValue(self.max or 0)
+        self.range_step.spinbox.setValue(self.step or 0)
         self.range_zoom.spinbox.setValue(self.zoom_factor)
-        self.range_precision.spinbox.setValue(self.precision)
+        self.range_precision.spinbox.setValue(self.precision or 0)
                 
     def set_range_minimum(self):
         val = self.range_min.spinbox.value()
@@ -313,6 +314,7 @@ class aNumber(ActiveWidget):
         self.precision = self.range_precision.spinbox.value()
         self.spinbox.set_precision(self.precision)
         self.set_tooltip()
+        self.update()
 
     def set_error(self, error=None):
         if error is None:

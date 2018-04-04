@@ -826,7 +826,7 @@ class aTable(ActiveWidget):
         self.table = aTableView(self)
         self.lay.addWidget(self.table)
         self.setSizePolicy(
-            QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Maximum)
+            QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.table.setSizePolicy(self.sizePolicy())
         self.resize_height()
         self.table.model().sigOutdated.connect(self.update_option)

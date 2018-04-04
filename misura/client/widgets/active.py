@@ -439,6 +439,7 @@ class LabelWidget(QtGui.QLabel):
         prop = active.prop
         QtGui.QLabel.__init__(
             self, unicode(_(prop['name'], context='Option')), parent=active)
+        self.setWordWrap(True)
         self.prop = prop
         self.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
 
@@ -557,7 +558,9 @@ class ActiveWidget(Active, QtGui.QWidget):
         win.setWindowTitle(self.label)
         wg.label_widget.show()
         lay.addWidget(wg.label_widget)
+        wg.label_widget.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         lay.addWidget(wg)
+        wg.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         win.setLayout(lay)
         self._win = win
         win.show()
@@ -710,7 +713,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.bmenu.setSizePolicy(
             QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.bmenu.clicked.connect(self.update_menu)
-        if not self.unit or self.type.startswith('Role'):
+        if not self.unit or self.type.startswith('Role') or self.type=='Table':
             self.bmenu.hide()
         self.set_label()
         self.lay.addWidget(self.bmenu)
