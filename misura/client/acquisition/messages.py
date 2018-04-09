@@ -133,6 +133,7 @@ class ValidationDialog(QtGui.QDialog):
         else:
             self.table.hide()
             self.btn_update.hide()
+            self.done()
             
         self.btn_start.setEnabled(ok) 
         return ok
