@@ -5,12 +5,14 @@
 import os
 
 import sip
+from unittest2.__main__ import main_
 sip.setapi('QString', 2)
 from PyQt4 import QtGui, QtCore
 
 # Veusz libraries
 import veusz.utils
-from veusz.windows.mainwindow import MainWindow
+from veusz.windows import mainwindow 
+
 import veusz.document as document
 import veusz.setting as setting
 from veusz import veusz_main
@@ -39,13 +41,15 @@ from . import plot
 from . import veuszplot
 
 
+
+
 setting.transient_settings['unsafe_mode'] = True
 
 
 class CustomInterface(object):
 
-    def __init__(self, mainwindow, name):
-        self.mw = mainwindow
+    def __init__(self, main_window, name):
+        self.mw = main_window
         self.menu = QtGui.QMenu(name)
         menu_bar = self.mw.menuBar()
         help_action = menu_bar.actions()[-1]
@@ -130,9 +134,9 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
 
     """MainWindow methods useful for misura specific widgets and actions"""
 
-    def __init__(self, mainwindow):
-        CustomInterface.__init__(self, mainwindow, 'Misura')
-        QtCore.QObject.__init__(self, parent=mainwindow)
+    def __init__(self, main_window):
+        CustomInterface.__init__(self, main_window, 'Misura')
+        QtCore.QObject.__init__(self, parent=main_window)
 
         # Navigator
         self.openedFilesDock = QtGui.QDockWidget(self.mw.centralWidget())
@@ -307,9 +311,9 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
 
     """MainWindow methods useful for Misura3 specific widgets and actions"""
 
-    def __init__(self, mainwindow):
-        CustomInterface.__init__(self, mainwindow, 'Misura3')
-        QtCore.QObject.__init__(self, parent=mainwindow)
+    def __init__(self, main_window):
+        CustomInterface.__init__(self, main_window, 'Misura3')
+        QtCore.QObject.__init__(self, parent=main_window)
 
         self.recentDatabase = RecentMenu(confdb, 'm3database', self.mw)
         self.connect(self.recentDatabase, QtCore.SIGNAL(
@@ -347,7 +351,8 @@ class Misura3Interface(CustomInterface, QtCore.QObject):
         return dsnames, instrument_name
 
 
-class Graphics(MainWindow):
+
+class Graphics(mainwindow.MainWindow):
 
     """Main Graphics window, derived directly from Veusz"""
     # FIXME: patch to Veusz for dynamic document substitution!
@@ -366,7 +371,9 @@ class Graphics(MainWindow):
         logging.debug('Load Icons OK')
         self._document = MisuraDocument()
         # Shortcuts to command interpreter and interface
-        MainWindow.__init__(self, *a)
+        
+        mainwindow.PlotWindow = veuszplot.VeuszPlotWindow
+        mainwindow.MainWindow.__init__(self, *a)
         logging.debug('MainWindow init')
         self.ci = self.console.interpreter
         self.cmd = self.ci.interface
@@ -383,6 +390,7 @@ class Graphics(MainWindow):
         self.setWindowIcon(QtGui.QIcon(os.path.join(params.pathArt, 'graphics.svg')))
         self.plot.dragMoveEvent = self.dragEnterEvent
         self.plot.dropEvent = self.dropEvent
+        
         
     def dragMoveEvent(self, event):
         veuszplot.process_image_dragMoveEvent(event)

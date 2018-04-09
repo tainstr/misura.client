@@ -25,6 +25,7 @@ from veusz.document import registerImportCommand
 
 import veusz.windows.plotwindow as plotwindow
 import veusz.setting as setting
+from veusz.document import OperationWidgetDelete
 
 
 
@@ -72,8 +73,8 @@ def process_image_dropEvent(plot_window, drop_event):
 class VeuszPlotWindow(plotwindow.PlotWindow):
     sigNearestWidget = QtCore.pyqtSignal(object)
     
-    def __init__(self, document, parent=None):
-        plotwindow.PlotWindow.__init__(self, document, parent)
+    def __init__(self, document, parent=None, **kw):
+        plotwindow.PlotWindow.__init__(self, document, parent=parent, **kw)
         self.contextmenu = QtGui.QMenu(self)
         self.sigUpdatePage.connect(self.update_page)
         self.navigator = False
@@ -132,7 +133,11 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         menu.addAction('Properties', self.f)
         self.f1 = partial(self.edit_properties, pos, True)
         menu.addAction('Formatting', self.f1)
+        self.fdel = partial(self.delete_widget, pos)
+        menu.addAction('Delete selected', self.fdel)
         self.widget_menu(menu, pos)
+        
+        
 
         # add some useful entries
         menu.addAction(self.vzactions['view.zoommenu'])
@@ -209,6 +214,11 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         s = treeeditwindow.SettingsProxySingle(self.document, widget.settings)
         self.w.updateProperties(s)
         self.w.show()
+        
+    def delete_widget(self, pos):
+        widget = self.identify_widget(pos)
+        op = OperationWidgetDelete(widget)
+        self.document.applyOperation(op)
 
     dirname_export = False
     filename = ''
