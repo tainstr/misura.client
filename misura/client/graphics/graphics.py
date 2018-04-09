@@ -5,7 +5,6 @@
 import os
 
 import sip
-from unittest2.__main__ import main_
 sip.setapi('QString', 2)
 from PyQt4 import QtGui, QtCore
 
