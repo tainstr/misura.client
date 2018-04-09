@@ -440,7 +440,11 @@ class aNumber(ActiveWidget):
             self.spinbox.blockSignals(False)
             if self.slider:
                 self.slider.blockSignals(False)
-        self.readonly_label.setText(self.spinbox.text())
+        c = int(self.current)
+        if c in self.prop.get('valueSignals',{}):
+            self.readonly_label.setText(str(self.prop['valueSignals'][c]))
+        else:
+            self.readonly_label.setText(self.spinbox.text())
 
     #@lockme()
     def setRange(self, m=None, M=None, step=0):
