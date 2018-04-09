@@ -3,7 +3,7 @@
 """Draws Thermal Cycle in a text label."""
 import veusz.plugins as plugins
 import numpy
-
+from traceback import print_exc
 from FieldMisuraNavigator import FieldMisuraNavigator
 
 
@@ -22,7 +22,7 @@ def cycleFormat(t, T):
     return [T, rates, stasis]
 
 
-def drawCycleOnGraph(cmd, tTc,  label='ThermalCycle', wdg=False, create=True, color='red', size='8pt'):
+def drawCycleOnGraph(cmd, tTc,  label='ThermalCycle', wdg=False, color='red', size='8pt'):
     if not wdg:
         wdg = 'tc' + label
     t = []
@@ -46,7 +46,9 @@ def drawCycleOnGraph(cmd, tTc,  label='ThermalCycle', wdg=False, create=True, co
         ir = '%3.1f' % (ir * 60)
         ist = '%3.1f' % (ist / 60)
         label += ' %-6s| %-7s| %-7s\\\\' % (iT, ir, ist)
-    if create:
+    try:
+        assert cmd.WidgetType(wdg)=='label'
+    except:
         cmd.Add('label', name=wdg)
     cmd.To(wdg)
     cmd.Set('label', label)
@@ -57,7 +59,7 @@ def drawCycleOnGraph(cmd, tTc,  label='ThermalCycle', wdg=False, create=True, co
 
 class ThermalCyclePlugin(plugins.ToolsPlugin):
 
-    """Show Misura Microscope shapes in graphics"""
+    """Draw a thermal cycle legend"""
     # a tuple of strings building up menu to place plugin on
     menu = ('Misura', 'Thermal legend')
     # unique name for plugin
