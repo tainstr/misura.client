@@ -131,6 +131,7 @@ class ValidationDialog(QtGui.QDialog):
             self.btn_update.setDefault(not ok)
             self.btn_update.setFocus(not ok)
         else:
+            logging.debug('No validation required: accepting the dialog.')
             self.table.hide()
             self.btn_update.hide()
             self.accept()
