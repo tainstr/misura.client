@@ -79,7 +79,7 @@ class ImageReference(utils.OperationWrapper, veusz.widgets.ImageFile):
             self.updateCachedEmbedded()
             return
         from .. import filedata
-        fp = filedata.getFileProxy(s.filename)
+        fp = filedata.getFileProxy(s.filename, mode='r')
         t = s.target
         dec = self.dec
         dec.reset(fp, datapath=s.dataset)

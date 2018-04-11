@@ -496,7 +496,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         if fp is False or not fp.isopen():
             logging.debug('Opening a new file proxy', self.filename)
             self.proxy = getFileProxy(
-                self.filename, version=self.params.version)
+                self.filename, version=self.params.version, mode='r')
         else:
             self.proxy = fp
         job(1, label='Configuration')

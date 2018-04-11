@@ -14,7 +14,7 @@ nativem4 = os.path.join(iutils_testing.data_dir, 'test_video.h5')
 class TestConstructor(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        file_proxy = filedata.getFileProxy(nativem4)
+        file_proxy = filedata.getFileProxy(nativem4,mode='r')
         file_proxy.load_conf()
         file_proxy.close()       
         self.conf = file_proxy.conf

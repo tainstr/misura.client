@@ -222,7 +222,9 @@ class DataDecoder(QtCore.QThread):
         if fp is False:
             logging.debug('get_data: no file proxy')
             return False
-
+        if not fp.isopen():
+            logging.debug('get_data: reopening')
+            fp.reopen()
         sequence_id = '%i' % (seq)
 
         if self.cached_profiles.has_key(sequence_id):
@@ -305,8 +307,12 @@ class DataDecoder(QtCore.QThread):
             logging.debug('proxy', self.proxy)
             logging.debug('datapath', self.datapath)
             return False
+        if not self.proxy.isopen():
+            logging.debug('get: reopening')
+            self.proxy.reopen()
         if not (seq in self.names):
             logging.debug('queue', seq)
+
             self.queue.append(seq)
             # If queue is longer than maximum cache length, remove oldest point
             if len(self.queue) >= params.maxImageCacheSize:

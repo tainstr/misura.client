@@ -23,7 +23,7 @@ class MeasureInfo(unittest.TestCase):
         from misura import kiln, flex
 
         file_proxy = filedata.getFileProxy(
-            os.path.join(iutils_testing.data_dir, 'test_video.h5'))
+            os.path.join(iutils_testing.data_dir, 'test_video.h5'), mode='r')
         file_proxy.load_conf()
 
         proxy = file_proxy.conf

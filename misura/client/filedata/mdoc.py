@@ -74,7 +74,7 @@ class MisuraDocument(document.Document):
             self.proxy_filename = proxy.get_path()
             self.up = True
         elif filename:
-            self.proxy = getFileProxy(filename)
+            self.proxy = getFileProxy(filename, mode='r')
             self.proxy_filename = filename
             self.up = False
         else:
@@ -112,7 +112,7 @@ class MisuraDocument(document.Document):
                     break
             if not do:
                 continue
-            proxy = getFileProxy(path)
+            proxy = getFileProxy(path, mode='r')
             self.create_proxy_decoders(proxy, linked.prefix)
 
     def add_cache(self, ds, name, overwrite=True):
@@ -402,7 +402,7 @@ class MisuraDocument(document.Document):
             if proxy is False:
                 proxy = self.proxies.get(vfn, False)
                 if proxy is False:
-                    proxy = getFileProxy(vfn, version=None)
+                    proxy = getFileProxy(vfn, version=None, mode='a')
                 self.proxies[vfn] = proxy
                 # Use pre-existing version_name
                 version_id = proxy.get_version_by_name(version_name)

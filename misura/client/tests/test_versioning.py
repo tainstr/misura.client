@@ -29,7 +29,7 @@ class TestSummaryVersioning(unittest.TestCase):
         os.remove(cls.path)
 
     def setUp(self):
-        self.file_proxy = filedata.getFileProxy(self.path)
+        self.file_proxy = filedata.getFileProxy(self.path,mode='a')
 
     def tearDown(self):
         self.file_proxy.close()

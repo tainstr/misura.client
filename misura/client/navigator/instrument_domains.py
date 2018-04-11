@@ -43,7 +43,7 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
     def render(self, node=False):
         """Render video from `node`"""
         from misura.client import video
-        sh = getFileProxy(node.linked.filename)
+        sh = getFileProxy(node.linked.filename, mode='r')
         pt = '/' + \
             node.path.replace(node.linked.prefix, '').replace('summary', '')
         v = video.VideoExporter(sh, pt)

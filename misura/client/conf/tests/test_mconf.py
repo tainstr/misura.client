@@ -29,7 +29,7 @@ def tearDownModule():
 class TestTreePanel(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        file_proxy = filedata.getFileProxy(nativem4)
+        file_proxy = filedata.getFileProxy(nativem4,mode='r')
         file_proxy.load_conf()
         file_proxy.close()
         self.server = file_proxy.conf

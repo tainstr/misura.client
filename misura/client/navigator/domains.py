@@ -122,7 +122,7 @@ class DataNavigatorDomain(NavigatorDomain):
     @node
     def save_on_current_version(self, node=False):
         #FIXME: Find out local t dataset!
-        proxy = getFileProxy(node.linked.filename)
+        proxy = getFileProxy(node.linked.filename, mode='a')
         prefix = node.linked.prefix
         try:
             proxy.save_data(node.ds.m_col, node.ds.data, self.model().doc.data[prefix + "t"].data)

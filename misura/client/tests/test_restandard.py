@@ -32,7 +32,7 @@ class TestRestandard(unittest.TestCase):
 #	@unittest.skip('')
     def test_restandard(self):
         """Tests the distribution of scripts"""
-        fp = filedata.getFileProxy(nativem4)
+        fp = filedata.getFileProxy(nativem4,mode='r')
         fp.conf.post.distribute_scripts()
         correct = fp.conf.post.sample0['Melting']
         # Set a wrong value
