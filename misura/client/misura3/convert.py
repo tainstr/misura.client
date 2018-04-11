@@ -275,6 +275,8 @@ class Converter(dataimport.Converter):
         # Open DB and import test data
         if not tcode:
             self.dbpath, tcode = self.dbpath.split('|')
+        self.outFile = False
+        self.outpath = False
         self.tcode = tcode
         conn, cursor = m3db.getConnectionCursor(self.dbpath)
         cursor.execute("select * from PROVE where IDProve = '%s'" % tcode)
@@ -300,39 +302,37 @@ class Converter(dataimport.Converter):
 
         safeName = ''.join(
             c for c in self.test[m3db.fprv.Desc_Prova] if c in valid_chars)
-        outpath = os.path.join(self.outdir, safeName + '_' + tcode + '.h5')
-
+        self.outpath = os.path.join(self.outdir, safeName + '_' + tcode + '.h5')
+        self.img = True
         # Manage overwriting options
-        if os.path.exists(outpath):
-            # Keep current images
-            if keep_img:
-                outFile = indexer.SharedFile(outpath, mode='a')
-                found = outFile.has_node('/hsm/sample0/frame')
-                # If no images: create new file
-                if not found:
-                    outFile.close()
-                    del outFile
-                    os.remove(outpath)
-                    outFile = indexer.SharedFile(outpath, mode='w')
-                # Else, wipe out data points and configuration, but keep images
-                else:
-                    # but keep images!
-                    img = False
-            # If I am forcing overwriting and not caring about current images,
+        if os.path.exists(self.outpath):
+            # If I am forcing overwriting and not caring about current images:
             # create new file
-            elif force:
-                os.remove(outpath)
-                outFile = indexer.SharedFile(outpath, mode='w')
-            # If I am not forcing neither keeping images, return the current file
-            else:
-                logging.debug('Already exported path:', outpath)
-                return outpath
+            self.outFile = False
+            try: 
+                self.outFile = indexer.SharedFile(self.outpath, mode='a')
+                # Keep images only if they exist
+                keep_img = keep_img and self.outFile.has_node('/hsm/sample0/frame')
+            except:
+                logging.error('Error opening existing file:', format_exc())
+                force = True
+                keep_img = False
+            
+            if not force:
+                logging.debug('Already exported path:', self.outpath)
+                self.outFile.close()
+                return False
+            elif force and not keep_img:
+                if self.outFile:
+                    self.outFile.close()
+                os.remove(self.outpath)
+                self.outFile = indexer.SharedFile(self.outpath, mode='w')
+            # Keep current images
+            elif keep_img:
+                self.img = False
         # If it does not exist, create!
         else:
-            outFile = indexer.SharedFile(outpath, mode='w')
-        self.outpath = outpath
-        self.outFile = outFile
-        self.img = img
+            self.outFile = indexer.SharedFile(self.outpath, mode='w')
         self.keep_img = keep_img
         self.force = force
         return self.outpath
@@ -567,10 +567,10 @@ class Converter(dataimport.Converter):
                                 'serial': serial,
                                 'uid': uid })
         self.progress = 99
-        log('Appending to Misura database')
+        log('Appending to Misura database: '+ self.outpath)
         outFile.close()
         indexer.Indexer.append_file_to_database(self.m4db, self.outpath)
-        log('Conversion ended.')
+        log('Conversion ended: '+ self.outpath)
         self.progress = 100
 
         return self.outpath

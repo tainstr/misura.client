@@ -212,6 +212,9 @@ def getHeatingCycle(entry):
             break
         t0, T0 = out[-1]
         R = R * numpy.sign(T - T0)
+        if R==0:
+            logging.error('Zero rate:', i, R,T,S)
+            break
         t = float(t0 + 60. * (T - T0) / R)
         if i == 1 and t == 0:
             addt = 1

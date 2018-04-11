@@ -162,6 +162,7 @@ class TestDialog(QtGui.QWidget):
     def resetList(self, *args):
         self.cursor.execute("select * from PROVE")
         tests = self.cursor.fetchall()
+        logging.debug('Retrieved tests:', len(tests), self.path)
         self.table.curveModel.setTests(tests)
         self.table.resizeRowsToContents()
 
@@ -238,7 +239,18 @@ class TestDialog(QtGui.QWidget):
         
         converter = convert.Converter(dbpath, self.outdir)
         outpath = converter.get_outpath(idprove, img=self.img,
-                                             keep_img=self.keep_img) 
+                                             keep_img=self.keep_img,
+                                             force=self.force)
+        if not converter.outpath:
+            logging.error('Could not convert empty test', path)
+            return False
+        if os.path.exists(converter.outpath) and not outpath:
+            outpath = converter.outpath
+            logging.debug('Skipping the export process, file found:', outpath)
+            if self.doOpen.isChecked():
+                self.emit(QtCore.SIGNAL('imported(QString)'), outpath)
+                self.emit(QtCore.SIGNAL('select(QString)'), outpath)
+            return False
         converter.pid = 'Converting to misura format: ' + idprove
         
         self.connect(registry.tasks, QtCore.SIGNAL('sig_done(QString)'), self.done)
@@ -251,6 +263,7 @@ class TestDialog(QtGui.QWidget):
         self.progress_timer.setInterval(500)
         self.connect(self.progress_timer, QtCore.SIGNAL('timeout()'), self.update_progress)
         self.progress_timer.start()
+        return True
         
     def update_progress(self):
         if not self.converters and self.progress_timer:
@@ -264,10 +277,10 @@ class TestDialog(QtGui.QWidget):
     def select(self, idx=False):
         """Import selected test/tests"""
         sel = self.table.selectedIndexes()
+        sel = set([idx.row() for idx in sel])
         done = []
         self.converters = []
-        for idx in sel:
-            i = idx.row()
+        for i in sel:
             if i in done:
                 logging.debug('Duplicate row found in selection', i)
                 continue
