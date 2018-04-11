@@ -150,15 +150,14 @@ class ViewerPicture(QtGui.QGraphicsView):
             s = max(s, 10)  # at least 10 steps
             # Invert controls and appearance?
             orient = m.slider.orientation()
-            invc = (align > 0 and orient == QtCore.Qt.Horizontal) or (align < 0 and orient == QtCore.Qt.Vertical )
+            invc = align<0
             logging.debug('############ INVERSION?', m.prop['kid'], invc)
             # Skip if no change
             if ps != m.slider.pageStep() or s != m.slider.singleStep() or invc != m.slider.invertedControls():
                 m.slider.setPageStep(ps)
                 m.slider.setSingleStep(s)
-                m.slider.setInvertedControls(invc)
-                m.slider.setInvertedAppearance(invc)
                 m.remObj.setattr(m.handle, 'step', s)
+                m.set_inverted_slider(invc)
         self._res = g  # cache resolution
         # Update all overlays
         for smp in self.samples:

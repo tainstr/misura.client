@@ -80,9 +80,7 @@ class ViewerControl(QtGui.QWidget):
         else: 
             widget.setOrientation(QtCore.Qt.Horizontal)
             
-        if inversion:
-            widget.slider.setInvertedControls(True)
-            widget.slider.setInvertedAppearance(True)
+        widget.set_inverted_slider(inversion)
         self.lay.addWidget(widget, *pos)
         self.controls[position] = widget
         logging.debug('ViewerControl.setControl', widget, position, pos)

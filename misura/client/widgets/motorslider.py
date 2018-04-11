@@ -15,6 +15,7 @@ class MotorSlider(aNumber):
         self.started = 0
         self.target = 0
         self.position = 0
+        
         aNumber.__init__(self, server, remObj, prop, parent)
         self.pos_obj = ActiveObject(
             server, remObj, remObj.gete('position'), parent=self)
@@ -38,6 +39,9 @@ class MotorSlider(aNumber):
         self.menu.addAction(self.labelact)
         self.zoomact = self.menu.addAction('Zoom', self.toggle_zoom)
         self.zoomact.setCheckable(True)
+        self.menu.addAction(self.arrow_act)
+        self.menu.addAction(self.invert_act)
+        self.arrow_act.setChecked(True)
         if self.server._readLevel>=4:
             self.cfact = self.menu.addAction(_('Configure'), self.hide_show)
             self.cfact.setCheckable(True)
@@ -123,8 +127,11 @@ class MotorSlider(aNumber):
     
     def toggle_zoom(self):
         logging.debug('Toggle zoom', self.zoom_factor)
-        self.slider.zoomed=not self.slider.zoomed
         self.setZoom()
+        
+
+
+        
         
 
 
