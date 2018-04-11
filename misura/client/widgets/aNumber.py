@@ -22,7 +22,7 @@ class FocusableSlider(QtGui.QSlider):
     zoom = QtCore.pyqtSignal(bool)
     pause = QtCore.pyqtSignal(bool)
     wheel = QtCore.pyqtSignal(QtGui.QWheelEvent)
-    zoom_factor = 1
+    zoom_factor = 1.
 
     def __init__(self, *a, **kw):
         QtGui.QSlider.__init__(self, *a, **kw)
@@ -30,12 +30,14 @@ class FocusableSlider(QtGui.QSlider):
 
     @property
     def zoomed(self):
-        return self.zoom_factor != 1
+        return self.zoom_factor != 1.
 
     @zoomed.setter
     def zoomed(self, val):
         if not val:
-            self.zoom_factor = 1
+            self.zoom_factor = 1.
+        else:
+            self.zoom_factor = 10.
 
     def set_paused(self, v):
         """Change paused state for the slider."""
@@ -218,10 +220,17 @@ class aNumber(ActiveWidget):
         self.arrow_act = QtGui.QAction(_('Arrows'), self)
         self.arrow_act.setCheckable(True)
         self.arrow_act.setChecked(False)
-        self.arrow_act.toggled.connect(self.toggle_arrows)
+        self.arrow_act.triggered.connect(self.toggle_arrows)
         self.invert_act = QtGui.QAction(_('Inverted'), self)
         self.invert_act.setCheckable(True)
-        self.invert_act.toggled.connect(self.toggle_invert)
+        self.invert_act.setChecked(False)
+        self.invert_act.triggered.connect(self.toggle_invert)
+        self.zoomact = QtGui.QAction(_('Zoom'), self)
+        self.zoomact.setCheckable(True)
+        self.zoomact.setChecked(False)
+        self.zoomact.triggered.connect(self.toggle_zoom)
+        
+        
 
     def changed_option(self):
         self.precision = self.prop.get('precision', -1)
@@ -303,12 +312,23 @@ class aNumber(ActiveWidget):
         if show is None:
             show = self.arrow_act.isChecked()
         logging.debug('Add/remove arrows', show)
+        self.arrow_act.setChecked(show)
         if show:
             self.arrow_plus.show()
             self.arrow_minus.show()
         else:
             self.arrow_plus.hide()
             self.arrow_minus.hide()
+    
+    def toggle_zoom(self):
+        if self.zoom_factor == 1.:
+            self.zoom_factor = 10.
+        else:
+            self.zoom_factor = 1.
+        if self.slider:
+            self.slider.zoom_factor = self.zoom_factor
+        self.setZoom()
+        logging.debug('Toggle zoom2', self.zoom_factor)
 
     def build_range_menu(self):
         # TODO: update ranges when unit changes!!!
@@ -367,7 +387,6 @@ class aNumber(ActiveWidget):
         if not self.slider:
             return
         self.zoom_factor = self.range_zoom.spinbox.value()
-        self.slider.zoom_factor = self.zoom_factor
         self.setZoom()
 
     def set_precision(self):
@@ -505,15 +524,14 @@ class aNumber(ActiveWidget):
     def setZoom(self, val=None):
         """Enable/disable zooming"""
         if self.slider:
+            logging.debug('setZoom', self.slider.zoom_factor, self.zoom_factor, self.slider.zoomed)
+            self.zoom_factor = self.slider.zoom_factor
             if self.slider.zoomed:
                 self.slider.setStyleSheet("background-color: red;")
-                if self.zoom_factor == 1:
-                    self.zoom_factor = 10.
             else:
                 self.slider.setStyleSheet("background-color:;")
-                if self.zoom_factor != 1:
-                    self.zoom_factor = 1.
-                    self.slider.zoom_factor = 1
+            self.zoomact.setChecked(self.slider.zoomed)
+            
         self.range_zoom.spinbox.setValue(self.zoom_factor)
         self.setRange(self.min, self.max, self.step)
 
