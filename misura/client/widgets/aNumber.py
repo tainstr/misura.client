@@ -273,7 +273,10 @@ class aNumber(ActiveWidget):
         self.update(minmax=False)
         self.build_range_menu()
         self.set_enabled()
-
+        
+        self.set_tooltip()
+        
+        
     def redraw(self):
         # Create the layout
         super(aNumber, self).redraw()
@@ -651,12 +654,15 @@ class aNumber(ActiveWidget):
         self.step_changed.emit(self.step)
 
     def set_tooltip(self):
+        tp = self.prop.get('toolTip', '')
+        if tp: 
+            tp += '\n'
         mx, mn = 'inf', '-inf'
         if self.max and ((self.double and self.max < MAX) or (self.max < MAXINT)):
             mx = self.spinbox.textFromValue(self.max)
         if self.min and ((self.double and self.min > MIN) or (self.min > MININT)):
             mn = self.spinbox.textFromValue(self.min)
-        tp = _('Range: {} >> {}\nStep: {}\n').format(mn, mx, self.step)
+        tp += _('Range: {} >> {}\nStep: {}\n').format(mn, mx, self.step)
         tp += _('Precision: {}').format(self.precision)
         if self.slider:
             tp += _(' Zoom: {}').format(self.zoom_factor * self.slider.zoomed)
@@ -666,6 +672,7 @@ class aNumber(ActiveWidget):
         if self.slider:
             self.slider.setToolTip(tp)
         self.spinbox.setToolTip(tp)
+        self.setToolTip(tp)
 
 
 class aNumberAction(QtGui.QWidgetAction):
