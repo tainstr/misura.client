@@ -135,6 +135,9 @@ ao(default_desc, 'recent_m3database', 'Table', attr=['Hidden'], current=[[('Path
 
 recent_tables = 'server,database,file,m3database'.split(',')
 
+if os.name!='nt':
+    default_desc['m3_enable']['current'] = False
+    default_desc['m3_enable']['attr'] = ['ReadOnly', 'Hidden']
 
 def tabname(name):
     if name in recent_tables:
@@ -277,6 +280,9 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if os.path.exists(self['database']):
             logging.debug('Found default database', self['database'])
             self.mem_database(self['database'], '')
+        if os.name!='nt':
+            self['m3_enable'] = False
+            self.setattr('m3_enable', 'attr', ['ReadOnly', 'Hidden'])
             
     def migrate_desc(self):
         """Migrate saved newdesc to current hard-coded configuration structure default_desc"""
