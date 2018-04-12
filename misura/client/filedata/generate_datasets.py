@@ -133,6 +133,8 @@ def table_to_datasets(proxy, opt, doc):
     base_path = proxy['fullpath'] + handle
     datasets = {}
     tab = np.array(tab[1:]).transpose()
+    tab[np.equal(tab, None)] = np.nan
+    tab = tab.astype('float')
     if len(tab) == 0:
         logging.debug('Skip empty table')
         return False
@@ -170,6 +172,7 @@ def table_to_datasets(proxy, opt, doc):
         err = None
         if Ecol_name:
             err = tab[Ecol_idx]
+            err[np.equal(err, np.nan)] = 0
         opt1 = opt.copy()
         opt1['unit'] = opt1['unit'][idx]
         datasets[base_path] = (tab[idx], opt['handle'], opt['name'], err, opt1)
