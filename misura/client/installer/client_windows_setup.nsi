@@ -5,7 +5,7 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Misura"
 ;!define PRODUCT_VERSION "4.2"
-!define PRODUCT_PUBLISHER "TA Instruments/Waters LLC"
+!define PRODUCT_PUBLISHER "TA Instruments / Waters LLC"
 !define PRODUCT_WEB_SITE "http://misura.readthedocs.io"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\browser.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -83,8 +83,12 @@ Section "MainSection" SEC01
   File "${VEUSZ_SRC_DIR}\veusz\veusz\__init__.py"
 
   CreateDirectory "$SMPROGRAMS\Misura"
-  CreateShortCut "$SMPROGRAMS\Misura\Browser.lnk" "$INSTDIR\browser.exe"
-  CreateShortCut "$DESKTOP\Browser.lnk" "$INSTDIR\browser.exe"
+  CreateShortCut "$SMPROGRAMS\Misura\MisuraBrowser.lnk" "$INSTDIR\browser.exe"
+  CreateShortCut "$DESKTOP\MisuraBrowser.lnk" "$INSTDIR\browser.exe"
+  CreateShortCut "$SMPROGRAMS\Misura\MisuraAcquisition.lnk" "$INSTDIR\acquisition.exe"
+  CreateShortCut "$DESKTOP\MisuraAcquisition.lnk" "$INSTDIR\acquisition.exe"
+  CreateShortCut "$SMPROGRAMS\Misura\MisuraGraphics.lnk" "$INSTDIR\graphics.exe"
+  CreateShortCut "$DESKTOP\MisuraGraphics.lnk" "$INSTDIR\graphics.exe"
   SetOverwrite ifnewer
 
   File "${PYINST_DIR}\README"
@@ -195,8 +199,12 @@ Section Uninstall
   
   Delete "$SMPROGRAMS\Misura\Uninstall.lnk"
   Delete "$SMPROGRAMS\Misura\Website.lnk"
-  Delete "$DESKTOP\Browser.lnk"
-  Delete "$SMPROGRAMS\Misura\Browser.lnk"
+  Delete "$DESKTOP\MisuraBrowser.lnk"
+  Delete "$SMPROGRAMS\Misura\MisuraBrowser.lnk"
+  Delete "$DESKTOP\MisuraAcquisition.lnk"
+  Delete "$SMPROGRAMS\Misura\MisuraAcquisition.lnk"
+  Delete "$DESKTOP\MisuraGraphics.lnk"
+  Delete "$SMPROGRAMS\Misura\MisuraGraphics.lnk"
 
   RMDir "$SMPROGRAMS\Misura"
   RMDir "$INSTDIR\eggs"

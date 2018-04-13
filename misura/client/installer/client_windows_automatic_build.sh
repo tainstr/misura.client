@@ -99,6 +99,8 @@ CONDADIR=`dirname "$CONDADIR"`
 CONDADIR=`dirname "$CONDADIR"`
 cp "$CONDADIR"/Library/bin/mkl_* "$OUTPUT_MISURA4_DIR/"
 
+makensis.exe $INSTALLER_DIR/client_windows_setup.nsi
+
 rm -f $BUILD_IN_PROGRSS_FILE
 echo "OK" > $LAST_BUILD_STATUS_FILE
 
