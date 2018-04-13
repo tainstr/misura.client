@@ -12,6 +12,7 @@ from misura.client import units
 from misura.client import iutils
 from misura.client.clientconf import settings
 from . import builder
+from _collections import defaultdict
 
 def _export(loaded, get_column_func,
             path='/tmp/misura/m.csv',
@@ -617,18 +618,23 @@ class aTableView(QtGui.QTableView):
         self.rowAfter = partial(self.addRow, 1)
         self.rowBefore = partial(self.addRow, -1)
         if not self.tableObj.readonly:
-            menu.addAction(_('Add row after'), self.rowAfter)
+            menu.addAction(_('Add row after'), self.rowAfter, QtGui.QKeySequence(QtCore.Qt.Key_Insert))
             menu.addAction(_('Add row before'), self.rowBefore)
-            menu.addAction(_('Delete row'), self.remRow)
+            menu.addAction(_('Delete row'), self.remRow, QtGui.QKeySequence(QtCore.Qt.Key_Delete))
         menu.addSeparator()
 
-        menu.addAction(_('Update'), self.tableObj.get)
-        menu.addAction(_('Export'), self.export)
+        menu.addAction(_('Update'), self.tableObj.get, QtGui.QKeySequence.Refresh)
+        if self.selectionModel().hasSelection():
+            menu.addAction(_('Copy'), self.copy_selection, QtGui.QKeySequence.Copy)
+        menu.addAction(_('Export'), self.export, QtGui.QKeySequence.Save)
         self.make_rotation_action(menu)
         menu_zoom = menu.addMenu(_('Zoom'))
         act_zoom = ZoomAction(menu_zoom)
+        act_zoom.slider.setValue(self.zoom_val)
         act_zoom.slider.valueChanged.connect(self.set_zoom)
         menu_zoom.addAction(act_zoom)
+        menu_zoom.addAction(_('In'), self.zoom_in,QtGui.QKeySequence.ZoomIn)
+        menu_zoom.addAction(_('Out'), self.zoom_out,QtGui.QKeySequence.ZoomOut)
         self.model().make_visible_units_action(menu)
         self.model().make_visibility_menu(menu, QtCore.Qt.Horizontal)
         self.model().make_visibility_menu(menu, QtCore.Qt.Vertical)
@@ -798,8 +804,10 @@ class aTableView(QtGui.QTableView):
         for i in range(self.model().rowCount()):
             h += self.rowHeight(i)
         return h
-
+    
+    zoom_val = 50
     def set_zoom(self, val):
+        self.zoom_val = val
         val = self.ref_font_size * (1 + ((val - 50) / 100.))
         d = '{{ font-size: {:.0f}pt; }}'.format(
             val)
@@ -808,6 +816,11 @@ class aTableView(QtGui.QTableView):
         self.setStyleSheet(s)
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
+        
+    def zoom_in(self):
+        self.set_zoom(self.zoom_val*1.1)
+    def zoom_out(self):
+        self.set_zoom(self.zoom_val*0.9)
 
     def rotate(self):
         self.model().rotated = not self.model().rotated
@@ -816,7 +829,53 @@ class aTableView(QtGui.QTableView):
         self.update_visible_columns()
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
-
+        
+        
+    def copy_selection(self):
+        if not self.selectionModel().hasSelection():
+                logging.debug('No selection')
+                return False
+        text = u''
+        data = defaultdict(dict)
+        for idx in self.selectionModel().selectedIndexes():
+            # Notice: rows and columns are inverted!
+            # This works also with rotation
+            data[idx.row()][idx.column()] = '{}'.format(idx.data())
+            
+        for col in sorted(data.keys()):
+            row = data[col]
+            row = [row[i] for i in sorted(row.keys())]
+            text += u'\t'.join(row)
+            text += u'\n'
+        logging.debug('Selected\n', text)
+        QtGui.QApplication.clipboard().setText(text)
+        return text
+        
+    def keyPressEvent(self, event):
+        #Some ref: http://www.walletfox.com/course/qtableviewcopypaste.php
+        if event.key() == QtCore.Qt.Key_Insert:
+            self.addRow(1)
+            return
+        if event.key() == QtCore.Qt.Key_Delete:
+            self.remRow()
+            return
+        if event.matches(QtGui.QKeySequence.Copy):
+            text = self.copy_selection()
+            return
+        if event.matches(QtGui.QKeySequence.Save):
+            self.export()
+            return
+        if event.matches(QtGui.QKeySequence.Refresh):
+            self.tableObj.get()
+            return
+        if event.matches(QtGui.QKeySequence.ZoomIn):
+            self.zoom_in()
+            return
+        if event.matches(QtGui.QKeySequence.ZoomOut):
+            self.zoom_out()
+            return
+        
+        return QtGui.QTableView.keyPressEvent(self, event)
 
 class aTable(ActiveWidget):
     table = False
