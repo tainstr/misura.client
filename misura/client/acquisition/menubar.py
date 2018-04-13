@@ -15,6 +15,7 @@ from . import windows
 from .. import iniconf
 from .. import widgets
 from ..live import registry
+from ..autoupdate import ServerUpdater
 from PyQt4 import QtGui, QtCore
 
 
@@ -413,11 +414,9 @@ class MenuBar(QtGui.QMenuBar):
         self.parent().resetFileProxy()
         
     def update_server(self):
-        self.pkg = widgets.aFileList(self.server, self.server.support, 
-                          self.server.support.gete('packages'), parent=self)
-        self.pkg.hide()
-        if self.pkg.send(): 
-            self.pkg.transfer.dlFinished.connect(self._apply_update_server)
+        self.server_updater=ServerUpdater(self.server, parent=self)
+        self.server_updater()
+        
         
     def _apply_update_server(self, *a):
         self.server.support['packages'] = os.path.basename(self.pkg.transfer.outfile)
@@ -444,7 +443,5 @@ class MenuBar(QtGui.QMenuBar):
         r.do()
         
         self._motor_limits_check = r
-        
-        
         
 

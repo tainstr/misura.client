@@ -407,6 +407,9 @@ class MisuraProxy(common_proxy.CommonProxy):
     def _has_key(self, path):
         r = self.remObj.has_key(path)
         return r
+    
+    def __contains__(self, path):
+        return self._has_key(path)
 
     def __getattr__(self, path):
         """Override standard ServerProxy in order to provide useful shortcuts."""

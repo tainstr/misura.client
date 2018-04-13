@@ -32,7 +32,8 @@ class TransferThread(QtCore.QThread):
     size = 0
     done = 0
 
-    def __init__(self, url=False, outfile=False, uid=False, server=False, dbpath=False, post=False, parent=None):
+    def __init__(self, url=False, outfile=False, uid=False, server=False, dbpath=False, post=False, 
+                 realm='MISURA', parent=None):
         QtCore.QThread.__init__(self, parent)
         self.url = url
         """directly download URL to outfile"""
@@ -54,6 +55,9 @@ class TransferThread(QtCore.QThread):
 
         self.prefix = 'Download: '
         """Prefix for transfer job in pending tasks"""
+        
+        self.realm = realm
+        """Authentication realm"""
         
         
 
@@ -124,11 +128,13 @@ class TransferThread(QtCore.QThread):
 
     def prepare_opener(self, url):
         """Install the basic authentication url opener"""
+        if not url.startswith('http'):
+            return url
         user, passwd, url = urlauth(url)
         # Connection to data
         auth_handler = urllib2.HTTPBasicAuthHandler()
         auth_handler.add_password(
-            realm='MISURA', uri=url, user=user, passwd=passwd)
+            realm=self.realm, uri=url, user=user, passwd=passwd)
         opener = urllib2.build_opener(auth_handler)
         # ...and install it globally so it can be used with urlopen.
         urllib2.install_opener(opener)
@@ -146,7 +152,12 @@ class TransferThread(QtCore.QThread):
         self.dlStarted.emit(url, outfile)
         logging.debug('TransferThread.download_url', url)
         req = urllib2.urlopen(url)
-        self.size = int(req.info().getheaders('Content-Length')[0])
+        length = req.info().getheaders('Content-Length')
+        if length:
+            self.size = int(length[0])
+        else:
+            self.size=1e8
+            
         self.dlSize.emit(self.size)
         # Determine a unique filename
         
@@ -165,17 +176,21 @@ class TransferThread(QtCore.QThread):
                 fp.write(chunk)
                 self.done += len(chunk)
                 self.dlDone.emit(self.done)
+            self.size = fp.tell()
         # Remove if aborted
         if self.aborted:
             logging.debug(
                 'Download ABORTED. Removing local file:', outfile)
             os.remove(outfile)
             self.dlAborted.emit(url, outfile)
+            self.size = 0
+            self.done = 0
+            
         # Append to db if defined
-        elif self.dbpath and os.path.exists(self.dbpath):
-            db = indexer.Indexer(self.dbpath)
-            db.appendFile(outfile)
-            db.close()
+            if self.dbpath and os.path.exists(self.dbpath):
+                db = indexer.Indexer(self.dbpath)
+                db.appendFile(outfile)
+                db.close()
         self.dlFinished.emit(url, outfile)
         return True
 
@@ -253,10 +268,10 @@ class TransferThread(QtCore.QThread):
                 data = ''
             else:
                 data = fp.read(self.chunk)
-            enc = urllib.urlencode({'opt': opt,
-                                    'filename': remotefile,
-                                    'data': data})
-            logging.debug('urlopen', url, opt, remotefile)
+            urlopt = {'opt': opt, 'filename': remotefile,'data': data}
+            if self.done==0:
+                urlopt['overwrite']=True
+            enc = urllib.urlencode(urlopt)
             content = urllib2.urlopen(url=url, data=enc).read()
             logging.debug('Transferred chunk', content)
             self.done += len(data)

@@ -24,17 +24,15 @@ class aFileList(aChooser):
         self.transfer = False
         self.set_enabled()       
 
-    def send(self, *args):
+    def send(self, filename=False, *a, **kw):
         """Upload local file"""
-        n = QtGui.QFileDialog.getOpenFileName(
-            parent=self, caption=_("Upload File"))
+        if filename:
+            n=filename
+        else:
+            n = QtGui.QFileDialog.getOpenFileName(
+                parent=self, caption=_("Upload File"))
         if len(n) == 0 or not os.path.exists(n):
             logging.debug('File Upload Aborted')
-            return False
-        if os.path.basename(n) in self.prop['options']:
-            # TODO: allow to overwrite....
-            QtGui.QMessageBox.warning(self, _('Overwriting file'), _(
-                'A file with the same name already exists.\nPlease choose a different one.'))
             return False
         url = self.remObj.conn_addr + \
             self.remObj['fullpath'][:-1]  # remove trailing /

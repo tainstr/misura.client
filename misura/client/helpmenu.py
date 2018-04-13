@@ -4,7 +4,7 @@
 import os
 import shutil
 import tempfile 
-
+from traceback import format_exc
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from misura.canon import option
@@ -18,8 +18,13 @@ from .clientconf import confdb
 from misura.canon.version import __version__ as canon_version
 from . import parameters
 from version import __version__ as client_version
-
+from .autoupdate import check_server_updates, check_client_updates
 from PyQt4 import QtGui, QtCore, uic
+
+
+
+
+
 
 about="""
 <h1> Misura &trade;</h1>
@@ -47,10 +52,21 @@ class HelpMenu():
     def add_help_menu(self, menu_bar):
         self.menu_bar = menu_bar
         self.help = menu_bar.addMenu('Help')
+        self.help.aboutToShow.connect(self.update_menu)
+        
+    @property
+    def server(self):
+        return getattr(self.menu_bar, 'server', False)
+        
+    def update_menu(self):
+        self.help.clear()
         self.help.addAction(_('Client configuration'), self.showClientConf)
         self.help.addAction(_('Documentation'), self.showDocSite)
         self.help.addAction(_('Pending operations'), self.showTasks)
         self.help.addAction(_('Bug report'), self.bug_report)
+        if self.server:
+            self.help.addAction(_('Check server updates'), self.check_server_updates)
+        #self.help.addAction(_('Check client updates'), self.check_client_updates)
         self.help.addAction(_('About'), showAbout)
 
     def showClientConf(self):
@@ -103,7 +119,6 @@ class HelpMenu():
         
         self._backupFileTransfer = False
         self._logsFileTransfer = False
-        self.server = getattr(self.menu_bar, 'server', False)
         if self.server:
             # Update debug values
             self.server.support['libs']
@@ -154,4 +169,19 @@ class HelpMenu():
         logging.debug('Created archive', filename, self._debug_dir)
         shutil.rmtree(self._debug_dir)
         logging.debug('Removed temporary debug dir', self._debug_dir)
+        
+    def check_client_updates(self):
+        try:
+            self._client_updater =  check_client_updates()
+            return
+        except:
+            QtGui.QMessageBox.warning(self, 'Client update error', format_exc())
+    
+    def check_server_updates(self):
+        try:
+            self._server_updater = check_server_updates(self.server, self.menu_bar)
+        except: 
+            QtGui.QMessageBox.warning(self.menu_bar, 'Server update error', format_exc())
+            
+        
         

@@ -69,12 +69,23 @@ ao(default_desc, 'templates', **{'name': 'Templates directory',
                               'current': os.path.expanduser("~/MisuraData/templates"),
                               'type': 'FilePath'})
 
+##############
+# Autoupdate
+ao(default_desc, 'updateUrl', 'String', 
+   'ftp://webshare.tainstruments.com/pub/Software/Misura/4/packages.ini', 
+   'AutoUpdate address')
+ao(default_desc, 'updateUser', 'String', 'taguest', 'AutoUpdate site username', parent='updateUrl')
+ao(default_desc, 'updatePassword', 'String', '', 'AutoUpdate site password', parent='updateUrl')
+ao(default_desc, 'updateLast', 'String', '', 'Last update url', parent='updateUrl')
 
+###############
+# Rules
 u = [[k, v] for k, v in units.user_defaults.iteritems()]
 ao(default_desc, 'units', 'Table', [
    [('Dimension', 'String'), ('Unit', 'String')]] + u, 'Measurement units')
 
 ao(default_desc, 'rule', 'Section', 'Dataset Rules', 'Dataset Rules')
+
 
 rule_exc = r'''^(/summary/)?beholder/
 ^(/summary/)?hydra/
@@ -122,12 +133,20 @@ ao(default_desc, 'rule_autoformat', 'Chooser', 'Line Color', 'Mark curves sharin
 
 ao(default_desc, 'rule_logo', **{'name': 'Plot Logo','current': '','type': 'FilePath'})
 
+##########
+# Plugins
 ao(default_desc, 'm3', 'Section', 'Data import', 'Data import')
 ao(default_desc, 'm3_enable', 'Boolean', True, 'Enable Misura 3 database interface')
 ao(default_desc, 'm3_plugins', 'TextArea', 'thegram', 'Import plugins by name')
 
-
-ao(default_desc, 'recent_server', 'Table', attr=['Hidden'], current=[[('Address', 'String'),('User', 'String'), ('Password','String'), ('MAC', 'String'),('Serial', 'String'), ('Name', 'String')], ])
+############
+# Recent tables
+ao(default_desc, 'recent_server', 'Table', attr=['Hidden'], current=[[('Address', 'String'),
+                                                                      ('User', 'String'), 
+                                                                      ('Password','String'), 
+                                                                      ('MAC', 'String'),
+                                                                      ('Serial', 'String'), 
+                                                                      ('Name', 'String')], ])
 ao(default_desc, 'recent_database', 'Table', attr=['Hidden'], current=[[('Path', 'String'),('Name','String')], ])
 ao(default_desc, 'recent_file', 'Table', attr=['Hidden'], current=[[('Path', 'String'),('Name','String')], ])
 ao(default_desc, 'recent_m3database', 'Table', attr=['Hidden'], current=[[('Path', 'String'),('Name','String')], ])
