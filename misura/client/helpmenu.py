@@ -66,7 +66,7 @@ class HelpMenu():
         self.help.addAction(_('Bug report'), self.bug_report)
         if self.server:
             self.help.addAction(_('Check server updates'), self.check_server_updates)
-        #self.help.addAction(_('Check client updates'), self.check_client_updates)
+        self.help.addAction(_('Check client updates'), self.check_client_updates)
         self.help.addAction(_('About'), showAbout)
 
     def showClientConf(self):
@@ -172,16 +172,27 @@ class HelpMenu():
         
     def check_client_updates(self):
         try:
-            self._client_updater =  check_client_updates()
+            r = check_client_updates()
+            if not r:
+                QtGui.QMessageBox.information(self.menu_bar, 'Up to date', 'Misura Client is up to date.\nNo newer version was found.')
+                return True
+            if r is True:
+                QtGui.QMessageBox.information(self.menu_bar, 'Updated', 'Misura Client sources were updated.')
+                return True
+            self._client_updater = r  
             return
         except:
-            QtGui.QMessageBox.warning(self, 'Client update error', format_exc())
+            QtGui.QMessageBox.warning(self.menu_bar, 'Misura Client update error', format_exc())
     
     def check_server_updates(self):
         try:
-            self._server_updater = check_server_updates(self.server, self.menu_bar)
+            r = check_server_updates(self.server, self.menu_bar)
+            if not r:
+                QtGui.QMessageBox.information(self.menu_bar, 'Up to date', 'Misura Server is up to date.\nNo newer version was found.')
+                return True
+            self._server_updater = r
         except: 
-            QtGui.QMessageBox.warning(self.menu_bar, 'Server update error', format_exc())
+            QtGui.QMessageBox.warning(self.menu_bar, 'Misura Server update error', format_exc())
             
         
         

@@ -1,7 +1,7 @@
 import os
 import urllib2
 import tempfile
-
+from traceback import format_exc
 try:
     import configparser
 except:
@@ -45,22 +45,33 @@ class ServerUpdater(object):
 
 fi = lambda s: int(s.ljust(20, '0'))
 
-def get_packages():
+def get_packages(*filenames):
     url = confdb['updateUrl']
     user = confdb['updateUser']
     password = confdb['updatePassword']
     if user:
         protocol, url = url.split('://')
         url = '{}://{}:{}@{}'.format(protocol, user, password, url)
-    
-    logging.debug('Packages:', url)
-    res = urllib2.urlopen(url)
+    while url.endswith('/'):
+        url = url[:-1]
+    if 'packages.ini' not in filenames:
+        filenames=['packages.ini']+list(filenames)
+    logging.debug('Update site:', url, filenames)
     conf = configparser.SafeConfigParser()
     conf.optionxform = str
-    conf.readfp(res)
+    for f in filenames:
+        file_url = url+'/'+f
+        logging.debug('Getting:', file_url)
+        try:
+            res = urllib2.urlopen(file_url)
+            conf.readfp(res)
+        except:
+            if f=='packages.ini':
+                raise 
+            logging.error(format_exc())
     return conf
 
-def get_best_client_version(conf):
+def get_best_client_version(conf, serials):
     """Get best client version compatible with the oldest server 
     appearing in recent cronology"""
     client = conf.get('latest', 'client')
@@ -71,8 +82,7 @@ def get_best_client_version(conf):
     # Search latest version available for oldest serial getting an update
     sections = conf.sections()
     oldest_serial = False
-    for recent in confdb['recent_server'][1:]:
-        serial = recent[4] 
+    for serial in serials:
         if serial  not in sections:
             logging.debug('Serial not found:', serial)
             continue
@@ -102,7 +112,7 @@ def check_server_updates(remote, parent=None):
     
     serial = remote['eq_sn']
     
-    conf = get_packages()
+    conf = get_packages(serial+'.ini')
     if conf.has_option(serial, 'server'):
         latest = conf.get(serial, 'server')
         v = fi(latest)
@@ -128,12 +138,33 @@ def check_server_updates(remote, parent=None):
     tt.start()
     return tt
     
-def check_client_updates():
-    conf = get_packages()
+def update_from_source():
+    from misura.canon import determine_path
+    from commands import getstatusoutput as go
+    paths = []
+    paths.append(os.path.dirname(determine_path(__file__)))
+    from misura.canon import __file__ as canonfile
+    paths.append(os.path.dirname(determine_path(canonfile)))
+    from veusz import __file__ as veuszfile
+    paths.append(os.path.dirname(determine_path(veuszfile)))
+    for path in paths:
+        s,r=go('git -C "{}" status'.format(path))
+        logging.debug(s,r)            
+        logging.debug('Updating',path)
+        s,r=go('git -C "{}" pull --rebase'.format(path))
+        logging.debug(s,r)
+    return True 
     
+def check_client_updates():
+    if os.name!='nt':
+        return update_from_source()
+    assert False, 'unimplemented'
+    serials = []
+    for recent in confdb['recent_server'][1:]:
+        serials.append(recent[4]+'.ini') 
+    conf = get_packages(*serials)
+    client, server, oldest_serial = get_best_client_version(conf, serials)
     client_url = conf.get('url', str(client))
-    if client_url==confdb['updateLast']:
-        logging.debug('Last update address matches latest package available')
-        return False
+    #TODO: mark client as with server packages
     #TODO: client update
     

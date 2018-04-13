@@ -72,7 +72,7 @@ ao(default_desc, 'templates', **{'name': 'Templates directory',
 ##############
 # Autoupdate
 ao(default_desc, 'updateUrl', 'String', 
-   'ftp://webshare.tainstruments.com/pub/Software/Misura/4/packages.ini', 
+   'ftp://webshare.tainstruments.com/pub/Software/Misura/4/', 
    'AutoUpdate address')
 ao(default_desc, 'updateUser', 'String', 'taguest', 'AutoUpdate site username', parent='updateUrl')
 ao(default_desc, 'updatePassword', 'String', '', 'AutoUpdate site password', parent='updateUrl')
