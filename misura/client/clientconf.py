@@ -76,7 +76,6 @@ ao(default_desc, 'updateUrl', 'String',
    'AutoUpdate address')
 ao(default_desc, 'updateUser', 'String', 'taguest', 'AutoUpdate site username', parent='updateUrl')
 ao(default_desc, 'updatePassword', 'String', '', 'AutoUpdate site password', parent='updateUrl')
-ao(default_desc, 'updateLast', 'String', '', 'Last update url', parent='updateUrl')
 
 ###############
 # Rules

@@ -172,7 +172,7 @@ class HelpMenu():
         
     def check_client_updates(self):
         try:
-            r = check_client_updates()
+            r = check_client_updates(self.menu_bar)
             if not r:
                 QtGui.QMessageBox.information(self.menu_bar, 'Up to date', 'Misura Client is up to date.\nNo newer version was found.')
                 return True

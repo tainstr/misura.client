@@ -12,10 +12,11 @@ logging = get_module_logging(__name__)
 from . import widgets
 from .clientconf import confdb
 from .network import TransferThread
-
+from .parameters import pathClient
+from .live import registry
 
 class ServerUpdater(object):
-    def __init__(self, server, parent=None):
+    def __init__(self, server, parent):
         self.server = server
         self.parent = parent
         self.pkg = False
@@ -42,6 +43,20 @@ class ServerUpdater(object):
         self.server.restart()
         logging.debug('Closing the client while server restarts.')
         self.parent.quit()
+        
+class ClientUpdater(object):
+    def __init__(self, execfile, parent):
+        self.execfile = execfile
+        self.parent = parent
+    
+    def __call__(self):
+        from PyQt4 import QtCore
+        QtCore.QProcess.startDetached(self.execfile)
+        from .iutils import app
+        app.quit()
+        
+        
+    
 
 fi = lambda s: int(s.ljust(20, '0'))
 
@@ -97,18 +112,22 @@ def get_best_client_version(conf, serials):
     logging.debug('Oldest serial:', oldest_serial)
     logging.debug('Found client:', client, iclient)
     logging.debug('Found server:', server, iserver)
-    return client, server, oldest_serial
+    return client, iclient
     
+def get_version_date(versionString):
+    current = -1
+    for line in versionString.splitlines():
+        if line.startswith('date'):
+            line=line.split('=')[-1].replace(' ','').replace(':','').replace('-','')
+            current = fi(line)
+    return current
     
 def check_server_updates(remote, parent=None):
     current = -1
     latest = -1
     # Take current last version
     if 'versionString' in remote.support:
-        for line in remote.support['versionString'].splitlines():
-            if line.startswith('date'):
-                line=line.split('=')[-1].replace(' ','').replace(':','').replace('-','')
-                current = fi(line)
+        current = get_version_date(remote.support['versionString'])
     
     serial = remote['eq_sn']
     
@@ -117,7 +136,7 @@ def check_server_updates(remote, parent=None):
         latest = conf.get(serial, 'server')
         v = fi(latest)
         if v<=current:
-            logging.info('No available update was found', current, latest)
+            logging.info('No update was found', current, latest)
             return False
     else:
         # Take latest version
@@ -133,7 +152,7 @@ def check_server_updates(remote, parent=None):
     updater.outfile=server_out
     tt = TransferThread(server_url, server_out)
     tt.dlFinished.connect(updater)
-    from .live import registry
+    tt.updater = updater
     tt.set_tasks(registry.tasks)
     tt.start()
     return tt
@@ -155,16 +174,31 @@ def update_from_source():
         logging.debug(s,r)
     return True 
     
-def check_client_updates():
+def check_client_updates(parent):
     if os.name!='nt':
         return update_from_source()
-    assert False, 'unimplemented'
     serials = []
     for recent in confdb['recent_server'][1:]:
         serials.append(recent[4]+'.ini') 
     conf = get_packages(*serials)
-    client, server, oldest_serial = get_best_client_version(conf, serials)
-    client_url = conf.get('url', str(client))
-    #TODO: mark client as with server packages
-    #TODO: client update
+    client, iclient = get_best_client_version(conf, serials)
+    
+    current = os.path.join(pathClient, 'VERSION')
+    current = open(current, 'r').read()
+    current = get_version_date(current)
+    
+    if current>iclient:
+        logging.info('No update was found', current, client)
+        return False
+    tempdir = tempfile.mkdtemp('misura_updater')    
+    
+    client_out = os.path.join(tempdir, 'misura_client_{}.exe'.format(client))
+    url = conf.get('url', str(client))
+    updater = ClientUpdater(client_out, parent)
+    tt = TransferThread(url, client_out)
+    tt.dlFinished.connect(updater)
+    tt.updater = updater
+    tt.set_tasks(registry.tasks)
+    tt.start()
+    return tt
     
