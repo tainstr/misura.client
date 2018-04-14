@@ -139,7 +139,8 @@ class TransferThread(QtCore.QThread):
         # ...and install it globally so it can be used with urlopen.
         urllib2.install_opener(opener)
         return url
-
+    
+    valid_size = True
     def download_url(self, url, outfile):
         """Download from url and save to outfile path"""
         logging.debug('download url', url, outfile)
@@ -155,8 +156,10 @@ class TransferThread(QtCore.QThread):
         length = req.info().getheaders('Content-Length')
         if length:
             self.size = int(length[0])
+            self.valid_size = True
         else:
-            self.size=1e8
+            self.size=1000000
+            self.valid_size = False
             
         self.dlSize.emit(self.size)
         # Determine a unique filename
@@ -175,8 +178,13 @@ class TransferThread(QtCore.QThread):
                     break
                 fp.write(chunk)
                 self.done += len(chunk)
+                # If no valid size was determined, increase it
+                if not self.valid_size:
+                    self.size = self.done+1000000
+                    self.dlSize.emit(self.size)
                 self.dlDone.emit(self.done)
             self.size = fp.tell()
+            self.dlSize.emit(self.size)
         # Remove if aborted
         if self.aborted:
             logging.debug(
@@ -187,11 +195,13 @@ class TransferThread(QtCore.QThread):
             self.done = 0
             
         # Append to db if defined
-            if self.dbpath and os.path.exists(self.dbpath):
-                db = indexer.Indexer(self.dbpath)
-                db.appendFile(outfile)
-                db.close()
-        self.dlFinished.emit(url, outfile)
+        elif self.dbpath and os.path.exists(self.dbpath):
+            db = indexer.Indexer(self.dbpath)
+            db.appendFile(outfile)
+            db.close()
+            
+        if not self.aborted:
+            self.dlFinished.emit(url, outfile)
         return True
 
     def download_uid(self, server, uid, outfile=False, retry=20):

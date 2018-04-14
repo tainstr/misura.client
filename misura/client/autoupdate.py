@@ -45,13 +45,15 @@ class ServerUpdater(object):
         self.parent.quit()
         
 class ClientUpdater(object):
-    def __init__(self, execfile, parent):
+    def __init__(self, execfile):
         self.execfile = execfile
-        self.parent = parent
     
     def __call__(self):
         from PyQt4 import QtCore
-        QtCore.QProcess.startDetached(self.execfile)
+        logging.debug('EXECUTING', self.execfile)
+        import subprocess
+        p = subprocess.Popen([self.execfile], shell=True)
+        logging.debug('DONE',p)
         from .iutils import app
         app.quit()
         
@@ -115,6 +117,7 @@ def get_best_client_version(conf, serials):
     return client, iclient
     
 def get_version_date(versionString):
+    print versionString
     current = -1
     for line in versionString.splitlines():
         if line.startswith('date'):
@@ -194,7 +197,7 @@ def check_client_updates(parent):
     
     client_out = os.path.join(tempdir, 'misura_client_{}.exe'.format(client))
     url = conf.get('url', str(client))
-    updater = ClientUpdater(client_out, parent)
+    updater = ClientUpdater(client_out)
     tt = TransferThread(url, client_out)
     tt.dlFinished.connect(updater)
     tt.updater = updater
