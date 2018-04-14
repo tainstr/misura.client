@@ -59,8 +59,11 @@ class ClientUpdater(object):
         
         
     
-
-fi = lambda s: int(s.ljust(20, '0'))
+def fi(s):
+    """Return numeric version number"""
+    s = ''.join(c for c in s if c.isdigit())
+    s = s.ljust(20, '0')
+    return int(s)
 
 def get_packages(*filenames):
     url = confdb['updateUrl']
@@ -145,8 +148,10 @@ def check_server_updates(remote, parent=None):
         # Take latest version
         latest = conf.get('latest', 'server')
     
-            
-    tempdir = tempfile.mkdtemp('misura_updater')    
+    if os.name=='nt':
+        tempdir = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop') 
+    else:
+        tempdir = os.path.join(os.path.expanduser('~'))  
     server_url = conf.get('url', latest)
     server_out = os.path.join(tempdir, 'misura_pkg_{}.tar'.format(latest))
     logging.debug('Downloading server package', server_url)
@@ -193,8 +198,7 @@ def check_client_updates(parent):
     if current>iclient:
         logging.info('No update was found', current, client)
         return False
-    tempdir = tempfile.mkdtemp('misura_updater')    
-    
+    tempdir = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
     client_out = os.path.join(tempdir, 'misura_client_{}.exe'.format(client))
     url = conf.get('url', str(client))
     updater = ClientUpdater(client_out)
