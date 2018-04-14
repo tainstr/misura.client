@@ -68,7 +68,30 @@ rm -rf "$CANON_LINK"
 ln -s "$CANON_DIR" "$CANON_LINK"
 
 mkdir "$DISTRIBUTION_DIR"
+mkdir "$OUTPUT_MISURA4_DIR"
+
+
+
+###################
+###################
 pyinstaller -y --clean --win-private-assemblies "$SPEC_FILE"
+###################
+###################
+
+# Copy the correct license
+cp $CODE_BASE/misura.client/LICENSE.txt $OUTPUT_MISURA4_DIR/LICENSE
+
+# Create version stamps
+VERSION="$OUTPUT_MISURA4_DIR/VERSION"
+GIT_CLIENT=`git -C "$CLIENT_DIR" log --pretty=format:'%h' -n 1`
+GIT_CANON=`git -C "$CANON_DIR" log --pretty=format:'%h' -n 1`
+GIT_VEUSZ=`git -C "$VEUSZ_DIR" log --pretty=format:'%h' -n 1`
+echo "misura.client = $GIT_CLIENT" > $VERSION
+echo "misura.canon = $GIT_CANON" >> $VERSION
+echo "veusz = $GIT_VEUSZ" >> $VERSION
+STAMP=`date +"%F %T"`
+echo "date = $STAMP" >> $VERSION
+
 
 if [ $? -ne 0 ]; then
 	echo "Error building Misura4 package."
@@ -99,7 +122,7 @@ CONDADIR=`dirname "$CONDADIR"`
 CONDADIR=`dirname "$CONDADIR"`
 cp "$CONDADIR"/Library/bin/mkl_* "$OUTPUT_MISURA4_DIR/"
 
-makensis.exe $INSTALLER_DIR/client_windows_setup.nsi
+"C:\Program Files (x86)\NSIS\makensis.exe" "$INSTALLER_DIR/client_windows_setup.nsi"
 
 rm -f $BUILD_IN_PROGRSS_FILE
 echo "OK" > $LAST_BUILD_STATUS_FILE

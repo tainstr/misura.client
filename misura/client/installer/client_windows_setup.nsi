@@ -4,7 +4,8 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Misura"
-;!define PRODUCT_VERSION "4.2"
+!define /date DATE "%Y%m%d"
+!define PRODUCT_VERSION "4.2-${DATE}"
 !define PRODUCT_PUBLISHER "TA Instruments / Waters LLC"
 !define PRODUCT_WEB_SITE "http://misura.readthedocs.io"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\browser.exe"
@@ -24,14 +25,15 @@ SetCompressor /solid lzma
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
 ; License page
-!insertmacro MUI_PAGE_LICENSE "${PYINST_DIR}\COPYING"
+!insertmacro MUI_PAGE_LICENSE "${PYINST_DIR}\LICENSE"
 ; Directory page
 !insertmacro MUI_PAGE_DIRECTORY
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
 !define MUI_FINISHPAGE_RUN "$INSTDIR\browser.exe"
-!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README"
+!define MUI_FINISHPAGE_LINK "Open Misura Documentation"
+!define MUI_FINISHPAGE_LINK_LOCATION "${PRODUCT_WEB_SITE}"
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
@@ -43,7 +45,7 @@ SetCompressor /solid lzma
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "misura-${PRODUCT_VERSION}-windows-setup.exe"
+OutFile "misura-${PRODUCT_VERSION}.exe"
 InstallDir "$PROGRAMFILES\Misura"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -79,24 +81,22 @@ Section "MainSection" SEC01
   File "${PYINST_DIR}\*.dll"
   File "${PYINST_DIR}\*.pyd"
   File "${PYINST_DIR}\*.manifest"
-  File "${VEUSZ_SRC_DIR}\veusz\veusz\embed.py"
-  File "${VEUSZ_SRC_DIR}\veusz\veusz\__init__.py"
 
   CreateDirectory "$SMPROGRAMS\Misura"
-  CreateShortCut "$SMPROGRAMS\Misura\MisuraBrowser.lnk" "$INSTDIR\browser.exe"
-  CreateShortCut "$DESKTOP\MisuraBrowser.lnk" "$INSTDIR\browser.exe"
-  CreateShortCut "$SMPROGRAMS\Misura\MisuraAcquisition.lnk" "$INSTDIR\acquisition.exe"
-  CreateShortCut "$DESKTOP\MisuraAcquisition.lnk" "$INSTDIR\acquisition.exe"
-  CreateShortCut "$SMPROGRAMS\Misura\MisuraGraphics.lnk" "$INSTDIR\graphics.exe"
-  CreateShortCut "$DESKTOP\MisuraGraphics.lnk" "$INSTDIR\graphics.exe"
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Browser.lnk" "$INSTDIR\browser.exe"
+  CreateShortCut "$DESKTOP\Misura Browser.lnk" "$INSTDIR\browser.exe"
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Acquisition.lnk" "$INSTDIR\acquisition.exe"
+  CreateShortCut "$DESKTOP\Misura Acquisition.lnk" "$INSTDIR\acquisition.exe"
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Graphics.lnk" "$INSTDIR\graphics.exe"
+  CreateShortCut "$DESKTOP\Misura Graphics.lnk" "$INSTDIR\graphics.exe"
   SetOverwrite ifnewer
 
   File "${PYINST_DIR}\README"
   File "${PYINST_DIR}\COPYING"
   File "${PYINST_DIR}\VERSION"
 
-  SetOutPath "$INSTDIR\eggs"
-  File "${PYINST_DIR}\eggs\*.egg"
+  ;SetOutPath "$INSTDIR\eggs"
+  ;File "${PYINST_DIR}\eggs\*.egg"
 
   SetOutPath "$INSTDIR\icons"
   File "${PYINST_DIR}\icons\*.png"
@@ -104,9 +104,28 @@ Section "MainSection" SEC01
   File "${PYINST_DIR}\icons\*.svg"
   
   SetOutPath "$INSTDIR\art"
-  File "${PYINST_DIR}\art\*.png"
-  File "${PYINST_DIR}\art\*.ico"
-  File "${PYINST_DIR}\art\*.svg"
+  File /r "${PYINST_DIR}\art\*"
+  
+  SetOutPath "$INSTDIR\i18n"
+  File /r "${PYINST_DIR}\i18n\*"
+
+  SetOutPath "$INSTDIR\Include"
+  File /r "${PYINST_DIR}\Include\*"
+  
+  SetOutPath "$INSTDIR\IPython"
+  File /r "${PYINST_DIR}\IPython\*"
+
+  SetOutPath "$INSTDIR\mpl-data"
+  File /r "${PYINST_DIR}\mpl-data\*"
+  
+  SetOutPath "$INSTDIR\OpenGL\"
+  File /r "${PYINST_DIR}\OpenGL\*"
+
+  SetOutPath "$INSTDIR\pytz"
+  File /r "${PYINST_DIR}\pytz\*"
+  
+  SetOutPath "$INSTDIR\thegram"
+  File /r "${PYINST_DIR}\thegram\*"
 
   SetOutPath "$INSTDIR\ui"
   File "${PYINST_DIR}\ui\*.ui"
@@ -118,12 +137,8 @@ Section "MainSection" SEC01
   File "${PYINST_DIR}\examples\*.csv"
   SetOutPath "$INSTDIR"
 
-  SetOutPath "$INSTDIR\qt4_plugins\iconengines"
-  File "${PYINST_DIR}\qt4_plugins\iconengines\*.dll"
-  SetOutPath "$INSTDIR"
-
-  SetOutPath "$INSTDIR\qt4_plugins\imageformats"
-  File "${PYINST_DIR}\qt4_plugins\imageformats\*.dll"
+  SetOutPath "$INSTDIR\qt4_plugins\"
+  File /r "${PYINST_DIR}\qt4_plugins\"
   SetOutPath "$INSTDIR"
 
   WriteRegStr HKCR ".vsz" "" "MisuraGraphics.Document"
@@ -139,8 +154,8 @@ SectionEnd
 
 Section -AdditionalIcons
   WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
-  CreateShortCut "$SMPROGRAMS\Veusz\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
-  CreateShortCut "$SMPROGRAMS\Veusz\Uninstall.lnk" "$INSTDIR\uninst.exe"
+  CreateShortCut "$SMPROGRAMS\Misura\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
+  CreateShortCut "$SMPROGRAMS\Misura\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
 Section -Post
@@ -178,13 +193,17 @@ Section Uninstall
   Delete "$INSTDIR\*.exe"
   Delete "$INSTDIR\*.manifest"
   Delete "$INSTDIR\*.zip"
-  Delete "$INSTDIR\embed.py"
-  Delete "$INSTDIR\__init__.py"
-
-  Delete "$INSTDIR\eggs\*.egg"
-
-  Delete "$INSTDIR\qt4_plugins\iconengines\*.dll"
-  Delete "$INSTDIR\qt4_plugins\imageformats\*.dll"
+  
+  
+  RMDir /r "${PYINST_DIR}\art"
+  RMDir /r "${PYINST_DIR}\i18n"
+  RMDir /r "${PYINST_DIR}\Include"
+  RMDir /r "${PYINST_DIR}\IPython"
+  RMDir /r "${PYINST_DIR}\mpl-data"
+  RMDir /r "${PYINST_DIR}\OpenGL"
+  RMDir /r "${PYINST_DIR}\pytz"
+  RMDir /r "${PYINST_DIR}\thegram"
+  RMDir /r "$INSTDIR\qt4_plugins"
 
   Delete "$INSTDIR\icons\*.png"
   Delete "$INSTDIR\icons\*.ico"
@@ -192,19 +211,14 @@ Section Uninstall
   Delete "$INSTDIR\ui\*.ui"
   Delete "$INSTDIR\examples\*.*"
   
-  Delete "$INSTDIR\art\*.png"
-  Delete "$INSTDIR\art\*.ico"
-  Delete "$INSTDIR\art\*.svg"
-  Delete "$INSTDIR\thegram\*"
-  
   Delete "$SMPROGRAMS\Misura\Uninstall.lnk"
   Delete "$SMPROGRAMS\Misura\Website.lnk"
-  Delete "$DESKTOP\MisuraBrowser.lnk"
-  Delete "$SMPROGRAMS\Misura\MisuraBrowser.lnk"
-  Delete "$DESKTOP\MisuraAcquisition.lnk"
-  Delete "$SMPROGRAMS\Misura\MisuraAcquisition.lnk"
-  Delete "$DESKTOP\MisuraGraphics.lnk"
-  Delete "$SMPROGRAMS\Misura\MisuraGraphics.lnk"
+  Delete "$DESKTOP\Misura Browser.lnk"
+  Delete "$SMPROGRAMS\Misura\Misura Browser.lnk"
+  Delete "$DESKTOP\Misura Acquisition.lnk"
+  Delete "$SMPROGRAMS\Misura\Misura Acquisition.lnk"
+  Delete "$DESKTOP\Misura Graphics.lnk"
+  Delete "$SMPROGRAMS\Misura\Misura Graphics.lnk"
 
   RMDir "$SMPROGRAMS\Misura"
   RMDir "$INSTDIR\eggs"
