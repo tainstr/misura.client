@@ -1,3 +1,14 @@
+Misura is licensed as GNU GPL v2, as hereafter copied.
+
+Nonetheless, it contains numerous third-party software components 
+with different, but compatible, software licenses.
+
+The user can install external plugins with 
+different licenses, including commercial licenses, which will be 
+called by Misura itself to extend its functionality.
+
+----------------------------------------------------------------------------
+
                     GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991
 
