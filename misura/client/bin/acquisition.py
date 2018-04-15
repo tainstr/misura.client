@@ -1,13 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sys
+import sys
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from misura.client import acquisition, from_argv, iutils
 import multiprocessing
-
-if __name__ == '__main__':
-    multiprocessing.freeze_support()
+    
+    
+def run_acquisition_app():
     iutils.initApp()
     o = iutils.getOpts()
     logging.debug('Passed options', o)
@@ -18,3 +19,7 @@ if __name__ == '__main__':
         mw.succeed_login(m)
     mw.show()
     sys.exit(app.exec_())
+    
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
+    run_acquisition_app()

@@ -8,7 +8,7 @@ import veusz.utils.vzdbus as vzdbus
 import veusz.utils.vzsamp as vzsamp
 import multiprocessing
 
-def run():
+def run_graphics_app():
     activate_plugins(confdb)
     app = graphics.GraphicsApp(sys.argv)
 # 	iutils.initApp(qapp=app)
@@ -23,4 +23,4 @@ def run():
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    run()
+    run_graphics_app()

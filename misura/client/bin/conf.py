@@ -6,9 +6,8 @@ logging = get_module_logging(__name__)
 from misura.client import iutils, conf
 from misura.client.clientconf import confdb
 import multiprocessing
-
-if __name__ == '__main__':
-    multiprocessing.freeze_support()
+    
+def run_conf_app():
     logging.debug('initApp')
     iutils.initApp()
     logging.debug('done initApp', confdb['recent_server'])
@@ -21,3 +20,7 @@ if __name__ == '__main__':
     mc.menu.show()
     mc.show()
     sys.exit(iutils.app.exec_())
+
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
+    run_conf_app()
