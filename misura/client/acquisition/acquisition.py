@@ -26,7 +26,7 @@ from ..livelog import LiveLog
 from .. import iutils
 from .. import parameters
 from ..clientconf import confdb
-from ..confwidget import RecentWidget
+from ..confwidget import RecentWidget, check_default_database
 from .menubar import MenuBar
 from .selector import InstrumentSelector
 from .measureinfo import MeasureInfo
@@ -372,6 +372,7 @@ class MainWindow(QtGui.QMainWindow):
     _blockResetFileProxy = False    
 
     def setServer(self, server=False):
+        check_default_database()
         self._blockResetFileProxy = True
         logging.debug('Setting server to', server)
         self.server = server

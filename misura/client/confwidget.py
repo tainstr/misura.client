@@ -10,7 +10,7 @@ from misura.canon.plugin import dataimport
 
 from . import _
 from . import iutils
-from .clientconf import confdb, settings
+from .clientconf import confdb, settings, default_misuradb_path
 
 
 
@@ -276,3 +276,37 @@ class Greeter(QtGui.QWidget):
 #        self.lay.addWidget(self.server)
 
         self.setLayout(self.lay)
+        
+import os
+
+empty_db_msg = _("""The default database was not configured.
+Completed tests cannot be downloaded anywhere.
+Please select now a new or existing database file (Ok), 
+or Cancel to accept the default path:\n""") + default_misuradb_path
+missing_db_msg = _("""The default database was not found in the configured path:\
+{}
+Please be sure any external/network drive is connected.
+Please select now a new or existing database file (Ok), 
+or (Cancel) to accept the default path:\n""") + default_misuradb_path
+
+def check_default_database():
+    db = confdb['database']
+    if not os.path.exists(db):
+        if not db:
+            r = QtGui.QMessageBox.warning(None, _('No default database was configured'), empty_db_msg,
+                                          QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
+        else:
+            r = QtGui.QMessageBox.warning(None, _('Default database was not found'), missing_db_msg.format(db),
+                                          QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
+        
+        if r==QtGui.QMessageBox.Cancel:
+            confdb['database'] = default_misuradb_path
+        else:
+            fname = QtGui.QFileDialog.getSaveFileName(
+                None, 'Choose the default database path', 'database.sqlite', "SQLite (*.sqlite)")
+            if fname:
+                confdb['database'] = fname
+            else:
+                confdb['database'] = default_misuradb_path
+        confdb.save()
+    return True

@@ -34,7 +34,7 @@ ao(default_desc, 'refresh', **{'name': 'Remote Server Refresh Rate (ms)',
                                'current': 2000, 'max': 20000,   'min': 100, 'type': 'Integer'})
 
 ao(default_desc, 'database', **
-   {'name': 'Default Database', 'current': default_misuradb_path, 'type': 'FilePath'})
+   {'name': 'Default Database', 'current': '', 'type': 'FilePath'})
 ao(default_desc, 'hserver', **
    {'name': 'Recent Servers', 'current': 5, 'max': 20, 'min': 0, 'type': 'Integer'})
 ao(default_desc, 'saveLogin', **
@@ -362,11 +362,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     def create_index(self):
         self.index = False
         path = self['database']
-        if path.strip() == '':
-            path = default_misuradb_path
-            self['database'] = path
-            self.save()
-
+        
         if path and os.path.exists(path):
             logging.debug('Creating indexer at', path)
             self.index = Indexer(path)
@@ -559,6 +555,10 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             d = os.path.dirname(tab[-1][0])
         return d
 
+
+
+
+
 import importlib
 def activate_plugins(confdb):
     plugins = confdb['m3_plugins'].splitlines()
@@ -586,3 +586,4 @@ elif os.path.exists(cf):
     confdb = ConfDb(path=cf)
 settings.setValue('/Configuration', confdb.path)
 #activate_plugins(confdb)
+
