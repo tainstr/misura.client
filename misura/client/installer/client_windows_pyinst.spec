@@ -27,7 +27,7 @@ Analyses=[]
 
 # VEUSZ ANALYSIS
 
-a = Analysis([ bin+'graphics.py'],
+a = Analysis([ bin+'misura.py'],
              pathex=[bin],
              excludes=exim,
              hiddenimports=him,
@@ -76,7 +76,7 @@ for ddir in ['art','i18n','ui']:
 
 print 'BINARIES', binaries
 
-Analyses.append( (a,'misura4', os.path.join('build','graphics.exe')) )
+Analyses.append( (a,'misura4', os.path.join('build','misura.exe')) )
 
 # MISURA 4 ANALYSIS
 AppNames=['acquisition.py','browser.py' ,'conf.py']
@@ -84,19 +84,19 @@ Icons = ['graphics.ico', 'misura.ico', 'browser.ico', 'favicon.ico']
 BaseNames=['acquisition','browser','configuration']
 ExeNames=['acquisition.exe','browser.exe','conf.exe']
 
-for i,name in enumerate(AppNames):
-	print 'Analyzing ',bin+name
-	a = Analysis([bin+name],
-				 pathex=[bin],
-				 excludes=exim,
-				 hiddenimports=him,
-				 runtime_hooks=rthooks)
-	Analyses.append(
-		(a,BaseNames[i],os.path.join('build',ExeNames[i]))
-		)
+#for i,name in enumerate(AppNames):
+#	print 'Analyzing ',bin+name
+#	a = Analysis([bin+name],
+#				 pathex=[bin],
+#				 excludes=exim,
+#				 hiddenimports=him,
+#				 runtime_hooks=rthooks)
+#	Analyses.append(
+#		(a,BaseNames[i],os.path.join('build',ExeNames[i]))
+#		)
 
-print 'Merging analyses',Analyses
-MERGE(*Analyses)
+#print 'Merging analyses',Analyses
+#MERGE(*Analyses)
 
 for i, (an, basename, exename) in enumerate(Analyses):
 	icon = Icons[i]

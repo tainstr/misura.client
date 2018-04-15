@@ -8,7 +8,7 @@
 !define PRODUCT_VERSION "4.2-${DATE}"
 !define PRODUCT_PUBLISHER "TA Instruments / Waters LLC"
 !define PRODUCT_WEB_SITE "http://misura.readthedocs.io"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\browser.exe"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\misura.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
@@ -31,7 +31,7 @@ SetCompressor /solid lzma
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\browser.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\misura.exe"
 !define MUI_FINISHPAGE_LINK "Open Misura Documentation"
 !define MUI_FINISHPAGE_LINK_LOCATION "${PRODUCT_WEB_SITE}"
 !insertmacro MUI_PAGE_FINISH
@@ -83,12 +83,12 @@ Section "MainSection" SEC01
   File "${PYINST_DIR}\*.manifest"
 
   CreateDirectory "$SMPROGRAMS\Misura"
-  CreateShortCut "$SMPROGRAMS\Misura\Misura Browser.lnk" "$INSTDIR\browser.exe"
-  CreateShortCut "$DESKTOP\Misura Browser.lnk" "$INSTDIR\browser.exe"
-  CreateShortCut "$SMPROGRAMS\Misura\Misura Acquisition.lnk" "$INSTDIR\acquisition.exe"
-  CreateShortCut "$DESKTOP\Misura Acquisition.lnk" "$INSTDIR\acquisition.exe"
-  CreateShortCut "$SMPROGRAMS\Misura\Misura Graphics.lnk" "$INSTDIR\graphics.exe"
-  CreateShortCut "$DESKTOP\Misura Graphics.lnk" "$INSTDIR\graphics.exe"
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Browser.lnk" "$INSTDIR\misura.exe" --browser
+  CreateShortCut "$DESKTOP\Misura Browser.lnk" "$INSTDIR\misura.exe" --browser 
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Acquisition.lnk" "$INSTDIR\misura.exe" --acquisition
+  CreateShortCut "$DESKTOP\Misura Acquisition.lnk" "$INSTDIR\misura.exe" --acquisition
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Graphics.lnk" "$INSTDIR\misura.exe" --graphics
+  CreateShortCut "$DESKTOP\Misura Graphics.lnk" "$INSTDIR\misura.exe" --graphics
   SetOverwrite ifnewer
 
   File "${PYINST_DIR}\README"
@@ -143,12 +143,12 @@ Section "MainSection" SEC01
 
   WriteRegStr HKCR ".vsz" "" "MisuraGraphics.Document"
   WriteRegStr HKCR "MisuraGraphics.Document" "" "Misura Graphics Document"
-  WriteRegStr HKCR "MisuraGraphics.Document\shell\open\command" "" '"$INSTDIR\graphics.exe" "%1"'
+  WriteRegStr HKCR "MisuraGraphics.Document\shell\open\command" "" '"$INSTDIR\misura.exe" --graphics "%1"'
   WriteRegStr HKCR "MisuraGraphics.Document\DefaultIcon" "" '"$INSTDIR\icons\graphics.ico"'
   
   WriteRegStr HKCR ".h5" "" "Misura.Document"
   WriteRegStr HKCR "Misura.Document" "" "Misura Document"
-  WriteRegStr HKCR "Misura.Document\shell\open\command" "" '"$INSTDIR\browser.exe" "%1"'
+  WriteRegStr HKCR "Misura.Document\shell\open\command" "" '"$INSTDIR\misura.exe" --browser "%1"'
   WriteRegStr HKCR "Misura.Document\DefaultIcon" "" '"$INSTDIR\icons\browser.ico"'
 SectionEnd
 
@@ -160,10 +160,10 @@ SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\browser.exe"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\misura.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\browser.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\misura.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
