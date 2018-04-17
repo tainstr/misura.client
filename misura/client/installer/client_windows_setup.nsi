@@ -83,12 +83,12 @@ Section "MainSection" SEC01
   File "${PYINST_DIR}\*.manifest"
 
   CreateDirectory "$SMPROGRAMS\Misura"
-  CreateShortCut "$SMPROGRAMS\Misura\Misura Browser.lnk" "$INSTDIR\misura.exe" --browser
-  CreateShortCut "$DESKTOP\Misura Browser.lnk" "$INSTDIR\misura.exe" --browser 
-  CreateShortCut "$SMPROGRAMS\Misura\Misura Acquisition.lnk" "$INSTDIR\misura.exe" --acquisition
-  CreateShortCut "$DESKTOP\Misura Acquisition.lnk" "$INSTDIR\misura.exe" --acquisition
-  CreateShortCut "$SMPROGRAMS\Misura\Misura Graphics.lnk" "$INSTDIR\misura.exe" --graphics
-  CreateShortCut "$DESKTOP\Misura Graphics.lnk" "$INSTDIR\misura.exe" --graphics
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Browser.lnk" "$INSTDIR\misura.exe" --browser "$INSTDIR\art\browser.ico"
+  CreateShortCut "$DESKTOP\Misura Browser.lnk" "$INSTDIR\misura.exe" --browser "$INSTDIR\art\browser.ico"
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Acquisition.lnk" "$INSTDIR\misura.exe" --acquisition "$INSTDIR\art\misura.ico"
+  CreateShortCut "$DESKTOP\Misura Acquisition.lnk" "$INSTDIR\misura.exe" --acquisition "$INSTDIR\art\misura.ico"
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Graphics.lnk" "$INSTDIR\misura.exe" --graphics "$INSTDIR\art\graphics.ico"
+  CreateShortCut "$DESKTOP\Misura Graphics.lnk" "$INSTDIR\misura.exe" --graphics "$INSTDIR\art\graphics.ico"
   SetOverwrite ifnewer
 
   File "${PYINST_DIR}\README"

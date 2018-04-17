@@ -3,7 +3,7 @@
 .ropeproject
 last_build_status
 build_in_progress
-
+misura/client/installer/*.exe
 
 libvideodev.version
 .idea

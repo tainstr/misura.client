@@ -410,6 +410,15 @@ class Graphics(mainwindow.MainWindow):
 
 class GraphicsApp(veusz_main.VeuszApp):
 
+    def __init__(self, args):
+        if 'python' in args:
+            args.remove('python')
+        self.args = args
+        super(GraphicsApp, self).__init__(args)
+        
+    def arguments(self):
+        return self.args
+
     def openMainWindow(self, args):
         """Open the main window with any loaded files."""
         MainWindow = Graphics
