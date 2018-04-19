@@ -120,7 +120,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         tc = kiln['curve']
         if len(tc) <= 8:
             drawCycleOnGraph(command_interface, tc, label=False, wdg=report_path +
-                             '/lbl_tc', color='black', size='6pt', create=False)
+                             '/lbl_tc', color='black', size='6pt')
         else:
             self.toset(page.getChild('lbl_tc'), 'hide', True)
         msg = wr('Measure', measure['name'])
@@ -208,10 +208,11 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
                                                        'currentwidget': report_path + '/temp'}
                                                       ))
         self.apply_ops()
+        
 
-        self.dict_toset(doc.resolveFullWidgetPath(
-            report_path + '/temp/ax:' + fields['measure_to_plot']), cf)
-
+        self.dict_toset(doc.resolveFullWidgetPath(report_path + '/temp/ax:' + fields['measure_to_plot']), cf)
+        self.toset(doc.resolveFullWidgetPath(report_path + '/tc/x'), {'scale', 1/60.})
+        self.toset(doc.resolveFullWidgetPath(report_path + '/tc/y'), 'scale', 60.)
         self.apply_ops()
 
         command_interpreter.run("MoveToLastPage()")
