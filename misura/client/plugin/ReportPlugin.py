@@ -183,9 +183,6 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
             self.toset(page.getChild('lbl_initial'), 'label',
                        'Initial, %.2f{{\\deg}}C' % T)
 
-            #self.toset(page.getChild('standard'), 'label', wr(
-            #    'Standard', sample['preset'], 50))
-
         # Thermal cycle plotting
         from ..procedure.thermal_cycle import ThermalCyclePlot
         from ..procedure.model import clean_curve
@@ -211,8 +208,8 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
         
 
         self.dict_toset(doc.resolveFullWidgetPath(report_path + '/temp/ax:' + fields['measure_to_plot']), cf)
-        self.toset(doc.resolveFullWidgetPath(report_path + '/tc/x'), {'scale', 1/60.})
-        self.toset(doc.resolveFullWidgetPath(report_path + '/tc/y'), 'scale', 60.)
+        self.toset(doc.resolveFullWidgetPath(report_path + '/tc/x'), 'datascale', 1/60.)
+        self.toset(doc.resolveFullWidgetPath(report_path + '/tc/y'), 'datascale', 60.)
         self.apply_ops()
 
         command_interpreter.run("MoveToLastPage()")
