@@ -4,7 +4,7 @@
 import functools
 from datetime import datetime
 import os
-
+from traceback import format_exc
 from veusz.utils import pixmapAsHtml
 
 from PyQt4 import QtGui, QtCore
@@ -251,8 +251,15 @@ class VersionMenu(QtGui.QMenu):
         if not st:
             return False
         name = qid.textValue()
-        self.proxy.create_version(unicode(name).encode('ascii', 'replace'))
-        self.save_version()
+        try:
+            self.proxy.create_version(unicode(name).encode('ascii', 'replace'))
+            self.save_version()
+            return True
+        except:
+            QtGui.QMessageBox.information(self, _('Could not save version'),
+                    _('An error occurred while saving version:\n{}').format(format_exc()))
+            return False
+            
         return True
 
     def remove_version(self, version=False):
@@ -263,8 +270,13 @@ class VersionMenu(QtGui.QMenu):
             logging.debug('No current version can be removed')
             self.actRemove.setEnabled(False)
             return False
-        self.proxy.remove_version(version)
-        logging.debug('Removed version', version)
+        try:
+            self.proxy.remove_version(version)
+            logging.debug('Removed version', version)
+        except:
+            self.log.error('Could not remove version:', format_exc())
+            QtGui.QMessageBox.information(self, _('Could not remove version'),format_exc())
+            return False
         # Return to original version
         if version == self.current:
             self.load_version(0)
