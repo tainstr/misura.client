@@ -407,8 +407,9 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if self.cmd.currentwidget.typename =='xy' and up:
             dsn = self.cmd.currentwidget.settings.yData
             node = self.model().tree.traverse(dsn)
-            self.selectionModel().clear()
-            self.expand_node_path(node, select=True)
+            if node:
+                self.selectionModel().clear()
+                self.expand_node_path(node, select=True)
         return self.cmd.currentwidget
     
     def build_menu_from_configuration(self, proxy, menu=False):
