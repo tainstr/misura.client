@@ -44,6 +44,11 @@ from . import veuszplot
 
 setting.transient_settings['unsafe_mode'] = True
 
+def set_tearoff(m):
+    for a in m.actions():
+        if a.menu():
+            a.menu().setTearOffEnabled(True)
+            set_tearoff(a.menu())
 
 class CustomInterface(object):
 
@@ -61,6 +66,8 @@ class CustomInterface(object):
         mmenus = [[self.name.lower(), '&' + self.name, menu]]
         veusz.utils.constructMenus(
             self.mw.menuBar(), {self.name.lower(): self.menu}, mmenus, actions)
+        
+        set_tearoff(self.menu)
 
     def buildToolbars(self, actions):
         # Build the toolbars

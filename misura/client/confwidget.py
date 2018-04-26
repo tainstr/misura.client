@@ -138,7 +138,7 @@ class RecentInterface(object):
         file_filter = ''
         for converter in dataimport.data_importers:
             file_filter += '{} ({});;'.format(_(converter.name), converter.file_pattern.replace(';', ' '))
-            print 'adding filter', file_filter
+            print('adding filter', file_filter)
         path = QtGui.QFileDialog.getOpenFileName(
             self, _("Data import"),
             d,
@@ -154,6 +154,7 @@ class RecentMenu(RecentInterface, QtGui.QMenu):
         QtGui.QMenu.__init__(self, parent=parent)
         RecentInterface.__init__(self, conf, category)
         self.setTitle(_('Recent ' + self.name + 's'))
+        self.setTearOffEnabled(True)
         self.redraw()
         self.connect(self.conf, QtCore.SIGNAL('mem()'), self.redraw)
         self.connect(self.conf, QtCore.SIGNAL('rem()'), self.redraw)
@@ -161,6 +162,7 @@ class RecentMenu(RecentInterface, QtGui.QMenu):
 
     def redraw(self):
         self.clear()
+        self.setTearOffEnabled(True)
         nsl = self.getNameSigList()
         for name, sig, row in nsl:
             p = functools.partial(
