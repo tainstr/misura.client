@@ -9,11 +9,15 @@ except:
     
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
+from misura.canon import option
+
+from . import _
 from . import widgets
 from .clientconf import confdb
 from .network import TransferThread
 from .parameters import pathClient
 from .live import registry
+from . import conf
 
 class ServerUpdater(object):
     def __init__(self, server, parent):
@@ -136,8 +140,8 @@ def check_server_updates(remote, parent=None):
         current = get_version_date(remote.support['versionString'])
     
     serial = remote['eq_sn']
-    
     conf = get_packages(serial+'.ini')
+    
     if conf.has_option(serial, 'server'):
         latest = conf.get(serial, 'server')
         v = fi(latest)
@@ -187,7 +191,8 @@ def check_client_updates(parent):
         return update_from_source()
     serials = []
     for recent in confdb['recent_server'][1:]:
-        serials.append(recent[4]+'.ini') 
+        serials.append(recent[4]+'.ini')
+        
     conf = get_packages(*serials)
     client, iclient = get_best_client_version(conf, serials)
     
@@ -208,4 +213,20 @@ def check_client_updates(parent):
     tt.set_tasks(registry.tasks)
     tt.start()
     return tt
+
+def set_update_site_info(parent=None):
+    opt = {}
+    v = ('updateUser','updatePassword')
+    for o in v:
+        opt[o] = confdb.gete(o)
+    cp = option.ConfigurationProxy({'self': opt})
+    dia = conf.InterfaceDialog(cp, cp, opt, parent=parent)
+    dia.setWindowTitle(_('Authentication Error! Please review your autoupdate settings:'))
+    dia.interface.sectionsMap['Main'].expand()
+    if not dia.exec_():
+        return False
+    for o in v:
+        confdb[o] = cp[o]
+    confdb.save()
+    return True
     

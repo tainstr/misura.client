@@ -4,6 +4,7 @@
 import os
 import shutil
 import tempfile 
+import urllib2
 from traceback import format_exc
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
@@ -18,7 +19,7 @@ from .clientconf import confdb
 from misura.canon.version import __version__ as canon_version
 from . import parameters
 from version import __version__ as client_version
-from .autoupdate import check_server_updates, check_client_updates
+from .autoupdate import check_server_updates, check_client_updates, set_update_site_info
 from PyQt4 import QtGui, QtCore, uic
 
 
@@ -181,8 +182,18 @@ class HelpMenu():
                 return True
             self._client_updater = r  
             return
+        except urllib2.URLError, e:
+            if 'Invalid userid/password' in getattr(e, 'reason', ''):
+                if set_update_site_info():
+                    self.check_client_updates()
+                return
+            QtGui.QMessageBox.warning(self.menu_bar, 
+                                      'Misura Client update error', 
+                                      format_exc())
         except:
-            QtGui.QMessageBox.warning(self.menu_bar, 'Misura Client update error', format_exc())
+            QtGui.QMessageBox.warning(self.menu_bar, 
+                                      'Misura Client update error', 
+                                      format_exc())
     
     def check_server_updates(self):
         try:
@@ -191,8 +202,18 @@ class HelpMenu():
                 QtGui.QMessageBox.information(self.menu_bar, 'Up to date', 'Misura Server is up to date.\nNo newer version was found.')
                 return True
             self._server_updater = r
+        except urllib2.URLError, e:
+            if 'Invalid userid/password' in getattr(e, 'reason', ''):
+                if set_update_site_info():
+                    self.check_server_updates()
+                return
+            QtGui.QMessageBox.warning(self.menu_bar, 
+                                      'Misura Server update error', 
+                                      format_exc())
         except: 
-            QtGui.QMessageBox.warning(self.menu_bar, 'Misura Server update error', format_exc())
+            QtGui.QMessageBox.warning(self.menu_bar, 
+                                      'Misura Server update error', 
+                                      format_exc())
             
         
         
