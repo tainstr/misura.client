@@ -81,10 +81,14 @@ class ClientConf(QtGui.QWidget):
 
 
 class RecentInterface(object):
-
-    """Common functions"""
+    """Common functions for recent elements management"""
+    open_new = QtCore.pyqtSignal(str)
+    select = QtCore.pyqtSignal(str)
+    convert = QtCore.pyqtSignal(str)
+    
 
     def __init__(self, conf, category):
+        super(RecentInterface, self).__init__()
         self.category = category
         self.conf = conf
         self.name = category
@@ -93,8 +97,6 @@ class RecentInterface(object):
             self.label = self.name
         else:
             self.label = 'Recent {}'.format(self.name.capitalize())
-        self.sig_select = QtCore.SIGNAL('select(QString)')
-        self.sig_convert = QtCore.SIGNAL('convert(QString)')
 
     def getNameSigList(self):
         tab = self.conf['recent_' + self.category]
@@ -130,8 +132,8 @@ class RecentInterface(object):
                 self, _("Open a new ") + self.category, d)
         if not path:
             return
-        self.emit(QtCore.SIGNAL('new(QString)'), path)
-        self.emit(QtCore.SIGNAL('select(QString)'), path)
+        self.open_new.emit(path)
+        self.select.emit(path)
 
     def data_import(self, *a):
         d= self.conf.last_directory(self.category)
@@ -143,17 +145,26 @@ class RecentInterface(object):
             self, _("Data import"),
             d,
             file_filter)
-        self.emit(QtCore.SIGNAL('convert(QString)'), path)
+        self.convert.emit(path)
 
 
 class RecentMenu(RecentInterface, QtGui.QMenu):
-
     """Recent objects menu"""
+    open_new = QtCore.pyqtSignal(str)
+    select = QtCore.pyqtSignal(str)
+    convert = QtCore.pyqtSignal(str)
+    server_disconnect = QtCore.pyqtSignal()
+    server_shutdown = QtCore.pyqtSignal()
+    server_restart = QtCore.pyqtSignal()
 
+    _detached = False
+    
     def __init__(self, conf, category, parent=None):
         QtGui.QMenu.__init__(self, parent=parent)
         RecentInterface.__init__(self, conf, category)
-        self.setTitle(_('Recent ' + self.name + 's'))
+        tit = _('Recent {}s'.format(self.name))
+        self.setTitle(tit)
+        self.setWindowTitle(tit)
         self.setTearOffEnabled(True)
         self.redraw()
         self.connect(self.conf, QtCore.SIGNAL('mem()'), self.redraw)
@@ -175,24 +186,36 @@ class RecentMenu(RecentInterface, QtGui.QMenu):
         if self.name == 'file' and len(dataimport.data_importers) > 0:
             self.addAction(_("Import") + '...', self.data_import)
         if self.category == 'server':
-            self.addAction(_('Disconnect'), self.server_disconnect)
-            self.addAction(_('Restart'), self.server_restart)
-            self.addAction(_('Shutdown'), self.server_shutdown)
-
-    def server_disconnect(self):
-        self.emit(QtCore.SIGNAL('server_disconnect()'))
-
-    def server_shutdown(self):
-        self.emit(QtCore.SIGNAL('server_shutdown()'))
-
-    def server_restart(self):
-        self.emit(QtCore.SIGNAL('server_restart()'))
+            
+            self.addAction(_('Disconnect'), self.server_disconnect.emit)
+            self.addAction(_('Restart'), self.server_restart.emit)
+            self.addAction(_('Shutdown'), self.server_shutdown.emit)
+        self.addSeparator()
+        self.addAction(_('Detach'), self.detach)
+        
+    def detach(self):
+        if self._detached:
+            self._detached.hide()
+            self._detached.close()
+        wg = RecentWidget(self.conf, self.category)
+        wg.route_select = lambda *a: self.select.emit(*a)
+        wg.route_convert = lambda *a: self.convert.emit(*a)
+        #wg.connect(wg, QtCore.SIGNAL('select(QString)'),wg.route_select)
+        wg.select.connect(self.select.emit)
+        wg.convert.connect(self.convert.emit)
+        wg.open_new.connect(self.open_new.emit)
+        wg.setWindowTitle(self.windowTitle())
+        wg.show()
+        self._detached = wg
+        
 
 
 class RecentWidget(RecentInterface, QtGui.QWidget):
 
     """Recent objects list widget"""
-
+    open_new = QtCore.pyqtSignal(str)
+    select = QtCore.pyqtSignal(str)
+    convert = QtCore.pyqtSignal(str)
     def __init__(self, conf, category, parent=None):
         QtGui.QWidget.__init__(self, parent)
         RecentInterface.__init__(self, conf, category)
@@ -254,7 +277,7 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         """Emit the 'select(QString)' signal with the path of the object"""
         item = self.pre_select_item(item)
         if item:
-            self.emit(self.sig_select, 
+            self.select.emit(
                       item.data(QtCore.Qt.UserRole))
         
 

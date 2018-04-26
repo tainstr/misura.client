@@ -96,16 +96,14 @@ class MainWindow(QtGui.QMainWindow):
 
         # Recent objects greeter window:
         greeter = confwidget.Greeter(parent=self)
-        self.connect(greeter.file, greeter.file.sig_select, self.open_file)
-        self.connect(greeter.file, greeter.file.sig_convert, self.convert_file)
-        self.connect(
-            greeter.database, greeter.database.sig_select, self.open_database)
+        greeter.file.select.connect(self.open_file)
+        greeter.file.convert.connect(self.convert_file)
+        greeter.database.select.connect(self.open_database)
 
         if confdb['m3_enable'] and misura3:
-            self.connect(
-                greeter.m3database, greeter.database.sig_select, self.open_m3db)
-            self.connect(self.myMenuBar.recentM3db, QtCore.SIGNAL(
-                'select(QString)'), self.open_m3db)
+            
+            greeter.m3database.select.connect(self.open_m3db)
+            self.myMenuBar.recentM3db.select.connect(self.open_m3db)
 
         win = self.area.addSubWindow(greeter,
                                      QtCore.Qt.CustomizeWindowHint |

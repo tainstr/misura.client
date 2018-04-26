@@ -129,13 +129,10 @@ class MConf(QtGui.QMainWindow):
         self.fixed_path = fixed_path
         self.menu = RecentMenu(confdb, 'server', parent=self)
         self.menu.setTitle('Server')
-        self.connect(self.menu, QtCore.SIGNAL(
-            'server_disconnect()'), self.server_disconnect)
-        self.connect(
-            self.menu, QtCore.SIGNAL('server_shutdown()'), self.server_shutdown)
-        self.connect(
-            self.menu, QtCore.SIGNAL('server_restart()'), self.server_restart)
-        self.connect(self.menu, QtCore.SIGNAL('select(QString)'), self.setAddr)
+        self.menu.server_disconnect.connect(self.server_disconnect)
+        self.menu.server_shutdown.connect(self.server_shutdown)
+        self.menu.server_restart.connect(self.server_restart)
+        self.menu.select.connect(self.setAddr)
         self.cmenu = QtGui.QMenu('Client')
         self.cmenu.addAction(_('Configuration'), self.clientConf)
         self.cmenu.addAction(_('Pending Tasks'), self.show_tasks)
