@@ -380,6 +380,14 @@ class SectionBox(QtGui.QWidget):
 
         self.lay.addStretch(1)
         self.reorder()
+        
+    def expand(self):
+        for s in self.sections:
+            s.expand()
+            
+    def collapse(self):
+        for s in self.sections:
+            s.collapse()
 
     def get_status(self):
         status = [True,True,True]
