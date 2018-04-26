@@ -205,6 +205,7 @@ class RecentMenu(RecentInterface, QtGui.QMenu):
         wg.convert.connect(self.convert.emit)
         wg.open_new.connect(self.open_new.emit)
         wg.setWindowTitle(self.windowTitle())
+        wg.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         wg.show()
         self._detached = wg
         
