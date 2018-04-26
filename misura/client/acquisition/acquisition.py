@@ -293,8 +293,7 @@ class MainWindow(QtGui.QMainWindow):
         self.serverDock = QtGui.QDockWidget(self.centralWidget())
 #       self.serverSelector=connection.ServerSelector(self.serverDock)
         self.serverSelector = RecentWidget(confdb, 'server', self.serverDock)
-        self.connect(
-            self.serverSelector, self.serverSelector.sig_select, self.set_addr)
+        self.serverSelector.select.connect(self.set_addr)
         self.serverDock.setWindowTitle(self.serverSelector.label)
         self.serverDock.setWidget(self.serverSelector)
         self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.serverDock)

@@ -161,10 +161,8 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
 
         # Recent Files Menus
         self.recentFile = RecentMenu(confdb, 'file', self.mw)
-        self.connect(
-            self.recentFile, self.recentFile.sig_select, self.liveImport)
-        self.connect(
-            self.recentFile, self.recentFile.sig_convert, self.convert_file)
+        self.recentFile.select.connect(self.liveImport)
+        self.recentFile.convert.connect(self.convert_file)
         self.menu.addMenu(self.recentFile)
         self.recentDatabase = RecentMenu(confdb, 'database', self.mw)
         self.connect(self.recentDatabase, QtCore.SIGNAL(
