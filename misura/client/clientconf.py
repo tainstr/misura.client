@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """misura Configuration Manager"""
 import os
+import multiprocessing
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import sqlite3
@@ -69,6 +70,9 @@ ao(default_desc, 'templates', **{'name': 'Templates directory',
                               'current': os.path.expanduser("~/MisuraData/templates"),
                               'type': 'FilePath'})
 
+cpu = multiprocessing.cpu_count()
+ao(default_desc, 'maxcpu', **{'name': 'Maximum number of CPU', 'current': cpu,
+                                'max': cpu, 'min': 1, 'step': 1, 'type': 'Integer'})
 ##############
 # Autoupdate
 ao(default_desc, 'updateUrl', 'String', 
