@@ -6,7 +6,7 @@ from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import datetime
 import functools
-from misura.client import _
+from misura.client import _, parameters
 from misura.canon import csutil, indexer
 
 
@@ -45,6 +45,10 @@ class DatabaseModel(QtCore.QAbstractTableModel):
             return 0
         row = self.tests[index.row()]
         col = index.column()
+        if role == QtCore.Qt.DecorationRole and col==instrument_column:
+            instrument = row[col]
+            icon = QtGui.QIcon(os.path.join(parameters.pathArt, 'small_' + instrument + '.svg'))
+            return icon
         if role != QtCore.Qt.DisplayRole and role != QtCore.Qt.EditRole:
             return
         val = row[col]
