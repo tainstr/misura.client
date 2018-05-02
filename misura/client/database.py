@@ -183,15 +183,30 @@ class DatabaseTable(QtGui.QTableView):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
-
+        
         self.menu.addAction(
             _('Open selected tests'), lambda: self.select(None))
         
         if self.browser:
             self.menu_add_to = self.menu.addMenu(_('Add to...'))
+        
+        self.menu.addAction(_('Edit Name'), self.edit_name)
+        self.menu.addAction(_('Edit Comment'), self.edit_comment)
             
         self.menu.addAction(_('View folder'), self.view_folder)
         self.menu.addAction(_('Delete'), self.delete)
+        
+    def edit_name(self):
+        record = self.selectionModel().selectedIndexes()[0]
+        record = record.sibling(record.row(), name_column)
+        self.scrollTo(record)
+        self.edit(record)
+    
+    def edit_comment(self):
+        record = self.selectionModel().selectedIndexes()[0]
+        record = record.sibling(record.row(), comment_column)
+        self.scrollTo(record)
+        self.edit(record)
 
     def showMenu(self, pt):
         if self.menu_add_to:
