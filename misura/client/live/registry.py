@@ -90,6 +90,8 @@ class KidRegistry(QtCore.QThread):
 
     @property
     def progress(self):
+        if self.taskswg is False:
+            return False
         return self.taskswg.progress
 
     @property
@@ -159,7 +161,7 @@ class KidRegistry(QtCore.QThread):
         # Force progress update
         cur = self.obj.get('progress')
         run = self.obj['isRunning']
-        if self.progress.progress:
+        if self.progress and self.progress.progress:
             self.progress.progress.emit(QtCore.SIGNAL('selfchanged'), cur)
         for kid, ws in self.rid.items():
             t = self.times.get(kid, 0)
