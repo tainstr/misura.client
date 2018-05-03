@@ -97,6 +97,7 @@ class RecentInterface(object):
             self.label = self.name
         else:
             self.label = 'Recent {}'.format(self.name.capitalize())
+            
 
     def getNameSigList(self):
         tab = self.conf['recent_' + self.category]
@@ -129,7 +130,7 @@ class RecentInterface(object):
         else:
             d= self.conf.last_directory(self.category)
             path = QtGui.QFileDialog.getOpenFileName(
-                self, _("Open a new ") + self.category, d)
+                self.parent(), _("Open a new ") + self.category, d)
         if not path:
             return
         self.open_new.emit(path)
@@ -142,7 +143,7 @@ class RecentInterface(object):
             file_filter += '{} ({});;'.format(_(converter.name), converter.file_pattern.replace(';', ' '))
             print('adding filter', file_filter)
         path = QtGui.QFileDialog.getOpenFileName(
-            self, _("Data import"),
+            self.parent(), _("Data import"),
             d,
             file_filter)
         self.convert.emit(path)
