@@ -123,6 +123,7 @@ class OptionsGroup(QtGui.QGroupBox):
         QtGui.QGroupBox.__init__(self, parent=parent)
         self.wg = wg
         self.children = children
+        
         self.more = ClickableLabel()
         self.more.setIcon(iutils.theme_icon('add'))
         self.more.setMaximumWidth(30)
@@ -151,15 +152,28 @@ class OptionsGroup(QtGui.QGroupBox):
         glay.addWidget(out)
         glay.addWidget(children)
         self.setLayout(glay)
-        
+    
+    def mousePressEvent(self, event):
+        if not self.title():
+            return
+        # only active near the title bar
+        if event.pos().y()>10:
+            return 
+        button = event.button()
+        if button==QtCore.Qt.LeftButton:
+            self.hide_show()
+        elif button==QtCore.Qt.RightButton:
+            self.show_menu(event.pos())
         
     def expand(self):
         self.children.show()
         self.more.setIcon(iutils.theme_icon('list-remove'))
+        self.setChecked(True)
         
     def collapse(self):
         self.children.hide()
-        self.more.setIcon(iutils.theme_icon('add'))                         
+        self.more.setIcon(iutils.theme_icon('add'))
+        self.setChecked(False)                         
         
     def hide_show(self):
         """Hide or show option's children"""
@@ -168,8 +182,10 @@ class OptionsGroup(QtGui.QGroupBox):
         else:
             self.expand()
             
-    def show_menu(self):
-        self.menu.popup(self.mapToGlobal(self.more.pos()))
+    def show_menu(self, pos=False):
+        if not pos:
+            pos = self.more.pos()
+        self.menu.popup(self.mapToGlobal(pos))
         
     def build_compare_menu(self):
         self.comparisons = {}
