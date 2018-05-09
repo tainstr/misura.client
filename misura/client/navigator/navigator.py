@@ -307,7 +307,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             logging.error('Not a valid node', node)
         return done
 
-    def add_status_actions(self, menu):
+    def add_status_actions(self, menu, node=False):
         menu.addSeparator()
         self.acts_status = []
         for i, s in enumerate(filedata.dstats):
@@ -323,7 +323,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.acts_status.append(act)
         act = menu.addAction(_('Set filter (CTRL+F)'), self.edit_regex_rule)
         self.acts_status.append(act)
-        self.act_del = menu.addAction(_('Delete'), self.deleteChildren)
+        if not node:
+            self.act_del = menu.addAction(_('Delete'), self.deleteChildren)
         self.acts_status.append(self.act_del)
         act = menu.addAction(_('Update view (F5)'), self.update_view)
         self.acts_status.append(act)
@@ -364,7 +365,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         file_menu.addAction(_('Update view'), self.update_view)
         for domain in self.domains:
             domain.build_file_menu(file_menu, node)
-        self.add_status_actions(file_menu)
+        self.add_status_actions(file_menu, node)
         self.act_del.setEnabled(bool(node))
         return file_menu
 
