@@ -19,7 +19,7 @@ from .clientconf import confdb
 from misura.canon.version import __version__ as canon_version
 from . import parameters
 from version import __version__ as client_version
-from .autoupdate import check_server_updates, check_client_updates, set_update_site_info
+from .autoupdate import check_server_updates, check_client_updates, set_update_site_info, get_version_file
 from PyQt4 import QtGui, QtCore, uic
 
 
@@ -39,8 +39,11 @@ def showAbout():
     dialog = QtGui.QDialog()
     uic.loadUi(os.path.join(parameters.pathUi, 'about_misura.ui'), dialog)
     dialog.logo_label.setScaledContents(True)
+    
     dialog.label_client_version.setText('client: ' + client_version)
     dialog.label_canon_version.setText('canon: ' + canon_version)
+    dialog.label_extended_version.setText(get_version_file())
+    
 
     dialog.logo_label.setPixmap(QtGui.QPixmap(os.path.join(parameters.pathArt, 'logo.png')))
     dialog.setWindowIcon(QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))

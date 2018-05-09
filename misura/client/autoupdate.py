@@ -186,6 +186,12 @@ def update_from_source():
         logging.debug(s,r)
     return True 
     
+def get_version_file():
+    if os.name!='nt':
+        return '*** running source code ***'
+    current = os.path.join(pathClient, 'VERSION')
+    return open(current, 'r').read()
+
 def check_client_updates(parent):
     if os.name!='nt':
         return update_from_source()
@@ -196,8 +202,7 @@ def check_client_updates(parent):
     conf = get_packages(*serials)
     client, iclient = get_best_client_version(conf, serials)
     
-    current = os.path.join(pathClient, 'VERSION')
-    current = open(current, 'r').read()
+    current = get_version_file()
     current = get_version_date(current)
     
     if current>iclient:
