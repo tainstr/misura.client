@@ -22,7 +22,8 @@ base_units = {'micron': 'length',
               'gram': 'weight',
               'volt': 'tension',
               'ohm': 'resistance',
-              'volt/second': 'tensionRate'}
+              'volt/second': 'tensionRate',
+              'ampere': 'current'}
 
 from_base = {'length': {'micron': lambda v: v,
                         'nanometer': lambda v: v * 1E3,
@@ -73,6 +74,7 @@ from_base = {'length': {'micron': lambda v: v,
                    'megaohm': lambda v: v * 1E-6,
                    },
     'tensionRate': {'volt/second': lambda v: v},
+    'current': {'ampere': lambda v: v},
 }
 
 derivatives = {'length': {'micron': 1,
@@ -118,6 +120,7 @@ derivatives = {'length': {'micron': 1,
                    'megaohm': 1E-6,
                    },
     'tensionRate': {'volt/second': 1},
+    'current': {'ampere': 1},
 }
 
 to_base = {'length': {'micron': lambda v: v,
@@ -169,6 +172,7 @@ to_base = {'length': {'micron': lambda v: v,
                            'megaohm': lambda v: v * 1E6,
                            },
             'tensionRate': {'volt/second': lambda v: v},
+            'current': {'ampere': lambda v: v},
 }
 
 # Latex symbols for Veusz
@@ -204,6 +208,7 @@ symbols = {'micron': '{\mu}m', 	'nanometer': 'nm', 	'millimeter': 'mm',
            'volt/second': 'V/s',
            '1/second': '1/s',
            '1/celsius': '{\deg}C^-1', '1/fahrenheit': '{\deg}F^-1', '1/kelvin': '{\deg}K^-1',
+           'ampere': 'A',
            }
 
 # HTML symbols for Qt
@@ -253,6 +258,7 @@ user_defaults = {'length': 'micron',
                 'tension': 'volt',
                 'resistance': 'ohm',
                 'tensionRate': 'volt/second',
+                'current': 'ampere'
                  }
 
 
