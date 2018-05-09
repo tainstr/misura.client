@@ -150,7 +150,8 @@ class ViewerPicture(QtGui.QGraphicsView):
             s = max(s, 10)  # at least 10 steps
             # Invert controls and appearance?
             orient = m.slider.orientation()
-            invc = align<0
+            #invc = align<0
+            invc = (align>0 and c=='x') or (align<0 and c=='y' )
             logging.debug('############ INVERSION?', m.prop['kid'], invc)
             # Skip if no change
             if ps != m.slider.pageStep() or s != m.slider.singleStep() or invc != m.slider.invertedControls():
