@@ -99,10 +99,11 @@ def get_best_client_version(conf, serials):
     """Get best client version compatible with the oldest server 
     appearing in recent cronology"""
     client = conf.get('latest', 'client')
-    iclient = fi(client)
+    ilatest_client = fi(client)
+    iclient = ilatest_client
     server = conf.get('latest', 'server')
-    iserver = fi(server)
-    
+    ilatest_server = fi(server)
+    iserver = ilatest_server
     # Search latest version available for oldest serial getting an update
     sections = conf.sections()
     oldest_serial = False
@@ -110,15 +111,27 @@ def get_best_client_version(conf, serials):
         if serial  not in sections:
             logging.debug('Serial not found:', serial)
             continue
-        new = conf.get(serial, 'server')
-        inew = fi(new)
-        if inew<iserver:
-            server=new
-            iserver = inew
-            client=conf.get(serial, 'client')
-            iclient = fi(client)
+        new_server = conf.get(serial, 'server')
+        inew_server = fi(new_server)
+        
+        new_client =conf.get(serial, 'client')
+        inew_client = fi(client)
+        # Keep oldest server
+        if inew_server<=iserver or iserver==ilatest_server:
+            server = new_server
+            iserver = inew_server
             oldest_serial=serial
-    logging.debug('Oldest serial:', oldest_serial)
+            logging.debug('Oldest server serial updated to:', oldest_serial)
+            # Keep also the oldest associated client
+            if inew_client<iclient or iclient==ilatest_client:
+                iclient = inew_client
+                logging.debug('Oldest client serial updated to:', new_client)
+            else:
+                logging.debug('Skipping client serial', new_client)
+        else:
+            logging.debug('Skipping serial',new_server, new_client)
+        
+    logging.debug('Oldest server serial:', oldest_serial)
     logging.debug('Found client:', client, iclient)
     logging.debug('Found server:', server, iserver)
     return client, iclient
