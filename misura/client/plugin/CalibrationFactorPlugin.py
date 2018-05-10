@@ -201,7 +201,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 'label', _('Draw calibration label'), default=label),
             plugins.FieldBool(
                 'add', _('Add calibration datasets'), default=add),
-            plugins.FieldFloat(
+            plugins.FieldInt(
                 'idx0', descr=_('Start index'), default=idx0),       
         ]
 
@@ -212,7 +212,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         """
         self.ops = []
         self.doc = cmd.document
-        idx0 = fields['idx0']
+        idx0 = int(fields['idx0'])
         ds = self.doc.data[fields['d']]
         Ts = self.doc.data[fields['T']]
         # Convert to percent, if possible
