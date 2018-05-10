@@ -224,7 +224,7 @@ class CalibrationFactorPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         self.T = T
         # Cut away any cooling
         while max(T) != T[-1]:
-            i = np.where(T == max(T))[0]
+            i = int(np.where(T == max(T))[0][0])
             T = T[:i]
         d = ds.data[idx0:len(T)+idx0]
 
