@@ -1,6 +1,7 @@
 ; Change this to specify location to build installer from
-!define VEUSZ_SRC_DIR "c:\users\misura\desktop\misura4"
-!define PYINST_DIR "${VEUSZ_SRC_DIR}\misura.client\misura\client\installer\dist\misura4"
+; misura.client\misura\client\installer\dist\misura4
+!define PYINST_DIR ".\dist\misura4"
+!define VEUSZ_SRC_DIR ".\..\..\..\..\"
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Misura"

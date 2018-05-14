@@ -102,11 +102,6 @@ fi
 
 rm -rf $CANON_LINK
 
-# copy partial packages
-cp -r "$DISTRIBUTION_DIR/configuration/"* $OUTPUT_MISURA4_DIR
-cp -r "$DISTRIBUTION_DIR/browser/"* $OUTPUT_MISURA4_DIR
-cp -r "$DISTRIBUTION_DIR/acquisition/"* $OUTPUT_MISURA4_DIR
-
 # copy compiled packages
 python -m compileall $CODE_BASE/thegram/thegram
 cp -r "$CODE_BASE/thegram/thegram" "$OUTPUT_MISURA4_DIR"
