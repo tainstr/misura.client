@@ -343,48 +343,56 @@ class aNumber(ActiveWidget):
         mx = self.max or 0
         mn = self.min or 0
         st = self.step or 0
-        self.range_min = SpinboxAction(_('Min'), mn, maximum=mx or None,
-                                       callback=self.set_range_minimum, parent=self)
+        self.range_min = SpinboxAction(_('Min'), mn, parent=self)
         self.range_menu.addAction(self.range_min)
-        self.range_max = SpinboxAction(_('Max'), mx, minimum=mn or None,
-                                       callback=self.set_range_maximum, parent=self)
+        self.range_max = SpinboxAction(_('Max'), mx, parent=self)
         self.range_menu.addAction(self.range_max)
         stm = max(((mx - mn) / 3., st))
-        self.range_step = SpinboxAction(_('Step'), st, minimum=0, maximum=stm,
-                                        callback=self.set_range_step, parent=self)
+        self.range_step = SpinboxAction(_('Step'), st, minimum=0, maximum=stm, parent=self)
         self.range_menu.addAction(self.range_step)
-        self.range_zoom = SpinboxAction(_('Zoom'), self.zoom_factor, minimum=1., maximum=1e8,
-                                        callback=self.set_zoom_factor, parent=self)
+        self.range_zoom = SpinboxAction(_('Zoom'), self.zoom_factor, minimum=1., maximum=1e8, parent=self)
         self.range_menu.addAction(self.range_zoom)
         self.range_precision = SpinboxAction(_('Precision'), self.precision, minimum=-1, maximum=12, step=1,
-                                             double=False, callback=self.set_precision, parent=self)
+                                             double=False, parent=self)
         self.range_menu.addAction(self.range_precision)
+        self.range_menu.aboutToHide.connect(self.set_range_menu)
         return True
 
     def update_range_menu(self):
-        self.range_min.spinbox.setValue(self.min or 0)
-        self.range_max.spinbox.setValue(self.max or 0)
-        self.range_step.spinbox.setValue(self.step or 0)
+        """Populate range menu"""
+        m, M, s = self.min, self.max, self.step
+        self.range_min.spinbox.setValue(m or 0)
+        self.range_max.spinbox.setValue(M or 0)
+        self.range_step.spinbox.setValue(s or 0)
         self.range_zoom.spinbox.setValue(self.zoom_factor)
         self.range_precision.spinbox.setValue(self.precision or 0)
 
-    def set_range_minimum(self):
-        val = self.range_min.spinbox.value()
-        self.prop['min'] = val
-        self.min = val
-        self.setRange(self.min, self.max, self.step)
-
-    def set_range_maximum(self):
-        val = self.range_max.spinbox.value()
-        self.prop['max'] = val
-        self.max = val
-        self.setRange(self.min, self.max, self.step)
-
-    def set_range_step(self):
-        val = self.range_step.spinbox.value()
-        self.prop['step'] = val
-        self.step = val
-        self.setRange(self.min, self.max, self.step)
+        
+    def set_range_minimum_maximum_step(self):
+        """Apply min/max/step from range menu"""
+        m = self.range_min.spinbox.value()
+        M = self.range_max.spinbox.value()
+        if m>=M:
+            logging.error('Cannot set a minimum higher than maximum!', self.handle, m, M)
+            return False
+        self.min, self.max = m, M
+        
+        
+        self.prop['min'] = self.adapt2srv(self.min)
+        self.remObj.setattr(self.handle, 'min', self.prop['min'])
+        
+        
+        self.prop['max'] = self.adapt2srv(self.max)
+        self.remObj.setattr(self.handle, 'max', self.prop['max'])
+        
+        self.step = self.range_step.spinbox.value()
+        self.prop['step'] = self.adapt2srv(self.step)
+        self.remObj.setattr(self.handle, 'step', self.prop['step'])               
+        
+        self.setRange(self.prop['min'], 
+                      self.prop['max'], 
+                      self.prop['step'])
+        return True
 
     def set_zoom_factor(self):
         if not self.slider:
@@ -397,6 +405,12 @@ class aNumber(ActiveWidget):
         self.spinbox.set_precision(self.precision)
         self.set_tooltip()
         self.update()
+        
+    def set_range_menu(self):
+        """Apply all options in the range menu"""
+        self.set_range_minimum_maximum_step()
+        self.set_zoom_factor()
+        self.set_precision()
 
     def set_error(self, error=None):
         if error is None:
@@ -536,7 +550,9 @@ class aNumber(ActiveWidget):
             self.zoomact.setChecked(self.slider.zoomed)
             
         self.range_zoom.spinbox.setValue(self.zoom_factor)
-        self.setRange(self.min, self.max, self.step)
+        self.setRange(self.adapt2srv(self.min), 
+                      self.adapt2srv(self.max), 
+                      self.adapt2srv(self.step))
 
     def update(self, minmax=True):
         self.set_tooltip()
@@ -559,12 +575,15 @@ class aNumber(ActiveWidget):
                               self.prop.get('step', False))
             self.slider.blockSignals(True)
         # Translate server-side value into client-side units
+        self.prop['current'] = self.current
         cur = self.adapt2gui(self.current)
         try:
             if not self.double:
                 cur = int(cur)
             if not self.slider or not self.slider.zoomed:
-                self.setRange(self.min, self.max, self.step)
+                self.setRange(self.adapt2srv(self.min), 
+                              self.adapt2srv(self.max), 
+                              self.adapt2srv(self.step))
             # print 'aNumber.update',self.handle,cur,self.current
             self.spinbox.setValue(cur)
             if self.slider:
@@ -606,6 +625,9 @@ class aNumber(ActiveWidget):
                     m = MININT
             else:
                 self.min = m
+                
+        self.step = step
+                
         if self.slider and self.slider.zoomed:
             d = abs(M - m) / self.zoom_factor
             m = max((cur - d, m))
@@ -617,7 +639,8 @@ class aNumber(ActiveWidget):
             m = int(m)
             M = int(M)
 
-        self.step = step
+
+        
         if step == 0:
             if (M - m) < MAXINT / 2:
                 step = abs(M - m) / 100.
