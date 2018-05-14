@@ -594,7 +594,7 @@ class aNumber(ActiveWidget):
             self.spinbox.blockSignals(False)
             if self.slider:
                 self.slider.blockSignals(False)
-        c = int(self.current)
+        c = str(int(self.current))
         if c in self.prop.get('valueSignals', {}):
             self.readonly_label.setText(str(self.prop['valueSignals'][c]))
         else:
