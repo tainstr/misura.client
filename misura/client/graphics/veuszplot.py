@@ -338,6 +338,8 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         return r
     
     def doPick(self, mouse_position):
+        logging.debug('DO PICK', mouse_position)
+        plotwindow.PlotWindow.doPick(self, mouse_position)
         plugin.InterceptPlugin.clicked_curve(mouse_position, self.parent())
     
 

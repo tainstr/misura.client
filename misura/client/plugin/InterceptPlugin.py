@@ -11,7 +11,6 @@ import numpy as np
 import utils
 
 
-
 class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
     """Intercept all curves at a given x or y by placing datapoints"""
@@ -25,7 +24,7 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     description_full = 'Intercept all curves pertaining to a file, sample or dataset by placing descriptive datapoints'
 
     def __init__(self, target=[], axis='X', val=0., search='Nearest (Fixed X)', searchRange=25, critical_x='',
-                 text='Intercept\\\\%(xlabel)s=%(x).0f\\\\%(ylabel)s=%(y)E'):
+                 text='Intercept\\\\%(xlabel)s=%(x).0f\\\\%(ylabel)s=%(y)E', currentwidget=False):
         """Make list of fields."""
         self.fields = [
             plugins.FieldDatasetMulti(
@@ -62,11 +61,12 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         if not pickinfo:
             return
-
+        
         curve_to_intercept = pickinfo.widget.settings['yData']
         p = InterceptPlugin(target=[curve_to_intercept],
                             axis='X',
                             critical_x='0:t',
+                            currentwidget=main_window.plot.pickerwidgets[-1],
                             val=pickinfo.coords[0])
         d = PluginDialog(main_window, main_window._document, p, InterceptPlugin)
         main_window.showDialog(d)

@@ -15,6 +15,7 @@ from veusz.windows import mainwindow
 import veusz.document as document
 import veusz.setting as setting
 from veusz import veusz_main
+import veusz.windows.plotwindow as plotwindow
 
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
@@ -388,9 +389,13 @@ class Graphics(mainwindow.MainWindow):
         # print 'Misura3 Interface'
         self.m3 = Misura3Interface(self)
         self.datadock.hide()
-
-        self.plot.doPick = lambda mouse_position: plugin.InterceptPlugin.clicked_curve(
-            mouse_position, self)
+        
+        def doPick(mouse_position):
+            plotwindow.PlotWindow.doPick(self.plot, mouse_position)
+            self.treeedit.selectWidget(self.plot.pickerwidgets[0].parent)
+            plugin.InterceptPlugin.clicked_curve(mouse_position, self)
+        
+        self.plot.doPick = doPick
         self.setWindowIcon(QtGui.QIcon(os.path.join(params.pathArt, 'graphics.svg')))
         self.plot.dragMoveEvent = self.dragEnterEvent
         self.plot.dropEvent = self.dropEvent
