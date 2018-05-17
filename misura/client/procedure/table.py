@@ -162,7 +162,7 @@ class ThermalCurveTable(QtGui.QTableView):
         option.ao(desc, 'target', 'Float', name=_("Target Sample Thermocouple Weight"),
                   current=1, min=0, max=1, step=0.01)
         option.ao(desc, 'rate', 'Float', name=_("Control temperature switching rate (0=sudden)"),
-                  unit='celsius/minute', current=5, min=0, max=30, step=0.1)
+                  unit='celsius/min', current=5, min=0, max=30, step=0.1)
         cp = option.ConfigurationProxy({'self': desc})
         chk = conf.InterfaceDialog(cp, cp, desc, parent=self)
         chk.setWindowTitle(_("Thermocouple Control Transition Configuration"))
