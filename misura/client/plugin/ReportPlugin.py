@@ -209,7 +209,7 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
 
         self.dict_toset(doc.resolveFullWidgetPath(report_path + '/temp/ax:' + fields['measure_to_plot']), cf)
         self.toset(doc.resolveFullWidgetPath(report_path + '/tc/x'), 'datascale', 1/60.)
-        self.toset(doc.resolveFullWidgetPath(report_path + '/tc/y'), 'datascale', 60.)
+        self.toset(doc.resolveFullWidgetPath(report_path + '/tc/y1'), 'datascale', 60.)
         self.apply_ops()
 
         command_interpreter.run("MoveToLastPage()")
