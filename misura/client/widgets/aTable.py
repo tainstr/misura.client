@@ -195,10 +195,11 @@ class aTableModel(QtCore.QAbstractTableModel):
     sigOutdated = QtCore.pyqtSignal()
 
     def __init__(self, tableObj):
-        QtCore.QAbstractTableModel.__init__(self)
+        super(aTableModel, self).__init__()
         self.tableObj = tableObj
         self.rows = []
         self.header = []
+        self.header_struct = {}
         self.visible_headers = []  # visible headers
         self.visible_data = []  # visible data rows
         self.unit = 'None'
@@ -303,13 +304,23 @@ class aTableModel(QtCore.QAbstractTableModel):
             logging.error(
                 'aTableModel data is outdated!', self.tableObj.handle)
         return v
-
+    
+    def set_header(self, header):
+        """Set new header value and update header_struct"""
+        self.header = header
+        self.header_struct = collections.defaultdict(set)
+        # {position: set(names)}
+        for h in self.header:
+            h = h[0].split(' ')
+            for i,name in enumerate(h):
+                self.header_struct[i].add(name)
+                
     def up(self, validate=True):
         r = self._rotated
         self._rotated = False
         hp = self.tableObj.current
         # Table header is the first row in the option
-        self.header = hp[0]
+        self.set_header(hp[0])
         # Rows are the rest of the option
         self.rows = hp[1:]
         self.unit = self.tableObj.prop.get('unit', False)
@@ -424,13 +435,33 @@ class aTableModel(QtCore.QAbstractTableModel):
 
     _menu_funcs = []  # Keep references for partial functions
 
-    def make_visibility_action(self, menu, col, orientation, name=False):
+    def make_visibility_action(self, menu, col, orientation, name=False, deep=False):
         if not name:
             name = self.headerData(col, orientation)
         if not name:
             name = str(col)
-
+            
+        tokens = name.split(' ')
+        #TODO: add the "Show all/Hide all" actions in case of deep
+        if deep and len(tokens)>2:
+            for token in tokens[:-2]:
+                found = 0
+                for act in menu.actions():
+                    act = act.menu()
+                    if not act:
+                        continue
+                    if token==act.objectName():
+                        found=1
+                        menu = act
+                        break
+                    print('Skipping action', token, act.objectName())
+                if not found:
+                    menu = menu.addMenu(token)
+                    menu.setObjectName(token)
+                    print 'setObjectName', token, menu.objectName()
+            
         act = menu.addAction(name)
+        act.setObjectName(name)
         f = functools.partial(self.change_visibility, col, orientation)
         act.triggered.connect(f)
         act.setCheckable(True)
@@ -505,10 +536,13 @@ class aTableModel(QtCore.QAbstractTableModel):
         else:
             m = menu.addMenu(_('More columns'))
             v = self.visible_cols
+            
+        deep = len(v)>10
         for col, vis in enumerate(v):
             if vis:
                 continue
-            self.make_visibility_action(m, col, orientation)
+            self.make_visibility_action(m, col, orientation, deep=deep)                
+        
         return m
 
     def set_as_perpendicular_header(self, col):
@@ -639,7 +673,9 @@ class aTableView(QtGui.QTableView):
         self.model().make_visibility_menu(menu, QtCore.Qt.Horizontal)
         self.model().make_visibility_menu(menu, QtCore.Qt.Vertical)
         # View local aggregation
-        if self.tableObj.prop.get('aggregate', ''):
+        agg = self.tableObj.prop.get('aggregate', '')
+        # TODO: improve cellmenu for table_flat aggregates
+        if agg:
             self.make_aggregation_menu(index, menu)
 
         menu.popup(self.mapToGlobal(pt))
@@ -680,7 +716,7 @@ class aTableView(QtGui.QTableView):
         """Returns the aggregation source device and option name for cell at `index`"""
         wg = self.tableObj
         r = wg.remObj.collect_aggregate(wg.prop['aggregate'], wg.handle)
-        func_name, targets, values, fullpaths, foo = r
+        func_name, targets, values, fullpaths = r[:4]
         col0, row0 = self._coord(index)
         targets_map = {}
         col = col0
@@ -721,7 +757,7 @@ class aTableView(QtGui.QTableView):
             agg = prop.get('aggregate', '')
             if agg:
                 r = dev.collect_aggregate(agg, t)
-                f, targets, values, fullpaths, devs = r
+                f, targets, values, fullpaths, devs, tree = r
                 print targets, sub_target_col, col0, j0
                 subt = targets[sub_target_col]
                 for fullpath in fullpaths[subt]:
