@@ -135,7 +135,7 @@ def build_recursive_aggregation_menu(root, main_dev, aggregation, handles_map, m
     
     fullpath = main_dev['fullpath']
     handle = handles_map.get(fullpath)
-    f, targets, values, devs, foo = main_dev.collect_aggregate(aggregation, handle)
+    f, targets, values, devs = main_dev.collect_aggregate(aggregation, handle)[:4]
     
     if fullpath+'::list' not in menu_map:
         act = menu.addAction(_('List aggregated options'), 
@@ -182,7 +182,7 @@ def explore_child_aggregate(dev, target, win_map={}):
     win.highlight_option(target)
     
 def list_aggregate(dev, aggregate, handle, win_map={}):
-    f, targets, values, devs, foo = dev.collect_aggregate(aggregate, handle)
+    f, targets, values, devs = dev.collect_aggregate(aggregate, handle)[:4]
     win = build_aggregate_view(dev.root, targets, devs, handle)
     win.setWindowTitle(_('Explore aggregation: {} ({})').format(dev['name'], handle))
     win.show()
