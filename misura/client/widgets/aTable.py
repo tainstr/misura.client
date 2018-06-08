@@ -435,7 +435,7 @@ class aTableModel(QtCore.QAbstractTableModel):
 
     _menu_funcs = []  # Keep references for partial functions
 
-    def make_visibility_action(self, menu, col, orientation, name=False, deep=False):
+    def make_visibility_action(self, menu, col, orientation, set_visibility=True, name=False, deep=False):
         if not name:
             name = self.headerData(col, orientation)
         if not name:
@@ -444,7 +444,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         tokens = name.split(' ')
         #TODO: add the "Show all/Hide all" actions in case of deep
         if deep and len(tokens)>2:
-            for token in tokens[:-2]:
+            for i, token in enumerate(tokens[:-2]):
                 found = 0
                 for act in menu.actions():
                     act = act.menu()
@@ -454,15 +454,24 @@ class aTableModel(QtCore.QAbstractTableModel):
                         found=1
                         menu = act
                         break
-                    print('Skipping action', token, act.objectName())
                 if not found:
                     menu = menu.addMenu(token)
                     menu.setObjectName(token)
-                    print 'setObjectName', token, menu.objectName()
+                    # Show all/hide all menu actions
+                    if set_visibility:
+                        act = menu.addAction(_('Show all'))
+                    else:
+                        act = menu.addAction(_('Hide all'))
+                    act.setObjectName('__all__')
+                    f = functools.partial(self.recursive_visibility, tokens[:i+1], orientation, visible=set_visibility)
+                    act.triggered.connect(f)
+                    self._menu_funcs.append(f)
+                    menu.addSeparator()
+                    
             
         act = menu.addAction(name)
         act.setObjectName(name)
-        f = functools.partial(self.change_visibility, col, orientation)
+        f = functools.partial(self.change_visibility, col, orientation, status=set_visibility)
         act.triggered.connect(f)
         act.setCheckable(True)
         if orientation == QtCore.Qt.Horizontal:
@@ -471,6 +480,21 @@ class aTableModel(QtCore.QAbstractTableModel):
             act.setChecked(self.visible_rows[col])
         self._menu_funcs.append(f)
         return act
+    
+    def recursive_visibility(self, tokens, orientation=QtCore.Qt.Horizontal, visible=True):
+        """Force visibility `visible` on all columns starting with `tokens`"""
+        if orientation == QtCore.Qt.Vertical:
+            v = self.visible_rows
+        else:
+            v = self.visible_cols
+        
+        for col, vis in enumerate(v):
+            name = self.headerData(col, orientation)
+            name = name.split(' ')
+            if name[:len(tokens)] == tokens:
+                if vis!=visible:
+                    self.change_visibility(col, orientation, status=visible)
+        
 
     @property
     def visible_cols(self):
@@ -531,18 +555,18 @@ class aTableModel(QtCore.QAbstractTableModel):
     def make_visibility_menu(self, menu, orientation):
         """Adds a submenu allowing to choose visible/hidden columns"""
         if orientation == QtCore.Qt.Vertical:
-            m = menu.addMenu(_('More rows'))
+            more = menu.addMenu(_('More rows'))
+            less = menu.addMenu(_('Less rows'))
             v = self.visible_rows
         else:
-            m = menu.addMenu(_('More columns'))
+            more = menu.addMenu(_('More columns'))
+            less = menu.addMenu(_('Less columns'))
             v = self.visible_cols
             
         deep = len(v)>10
         for col, vis in enumerate(v):
-            if vis:
-                continue
-            self.make_visibility_action(m, col, orientation, deep=deep)                
-        
+            m = less if vis else more
+            self.make_visibility_action(m, col, orientation, set_visibility=not vis, deep=deep)
         return m
 
     def set_as_perpendicular_header(self, col):
@@ -565,7 +589,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.validate()
         self._menu_funcs = []
         menu = QtGui.QMenu(self.tableObj)
-        self.make_visibility_action(menu, col, orientation, name=_('Visible'))
+        self.make_visibility_action(menu, col, orientation, set_visibility=False, name=_('Visible'))
         self.make_visibility_menu(menu, orientation)
         self.make_unit_menu(menu, col)
         self.make_perpendicular_header_action(menu, col)
