@@ -9,8 +9,13 @@ logging = get_module_logging(__name__)
 def add_object_options(remObj, opts):
     fp = remObj['fullpath']
     for handle in remObj.keys():
-        pos = confdb.rule_opt_status(fp+handle)
+        h1 = fp+handle
+        pos = confdb.rule_opt_status(h1)
+        # Skip if not included
         if not pos:
+            continue
+        # Skip if hidden
+        if confdb.rule_hide(h1):
             continue
         pos, force = pos
         if pos:
@@ -43,6 +48,7 @@ class Status(QtGui.QWidget):
         done_motor = False
         positions = sorted(opts.keys())
         for pos in positions:
+            # Inject motor after third position
             if pos>3 and not done_motor:
                 self.add_motorStatus(server)
                 done_motor = True
@@ -58,9 +64,6 @@ class Status(QtGui.QWidget):
                 wg.force_update = force
             
             self.insert_widget(wg)
-        
-
-
         self.setLayout(self.lay)
         
     def add_motorStatus(self, server):
@@ -70,7 +73,6 @@ class Status(QtGui.QWidget):
                     server, server.kiln, server.kiln.gete('motorStatus'))
                 wg.force_update = True
                 self.insert_widget(wg)
-        
 
     def insert_widget(self, wg):
         if wg is False:
