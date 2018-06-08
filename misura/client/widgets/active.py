@@ -694,6 +694,10 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.emenu.addAction(_('Check for modification'), self.get)
         self.emenu.addAction(_('Option Info'), self.show_info)
         self.emenu.addAction(_('Detach'), self.new_window)
+        
+        if 'fullpath' in self.remObj:
+            self.emenu.addAction('Hide this option', self.set_option_hidden)
+        
         if self.prop.get('aggregate', ''):
             self.agg_menu = self.emenu.addMenu(_('Aggregation'))
             self.agg_menu.menuAction().hovered.connect(functools.partial(self.build_aggregation_menu, self.agg_menu))
@@ -706,6 +710,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         if len(self.prop.get('children', [])):
             self.emenu.addMenu(self.compare_group_menu)
         self.nav_menu = self.emenu.addMenu(_('Navigator'))
+        
         #self.emenu.addAction(_('Online help for "%s"') % self.handle, self.emitHelp)
         # Units button
         self.bmenu = LabelUnit(self.prop, self)
@@ -717,6 +722,25 @@ class ActiveWidget(Active, QtGui.QWidget):
             self.bmenu.hide()
         self.set_label()
         self.lay.addWidget(self.bmenu)
+        
+    def set_option_hidden(self):
+        self.hide()
+        self.label_widget.hide()
+        self.readonly_label.hide()
+        return
+        #TODO: need a way to easily restore the visibility! 
+        # eg: am Interface panel context menu to recall all hidden options
+        fp = self.remObj['fullpath']
+        rule = '^'+fp+self.handle+'$'
+        opt = confdb['opt_hide']
+        logging.debug('HIDE', fp, rule, opt)
+        if rule not in opt:
+            if len(opt):
+                rule = '\n'+rule
+            confdb['opt_hide'] = opt+rule
+            logging.debug('Set opt_hide to', confdb['opt_hide'])
+
+        
         
     def update_aggregate(self):
         r = self.remObj.update_aggregate(self.handle)

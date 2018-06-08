@@ -15,7 +15,7 @@ def add_object_options(remObj, opts):
         if not pos:
             continue
         # Skip if hidden
-        if confdb.rule_hide(h1):
+        if confdb.rule_opt_hide(h1):
             continue
         pos, force = pos
         if pos:
