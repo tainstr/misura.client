@@ -2,8 +2,21 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
 from .. import widgets
+from ..clientconf import confdb
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
+
+def add_object_options(remObj, opts):
+    fp = remObj['fullpath']
+    for handle in remObj.keys():
+        pos = confdb.rule_opt_status(fp+handle)
+        if not pos:
+            continue
+        pos, force = pos
+        if pos:
+            opts[pos] = (remObj, handle, force)
+    return opts
+            
 
 class Status(QtGui.QWidget):
 
@@ -14,55 +27,50 @@ class Status(QtGui.QWidget):
         self.lay = QtGui.QFormLayout()
         self.lay.setLabelAlignment(QtCore.Qt.AlignRight)
         self.lay.setRowWrapPolicy(QtGui.QFormLayout.WrapLongRows)
-        wg = widgets.build(server, server, server.gete('isRunning'))
-        self.insert_widget(wg)
-        has_kiln = server.has_child('kiln')
-        if has_kiln:
-            wg = widgets.build(server, server.kiln, server.kiln.gete('analysis'))
-            self.insert_widget(wg)
-        for opt in 'name', 'elapsed':
-            wg = widgets.build(
-                server, remObj.measure, remObj.measure.gete(opt))
-            self.insert_widget(wg)
-        if has_kiln:
-            if server.kiln['motorStatus'] >= 0:
-                wg = widgets.build(
-                    server, server.kiln, server.kiln.gete('motorStatus'))
-                wg.force_update = True
-                self.insert_widget(wg)
-            for opt in 'T', 'S', 'P', 'Ts', 'Tk', 'Th', 'Te':
-                # Skip empty IO pointers
-                opt_dict = server.kiln.gete(opt)
-                if opt_dict.has_key('options') and opt_dict['options'][0] == 'None':
-                    continue
-                wg = widgets.build(server, server.kiln, opt_dict)
-                if wg.type.endswith('IO'):
-                    wg.value.force_update = True
-                else:
-                    wg.force_update = True
-                self.insert_widget(wg)
-        n = remObj['devpath']
-
-        if n != 'kiln':
-            if n == 'hsm':
-                self.add_samples_option(server, remObj, 'h')
-            elif n in ('vertical', 'horizontal', 'flex'):
-                self.add_samples_option(server, remObj, 'd')
-                self.add_samples_option(server, remObj, 'initialDimension')
-            elif n=='dta':
-                self.add_samples_option(server, remObj, 'deltaT')
-
-        self.setLayout(self.lay)
-
-    def add_samples_option(self, server, remObj, option):
+        
+        # Collect available ordered options
+        opts = {} # position: (parent, handle)
+        opts = add_object_options(server, opts)
+        opts = add_object_options(server.kiln, opts)
+        opts = add_object_options(remObj.measure, opts)
         for i in range(remObj.measure['nSamples'] + 1):
             name = 'sample' + str(i)
             if not remObj.has_child(name):
                 continue
             smp = getattr(remObj, name)
-            print 'Building widget', smp['fullpath'], option
-            wg = widgets.build(server, smp, smp.gete(option))
+            opts = add_object_options(smp, opts)
+        
+        done_motor = False
+        positions = sorted(opts.keys())
+        for pos in positions:
+            if pos>3 and not done_motor:
+                self.add_motorStatus(server)
+                done_motor = True
+            parent, handle, force = opts[pos]
+            # Skip empty IO pointers
+            opt = parent.gete(handle)
+            if opt.has_key('options') and opt['options'][0] == 'None':
+                    continue
+            wg = widgets.build(server, parent, opt)
+            if wg.type.endswith('IO'):
+                wg.value.force_update = force
+            else:
+                wg.force_update = force
+            
             self.insert_widget(wg)
+        
+
+
+        self.setLayout(self.lay)
+        
+    def add_motorStatus(self, server):
+        if server.has_child('kiln'):
+            if server.kiln['motorStatus'] >= 0:
+                wg = widgets.build(
+                    server, server.kiln, server.kiln.gete('motorStatus'))
+                wg.force_update = True
+                self.insert_widget(wg)
+        
 
     def insert_widget(self, wg):
         if wg is False:

@@ -44,7 +44,7 @@ ao(default_desc, 'autoConnect', **
    {'name': 'Auto-connect to last server used',
     'current': True, 'type': 'Boolean'})
 
-ao(default_desc, 'authLevel', 'Chooser', 2, 'Authorization level when opening test files', 
+ao(default_desc, 'authLevel', 'Chooser', 2, 'Authorization level when opening test files',
    values=range(6), options=['guest', 'basic', 'user', 'tech', 'maint', 'admin'])
 
 ao(default_desc, 'hdatabase', **
@@ -60,26 +60,28 @@ ao(default_desc, 'logdir', **{'name': 'Log files directory',
 ao(default_desc, 'loglevel', **{'name': 'Logging Level', 'current': 30,
                                 'max': 50, 'min': -1, 'step': 10, 'type': 'Integer', 'parent': 'logdir'})
 ao(default_desc, 'lognotify', **{'name': 'Popup notification level', 'current': 40,
-                                'max': 50, 'min': -1, 'step': 10, 'type': 'Integer', 'parent': 'logdir'})
+                                 'max': 50, 'min': -1, 'step': 10, 'type': 'Integer', 'parent': 'logdir'})
 ao(default_desc, 'logsize', **{'name': 'Size of each log file', 'current':
                                2048, 'min': 0, 'unit': 'kilobyte', 'type': 'Integer', 'parent': 'logdir'})
 ao(default_desc, 'lognumber', **{'name': 'Max number of logfiles to be kept',
                                  'current': 50, 'min': 0, 'type': 'Integer', 'parent': 'logdir'})
 
 ao(default_desc, 'templates', **{'name': 'Templates directory',
-                              'current': os.path.expanduser("~/MisuraData/templates"),
-                              'type': 'FilePath'})
+                                 'current': os.path.expanduser("~/MisuraData/templates"),
+                                 'type': 'FilePath'})
 
 cpu = multiprocessing.cpu_count()
 ao(default_desc, 'maxcpu', **{'name': 'Maximum number of CPU', 'current': cpu,
-                                'max': cpu, 'min': 1, 'step': 1, 'type': 'Integer'})
+                              'max': cpu, 'min': 1, 'step': 1, 'type': 'Integer'})
 ##############
 # Autoupdate
-ao(default_desc, 'updateUrl', 'String', 
-   'ftp://webshare.tainstruments.com/pub/Software/Misura/4/', 
+ao(default_desc, 'updateUrl', 'String',
+   'ftp://webshare.tainstruments.com/pub/Software/Misura/4/',
    'AutoUpdate site address')
-ao(default_desc, 'updateUser', 'String', 'taguest', 'AutoUpdate site username', parent='updateUrl')
-ao(default_desc, 'updatePassword', 'String', '', 'AutoUpdate site password', parent='updateUrl')
+ao(default_desc, 'updateUser', 'String', 'taguest',
+   'AutoUpdate site username', parent='updateUrl')
+ao(default_desc, 'updatePassword', 'String', '',
+   'AutoUpdate site password', parent='updateUrl')
 
 ###############
 # Rules
@@ -132,22 +134,42 @@ rule_style = [[('Rule', 'String'), ('Range', 'String'), ('Scale', 'Float'),
               ]
 ao(default_desc, 'rule_style', 'Table', rule_style, 'Formatting')
 
-ao(default_desc, 'rule_autoformat', 'Chooser', 'Line Color', 'Mark curves sharing same axis by:', options=['Line Style', 'Line Color'])
+ao(default_desc, 'rule_autoformat', 'Chooser', 'Line Color',
+   'Mark curves sharing same axis by:', options=['Line Style', 'Line Color'])
 
-ao(default_desc, 'rule_logo', **{'name': 'Plot Logo','current': '','type': 'FilePath'})
+ao(default_desc, 'rule_logo', **
+   {'name': 'Plot Logo', 'current': '', 'type': 'FilePath'})
 
 ##########
 # Plugins
 ao(default_desc, 'm3', 'Section', 'Data import', 'Data import')
-ao(default_desc, 'm3_enable', 'Boolean', True, 'Enable Misura 3 database interface')
+ao(default_desc, 'm3_enable', 'Boolean',
+   True, 'Enable Misura 3 database interface')
 ao(default_desc, 'm3_plugins', 'TextArea', 'thegram', 'Import plugins by name')
 
 ##########
 # Option panels
 ao(default_desc, 'opt', 'Section', 'Options', 'Options')
-ao(default_desc, 'opt_status', 'TextArea', '', 'Status')
-ao(default_desc, 'opt_measure', 'TextArea', '', 'Measure')
-ao(default_desc, 'opt_sample', 'TextArea', '', 'Sample')
+# rule, position
+rule_opt_status = [[('Option', 'String'), ('Position', 'Integer'), ('Force', 'Boolean')],
+                   ['^/isRunning$', 1, 0],
+                   ['^/kiln/analysis$', 2, 0],
+                   ['/measure/name$', 3, 0],
+                   ['/measure/elapsed$', 4, 0],
+                   ['^/kiln/T$', 5, 1],
+                   ['^/kiln/S$', 6, 1],
+                   ['^/kiln/P$', 7, 1],
+                   ['^/kiln/Ts$', 8, 1],
+                   ['^/kiln/Tk$', 9, 1],
+                   ['^/kiln/Th$', 10, 1],
+                   ['^/kiln/Te$', 11, 1],
+                   ['^/hsm/sample\d/h$', 12, 0],
+                   ['^(horizontal|vertical|flex)?/sample\d/d$', 13, 0],
+                   ['^(horizontal|vertical|flex)?/sample\d/initialDimension$', 14, 0],
+                   ['^/dta/sample\d/deltaT$', 15, 0],
+                   ]
+
+ao(default_desc, 'opt_status', 'Table', rule_opt_status, 'Status')
 ao(default_desc, 'opt_tc', 'TextArea', '', 'Thermal cycle')
 ao(default_desc, 'opt_hide', 'TextArea', '', 'Hide always')
 
@@ -155,21 +177,29 @@ ao(default_desc, 'opt_hide', 'TextArea', '', 'Hide always')
 ############
 # Recent tables
 ao(default_desc, 'recent_server', 'Table', attr=['Hidden'], current=[[('Address', 'String'),
-                                                                      ('User', 'String'), 
-                                                                      ('Password','String'), 
-                                                                      ('MAC', 'String'),
-                                                                      ('Serial', 'String'), 
+                                                                      ('User',
+                                                                       'String'),
+                                                                      ('Password',
+                                                                       'String'),
+                                                                      ('MAC',
+                                                                       'String'),
+                                                                      ('Serial',
+                                                                       'String'),
                                                                       ('Name', 'String')], ])
-ao(default_desc, 'recent_database', 'Table', attr=['Hidden'], current=[[('Path', 'String'),('Name','String')], ])
-ao(default_desc, 'recent_file', 'Table', attr=['Hidden'], current=[[('Path', 'String'),('Name','String')], ])
-ao(default_desc, 'recent_m3database', 'Table', attr=['Hidden'], current=[[('Path', 'String'),('Name','String')], ])
+ao(default_desc, 'recent_database', 'Table', attr=[
+   'Hidden'], current=[[('Path', 'String'), ('Name', 'String')], ])
+ao(default_desc, 'recent_file', 'Table', attr=[
+   'Hidden'], current=[[('Path', 'String'), ('Name', 'String')], ])
+ao(default_desc, 'recent_m3database', 'Table', attr=[
+   'Hidden'], current=[[('Path', 'String'), ('Name', 'String')], ])
 
 
 recent_tables = 'server,database,file,m3database'.split(',')
 
-if os.name!='nt':
+if os.name != 'nt':
     default_desc['m3_enable']['current'] = False
     default_desc['m3_enable']['attr'] = ['ReadOnly', 'Hidden']
+
 
 def tabname(name):
     if name in recent_tables:
@@ -201,8 +231,7 @@ class RulesTable(object):
             r = re.compile(r.replace('\n', '|'))
             self.rules.append(r)
             self.rows.append(row[1:])
-    
-    
+
     def __call__(self, s, latest=False):
         """Return the row corresponding to the first rule matching the string `s`.
         latest = 0, 1, 'all'"""
@@ -218,13 +247,14 @@ class RulesTable(object):
                 elif not latest:
                     return f
         # No match found, or all
-        if latest=='all':
+        if latest == 'all':
             return all
-        return f 
-    
-    
+        return f
 
-rule_suffixes= ['exc', 'inc', 'load', 'plot']
+
+rule_suffixes = ['exc', 'inc', 'load', 'plot']
+
+
 class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     _Method__name = 'CONF'
     conn = False
@@ -278,21 +308,38 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if not self._rule_unit:
             self._rule_unit = RulesTable(self['rule_unit'])
         return self._rule_unit
-    
+
     @property
     def rule_opt_hide(self):
         if not self._rule_opt_hide:
-            tab = [[('t',),('retn',)],
+            tab = [[('t',), ('retn',)],
                    [self['opt_hide'], 1],
-                  ]
+                   ]
             self._rule_opt_hide = RulesTable(tab)
         return self._rule_opt_hide
+
+    @property
+    def rule_opt_status(self):
+        if not self._rule_opt_status:
+            self._rule_opt_status = RulesTable(self['opt_status'])
+        return self._rule_opt_status
+
+    @property
+    def rule_opt_tc(self):
+        if not self._rule_opt_tc:
+            tab = [[('t',), ('retn',)],
+                   [self['opt_tc'], 1],
+                   ]
+            self._rule_opt_tc = RulesTable(tab)
+        return self._rule_opt_tc
 
     def reset_rules(self):
         self._rule_style = False
         self._rule_dataset = False
         self._rule_unit = False
         self._rule_opt_hide = False
+        self._rule_opt_status = False
+        self._rule_opt_tc = False
 
     def load_configuration(self, cursor):
         # Configuration table
@@ -306,9 +353,10 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                 desc.update(stored_desc)
                 self.desc = desc
                 logging.debug('Loaded configuration', self.desc)
-                loaded=True
+                loaded = True
             except:
-                logging.error('Loading configuration from', self.path, format_exc())
+                logging.error('Loading configuration from',
+                              self.path, format_exc())
         if not loaded:
             logging.debug('Recreating client configuration')
             for key, val in default_desc.iteritems():
@@ -321,10 +369,10 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if os.path.exists(self['database']):
             logging.debug('Found default database', self['database'])
             self.mem_database(self['database'], '')
-        if os.name!='nt':
+        if os.name != 'nt':
             self['m3_enable'] = False
             self.setattr('m3_enable', 'attr', ['ReadOnly', 'Hidden'])
-            
+
     def migrate_desc(self):
         """Migrate saved newdesc to current hard-coded configuration structure default_desc"""
         desc_ret = {}
@@ -334,14 +382,14 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                 coded_opt = option.Option(**self.default_desc[key])
                 saved_opt.migrate_from(coded_opt)
                 desc_ret[key] = saved_opt
-        self.desc = desc_ret 
-        
+        self.desc = desc_ret
+
     def add_option(self, *a, **k):
         """When a new option is defined, add also to default_desc definition"""
         out = option.ConfigurationProxy.add_option(self, *a, **k)
         self.default_desc[out['handle']] = out.entry
         return out
-            
+
     def load(self, path=False):
         """Load an existent client configuration database, or create a new one."""
         logging.debug('LOAD', path)
@@ -354,20 +402,20 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             self.path, detect_types=sqlite3.PARSE_DECLTYPES)
         self.conn.text_factory = unicode
         cursor = self.conn.cursor()
-        
+
         self.load_configuration(cursor)
         cursor.close()
-        
+
         self.conn.commit()
-        
+
         # Forget recent tables defined with old headers
         for tname in recent_tables:
-            tname = 'recent_'+tname
-            if self[tname][0]!=default_desc[tname]['current'][0]:
+            tname = 'recent_' + tname
+            if self[tname][0] != default_desc[tname]['current'][0]:
                 self[tname] = default_desc[tname]['current']
-        
+
         self.emit(QtCore.SIGNAL('load()'))
-        
+
         for key in ['logdir', 'templates']:
             if not os.path.exists(self[key]):
                 logging.debug('Creating configured directory', key, self[key])
@@ -375,17 +423,14 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                     os.makedirs(self[key])
                 except:
                     logging.error(format_exc())
-        
-        
+
         self.reset_rules()
         self.create_index()
-
-
 
     def create_index(self):
         self.index = False
         path = self['database']
-        
+
         if path and os.path.exists(path):
             logging.debug('Creating indexer at', path)
             self.index = Indexer(path)
@@ -417,16 +462,16 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         # Avoid saving duplicate values
         arg = list(unicode(a) for a in arg)
         # Adjust headers
-        if len(arg)<len(tab[0]):
-            arg += [''] * (len(tab[0])-len(arg))
+        if len(arg) < len(tab[0]):
+            arg += [''] * (len(tab[0]) - len(arg))
         # Update order
         if arg in tab:
             tab.remove(arg)
         tab.append(arg)
-        
+
         lim = self.desc['h' + name]['current']
-        if len(tab)-1 > lim:
-            tab.pop(1) # preserve header
+        if len(tab) - 1 > lim:
+            tab.pop(1)  # preserve header
         setattr(self, tname, tab)
         self.emit(QtCore.SIGNAL('mem()'))
         self.save()
@@ -442,7 +487,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if key not in v:
             return False
         i = v.index(key)
-        tab.pop(i+1) # preserve the header
+        tab.pop(i + 1)  # preserve the header
         self[tname] = tab
         self.emit(QtCore.SIGNAL('rem()'))
         self.save()
@@ -489,7 +534,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             return False
         # Change order so that it becomes the most recent
         i = v.index(addr)
-        entry = self['recent_server'][i+1]
+        entry = self['recent_server'][i + 1]
         # TODO: this looses password!!!
         self.rem('server', addr)
         self.mem('server', *entry)
@@ -498,7 +543,8 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     # TODO: accettare serial e name e altro...
     def mem_server(self, addr, user='', password='', mac='', name='', save=True):
         # Remove entries with empty user/password
-        addr, user, password, mac, name = str(addr), str(user), str(password), str(mac), str(name)
+        addr, user, password, mac, name = str(addr), str(
+            user), str(password), str(mac), str(name)
         if not save:
             user = ''
             password = ''
@@ -513,7 +559,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         for entry in self[table_name][1:]:
             if entry[0] == key:
                 return entry
-        return ['']*len(self[table_name][0])
+        return [''] * len(self[table_name][0])
 
     def resolve_uid(self, uid):
         """Search file path corresponding to uid across default database and recent databases"""
@@ -522,10 +568,10 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             return False
         known = self.known_uids.get(uid, False)
         if known:
-            logging.debug( 'UID was known %s',known)
+            logging.debug('UID was known %s', known)
             return known, False
         else:
-            logging.debug('Uid not previously known %s',uid)
+            logging.debug('Uid not previously known %s', uid)
         if self.index:
             dbPath = self.index.dbPath
             file_path = self.index.searchUID(uid)
@@ -556,7 +602,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             try:
                 db = Indexer(path)
             except:
-                logging.info('Db open error: \n',format_exc())
+                logging.info('Db open error: \n', format_exc())
                 continue
             file_path = db.searchUID(uid)
             if file_path:
@@ -579,14 +625,13 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         return d
 
 
-
-
-
 import importlib
+
+
 def activate_plugins(confdb):
     plugins = confdb['m3_plugins'].splitlines()
     for plug in plugins:
-        plug = plug.replace('\n','')
+        plug = plug.replace('\n', '')
         print 'Plugging: ', plug
         try:
             importlib.import_module(plug)
@@ -598,6 +643,7 @@ def activate_plugins(confdb):
         update_func(confdb)
     confdb.migrate_desc()
 
+
 settings = QtCore.QSettings(
     QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope, 'Expert System Solutions', 'Misura 4')
 # Set the configuration db
@@ -608,5 +654,4 @@ elif os.path.exists(cf):
     params.set_pathConf(cf)
     confdb = ConfDb(path=cf)
 settings.setValue('/Configuration', confdb.path)
-#activate_plugins(confdb)
-
+# activate_plugins(confdb)
