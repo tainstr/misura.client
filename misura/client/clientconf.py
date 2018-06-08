@@ -142,6 +142,16 @@ ao(default_desc, 'm3', 'Section', 'Data import', 'Data import')
 ao(default_desc, 'm3_enable', 'Boolean', True, 'Enable Misura 3 database interface')
 ao(default_desc, 'm3_plugins', 'TextArea', 'thegram', 'Import plugins by name')
 
+##########
+# Option panels
+ao(default_desc, 'opt', 'Section', 'Options', 'Options')
+ao(default_desc, 'opt_status', 'TextArea', '', 'Status')
+ao(default_desc, 'opt_measure', 'TextArea', '', 'Measure')
+ao(default_desc, 'opt_sample', 'TextArea', '', 'Sample')
+ao(default_desc, 'opt_tc', 'TextArea', '', 'Thermal cycle')
+ao(default_desc, 'opt_hide', 'TextArea', '', 'Hide always')
+
+
 ############
 # Recent tables
 ao(default_desc, 'recent_server', 'Table', attr=['Hidden'], current=[[('Address', 'String'),
@@ -180,7 +190,6 @@ class RulesTable(object):
         self.tab = tab
         for row in tab:
             if len(row) <= 1:
-                logging.debug('skipping malformed rule', row)
                 logging.debug('skipping malformed rule', row)
             if isinstance(row[0], tuple):
                 # Skip header row
@@ -253,7 +262,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     def rule_dataset(self):
         """A special RulesTable collecting dataset loading behaviors."""
         if not self._rule_dataset:
-            tab = [[('header placeholder'), ('retn')],
+            tab = [[('header placeholder',), ('retn',)],
                    [self['rule_plot'], 4],  # plot
                    [self['rule_load'], 3],  # load
                    [self['rule_inc'], 2],  # create
@@ -269,11 +278,21 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if not self._rule_unit:
             self._rule_unit = RulesTable(self['rule_unit'])
         return self._rule_unit
+    
+    @property
+    def rule_opt_hide(self):
+        if not self._rule_opt_hide:
+            tab = [[('t',),('retn',)],
+                   [self['opt_hide'], 1],
+                  ]
+            self._rule_opt_hide = RulesTable(tab)
+        return self._rule_opt_hide
 
     def reset_rules(self):
         self._rule_style = False
         self._rule_dataset = False
         self._rule_unit = False
+        self._rule_opt_hide = False
 
     def load_configuration(self, cursor):
         # Configuration table

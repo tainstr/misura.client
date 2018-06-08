@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Programmatic interface construction utilities"""
 from misura.canon.logger import get_module_logging
+from __builtin__ import False
 logging = get_module_logging(__name__)
 import functools
 import os
@@ -16,6 +17,7 @@ from .. import _
 from .. import widgets
 from ..configuration_check import recursive_configuration_check, render_wiring
 from .. import iutils
+from ..clientconf import confdb
 
 from PyQt4 import QtGui, QtCore, QtSvg
 
@@ -57,7 +59,7 @@ def sort_children(prop_dict):
 
 
 def orgSections(prop_dict, configuration_level=5):
-    """Riordina le chiavi a seconda delle sezioni cui appartengono."""
+    """Reorder keys according to their sections"""
     # Move children options into their parent's "children" key
     prop_dict = prop_dict.copy()
     for handle in prop_dict.keys():
@@ -530,6 +532,15 @@ class Interface(QtGui.QTabWidget):
                              self.remObj._Method__name)
             return
         self.clear()
+        # Check if the option should be hidden by configuration opt_hide:
+        fp = ''
+        if 'fullpath' in prop_dict:
+            fp = prop_dict['fullpath']['current']
+        if not fp.endswith('/'): fp+='/'
+        for handle in prop_dict.keys():
+            if confdb.rule_opt_hide(fp+handle):
+                logging.debug('Hidden by configuration', fp+handle)
+                prop_dict.pop(handle)
         self.sections = orgSections(prop_dict, self.remObj._readLevel)
         self.prop_dict = prop_dict
         self.prop_keys = self.prop_dict.keys()
