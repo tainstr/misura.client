@@ -13,6 +13,7 @@ from misura.client import iutils
 from misura.client.clientconf import settings
 from . import builder
 from _collections import defaultdict
+from misura.canon.option.aggregative import calc_aggregate_subelements
 
 def _export(loaded, get_column_func,
             path='/tmp/misura/m.csv',
@@ -443,7 +444,7 @@ class aTableModel(QtCore.QAbstractTableModel):
             
         tokens = name.split(' ')
         #TODO: add the "Show all/Hide all" actions in case of deep
-        if deep and len(tokens)>2:
+        if deep and len(tokens)>1:
             for i, token in enumerate(tokens[:-2]):
                 found = 0
                 for act in menu.actions():
@@ -455,7 +456,7 @@ class aTableModel(QtCore.QAbstractTableModel):
                         menu = act
                         break
                 if not found:
-                    menu = menu.addMenu(token)
+                    menu = menu.addMenu(token+' ...')
                     menu.setObjectName(token)
                     # Show all/hide all menu actions
                     if set_visibility:
@@ -481,17 +482,17 @@ class aTableModel(QtCore.QAbstractTableModel):
         self._menu_funcs.append(f)
         return act
     
-    def recursive_visibility(self, tokens, orientation=QtCore.Qt.Horizontal, visible=True):
+    def recursive_visibility(self, tokens, orientation=QtCore.Qt.Horizontal, visible=True, level=2):
         """Force visibility `visible` on all columns starting with `tokens`"""
         if orientation == QtCore.Qt.Vertical:
             v = self.visible_rows
         else:
             v = self.visible_cols
-        
+        N = len(tokens)+level
         for col, vis in enumerate(v):
             name = self.headerData(col, orientation)
             name = name.split(' ')
-            if name[:len(tokens)] == tokens:
+            if name[:len(tokens)] == tokens and len(name)<=N:
                 if vis!=visible:
                     self.change_visibility(col, orientation, status=visible)
         
@@ -713,7 +714,12 @@ class aTableView(QtGui.QTableView):
         if self.model().data(index) is None:
             logging.debug('Empty cell')
             return menu
-        dev, t, targets_map = self.aggregate_cell_source(index)
+        wg = self.tableObj
+        r = wg.remObj.collect_aggregate(wg.prop['aggregate'], wg.handle)
+        dev, t, targets_map = self.aggregate_cell_source(index, *r)
+        if not dev:
+            logging.debug('Cannot find aggregation target', index)
+            return menu
         root = dev.root
         dmenu = builder.build_aggregation_menu(
             root, dev, menu, target=t, win_map=self.tableObj._win_map)
@@ -736,44 +742,72 @@ class aTableView(QtGui.QTableView):
             col = a
         return col, row
 
-    def aggregate_cell_source(self, index):
+    def aggregate_cell_source(self, index, func_name, targets, values, fullpaths, devices, subtree):
         """Returns the aggregation source device and option name for cell at `index`"""
         wg = self.tableObj
-        r = wg.remObj.collect_aggregate(wg.prop['aggregate'], wg.handle)
-        func_name, targets, values, fullpaths = r[:4]
         col0, row0 = self._coord(index)
         targets_map = {}
         col = col0
         row = row0
+        is_merge_tables = func_name == 'merge_tables'
+        
+        # Resolve merge_tables shape
         j = 0
         j0 = 0
-        is_merge_tables = func_name == 'merge_tables'
-        found = not is_merge_tables
-        # Resolve merge_tables shape
-        for target_index, target in enumerate(targets):
-            if found:  # or not a merge_tables
-                break
-            for device_index, value in enumerate(values[target]):
-                j0 = j
-                if not hasattr(value, '__len__'):
-                    j += 1
-                elif not hasattr(value[0], '__len__'):
-                    j += 1
-                else:
-                    # Table header length
-                    j += len(value[0])
-                if j0 <= col < j:
-                    col = target_index
-                    row = device_index
-                    found = True
+        found = True         
+        if is_merge_tables:
+
+            found = False
+            for target_index, target in enumerate(targets):
+                for device_index, value in enumerate(values[target]):
+                    j0 = j
+                    if not hasattr(value, '__len__'):
+                        j += 1
+                    elif not hasattr(value[0], '__len__'):
+                        j += 1
+                    else:
+                        # Table header length
+                        j += len(value[0])
+                    if j0 <= col < j:
+                        col = target_index
+                        row = device_index
+                        found = True
+                        break
+        
+        # Resolve table_flat shape
+        sub_dev_name = False
+        if func_name == 'table_flat' and col>0:
+            elements, devpaths = calc_aggregate_subelements(targets, values, subtree)
+            total = -1
+            for col1, subdevs in enumerate(devpaths[row]):
+                total += 1
+                n = len(subdevs)
+                # Found a primary target column
+                if total==col:
+                    col = col1
                     break
+                # Found sub-aggregated column
+                elif total+n>=col:
+                    # Index in sub devices
+                    sub_index = col-total-1
+                    # Effective column is the previous target index
+                    col = col1
+                    # Name of the subdevice
+                    sub_dev_name = subdevs[sub_index]
+                    break
+                # Continue scanning
+                else:
+                    total += n
 
         t = targets[col]
         devpath = fullpaths[t][row]
+        if sub_dev_name:
+            devpath += sub_dev_name +'/'
+            logging.debug('FLAT MENU', devpath, sub_dev_name)
         root = wg.remObj.root
         dev = root.toPath(devpath)
 
-        # Complete targets_map for highlight_option
+        # Complete targets_map for highlight_option in merge_tables
         targets_map[devpath] = t
         if found and is_merge_tables:
             sub_target_col = col0 - j0
@@ -789,6 +823,7 @@ class aTableView(QtGui.QTableView):
                 targets_map[fullpaths[subt][row0]] = subt
 
         return dev, t, targets_map
+    
 
     def showHeaderMenu(self, header, orientation, pt):
         coord = pt.x()
