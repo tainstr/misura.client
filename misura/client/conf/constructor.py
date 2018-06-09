@@ -538,9 +538,21 @@ class Interface(QtGui.QTabWidget):
             fp = prop_dict['fullpath']['current']
         if not fp.endswith('/'): fp+='/'
         for handle in prop_dict.keys():
+            opt = prop_dict[handle]
+            a = list(set(opt['attr']))
             if confdb.rule_opt_hide(fp+handle):
-                logging.debug('Hidden by configuration', fp+handle)
-                prop_dict.pop(handle)
+                logging.debug('Hidden by configuration', fp+handle)                
+                if 'ClientHide' not in a:
+                    a.append('ClientHide')
+                    logging.debug('Set ClientHide attributes', fp, handle, a)
+                    self.remObj.setattr(handle, 'attr', a)
+                    opt['attr']=a
+            else:
+                if 'ClientHide' in a:
+                    a.remove('ClientHide')
+                    self.remObj.setattr(handle, 'attr', a)
+                    opt['attr']=a
+            
         self.sections = orgSections(prop_dict, self.remObj._readLevel)
         self.prop_dict = prop_dict
         self.prop_keys = self.prop_dict.keys()

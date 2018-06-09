@@ -36,6 +36,8 @@ def build(server, remObj, prop, parent=None):
     T = prop['type']
     if 'Hidden' in A + [T]:
         return False
+    if 'ClientHide' in A:
+        return False
     obj = False
     try:
         if T in ['String', 'ReadOnly', 'Date', 'FilePath']:
