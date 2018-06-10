@@ -11,7 +11,7 @@ from misura.canon.logger import Log as logging
 from .. import _
 
 
-def build(server, remObj, prop, parent=None):
+def build(server, remObj, prop, parent=None, force=False):
     """Build a property widget based on a property dict"""
     # FIXME: horrible! change package layout to fix this!
     from aBoolean import aBoolean
@@ -34,10 +34,11 @@ def build(server, remObj, prop, parent=None):
     arg = (server, remObj, prop, parent)
     A = prop.get('attr', [])
     T = prop['type']
-    if 'Hidden' in A + [T]:
-        return False
-    if 'ClientHide' in A:
-        return False
+    if not force:
+        if 'Hidden' in A + [T]:
+            return False
+        if 'ClientHide' in A:
+            return False
     obj = False
     try:
         if T in ['String', 'ReadOnly', 'Date', 'FilePath']:
@@ -104,7 +105,7 @@ def build_aggregate_view(root, targets, devs, handle=False):
             lay.addRow(QtGui.QLabel(_('Aggregation Target: ') + t))
         for fullpath in devs[t]:
             dev = root.toPath(fullpath)
-            wg = build(root, dev, dev.gete(t), parent=w)
+            wg = build(root, dev, dev.gete(t), parent=w, force=True)
             wg.label_widget.setText(
                 '{} ({}): {}'.format(dev['name'], dev['devpath'], _(wg.prop['name'])))
             lay.addRow(wg.label_widget, wg)

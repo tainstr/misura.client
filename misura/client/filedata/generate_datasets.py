@@ -166,24 +166,26 @@ def table_to_datasets(proxy, opt, doc):
             Topt = option.ao({}, handle+'_T', 'Float', 0, 'Temperature', unit=u).popitem()[1]
             datasets[
                 path + '_T'] = (tab[Tcol_idx], path + '_T', 'Temperature', None, Topt)
-
+    
+    opt1 = opt.copy()
+    
     if len(value_idxes) == 1:
         idx = value_idxes[0]
         err = None
         if Ecol_name:
             err = tab[Ecol_idx]
             err[np.equal(err, np.nan)] = 0
-        opt1 = opt.copy()
+        
         opt1['unit'] = opt1['unit'][idx]
         datasets[base_path] = (tab[idx], opt['handle'], opt['name'], err, opt1)
         add_tT(base_path)
     else:
-        logging.debug('Generating multi column datasets')
+        logging.debug('Generating multi column datasets', value_idxes, column_names)
         for idx in value_idxes:
             name = column_names[idx]
             sub_path = base_path + '/' + name
             
-            if 'unit' in opt1 and isinstance(list, opt1['unit']):
+            if 'unit' in opt1 and isinstance(opt1['unit'], list):
                 opt1['unit'] = opt1['unit'][idx]
             datasets[sub_path] = (tab[idx], name, opt['name'] + ' - ' + name, 
                                   None, opt1)

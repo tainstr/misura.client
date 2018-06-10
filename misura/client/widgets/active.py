@@ -744,6 +744,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         
     def update_aggregate(self):
         r = self.remObj.update_aggregate(self.handle)
+        logging.debug('Update aggregate', self.handle)
         if r:
             self.get()
         

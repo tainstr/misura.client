@@ -225,6 +225,10 @@ class RulesTable(object):
                 # Skip header row
                 continue
             r = row[0]
+            # remove empty rows
+            r = r.replace('\n\n','\n')
+            if r.endswith('\n'):
+                 r = r[:-1]
             if len(r) == 0:
                 logging.debug('skipping empty rule', row)
                 continue
