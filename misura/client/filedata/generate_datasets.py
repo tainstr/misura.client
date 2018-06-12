@@ -19,9 +19,11 @@ contains = lambda s, words: sum([word in s for word in words])
 possible_timecol_names = ('time', )
 is_time_col = lambda col: contains(col.lower(), possible_timecol_names)
 
-possible_Tcol_names = ('temp', 'temp.', 'temperature', 'setpoint', )
+possible_Tcol_names = ('temp', 'temp.', 'temperature',  )
 
 is_T_col = lambda col: contains(col.lower(), possible_Tcol_names)
+
+is_S_col = lambda col: contains(col.lower(), ('setpoint', 'S', ))
 
 possible_error_names = ('error', 'err', 'uncertainty')
 
@@ -67,12 +69,14 @@ def search_column_name(column_names_list, is_col=lambda col: False):
     col_name = False
     for i, col in enumerate(column_names_list):
         if is_col(col):
-            if col_name:
-                logging.debug('No univoque col name', col_name)
-                return False, -1
+            #if col_name:
+            #    logging.debug('No univoque col name', col_name)
+            #    return False, -1
             logging.debug('Found', col, i)
             col_name = col
             idx = i
+            # Stop at first found
+            break
     return col_name, idx
 
 
@@ -100,6 +104,9 @@ def table_to_datasets(proxy, opt, doc):
     """Generate time, temp, etc datasets from Table-type `opt`."""
     tab = opt['current']
     header = tab[0]
+    logging.debug('table_to_datasets, header', header)
+    logging.debug('table', tab[1:])
+    logging.debug(opt)
     Ncol = len(header)
     unit = opt.get('unit', False)
     if not unit:
@@ -122,6 +129,13 @@ def table_to_datasets(proxy, opt, doc):
 
     Tcol_name, Tcol_idx = search_column_name(column_names,
                                              is_T_col)
+    
+    Scol_name, Scol_idx = search_column_name(column_names, 
+                                             is_S_col)
+    
+    if Tcol_idx<0 and Scol_idx>=0:
+        Tcol_name, Tcol_idx = Scol_name, Scol_idx
+    
     Ecol_name, Ecol_idx = search_column_name(column_names,
                                              is_error_col)
 
@@ -134,6 +148,7 @@ def table_to_datasets(proxy, opt, doc):
     datasets = {}
     tab = np.array(tab[1:]).transpose()
     tab[np.equal(tab, None)] = np.nan
+    print('table to dataset', tab)
     tab = tab.astype('float')
     if len(tab) == 0:
         logging.debug('Skip empty table')
@@ -145,6 +160,9 @@ def table_to_datasets(proxy, opt, doc):
         value_idxes.remove(Tcol_idx)
     if Ecol_idx in value_idxes:
         value_idxes.remove(Ecol_idx)
+    # Precedence to temperature column
+    if Scol_idx!=Tcol_idx and Scol_idx>=0:
+        value_idxes.remove(Scol_idx)
 
     if len(value_idxes) == 0:
         logging.debug(
@@ -202,6 +220,8 @@ def generate_datasets(proxy, doc, rule=False):
         if rule and not rule.search(key):
             continue
         if opt['type'] == 'Table':
+            if opt.get('aggregate','').startswith('merge_tables'):
+                continue
             table_to_datasets(proxy, opt, doc)
 
 
