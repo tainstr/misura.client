@@ -127,6 +127,12 @@ rule_plot = r'''hsm/sample\d/Vol$
 ^(/summary/)?kiln/T$'''
 ao(default_desc, 'rule_plot', 'TextArea', rule_plot, 'Auto Plot')
 
+rule_nav_hide = r'''\w+/\w+/t$
+\w+/\w+_t$
+\w+/\w+_T$
+\w+/\w+Error$'''
+ao(default_desc, 'rule_nav_hide', 'TextArea', rule_nav_hide, 'Hide from Navigator')
+
 
 rule_style = [[('Rule', 'String'), ('Range', 'String'), ('Scale', 'Float'),
                ('Color', 'String'), ('Line', 'String'), ('Marker', 'String')],
@@ -217,6 +223,7 @@ class RulesTable(object):
     def set_table(self, tab):
         self.rules = []
         self.rows = []
+        self.lines = []
         self.tab = tab
         for row in tab:
             if len(row) <= 1:
@@ -228,12 +235,14 @@ class RulesTable(object):
             # remove empty rows
             r = r.replace('\n\n','\n')
             if r.endswith('\n'):
-                 r = r[:-1]
+                r = r[:-1]
             if len(r) == 0:
                 logging.debug('skipping empty rule', row)
                 continue
-            r = re.compile(r.replace('\n', '|'))
-            self.rules.append(r)
+            r = r.replace('\n', '|')
+            self.lines.append(r)
+            rule = re.compile(r)
+            self.rules.append(rule)
             self.rows.append(row[1:])
 
     def __call__(self, s, latest=False):
@@ -312,6 +321,20 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if not self._rule_unit:
             self._rule_unit = RulesTable(self['rule_unit'])
         return self._rule_unit
+    
+    
+    _rule_nav_hide = False
+    
+    @property
+    def rule_nav_hide(self):
+        if not self._rule_nav_hide:
+            tab = [[('t',), ('retn',)],
+                   [self['rule_nav_hide'], 1],
+                   ]
+            self._rule_nav_hide = RulesTable(tab)
+        return self._rule_nav_hide
+    
+    _rule_opt_hide = False
 
     @property
     def rule_opt_hide(self):
@@ -321,12 +344,16 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                    ]
             self._rule_opt_hide = RulesTable(tab)
         return self._rule_opt_hide
+    
+    _rule_opt_status = False
 
     @property
     def rule_opt_status(self):
         if not self._rule_opt_status:
             self._rule_opt_status = RulesTable(self['opt_status'])
         return self._rule_opt_status
+    
+    _rule_opt_tc = False
 
     @property
     def rule_opt_tc(self):
@@ -344,6 +371,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self._rule_opt_hide = False
         self._rule_opt_status = False
         self._rule_opt_tc = False
+        self._rule_nav_hide = False
 
     def load_configuration(self, cursor):
         # Configuration table

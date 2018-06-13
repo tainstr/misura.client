@@ -8,10 +8,12 @@ from compiler.ast import flatten
 import collections
 import re
 
+from misura.client.clientconf import confdb
+
 sep = '/'
 # Statuses
 dstats = collections.namedtuple(
-    'DocumentModelEntryStatus', ('empty outline available loaded'))(0, 1, 2, 3)
+    'DocumentModelEntryStatus', ('empty hidden outline available loaded'))(0, 1, 2, 3, 4)
 
 
 def iterpath(name, parent=False, splt=sep):
@@ -221,13 +223,6 @@ class NodeEntry(object):
     def mtype(self):
         return self.__class__.__name__
 
-    @property
-    def status(self):
-        s = [c.status for c in self._children.itervalues()]
-        if not len(s):
-            return dstats.empty
-        return max(s)
-
     def __len__(self):
         return len(self._children)
 
@@ -354,8 +349,19 @@ class NodeEntry(object):
             return False
         self._children.pop(k)
         return True
+    
+    @property
+    def status(self):
+        if confdb.rule_nav_hide(self.path):
+            return dstats.hidden
+        s = [c.status for c in self._children.itervalues()]
+        if not len(s):
+            return dstats.empty
+        s = max(s)
+        return s
+            
 
-    def recursive_status(self, st=dstats.loaded, depth=-1, exclude_rule='\w+/\w+/t$|\w+/\w+_t$|\w+/\w+_T$|\w+/\w+Error$', cls=False):
+    def recursive_status(self, st=dstats.loaded, depth=-1, cls=False):
         """Recursively list children with status in `st`. `st` can be an iterable (ideally a set()), an integer or a status name.
         `exclude`: regular expression to filter node names
         `depth`<0: infinite recursion
@@ -369,17 +375,17 @@ class NodeEntry(object):
         # Build an iterable
         if isinstance(st, int):
             st = set([st])
+        # Calculate cache key
         key = '.'.join([str(i) for i in sorted(list(st))]) 
-        key += '::' + exclude_rule
+        key += '::' + confdb.rule_nav_hide.lines[0]
         # Check filter cache
         if key == self.status_cache[0]:
             return self.status_cache[1]
-        exclude = re.compile(exclude_rule)
         m = min(st)
         for child in self.children.itervalues():
             #TODO: an include_rule should enable an excluded parent to appear anyway
-            if exclude.search(child.model_path):
-                continue
+            #if confdb.rule_nav_hide(child.model_path):
+            #    continue
             if isinstance(child, DatasetEntry):
                 if child.status not in st:
                     continue
@@ -410,7 +416,9 @@ class NodeEntry(object):
                 dn1 = dn[7 + len(self.splt):]
             self.names[dn] = dn1
             status = default_status
-            if len(d) == 0 and default_status >= dstats.available:
+            if confdb.rule_nav_hide(dn):
+                status = dstats.hidden
+            elif len(d) == 0 and default_status >= dstats.available:
                 status = dstats.available  # put on available
             else:
                 status = default_status
