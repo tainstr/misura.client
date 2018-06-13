@@ -250,12 +250,21 @@ class NodeEntry(object):
     def traverse(self, path):
         item = self
         for sub, parent, isLeaf in iterpath(path):
-            item = item.get(sub, False)
+            item1 = item.get(sub, False)
             if isLeaf:
                 break
-            if item is False:
+            if item1 is False:
+                logging.warning('NodeEntry.traverse FAILED on non-leaf', path, sub, parent, isLeaf, item)
                 return False
-        return item
+            item = item1
+        # Resolving leaf
+        if isLeaf and not item1:
+            for k,e in item.children.items():
+                if e.path == path:
+                    item1 = e
+                    break
+        
+        return item1
 
     @property
     def root(self):
