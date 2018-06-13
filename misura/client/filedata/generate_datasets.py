@@ -149,8 +149,8 @@ def table_to_datasets(proxy, opt, doc):
     # Move to object type to remove None
     tab = np.array(tab[1:]).transpose().astype('object')
     tab[np.equal(tab, None)] = np.nan
-    # Move to float type to prepare for writing
-    # tab = tab.astype('float')
+    # Move to float type to prepare for writing and plotting
+    tab = tab.astype('float')
     if len(tab) == 0:
         logging.debug('Skip empty table')
         return False
