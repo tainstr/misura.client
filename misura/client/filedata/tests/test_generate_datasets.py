@@ -39,16 +39,18 @@ class GenerateDatasetsUtilities(unittest.TestCase):
 
         check(['time', 'a', 'b'], gd.is_time_col, ('time', 0))
         check(['q', 'Time', 'a', 'b'], gd.is_time_col, ('Time', 1))
-        check(['q', 'time', 'a', 'Time'], gd.is_time_col, (False, -1))
+        # Take first
+        check(['q', 'time', 'a', 'Time'], gd.is_time_col, ('time', 1))
 
         check(['Temp', 'a', 'b'], gd.is_T_col, ('Temp', 0))
         check(['q', 'Temp', 'a', 'b'], gd.is_T_col, ('Temp', 1))
+        # Take first
         check(['q', 'Temp.', 'a', 'temperature'],
-              gd.is_T_col, (False, -1))
+              gd.is_T_col, ('Temp.', 1))
         
         check(['err', 'a', 'b'], gd.is_error_col, ('err', 0))
         check(['q', 'Error', 'a', 'b'], gd.is_error_col, ('Error', 1))
-        check(['q', 'error', 'a', 'Error'], gd.is_error_col, (False, -1))
+        check(['q', 'error', 'a', 'Error'], gd.is_error_col, ('error', 1))
         
 class GenerateDatasets(unittest.TestCase):
 

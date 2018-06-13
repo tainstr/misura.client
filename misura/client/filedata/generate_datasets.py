@@ -146,10 +146,11 @@ def table_to_datasets(proxy, opt, doc):
     handle = opt['handle']
     base_path = proxy['fullpath'] + handle
     datasets = {}
-    tab = np.array(tab[1:]).transpose()
+    # Move to object type to remove None
+    tab = np.array(tab[1:]).transpose().astype('object')
     tab[np.equal(tab, None)] = np.nan
-    print('table to dataset', tab)
-    tab = tab.astype('float')
+    # Move to float type to prepare for writing
+    # tab = tab.astype('float')
     if len(tab) == 0:
         logging.debug('Skip empty table')
         return False

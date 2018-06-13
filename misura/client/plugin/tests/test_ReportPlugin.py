@@ -47,7 +47,7 @@ class ReportPlugins(unittest.TestCase):
 
         self.assertTrue(entry != False)
         fields = {'sample': entry, 'measure_to_plot': measure_to_plot,
-                  'template_file_name': template_file_name}
+                  'template_file_name': template_file_name, 'image_dataset': 'profile'}
         plugin.ReportPlugin(None, template_file_name, measure_to_plot).apply(
             self.cmd, fields)
 
