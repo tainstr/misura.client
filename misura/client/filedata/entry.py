@@ -419,8 +419,8 @@ class NodeEntry(object):
         m = min(st)
         for child in self.children.itervalues():
             #TODO: an include_rule should enable an excluded parent to appear anyway
-            #if confdb.rule_nav_hide(child.model_path):
-            #    continue
+            if confdb.rule_nav_hide(child.model_path):
+                continue
             if isinstance(child, DatasetEntry):
                 if child.status not in st:
                     continue
