@@ -221,12 +221,12 @@ class DocumentModel(QtCore.QAbstractItemModel):
             if not plot_path.startswith(page+'/'):
                 continue
             plotted += datasets
-        nodes = [self.tree.traverse(path) for path in set(plotted)]
+        nodes = [self.tree.traverse_path(path) for path in set(plotted)]
         return nodes
 
     def nodeFromIndex(self, index):
         if index.isValid():
-            node = self.tree.traverse(str(index.internalPointer()))
+            node = self.tree.traverse_model_path(str(index.internalPointer()))
             if not node:
                 print '######### nodeFromIndex', index.internalPointer()
             return node

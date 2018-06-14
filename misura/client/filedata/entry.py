@@ -251,20 +251,46 @@ class NodeEntry(object):
         item = self
         for sub, parent, isLeaf in iterpath(path):
             item1 = item.get(sub, False)
+            if item1 is False:
+                break
             if isLeaf:
                 break
-            if item1 is False:
-                logging.warning('NodeEntry.traverse FAILED on non-leaf', path, sub, parent, isLeaf, item)
-                return False
             item = item1
+            
         # Resolving leaf
-        if isLeaf and not item1:
-            for k,e in item.children.items():
-                if e.path == path:
+        if not item1:
+            for k,e in item._children.items():
+                if e.model_path == path:
                     item1 = e
                     break
-        
+                
+        if not item1:
+            logging.warning('NodeEntry.traverse FAILED', path, sub, parent, isLeaf, item1,  [e.path for e in item.children.values()])
         return item1
+
+    def traverse_model_path(self, path):
+        """path in the model tree"""
+        item = self
+        e = False
+        for e in item._children.values():
+            if e.model_path == path:
+                break
+            e = e.traverse_model_path(path)
+            if e:
+                break
+        return e
+    
+    def traverse_path(self, path):
+        """path is the unique dataset name"""
+        item = self
+        e = False
+        for e in item._children.values():
+            if e.path == path:
+                break
+            e = e.traverse_path(path)
+            if e:
+                break
+        return e
 
     @property
     def root(self):
