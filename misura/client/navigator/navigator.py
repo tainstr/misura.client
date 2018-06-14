@@ -215,6 +215,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     def ensure_sync_of_view_and_model(self):
         self.collapseAll()
         self.restore_selection()
+        self.expand_plotted_nodes()
 
     @property
     def current_node_path(self):
