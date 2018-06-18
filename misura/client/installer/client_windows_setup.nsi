@@ -6,7 +6,7 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Misura"
 !define /date DATE "%Y%m%d"
-!define PRODUCT_VERSION "4.2-${DATE}"
+!define PRODUCT_VERSION "4.3-${DATE}"
 !define PRODUCT_PUBLISHER "TA Instruments / Waters LLC"
 !define PRODUCT_WEB_SITE "http://misura.readthedocs.io"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\misura.exe"
