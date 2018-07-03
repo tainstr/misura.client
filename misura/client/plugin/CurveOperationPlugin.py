@@ -108,32 +108,24 @@ def curve_operation(ax, ay, bx, by, relative=True, smooth=True, tolerance=10., o
         ax = utils.smooth(ax)
         bx = utils.smooth(bx)
 
-    # Rectify x datas so they can be used for interpolation
-    rbx = bx
-    rax = ax
-    if tolerance > 0:
-        rax, dax, erra = utils.rectify(ax)
-        rbx, dbx, errb = utils.rectify(bx)
-        logging.debug('rectification errors', erra, errb)
-        if max(erra, errb) > tolerance:
-            logging.error('Rectification exceeds tolerance', erra, errb, tolerance)
-            raise plugins.DatasetPluginException(
-                'X Datasets are not comparable in the required tolerance.')
-    # TODO: manage extrapolation!
-    # Get rectified B(x) spline for B(y)
-    N = len(rbx)
+    N = len(bx)
     margin = 1 + int(N / 10)
     step = 2 + int((N - 2 * margin) / 100)
-    logging.debug( 'interpolating', len(rbx), len(by), margin, step)
-    bsp = interpolate.LSQUnivariateSpline(rbx, by, rbx[margin:-margin:step]) #ext='const' scipy>=0.15
+    logging.debug( 'interpolating', len(bx), len(by), margin, step)
+    dbx = np.diff(bx) # derivative
+    rbx = bx[:-1]*np.sign(np.diff(bx))
+    knots = rbx[margin:-margin:step]
+    bsp = interpolate.LSQUnivariateSpline(rbx, by[:-1], knots)
     error = bsp.get_residual()
-    logging.debug('interpoltation error',error)
-    # Evaluate B(y) spline with A(x) array
-    b = bsp(rax) 
+    
+    # Evaluate B(y, dy) spline with A(x, dx) array
+    rax = ax[:-1]*np.sign(np.diff(ax))
+    b = bsp(rax)
     # Perform the operation using numexpr
-    out = numexpr.evaluate(op, local_dict={'a': ay, 'b': b})
+    out = numexpr.evaluate(op, local_dict={'a': ay[:-1], 'b': b})
+    out = np.concatenate((out, [out[-1]]))
     return out, error
-
+    
 
 # add plugin classes to this list to get used
 plugins.datasetpluginregistry.append(CurveOperationPlugin)

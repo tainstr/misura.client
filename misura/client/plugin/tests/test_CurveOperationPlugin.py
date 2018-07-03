@@ -117,6 +117,7 @@ class TestCurveOperationPlugin(unittest.TestCase):
                              np.linspace(100, 0, 1000)))
         
         out = self.do(ax, ay, bx, by, 'A-B', err=18, tolerance=-1)
+        
         #import pylab as pl
         #pl.plot(ax, ay, 'red')
         #pl.plot(bx, by, 'blue')
