@@ -51,6 +51,7 @@ def convert_file(caller, path):
     # Check overwrite
     outpath = caller.converter.get_outpath(path)
     if outpath is False:
+        logging.info('Conversion aborted - cannot determine outpath', path, outpath)
         return False
     ok = 1
     if os.path.exists(outpath):
