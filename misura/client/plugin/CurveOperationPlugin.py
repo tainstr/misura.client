@@ -57,7 +57,7 @@ class CurveOperationPlugin(plugins.DatasetPlugin):
                 'Curve A (X,Y) values must differ')
         if fields['bx'] == fields['by']:
             raise plugins.DatasetPluginException(
-                'Curve B (X,Y) value must differ')
+                'Curve B (X,Y) values must differ')
         if fields['ds_out'] in (fields['ax'], fields['bx'], fields['by'], '',):
             raise plugins.DatasetPluginException(
                 'Input and output datasets cannot be the same.')
@@ -68,78 +68,70 @@ class CurveOperationPlugin(plugins.DatasetPlugin):
         return [self.ds_out]
 
     def updateDatasets(self, fields, helper):
-        out, error = do(fields, helper)
+        ay = np.array(helper.getDataset(fields['ay']).data)
+        ax = np.array(helper.getDataset(fields['ax']).data)
+        by = np.array(helper.getDataset(fields['by']).data)
+        bx = np.array(helper.getDataset(fields['bx']).data)
+        out, error = curve_operation(ax, ay, bx, by, fields['relative'], fields['smooth'], fields['tolerance'], fields['operation'])
         self.error = error
         self.ds_out.update(data=out)
         return out
 
 
-def do(fields, helper):
+def curve_operation(ax, ay, bx, by, relative=True, smooth=True, tolerance=10., operation='A-B'):
     """Actually do the CurveOperationPlugin calculation."""
-    op = fields['operation'].lower()
-    xtol = fields['tolerance']
-    # get the input dataset - helper provides methods for getting other
-    # datasets from Veusz
-    ay = np.array(helper.getDataset(fields['ay']).data)
-    ax = np.array(helper.getDataset(fields['ax']).data)
+    op = operation.lower()
+
     N = len(ax)
     if len(ay) != N:
         raise plugins.DatasetPluginException(
             'Curve A X,Y datasets must have same length')
-    by = np.array(helper.getDataset(fields['by']).data)
-    bx = np.array(helper.getDataset(fields['bx']).data)
+
     Nb = len(bx)
     if len(by) != Nb:
         raise plugins.DatasetPluginException(
             'Curve B X,Y datasets must have same length')
-    error = 0
 
     # Relativize
-    if fields['relative']:
+    if relative:
         d = by[0] - ay[0]
         by -= d
         logging.debug('relative correction', d)
 
     # If the two curves share the same X dataset, directly operate
-    if fields['bx'] == fields['ax']:
+    if bx is ax:
         out = numexpr.evaluate(op, local_dict={'a': ay, 'b': by})
         return out, 0
 
     # Smooth x data
-    if fields['smooth']:
+    if smooth:
         ax = utils.smooth(ax)
         bx = utils.smooth(bx)
 
     # Rectify x datas so they can be used for interpolation
-    if xtol > 0:
+    rbx = bx
+    rax = ax
+    if tolerance > 0:
         rax, dax, erra = utils.rectify(ax)
         rbx, dbx, errb = utils.rectify(bx)
         logging.debug('rectification errors', erra, errb)
-        if erra > xtol or errb > xtol:
+        if max(erra, errb) > tolerance:
+            logging.error('Rectification exceeds tolerance', erra, errb, tolerance)
             raise plugins.DatasetPluginException(
                 'X Datasets are not comparable in the required tolerance.')
     # TODO: manage extrapolation!
     # Get rectified B(x) spline for B(y)
-    logging.debug('rbx', rbx[-1] - bx[-1], rbx)
-    logging.debug('by', by)
     N = len(rbx)
     margin = 1 + int(N / 10)
     step = 2 + int((N - 2 * margin) / 100)
     logging.debug( 'interpolating', len(rbx), len(by), margin, step)
     bsp = interpolate.LSQUnivariateSpline(rbx, by, rbx[margin:-margin:step]) #ext='const' scipy>=0.15
     error = bsp.get_residual()
-    # Evaluate B(y) spline with rectified A(x) array
-    b = bsp(rax)
-    logging.debug('rax', rax[-1] - ax[-1], rax)
-    logging.debug('a', ay)
-    logging.debug('b', b, b[1000:1010])
-#   np.save('/tmp/misura/rbx',rbx)
-#   np.save('/tmp/misura/by',by)
-#   np.save('/tmp/misura/rax',rax)
-#   np.save('/tmp/misura/ay',ay)
+    logging.debug('interpoltation error',error)
+    # Evaluate B(y) spline with A(x) array
+    b = bsp(rax) 
     # Perform the operation using numexpr
     out = numexpr.evaluate(op, local_dict={'a': ay, 'b': b})
-    logging.debug('out', out)
     return out, error
 
 
