@@ -610,7 +610,7 @@ class MathNavigatorDomain(NavigatorDomain):
         T1 = node1.linked.prefix + 'kiln/T'
         from misura.client import plugin
         p = plugin.CurveOperationPlugin(
-            ax=T0, ay=node0.path, bx=T1, by=node1.path, ds_out=node.path+'/corr')
+            ax=T0, ay=node0.path, bx=T1, by=node1.path, ds_out=node0.path+'/corr')
         # TODO: TC comparison?
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
