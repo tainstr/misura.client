@@ -25,7 +25,7 @@ class CurveOperationPlugin(plugins.DatasetPlugin):
                         'Use A and B to refer to curves. Supports numexpr expressions.'
                         'Output curve will have the same number of points as A.')
 
-    def __init__(self, ax='', ay='', bx='', by='', relative=True, smooth=False, tolerance=10., operation='A-B', ds_out=''):
+    def __init__(self, ax='', ay='', bx='', by='', relative=False, smooth=True, tolerance=10., operation='A-B', ds_out=''):
         """Define input fields for plugin."""
         self.fields = [
             plugins.FieldDataset('ay', 'Target A: Y dataset', default=ay),
