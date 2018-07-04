@@ -288,7 +288,7 @@ class DatabaseWidget(QtGui.QWidget):
         lay.addWidget(self.qfilter)
         self.nameContains = QtGui.QLineEdit(self)
         lay.addWidget(self.nameContains)
-        self.doQuery = QtGui.QPushButton(_('Apply'), parent=self)
+        self.doQuery = QtGui.QPushButton(_('Search'), parent=self)
         lay.addWidget(self.doQuery)
 
         self.connect(self.doQuery, QtCore.SIGNAL('clicked()'), self.query)
