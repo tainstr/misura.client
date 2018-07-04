@@ -34,7 +34,7 @@ from .. import navigator
 from ..clientconf import confdb
 from ..database import getDatabaseWidget, getRemoteDatabaseWidget
 
-from ..confwidget import RecentMenu, ClientConf
+from ..confwidget import RecentMenu, ClientConf, addNameSigList_to_menu
 from .. import iutils
 from ..live import Tasks
 from . import plot
@@ -144,6 +144,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
     def __init__(self, main_window):
         CustomInterface.__init__(self, main_window, 'Misura')
         QtCore.QObject.__init__(self, parent=main_window)
+        self.recent_actions = []
 
         # Navigator
         self.openedFilesDock = QtGui.QDockWidget(self.mw.centralWidget())
@@ -169,6 +170,8 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         self.connect(self.recentDatabase, QtCore.SIGNAL(
             'select(QString)'), self.open_database)
         self.menu.addMenu(self.recentDatabase)
+        self.menu.aboutToShow.connect(self.populate_recent)
+        
 #        self.recentServer = RecentMenu(confdb, 'server', self.mw)
 #        self.connect(self.recentServer, QtCore.SIGNAL(
 #            'select(QString)'), self.open_server)
@@ -221,7 +224,24 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
             QtGui.QIcon(os.path.join(params.pathArt, 'about.png')))
 
         self.mw.menuBar().actions()[-1].menu().addAction(about_misura_action)
-
+        
+    def populate_recent(self):
+        r = self.recent_actions
+        for ac in r:
+            self.menu.removeAction(ac)
+        r = []
+        # Recent files
+        r.append(self.menu.addSeparator())
+        nsl = self.recentFile.getNameSigList()
+        r += addNameSigList_to_menu(self.menu, nsl)
+        
+        # Recent databases
+        r.append(self.menu.addSeparator())
+        nsl = self.recentDatabase.getNameSigList()
+        r += addNameSigList_to_menu(self.menu, nsl)
+        
+        self.recent_actions = r
+        
     def open_conf(self):
         self.cc = ClientConf()
         self.cc.show()

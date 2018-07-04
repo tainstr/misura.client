@@ -149,6 +149,17 @@ class RecentInterface(object):
         self.convert.emit(path)
 
 
+def addNameSigList_to_menu(menu, nsl):
+    r = []
+    for name, sig, row in nsl:
+        p = functools.partial(
+            menu.emit, QtCore.SIGNAL('select(QString)'), sig)
+        a = menu.addAction(name, p)
+        a.setToolTip('\n'.join(row))
+        r.append(a)
+    return r
+    
+
 class RecentMenu(RecentInterface, QtGui.QMenu):
     """Recent objects menu"""
     open_new = QtCore.pyqtSignal(str)
@@ -176,11 +187,7 @@ class RecentMenu(RecentInterface, QtGui.QMenu):
         self.clear()
         self.setTearOffEnabled(True)
         nsl = self.getNameSigList()
-        for name, sig, row in nsl:
-            p = functools.partial(
-                self.emit, QtCore.SIGNAL('select(QString)'), sig)
-            a = self.addAction(name, p)
-            a.setToolTip('\n'.join(row))
+        addNameSigList_to_menu(self, nsl)
         self.addSeparator()
         self.addAction(_("Clear list"), self.clear_recent)
         self.addAction(_("Open") + '...', self.new)
