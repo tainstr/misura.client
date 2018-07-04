@@ -127,8 +127,30 @@ class TestCurveOperationPlugin(unittest.TestCase):
             pl.plot(bx, by, 'blue')
             pl.plot(ax, out, 'green')
             pl.show()
-        #self.assertAlmostEqual(ay[-1]-out[-1], 50)        
+        #self.assertAlmostEqual(ay[-1]-out[-1], 50)
         
+    def test_up_down(self):
+        ay = np.linspace(0, 20, 200)
+        ay += np.random.rand(200)
+        # Temperature raises and goes down (2 ramps)
+        ax = np.concatenate((np.linspace(0, 100, 100),
+                             np.linspace(100, 0, 100)))
+        
+        # Super sampled AND with a different heating rate
+        by = np.linspace(0, 20, 2000)
+        by += np.random.rand(2000)
+        # Temperature raises and goes down (2 ramps)
+        bx = np.concatenate((np.linspace(0, 100, 1000),
+                             np.linspace(100, 0, 1000)))  
+        
+                      
+        out = self.do(ax, ay, bx, by, 'A-B', err=18)
+        if 0:
+            import pylab as pl
+            pl.plot(ax, ay, 'red')
+            pl.plot(bx, by, 'blue')
+            pl.plot(ax, out, 'green')
+            pl.show()
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

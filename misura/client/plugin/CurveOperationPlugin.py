@@ -124,24 +124,34 @@ def curve_operation(ax, ay, bx, by, relative=True, smooth=True, tolerance=10., o
     if smooth:
         ax = utils.smooth(ax)
         bx = utils.smooth(bx)
+        
 
-    N = len(bx)
+    m, rbx, rby = filter_derivatives(bx, 1, by)
+    m, rax, ray = filter_derivatives(ax, 1, ay)
+    if tolerance > 0:
+        rax, dax, erra = utils.rectify(rax)
+        rbx, dbx, errb = utils.rectify(rbx)
+        logging.debug('rectification errors', erra, errb)
+        if max(erra, errb) > tolerance:
+            logging.error('Rectification exceeds tolerance', erra, errb, tolerance)
+            raise plugins.DatasetPluginException(
+                'X Datasets are not comparable in the required tolerance.')
+
+    N = len(rbx)
     margin = 1 + int(N / 10)
     step = 2 + int((N - 2 * margin) / 100)
-    logging.debug( 'interpolating', len(bx), len(by), margin, step)
+    logging.debug( 'interpolating', len(rbx), len(rby), margin, step)
     
-    
-    m, rbx, rby = filter_derivatives(bx, 1, by)
     knots = rbx[margin:-margin:step]
     bsp = interpolate.LSQUnivariateSpline(rbx, rby, knots)
-    #bsp = interpolate.UnivariateSpline(bx, by)
+    #bsp = interpolate.UnivariateSpline(rbx, rby)
     #errror = bsp.get_residuals()
     error = 0
     
     # Evaluate B(y) spline with A(x) array
-    b = bsp(ax)
+    b = bsp(rax)
     # Perform the operation using numexpr
-    out = numexpr.evaluate(op, local_dict={'a': ay, 'b': b})
+    out = numexpr.evaluate(op, local_dict={'a': ray, 'b': b})
     return out, error
     
 
