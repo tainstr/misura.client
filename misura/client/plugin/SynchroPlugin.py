@@ -9,6 +9,7 @@ import utils
 from misura.client.plugin.curve_label import CurveLabel
 
 from misura.canon.logger import get_module_logging
+from veusz.plugins.datasetplugin import AddDatasetPlugin
 logging = get_module_logging(__name__)
 
 
@@ -68,8 +69,8 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                                default=0.),
             plugins.FieldCombo("mode",
                                descr="Translation Mode:",
-                               items=['Translate Values', 'Translate Axes'],
-                               default="Translate Values")
+                               items=['Translate Values', 'Create new datasets', 'Translate Axes'],
+                               default="Create new datasets")
         ]
 
     def apply(self, cmd, fields):
@@ -120,35 +121,27 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         reference_dataset = doc.data[reference_curve.settings.yData]
 
         delta = translating_dataset.data[translating_curve_nearest_value_index] - reference_dataset.data[reference_curve_nearest_value_index]
-
-        message = {
-            'Translate Values': "Translated curve '%s' by %E %s." % (translating_dataset_name, delta, getattr(translating_dataset, 'unit', '')),
-            'Translate Axes': "Translated Y axis by %E %s." % (delta, getattr(translating_dataset, 'unit', ''))
-        }[fields['mode']]
-
-        translate = {
-            'Translate Values': lambda: self.translate_values(
-                translating_dataset,
-                translating_dataset_name,
-                delta,
-                doc
-            ),
-            'Translate Axes': lambda: self.translate_axis(
+        print 'MODE', fields['mode']
+        if fields['mode'] in ('Translate Values', 'Create new datasets'):
+            message = "Translated curve '%s' by %E %s." % (translating_dataset_name, delta, getattr(translating_dataset, 'unit', ''))
+            if fields['mode'].startswith('Create'):
+                self.translate_derived(translating_dataset_name, delta)
+            else:
+                self.translate_values(
+                    translating_dataset,
+                    translating_dataset_name,
+                delta)
+        else:
+            message = "Translated Y axis by %E %s." % (delta, getattr(translating_dataset, 'unit', ''))
+            self.translate_axis(
                 self.cmd,
                 reference_curve.parent.getChild(reference_curve.settings.yAxis),
                 translating_curve,
                 delta,
                 reference_curve,
-                doc
-            )
-        }[fields['mode']]
-
-        translate()
-
+                doc)
+        
         return message
-
-
-
 
     def translate_axis(self, cmd, dataset, translating_curve, delta, reference_curve, doc):
         # Create a new Y axis
@@ -179,14 +172,19 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         
         return True
 
-    def translate_values(self, dataset, dataset_name, delta, doc):
+    def translate_values(self, dataset, dataset_name, delta):
         translated_data = dataset.data - delta
         translated_dataset = copy.copy(dataset)
         translated_dataset.data = translated_data
         op = document.OperationDatasetSet(dataset_name, translated_dataset)
         self.ops.append(op)
-
-        self.apply_ops()
+        return True
+    
+    def translate_derived(self, dataset_name, delta):
+        op = document.OperationDatasetPlugin(AddDatasetPlugin(), {'ds_in': dataset_name, 
+                                                                    'ds_out': dataset_name+'/sync',
+                                                                    'value': -delta})
+        self.ops.append(op)  
         return True
 
 
