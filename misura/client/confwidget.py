@@ -149,11 +149,12 @@ class RecentInterface(object):
         self.convert.emit(path)
 
 
-def addNameSigList_to_menu(menu, nsl):
+def addNameSigList_to_menu(menu, nsl, emitter=False):
     r = []
+    emitter = emitter or menu
     for name, sig, row in nsl:
         p = functools.partial(
-            menu.emit, QtCore.SIGNAL('select(QString)'), sig)
+            emitter.emit, QtCore.SIGNAL('select(QString)'), sig)
         a = menu.addAction(name, p)
         a.setToolTip('\n'.join(row))
         r.append(a)

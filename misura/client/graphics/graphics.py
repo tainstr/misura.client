@@ -233,12 +233,12 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         # Recent files
         r.append(self.menu.addSeparator())
         nsl = self.recentFile.getNameSigList()
-        r += addNameSigList_to_menu(self.menu, nsl)
+        r += addNameSigList_to_menu(self.menu, nsl, emitter=self.recentFile)
         
         # Recent databases
         r.append(self.menu.addSeparator())
         nsl = self.recentDatabase.getNameSigList()
-        r += addNameSigList_to_menu(self.menu, nsl)
+        r += addNameSigList_to_menu(self.menu, nsl, emitter=self.recentDatabase)
         
         self.recent_actions = r
         
@@ -304,7 +304,8 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
         for f in self.imd.ls:
             f = str(f)
             self.liveImport(f, options=self.imd.options)
-        self.imd.close()
+        if self.imd.doClose.isChecked():
+            self.imd.close()
 
     def liveImport(self, filename, options={}):
         """Import misura data and do the default plotting"""

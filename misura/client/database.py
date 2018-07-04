@@ -291,6 +291,15 @@ class DatabaseWidget(QtGui.QWidget):
         self.doQuery = QtGui.QPushButton(_('Search'), parent=self)
         lay.addWidget(self.doQuery)
 
+        self.doClose = QtGui.QPushButton(_('Close'), parent=self)
+        self.doClose.setCheckable(True)
+        if not browser:
+            self.doClose.setChecked(True)
+            lay.addWidget(self.doClose)
+        else:
+            self.doClose.setChecked(False)
+            self.doClose.hide()
+
         self.connect(self.doQuery, QtCore.SIGNAL('clicked()'), self.query)
         self.connect(
             self.nameContains, QtCore.SIGNAL('returnPressed()'), self.query)
@@ -392,8 +401,7 @@ class DatabaseWidget(QtGui.QWidget):
             filename = row[filename_column_index]
             self.emit_selected(filename)
         self.table.selected_tab_index = -1
-        isGraphics = self.parent() is None
-        if isGraphics:
+        if self.doClose.isChecked():
             self.close()
 
 
