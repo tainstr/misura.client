@@ -79,13 +79,23 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         """Needed to allow children drawing"""
         graph_ancestor = utils.searchFirstOccurrence(self, "graph", -1)
         return graph_ancestor.getAxes(*args, **kwargs)
-
-    def removeGaps(self):
-        gap_range = self.settings.setdict['remove_gaps_range'].val
-        gaps_thershold = self.settings.setdict['remove_gaps_thershold'].val
+    
+    def set_remove_gaps_threshold(self):
+        gap_range = int(self.settings.setdict['remove_gaps_range'].val)
         start_index = int(round(self.point_index - gap_range / 2.0))
         end_index = start_index + gap_range
         data = self.parent.settings.get('yData').getFloatArray(self.document)
+        th = np.copy(data)[start_index:end_index].std()
+        logging.debug('Setting remove gaps threshold to', th)
+        self.settings.setdict['remove_gaps_thershold'].val = th
+        
+
+    def removeGaps(self):
+        gap_range = int(self.settings.setdict['remove_gaps_range'].val)
+        gaps_thershold = self.settings.setdict['remove_gaps_thershold'].val
+        start_index = int(round(self.point_index - gap_range / 2.0))
+        end_index = start_index + gap_range
+        data = self.parent.settings.get('yData').getFloatArray(self.document)      
         dataset_name = self.parent.settings.get('yData').val
         dataset = copy(self.document.data[dataset_name])
         data_without_gap = remove_gaps_from(
@@ -96,9 +106,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
         self.ops.append(operation)
         self.up_coord(yData=data_without_gap)
-
         self.apply_ops('Remove Gap')
-
 
 
     @classmethod
@@ -255,7 +263,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
     def actionUp(self, oldx=None, oldy=None):
         logging.debug('ACTION UP')
-
+        
         d = self.document
         self.doc = d
         self.ops = []
@@ -276,7 +284,9 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         self.up_perpendicular()
         self.up_passing()
         self.updateOutputLabel()
+        self.set_remove_gaps_threshold()
         self.apply_ops('DataPoint: Up')
+        
         return True
 
     def dependencies(self):
