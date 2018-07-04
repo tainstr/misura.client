@@ -105,24 +105,28 @@ class TestCurveOperationPlugin(unittest.TestCase):
 
 
     def test_non_uniform(self):
-        ax = np.linspace(0, 40, 200)
+        ax = np.linspace(0, 20, 200)
+        ax += np.random.rand(200)
         # Temperature raises and goes down (2 ramps)
         ay = np.concatenate((np.linspace(0, 100, 100),
                              np.linspace(100, 0, 100)))
         
         # Super sampled AND with a different heating rate
         bx = np.linspace(0, 20, 2000)
+        bx += np.random.rand(2000)
         # Temperature raises and goes down (2 ramps)
         by = np.concatenate((np.linspace(0, 100, 1000),
                              np.linspace(100, 0, 1000)))
         
+        
         out = self.do(ax, ay, bx, by, 'A-B', err=18, tolerance=-1)
         
-        #import pylab as pl
-        #pl.plot(ax, ay, 'red')
-        #pl.plot(bx, by, 'blue')
-        #pl.plot(ax, out, 'green')
-        #pl.show()
+        if 0:
+            import pylab as pl
+            pl.plot(ax, ay, 'red')
+            pl.plot(bx, by, 'blue')
+            pl.plot(ax, out, 'green')
+            pl.show()
         #self.assertAlmostEqual(ay[-1]-out[-1], 50)        
         
 

@@ -28,10 +28,10 @@ class CurveOperationPlugin(plugins.DatasetPlugin):
     def __init__(self, ax='', ay='', bx='', by='', relative=True, smooth=False, tolerance=10., operation='A-B', ds_out=''):
         """Define input fields for plugin."""
         self.fields = [
-            plugins.FieldDataset('ay', 'Curve A: Y dataset', default=ay),
-            plugins.FieldDataset('ax', 'Curve A: X dataset', default=ax),
-            plugins.FieldDataset('by', 'Curve B: Y dataset', default=by),
-            plugins.FieldDataset('bx', 'Curve B: X dataset', default=bx),
+            plugins.FieldDataset('ay', 'Target A: Y dataset', default=ay),
+            plugins.FieldDataset('ax', 'Target A: X dataset', default=ax),
+            plugins.FieldDataset('by', 'Reference B: Y dataset', default=by),
+            plugins.FieldDataset('bx', 'Reference B: X dataset', default=bx),
             # TODO: might support unlimited number of curves, thanks to numexpr
             plugins.FieldText(
                 'operation', 'Operation to perform. ', default=operation),
@@ -78,6 +78,22 @@ class CurveOperationPlugin(plugins.DatasetPlugin):
         return out
 
 
+def filter_derivatives(x, width=1, *y):
+    """Returns filtering mask and filtered arrays"""
+    x1= np.diff(x)
+    # Generate inhomogeneity mask
+    m = np.ones(len(x)).astype(np.bool)
+    for i, d in enumerate(x1[width:-width]):
+        i+=width
+        s = np.sign(x1[i-width:i+1+width])
+        if (s[width]!=s).any():
+            m[i+1] = False
+    y = list(y)
+    for i, g in enumerate(y):
+        y[i] = g[m]
+    out = [ m, x[m] ] + y
+    return out 
+
 def curve_operation(ax, ay, bx, by, relative=True, smooth=True, tolerance=10., operation='A-B'):
     """Actually do the CurveOperationPlugin calculation."""
     op = operation.lower()
@@ -112,18 +128,19 @@ def curve_operation(ax, ay, bx, by, relative=True, smooth=True, tolerance=10., o
     margin = 1 + int(N / 10)
     step = 2 + int((N - 2 * margin) / 100)
     logging.debug( 'interpolating', len(bx), len(by), margin, step)
-    dbx = np.diff(bx) # derivative
-    rbx = bx[:-1]*np.sign(np.diff(bx))
-    knots = rbx[margin:-margin:step]
-    bsp = interpolate.LSQUnivariateSpline(rbx, by[:-1], knots)
-    error = bsp.get_residual()
     
-    # Evaluate B(y, dy) spline with A(x, dx) array
-    rax = ax[:-1]*np.sign(np.diff(ax))
-    b = bsp(rax)
+    
+    m, rbx, rby = filter_derivatives(bx, 1, by)
+    knots = rbx[margin:-margin:step]
+    bsp = interpolate.LSQUnivariateSpline(rbx, rby, knots)
+    #bsp = interpolate.UnivariateSpline(bx, by)
+    #errror = bsp.get_residuals()
+    error = 0
+    
+    # Evaluate B(y) spline with A(x) array
+    b = bsp(ax)
     # Perform the operation using numexpr
-    out = numexpr.evaluate(op, local_dict={'a': ay[:-1], 'b': b})
-    out = np.concatenate((out, [out[-1]]))
+    out = numexpr.evaluate(op, local_dict={'a': ay, 'b': b})
     return out, error
     
 
