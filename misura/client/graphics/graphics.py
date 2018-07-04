@@ -269,6 +269,7 @@ class MisuraInterface(CustomInterface, QtCore.QObject):
             idb, QtCore.SIGNAL('selectedFile(QString)'), self.liveImport)
         # Keep a reference
         self.idb = idb
+        confdb.mem_database(path)
 
     def open_server(self, path):
         idb = getRemoteDatabaseWidget(path)

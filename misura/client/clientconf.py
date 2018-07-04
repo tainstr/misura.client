@@ -400,7 +400,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         option.ConfigurationProxy._writeLevel = self['authLevel']
         if os.path.exists(self['database']):
             logging.debug('Found default database', self['database'])
-            self.mem_database(self['database'], '')
+            self.mem_database(self['database'], 'Default')
         if os.name != 'nt':
             self['m3_enable'] = False
             self.setattr('m3_enable', 'attr', ['ReadOnly', 'Hidden'])
@@ -490,7 +490,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         """Memoize a recent datum"""
         logging.debug("mem ", name, arg)
         tname = tabname(name)
-        tab = self[tname]
+        tab = list(self[tname])
         # Avoid saving duplicate values
         arg = list(unicode(a) for a in arg)
         # Adjust headers
