@@ -553,7 +553,7 @@ class DatasetEntry(NodeEntry):
 
         pm = ds.pluginmanager
 
-        if len(self.parents) == 1 or pm.plugin.name == 'SmoothData':
+        if len(self.parents) == 1 or pm.plugin.name in ('SmoothData', 'Add', 'CurveOperation'):
             return self.parent.m_var
         if not isinstance(self.ds, document.datasets.Dataset1DPlugin):
             return getattr(ds, 'm_var', self.path)
