@@ -21,13 +21,13 @@ class OverwritePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     description_full = ('Overwrite dataset A with dataset B.'
                         'Optionally delete B dataset after operation.')
 
-    def __init__(self, a='', b='', delete=False):
+    def __init__(self, dst='', src='', delete=True):
         """Make list of fields."""
 
         self.fields = [
             plugins.FieldDataset(
-                'a', 'Dataset to be overwritten (A)', default=a),
-            plugins.FieldDataset('b', 'Source dataset (B)', default=b),
+                'dst', 'Destination dataset (A)', default=dst),
+            plugins.FieldDataset('src', 'Source dataset (B)', default=src),
             plugins.FieldBool('delete', 'Delete B dataset', default=delete),
         ]
 
@@ -38,22 +38,25 @@ class OverwritePlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         """
         self.ops = []
         self.doc = cmd.document
-        if fields['a'] == fields['b']:
+        if fields['dst'] == fields['src']:
             raise plugins.ToolsPluginException('A and B datasets must differ.')
         delete = fields['delete']
-        a = self.doc.data[fields['a']]
+        a = self.doc.data[fields['dst']]
         a1 = copy(a)
-        b = self.doc.data[fields['b']]
+        b = self.doc.data[fields['src']]
         pm = getattr(b, 'pluginmanager', False)
+
+        # Delete source B dataset, if requested
+        if delete:
+            self.ops.append(document.OperationDatasetDelete(fields['src']))
+            #self.apply_ops()
 
         # Overwrite data
         a1.data = b.data[:]
         # Substitute A with update version A1
-        self.ops.append(document.OperationDatasetSet(fields['a'], a1))
+        self.ops.append(document.OperationDatasetSet(fields['dst'], a1))
 
-        # Delete B dataset, if requested
-        if delete:
-            self.ops.append(document.OperationDatasetDelete(fields['b']))
+
 
         self.apply_ops()
 

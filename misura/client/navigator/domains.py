@@ -131,13 +131,12 @@ class DataNavigatorDomain(NavigatorDomain):
             QtGui.QMessageBox.warning(None,'Error', message)
         proxy.close()
 
-    @node
-    def overwrite(self, node=False):
-        """Overwrite the parent dataset with a derived one."""
-        ds, node = self.dsnode()
+    @nodes
+    def overwrite(self, nodes=[]):
+        """Overwrite first selected dataset with second selected."""
         from misura.client import plugin
         p = plugin.OverwritePlugin(
-            a=node.parent.path, b=node.path, delete=True)
+            dst=nodes[0].path, src=nodes[1].path, delete=True)
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.OverwritePlugin)
         self.mainwindow.showDialog(d)
         
@@ -303,7 +302,6 @@ class DataNavigatorDomain(NavigatorDomain):
     def add_derived_dataset_menu(self, menu, node):
         self.add_keep(menu, node)
         menu.addAction(_('Delete'), self.navigator.deleteData)
-        # menu.addAction(_('Overwrite parent'), self.overwrite)
 
     def create_table(self, header):
         from misura.client.fileui import SummaryView
@@ -327,6 +325,8 @@ class DataNavigatorDomain(NavigatorDomain):
         if len(header):
             menu.addAction(_('Table from selection'), functools.partial(self.create_table, header))
         menu.addAction(_('Delete selection'), self.navigator.deleteDatas)
+        if len(nodes)==2:
+            menu.addAction(_('Overwrite 1 with 2'), self.overwrite)
 
 from ..clientconf import confdb
 class PlottingNavigatorDomain(NavigatorDomain):
@@ -617,7 +617,8 @@ class MathNavigatorDomain(NavigatorDomain):
         self.mainwindow.showDialog(d)
 
     def add_multiary_menu(self, menu, nodes):
-        menu.addAction(_('Correct'), self.correct)
+        if len(nodes)==2:
+            menu.addAction(_('Correct'), self.correct)
 
 
 
