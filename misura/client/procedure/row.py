@@ -90,6 +90,9 @@ def update_row(rows, row_index, mode, time_correction=0, maxRate=80, rateLimit=[
     elif mode == 'ramp':  # rate/temperature (Rate)
         if heating_rate != 0:
             duration = (temperature - prev_temperature) / heating_rate
+            if duration<0:
+                heating_rate *= -1
+                duration = abs(duration)
         else:
             index_to_take = previous_not_event_row_index(row_index, rows)
             temperature = rows[index_to_take][colTEMP]
@@ -110,7 +113,6 @@ def update_row(rows, row_index, mode, time_correction=0, maxRate=80, rateLimit=[
     # Limit heating rate
     if ret[colRATE] > maxRate:
         delay = ret[colDUR] * ((ret[colRATE] / maxRate) - 1)
-        print temperature, prev_temperature, ret[colDUR], ret[colRATE], maxRate
         # Fix heating rate
         ret[colRATE] = maxRate
         # Increase time target
