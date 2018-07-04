@@ -86,7 +86,8 @@ def filter_derivatives(x, width=1, *y):
     for i, d in enumerate(x1[width:-width]):
         i+=width
         s = np.sign(x1[i-width:i+1+width])
-        if (s[width]!=s).any():
+        main = np.round(s.mean())
+        if s[width]!=main:
             m[i+1] = False
     y = list(y)
     for i, g in enumerate(y):
