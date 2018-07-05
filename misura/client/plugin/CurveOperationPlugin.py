@@ -149,9 +149,9 @@ def curve_operation(ax, ay, bx, by, relative=True, smooth=True, tolerance=10., o
     error = 0
     
     # Evaluate B(y) spline with A(x) array
-    b = bsp(rax)
+    b = bsp(ax)
     # Perform the operation using numexpr
-    out = numexpr.evaluate(op, local_dict={'a': ray, 'b': b})
+    out = numexpr.evaluate(op, local_dict={'a': ay, 'b': b})
     return out, error
     
 
