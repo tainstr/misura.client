@@ -498,13 +498,10 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if len(arg) < len(tab[0]):
             arg += [''] * (len(tab[0]) - len(arg))
         # Update order
-        print 'AAAAAA remove from tab', arg
         if arg in tab:
             tab.remove(arg)
         tab.append(arg)
-        print 'CCCCCC', tab
         lim = self.desc['h' + name]['current']
-        print 'BBBBBB', lim
         if len(tab) - 1 > lim:
             tab.pop(1)  # preserve header
         

@@ -85,7 +85,10 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
         start_index = int(round(self.point_index - gap_range / 2.0))
         end_index = start_index + gap_range
         data = self.parent.settings.get('yData').getFloatArray(self.document)
-        th = np.copy(data)[start_index:end_index].std()
+        y = np.copy(data)[start_index:end_index]
+        x = np.arange(len(y))
+        th = abs(y-interpolate.UnivariateSpline(x,y)(x)).sum()/len(x)
+        
         logging.debug('Setting remove gaps threshold to', th)
         self.settings.setdict['remove_gaps_thershold'].val = th
         
