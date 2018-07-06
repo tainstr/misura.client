@@ -33,12 +33,42 @@ class DatabaseModel(QtCore.QAbstractTableModel):
         self.remote = remote
         self.tests = tests
         self.header = header
+        self.orderby = 'zerotime'
+        self.order = 'DESC'
+        self.limit = 1000
+        self.offset = 0
 
     def rowCount(self, index=QtCore.QModelIndex()):
         return len(self.tests)
 
     def columnCount(self, index=QtCore.QModelIndex()):
         return len(self.header)
+    
+    def has_next(self):
+        return self.offset+self.limit<self.remote.get_len()
+    
+    def has_prev(self):
+        return self.offset>0
+
+    def next(self):
+        self.offset+=self.limit
+        self.select()
+        
+    def prev(self):
+        self.offset -= self.limit
+        if self.offset<5:
+            self.offset = 0
+        self.select()
+        
+    def pages(self):
+        N=self.remote.get_len()/self.limit
+        current = self.offset/self.limit
+        return current, N
+    
+    def set_page(self, N):
+        self.offset = N*self.limit
+        self.select()
+        
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
         if not index.isValid() or not (0 <= index.row() <= self.rowCount()):
@@ -85,6 +115,11 @@ class DatabaseModel(QtCore.QAbstractTableModel):
             flags = flags | QtCore.Qt.ItemIsEditable
 
         return QtCore.Qt.ItemFlags(flags)
+    
+    def sort(self, column, order):
+        self.orderby=indexer.indexer.testColumnDefault[column]
+        self.order = ['DESC', 'ASC'][order]
+        self.select()
 
     def select(self):
         self.up()
@@ -93,7 +128,8 @@ class DatabaseModel(QtCore.QAbstractTableModel):
         """TODO: rename to select()"""
         if not self.remote:
             return
-        self.tests = self.remote.query(conditions, operator)
+        self.tests = self.remote.query(conditions, operator, self.orderby, 
+                                       self.order, self.limit, self.offset)
         self.header = self.remote.header()
         self.sheader = []
         for h in self.header:
@@ -116,6 +152,10 @@ class DatabaseHeader(QtGui.QHeaderView):
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.show_menu)
         self.menu = QtGui.QMenu(self)
         self.setMovable(True)
+        self.setClickable(True)
+        self.setSortIndicatorShown(True)
+        # Default sorting on column DATE, descending
+        self.setSortIndicator(4, 0)
         
 
     def show_menu(self, pt):
@@ -176,13 +216,15 @@ class DatabaseTable(QtGui.QTableView):
         self.setModel(self.curveModel)
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.setSelectionModel(self.selection)
-
+        
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.setEditTriggers(QtGui.QAbstractItemView.EditKeyPressed)
         self.connect(
             self, QtCore.SIGNAL('doubleClicked(QModelIndex)'), self.select)
         self.setHorizontalHeader(DatabaseHeader(parent=self))
-
+        
+        self.setSortingEnabled(True)
+        
         self.menu = QtGui.QMenu(self)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
@@ -199,6 +241,8 @@ class DatabaseTable(QtGui.QTableView):
             
         self.menu.addAction(_('View folder'), self.view_folder)
         self.menu.addAction(_('Delete'), self.delete)
+        
+        
         
     def edit_name(self):
         record = self.selectionModel().selectedIndexes()[0]
@@ -299,6 +343,22 @@ class DatabaseWidget(QtGui.QWidget):
         else:
             self.doClose.setChecked(False)
             self.doClose.hide()
+            
+        #######
+        # PAGER
+        self.doPrev = QtGui.QPushButton('<', parent=self)
+        self.doPrev.setMaximumWidth(15)
+        self.doPrev.clicked.connect(self.table.model().prev)
+        lay.addWidget(self.doPrev)
+        self.pager = QtGui.QSlider(QtCore.Qt.Horizontal, parent=self)
+        self.pager.valueChanged.connect(self.table.model().set_page)
+        lay.addWidget(self.pager)
+        self.doNext = QtGui.QPushButton('>', parent=self)
+        self.doNext.setMaximumWidth(15)
+        self.doNext.clicked.connect(self.table.model().next)
+        lay.addWidget(self.doNext)
+                
+        self.table.model().modelReset.connect(self.update_pages)
 
         self.connect(self.doQuery, QtCore.SIGNAL('clicked()'), self.query)
         self.connect(
@@ -369,7 +429,30 @@ class DatabaseWidget(QtGui.QWidget):
         hh.hideSection(flavour_column)
 
         self.table.resizeColumnToContents(name_column)
-        # name_column =
+        self.update_pages()
+        
+    def update_pages(self):
+        r=2
+        if self.table.model().has_next():
+            self.doNext.show()
+            self.pager.show()
+        else:
+            self.doNext.hide()
+            r-=1
+        if self.table.model().has_prev():
+            self.doPrev.show()
+            self.pager.show()
+        else:
+            self.doPrev.hide()
+            r-=1
+        if r:
+            current, pages = self.table.model().pages()
+            self.pager.setMaximum(pages)
+            self.pager.setValue(current)
+        else:
+            self.pager.hide()
+        
+        
 
     def query(self, *a):
         d = self.qfilter.itemData(self.qfilter.currentIndex())

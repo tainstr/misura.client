@@ -19,6 +19,7 @@ class DelayedStart(QtGui.QDialog):
         self.lay = QtGui.QVBoxLayout()
         self.eng = widgets.aBoolean(server, server, server.gete('delayStart'))
         self.engaged = self.eng.current
+
         self.wg = widgets.aDelay(server, server, server.gete('delay'))
         h = time() + 3600
         if self.wg.current < h and not self.eng.current:
@@ -27,6 +28,10 @@ class DelayedStart(QtGui.QDialog):
         self.lay.addWidget(self.eng)
         self.wg.lay.insertWidget(0, self.wg.label_widget)
         self.lay.addWidget(self.wg)
+        
+        #self.delayT = widgets.aNumber(server, server, server.gete('delayT'))
+        #self.delayT.lay.insertWidget(0, self.delayT.label_widget)
+        #self.lay.addWidget(self.delayT)
         
         self.run = QtGui.QLabel(
             'Target instrument: ' + server['lastInstrument'].capitalize())
