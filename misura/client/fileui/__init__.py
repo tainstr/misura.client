@@ -4,6 +4,6 @@
 
 from version import VersionMenu, MultiVersionMenu
 from log import OfflineLog
-from summary import SummaryView
+from summary import SummaryView, SummaryWidget
 from minimage import MiniImage, ImageDialog
 from imagestrip import ImageSlider

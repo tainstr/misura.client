@@ -169,26 +169,19 @@ class SummaryHeader(QtGui.QHeaderView):
     def export(self):
         """Export to CSV file"""
         model = self.parent().model()
-        def get_column_func(name):
-            return model.doc.data[name].data
-        def get_unit_func(name):
-            u = getattr(model.doc.data[name], 'unit', '')
-            return units.hsymbols.get(u, '')
-        def get_verbose_func(name):
-            return getattr(model.doc.data[name], 'm_label', '')
-            
-        table_model_export(model._loaded, get_column_func, model, self, 
-                           get_unit_func,
-                           get_verbose_func)
-
+        doc = model.doc
+        table_model_export(model._loaded, doc.get_column_func, model, self, 
+                           doc.get_unit_func,
+                           doc.get_verbose_func)
+        
     def show_menu(self, pt):
         self.point = pt
         QtGui.qApp.processEvents()
         self.menu.clear()
+        self.menu.addAction(_('Export'), self.export)
         self.menu.addAction(_('Hide'), self.hide)
         # TODO: offer checkable entries to restore hidden columns
-        self.menu.addAction(_('Show more'), self.show_more)
-        self.menu.addAction(_('Export'), self.export)
+        #self.menu.addAction(_('Show more'), self.show_more)
         self.menu.popup(self.mapToGlobal(pt))
 
 
@@ -233,3 +226,32 @@ class SummaryView(QtGui.QTableView):
 
     def hide_show(self, col):
         pass
+    
+class SummaryWidget(QtGui.QWidget):
+    def __init__(self, parent=None):
+        super(SummaryWidget, self).__init__(parent=parent)
+        self.table = SummaryView(self)
+        self.toolbar= QtGui.QToolBar()
+        self.lay = QtGui.QVBoxLayout()
+        self.lay.addWidget(self.toolbar)
+        self.lay.addWidget(self.table)
+        self.setLayout(self.lay)
+    
+    def set_doc(self, *a, **k):
+        self.table.set_doc(*a, **k)
+        self.toolbar.addAction(_('Export'), self.table.horizontalHeader().export)
+        
+    def refresh(self, *a, **k):
+        return self.table.refresh(*a, **k)
+        
+    def update(self, *a, **k):
+        return self.table.update(*a, **k)       
+  
+    def set_idx(self, *a, **k):
+        return self.table.set_idx(*a, **k)
+        
+    def model(self):
+        return self.table.model()
+    
+      
+        

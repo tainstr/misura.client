@@ -78,7 +78,7 @@ def _export(loaded, get_column_func,
     f.close()
 
 
-def table_model_export(loaded, get_column_func, model, header_view, 
+def table_model_export(loaded, get_column_func, model=None, header_view=None, 
                        get_unit_func=False,
                        get_verbose_func=False):
     """Prepare to export to CSV file"""
@@ -91,13 +91,16 @@ def table_model_export(loaded, get_column_func, model, header_view,
         return
     if not dest.lower().endswith('.csv'):
         dest += '.csv'
+    order = False
     # Compute visual index order mapping to logical index,
     # as a consequence of visually moving columns
-    order = {}
-    for logicalIndex in range(model.columnCount(header_view.currentIndex())):
-        if header_view.isSectionHidden(logicalIndex):
-            continue
-        order[logicalIndex] = header_view.visualIndex(logicalIndex)
+    if model:
+        order = {}
+        for logicalIndex in range(model.columnCount(header_view.currentIndex())):
+            if header_view.isSectionHidden(logicalIndex):
+                continue
+            order[logicalIndex] = header_view.visualIndex(logicalIndex)
+
     _export(loaded, 
             get_column_func, 
             path=dest, 

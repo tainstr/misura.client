@@ -83,6 +83,15 @@ class MisuraDocument(document.Document):
         if self.proxy_filename:
             self.proxies[self.proxy_filename] = self.proxy
         self.create_proxy_decoders(self.proxy, '0:')
+        
+    #Table export utils
+    def get_column_func(self, name):
+        return self.data[name].data
+    def get_unit_func(self, name):
+        u = getattr(self.data[name], 'unit', '')
+        return units.hsymbols.get(u, '')
+    def get_verbose_func(self, name):
+        return getattr(self.data[name], 'm_label', '')
 
     def create_proxy_decoders(self, proxy, prefix=False):
         """Create one decoder for each relevant dataset in proxy"""

@@ -20,6 +20,7 @@ from ..filedata import DatasetEntry
 from ..filedata import getFileProxy
 from ..fileui import VersionMenu
 from ..clientconf import confdb, rule_suffixes
+from ..widgets.aTable import table_model_export
 
 
 
@@ -304,8 +305,8 @@ class DataNavigatorDomain(NavigatorDomain):
         menu.addAction(_('Delete'), self.navigator.deleteData)
 
     def create_table(self, header):
-        from misura.client.fileui import SummaryView
-        tab = SummaryView(self.navigator)
+        from misura.client.fileui import SummaryWidget
+        tab = SummaryWidget()#self.navigator)
         tab.set_doc(self.doc)
         tab.model().auto_load = False
         tab.model().set_loaded(header)
@@ -319,14 +320,22 @@ class DataNavigatorDomain(NavigatorDomain):
         header = [node.path for node in nodes]
         header = filter(lambda path: path in self.doc.data, header)
         return header
+    
+    
+    def export_csv(self, datasets):
+        table_model_export(datasets, self.doc.get_column_func, None, self.navigator, 
+                           self.doc.get_unit_func,
+                           self.doc.get_verbose_func)
 
     def add_multiary_menu(self, menu, nodes):
         header = self.get_table_header()
         if len(header):
             menu.addAction(_('Table from selection'), functools.partial(self.create_table, header))
+            menu.addAction(_('Export to csv'), functools.partial(self.export_csv, header))
         menu.addAction(_('Delete selection'), self.navigator.deleteDatas)
         if len(nodes)==2:
             menu.addAction(_('Overwrite 1 with 2'), self.overwrite)
+            
 
 from ..clientconf import confdb
 class PlottingNavigatorDomain(NavigatorDomain):
