@@ -9,6 +9,7 @@ import cStringIO
 from traceback import format_exc
 
 from PyQt4 import QtCore
+from tables.file import _open_files
 
 import veusz.document as document
 import veusz.plugins as vsplugins
@@ -399,7 +400,7 @@ class MisuraDocument(document.Document):
                 logging.debug('Skipping unlinked dataset', name, ds.linked)
                 continue
             is_local = name[-2:] in ('_t', '_T')
-            vfn = ds.linked.filename
+            vfn = os.path.abspath(ds.linked.filename)
             node = self.model.tree.traverse(name)
             conf = node.parent.get_configuration()
             # Exclude dataset not linked to any real option, except local t,T ds
@@ -409,8 +410,17 @@ class MisuraDocument(document.Document):
             proxy, proxy_version = proxies.get(vfn, (False, version_name))
             # Ensure conf is saved into proper version
             if proxy is False:
+                logging.debug('save_version_and_plot: checking', vfn)
                 proxy = self.proxies.get(vfn, False)
                 if proxy is False:
+                    logging.debug('save_version_and_plot: reopening', vfn)
+                    proxy = getFileProxy(vfn, version=None, mode='a')
+                # Might fail to open readwrite if already opened readonly:
+                if proxy.test is False:
+                    for h in list(_open_files.get_handlers_by_name(vfn)):
+                        logging.debug('Closing all handlers:', id(h), h.mode, vfn)
+                        h.close()
+                    logging.debug('save_version_and_plot: reopening', vfn)
                     proxy = getFileProxy(vfn, version=None, mode='a')
                 self.proxies[vfn] = proxy
                 # Use pre-existing version_name
