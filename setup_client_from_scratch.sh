@@ -49,7 +49,7 @@ sudo apt-get -y install python-qt4-sql libqt4-sql-sqlite
 #sudo apt-get -y install python-pyqt5 libqt5sql5-sqlite
 sudo apt-get -y install wget unzip git-core python-setuptools python-scipy
 sudo apt-get -y install libhdf5-10 libhdf5-dev
-sudo apt-get install libqt4-opengl python-qt4-gl
+sudo apt-get -y install libqt4-opengl python-qt4-gl
 
 sudo easy_install pip
 
