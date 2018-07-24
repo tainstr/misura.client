@@ -123,8 +123,10 @@ class RoleIO(ActiveWidget):
         # Recreate widget
         if path and obj and opt[2] not in ('None', None):
             from misura.client.widgets import build
-            refopt = obj.gete(opt[2])
-            if 'Hidden' in [refopt['type']]+refopt['attr']:
+            refopt = False
+            if opt[2] in obj:
+                refopt = obj.gete(opt[2])
+            if refopt is False or ('Hidden' in [refopt['type']]+refopt['attr']):
                 self.label_widget.hide()
                 self.hide()
                 raise RuntimeError('RoleIO points towards an hidden option.')
