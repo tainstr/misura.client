@@ -95,6 +95,18 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                         self, 
                         self.update_view)
 
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_C), 
+                        self, 
+                        self.collapse_siblings)
+        
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_E), 
+                        self, 
+                        self.expandAll)
+        
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL +QtCore.Qt.Key_E), 
+                        self, 
+                        self.expand_plotted_nodes)
+
     @property
     def tasks(self):
         return live.registry.tasks
@@ -310,6 +322,9 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def add_status_actions(self, menu, node=False):
         menu.addSeparator()
+        menu.addAction(_('Expand all (E)'), self.expandAll)
+        menu.addAction(_('Collapse siblings (C)'), self.collapse_siblings)
+        menu.addAction(_('Expand plotted (CTRL+E)'), self.expand_plotted_nodes)
         self.acts_status = []
         for i, s in enumerate(filedata.dstats):
             name = filedata.dstats._fields[i]
@@ -317,10 +332,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 _(name.capitalize()), self.set_status)
             act.setCheckable(True)
             if s in self.status:
-                print 'set action as checked', name, s, self.status
                 act.setChecked(True)
-            else:
-                print 'set action as unchecked', name, s, self.status
             self.acts_status.append(act)
         act = menu.addAction(_('Set filter (CTRL+F)'), self.edit_regex_rule)
         self.acts_status.append(act)
@@ -330,6 +342,31 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         act = menu.addAction(_('Update view (F5)'), self.update_view)
         self.acts_status.append(act)
         return True
+    
+    @node
+    def collapse_siblings(self, node=False):
+        if not node:
+            logging.debug('No node selected for collapse')
+            return False
+        if not node.parent:
+            logging.debug('Collapsing all')
+            self.collapseAll()
+            return False
+        print 'Calling indexFromNode', node, node.model_path
+        idx = self.model().indexFromNode(node)
+        if not idx or not idx.isValid():
+            logging.debug('Invalid index')
+            return False
+        row = -1
+        while 1:
+            row += 1
+            idx1 = self.model().sibling(row, 0, idx)
+            if idx1.isValid():
+                logging.debug('Collapsing', idx1.row())
+                self.collapse(idx1)
+            else:
+                break
+                
     
     
     def edit_regex_rule(self, node=False):
@@ -374,12 +411,16 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         sample_menu.clear()
         for domain in self.domains:
             domain.build_sample_menu(sample_menu, node)
+        self.add_status_actions(sample_menu)
+        self.act_del.setEnabled(bool(node))
         return sample_menu
 
     def update_dataset_menu(self, node, dataset_menu):
         dataset_menu.clear()
         for domain in self.domains:
             domain.build_dataset_menu(dataset_menu, node)
+        self.add_status_actions(dataset_menu)
+        self.act_del.setEnabled(bool(node))
         return dataset_menu
 
     def update_derived_menu(self, node, der_menu):

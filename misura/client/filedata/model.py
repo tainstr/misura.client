@@ -370,9 +370,11 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
     def indexFromNode(self, node):
         """Return the model index corresponding to node. Useful in ProxyModels"""
-        parent = self.parent(node)
+        parent = node.parent
+        if not parent:
+            return voididx
         row = parent.recursive_status(self.status, depth=0).index(node)
-        return self.createIndex(row, 0, parent.model_path)
+        return self.createIndex(row, 0, node.model_path)
 
     def index_path(self, node):
         """Returns the sequence of model indexes starting from a node."""
