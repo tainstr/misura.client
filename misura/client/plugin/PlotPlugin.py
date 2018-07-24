@@ -63,6 +63,7 @@ def dataset_curve_name(ds, dsn):
         curve_name = unicode(dsname + ' - ' + sampleName + ' - ' + fileName)
     else:
         curve_name = unicode(dsname + ' - ' + fileName)
+    curve_name = curve_name.replace('/','\\')
     bounded_name = bounded_axes.get(instrument_name, {}).get(dsvar, dsvar)
     ax_label = bounded_name
     unit = getattr(ds, 'unit', False)
