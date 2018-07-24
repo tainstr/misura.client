@@ -352,21 +352,23 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             logging.debug('Collapsing all')
             self.collapseAll()
             return False
-        print 'Calling indexFromNode', node, node.model_path
-        idx = self.model().indexFromNode(node)
-        if not idx or not idx.isValid():
-            logging.debug('Invalid index')
-            return False
-        row = -1
-        while 1:
-            row += 1
-            idx1 = self.model().sibling(row, 0, idx)
-            if idx1.isValid():
-                logging.debug('Collapsing', idx1.row())
-                self.collapse(idx1)
-            else:
-                break
-                
+        
+        # Find the node level
+        level = self.model().index_path(node)
+        root = self.model().indexFromNode(node.root)
+        level = len(level)
+        
+        siblings = [root]
+        # Collect all indexes at the same level as node
+        for lev in range(level):
+            for i,idx in enumerate(siblings[:]):
+                if i==0:
+                    siblings = []
+                siblings += self.model().list_children(idx)
+            
+        for idx in siblings:
+            self.collapse(idx)
+        
     
     
     def edit_regex_rule(self, node=False):

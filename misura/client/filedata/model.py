@@ -240,6 +240,11 @@ class DocumentModel(QtCore.QAbstractItemModel):
             return 0
         rc = len(node.recursive_status(self.status, depth=0))
         return rc
+    
+    def list_children(self, index):
+        node = self.nodeFromIndex(index)
+        r= node.recursive_status(self.status, depth=0)
+        return [self.indexFromNode(n) for n in r]
 
     def columnCount(self, parent):
         return self.ncols
