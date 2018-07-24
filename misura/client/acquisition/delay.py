@@ -5,6 +5,7 @@ from time import time
 import sys
 from .. import widgets
 from PyQt4 import QtGui, QtCore
+from .. import _
 
 from .messages import initial_sample_dimension
 
@@ -29,24 +30,24 @@ class DelayedStart(QtGui.QDialog):
         self.wg.lay.insertWidget(0, self.wg.label_widget)
         self.lay.addWidget(self.wg)
         
-        #self.delayT = widgets.aNumber(server, server, server.gete('delayT'))
-        #self.delayT.lay.insertWidget(0, self.delayT.label_widget)
-        #self.lay.addWidget(self.delayT)
+        self.delayT = widgets.aNumber(server, server, server.gete('delayT'))
+        self.delayT.lay.insertWidget(0, self.delayT.label_widget)
+        self.lay.addWidget(self.delayT)
         
         self.run = QtGui.QLabel(
-            'Target instrument: ' + server['lastInstrument'].capitalize())
+            _('Target instrument: ') + server['lastInstrument'].capitalize())
         self.lay.addWidget(self.run)
 
-        self.eta = QtGui.QLabel('Remaining time: --:--:--')
+        self.eta = QtGui.QLabel(_('Remaining time: {}').format(' --:--:--'))
         self.lay.addWidget(self.eta)
 
-        self.op = QtGui.QLabel('Operator: unknown')
+        self.op = QtGui.QLabel(_('Operator: {}').format('------'))
         self.lay.addWidget(self.op)
 
-        self.quit = QtGui.QPushButton("Save and exit", parent=self)
+        self.quit = QtGui.QPushButton(_("Save and exit"), parent=self)
         self.connect(self.quit, QtCore.SIGNAL('clicked()'), self.save_exit)
         self.lay.addWidget(self.quit)
-        self.abrt = QtGui.QPushButton("Abort delayed start", parent=self)
+        self.abrt = QtGui.QPushButton(_("Abort delayed start"), parent=self)
         self.connect(self.abrt, QtCore.SIGNAL('clicked()'), self.reject)
         self.lay.addWidget(self.abrt)
 
@@ -91,5 +92,5 @@ class DelayedStart(QtGui.QDialog):
             self.wg.twg.setReadOnly(False)
             self.quit.setEnabled(False)
         self.engaged = self.eng.current
-        self.eta.setText('Remaining time: {}'.format(dt))
-        self.op.setText('Operator: ' + self.ins.measure['operator'])
+        self.eta.setText(_('Remaining time: {}').format(dt))
+        self.op.setText(_('Operator: {}').format(self.ins.measure['operator']))
