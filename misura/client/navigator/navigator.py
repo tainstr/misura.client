@@ -22,6 +22,32 @@ from ..clientconf import confdb
 from ..filedata import operation
 from veusz.dataimport.base import ImportParamsBase
 
+style = """QTreeView {
+    show-decoration-selected: 1;
+}
+
+QTreeView::item {
+     border: 1px solid #d9d9d9;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+}
+
+QTreeView::item:hover {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e7effd, stop: 1 #cbdaf1);
+    border: 1px solid #bfcde4;
+}
+
+QTreeView::item:selected {
+    border: 1px solid #567dbc;
+}
+
+QTreeView::item:selected:active{
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6ea1f1, stop: 1 #567dbc);
+}
+
+QTreeView::item:selected:!active {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6b9be8, stop: 1 #577fbf);
+}"""
 
 class Navigator(quick.QuickOps, QtGui.QTreeView):
     previous_selection = False
@@ -33,6 +59,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=set([filedata.dstats.loaded]), cols=1):
         QtGui.QTreeView.__init__(self, parent)
+        self.setStyleSheet(style)
         self.status = status
         self.ncols = cols
         self._mainwindow = mainwindow
