@@ -249,6 +249,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return jdx
 
     def expand_plotted_nodes(self):
+        self.collapseAll()
         for node in self.model().list_plotted():
             if node:
                 self.expand_node_path(node, select=False)
