@@ -399,6 +399,9 @@ class MisuraDocument(document.Document):
             if not ds.linked or not os.path.exists(ds.linked.filename):
                 logging.debug('Skipping unlinked dataset', name, ds.linked)
                 continue
+            if getattr(ds.linked, 'mtype', False)!='LinkedMisuraFile':
+                logging.debug('Skipping non-misura dataset', name, ds.linked)
+                continue
             is_local = name[-2:] in ('_t', '_T')
             vfn = os.path.abspath(ds.linked.filename)
             node = self.model.tree.traverse(name)
