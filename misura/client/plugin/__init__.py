@@ -20,6 +20,7 @@ from CoefficientPlugin import CoefficientPlugin
 from SynchroPlugin import SynchroPlugin
 from OverwritePlugin import OverwritePlugin
 from ColorizePlugin import ColorizePlugin
+from FFTPlugin import FFTPlugin
 
 # Misura specific plugins
 from MakeDefaultDoc import MakeDefaultDoc, makeDefaultDoc
