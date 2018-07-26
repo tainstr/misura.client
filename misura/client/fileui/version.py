@@ -214,7 +214,12 @@ class VersionMenu(QtGui.QMenu):
 
     def load_version(self, v, latest_plot=True):
         """Load selected version"""
+        w = self.proxy.writable()
+        if not w:
+            self.proxy.reopen(mode='a')
         self.proxy.set_version(v)
+        if not w:
+            self.proxy.reopen(mode='r')
         v = self.proxy.get_version()
         self.current = v
         if latest_plot:
