@@ -347,8 +347,8 @@ class NodeEntry(object):
 
     def insert(self, path, status=dstats.loaded):
         """Insert a pure node"""
-        #if (path in self.doc.data) and isinstance(self.doc.data[path], document.datasets.Dataset1DPlugin):
-        #    return False
+        if (path in self.doc.data) and isinstance(self.doc.data[path], document.datasets.Dataset1DPlugin):
+            return False
         splt = self.splt
         if self.parent:
             assert self.path.startswith(path)
