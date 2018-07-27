@@ -97,7 +97,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         return True
           
     def plot_on_graph(self, names, graph):
-        logging.debug('plot_on_graph', graph, len(names))
+        logging.debug('plot_on_graph', graph, len(names), names)
         self.create_graph(graph)
         if graph.endswith('/temp'):
             x, y = self.get_temperature_datasets(names, graph)
@@ -132,7 +132,7 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 ds1 = ds1.split(':')[1]
             var = namingConvention(ds1)[0]
             logging.debug('Checking', ds, var)
-            if rp and rp.search(ds1):
+            if (rp and rp.search(ds1)) or (not rp):
                 names.append(ds)
                 
         if not len(names):

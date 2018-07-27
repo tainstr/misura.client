@@ -57,8 +57,7 @@ def dataset_curve_name(ds, dsn):
         n = dsn.split('/')
         if len(n):
             dsvar = n[-1]
-    fileName = '' if ds.linked is None else os.path.basename(
-        ds.linked.filename)
+    fileName = '' if (getattr(ds, 'linked', None) is None) else os.path.basename(ds.linked.filename)
     if sampleName:
         curve_name = unicode(dsname + ' - ' + sampleName + ' - ' + fileName)
     else:
@@ -239,7 +238,8 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             # If the ds is recursively derived, substitute it by its entry
             if not hasattr(ds, 'm_smp'):
                 logging.debug('Retrieving ent', y)
-                ds = doc.ent.get(y, False)
+                #ds = doc.ent.get(y, ds)
+                ds = doc.model.tree.traverse(y)
 
             # Get the curve and axis name
             cname, ax_name, ax_lbl = dataset_curve_name(ds, y)

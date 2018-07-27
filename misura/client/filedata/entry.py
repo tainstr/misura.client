@@ -264,8 +264,8 @@ class NodeEntry(object):
                     item1 = e
                     break
                 
-        if not item1:
-            logging.warning('NodeEntry.traverse FAILED', path, sub, parent, isLeaf, item1,  [e.path for e in item.children.values()])
+        #if not item1:
+        #    logging.warning('NodeEntry.traverse FAILED', path, sub, parent, isLeaf, item1,  [e.path for e in item.children.values()])
         return item1
 
     def traverse_model_path(self, path):
@@ -347,8 +347,8 @@ class NodeEntry(object):
 
     def insert(self, path, status=dstats.loaded):
         """Insert a pure node"""
-        if self.doc.data.has_key(path) and isinstance(self.doc.data[path], document.datasets.Dataset1DPlugin):
-            return False
+        #if (path in self.doc.data) and isinstance(self.doc.data[path], document.datasets.Dataset1DPlugin):
+        #    return False
         splt = self.splt
         if self.parent:
             assert self.path.startswith(path)

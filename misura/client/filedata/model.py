@@ -179,7 +179,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
                 logging.debug('model.refresh(): NOTHING CHANGED')
                 return False
 
-        logging.debug('REFRESHING MODEL', self.paused)
+        logging.debug('REFRESHING MODEL', self.paused, force)
         self.paused = True
         self.doc.suspendUpdates()
         self.emit(QtCore.SIGNAL('beginResetModel()'))

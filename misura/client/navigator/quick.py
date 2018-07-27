@@ -241,8 +241,8 @@ class QuickOps(object):
             self.doc.resolveFullWidgetPath(page)
         except:
             logging.error('No page', page)
-            return []
-        xname = axis_selection.get_best_x_for(y.path, lk.prefix, self.doc.data, page)
+            #return []
+        xname = axis_selection.get_best_x_for(y.path, getattr(lk,'prefix',''), self.doc.data, page)
 
         return [xname]
 

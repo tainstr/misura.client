@@ -58,6 +58,7 @@ class MisuraDocument(document.Document):
         self.no_update = set([]) # Skip those datasets
         self.cache = {}  # File-system cache
         self.proxies = {}
+        self.ent = {}
         self.proxy = False
         self.proxy_filename = False
         self.header = []
