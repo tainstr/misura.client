@@ -21,7 +21,7 @@ from SynchroPlugin import SynchroPlugin
 from OverwritePlugin import OverwritePlugin
 from ColorizePlugin import ColorizePlugin
 from FFTPlugin import FFTPlugin
-
+from BandPassPlugin import BandPassPlugin
 # Misura specific plugins
 from MakeDefaultDoc import MakeDefaultDoc, makeDefaultDoc
 from InitialDimensionPlugin import InitialDimensionPlugin

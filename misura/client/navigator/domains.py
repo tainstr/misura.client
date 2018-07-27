@@ -566,6 +566,18 @@ class MathNavigatorDomain(NavigatorDomain):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.SmoothDatasetPlugin)
         self.mainwindow.showDialog(d)
+        
+    @node
+    def bandpass(self, node=False):
+        """Call the BandPassPlugin on the current node"""
+        ds, node = self.dsnode(node)
+        ds_t = self.xnames(node, '/time')[0]
+        from misura.client import plugin
+        p = plugin.BandPassPlugin(
+            ds_in=node.path, ds_t=ds_t, ds_out=node.m_name + '/bp')
+        d = PluginDialog(
+            self.mainwindow, self.doc, p, plugin.BandPassPlugin)
+        self.mainwindow.showDialog(d)
 
     @node
     def coefficient(self, node=False):
@@ -605,6 +617,7 @@ class MathNavigatorDomain(NavigatorDomain):
         menu.addSeparator()
         menu.addAction(_('Edit'), self.edit_dataset)
         menu.addAction(_('Smoothing'), self.smooth)
+        menu.addAction(_('BandPass'), self.bandpass)
         menu.addAction(_('Derivatives'), self.derive)
         menu.addAction(_('Linear Coefficient'), self.coefficient)
 

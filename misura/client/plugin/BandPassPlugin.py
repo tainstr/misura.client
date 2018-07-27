@@ -1,27 +1,53 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Generic FFT plugin"""
+"""Butterworth bandpass plugin"""
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import veusz.plugins as plugins
 import numpy as np
-from scipy import fftpack
+from scipy.signal import butter, lfilter
+
+def butter_bandpass(lowcut, highcut, fs, order=5, btype='band'):
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    if btype.startswith('band'):
+        b, a = butter(order, [low, high], btype=btype)
+    elif btype=='lowpass':
+        b, a = butter(order, high, btype=btype)
+    else:
+        b, a = butter(order, low, btype=btype)
+        
+    return b, a
 
 
-class FFTPlugin(plugins.DatasetPlugin):
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=5, invert=False):
+    btype = 'band'
+    if lowcut<=0:
+        btype = 'lowpass'
+    elif highcut>fs:
+        bytpe = 'highpass'
+    # Invert the meaning
+    if invert:
+        btype = {'h': 'lowpass', 'l':'highpass', 'b': 'bandstop'}[btype[0]]
+    b, a = butter_bandpass(lowcut, highcut, fs, order=order, btype=btype)
+    y = lfilter(b, a, data)
+    return y
 
-    """Dataset plugin to compute Fast Fourier Transform"""
+class BandPassPlugin(plugins.DatasetPlugin):
+
+    """Bandpass filtering with Butterworth filters"""
     # tuple of strings to build position on menu
-    menu = ('Compute', 'FFT')
+    menu = ('Compute', 'BandPass')
     # internal name for reusing plugin later
-    name = 'FFT'
+    name = 'BandPass'
     # string which appears in status bar
-    description_short = 'FFT'
+    description_short = 'BandPass'
 
     # string goes in dialog box
-    description_full = 'Fast Fourier Transform'
+    description_full = 'Bandpass with Butterworth filters'
 
-    def __init__(self, ds_in='', ds_t='', max_freq=0, min_freq=100, start_index=0, end_index=0, ds_out=''):
+    def __init__(self, ds_in='', ds_t='', max_freq=1000, min_freq=0, start_index=0, end_index=0, order=5, invert=False, ds_out=''):
         """Define input fields for plugin."""
 
         self.fields = [
@@ -29,10 +55,13 @@ class FFTPlugin(plugins.DatasetPlugin):
                 'ds_in', 'Input dataset', default=ds_in),
             plugins.FieldDataset(
                 'ds_t', 'Time dataset', default=ds_t),
+            
             plugins.FieldInt('max_freq', 'Max frequency', minval=0, default=max_freq),
             plugins.FieldInt('min_freq', 'Min frequency', minval=0, default=min_freq),
             plugins.FieldInt('start_index', 'Start index', minval=0, default=start_index),
             plugins.FieldInt('end_index', 'End index (0 = last)', minval=0, default=end_index),
+            plugins.FieldBool('invert', 'Suppress band', default=invert),
+            plugins.FieldInt('order', 'Order', minval=0, default=order),
             
             plugins.FieldDataset(
                 'ds_out', 'Output dataset', default=ds_out)
@@ -49,9 +78,9 @@ class FFTPlugin(plugins.DatasetPlugin):
         # make a new dataset with name in fields['ds_out']
         logging.debug('DSOUT', fields)
         self.ds_out = plugins.Dataset1D(fields['ds_out'])
-        self.ds_out_freq = plugins.Dataset1D(fields['ds_out']+'_t')
+        #self.ds_out_t = plugins.Dataset1D(fields['ds_out']+'_t')
         # return list of datasets
-        return [self.ds_out, self.ds_out_freq]
+        return [self.ds_out]#, self.ds_out_t]
 
     def updateDatasets(self, fields, helper):
         """Do shifting of dataset.
@@ -71,23 +100,20 @@ class FFTPlugin(plugins.DatasetPlugin):
         t = np.array(ds_t.data)[start:end]
         if y.ndim != 1:
             raise plugins.DatasetPluginException(
-                "FFT only accepts 1 dimension arrays.")
+                "BandPass only accepts 1 dimension arrays.")
         
         N = len(y)
         dt = np.diff(t).mean()
         max_freq = fields.get('max_freq', 0) or int(N/2)
         min_freq = fields.get('min_freq', 0)
-        
-        yf = np.abs(fftpack.fft(y))
-        xf = fftpack.fftfreq(yf.shape[-1], d=dt)
-        
-        mask = (min_freq<xf)*(xf<max_freq)
-        
+        order = fields.get('order', 5)
+        invert = fields.get('invert', False)
+        yf = butter_bandpass_filter(y, min_freq, max_freq, 1./dt, order, invert)
 
         # update output dataset with input dataset (plus value) and errorbars
-        self.ds_out.update(data=yf[mask])
-        self.ds_out_freq.update(data=xf[mask])
-        return [self.ds_out, self.ds_out_freq]
+        self.ds_out.update(data=yf)
+        #self.ds_out_t.update(data=t)
+        return [self.ds_out]#, self.ds_out_t]
 
 # add plugin classes to this list to get used
-plugins.datasetpluginregistry.append(FFTPlugin)
+plugins.datasetpluginregistry.append(BandPassPlugin)
