@@ -141,6 +141,13 @@ class QuickOps(object):
             self.doc.available_data.pop(node_path)
             if not self.doc.data.has_key(node_path):
                 return True
+        
+        # Recursive call over derived datasets
+        if recursive:
+            for sub in node.children.itervalues():
+                if sub.path in self.doc.data:
+                    self.deleteData(sub, remove_dataset, recursive)
+            
         # Remove and exit if no plot is associated
         if not self.model().plots['dataset'].has_key(node_path):
             if remove_dataset:
@@ -208,10 +215,7 @@ class QuickOps(object):
             self.doc.applyOperation(op)
             logging.debug('deleted', node_path)
 
-        # Recursive call over derived datasets
-        if recursive:
-            for sub in node.children.itervalues():
-                self.deleteData(sub, remove_dataset, recursive)
+
 
         self.doc.setModified()
 
