@@ -60,6 +60,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=set([filedata.dstats.loaded]), cols=1):
         QtGui.QTreeView.__init__(self, parent)
         self.setStyleSheet(style)
+        self.widgets_registry = {}
         self.status = status
         self.ncols = cols
         self._mainwindow = mainwindow
@@ -113,21 +114,50 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         
         self.create_shortcuts()
         
-    def show_widget(self, wg):
-        """Show widget `wg` as new mdi window, if possible, else as separate new window."""
-        p = self.parent()
+    @property
+    def appwindow(self):
         found = False
+        p = self.parent()
         while p:
             if hasattr(p, 'area'):
                 found = True
                 break
             p = p.parent()
-        if not found:
+        if found:
+            return p
+        return False
+    
+    def show_widget_key(self, key):
+        """Shows existing widgets or subwindows by key"""
+        wg = self.widgets_registry.get(key, False)
+        if not wg:
+            return False
+        p = self.appwindow
+        if p:
+            if wg in p.centralWidget().subWindowList():
+                wg.showNormal()
+                #TODO: How to de-minimize?
+            else:
+                # Was closed!
+                self.widgets_registry.pop(key)
+                return False
+        # Spare window
+        wg.show()
+        return wg
+        
+    def show_widget(self, wg, key=False):
+        """Show widget `wg` as new mdi window, if possible, else as separate new window."""
+        p = self.appwindow
+        key = key or id(wg)
+        if not p:
             wg.show()
-            return
+            self.widgets_registry[key] = wg
+            return wg
         win = p.centralWidget().addSubWindow(wg)
         win.setWindowTitle(wg.windowTitle())
-        win.show()
+        win.showNormal()
+        self.widgets_registry[key] = win
+        return win
         
     def create_shortcuts(self):
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_F), 

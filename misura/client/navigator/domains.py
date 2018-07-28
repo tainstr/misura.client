@@ -305,17 +305,22 @@ class DataNavigatorDomain(NavigatorDomain):
         menu.addAction(_('Delete'), self.navigator.deleteData)
 
     def create_table(self, header):
+        tab_name = ', '.join(header)
+        key = 'SummaryWidget:'+tab_name
+        if self.navigator.show_widget_key(key):
+            return
+        
         from misura.client.fileui import SummaryWidget
         tab = SummaryWidget()#self.navigator)
         tab.set_doc(self.doc)
         tab.model().auto_load = False
         tab.model().set_loaded(header)
-        tab_name = ', '.join(header)
+        
         tab.setWindowTitle('Table {} ({})'.format(len(self.data_tables), tab_name))
-        self.navigator.show_widget(tab)
-        # Keep a reference for Qt
+        self.navigator.show_widget(tab, key)
+        # Keep another reference for nav menu
         self.data_tables[tab_name] = tab
-
+        
     
     def export_csv(self, datasets):
         table_model_export(datasets, self.doc.get_column_func, None, self.navigator, 
