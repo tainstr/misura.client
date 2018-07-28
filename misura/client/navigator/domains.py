@@ -11,7 +11,7 @@ from misura.canon.indexer import SharedFile
 from .. import conf, units, iutils
 from veusz.dialogs.plugin import PluginDialog
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 
 from .. import _
@@ -533,6 +533,7 @@ class PlottingNavigatorDomain(NavigatorDomain):
         menu.addAction(_('Synchronize curves'), self.synchronize)
 
 
+import veusz.document as document
 
 
 class MathNavigatorDomain(NavigatorDomain):
@@ -556,16 +557,41 @@ class MathNavigatorDomain(NavigatorDomain):
             dialog.slotDatasetEdit()
 
     @node
-    def smooth(self, node=False):
+    def smooth(self, node=False, dialog=True):
         """Call the SmoothDatasetPlugin on the current node"""
         ds, node = self.dsnode(node)
         w = max(5, len(ds.data) / 50)
         from misura.client import plugin
-        p = plugin.SmoothDatasetPlugin(
-            ds_in=node.path, ds_out=node.m_name + '/sm', window=int(w))
-        d = PluginDialog(
-            self.mainwindow, self.doc, p, plugin.SmoothDatasetPlugin)
-        self.mainwindow.showDialog(d)
+        out = node.m_name + '/sm'
+        fields = dict(ds_in=node.path, ds_out=out, window=int(w))
+        p = plugin.SmoothDatasetPlugin(**fields)
+        if dialog:
+            d = PluginDialog(
+                self.mainwindow, self.doc, p, plugin.SmoothDatasetPlugin)
+            self.mainwindow.showDialog(d)
+        else:
+            op = document.OperationDatasetPlugin(p, fields)
+            self.doc.applyOperation(op)
+        return out
+    
+    @node
+    def smooth_no_dialog(self, node=False):
+        return self.smooth(node, False)
+        
+        
+    @node
+    def smooth_and_plot(self, node=False):
+        smooth_ds = self.smooth_no_dialog(node)
+        plots = self.model().is_plotted(node.path)
+        if not plots:
+            self.plot(node.root.traverse(smooth_ds))
+            return
+        ops = []
+        for path in plots:
+            p = self.doc.resolveFullWidgetPath(path)
+            op = document.OperationSettingSet(p.settings.get('yData'), smooth_ds)
+            ops.append(op)
+        self.doc.applyOperation(document.OperationMultiple(ops, 'SmoothAndPlot'))
         
     @node
     def bandpass(self, node=False):
@@ -616,10 +642,20 @@ class MathNavigatorDomain(NavigatorDomain):
     def add_dataset_menu(self, menu, node):
         menu.addSeparator()
         menu.addAction(_('Edit'), self.edit_dataset)
-        menu.addAction(_('Smoothing'), self.smooth)
+        menu.addAction(_('Smooth (Ctrl+S)'), self.smooth)
+        menu.addAction(_('Smooth+plot (S)'), self.smooth_and_plot)
+        
         menu.addAction(_('BandPass'), self.bandpass)
         menu.addAction(_('Derivatives'), self.derive)
         menu.addAction(_('Linear Coefficient'), self.coefficient)
+        
+    def create_shortcuts(self):
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL+QtCore.Qt.Key_S), 
+                        self.navigator, 
+                        self.smooth_no_dialog)
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_S), 
+                        self.navigator, 
+                        self.smooth_and_plot)
 
     add_derived_dataset_menu = add_dataset_menu
 
