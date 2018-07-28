@@ -246,14 +246,15 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         self.connect(
             self.open_button, QtCore.SIGNAL('clicked()'), self.select_item)
         self.lay.addWidget(self.open_button)
-
-        self.add_button = QtGui.QPushButton(_('Add') + '...', parent=self)
+        
+        lbl = {'file': 'Misura file'}.get(category, '')
+        self.add_button = QtGui.QPushButton(_('Open another') +lbl + ' ...', parent=self)
         self.connect(self.add_button, QtCore.SIGNAL('clicked()'), self.new)
         self.lay.addWidget(self.add_button)
-
+        
         if category == 'file' and len(dataimport.data_importers) > 0:
             self.import_button = QtGui.QPushButton(
-                _('Import') + '...', parent=self)
+                _('Import from') + '...', parent=self)
             self.connect(
                 self.import_button, QtCore.SIGNAL('clicked()'), self.data_import)
             self.lay.addWidget(self.import_button)
