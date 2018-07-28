@@ -315,12 +315,6 @@ class DataNavigatorDomain(NavigatorDomain):
         # Keep a reference for Qt
         self.data_tables[tab_name] = tab
 
-    @nodes
-    def get_table_header(self, nodes):
-        header = [node.path for node in nodes]
-        header = filter(lambda path: path in self.doc.data, header)
-        return header
-    
     
     def export_csv(self, datasets):
         table_model_export(datasets, self.doc.get_column_func, None, self.navigator, 
@@ -328,7 +322,7 @@ class DataNavigatorDomain(NavigatorDomain):
                            self.doc.get_verbose_func)
 
     def add_multiary_menu(self, menu, nodes):
-        header = self.get_table_header()
+        header = self.get_datasets_from_selection()
         if len(header):
             menu.addAction(_('Table from selection'), functools.partial(self.create_table, header))
             menu.addAction(_('Export to csv'), functools.partial(self.export_csv, header))
@@ -583,9 +577,11 @@ class MathNavigatorDomain(NavigatorDomain):
     def smooth_and_plot(self, node=False):
         smooth_ds = self.smooth_no_dialog(node)
         plots = self.model().is_plotted(node.path)
+        # Not plotted: add a new plot
         if not plots:
             self.plot(node.root.traverse(smooth_ds))
             return
+        # Already plotted: replace yData in all plots
         ops = []
         for path in plots:
             p = self.doc.resolveFullWidgetPath(path)
@@ -673,11 +669,16 @@ class MathNavigatorDomain(NavigatorDomain):
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.CurveOperationPlugin)
         self.mainwindow.showDialog(d)
+        
+    
 
     def add_multiary_menu(self, menu, nodes):
-        if len(nodes)==2:
-            menu.addAction(_('Correct'), self.correct)
-
+        datasets = self.get_datasets_from_selection()
+        if len(datasets)==2:
+            menu.addAction(_('Correct'), functools.partial(self.correct, datasets))
+        if len(datasets):
+            menu.addAction(_('Smooth all'), functools.partial(self.iternodes, datasets, self.smooth, dialog=False))
+            menu.addAction(_('Smooth+plot all'), functools.partial(self.iternodes, datasets, self.smooth_and_plot))
 
 
 class MeasurementUnitsNavigatorDomain(NavigatorDomain):
