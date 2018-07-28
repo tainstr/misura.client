@@ -310,8 +310,9 @@ class DataNavigatorDomain(NavigatorDomain):
         tab.set_doc(self.doc)
         tab.model().auto_load = False
         tab.model().set_loaded(header)
-        tab.show()
-        tab_name = ' '.join(header)
+        tab_name = ', '.join(header)
+        tab.setWindowTitle('Table {} ({})'.format(len(self.data_tables), tab_name))
+        self.navigator.show_widget(tab)
         # Keep a reference for Qt
         self.data_tables[tab_name] = tab
 

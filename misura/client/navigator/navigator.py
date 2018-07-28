@@ -113,6 +113,22 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         
         self.create_shortcuts()
         
+    def show_widget(self, wg):
+        """Show widget `wg` as new mdi window, if possible, else as separate new window."""
+        p = self.parent()
+        found = False
+        while p:
+            if hasattr(p, 'area'):
+                found = True
+                break
+            p = p.parent()
+        if not found:
+            wg.show()
+            return
+        win = p.centralWidget().addSubWindow(wg)
+        win.setWindowTitle(wg.windowTitle())
+        win.show()
+        
     def create_shortcuts(self):
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_F), 
                         self, 
