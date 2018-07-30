@@ -322,7 +322,6 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def expand_node_path(self, node, select=False):
         jdx = self.model().index_path(node)
-        print "NODEPATH", jdx
         if len(jdx) > 0:
             self.setExpanded(jdx[-1], True)
             if select:

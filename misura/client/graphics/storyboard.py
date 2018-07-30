@@ -139,6 +139,7 @@ class Storyboard(QtGui.QWidget):
             lbl = QtGui.QToolButton(parent=self.container)
             lbl.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
             lbl.setStyleSheet("QToolButton { font: 12px}")
+            lbl.setCheckable(True)
             show_func = functools.partial(self.slot_select_page, page.name)
             list_children_func = functools.partial(
                 self.slot_list_children, page.name)
@@ -164,7 +165,12 @@ class Storyboard(QtGui.QWidget):
         lbl.setIconSize(pix.size())
         self.cache[page.name] = lbl, self.doc.changeset
         return True
-
+    
+    def highlight(self):
+        for k in self.cache:
+            lbl = self.cache[k][0]
+            lbl.setChecked(k==self.page.name)
+            
     def update(self, *args, **kwargs):
         force = kwargs.get('force', False)
         p = self.plot.plot.getPageNumber()
@@ -179,6 +185,7 @@ class Storyboard(QtGui.QWidget):
         if no_change and not force:
             logging.debug('Storyboard.update: no change',
                           page.name, self.page.name)
+            self.highlight()
             return False
         if no_change and force:
             logging.debug('FORCING UPDATE!!!')
@@ -200,6 +207,7 @@ class Storyboard(QtGui.QWidget):
         hierarchy, level, page_idx = calc_plot_hierarchy(self.doc, page)
         if level < 0:
             logging.debug('Storyboard.update: negative level requested')
+            self.highlight()
             return False
         page_name, page_plots, crumbs, notes = hierarchy[level][page_idx]
         N = len(hierarchy)
@@ -227,6 +235,7 @@ class Storyboard(QtGui.QWidget):
             lbl.setText(txt)
             self.lay.addWidget(lbl)
             lbl.show()
+        self.highlight()
 
     def slot_list_children(self, page_name):
         if page_name.lower().endswith('_t'):
@@ -246,6 +255,9 @@ class Storyboard(QtGui.QWidget):
         if p < 0:
             logging.debug('Selected page was not found! Update...', page_name)
             self.update(force=True)
+        else:
+            if page==self.page:
+                self.highlight()
         return p
 
     def slot_delete_page(self, page_name):

@@ -247,7 +247,7 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
             self.open_button, QtCore.SIGNAL('clicked()'), self.select_item)
         self.lay.addWidget(self.open_button)
         
-        lbl = {'file': 'Misura file'}.get(category, '')
+        lbl = {'file': ' Misura file'}.get(category, '')
         self.add_button = QtGui.QPushButton(_('Open another') +lbl + ' ...', parent=self)
         self.connect(self.add_button, QtCore.SIGNAL('clicked()'), self.new)
         self.lay.addWidget(self.add_button)
