@@ -145,11 +145,13 @@ class Storyboard(QtGui.QWidget):
                 self.slot_list_children, page.name)
             del_func = functools.partial(self.slot_delete_page, page.name)
             export_func = functools.partial(self.slot_export_page, pageNum)
+            del_children_func = functools.partial(self.slot_delete_children, page)
             lbl.clicked.connect(show_func)
             menu = QtGui.QMenu()
             menu.addAction(_('Show'), show_func)
             menu.addAction(_('List children'), list_children_func)
             menu.addAction(_('Delete'), del_func)
+            menu.addAction(_('Delete recursively'), del_children_func)
             menu.addAction(_('Export'), export_func)
             lbl.setMenu(menu)
 
@@ -171,11 +173,27 @@ class Storyboard(QtGui.QWidget):
             lbl = self.cache[k][0]
             lbl.setChecked(k==self.page.name)
             
+            
+    def iter_page_level(self, page, level_modifier=0):
+        hierarchy, level, page_idx = calc_plot_hierarchy(self.doc, page)
+        if level < 0:
+            logging.debug('Storyboard.iter_page_level: negative level requested')
+            return []
+        page_name, page_plots, crumbs, notes = hierarchy[level][page_idx]
+        N = len(hierarchy)
+        level += level_modifier
+        if level < 0:
+            level = 0
+        if level >= N:
+            level = N - 1
+
+        return hierarchy[level]
+            
+            
     def update(self, *args, **kwargs):
         force = kwargs.get('force', False)
         p = self.plot.plot.getPageNumber()
         N = len(self.doc.basewidget.children)
-        #logging.debug('Storyboard.update', p, self.level_modifier, self._level_modifier)
         if p > N - 1:
             logging.debug('Cannot locate page', p, N - 1)
             p = N - 1
@@ -204,20 +222,8 @@ class Storyboard(QtGui.QWidget):
         self.page = page
         if self.page != oldpage:
             self.update_page_image()
-        hierarchy, level, page_idx = calc_plot_hierarchy(self.doc, page)
-        if level < 0:
-            logging.debug('Storyboard.update: negative level requested')
-            self.highlight()
-            return False
-        page_name, page_plots, crumbs, notes = hierarchy[level][page_idx]
-        N = len(hierarchy)
-        level += self.level_modifier
-        if level < 0:
-            level = 0
-        if level >= N:
-            level = N - 1
-
-        for page_name, page_plots, crumbs, notes in hierarchy[level]:
+            
+        for page_name, page_plots, crumbs, notes in self.iter_page_level(page, self.level_modifier):
             if self.parent_modifier:
                 if not page_name.startswith(self.parent_modifier):
                     continue
@@ -235,6 +241,7 @@ class Storyboard(QtGui.QWidget):
             lbl.setText(txt)
             self.lay.addWidget(lbl)
             lbl.show()
+            
         self.highlight()
 
     def slot_list_children(self, page_name):
@@ -244,7 +251,8 @@ class Storyboard(QtGui.QWidget):
         self.levelFilter.setText(self.parent_modifier)
         self.levelFilter.setToolTip(self.parent_modifier)
         self.slot_down()
-
+        
+ 
     def slot_select_page(self, page_name):
         p = -1
         for i, page in enumerate(self.doc.basewidget.children):
@@ -270,6 +278,24 @@ class Storyboard(QtGui.QWidget):
                 p = i
                 break
         self.update(force=True)
+        
+    def slot_delete_children(self, page):
+        parent_modifier = page.name
+        if parent_modifier.lower().endswith('_t'):
+            parent_modifier = parent_modifier[:-2]
+        ops = []
+        for page_name, page_plots, crumbs, notes in self.iter_page_level(page, +1):
+            if not page_name.startswith(parent_modifier):
+                continue
+            if page_name == page.name:
+                continue
+            cpage = filter(lambda wg: wg.name == page_name, 
+                          self.doc.basewidget.children)[0]
+            self.slot_delete_children(cpage)
+            logging.debug('Deleting page', page_name, cpage)
+            ops.append(OperationWidgetDelete(cpage))
+        op = document.OperationMultiple(ops, "DeletePageChildren")
+        self.doc.applyOperation(op)
         
     def slot_export_page(self, page_num):
         self.plot.plot.slotPageExport(page_num=page_num)
