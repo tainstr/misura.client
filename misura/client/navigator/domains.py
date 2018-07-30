@@ -586,6 +586,7 @@ class MathNavigatorDomain(NavigatorDomain):
         plots = self.model().is_plotted(node.path)
         # Not plotted: add a new plot
         if not plots:
+            print 'AAAAAA plotting', smooth_ds
             self.plot(node.root.traverse(smooth_ds))
             return
         # Already plotted: replace yData in all plots

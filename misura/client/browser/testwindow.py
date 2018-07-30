@@ -15,21 +15,11 @@ from .. import acquisition
 from ..live import registry
 from misura.canon.csutil import profile
 from ..graphics import Breadcrumb, Storyboard
-
+from ..navigator import NavigatorToolbar
 from misura.client.iutils import calc_plot_hierarchy, most_involved_node
 
 
-class NavigatorToolbar(QtGui.QToolBar):
-    def addMenu(self, name_or_menu):
-        if isinstance(name_or_menu, basestring):
-            name = name_or_menu
-            menu = QtGui.QMenu(name)
-        else:
-            menu = name_or_menu
-            name = menu.title()
-            
-        return menu
-        
+
 
 class TestWindow(acquisition.MainWindow):
 

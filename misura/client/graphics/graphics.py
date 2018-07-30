@@ -422,6 +422,20 @@ class Graphics(mainwindow.MainWindow):
         self.plot.dragMoveEvent = self.dragEnterEvent
         self.plot.dropEvent = self.dropEvent
         
+        from ..navigator import NavigatorToolbar
+        self.navtoolbar = NavigatorToolbar(self)
+        self.navtoolbar.show()
+        self.addToolBar(QtCore.Qt.TopToolBarArea, self.navtoolbar)
+        self.m4.openedFiles.selectionModel().currentChanged.connect(self.update_navtoolbar)
+        
+    def update_navtoolbar(self, *foo):
+        self.navtoolbar.clear()
+        self.m4.openedFiles.buildContextMenu(menu=self.navtoolbar)
+        for a in self.navtoolbar.actions():          
+            if a.icon().isNull():
+                self.navtoolbar.removeAction(a)
+        
+        
         
     def dragMoveEvent(self, event):
         veuszplot.process_image_dragMoveEvent(event)

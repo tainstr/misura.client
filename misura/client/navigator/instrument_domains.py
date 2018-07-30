@@ -11,6 +11,7 @@ from .. import _
 from ..filedata import getFileProxy
 from ..fileui import ImageSlider
 from .. import axis_selection
+from .. import iutils
 
 from PyQt4 import QtCore
 
@@ -94,7 +95,7 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
         if node.path.split('/')[-1] in dilatometer_subsamples:
             return True
         menu.addAction(_('Open storyboard'), self.show_storyboard)
-        menu.addAction(_('Render video'), self.render)
+        menu.addAction(iutils.theme_icon('video-x-generic'), _('Render video'), self.render)
         from misura.client import extrusion, postanalysis
         if extrusion.enabled:
             menu.addAction(_('3D Extrusion'), self.extrude)
@@ -106,7 +107,7 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
         spl = node.path.split('/')
         if spl[-1] in dilatometer_subsamples:
             menu.addAction(_('Open storyboard'), self.show_storyboard)
-            menu.addAction(_('Render video'), self.render)
+            menu.addAction(iutils.theme_icon('video-x-generic'), _('Render video'), self.render)
             from misura.client import extrusion, postanalysis
             if extrusion.enabled:
                 menu.addAction(_('3D Extrusion'), self.extrude)
@@ -198,7 +199,7 @@ class MicroscopeSampleNavigatorDomain(ImageAnalysisNavigatorDomain):
             menu.addAction(_('Surface tension'), self.surface_tension)
         menu.addAction(_('Viscosity'), self.viscosity)
         menu.addAction(_('Show Characteristic Points'), self.showPoints)
-        menu.addAction(_('Report'), self.hsm_report)
+        menu.addAction(iutils.theme_icon('report'), _('Report'), self.hsm_report)
         # Add generic image analysis entries
         ImageAnalysisNavigatorDomain.add_sample_menu(self, menu, node)
         return True
@@ -243,7 +244,7 @@ class HorizontalSampleNavigatorDomain(DilatometerNavigatorDomain):
         self.mainwindow.showDialog(d)
     
     def add_sample_menu(self, menu, node): 
-        menu.addAction(_('Report'), self.report)
+        menu.addAction(iutils.theme_icon('report'), _('Report'), self.report)
         return True
  
 class VerticalSampleNavigatorDomain(DilatometerNavigatorDomain):
@@ -262,7 +263,7 @@ class VerticalSampleNavigatorDomain(DilatometerNavigatorDomain):
         self.mainwindow.showDialog(d)
     
     def add_sample_menu(self, menu, node): 
-        menu.addAction(_('Report'), self.report)
+        menu.addAction(iutils.theme_icon('report'), _('Report'), self.report)
         return True
         
 class FlexSampleNavigatorDomain(NavigatorDomain):

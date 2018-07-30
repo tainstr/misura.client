@@ -49,6 +49,18 @@ QTreeView::item:selected:!active {
     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6b9be8, stop: 1 #577fbf);
 }"""
 
+class NavigatorToolbar(QtGui.QToolBar):
+    def addMenu(self, name_or_menu):
+        if isinstance(name_or_menu, basestring):
+            name = name_or_menu
+            menu = QtGui.QMenu(name)
+        else:
+            menu = name_or_menu
+            name = menu.title()
+            
+        return menu
+        
+
 class Navigator(quick.QuickOps, QtGui.QTreeView):
     previous_selection = False
     """List of currently opened misura Tests and reference to datasets names"""
