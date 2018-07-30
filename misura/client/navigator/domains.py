@@ -260,16 +260,16 @@ class DataNavigatorDomain(NavigatorDomain):
 
     def add_configuration(self, menu, node):
         if node.linked and hasattr(node.linked, 'conf'):
-            menu.addAction(_('Configure'), self.configure)
+            menu.addAction(iutils.theme_icon("details"), _('Details'), self.configure)
             
     def add_nodoc_menu(self, menu, proxy):
         menu.addAction(_('Configure'), functools.partial(self.configure_proxy, proxy))
 
     def add_file_menu(self, menu, node):
-        menu.addAction(_('View'), self.viewFile)
+        menu.addAction(iutils.theme_icon("add"), _('View'), self.viewFile)
         menu.addAction(_('Reload'), self.reloadFile)
         menu.addAction(_('Recalculate metadata'), self.recalculate_metadata)
-        menu.addAction(_('Close'), self.closeFile)
+        a = menu.addAction(iutils.theme_icon('edit-delete'), _('Close'), self.closeFile)
         proxy = self.doc.proxies.get(node.linked.params.filename, False)
         if proxy:
             self.versions = VersionMenu(self.doc, proxy=proxy, parent=menu)
@@ -375,9 +375,10 @@ class PlottingNavigatorDomain(NavigatorDomain):
 
     def add_plotted(self, menu, node, is_plotted=False):
         """Add plot/unplot action"""
-        self.act_plot = menu.addAction(_('Plot'), self.plot)
+        self.act_plot = menu.addAction(iutils.theme_icon('help-about'), _('Plot'), self.plot)
         self.act_plot.setCheckable(True)
         self.act_plot.setChecked(is_plotted)
+        
 
     @node
     def colorize(self, node=False):
@@ -643,9 +644,9 @@ class MathNavigatorDomain(NavigatorDomain):
 
     def add_dataset_menu(self, menu, node):
         menu.addSeparator()
-        menu.addAction(_('Edit'), self.edit_dataset)
+        menu.addAction(iutils.theme_icon('edit'), _('Edit (V)'), self.edit_dataset)
         menu.addAction(_('Smooth (Ctrl+S)'), self.smooth)
-        menu.addAction(_('Smooth+plot (S)'), self.smooth_and_plot)
+        menu.addAction(iutils.theme_icon('smooth'), _('Smooth+plot (S)'), self.smooth_and_plot)
         
         menu.addAction(_('BandPass'), self.bandpass)
         menu.addAction(_('Derivatives'), self.derive)
@@ -658,7 +659,10 @@ class MathNavigatorDomain(NavigatorDomain):
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_S), 
                         self.navigator, 
                         self.smooth_and_plot)
-
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_V), 
+                        self.navigator, 
+                        self.edit_dataset)
+        
     add_derived_dataset_menu = add_dataset_menu
 
     @nodes
@@ -737,7 +741,7 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
         """Add percentage conversion action"""
         self.act_percent = menu.addAction(
             _('Set Initial Dimension'), self.setInitialDimension)
-        self.act_percent = menu.addAction(
+        self.act_percent = menu.addAction(iutils.theme_icon('percent'),
             _('Percentage'), self.convertPercent)
         self.act_percent.setCheckable(True)
         self.act_percent.setChecked(node.m_percent)

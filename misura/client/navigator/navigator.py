@@ -136,7 +136,6 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if p:
             if wg in p.centralWidget().subWindowList():
                 wg.showNormal()
-                #TODO: How to de-minimize?
             else:
                 # Was closed!
                 self.widgets_registry.pop(key)
@@ -311,6 +310,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def expand_node_path(self, node, select=False):
         jdx = self.model().index_path(node)
+        print "NODEPATH", jdx
         if len(jdx) > 0:
             self.setExpanded(jdx[-1], True)
             if select:
@@ -318,7 +318,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 self.selectionModel().setCurrentIndex(jdx[-1], QtGui.QItemSelectionModel.Select)
             # Qt bug: without scrollTo, expansion is not effective!!!
             self.scrollTo(jdx[-1])
-
+        
         return jdx
 
     def expand_plotted_nodes(self):
@@ -531,16 +531,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 self.expand_node_path(node, select=True)
         return self.cmd.currentwidget
     
-    def build_menu_from_configuration(self, proxy, menu=False):
-        """Build a menu from a MisuraProxy or ConfigurationProxy"""
-        if not menu:
-            menu = QtGui.QMenu()
-        # In live, out-of-test, doc is not defined:
-        if not self.doc:
-            menu.clear()
-            for domain in self.domains:
-                domain.build_nodoc_menu(menu, proxy)
-            return menu
+    def get_node_from_configuration(self, proxy):
         ins = proxy.instrument_obj
         uid = ins.measure['uid']
         prefix = '0:'
@@ -569,12 +560,26 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if not node:
             logging.debug('Node not found while building menu', node_path)
             return False
+        return node     
+    
+    def build_menu_from_configuration(self, proxy, menu=False):
+        """Build a menu from a MisuraProxy or ConfigurationProxy"""
+        if not menu:
+            menu = QtGui.QMenu()
+        # In live, out-of-test, doc is not defined:
+        if not self.doc:
+            menu.clear()
+            for domain in self.domains:
+                domain.build_nodoc_menu(menu, proxy)
+            return menu
+        node = self.get_node_from_configuration(proxy)
         menu = self.buildContextMenu(node, menu=menu)
         self.selectionModel().clear()
         self.expand_node_path(node, select=True)  
         return menu      
     
-    def buildContextMenu(self, node, sel=[], menu=False):
+    @node
+    def buildContextMenu(self, node=False, sel=[], menu=False):
         n = len(sel)
         if node is None or not node.parent:
             menu = self.update_base_menu(node, menu or self.base_menu)

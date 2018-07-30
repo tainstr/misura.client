@@ -58,10 +58,21 @@ class MeasureInfo(QtGui.QTabWidget):
 
     def tabChanged(self, *foo):
         """Check if thermal cycle is saved - only if live"""
+        currentTab = self.currentWidget()
+        
+        if getattr(self.results, 'doc', False):
+            proxy = getattr(currentTab, 'remObj', False)
+            if not proxy:
+                return
+            node = self.results.navigator.get_node_from_configuration(proxy)
+            print proxy['fullpath'], node
+            if node:
+                self.results.navigator.selectionModel().clear()
+                self.results.navigator.expand_node_path(node, select=True)
         # Do not check tc if local
         if not getattr(self.remote, 'addr'):
             return
-        currentTab = self.currentWidget()
+        
         if not currentTab == self.thermalCycleView:
             if self.fromthermalCycleView:
                 self.checkCurve()

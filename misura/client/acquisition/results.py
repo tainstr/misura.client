@@ -9,7 +9,7 @@ from veusz.windows import consolewindow
 from PyQt4 import QtGui, QtCore
 
 class Results(QtGui.QTabWidget):
-
+    doc = None
     def __init__(self, parent, plot, readLevel=5):
         super(Results, self).__init__(parent=parent)
         self.setTabPosition(QtGui.QTabWidget.North)
@@ -45,6 +45,7 @@ class Results(QtGui.QTabWidget):
             self.plot.treeedit.hide()
         
         self.plot.plot.sigWidgetClicked.connect(self.slot_selected_widget)
+        self.doc = doc
         
     def slot_selected_widget(self, *foo):
         name = _('For: ')+self.navigator.cmd.currentwidget.name

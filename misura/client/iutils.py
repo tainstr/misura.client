@@ -128,6 +128,7 @@ def initApp(name='misura', org="Expert System Solutions", domain="expertsystemso
     app.setStyleSheet(stylesheet)
     if client:
         initClient()
+    app.setAttribute(QtCore.Qt.AA_DontShowIconsInMenus, False)
     return app
 
 app_closed = False
@@ -447,6 +448,8 @@ def theme_icon(name, ext='.svg'):
     p = os.path.join(params.pathIcons, name+ext)
     if not os.path.exists(p):
         p = os.path.join(params.pathArt, name+ext)
+    if not os.path.exists(p):
+        return QtGui.QIcon()
     return QtGui.QIcon(p)
 
 

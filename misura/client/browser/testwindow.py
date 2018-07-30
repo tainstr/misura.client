@@ -19,6 +19,18 @@ from ..graphics import Breadcrumb, Storyboard
 from misura.client.iutils import calc_plot_hierarchy, most_involved_node
 
 
+class NavigatorToolbar(QtGui.QToolBar):
+    def addMenu(self, name_or_menu):
+        if isinstance(name_or_menu, basestring):
+            name = name_or_menu
+            menu = QtGui.QMenu(name)
+        else:
+            menu = name_or_menu
+            name = menu.title()
+            
+        return menu
+        
+
 class TestWindow(acquisition.MainWindow):
 
     """View of a single test file"""
@@ -36,6 +48,7 @@ class TestWindow(acquisition.MainWindow):
     breadbar = False
     plotboard=False
     menuVersions = False
+    navtoolbar = False
 
     def load_version(self, v=-1):
         self.fixedDoc.paused = True
@@ -62,6 +75,10 @@ class TestWindow(acquisition.MainWindow):
         
         self.create_version_plot_menus()
         
+        #self.measure_toolbar = QtGui.QToolBar(self)
+        #self.addToolBar(QtCore.Qt.TopToolBarArea, self.measure_toolbar)
+        
+        
         if self.vtoolbar:
             self.vtoolbar.hide()
         self.vtoolbar = self.summaryPlot.plot.createToolbar(self)
@@ -69,6 +86,12 @@ class TestWindow(acquisition.MainWindow):
                                       self.summaryPlot.treeedit.vzactions, 
                                       ('add.key', 'add.label', 'add.shapemenu'))
         self.vtoolbar.show()
+        
+        self.navtoolbar = NavigatorToolbar(self)
+        self.navtoolbar.show()
+        self.addToolBar(QtCore.Qt.TopToolBarArea, self.navtoolbar)
+        self.navigator.selectionModel().currentChanged.connect(self.update_navtoolbar)
+        
         self.graphWin.show()
         
         
@@ -101,6 +124,15 @@ class TestWindow(acquisition.MainWindow):
                      self.play.set_idx)
         
         self.fixedDoc.paused = False
+        
+    def update_navtoolbar(self, *foo):
+        self.navtoolbar.clear()
+        self.navigator.buildContextMenu(menu=self.navtoolbar)
+        for a in self.navtoolbar.actions():          
+            if a.icon().isNull():
+                self.navtoolbar.removeAction(a)
+                
+        
         
     def add_playback(self):
         """FIXME: DISABLED"""
