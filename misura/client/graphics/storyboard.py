@@ -60,6 +60,9 @@ class Storyboard(QtGui.QWidget):
         levelDown.setIcon(theme_icon('go-down'))
         levelDown.clicked.connect(self.slot_down)
         clay.addWidget(levelDown)
+        self.levelFilter = QtGui.QLabel(self.container)
+        self.levelFilter.setMinimumWidth(300)
+        #clay.addWidget(self.levelFilter)
         self.controls.setMaximumWidth(75)
         self.base_lay.addWidget(self.controls)
 
@@ -74,6 +77,8 @@ class Storyboard(QtGui.QWidget):
     def slot_home(self):
         self.level_modifier = 0
         self.parent_modifier = False
+        self.levelFilter.setText('')
+        self.levelFilter.setToolTip('')
         self.update()
 
     def set_plot(self, plot):
@@ -224,7 +229,11 @@ class Storyboard(QtGui.QWidget):
             lbl.show()
 
     def slot_list_children(self, page_name):
+        if page_name.lower().endswith('_t'):
+            page_name = page_name[:-2]
         self.parent_modifier = page_name
+        self.levelFilter.setText(self.parent_modifier)
+        self.levelFilter.setToolTip(self.parent_modifier)
         self.slot_down()
 
     def slot_select_page(self, page_name):
