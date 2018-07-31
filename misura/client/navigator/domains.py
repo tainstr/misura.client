@@ -563,7 +563,7 @@ class MathNavigatorDomain(NavigatorDomain):
         ds, node = self.dsnode(node)
         w = max(5, len(ds.data) / 50)
         from misura.client import plugin
-        out = node.m_name + '/sm'
+        out = node.path + '/sm'
         fields = dict(ds_in=node.path, ds_out=out, window=int(w))
         p = plugin.SmoothDatasetPlugin(**fields)
         if dialog:
@@ -586,8 +586,11 @@ class MathNavigatorDomain(NavigatorDomain):
         plots = self.model().is_plotted(node.path)
         # Not plotted: add a new plot
         if not plots:
-            print 'AAAAAA plotting', smooth_ds
-            self.plot(node.root.traverse(smooth_ds))
+            # Remap children
+            node.children
+            n = node.root.traverse_path(smooth_ds)
+            logging.debug('Plotting smoothed data', smooth_ds,n)
+            self.plot(n)
             return
         # Already plotted: replace yData in all plots
         ops = []
