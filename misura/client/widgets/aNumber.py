@@ -7,11 +7,10 @@ from misura.client.parameters import MAX, MIN, MAXINT, MININT
 from misura.client.widgets.active import ActiveWidget, extend_decimals
 import math
 
-from misura.canon.csutil import lockme
+from misura.canon.csutil import isWindows
 import numpy as np
 
 from misura.canon.logger import get_module_logging
-
 logging = get_module_logging(__name__)
 
 from traceback import print_exc
@@ -180,7 +179,8 @@ class SpinboxAction(QtGui.QWidgetAction):
         if maximum is None:
             maximum = MAX if double else MAXINT
         self.label = QtGui.QLabel(label)
-        self.label.setForegroundRole(QtGui.QPalette.BrightText)
+        if not isWindows:
+            self.label.setForegroundRole(QtGui.QPalette.BrightText)
         self.spinbox = ScientificSpinbox(double=double)
         self.spinbox.setRange(minimum, maximum)
         self.spinbox.setValue(current)
