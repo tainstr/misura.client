@@ -496,8 +496,9 @@ class Interface(QtGui.QTabWidget):
             if sec==name and not hide:
                 self.setCurrentIndex(i)
             elif sec!=name and hide:
-                self.removeTab(sections.index(sec))
-                sections.pop(i)
+                j = sections.index(sec)
+                self.removeTab(j)
+                sections.pop(j)
         return True
             
 
