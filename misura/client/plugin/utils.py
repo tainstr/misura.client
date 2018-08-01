@@ -134,12 +134,12 @@ class OperationWrapper(plugins.OperationWrapper):
 
         return node.get_configuration()
 
-    def node_configuration_dialog(self, configuration_proxy, section='Main'):
+    def node_configuration_dialog(self, configuration_proxy, section='Main', hide=False):
         ui = plugins.FieldConfigurationProxy.conf_module.InterfaceDialog(
             configuration_proxy)
         ui.setWindowTitle(
             self._('Review settings for ') + configuration_proxy['fullpath'])
-        ui.interface.show_section(section)
+        ui.interface.show_section(section, hide=hide)
         return ui
 
     def show_node_configuration(self, configuration_proxy, section='Main'):

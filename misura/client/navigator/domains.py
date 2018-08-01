@@ -579,7 +579,6 @@ class MathNavigatorDomain(NavigatorDomain):
     def smooth_no_dialog(self, node=False):
         return self.smooth(node, False)
         
-        
     @node
     def smooth_and_plot(self, node=False):
         smooth_ds = self.smooth_no_dialog(node)
