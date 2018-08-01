@@ -145,7 +145,7 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
         return v
 
     def validate(self, text, pos):
-        if text in ('', '-', '+'):
+        if text in ('', '-', '+', '.', ','):
             return (QtGui.QValidator.Intermediate, text, pos)
         if not self.double:
             try:
