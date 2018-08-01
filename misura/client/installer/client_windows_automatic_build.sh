@@ -4,6 +4,7 @@ CODE_BASE=$USERPROFILE/Desktop/misura4
 DEPLOY_DIR=//Ess-server/company/Installations/Misura4
 CLIENT_DIR=$CODE_BASE/misura.client/misura/client
 CANON_DIR=$CODE_BASE/misura.canon/misura/canon
+THEGRAM_DIR=$CODE_BASE/thegram
 
 VEUSZ_DIR=$CODE_BASE/veusz
 INSTALLER_DIR=$CLIENT_DIR/installer
@@ -49,7 +50,17 @@ if [ -n "$NEW_VEUSZ_COMMITS" ]; then
   git pull --rebase
 fi
 
-if [ -z "$1" ] && [ -z "$NEW_CLIENT_COMMITS" ] && [ -z "$NEW_CANON_COMMITS" ] && [ -z "$NEW_VEUSZ_COMMITS" ]; then
+# THEGRAM ############
+cd $THEGRAM_DIR
+git remote update
+git checkout master
+NEW_THEGRAM_COMMITS=$(git log HEAD..origin/master --oneline)
+if [ -n "$NEW_THEGRAM_COMMITS" ]; then
+  git pull --rebase
+fi
+
+
+if [ -z "$1" ] && [ -z "$NEW_CLIENT_COMMITS" ] && [ -z "$NEW_CANON_COMMITS" ] && [ -z "$NEW_VEUSZ_COMMITS" ] && [ -z "$NEW_THEGRAM_COMMITS" ]; then
    echo "No changes detected."
    rm $BUILD_IN_PROGRSS_FILE
    exit 0
