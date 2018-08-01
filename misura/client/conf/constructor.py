@@ -485,12 +485,21 @@ class Interface(QtGui.QTabWidget):
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
 
-    def show_section(self, name):
+    def show_section(self, name, hide=False):
+        """Set `name` as section the active tab. 
+        If `hide`, removes all other tabs."""
         sections = self.sectionsMap.keys()
         if name not in sections:
             logging.warning('No section named', name)
-        i = sections.index(name)
-        self.setCurrentIndex(i)
+            return False
+        for i,sec in enumerate(sections[:]):
+            if sec==name and not hide:
+                self.setCurrentIndex(i)
+            elif sec!=name and hide:
+                self.removeTab(sections.index(sec))
+                sections.pop(i)
+        return True
+            
 
     def showEvent(self, event):
         if self.first_show:
