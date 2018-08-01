@@ -214,13 +214,16 @@ def check_client_updates(parent):
         
     conf = get_packages(*serials)
     client, iclient = get_best_client_version(conf, serials)
-    
+    logging.debug('get_best_client_version', client, iclient)
     current = get_version_file()
+    logging.debug('get_version_file', current)
     current = get_version_date(current)
+    logging.debug('get_version_date', current)
     
     if current>iclient:
         logging.info('No update was found', current, client)
         return False
+    logging.debug('Updating', iclient, current)
     tempdir = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
     client_out = os.path.join(tempdir, 'misura_client_{}.exe'.format(client))
     url = conf.get('url', str(client))
