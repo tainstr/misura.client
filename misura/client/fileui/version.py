@@ -232,14 +232,16 @@ class VersionMenu(QtGui.QMenu):
         logging.debug('save_version', version_id)
         if not version_id:
             version_id = self.proxy.get_version()
-        if version_id == '':
+        if version_id in ('', u''):
+            logging.debug('Asking a new version name', repr(version_id))
             if not self.new_version():
                 QtGui.QMessageBox.critical(
                     self, _("Not saved"), _("Cannot overwrite original version"))
                 return False
             return True
-        logging.debug('save_version', version_id)
-        version_name, version_date = self.proxy.get_versions()[version_id]
+        logging.debug('save_version', repr(version_id))
+        vers = self.proxy.get_versions()
+        version_name, version_date = vers[version_id]
         self.doc.save_version_and_plot(version_name)
         self.current_plot_id = version_name
         self.current = self.proxy.get_version()

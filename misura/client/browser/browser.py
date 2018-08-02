@@ -133,6 +133,7 @@ class MainWindow(QtGui.QMainWindow):
             tab = self.tab.widget(tab_index)
             tab.measureTab.results.navigator.open_file(path)
             return
+        
         try:
             doc = filedata.MisuraDocument(path)
         except Exception as error:
@@ -199,10 +200,11 @@ class MainWindow(QtGui.QMainWindow):
         if idx == 0:
             return
         w = self.tab.widget(idx)
-        self.tab.removeTab(idx)
-        # explicitly destroy the widget
-        w.close()
-        del w
+        if w.check_save():
+            self.tab.removeTab(idx)
+            w.close()
+            # explicitly destroy the widget
+            del w
 
     def remove_close_button_from_tab(self, tab_index):
         self.tab.tabBar().tabButton(

@@ -18,9 +18,6 @@ from ..graphics import Breadcrumb, Storyboard
 from ..navigator import NavigatorToolbar
 from misura.client.iutils import calc_plot_hierarchy, most_involved_node
 
-
-
-
 class TestWindow(acquisition.MainWindow):
 
     """View of a single test file"""
@@ -39,21 +36,26 @@ class TestWindow(acquisition.MainWindow):
     plotboard=False
     menuVersions = False
     navtoolbar = False
-
+    initial_veusz_doc_changeset = -1
+    
     def load_version(self, v=-1):
         self.fixedDoc.paused = True
         logging.debug("SETTING VERSION", v)
         self.plot_page = False
         if not self.fixedDoc.proxy.isopen():
             self.fixedDoc.proxy.reopen()
+            
         self.fixedDoc.proxy.set_version(v)
+        
         if self.fixedDoc.proxy.conf is False:
+            logging.debug('load_conf')
             self.fixedDoc.proxy.load_conf()
         self.fixedDoc.proxy.conf.filename = self.fixedDoc.proxy.path
         self.fixedDoc.proxy.conf.doc = self.fixedDoc
-        self.setServer(self.fixedDoc.proxy.conf)
-        self.fixedDoc.proxy.conf._navigator = self.navigator
         
+        self.setServer(self.fixedDoc.proxy.conf)
+        
+        self.fixedDoc.proxy.conf._navigator = self.navigator
         self.name = self.fixedDoc.proxy.get_node_attr('/conf', 'instrument')
         self.imageSlider.slider.choice()
         self.imageSlider.strip.set_idx()
@@ -112,7 +114,9 @@ class TestWindow(acquisition.MainWindow):
         self.connect(self.imageSlider, QtCore.SIGNAL('set_idx(int)'), 
                      self.play.set_idx)
         
-        self.fixedDoc.paused = False        
+        self.fixedDoc.paused = False       
+        
+        self.initial_veusz_doc_changeset = self.doc.changeset
         
     def add_playback(self):
         """FIXME: DISABLED"""
@@ -206,14 +210,37 @@ class TestWindow(acquisition.MainWindow):
         return True
 
     def closeEvent(self, ev):
-        self.close()
-        ret = QtGui.QMainWindow.closeEvent(self, ev)
+        ret = self.close()
+        if ret:
+            ret = QtGui.QMainWindow.closeEvent(self, ev)
         return ret
-
-    def close(self):
+    
+    def check_save(self):
+        logging.debug('Checking changesets', self.doc.changeset, self.initial_veusz_doc_changeset)
+        if self.doc.changeset>self.initial_veusz_doc_changeset:
+            ver = self.doc.proxy.get_version()
+            logging.debug('got version', repr(ver))
+            if not ver:
+                ver = _('a new version')
+            else:
+                ver = _('on version: ')+ver             
+            r = QtGui.QMessageBox.question(self, _('Save changes'), 
+                                       _('Some changes were detected. \nWould you like to save ')+ver+' ?',
+                                       QtGui.QMessageBox.Ok|QtGui.QMessageBox.Discard|QtGui.QMessageBox.Abort)
+            if r==QtGui.QMessageBox.Abort:
+                logging.debug('Aborting close action.')
+                return False
+            elif r==QtGui.QMessageBox.Ok:
+                logging.debug('Saving a version on close', ver)
+                v = fileui.VersionMenu(self.doc, self.doc.proxy)
+                v.save_version()
+        return True
+    
+    def close(self):                
         self.play.close()
         self.fixedDoc.proxy.close()
         acquisition.MainWindow.close(self)
+        return False
 
     def set_idx(self, idx):
         logging.debug('TestWindow.set_idx', self.play.isRunning(), idx)
