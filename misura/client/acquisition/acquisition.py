@@ -93,6 +93,7 @@ class MainWindow(QtGui.QMainWindow):
     remote = False
     myMenuBar = False
     plotboardDock = False
+    serverDock = False
 
     @property
     def tasks(self):
@@ -123,8 +124,7 @@ class MainWindow(QtGui.QMainWindow):
         self.server = False
         self.area = QtGui.QMdiArea()
         self.setCentralWidget(self.area)
-        self.setMinimumSize(800, 600)
-        self.setWindowTitle(_('Misura Live'))
+
         
         self.tray_icon = QtGui.QSystemTrayIcon(self)
         self.tray_icon.setIcon(iutils.theme_icon('icon'))
@@ -132,16 +132,21 @@ class MainWindow(QtGui.QMainWindow):
         self.add_menubar(setInstrument=False)
         
         self.add_statusbar()
-        self.add_server_selector()
 
         self.reset_file_proxy_timer = QtCore.QTimer()
         self.reset_instrument_timer = QtCore.QTimer()
-        self.reset_instrument.connect(self.setInstrument)
-        self.connect(self.tray_icon, QtCore.SIGNAL('messageClicked()'), self.focus_logging)
+            
         self.setWindowIcon(QtGui.QIcon(os.path.join(parameters.pathArt, 'icon.svg')))
-        if not self.fixedDoc and confdb['autoConnect'] and len(confdb['recent_server']) > 1:
-            self.set_addr(confdb['recent_server'][-1][0])
-        self.showMaximized()
+        
+        if not self.fixedDoc:
+            self.setMinimumSize(800, 600)
+            self.setWindowTitle(_('Misura Live'))
+            self.add_server_selector()
+            self.connect(self.tray_icon, QtCore.SIGNAL('messageClicked()'), self.focus_logging)
+            self.reset_instrument.connect(self.setInstrument)
+            self.showMaximized()
+            if confdb['autoConnect'] and len(confdb['recent_server']) > 1:
+                self.set_addr(confdb['recent_server'][-1][0])
         
     
     def add_menubar(self, setInstrument=True):
@@ -371,7 +376,6 @@ class MainWindow(QtGui.QMainWindow):
     _blockResetFileProxy = False    
 
     def setServer(self, server=False):
-        check_default_database()
         self._blockResetFileProxy = True
         logging.debug('Setting server to', server)
         self.server = server
@@ -379,10 +383,12 @@ class MainWindow(QtGui.QMainWindow):
             network.manager.remote.connect()
             self.server = network.manager.remote
         if not self.fixedDoc:
+            check_default_database()
             if not check_time_delta(self.server):
                 return False
         registry.toggle_run(True)
-        self.serverDock.hide()
+        if self.serverDock:
+            self.serverDock.hide()
         self.add_menubar(setInstrument=False)
         self.rem('logDock')
         self.logDock = QtGui.QDockWidget(self.centralWidget())
@@ -577,6 +583,9 @@ class MainWindow(QtGui.QMainWindow):
             self.remote = remote
 
         self.clean_interface(remote)
+        if self.fixedDoc:
+            self.updateInstrumentInterface(remote)
+            return True
 
         self.tasks.jobs(-1, 'Waiting for server')
         if self.remote['initInstrument'] != 0:
