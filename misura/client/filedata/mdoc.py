@@ -41,6 +41,7 @@ class MisuraDocument(document.Document):
     interval = 1  # Update interval
     instrument_name = False
     root = False
+    changeset_ignore = 0
     sigConfProxyModified = QtCore.pyqtSignal()
 
     def close(self):

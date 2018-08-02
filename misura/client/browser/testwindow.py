@@ -116,7 +116,7 @@ class TestWindow(acquisition.MainWindow):
         
         self.fixedDoc.paused = False       
         
-        self.initial_veusz_doc_changeset = self.doc.changeset
+        self.initial_veusz_doc_changeset = self.doc.changeset-self.doc.changeset_ignore
         
     def add_playback(self):
         """FIXME: DISABLED"""
@@ -216,8 +216,11 @@ class TestWindow(acquisition.MainWindow):
         return ret
     
     def check_save(self):
-        logging.debug('Checking changesets', self.doc.changeset, self.initial_veusz_doc_changeset)
-        if self.doc.changeset>self.initial_veusz_doc_changeset:
+        effective_changeset = self.doc.changeset-self.doc.changeset_ignore
+        conf_changeset = self.server.recursive_changeset()
+        logging.debug('Checking changesets', effective_changeset, self.doc.changeset, self.doc.changeset_ignore, 
+                      self.initial_veusz_doc_changeset, conf_changeset)
+        if effective_changeset > self.initial_veusz_doc_changeset or conf_changeset>0:
             ver = self.doc.proxy.get_version()
             logging.debug('got version', repr(ver))
             if not ver:

@@ -470,6 +470,7 @@ class VeuszPlot(QtGui.QWidget):
         if not isinstance(self.plot, VeuszPlotWindow):
             logging.debug( 'Cannot fitSize on widget')
             return
+        changeset = self.document.changeset
         if not zoom and self.plot.zoomfactor!=1.:
             self.plot.slotViewZoom11()
         w = self.plot.width()
@@ -487,12 +488,15 @@ class VeuszPlot(QtGui.QWidget):
         g = page.path
         if g.endswith('_report'):
             return
+        
+        
         sw = '{:.1f}in'.format(w)
         sh = '{:.1f}in'.format(h)
         r1 = self.set_if_differs(page.path+'/width', sw)
         r2 = self.set_if_differs(page.path+'/height', sh)
         if not r1 and not r2:
             logging.debug('fitSize: nothing to do')
+            self.document.changeset_ignore += self.document.changeset - changeset
             return
         logging.debug('fitSize', w, h)
         wg = searchFirstOccurrence(page, 'grid', 1)
@@ -523,6 +527,7 @@ class VeuszPlot(QtGui.QWidget):
             self.emit(QtCore.SIGNAL('bigPlot()'))
         logging.debug('endfitsize')
         self.emit(QtCore.SIGNAL('fitSize()'))
+        self.document.changeset_ignore += self.document.changeset - changeset
 
     def slotDataEdit(self, editdataset=None):
         """Edit existing datasets.
