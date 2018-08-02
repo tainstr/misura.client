@@ -123,7 +123,8 @@ class MisuraDocument(document.Document):
                     break
             if not do:
                 continue
-            proxy = getFileProxy(path, mode='r')
+            #FIXME: this causes double loading of /conf node!!!
+            proxy = getFileProxy(path, mode='r', load_conf=False)
             self.create_proxy_decoders(proxy, linked.prefix)
 
     def add_cache(self, ds, name, overwrite=True):
@@ -454,6 +455,8 @@ class MisuraDocument(document.Document):
             time_data = units.Converter.convert(time_ds.unit, 'second', time_ds.data)
             logging.debug('Writing dataset', name)
             proxy.save_data(name, ds.data, time_data, opt=ds.m_opt)
+        proxy.header(refresh=True)
+        proxy.flush()
         return True
 
     def save(self, filename, mode='vsz'):
