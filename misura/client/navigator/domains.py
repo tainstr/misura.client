@@ -264,16 +264,24 @@ class DataNavigatorDomain(NavigatorDomain):
             
     def add_nodoc_menu(self, menu, proxy):
         menu.addAction(_('Configure'), functools.partial(self.configure_proxy, proxy))
+        
+    @node
+    def add_versions_menu(self, node=False, menu=None):
+        proxy = self.doc.proxies.get(node.linked.params.filename, False)
+        logging.debug('add_versions_menu', node, node.linked.params.filename, proxy)
+        if proxy:
+            versions = VersionMenu(self.doc, proxy=proxy, parent=menu)
+            if menu:
+                menu.addMenu(versions) 
+            return versions
+        return False
 
     def add_file_menu(self, menu, node):
         menu.addAction(iutils.theme_icon("add"), _('View'), self.viewFile)
         menu.addAction(_('Reload'), self.reloadFile)
         menu.addAction(_('Recalculate metadata'), self.recalculate_metadata)
         a = menu.addAction(iutils.theme_icon('edit-delete'), _('Close'), self.closeFile)
-        proxy = self.doc.proxies.get(node.linked.params.filename, False)
-        if proxy:
-            self.versions = VersionMenu(self.doc, proxy=proxy, parent=menu)
-            menu.addMenu(self.versions) 
+        self.versions = self.add_versions_menu(node, menu)
         self.add_configuration(menu, node)
         if len(self.data_tables):
             tab_menu = menu.addMenu('Tables')

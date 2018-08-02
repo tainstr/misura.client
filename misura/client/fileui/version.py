@@ -76,7 +76,7 @@ class VersionMenu(QtGui.QMenu):
         self.setTitle(_('Version'))
         self.doc = doc
         self._proxy = proxy
-        self.menuAction().hovered.connect(self.redraw)
+        self.aboutToShow.connect(self.redraw)
 
     @property
     def proxy(self):

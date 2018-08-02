@@ -19,6 +19,7 @@ from .. import filedata
 from .. import live
 from .. import plugin
 from ..clientconf import confdb
+from .. import iutils
 from ..filedata import operation
 from veusz.dataimport.base import ImportParamsBase
 
@@ -50,6 +51,11 @@ QTreeView::item:selected:!active {
 }"""
 
 class NavigatorToolbar(QtGui.QToolBar):
+    def __init__(self, navigator, parent=None):
+        super(NavigatorToolbar, self).__init__(parent=parent)
+        self.navigator = navigator
+        self.navigator.selectionModel().currentChanged.connect(self.update_navtoolbar)
+        
     def addMenu(self, name_or_menu):
         if isinstance(name_or_menu, basestring):
             name = name_or_menu
@@ -57,8 +63,26 @@ class NavigatorToolbar(QtGui.QToolBar):
         else:
             menu = name_or_menu
             name = menu.title()
-            
         return menu
+    
+    def save(self):
+        return self.save_menu.save_version()
+    
+    def add_save_menu(self):
+        dom = self.navigator.domainsMap['DataNavigatorDomain']
+        self.save_menu = dom.add_versions_menu()
+        self.act_save = QtGui.QAction(iutils.theme_icon('media-floppy'), _('Save in Misura file'), self)
+        self.act_save.triggered.connect(self.save)
+        self.act_save.setMenu(self.save_menu)
+        self.insertAction(self.actions()[0], self.act_save)
+        
+    def update_navtoolbar(self, *foo):
+        self.clear()
+        self.navigator.buildContextMenu(menu=self)
+        for a in self.actions():          
+            if a.icon().isNull():
+                self.removeAction(a)
+        self.add_save_menu()
         
 
 class Navigator(quick.QuickOps, QtGui.QTreeView):
@@ -89,12 +113,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.connect(self, QtCore.SIGNAL('clicked(QModelIndex)'), self.select)
         self.connect(self, QtCore.SIGNAL('updateView()'), self.update_view, QtCore.Qt.QueuedConnection)
         self.domains = []
-        done = set([])
+        self.domainsMap = {}
         for domain in navigator_domains:
-            if domain in done:
+            if domain.__name__ in self.domainsMap:
                 continue
-            self.domains.append(domain(self))
-            done.add(domain)
+            dom = domain(self)
+            self.domains.append(dom)
+            self.domainsMap[domain.__name__] = dom
         # Menu creation
         if menu:
             self.setContextMenuPolicy(Qt.CustomContextMenu)

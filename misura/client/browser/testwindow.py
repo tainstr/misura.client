@@ -77,10 +77,9 @@ class TestWindow(acquisition.MainWindow):
                                       ('add.key', 'add.label', 'add.shapemenu'))
         self.vtoolbar.show()
         
-        self.navtoolbar = NavigatorToolbar(self)
+        self.navtoolbar = NavigatorToolbar(self.navigator, self)
         self.navtoolbar.show()
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.navtoolbar)
-        self.navigator.selectionModel().currentChanged.connect(self.update_navtoolbar)
         
         self.graphWin.show()
         
@@ -113,16 +112,7 @@ class TestWindow(acquisition.MainWindow):
         self.connect(self.imageSlider, QtCore.SIGNAL('set_idx(int)'), 
                      self.play.set_idx)
         
-        self.fixedDoc.paused = False
-        
-    def update_navtoolbar(self, *foo):
-        self.navtoolbar.clear()
-        self.navigator.buildContextMenu(menu=self.navtoolbar)
-        for a in self.navtoolbar.actions():          
-            if a.icon().isNull():
-                self.navtoolbar.removeAction(a)
-                
-        
+        self.fixedDoc.paused = False        
         
     def add_playback(self):
         """FIXME: DISABLED"""
