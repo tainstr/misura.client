@@ -172,7 +172,7 @@ def tasks():
     return r
 
 
-def jobs(n, pid="File import"):
+def jobs(n, pid="Reading dataset"):
     # FIXME: causes random crashes while opening microscope tests in compiled
     # win exe
     # return
@@ -181,7 +181,7 @@ def jobs(n, pid="File import"):
         t.jobs(n, pid)
 
 
-def job(n, pid="File import", label=''):
+def job(n, pid="Reading dataset", label=''):
     # FIXME: causes random crashes while opening microscope tests in compiled
     # win exe
     # return
@@ -190,7 +190,7 @@ def job(n, pid="File import", label=''):
         t.job(n, pid, label)
 
 
-def done(pid="File import"):
+def done(pid="Reading dataset"):
     # FIXME: causes random crashes while opening microscope tests in compiled
     # win exe
     # return
@@ -259,7 +259,7 @@ def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
         # Correct missing celsius indication
         if not u and m_var == 'T':
             u = 'celsius'
-    logging.debug('dataset_measuring_unit', hdf_dataset_name, u)
+    #logging.debug('dataset_measuring_unit', hdf_dataset_name, u)
     return u
 
 def resolve_unit(ds, opt, default):
@@ -737,7 +737,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                 attr = []
         if not m_update:
             # leave ds empty
-            logging.debug('Not loading:', col0, m_update)
+            #logging.debug('Not loading:', col0, m_update)
             pass
         elif col == 't':
             data = units.Converter.convert('second', self.params.time_unit, time_sequence)
