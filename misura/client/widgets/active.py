@@ -309,8 +309,16 @@ class Active(object):
         return self.get()
 
     def set_raw(self, val):
-        """Set value directly, without adapt2srv conversion"""
+        """Set value directly, without adapt2srv conversion.
+        Enable if disabled."""
         self.remObj.set(self.handle, val)
+        enable = None
+        if self.remObj.hasattr(self.handle, 'flags'):
+            flags = self.remObj.getattr(self.handle, 'flags')
+            enable = flags.get('enabled', None)
+        if enable==False:
+            self.remObj.setattr(self.handle, 'flags', {'enabled': True})
+            self._check_flags()
         self.get()
 
     def _get(self, rem=None):
