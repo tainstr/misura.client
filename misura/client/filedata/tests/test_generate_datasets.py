@@ -56,7 +56,7 @@ class GenerateDatasets(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        f = indexer.SharedFile(nativem4)
+        f = indexer.SharedFile(nativem4, mode='r')
         cls.doc = filedata.MisuraDocument(proxy=f)
         cls.doc.reloadData()
         f.close()
