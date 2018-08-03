@@ -351,7 +351,7 @@ class NodeEntry(object):
             return False
         splt = self.splt
         if self.parent:
-            assert self.path.startswith(path)
+            assert path.startswith(self.path)
             # Cut away the common part
             path = path[len(self.path) + len(splt):]
         item = self
@@ -366,7 +366,7 @@ class NodeEntry(object):
                 # Propagate the linked file to the first part of the path
                 if item.ds and item.ds.linked:
                     linked_item = self.root.get(linked, None)
-                    if linked_item.linked == False:
+                    if linked_item and linked_item.linked == False:
                         linked_item.linked = item.ds.linked
                 break
             new = item.get(sub, False)
