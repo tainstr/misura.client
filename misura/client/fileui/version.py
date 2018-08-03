@@ -67,6 +67,8 @@ class VersionMenu(QtGui.QMenu):
     """Available object versions menu"""
     versionChanged = QtCore.pyqtSignal(('QString'))
     plotChanged = QtCore.pyqtSignal(str, str)
+    versionSaved = QtCore.pyqtSignal(str)
+    plotSaved = QtCore.pyqtSignal(str)
     current_plot_id = False
     doc = False
     _proxy = False
@@ -113,6 +115,7 @@ class VersionMenu(QtGui.QMenu):
         r = self.doc.save_plot(self.proxy, plot_id, page, name)
         self.current_plot_id = plot_id
         self.redraw()
+        self.plotSaved.emit(plot_id)
         return
 
     def load_latest_plot(self):
@@ -245,6 +248,7 @@ class VersionMenu(QtGui.QMenu):
         self.doc.save_version_and_plot(version_name)
         self.current_plot_id = version_name
         self.current = self.proxy.get_version()
+        self.versionSaved.emit(self.current)
         return True
 
     def new_version(self):

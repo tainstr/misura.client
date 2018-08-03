@@ -82,6 +82,7 @@ class TestWindow(acquisition.MainWindow):
         self.navtoolbar = NavigatorToolbar(self.navigator, self)
         self.navtoolbar.show()
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.navtoolbar)
+        self.navtoolbar.versionSaved.connect(self.reset_changeset)
         
         self.graphWin.show()
         
@@ -116,7 +117,13 @@ class TestWindow(acquisition.MainWindow):
         
         self.fixedDoc.paused = False       
         
+        self.reset_changeset()
+        
+    def reset_changeset(self, *foo):
         self.initial_veusz_doc_changeset = self.doc.changeset-self.doc.changeset_ignore
+        self.initial_server_changeset = self.server.recursive_changeset()
+        logging.debug('Reset changeset', self.initial_veusz_doc_changeset,
+                      self.initial_server_changeset)
         
     def add_playback(self):
         """FIXME: DISABLED"""
@@ -160,7 +167,7 @@ class TestWindow(acquisition.MainWindow):
         if not self.menuVersions:
             self.menuVersions = fileui.VersionMenu(self.fixedDoc, self.fixedDoc.proxy)
             self.menuVersions.versionChanged.connect(partial(self.slot_version_changed))
-            
+            self.menuVersions.versionSaved.connect(self.reset_changeset)
         self.myMenuBar.measure.addMenu(self.menuVersions)
         
     def slot_version_changed(self):
@@ -218,9 +225,9 @@ class TestWindow(acquisition.MainWindow):
     def check_save(self):
         effective_changeset = self.doc.changeset-self.doc.changeset_ignore
         conf_changeset = self.server.recursive_changeset()
-        logging.debug('Checking changesets', effective_changeset, self.doc.changeset, self.doc.changeset_ignore, 
-                      self.initial_veusz_doc_changeset, conf_changeset)
-        if effective_changeset > self.initial_veusz_doc_changeset or conf_changeset>0:
+        logging.debug('Checking changesets', effective_changeset, self.doc.changeset,  
+                      self.initial_veusz_doc_changeset, conf_changeset, self.initial_server_changeset)
+        if effective_changeset > self.initial_veusz_doc_changeset or conf_changeset>self.initial_server_changeset:
             ver = self.doc.proxy.get_version()
             logging.debug('got version', repr(ver))
             if not ver:

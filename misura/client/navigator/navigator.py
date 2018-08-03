@@ -51,6 +51,11 @@ QTreeView::item:selected:!active {
 }"""
 
 class NavigatorToolbar(QtGui.QToolBar):
+    versionChanged = QtCore.pyqtSignal(('QString'))
+    plotChanged = QtCore.pyqtSignal(str, str)
+    versionSaved = QtCore.pyqtSignal(str)
+    plotSaved = QtCore.pyqtSignal(str)
+    
     def __init__(self, navigator, parent=None):
         super(NavigatorToolbar, self).__init__(parent=parent)
         self.navigator = navigator
@@ -75,6 +80,10 @@ class NavigatorToolbar(QtGui.QToolBar):
         self.act_save.triggered.connect(self.save)
         self.act_save.setMenu(self.save_menu)
         self.insertAction(self.actions()[0], self.act_save)
+        self.save_menu.versionSaved.connect(self.versionSaved.emit)
+        self.save_menu.plotSaved.connect(self.plotSaved.emit)
+        self.save_menu.versionChanged.connect(self.versionChanged.emit)
+        self.save_menu.plotChanged.connect(self.plotChanged.emit)
         
     def update_navtoolbar(self, *foo):
         self.clear()
