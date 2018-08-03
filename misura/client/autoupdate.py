@@ -142,7 +142,7 @@ def get_version_date(versionString):
     for line in versionString.splitlines():
         if line.startswith('date'):
             line=line.split('=')[-1].replace(' ','').replace(':','').replace('-','')
-            current = fi(line+'31')
+            current = fi(line)
     return current
     
 def check_server_updates(remote, parent=None):
