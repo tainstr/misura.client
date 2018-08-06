@@ -89,6 +89,6 @@ def get_default_plot_plugin_class(instrument_name):
     from ..clientconf import confdb
     from .. import plugin
     plugin_class = default_plot_plugins.get(instrument_name, plugin.DefaultPlotPlugin)
-    print 'defaultPlot', plugin_class
+    logging.debug('get_default_plot_plugin_class', plugin_class)
     plot_rule_func = default_plot_rules.get(instrument_name, lambda *a: confdb['rule_plot'])
     return plugin_class, plot_rule_func

@@ -137,7 +137,7 @@ class Plot(VeuszPlot):
         plugin_class, plot_rule_func = get_default_plot_plugin_class(
             instrument_name)
         plot_rule = plot_rule_func(confdb, linked.conf)
-        print 'default_plot', plugin_class, plot_rule
+        logging.debug('default_plot', plugin_class, plot_rule)
         p = plugin_class()
         r = p.apply(
             self.cmd, {'dsn': self.document.data.keys(), 'rule': plot_rule})

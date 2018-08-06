@@ -109,7 +109,6 @@ class TestWindow(acquisition.MainWindow):
         self.add_playback()
 
         self.graphWin.showMaximized()
-#         self.summaryPlot.default_plot()
         self.removeToolBar(self.controls)
         self.connect(self.play, QtCore.SIGNAL('set_idx(int)'), self.set_idx)
         self.connect(self.imageSlider, QtCore.SIGNAL('set_idx(int)'), 
