@@ -242,6 +242,7 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         self.lay.addWidget(self.list)
 
         self.open_button = QtGui.QPushButton(_('Open Selected'), parent=self)
+        self.open_button.setIcon(iutils.theme_icon('document-new'))
         self.open_button.setEnabled(False)
         self.connect(
             self.open_button, QtCore.SIGNAL('clicked()'), self.select_item)
@@ -249,6 +250,7 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         
         lbl = {'file': ' Misura file'}.get(category, '')
         self.add_button = QtGui.QPushButton(_('Open another') +lbl + ' ...', parent=self)
+        self.add_button.setIcon(iutils.theme_icon('system-file-manager'))
         self.connect(self.add_button, QtCore.SIGNAL('clicked()'), self.new)
         self.lay.addWidget(self.add_button)
         

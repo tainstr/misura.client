@@ -37,6 +37,22 @@ class DatabasesArea(QtGui.QMdiArea):
     def __init__(self, parent=None):
         super(DatabasesArea, self).__init__(parent)
         self.setAcceptDrops(True)
+        self.pix_size = QtCore.QSize(500, 100)
+        self.pix = iutils.theme_icon("browser_drag_drop").pixmap(self.pix_size)
+        self.gray = self.background()
+        
+    def resizeEvent(self, event):
+        """Add the drag-n-drop artwork"""
+        size = event.size()
+        new_back = QtGui.QImage(size, QtGui.QImage.Format_ARGB32_Premultiplied)
+        paint = QtGui.QPainter(new_back)
+        paint.fillRect(0, 0, size.width(), size.height(), self.gray)
+        paint.drawPixmap(size.width()-self.pix_size.width(), 
+                         size.height()-self.pix_size.height(), 
+                         self.pix, 0, 0, 0 , 0)
+        paint.end()
+        self.setBackground(QtGui.QBrush(new_back))
+        return QtGui.QMdiArea.resizeEvent(self, event)
 
     def dragEnterEvent(self, event):
         logging.debug('dragEnterEvent', event.mimeData())
