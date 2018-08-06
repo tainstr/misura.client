@@ -267,6 +267,8 @@ class DataNavigatorDomain(NavigatorDomain):
         
     @node
     def add_versions_menu(self, node=False, menu=None):
+        if not node:
+            return False
         proxy = self.doc.proxies.get(node.linked.params.filename, False)
         logging.debug('add_versions_menu', node, node.linked.params.filename, proxy)
         if proxy:
