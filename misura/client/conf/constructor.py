@@ -119,12 +119,16 @@ class ClickableLabel(QtGui.QPushButton):
             self.right_clicked.emit()
         return QtGui.QPushButton.mousePressEvent(self, event)
 
+class ChildSection(QtGui.QWidget):
+    def __init__(self, *a, **k):
+        super(QtGui.QWidget, self).__init__(*a, **k)
+        self.widgetsMap={}
 
 class OptionsGroup(QtGui.QGroupBox):
-    def __init__(self, wg, children, parent=None):
+    def __init__(self, wg, child_section, parent=None):
         QtGui.QGroupBox.__init__(self, parent=parent)
         self.wg = wg
-        self.children = children
+        self.child_section = child_section
         
         self.more = ClickableLabel()
         self.more.setIcon(iutils.theme_icon('add'))
@@ -152,7 +156,7 @@ class OptionsGroup(QtGui.QGroupBox):
         
         glay = QtGui.QVBoxLayout()
         glay.addWidget(out)
-        glay.addWidget(children)
+        glay.addWidget(child_section)
         self.setLayout(glay)
     
     def mousePressEvent(self, event):
@@ -168,18 +172,18 @@ class OptionsGroup(QtGui.QGroupBox):
             self.show_menu(event.pos())
         
     def expand(self):
-        self.children.show()
+        self.child_section.show()
         self.more.setIcon(iutils.theme_icon('list-remove'))
         self.setChecked(True)
         
     def collapse(self):
-        self.children.hide()
+        self.child_section.hide()
         self.more.setIcon(iutils.theme_icon('add'))
         self.setChecked(False)                         
         
     def hide_show(self):
-        """Hide or show option's children"""
-        if self.children.isVisible():
+        """Hide or show option's child_section"""
+        if self.child_section.isVisible():
             self.collapse()
         else:
             self.expand()
@@ -192,16 +196,17 @@ class OptionsGroup(QtGui.QGroupBox):
     def build_compare_menu(self):
         self.comparisons = {}
         self.compare_menu.clear()
-        wm = self.children.widgetsMap.copy()
+        wm = self.child_section.widgetsMap.copy()
         wm[self.wg.handle] = self.wg
         comparison = self.wg.remObj.compare_option(*wm.keys())
         set_func = lambda keyvals: [wm[k].set_raw(v) for k,v in keyvals]
         widgets.active.build_option_menu(comparison, self.comparisons, self.compare_menu, set_func)
         
-class ChildSection(QtGui.QWidget):
-    def __init__(self, *a, **k):
-        super(QtGui.QWidget, self).__init__(*a, **k)
-        self.widgetsMap={}
+    @property
+    def widgetsMap(self):
+        return self.child_section.widgetsMap
+        
+
         
 class Section(QtGui.QGroupBox):
     """Form builder for a list of options"""
@@ -289,11 +294,11 @@ class Section(QtGui.QGroupBox):
             parent_layout.addRow(parent_widget.label_widget, parent_widget)
             return True
         # Widget hosting the children form
-        children = ChildSection(parent_widget)
+        child_section = ChildSection(parent_widget)
         children_lay = QtGui.QFormLayout()
-        children.setLayout(children_lay)
+        child_section.setLayout(children_lay)
         # Add the parent option plus the expansion button
-        group = OptionsGroup(parent_widget, children, parent=self)
+        group = OptionsGroup(parent_widget, child_section, parent=self)
         self.groupsMap[parent_widget.handle] = group
         parent_layout.addRow(group)
         for handle, child in prop['children'].iteritems():
@@ -301,9 +306,9 @@ class Section(QtGui.QGroupBox):
                 logging.error(
                     'Option parenthood loop detected', handle, prop['children'].keys())
                 continue
-            self.add_children(children, child)
-            self.parentsMap[handle] = children
-        children.hide()
+            self.add_children(child_section, child)
+            self.parentsMap[handle] = child_section
+        child_section.hide()
 
     def build(self, prop):
         self.add_children(self, prop)

@@ -784,7 +784,10 @@ class ActiveWidget(Active, QtGui.QWidget):
         """Populate option group comparison menu"""
         self.compare_group = {}
         comparison = self.remObj.compare_option(self.handle, *self.prop['children'].keys())
-        build_option_menu(comparison, self.compare_group, self.compare_group_menu, self.set_raw)
+        wm = self.parent().parent().widgetsMap.copy()
+        wm[self.handle] = self
+        set_func = lambda keyvals: [wm[k].set_raw(v) for k,v in keyvals]
+        build_option_menu(comparison, self.compare_group, self.compare_group_menu, set_func)
         
 
     def isVisible(self):
