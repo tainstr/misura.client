@@ -14,7 +14,7 @@
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
 SetCompressor /solid lzma
-
+;SetCompress off
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
 
@@ -29,6 +29,8 @@ SetCompressor /solid lzma
 !insertmacro MUI_PAGE_LICENSE "${PYINST_DIR}\LICENSE"
 ; Directory page
 !insertmacro MUI_PAGE_DIRECTORY
+; Components selection page
+!insertmacro MUI_PAGE_COMPONENTS
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
@@ -54,7 +56,7 @@ ShowUnInstDetails show
 
 ; taken from http://stackoverflow.com/questions/719631/how-do-i-require-user-to-uninstall-previous-version-with-nsis
 ; The "" makes the section hidden.
-Section "" SecUninstallPrevious
+Section -SecUninstallPrevious
     Call UninstallPrevious
 SectionEnd
 
@@ -75,7 +77,8 @@ Function UninstallPrevious
 
 FunctionEnd
 
-Section "MainSection" SEC01
+Section "Misura" SEC01
+  SectionIn RO
   SetOutPath "$INSTDIR"
   SetOverwrite try
   File "${PYINST_DIR}\*.exe"
@@ -153,6 +156,25 @@ Section "MainSection" SEC01
   WriteRegStr HKCR "Misura.Document\DefaultIcon" "" '"$INSTDIR\icons\browser.ico"'
 SectionEnd
 
+
+
+Section "Flash diffusivity" SEC_FLASH
+
+  SectionIn 1
+  SetOutPath "$INSTDIR"
+  WriteINIStr "$INSTDIR\nsis_installer.ini" "main" "flash" 1
+  
+
+SectionEnd
+
+Section "Misura3 compatibility" SEC_M3
+
+  SectionIn 2
+  SetOutPath "$INSTDIR"
+  WriteINIStr "$INSTDIR\nsis_installer.ini" "main" "m3" 1
+
+SectionEnd
+
 Section -AdditionalIcons
   WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
   CreateShortCut "$SMPROGRAMS\Misura\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
@@ -181,7 +203,7 @@ Function un.onInit
   Abort
 FunctionEnd
 
-Section Uninstall
+Section -Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}.url"
   Delete "$INSTDIR\uninst.exe"
 
