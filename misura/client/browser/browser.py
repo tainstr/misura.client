@@ -31,6 +31,17 @@ except:
 
 
 
+def decode_drop_event(drop_event):
+    urls = drop_event.mimeData().urls()
+    logging.debug('dropEvent', urls)
+    for url in urls:
+        url = url.toString().replace('file://', '')
+        # on windows, remove also the first "/"
+        if os.name.lower() == 'nt':
+            url = url[1:]
+        return url
+    return False
+
 class DatabasesArea(QtGui.QMdiArea):
     convert = QtCore.pyqtSignal(str)
 
@@ -60,15 +71,26 @@ class DatabasesArea(QtGui.QMdiArea):
             event.acceptProposedAction()
 
     def dropEvent(self, drop_event):
-        urls = drop_event.mimeData().urls()
-        logging.debug('dropEvent', urls)
-        for url in urls:
-            url = url.toString().replace('file://', '')
-            # on windows, remove also the first "/"
-            if os.name.lower() == 'nt':
-                url = url[1:]
+        url = decode_drop_event(drop_event)
+        if url:
             self.convert.emit(url)
 
+class TestsTabBar(QtGui.QTabBar):
+    dropped = QtCore.pyqtSignal(str)
+    
+    def __init__(self, *a, **k):
+        super(TestsTabBar, self).__init__(*a, **k)
+        self.setAcceptDrops(True)
+    
+    def dragEnterEvent(self, event):
+        logging.debug('TestsTabBar.dragEnterEvent', event.mimeData())
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()    
+    
+    def dropEvent(self, drop_event):
+        url = decode_drop_event(drop_event)
+        if url:
+            self.dropped.emit(url)        
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -78,11 +100,16 @@ class MainWindow(QtGui.QMainWindow):
         super(QtGui.QMainWindow, self).__init__(parent)
         configure_logger('browser.log')
         self.tab = QtGui.QTabWidget()
+        self.tab_bar = TestsTabBar()
+        self.tab_bar.dropped.connect(self.convert_file)
+        self.tab.setTabBar(self.tab_bar)
         self.setAcceptDrops(True)
         self.area = DatabasesArea(self)
         self.tab.addTab(self.area, _('Databases'))
         self.tab.setTabsClosable(True)
         self.tab.setDocumentMode(True)
+
+        
         database_tab_index = 0
         self.remove_close_button_from_tab(database_tab_index)
         self.setCentralWidget(self.tab)
