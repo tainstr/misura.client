@@ -82,6 +82,22 @@ def get_progress_time_for(current_segment_progress, kiln):
     result = (time + (current_segment[-1][0] - time) * current_segment_progress / 100.) / 60.
     return result
 
+def compare_curves(c1, c2, tol=0.01):
+    """Check if two heating cycles are equal within a tolerance"""
+    if len(c1)!=len(c2):
+        return False
+    for i, (t1, v1) in enumerate(c1):
+        t2, v2 = c2[i]
+        if abs(t1-t2)>tol:
+            return False
+        if v1==v2:
+            continue
+        if isinstance(v1, basestring) or isinstance(v2, basestring):
+            return False
+        if abs(v1-v2)>tol:
+            return False
+    return True
+
 class ThermalCycleDesigner(QtGui.QSplitter):
 
     """The configuration interface widget. It builds interactive controls to deal with a misura configuration object (options, settings, peripherals configurations, etc)."""
@@ -302,7 +318,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
             tbrowcurve.append(row[1])
             tbcurve.append(tbrowcurve)
         
-        remote_equals = tbcurve == self.remote.get('curve')
+        remote_equals = compare_curves(tbcurve, self.remote.get('curve'))
         for btn in [self.bApp, self.bRead]:
             if not btn:
                 continue
@@ -310,10 +326,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
                 "color:" + (';' if remote_equals else 'red;'))
         saved_equals = True 
         if self.remote.has_key('savedCurve'):
-            saved_equals = ( tbcurve == self.remote.get('savedCurve') )
-        print 'cli',tbcurve
-        print 'rem', self.remote.get('curve')
-        print 'saved',self.remote.get('savedCurve')
+            saved_equals = compare_curves(tbcurve, self.remote.get('savedCurve'))
         if saved_equals:
             self.tcc.setStyleSheet("border-color: ; border-style: ; border-width: 0px;" )
         else:

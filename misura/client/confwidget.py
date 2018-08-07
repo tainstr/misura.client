@@ -250,7 +250,12 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         
         lbl = {'file': ' Misura file'}.get(category, '')
         self.add_button = QtGui.QPushButton(_('Open another') +lbl + ' ...', parent=self)
-        self.add_button.setIcon(iutils.theme_icon('system-file-manager'))
+        if self.name == 'server':
+            icon = iutils.theme_icon('connect')
+        else:
+            icon = iutils.theme_icon('system-file-manager')
+        self.add_button.setIcon(icon)
+        
         self.connect(self.add_button, QtCore.SIGNAL('clicked()'), self.new)
         self.lay.addWidget(self.add_button)
         
