@@ -6,13 +6,14 @@ import functools
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from misura.canon.plugin import navigator_domains, NavigatorDomain, node, nodes
+from misura.canon.plugin import domains as canon_domains
 from misura.canon.indexer import SharedFile
 
 from .. import conf, units, iutils
 from veusz.dialogs.plugin import PluginDialog
 
 from PyQt4 import QtGui, QtCore
-
+canon_domains.QtUserRole = QtCore.Qt.UserRole
 
 from .. import _
 from ..filedata import MisuraDocument
@@ -339,6 +340,8 @@ class DataNavigatorDomain(NavigatorDomain):
 
     def add_multiary_menu(self, menu, nodes):
         header = self.get_datasets_from_selection()
+        nodes = [h[1] for h in header]
+        header = [h[0] for h in header]
         if len(header):
             menu.addAction(_('Table from selection'), functools.partial(self.create_table, header))
             menu.addAction(_('Export to csv'), functools.partial(self.export_csv, header))
@@ -697,11 +700,12 @@ class MathNavigatorDomain(NavigatorDomain):
 
     def add_multiary_menu(self, menu, nodes):
         datasets = self.get_datasets_from_selection()
+        nodes = [d[1] for d in datasets]
         if len(datasets)==2:
-            menu.addAction(_('Correct'), functools.partial(self.correct, datasets))
+            menu.addAction(_('Correct'), functools.partial(self.correct, nodes))
         if len(datasets):
-            menu.addAction(_('Smooth all'), functools.partial(self.iternodes, datasets, self.smooth, dialog=False))
-            menu.addAction(_('Smooth+plot all'), functools.partial(self.iternodes, datasets, self.smooth_and_plot))
+            menu.addAction(_('Smooth all'), functools.partial(self.iternodes, nodes, self.smooth, dialog=False))
+            menu.addAction(_('Smooth+plot all'), functools.partial(self.iternodes, nodes, self.smooth_and_plot))
 
 
 class MeasurementUnitsNavigatorDomain(NavigatorDomain):

@@ -163,15 +163,12 @@ class NodeEntry(object):
         # Root and file entries
         if not self.parent:
             self._path = self._name
-            logging.debug('Root entry', self._name)
         # File entry
         elif not self.parent.parent:
             self._path = self._name
-            logging.debug('File entry', self._name)
         # First level entries (t, groups)
         elif not self.parent.parent.parent:
             self._path = self.parent.path + ':' + self._name
-            logging.debug('First level', self._path)
         # Normal entries
         else:
             self._path = self.splt.join([self.parent.path, self._name])
