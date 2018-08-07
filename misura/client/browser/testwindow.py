@@ -21,6 +21,7 @@ from misura.client.iutils import calc_plot_hierarchy, most_involved_node
 class TestWindow(acquisition.MainWindow):
 
     """View of a single test file"""
+    loaded_version = QtCore.pyqtSignal(str)
     
     def __init__(self, doc, parent=None):
         acquisition.MainWindow.__init__(self, doc=doc, parent=parent)
@@ -114,9 +115,24 @@ class TestWindow(acquisition.MainWindow):
         self.connect(self.imageSlider, QtCore.SIGNAL('set_idx(int)'), 
                      self.play.set_idx)
         
-        self.fixedDoc.paused = False       
+        
+        
+        self.fixedDoc.paused = False 
         
         self.reset_changeset()
+        self.loaded_version.emit(self.fixedDoc.proxy.get_version())
+        
+    def get_tooltip(self):
+        """This is shown in tabbar"""
+        m = self.remote.measure
+        tt = [self.fixedDoc.proxy.get_path(), m['name']]
+        cm = m['comment']
+        if cm:
+            tt.append(cm)
+        for smp in self.remote.samples:
+            tt.append(smp['name'])
+        tt.append(m['date'])
+        return '\n'.join(tt)
         
     def reset_changeset(self, *foo):
         self.initial_veusz_doc_changeset = self.doc.changeset-self.doc.changeset_ignore

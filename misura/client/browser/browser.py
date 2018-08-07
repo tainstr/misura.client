@@ -189,10 +189,17 @@ class MainWindow(QtGui.QMainWindow):
         instrument = doc.proxy.conf['runningInstrument']
         cw = self.centralWidget()
         icon = QtGui.QIcon(os.path.join(parameters.pathArt, 'small_' + instrument + '.svg'))
-        win = cw.addTab(tw, icon, tw.title)
+        idx = cw.addTab(tw, icon, tw.title)
+        self.tab_bar.setTabToolTip(idx, tw.toolTip())
+        tw.loaded_version.connect(self.update_tooltip)
         confdb.mem_file(path, tw.remote.measure['name'])
-        cw.setCurrentIndex(cw.count() - 1)
+        cw.setCurrentIndex(idx)
+        self.update_tooltip(tw)
         return tw
+    
+    def update_tooltip(self, test_window):
+        idx = self.tab.indexOf(test_window)
+        self.tab_bar.setTabToolTip(idx, test_window.get_tooltip())
 
     def open_database(self, path, new=False):
         idb = getDatabaseWidget(path, new=new, browser=self)
