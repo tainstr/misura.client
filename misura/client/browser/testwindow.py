@@ -264,8 +264,7 @@ class TestWindow(acquisition.MainWindow):
     def close(self):                
         self.play.close()
         self.fixedDoc.proxy.close()
-        acquisition.MainWindow.close(self)
-        return False
+        return acquisition.MainWindow.close(self)
 
     def set_idx(self, idx):
         logging.debug('TestWindow.set_idx', self.play.isRunning(), idx)

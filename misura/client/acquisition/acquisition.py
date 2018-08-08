@@ -371,6 +371,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.fixedDoc.proxy.close()
         ev.accept()
+        return super(MainWindow, self).closeEvent(ev)
     
 
     _blockResetFileProxy = False    
