@@ -154,24 +154,44 @@ Section "Misura" SEC01
   WriteRegStr HKCR "Misura.Document" "" "Misura Document"
   WriteRegStr HKCR "Misura.Document\shell\open\command" "" '"$INSTDIR\misura.exe" --browser "%1"'
   WriteRegStr HKCR "Misura.Document\DefaultIcon" "" '"$INSTDIR\icons\browser.ico"'
+  
+  
+  ; Installer options
+	WriteINIStr "$INSTDIR\installer_options.ini" "main" "m3" 0
+	WriteINIStr "$INSTDIR\installer_options.ini" "main" "flash" 0
+	WriteINIStr "$INSTDIR\installer_options.ini" "main" "adv" 0
+	WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_flash" "0"
+	WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_m3" "0"
+	WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_adv" "0"
 SectionEnd
 
 
 
-Section "Flash diffusivity" SEC_FLASH
+Section "Flash diffusivity" CMP_FLASH
 
   SectionIn 1
   SetOutPath "$INSTDIR"
-  WriteINIStr "$INSTDIR\nsis_installer.ini" "main" "flash" 1
+  WriteINIStr "$INSTDIR\installer_options.ini" "main" "flash" 1
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_flash" "1"
   
 
 SectionEnd
 
-Section "Misura3 compatibility" SEC_M3
+Section "Misura3 compatibility" CMP_M3
 
   SectionIn 2
   SetOutPath "$INSTDIR"
-  WriteINIStr "$INSTDIR\nsis_installer.ini" "main" "m3" 1
+  WriteINIStr "$INSTDIR\installer_options.ini" "main" "m3" 1
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_m3" "1"
+
+SectionEnd
+
+Section "Advanced mode" CMP_ADV
+
+  SectionIn 3
+  SetOutPath "$INSTDIR"
+  WriteINIStr "$INSTDIR\installer_options.ini" "main" "adv" 1
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_adv" "1"
 
 SectionEnd
 
@@ -265,3 +285,27 @@ Section -Uninstall
   DeleteRegKey HKCR "Misura.Document"
   SetAutoClose true
 SectionEnd
+
+Function .OnInit
+	!insertmacro UnselectSection ${CMP_M3}
+	ReadRegStr $R0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_m3"
+	DetailPrint "cmp_m3 $R0"
+	${If} $R0 == "1"
+	   !insertmacro SelectSection ${CMP_M3}
+	${EndIf}
+
+	!insertmacro UnselectSection ${CMP_FLASH}
+	ReadRegStr $R0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_flash"
+	DetailPrint "cmp_flash $R0"
+	${If} $R0 == "1"
+	   !insertmacro SelectSection ${CMP_FLASH}
+	${EndIf}
+	
+	!insertmacro UnselectSection ${CMP_ADV}
+	ReadRegStr $R0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_adv"
+	DetailPrint "cmp_adv $R0"
+	${If} $R0 == "1"
+	   !insertmacro SelectSection ${CMP_ADV}
+	${EndIf}
+FunctionEnd
+
