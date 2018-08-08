@@ -102,6 +102,8 @@ class DataNavigatorDomain(NavigatorDomain):
         else:
             is_loaded = (node.ds is not False) and (len(node.ds) > 0)
             self.act_load.setChecked(is_loaded)
+            if not is_loaded:
+                menu.addAction(iutils.theme_icon('help-about'), _('Plot'), self.plot)
         return is_loaded
 
     @node

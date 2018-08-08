@@ -74,6 +74,8 @@ class NavigatorToolbar(QtGui.QToolBar):
         return self.save_menu.save_version()
     
     def add_save_menu(self):
+        if not self.actions():
+            return
         dom = self.navigator.domainsMap['DataNavigatorDomain']
         self.save_menu = dom.add_versions_menu()
         self.act_save = QtGui.QAction(iutils.theme_icon('media-floppy'), _('Save in Misura file'), self)
