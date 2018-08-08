@@ -8,6 +8,10 @@ logging = get_module_logging(__name__)
 import sqlite3
 import re
 from traceback import format_exc, print_exc
+try:
+    import configparser
+except:
+    import ConfigParser as configparser
 
 from PyQt4 import QtCore
 
@@ -200,12 +204,30 @@ ao(default_desc, 'recent_m3database', 'Table', attr=[
    'Hidden'], current=[[('Path', 'String'), ('Name', 'String')], ])
 
 
+# Windows installer options
+ao(default_desc, 'inst_m3', **{'name': 'Component: M3','current': False, 'type': 'Hidden'})
+ao(default_desc, 'inst_flash', **{'name': 'Component: Flash','current': True, 'type': 'Hidden'})
+
 recent_tables = 'server,database,file,m3database'.split(',')
 
 if os.name != 'nt':
     default_desc['m3_enable']['current'] = False
     default_desc['m3_enable']['attr'] = ['ReadOnly', 'Hidden']
 
+def get_installer_opts():
+    r = {}
+    current = os.path.join(params.pathClient, 'installer_options.ini')
+    if not os.path.exists(current):
+        logging.debug('No installer options found', current)
+        return r
+    logging.info('Reading installer configuration', current)
+    conf = configparser.SafeConfigParser()
+    conf.optionxform = str
+    conf.read(current)
+    for opt, val in conf.items('main'):
+        r[opt] = val
+    os.rename(current, os.path.join(params.pathClient, 'installer_options_backup.ini'))
+    return r
 
 def tabname(name):
     if name in recent_tables:
@@ -458,6 +480,25 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
 
         self.reset_rules()
         self.create_index()
+        
+        self.load_installer_options()
+        
+    def load_installer_options(self):
+        r = get_installer_opts()
+        logging.debug('load_installer_options', r)
+        if not r:
+            return False
+        for k, v in r.items():
+            k = 'inst_'+k
+            if k not in self:
+                logging.error('Missing installer option', k, v)
+                continue
+            self[k] = v
+        if not self['inst_m3']:
+            self['m3_enable'] = False
+        if not self['inst_flash']:
+            self['m3_plugin'] = self['m3_plugin'].replace('thegram', '').replace('\n\n', '\n')
+        self.save()
 
     def create_index(self):
         self.index = False
