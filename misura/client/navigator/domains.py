@@ -33,6 +33,21 @@ class DataNavigatorDomain(NavigatorDomain):
         self.data_tables = {}
         self.test_windows = {}
         
+    @node
+    def edit_dataset(self, node=False):
+        """Slot for opening the dataset edit window on the currently selected entry"""
+        ds, y = self.dsnode(node)
+        name = node.path
+        logging.debug('name', name)
+        dialog = self.mainwindow.slotDataEdit(name)
+        if ds is not y:
+            dialog.slotDatasetEdit()
+            
+    def create_shortcuts(self):
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_V), 
+                        self.navigator, 
+                        self.edit_dataset)
+        
         
     @node
     def viewFile(self, node=False):
@@ -308,6 +323,7 @@ class DataNavigatorDomain(NavigatorDomain):
         menu.addSeparator()
         self.add_load(menu, node)
         self.add_keep(menu, node)
+        menu.addAction(iutils.theme_icon('edit'), _('Edit (V)'), self.edit_dataset)
         menu.addAction(('Save on current version'), self.save_on_current_version)
         self.add_rules(menu, node)
         menu.addAction(_('Delete'), self.navigator.deleteData)
@@ -563,16 +579,6 @@ class MathNavigatorDomain(NavigatorDomain):
         return (not istime) and is_loaded
 
     @node
-    def edit_dataset(self, node=False):
-        """Slot for opening the dataset edit window on the currently selected entry"""
-        ds, y = self.dsnode(node)
-        name = node.path
-        logging.debug('name', name)
-        dialog = self.mainwindow.slotDataEdit(name)
-        if ds is not y:
-            dialog.slotDatasetEdit()
-
-    @node
     def smooth(self, node=False, dialog=True):
         """Call the SmoothDatasetPlugin on the current node"""
         ds, node = self.dsnode(node)
@@ -662,7 +668,6 @@ class MathNavigatorDomain(NavigatorDomain):
 
     def add_dataset_menu(self, menu, node):
         menu.addSeparator()
-        menu.addAction(iutils.theme_icon('edit'), _('Edit (V)'), self.edit_dataset)
         menu.addAction(_('Smooth (Ctrl+S)'), self.smooth)
         menu.addAction(iutils.theme_icon('smooth'), _('Smooth+plot (S)'), self.smooth_and_plot)
         
@@ -677,9 +682,6 @@ class MathNavigatorDomain(NavigatorDomain):
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_S), 
                         self.navigator, 
                         self.smooth_and_plot)
-        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_V), 
-                        self.navigator, 
-                        self.edit_dataset)
         
     add_derived_dataset_menu = add_dataset_menu
 
@@ -786,7 +788,8 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
 
     def add_dataset_menu(self, menu, node):
         menu.addSeparator()
-        self.add_percent(menu, node)
+        if not node.path.endswith(':t'):
+            self.add_percent(menu, node)
         self.add_unit(menu, node)
 
 
