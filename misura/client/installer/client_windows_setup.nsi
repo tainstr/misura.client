@@ -309,3 +309,8 @@ Function .OnInit
 	${EndIf}
 FunctionEnd
 
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+  !insertmacro MUI_DESCRIPTION_TEXT ${CMP_M3} "Misura3 database import functionality"
+  !insertmacro MUI_DESCRIPTION_TEXT ${CMP_FLASH} "Import FlashLine diffusivity test data and run advanced models and post-anlaysis"
+  !insertmacro MUI_DESCRIPTION_TEXT ${CMP_ADV} "Expose all private options, experimental features and possibly misleading functionalities."
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
