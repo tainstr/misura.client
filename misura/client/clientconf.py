@@ -207,6 +207,7 @@ ao(default_desc, 'recent_m3database', 'Table', attr=[
 # Windows installer options
 ao(default_desc, 'inst_m3', **{'name': 'Component: M3','current': False, 'type': 'Hidden'})
 ao(default_desc, 'inst_flash', **{'name': 'Component: Flash','current': True, 'type': 'Hidden'})
+ao(default_desc, 'inst_adv', **{'name': 'Component: Advanced','current': False, 'type': 'Hidden'})
 
 recent_tables = 'server,database,file,m3database'.split(',')
 
@@ -225,8 +226,11 @@ def get_installer_opts():
     conf.optionxform = str
     conf.read(current)
     for opt, val in conf.items('main'):
-        r[opt] = val
-    os.rename(current, os.path.join(params.pathClient, 'installer_options_backup.ini'))
+        r[opt] = int(val)
+    bak = os.path.join(params.pathClient, 'installer_options_backup.ini')
+    if os.path.exists(bak):
+        os.remove(bak)
+    os.rename(current, bak)
     return r
 
 def tabname(name):
@@ -494,10 +498,26 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
                 logging.error('Missing installer option', k, v)
                 continue
             self[k] = v
-        if not self['inst_m3']:
-            self['m3_enable'] = False
-        if not self['inst_flash']:
-            self['m3_plugin'] = self['m3_plugin'].replace('thegram', '').replace('\n\n', '\n')
+        # M3
+        self['m3_enable'] = self['inst_m3']
+        
+        # FLASH
+        if self['inst_flash']:
+            m3p = self['m3_plugins']
+            if 'thegram' not in m3p:
+                if m3p and not m3p.endswith('\n'):
+                    m3p += '\n'
+                self['m3_plugins'] = m3p+'thegram'
+        else: 
+            # Disable plugin
+            self['m3_plugin'] = m3p.replace('thegram', '').replace('\n\n', '\n')
+            
+        # ADV
+        if self['inst_adv']:
+            self['authLevel'] = 5
+        else:
+            self['authLevel'] = 2
+            
         self.save()
 
     def create_index(self):
