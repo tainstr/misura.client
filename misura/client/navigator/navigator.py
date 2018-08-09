@@ -142,7 +142,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             
             #TODO: all these should be implicit
             self.base_menu = QtGui.QMenu(self)
-            self.add_status_actions(self.base_menu)
+            self.add_tree_actions(self.base_menu)
             self.file_menu = QtGui.QMenu(_('File'), self)
             self.group_menu = QtGui.QMenu(_('Node'), self)
             self.sample_menu = QtGui.QMenu(_('Sample'), self)
@@ -445,7 +445,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             logging.error('Not a valid node', node)
         return done
 
-    def add_status_actions(self, menu, node=False):
+    def add_tree_actions(self, menu, node=False):
         menu.addSeparator()
         menu.addAction(_('Expand all (E)'), self.expandAll)
         menu.addAction(_('Collapse siblings (C)'), self.collapse_siblings)
@@ -509,44 +509,49 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.update_view()
         
 
-    def update_base_menu(self, node=False, base_menu=False):
+    def update_base_menu(self, node=False, base_menu=False, tree_actions=False):
         base_menu.clear()
         for domain in self.domains:
             domain.build_base_menu(base_menu, node)
-        self.add_status_actions(base_menu)
+        if tree_actions:
+            self.add_tree_actions(base_menu)
         self.act_del.setEnabled(bool(node))
         return base_menu
 
-    def update_group_menu(self, node, group_menu):
+    def update_group_menu(self, node, group_menu, tree_actions=False):
         group_menu.clear()
         for domain in self.domains:
             domain.build_group_menu(group_menu, node)
-        self.add_status_actions(group_menu)
+        if tree_actions:
+            self.add_tree_actions(group_menu)
         self.act_del.setEnabled(bool(node))
         return group_menu
 
-    def update_file_menu(self, node, file_menu):
+    def update_file_menu(self, node, file_menu, tree_actions=False):
         file_menu.clear()
         file_menu.addAction(_('Update view'), self.update_view)
         for domain in self.domains:
             domain.build_file_menu(file_menu, node)
-        self.add_status_actions(file_menu, node)
+        if tree_actions:
+            self.add_tree_actions(file_menu, node)
         self.act_del.setEnabled(bool(node))
         return file_menu
 
-    def update_sample_menu(self, node, sample_menu):
+    def update_sample_menu(self, node, sample_menu, tree_actions=False):
         sample_menu.clear()
         for domain in self.domains:
             domain.build_sample_menu(sample_menu, node)
-        self.add_status_actions(sample_menu)
+        if tree_actions:
+            self.add_tree_actions(sample_menu)
         self.act_del.setEnabled(bool(node))
         return sample_menu
 
-    def update_dataset_menu(self, node, dataset_menu):
+    def update_dataset_menu(self, node, dataset_menu, tree_actions=False):
         dataset_menu.clear()
         for domain in self.domains:
             domain.build_dataset_menu(dataset_menu, node)
-        self.add_status_actions(dataset_menu)
+        if tree_actions:
+            self.add_tree_actions(dataset_menu)
         self.act_del.setEnabled(bool(node))
         return dataset_menu
 
@@ -630,30 +635,30 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return menu      
     
     @node
-    def buildContextMenu(self, node=False, sel=[], menu=False):
+    def buildContextMenu(self, node=False, sel=[], menu=False, tree_actions=False):
         n = len(sel)
         if node is None or not node.parent:
-            menu = self.update_base_menu(node, menu or self.base_menu)
+            menu = self.update_base_menu(node, menu or self.base_menu, tree_actions=tree_actions)
         elif n>1:
             menu = self.update_multiary_menu(sel, menu or self.multi_menu)
         elif node.ds is False:
             # Identify a "summary" node
             if not node.parent.parent:
-                menu = self.update_file_menu(node, menu or self.file_menu)
+                menu = self.update_file_menu(node, menu or self.file_menu, tree_actions=tree_actions)
             # Identify a "sampleN" node
             elif node.name().startswith('sample'):
-                menu = self.update_sample_menu(node, menu or self.sample_menu)
+                menu = self.update_sample_menu(node, menu or self.sample_menu, tree_actions=tree_actions)
             else:
-                menu = self.update_group_menu(node, menu or self.group_menu)
+                menu = self.update_group_menu(node, menu or self.group_menu, tree_actions=tree_actions)
         # The DatasetEntry refers to a plugin
         elif hasattr(node.ds, 'getPluginData'):
             menu = self.update_derived_menu(node, menu or self.der_menu)
         # The DatasetEntry refers to a standard dataset
         elif n <= 1:
-            menu = self.update_dataset_menu(node, menu or self.dataset_menu)
+            menu = self.update_dataset_menu(node, menu or self.dataset_menu, tree_actions=tree_actions)
         # No active selection
         else:
-            menu = self.update_base_menu(node, menu or self.base_menu)
+            menu = self.update_base_menu(node, menu or self.base_menu, tree_actions=tree_actions)
         return menu
 
 
@@ -664,7 +669,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         sel = self.selectedIndexes()
         node = self.model().data(self.currentIndex(), role=Qt.UserRole)
         logging.debug('showContextMenu', node)
-        menu = self.buildContextMenu(node, sel)
+        menu = self.buildContextMenu(node, sel, tree_actions=True)
         
         # menu.popup(self.mapToGlobal(pt))
         # Synchronous call to menu, otherise selection is lost on live update
