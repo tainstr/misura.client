@@ -43,27 +43,6 @@ network.manager.connect(network.manager,
 net = network.manager
 
 
-def connectNetwork():
-    global net
-    prev = str(settings.value('/ServerAddress'))
-    net.connect(net, QtCore.SIGNAL('connected()'), saveAddress)
-    if len(prev.split(':')) == 2:
-        s = network.ServerInfo(fullname='previous')
-        s.fromAddr(prev)
-        s.user = settings.value('/ServerUser')
-        s.password = settings.value('/ServerPassword')
-        s.name = settings.value('/ServerName')
-        s.host = 'previous'
-        net.servers['previous'] = s
-
-
-def saveAddress():
-    settings.setValue('/ServerAddress', net.addr)
-    settings.setValue('/ServerUser', net.user)
-    settings.setValue('/ServerPassword', net.password)
-#	settings.setValue('/ServerName', net.name)
-
-
 def initClient():
     global translators, app,  confdb, registry
     app = QtGui.QApplication.instance()
@@ -96,6 +75,7 @@ def initTranslations(app):
 def initNetwork():
     """Start zeroconf network scanner - deprecated"""
     # network.manager.start()
+    pass
 
 
 def initRegistry():
