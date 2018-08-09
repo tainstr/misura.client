@@ -2,45 +2,55 @@
 # -*- coding: utf-8 -*-
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
-from time import strftime, time
 from datetime import datetime
 
 from PyQt4 import QtGui, QtCore
 
 from misura.client import _
 from live import registry
+ 
 
 
-class LiveLogModel(QtCore.QAbstractTableModel):
-    def __init__(self, max_rows=1e4):
+class AbstractLogModel(QtCore.QAbstractTableModel):
+    def __init__(self, max_rows=1e4, parent=None):
         QtCore.QAbstractTableModel.__init__(self)
+        #super(AbstractLogModel, self).__init__(self, parent=parent)
         self._header_data = ['Time', 'L', 'Message']
         self._data = []
         self.max_rows=1e4
         self.current_buf = []
-
+        
     def rowCount(self, index=QtCore.QModelIndex()):
         return len(self._data)
 
     def columnCount(self, index=QtCore.QModelIndex()):
         if self.rowCount() == 0:
             return 0
-        return len(self._data[0])
-
+        return len(self._header_data)
+    
+    def decode_row(self, row):
+        return row
+        
     def data(self, index, role=QtCore.Qt.DisplayRole):
         if not index.isValid() or not (0 <= index.row() <= self.rowCount()):
             return 0
-        row = self._data[index.row()]
+        row = self.decode_row(self._data[index.row()])
         col = index.column()
         if role != QtCore.Qt.DisplayRole and role != QtCore.Qt.EditRole:
             return
         return row[col]
-
+    
     def headerData(self, section, orientation, role=QtCore.Qt.DisplayRole):
         if orientation != QtCore.Qt.Horizontal:
             return
         if role == QtCore.Qt.DisplayRole:
-            return self._header_data[section]
+            return self._header_data[section]        
+
+
+class LiveLogModel(AbstractLogModel):
+    def __init__(self, max_rows=1e4, parent=None):
+        AbstractLogModel.__init__(self, max_rows)
+        #super(LiveLogModel, self).__init__(max_rows, parent=None)
         
     def append(self, buf):
         if buf == self.current_buf:
@@ -70,7 +80,6 @@ class LiveLogModel(QtCore.QAbstractTableModel):
             QtCore.QAbstractTableModel.reset(self)
 
 
-    
 class LiveLog(QtGui.QTableView):
     iter = 0      
     def __init__(self, parent=None):
