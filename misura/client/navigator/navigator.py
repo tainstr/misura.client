@@ -192,7 +192,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         wg.show()
         return wg
         
-    def show_widget(self, wg, key=False):
+    def show_widget(self, wg, key=False, width=False, height=False):
         """Show widget `wg` as new mdi window, if possible, else as separate new window."""
         p = self.appwindow
         key = key or id(wg)
@@ -202,8 +202,12 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             return wg
         win = p.centralWidget().addSubWindow(wg)
         win.setWindowTitle(wg.windowTitle())
+        w = width or win.width()
+        h = height or win.height()
+        win.resize(w, h)
         win.showNormal()
         self.widgets_registry[key] = win
+        
         return win
         
     def create_shortcuts(self):
