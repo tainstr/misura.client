@@ -57,7 +57,7 @@ class TestSummaryVersioning(unittest.TestCase):
         self.assertEqual(2, len(versions))
         self.assertEqual(versions['/ver_1'][0], 'any version name')
 
-        self.file_proxy.set_version(0)
+        self.file_proxy.set_version('')
         self.assertEqual(self.file_proxy.conf['name'], original_name)
 
         self.file_proxy.set_version(1)

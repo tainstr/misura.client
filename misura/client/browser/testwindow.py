@@ -46,7 +46,7 @@ class TestWindow(acquisition.MainWindow):
         if not self.fixedDoc.proxy.isopen():
             self.fixedDoc.proxy.reopen()
             
-        self.fixedDoc.proxy.set_version(v)
+        self.fixedDoc.proxy.set_version(v, load_conf=True)
         
         if self.fixedDoc.proxy.conf is False:
             logging.debug('load_conf')
