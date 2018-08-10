@@ -42,7 +42,6 @@ def from_argv():
 
 
 def configure_logger(log_file_name=False, logdir=None, logsize=None, level=None):
-    import os
     import logging
     import logging.handlers
     from misura.client.clientconf import confdb

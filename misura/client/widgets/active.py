@@ -697,7 +697,7 @@ class ActiveWidget(Active, QtGui.QWidget):
                 self.units[u1] = (act, p)
                 
         if not self.readonly:
-            self.emenu.addAction(_('Set default value'), self.set_default)
+            self.emenu.addAction(_('Reset to default value'), self.set_default)
             
         self.emenu.addAction(_('Check for modification'), self.get)
         self.emenu.addAction(_('Option Info'), self.show_info)
