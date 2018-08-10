@@ -17,6 +17,7 @@ class ReferenceLogModel(AbstractLogModel):
         AbstractLogModel.__init__(self, max_rows)
         #super(ReferenceLogModel, self).__init__(max_rows, parent=None)
         self.proxy = proxy
+        self.path = ''
         
     def get_log_paths(self):
         return self.proxy.header(['Log'])
@@ -29,6 +30,7 @@ class ReferenceLogModel(AbstractLogModel):
         self._filtered = np.where(self._levels>self.level)[0]
         print len(self._filtered), self._filtered
         self.modelReset.emit()
+        self.path = path
         
     def decode_row(self, row):
         return [float(row[0]), int(row[1][0]), unicode(row[1][1])]
@@ -53,15 +55,19 @@ class OfflineLog(QtGui.QTableView):
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
         self.setFont(QtGui.QFont('TypeWriter',  7, 50, False))
         self.log_model.set_log_path('/log')
+        self.horizontalHeader().setStretchLastSection(True)
         
     def build_menu(self):
         self.menu.clear()
         for p in self.log_model.get_log_paths():
             func = functools.partial(self.log_model.set_log_path, p)
-            self.menu.addAction(p, func)
+            a = self.menu.addAction(p, func)
+            a.setCheckable(True)
         self.menu.addSeparator()
         self.log_model.build_menu(self.menu)     
 
     def showMenu(self, pt):
+        for a in self.menu.actions():
+            a.setChecked(a.text()==self.log_model.path)
         self.menu.popup(self.mapToGlobal(pt))
         

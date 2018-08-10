@@ -101,7 +101,7 @@ class AbstractLogModel(QtCore.QAbstractTableModel):
                 a.setIcon(QtGui.QIcon())
                 
         self.level = new_level
-        self._filtered = np.where(np.array(self._levels)>self.level)[0]
+        self._filtered = list(np.where(np.array(self._levels)>self.level)[0])
         if update:
             self.modelReset.emit()
     
@@ -170,6 +170,7 @@ class LiveLog(QtGui.QTableView):
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.setWordWrap(True)
         self.setTextElideMode(QtCore.Qt.ElideLeft)
+        self.horizontalHeader().setStretchLastSection(True)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
         if registry != None:
