@@ -383,19 +383,6 @@ class SectionBox(QtGui.QWidget):
         self.widgetsMap.update(self.status_section.widgetsMap)
         self.widgetsMap.update(self.results_section.widgetsMap)
         self.widgetsMap.update(self.config_section.widgetsMap)
-        
-        self.search = QtGui.QLineEdit(self)
-        self.search.setPlaceholderText(_('Search option'))
-        self.search.hide()
-        self.search.textChanged.connect(self.filter_text)
-        self.filtered = set()
-        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL+QtCore.Qt.Key_F), 
-                        self, 
-                        self.activate_search)
-        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Escape), 
-                        self, 
-                        self.deactivate_search)
-
 
         lens = [len(sec.widgetsMap) > 0 for sec in self.sections]
         # None active!
@@ -429,46 +416,7 @@ class SectionBox(QtGui.QWidget):
         self.lay.addStretch(1)
         self.reorder()
         
-    def resizeEvent(self, ev):
-        w, h = ev.size().width(), ev.size().height()
-        self.search.move(w-self.search.width(), 5)
-        
-        
-    def deactivate_search(self):
-        self.search.hide()
-        self.search.setText('')
-        self.search.releaseKeyboard()
-        for s in self.sections:
-            s.collapse_children()
-        
-    def activate_search(self):
-        self.expand()
-        self.search.show()
-        self.search.raise_()
-        self.search.setFocus()
-        for s in self.sections:
-            s.expand_children()
-            
-    def filter_text(self, query=False):
-        if not query or not self.search.isVisible():
-            for wg in self.filtered:
-                wg.show()
-                wg.label_widget.show()
-            self.filtered = set()
-            return 0
-        i = 0
-        for wg in self.widgetsMap.values():
-            if match_widget_filter(wg, query):
-                wg.show()
-                wg.label_widget.show()
-                if wg in self.filtered:
-                    self.filtered.remove(wg)
-                i += 1
-            else:
-                wg.hide()
-                wg.label_widget.hide()
-                self.filtered.add(wg)
-        return i
+
         
     def expand(self):
         for s in self.sections:
@@ -556,9 +504,25 @@ class Interface(QtGui.QTabWidget):
         self.fixed = fixed
         self.rebuild(prop_dict)
         self.menu = QtGui.QMenu(self)
+        self.menu.addAction(_('Search (Ctrl+F)'), self.activate_search)
+        self.menu.addAction(_('Exit search (Esc)'), self.deactivate_search)
+        self.menu.addAction(_('Table'), self.show_details)
+        self.menu.addAction(_('Rebuild'), self.rebuild)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
+        
+        self.search = QtGui.QLineEdit(self)
+        self.search.setPlaceholderText(_('Search option'))
+        self.search.hide()
+        self.search.textChanged.connect(self.filter_text)
+        self.filtered = set()
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL+QtCore.Qt.Key_F), 
+                        self, 
+                        self.activate_search)
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Escape), 
+                        self, 
+                        self.deactivate_search)
 
     def show_section(self, name, hide=False):
         """Set `name` as section the active tab. 
@@ -790,6 +754,55 @@ class Interface(QtGui.QTabWidget):
         self._wiring = wg
         # Cleanup
         os.remove(svg_filename)
+        
+    def resizeEvent(self, ev):
+        self.move_search()
+        return super(self.__class__, self).resizeEvent(ev)
+        
+    def move_search(self):
+        w = self.size().width()
+        self.search.move(w-self.search.width()-10, 5)
+        
+        
+    def deactivate_search(self):
+        self.search.hide()
+        self.search.setText('')
+        self.search.releaseKeyboard()
+        for sec in self.sectionsMap.itervalues():
+            for s in sec.sections:
+                s.collapse_children()
+        
+    def activate_search(self):
+        for sec in self.sectionsMap.itervalues():
+            sec.expand()
+            for s in sec.sections:
+                s.expand_children()
+        self.search.show()
+        self.search.raise_()
+        self.search.setFocus()
+        self.move_search()
+
+            
+    def filter_text(self, query=False):
+        if not query or not self.search.isVisible():
+            for wg in self.filtered:
+                wg.show()
+                wg.label_widget.show()
+            self.filtered = set()
+            return 0
+        i = 0
+        for wg in self.widgetsMap.values():
+            if match_widget_filter(wg, query):
+                wg.show()
+                wg.label_widget.show()
+                if wg in self.filtered:
+                    self.filtered.remove(wg)
+                i += 1
+            else:
+                wg.hide()
+                wg.label_widget.hide()
+                self.filtered.add(wg)
+        return i
 
 
 class InterfaceDialog(QtGui.QDialog):
