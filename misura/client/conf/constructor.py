@@ -252,6 +252,7 @@ class Section(QtGui.QGroupBox):
     def expand(self):
         for w in self.groupsMap.itervalues():
             w.show()
+            #w.expand()
         for w in self.widgetsMap.itervalues():
             w.show()
             w.label_widget.show()
@@ -269,7 +270,6 @@ class Section(QtGui.QGroupBox):
         self.setMaximumHeight(40)
         self.setChecked(False)
         return True
-
             
     def expand_children(self):
         for group in self.groupsMap.itervalues():
@@ -331,10 +331,22 @@ class Section(QtGui.QGroupBox):
 CONFIG_SEC = 0
 STATUS_SEC = 1
 RESULT_SEC = 2
+
+def match_widget_filter(wg, query):
+    query = query.lower()
+    if query in wg.handle.lower():
+        return True
+    if query in wg.name.lower():
+        return True
+    if query in wg.label.lower():
+        return True
+    if query in str(wg.current).lower():
+        return True
+    return False
+
 class SectionBox(QtGui.QWidget):
     """Divide section into Status, Configuration and Results toolboxes."""
     sigScrollTo = QtCore.pyqtSignal(int, int)
-    
     def __init__(self, server, remObj, prop_list, parent=None, context='Option'):
         QtGui.QWidget.__init__(self, parent=parent)
         self.lay = QtGui.QVBoxLayout()
@@ -371,6 +383,19 @@ class SectionBox(QtGui.QWidget):
         self.widgetsMap.update(self.status_section.widgetsMap)
         self.widgetsMap.update(self.results_section.widgetsMap)
         self.widgetsMap.update(self.config_section.widgetsMap)
+        
+        self.search = QtGui.QLineEdit(self)
+        self.search.setPlaceholderText(_('Search option'))
+        self.search.hide()
+        self.search.textChanged.connect(self.filter_text)
+        self.filtered = set()
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL+QtCore.Qt.Key_F), 
+                        self, 
+                        self.activate_search)
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Escape), 
+                        self, 
+                        self.deactivate_search)
+
 
         lens = [len(sec.widgetsMap) > 0 for sec in self.sections]
         # None active!
@@ -403,6 +428,47 @@ class SectionBox(QtGui.QWidget):
 
         self.lay.addStretch(1)
         self.reorder()
+        
+    def resizeEvent(self, ev):
+        w, h = ev.size().width(), ev.size().height()
+        self.search.move(w-self.search.width(), 5)
+        
+        
+    def deactivate_search(self):
+        self.search.hide()
+        self.search.setText('')
+        self.search.releaseKeyboard()
+        for s in self.sections:
+            s.collapse_children()
+        
+    def activate_search(self):
+        self.expand()
+        self.search.show()
+        self.search.raise_()
+        self.search.setFocus()
+        for s in self.sections:
+            s.expand_children()
+            
+    def filter_text(self, query=False):
+        if not query or not self.search.isVisible():
+            for wg in self.filtered:
+                wg.show()
+                wg.label_widget.show()
+            self.filtered = set()
+            return 0
+        i = 0
+        for wg in self.widgetsMap.values():
+            if match_widget_filter(wg, query):
+                wg.show()
+                wg.label_widget.show()
+                if wg in self.filtered:
+                    self.filtered.remove(wg)
+                i += 1
+            else:
+                wg.hide()
+                wg.label_widget.hide()
+                self.filtered.add(wg)
+        return i
         
     def expand(self):
         for s in self.sections:
@@ -464,6 +530,7 @@ class SectionBox(QtGui.QWidget):
             parent = parent.parent()
         self.sigScrollTo.emit(x, y)
         return wg
+    
 
 class SectionScroll(QtGui.QScrollArea):
     def wheelEvent(self, ev):
