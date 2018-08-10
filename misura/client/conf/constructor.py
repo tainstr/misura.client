@@ -465,6 +465,9 @@ class SectionBox(QtGui.QWidget):
         self.sigScrollTo.emit(x, y)
         return wg
 
+class SectionScroll(QtGui.QScrollArea):
+    def wheelEvent(self, ev):
+        ev.ignore()
 
 class Interface(QtGui.QTabWidget):
 
@@ -602,7 +605,7 @@ class Interface(QtGui.QTabWidget):
             self.server, self.remObj, self.sections['Main'], parent=self)
         self.sectionsMap = collections.OrderedDict({'Main': wg})
         self._funcs = []
-        area = QtGui.QScrollArea(self)
+        area = SectionScroll(self)
         area.setWidget(wg)
         area.setWidgetResizable(True)
         self.areasMap = collections.OrderedDict({'Main': area})
@@ -623,7 +626,7 @@ class Interface(QtGui.QTabWidget):
             if not len(wg.widgetsMap):
                 continue
             self.sectionsMap[section] = wg
-            area = QtGui.QScrollArea(self)
+            area = SectionScroll(self)
             area.setWidget(wg)
             area.setWidgetResizable(True)
             self.areasMap[section] = area
