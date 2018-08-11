@@ -97,7 +97,7 @@ class LocalTasks(QtGui.QWidget):
         self.connect(self.more, QtCore.SIGNAL('clicked()'), self.toggle_log)
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.sort_jobs)
-        self.timer.start(2000)
+        #self.timer.start(5000)
 
         # Progress bars widget
         self.mw = QtGui.QWidget(parent=self)
@@ -178,8 +178,7 @@ class LocalTasks(QtGui.QWidget):
         wg.pb = pb
         self.mlay.addWidget(wg)
         self.prog[pid] = wg
-        if not self.isVisible():
-            self.ch.emit()
+        self.ch.emit()
         
 
     def jobs(self, tot, pid='Operation', abort=lambda *a, **k: 0):
@@ -196,6 +195,7 @@ class LocalTasks(QtGui.QWidget):
         all = sorted(all, key=pval, reverse=True)
         for wg in all:
             self.mlay.addWidget(wg)
+        self.ch.emit()
 
     @lockme()
     def _job(self, step, pid='Operation', label=''):
@@ -260,19 +260,25 @@ class Tasks(QtGui.QTabWidget):
         QtGui.QTabWidget.__init__(self)
         self._lock = threading.Lock()
         self.setWindowTitle(_('Pending Tasks'))
+        self.progress_area = QtGui.QScrollArea(self)
+        self.progress_area.setWidgetResizable(True)
+        self.progress = RemoteTasks(self)
+        self.progress_area.setWidget(self.progress)
+        self.addTab(self.progress_area, _('Remote'))
 
-        self.progress = RemoteTasks()
-        self.addTab(self.progress, _('Remote'))
-
-        self.tasks = LocalTasks()
-        self.addTab(self.tasks, _('Local'))
-
+        self.tasks = LocalTasks(self)
+        self.tasks_area = QtGui.QScrollArea(self)
+        self.tasks_area.setWidgetResizable(True)
+        self.tasks_area.setWidget(self.tasks)
+        self.addTab(self.tasks_area, _('Local'))
+        
         self.sync = SyncWidget(self)
         self.addTab(self.sync, _('Storage'))
 
         self.tasks.ch.connect(self.hide_show, QtCore.Qt.QueuedConnection)
         self.progress.ch.connect(self.hide_show, QtCore.Qt.QueuedConnection)
         self.sync.ch.connect(self.hide_show, QtCore.Qt.QueuedConnection)
+        self.setMinimumWidth(600)
 
     def removeStorageAndRemoteTabs(self):
         if self.count()==3:
@@ -308,7 +314,7 @@ class Tasks(QtGui.QTabWidget):
             self.show()
             self.show_signal.emit()
             n = max(len(self.progress), len(self.tasks))
-            self.setMinimumHeight(n*50+100)
+            self.setMinimumHeight(n*10+100)
         else:
             self.hide()
             self.hide_signal.emit()
