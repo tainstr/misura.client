@@ -38,11 +38,7 @@ def from_argv():
          '-u': 'admin', '-w': 'admin'}
     for opt, val in opts:
         r[opt] = val
-    return default(host=r['-h'], port=r['-p'], user=r['-u'], password=r['-w'])
-
-
-
-        
+    return default(host=r['-h'], port=r['-p'], user=r['-u'], password=r['-w'])  
 
 
 def configure_logger(log_file_name=False, logdir=None, logsize=None, level=None):

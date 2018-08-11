@@ -95,6 +95,9 @@ class LocalTasks(QtGui.QWidget):
         self.log.hide()
         self.more = QtGui.QPushButton(_('Log'), parent=self)
         self.connect(self.more, QtCore.SIGNAL('clicked()'), self.toggle_log)
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.sort_jobs)
+        self.timer.start(2000)
 
         # Progress bars widget
         self.mw = QtGui.QWidget(parent=self)
@@ -158,7 +161,6 @@ class LocalTasks(QtGui.QWidget):
             if not self.isVisible():
                 self.ch.emit()
             return
-
         wg = QtGui.QWidget(parent=self)
         pb = QtGui.QProgressBar(parent=wg)
         pb.setRange(0, tot)
@@ -178,10 +180,22 @@ class LocalTasks(QtGui.QWidget):
         self.prog[pid] = wg
         if not self.isVisible():
             self.ch.emit()
+        
 
     def jobs(self, tot, pid='Operation', abort=lambda *a, **k: 0):
         """Thread-safe call for _jobs()"""
         self.emit(QtCore.SIGNAL('jobs(int,QString,PyQt_PyObject)'), tot, pid, abort)
+        
+    def sort_jobs(self):
+        all = self.prog.values()
+        if not all:
+            return
+        for wg in all:
+            self.mlay.removeWidget(wg)
+        pval = lambda a: a.pb.value()/a.pb.maximum()
+        all = sorted(all, key=pval)
+        for wg in all:
+            self.mlay.addWidget(wg)
 
     @lockme()
     def _job(self, step, pid='Operation', label=''):
