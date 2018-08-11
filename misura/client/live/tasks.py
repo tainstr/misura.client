@@ -4,7 +4,7 @@
 from traceback import format_exc
 import functools
 import threading
-
+from random import random
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from misura.canon.csutil import lockme
@@ -95,9 +95,6 @@ class LocalTasks(QtGui.QWidget):
         self.log.hide()
         self.more = QtGui.QPushButton(_('Log'), parent=self)
         self.connect(self.more, QtCore.SIGNAL('clicked()'), self.toggle_log)
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.sort_jobs)
-        #self.timer.start(5000)
 
         # Progress bars widget
         self.mw = QtGui.QWidget(parent=self)
@@ -157,6 +154,7 @@ class LocalTasks(QtGui.QWidget):
         """Initialize a new progress bar for job `pid` having total steps `tot`."""
         wg = self.prog.get(pid, False)
         if wg:
+            self.msg('New target: {}, {}/{}'.format(pid, wg.pb.value(),tot))
             wg.pb.setRange(0, tot)
             if not self.isVisible():
                 self.ch.emit()
@@ -179,6 +177,7 @@ class LocalTasks(QtGui.QWidget):
         self.mlay.addWidget(wg)
         self.prog[pid] = wg
         self.ch.emit()
+        self.msg('New task: {}, {}'.format(pid, tot))
         
 
     def jobs(self, tot, pid='Operation', abort=lambda *a, **k: 0):
@@ -186,6 +185,7 @@ class LocalTasks(QtGui.QWidget):
         self.emit(QtCore.SIGNAL('jobs(int,QString,PyQt_PyObject)'), tot, pid, abort)
         
     def sort_jobs(self):
+        """Deprecated"""
         all = self.prog.values()
         if not all:
             return
@@ -207,11 +207,15 @@ class LocalTasks(QtGui.QWidget):
         if step < 0:
             step = wg.pb.value() + 1
         wg.pb.setValue(step)
+        mx = wg.pb.maximum()
         if label != '':
-            self.msg(pid + ': ' + label)
-        if step >= wg.pb.maximum() and step != 0:
+            self.msg('{} {}/{}: {}'.format(pid, step, mx, label))
+        if step >= mx and step != 0:
             self._lock.release()
             self._done(pid)
+        #else:
+            #if random()<1./(wg.pb.maximum()+1):
+            #    self.ch.emit()
         return True
 
     def job(self, step, pid='Operation', label=''):
@@ -313,11 +317,11 @@ class Tasks(QtGui.QTabWidget):
         if self.update_active() or self.user_show:
             self.show()
             self.show_signal.emit()
-            n = max(len(self.progress), len(self.tasks))
-            self.setMinimumHeight(n*10+100)
         else:
             self.hide()
             self.hide_signal.emit()
+        n = max(len(self.progress), len(self.tasks))
+        self.setMinimumHeight(min(n,10)*50+100)
 
     def hideEvent(self, e):
         self.user_show = False
