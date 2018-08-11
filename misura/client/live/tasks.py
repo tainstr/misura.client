@@ -193,7 +193,7 @@ class LocalTasks(QtGui.QWidget):
         for wg in all:
             self.mlay.removeWidget(wg)
         pval = lambda a: a.pb.value()/a.pb.maximum()
-        all = sorted(all, key=pval)
+        all = sorted(all, key=pval, reverse=True)
         for wg in all:
             self.mlay.addWidget(wg)
 
