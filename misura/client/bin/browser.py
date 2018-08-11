@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sys
-from misura.client import iutils, browser, live
+from misura.client import iutils, browser, live, configure_logger
 import multiprocessing
     
 def run_browser_app():
@@ -13,6 +13,7 @@ def run_browser_app():
     if len(sys.argv) > 1:
         mw.open_file(sys.argv[1])
     mw.show()
+    configure_logger('browser.log')
     sys.exit(app.exec_())
 
 

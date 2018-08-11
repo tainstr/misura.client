@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sys
-from misura.client import iutils
+from misura.client import iutils, configure_logger
 from misura.client import graphics
 from misura.client.clientconf import confdb, activate_plugins
-import veusz.utils.vzdbus as vzdbus
-import veusz.utils.vzsamp as vzsamp
+#import veusz.utils.vzdbus as vzdbus 
+#import veusz.utils.vzsamp as vzsamp
 import multiprocessing
 
 def run_graphics_app():
@@ -18,6 +18,7 @@ def run_graphics_app():
     iutils.initTranslations(app)
     app.startup()
     iutils.initRegistry()
+    configure_logger('browser.log')
     app.exec_()
 # 	csutil.stop_profiler(mw)
 

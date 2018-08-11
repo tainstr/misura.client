@@ -115,7 +115,6 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self, doc=False, parent=None):
         super(MainWindow, self).__init__(parent)
-        configure_logger('acquisition.log')
         self._lock = threading.Lock()
         self.saved_set = set()
         self.cameras = {}

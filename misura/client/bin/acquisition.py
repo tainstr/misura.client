@@ -4,7 +4,7 @@ import sys
 import sys
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
-from misura.client import acquisition, from_argv, iutils
+from misura.client import acquisition, from_argv, iutils, configure_logger
 import multiprocessing
     
     
@@ -18,6 +18,7 @@ def run_acquisition_app():
         m = from_argv()
         mw.succeed_login(m)
     mw.show()
+    configure_logger('acquisition.log')
     sys.exit(app.exec_())
     
 if __name__ == '__main__':

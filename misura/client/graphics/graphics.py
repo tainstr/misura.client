@@ -393,7 +393,6 @@ class Graphics(mainwindow.MainWindow):
         return
 
     def __init__(self, *a):
-        configure_logger('graphics.log')
         iutils.loadIcons()
         logging.debug('Load Icons OK')
         self._document = MisuraDocument()

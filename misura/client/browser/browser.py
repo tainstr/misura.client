@@ -98,7 +98,6 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
         super(QtGui.QMainWindow, self).__init__(parent)
-        configure_logger('browser.log')
         self.tab = QtGui.QTabWidget()
         self.tab_bar = TestsTabBar()
         self.tab_bar.dropped.connect(self.convert_file)
