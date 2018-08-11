@@ -150,12 +150,12 @@ class MisuraDocument(document.Document):
             del ds.document
         ds.m_name = name
         # Separate data attributes
-        data = {}
+        data = []
         for col in ds.columns:
-            data[col] = getattr(ds, col)
+            data.append(getattr(ds, col))
             setattr(ds, col, [])
         o = open(filename, 'wb')
-        np.savez_compressed(o, **data)
+        np.save(o, data)
         open(filename+'m', 'wb').write(dumps(ds))
         logging.debug('Cached', name, filename)
         self.available_data[name] = ds
@@ -180,8 +180,8 @@ class MisuraDocument(document.Document):
             return ds
         # Restore data attributes
         data = np.load(open(filename, 'rb'))
-        for attr, val in data.items():
-            setattr(ds, attr, val)
+        for i, col in enumerate(ds.columns):
+            setattr(ds, col, data[i])
         return ds
 
     def load_rule(self, filename, rule, **kw):
