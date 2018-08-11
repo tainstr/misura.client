@@ -10,6 +10,7 @@ from traceback import format_exc
 
 from PyQt4 import QtCore
 from tables.file import _open_files
+import numpy as np
 
 import veusz.document as document
 import veusz.plugins as vsplugins
@@ -27,7 +28,7 @@ from ..clientconf import confdb
 from .. import parameters as params
 from misura.client.axis_selection import get_best_x_for
 from misura.client.filedata.dataset import MisuraDataset
-
+from misura.client.live import registry
 MAX = 10**5
 MIN = -10**5
 
@@ -43,6 +44,10 @@ class MisuraDocument(document.Document):
     root = False
     changeset_ignore = 0
     sigConfProxyModified = QtCore.pyqtSignal()
+    
+    @property
+    def tasks(self):
+        return getattr(registry, 'tasks', False)
 
     def close(self):
         self.up = False
@@ -130,7 +135,7 @@ class MisuraDocument(document.Document):
 
     def add_cache(self, ds, name, overwrite=True):
         """Writes the dataset `ds` onto the filesystem cache. 
-        The caller must then empty `ds` from any data in order to free memory"""
+        """
         if name in self.cache:
             if not overwrite:
                 return False
@@ -149,7 +154,8 @@ class MisuraDocument(document.Document):
         for col in ds.columns:
             data[col] = getattr(ds, col)
             setattr(ds, col, [])
-        open(filename, 'wb').write(dumps(data))
+        o = open(filename, 'wb')
+        np.savez_compressed(o, **data)
         open(filename+'m', 'wb').write(dumps(ds))
         logging.debug('Cached', name, filename)
         self.available_data[name] = ds
@@ -173,7 +179,7 @@ class MisuraDocument(document.Document):
         if not load_data:
             return ds
         # Restore data attributes
-        data = loads(open(filename, 'rb').read())
+        data = np.load(open(filename, 'rb'))
         for attr, val in data.items():
             setattr(ds, attr, val)
         return ds
@@ -408,10 +414,15 @@ class MisuraDocument(document.Document):
             logging.debug('Saving cached dataset', name)
             yield name, ds
     
-    def save_version_and_plot(self, version_name, vsz_text=False):
+    def save_version_and_plot(self, version_name, vsz_text=False, pid=False):
         plots = set([])  # filename where plot is already saved
         proxies = {}
-        for name, ds in self.iter_data_and_cache():
+        pid = pid or 'Save: {}'.format(version_name)
+        if self.tasks is not False:
+            self.tasks.jobs(len(self.data)+len(self.cache), pid)
+        for i, (name, ds) in enumerate(self.iter_data_and_cache()):
+            if self.tasks is not False:
+                self.tasks.job(i, pid, name)
             if not ds.linked or not os.path.exists(ds.linked.filename):
                 logging.debug('Skipping unlinked dataset', name, ds.linked)
                 continue

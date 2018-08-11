@@ -119,6 +119,12 @@ def build_option_menu(comparison, container, menu, set_func):
                 sub.addAction(label, p)
                 container[name+':'+key] = (p, key, val) 
 
+class Notifier(QtCore.QObject):
+    done = QtCore.pyqtSignal()
+    failed = QtCore.pyqtSignal()
+    error = QtCore.pyqtSignal(str)
+    result = QtCore.pyqtSignal(object)
+
 class RunMethod(QtCore.QRunnable):
     runnables = []
     step = 2
@@ -126,7 +132,7 @@ class RunMethod(QtCore.QRunnable):
 
     def __init__(self, func, *args, **kwargs):
         QtCore.QRunnable.__init__(self)
-        self.notifier = QtCore.QObject()
+        self.notifier = Notifier()
         self.func = func
         self.args = args
         self.kwargs = kwargs
@@ -161,14 +167,14 @@ class RunMethod(QtCore.QRunnable):
         try:
             self.result = self.func(*self.args, **self.kwargs)
             logging.debug('RunMethod.run done')
-            self.notifier.emit(QtCore.SIGNAL('done()'))
+            self.notifier.done.emit()
             if self.emit_result:
-                self.notifier.emit(QtCore.SIGNAL('done(PyQt_PyObject)'), self.result)
+                self.notifier.result.emit(self.result)
         except:
             self.error = format_exc()
             logging.debug('RunMethod.run error', self.error)
-            self.notifier.emit(QtCore.SIGNAL('failed()'))
-            self.notifier.emit(QtCore.SIGNAL('failed(QString)'), self.error)
+            self.notifier.failed.emit()
+            self.notifier.error.emit(self.error)
         registry.tasks.done(self.pid)
         self.runnables.remove(self)
         self.done = True

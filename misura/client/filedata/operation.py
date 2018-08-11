@@ -702,10 +702,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         if (not self.params.overwrite) or (not m_update):
             # completely skip processing if dataset is already in document
             if pcol in self._doc.data:
-                logging.debug('Dataset is already in document', col0)
                 return False
             if pcol in self._doc.available_data and not m_update:
-                logging.debug('Dataset is already available', col0)
                 return False               
         
         # Try reading cached data
