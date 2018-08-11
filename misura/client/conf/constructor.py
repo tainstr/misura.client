@@ -616,7 +616,7 @@ class Interface(QtGui.QTabWidget):
             self.connect(self.sectionsMap['Main'].widgetsMap[
                          'preset'], QtCore.SIGNAL('changed'), self.update)
             self.scSave = QtGui.QShortcut(
-                QtGui.QKeySequence(_('Ctrl+S')), self)
+                QtGui.QKeySequence(QtCore.Qt.CTRL+QtCore.Qt.Key_S), self, context=QtCore.Qt.WidgetWithChildrenShortcut)
             self.connect(self.scSave, QtCore.SIGNAL('activated()'), self.sectionsMap[
                          'Main'].widgetsMap['preset'].save_current)
             

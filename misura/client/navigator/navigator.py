@@ -75,9 +75,13 @@ class NavigatorToolbar(QtGui.QToolBar):
     
     def add_save_menu(self):
         if not self.actions():
-            return
+            return False
         dom = self.navigator.domainsMap['DataNavigatorDomain']
-        self.save_menu = dom.add_versions_menu()
+        sm = dom.add_versions_menu()
+        if not sm:
+            logging.debug('Cannot add_versions_menu')
+            return False
+        self.save_menu = sm
         self.act_save = QtGui.QAction(iutils.theme_icon('media-floppy'), _('Save in Misura file'), self)
         self.act_save.triggered.connect(self.save)
         self.act_save.setMenu(self.save_menu)
@@ -86,6 +90,7 @@ class NavigatorToolbar(QtGui.QToolBar):
         self.save_menu.plotSaved.connect(self.plotSaved.emit)
         self.save_menu.versionChanged.connect(self.versionChanged.emit)
         self.save_menu.plotChanged.connect(self.plotChanged.emit)
+        return True
         
     def update_navtoolbar(self, *foo):
         self.clear()
@@ -213,23 +218,28 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     def create_shortcuts(self):
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL + QtCore.Qt.Key_F), 
                         self, 
-                        self.edit_regex_rule)
+                        self.edit_regex_rule,
+                        context=QtCore.Qt.WidgetWithChildrenShortcut)
         
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_F5), 
                         self, 
-                        self.update_view)
+                        self.update_view,
+                        context=QtCore.Qt.WidgetWithChildrenShortcut)
 
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_C), 
                         self, 
-                        self.collapse_siblings)
+                        self.collapse_siblings,
+                        context=QtCore.Qt.WidgetWithChildrenShortcut)
         
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_E), 
                         self, 
-                        self.expandAll)
+                        self.expandAll,
+                        context=QtCore.Qt.WidgetWithChildrenShortcut)
         
-        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL +QtCore.Qt.Key_E), 
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.ALT +QtCore.Qt.Key_E), 
                         self, 
-                        self.expand_plotted_nodes)
+                        self.expand_plotted_nodes,
+                        context=QtCore.Qt.WidgetWithChildrenShortcut)
 
     @property
     def tasks(self):
@@ -449,7 +459,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         menu.addSeparator()
         menu.addAction(_('Expand all (E)'), self.expandAll)
         menu.addAction(_('Collapse siblings (C)'), self.collapse_siblings)
-        menu.addAction(_('Expand plotted (CTRL+E)'), self.expand_plotted_nodes)
+        menu.addAction(_('Expand plotted (Alt+E)'), self.expand_plotted_nodes)
         self.acts_status = []
         for i, s in enumerate(filedata.dstats):
             name = filedata.dstats._fields[i]

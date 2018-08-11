@@ -46,7 +46,8 @@ class DataNavigatorDomain(NavigatorDomain):
     def create_shortcuts(self):
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_V), 
                         self.navigator, 
-                        self.edit_dataset)
+                        self.edit_dataset,
+                        context=QtCore.Qt.WidgetWithChildrenShortcut)
         
         
     @node
@@ -365,7 +366,9 @@ class DataNavigatorDomain(NavigatorDomain):
             menu.addAction(_('Export to csv'), functools.partial(self.export_csv, header))
         menu.addAction(_('Delete selection'), self.navigator.deleteDatas)
         if len(nodes)==2:
-            menu.addAction(_('Overwrite 1 with 2'), self.overwrite)
+            a = menu.addAction(_('Overwrite {} with {}').format(nodes[0].name(), nodes[1].name()), self.overwrite)
+            a.setToolTip(_('{} will be overwritten by {}').format(nodes[0].path, nodes[1].path))
+            #Qt5.1: a.setToolTipVisible(True)
             
 
 from ..clientconf import confdb
@@ -598,6 +601,8 @@ class MathNavigatorDomain(NavigatorDomain):
     
     @node
     def smooth_no_dialog(self, node=False):
+        if not node:
+            return False
         return self.smooth(node, False)
         
     @node
@@ -668,7 +673,7 @@ class MathNavigatorDomain(NavigatorDomain):
 
     def add_dataset_menu(self, menu, node):
         menu.addSeparator()
-        menu.addAction(_('Smooth (Ctrl+S)'), self.smooth)
+        menu.addAction(_('Smooth (Alt+S)'), self.smooth)
         menu.addAction(iutils.theme_icon('smooth'), _('Smooth+plot (S)'), self.smooth_and_plot)
         
         menu.addAction(_('BandPass'), self.bandpass)
@@ -676,12 +681,14 @@ class MathNavigatorDomain(NavigatorDomain):
         menu.addAction(_('Linear Coefficient'), self.coefficient)
         
     def create_shortcuts(self):
-        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.CTRL+QtCore.Qt.Key_S), 
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.ALT+QtCore.Qt.Key_S), 
                         self.navigator, 
-                        self.smooth_no_dialog)
+                        self.smooth_no_dialog, 
+                        context=QtCore.Qt.WidgetWithChildrenShortcut)
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_S), 
                         self.navigator, 
-                        self.smooth_and_plot)
+                        self.smooth_and_plot,
+                        context=QtCore.Qt.WidgetWithChildrenShortcut)
         
     add_derived_dataset_menu = add_dataset_menu
 
