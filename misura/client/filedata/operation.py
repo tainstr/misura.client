@@ -699,11 +699,14 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             m_update = False
 
         # Avoid overwriting
-        if not self.params.overwrite or not m_update:
+        if (not self.params.overwrite) or (not m_update):
             # completely skip processing if dataset is already in document
-            if self._doc.data.has_key(pcol):
+            if pcol in self._doc.data:
                 logging.debug('Dataset is already in document', col0)
                 return False
+            if pcol in self._doc.available_data and not m_update:
+                logging.debug('Dataset is already available', col0)
+                return False               
         
         # Try reading cached data
         ds = False
@@ -790,10 +793,10 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
         # Set available curves on the LF
         jobs(2)
-        available, autoload = self.get_available_autoload()
-
+        self.get_available_autoload()
+        
         # Emit the number of jobs
-        jobs(len(autoload) + len(available))
+        jobs(len(self.autoload) + len(self.available))
 
         self.refsmp = self.create_samples()
 
@@ -813,7 +816,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
         # First import cycle
         logging.debug('PRIMARY IMPORT')
-        for p, col0 in enumerate(['t'] + available):
+        for p, col0 in enumerate(['t'] + self.available):
             self._dataset_import(
                 p, col0, time_sequence, availds, names, error_map, sub_map0)
 
