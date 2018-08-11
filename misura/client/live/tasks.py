@@ -231,7 +231,7 @@ class LocalTasks(QtGui.QWidget):
         self.mlay.removeWidget(wg)
         del wg
         self.msg('Completed task: ' + str(pid))
-        logging.debug('LocalTasks.done', self.prog)
+        logging.debug('LocalTasks.done', str(pid), self.prog.keys())
         self.ch.emit()
         return True
 

@@ -329,8 +329,6 @@ class MisuraProxy(common_proxy.CommonProxy):
         obj.paste(self)
         return obj
 
-    def __nonzero__(self):
-        return 1
 
     @lockme()
     def describe(self, *args):
@@ -363,7 +361,7 @@ class MisuraProxy(common_proxy.CommonProxy):
 
     @reconnect
     @lockme()
-    def get(self, key):
+    def __getitem__(self, key):
         """Cached get function"""
         t = time()
         if t - self._refresh_last[self._Method__name][key] > self._refresh_interval:
@@ -377,9 +375,6 @@ class MisuraProxy(common_proxy.CommonProxy):
         else:
             pass
         return self._cache[key]
-
-    def __getitem__(self, key):
-        return self.get(key)
 
     @reconnect
     @lockme()

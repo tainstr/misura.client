@@ -26,9 +26,7 @@ class ReferenceLogModel(AbstractLogModel):
         self._data = reference.get_node_reference(self.proxy, path)
         n = self.proxy._get_node(path)
         self._levels = n.cols.priority[:].astype(int)
-        print len(self._levels), self._levels
         self._filtered = np.where(self._levels>self.level)[0]
-        print len(self._filtered), self._filtered
         self.modelReset.emit()
         self.path = path
         
