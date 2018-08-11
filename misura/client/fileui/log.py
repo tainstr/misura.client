@@ -36,7 +36,7 @@ class ReferenceLogModel(AbstractLogModel):
         return [float(row[0]), int(row[1][0]), unicode(row[1][1])]
         
 
-    
+
 class OfflineLog(QtGui.QTableView):
     iter = 0      
     def __init__(self, proxy, parent=None):

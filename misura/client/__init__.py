@@ -41,12 +41,33 @@ def from_argv():
     return default(host=r['-h'], port=r['-p'], user=r['-u'], password=r['-w'])
 
 
+
+        
+
+
 def configure_logger(log_file_name=False, logdir=None, logsize=None, level=None):
     import logging
     import logging.handlers
     from misura.client.clientconf import confdb
     from misura.client.units import Converter
     from misura.canon.logger import formatter
+
+    class ClosedFileHandler(logging.handlers.RotatingFileHandler):
+        def __init__(self, *a, **k):
+            super(self.__class__, self).__init__(*a, **k)
+            self.buffer = []
+            
+        def emit(self, record):
+            if not self.stream:
+                self.stream = self._open()
+            self.buffer.append(record)
+            try:
+                while len(self.buffer):
+                    super(self.__class__, self).emit(self.buffer.pop(0))
+            except:
+                print 'Logging error', len(self.buffer), record
+            self.close()
+
     
     root = logging.getLogger()
     logdir = logdir or confdb['logdir']
@@ -57,9 +78,7 @@ def configure_logger(log_file_name=False, logdir=None, logsize=None, level=None)
     
     if log_file_name:
         log_file = os.path.join(logdir, log_file_name)
-        rotating_file_handler = logging.handlers.RotatingFileHandler(
-                                                                     log_file, 
-                                                                     maxBytes=logsize, 
+        rotating_file_handler = ClosedFileHandler(log_file, maxBytes=logsize, 
                                                                      backupCount=confdb['lognumber'])
         root.addHandler(rotating_file_handler)
     
