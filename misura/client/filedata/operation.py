@@ -505,6 +505,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         LF.version = self.proxy.get_version()
         doc.proxies[self.proxy.get_path()] = self.proxy
         self.params.version = LF.version
+        if not len(self.proxy.conf):
+            logging.debug('Reloading proxy conf')
+            self.proxy.load_conf()
         # Redefine LF.conf if empty
         if not LF.conf:
             logging.debug('Redefining LF.conf')

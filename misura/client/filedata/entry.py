@@ -108,7 +108,7 @@ class NodeEntry(object):
     statuses = {v: [] for v in range(0,4)}
     """Children accessibility status"""
     idx = -1
-    name = 'root'
+    _name = 'root'
     """Node base name"""
     _path = False  # auto calc
     """Node full path or dataset key in doc.data"""
