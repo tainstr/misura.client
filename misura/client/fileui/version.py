@@ -11,6 +11,7 @@ from PyQt4 import QtGui, QtCore
 
 from misura.canon.csutil import validate_filename
 from misura.canon.logger import get_module_logging
+from misura.client.widgets.active import RunMethod
 logging = get_module_logging(__name__)
 
 from .. import _
@@ -246,11 +247,18 @@ class VersionMenu(QtGui.QMenu):
         logging.debug('save_version', repr(version_id))
         vers = self.proxy.get_versions()
         version_name, version_date = vers[version_id]
-        self.doc.save_version_and_plot(version_name)
+        pid = 'Save: {}'.format(version_name)
+        self.thread = RunMethod(self.doc.save_version_and_plot, version_name, pid=pid)
+        self.thread.pid = pid
+        self.thread.do()
+        self.thread.notifier.done.connect(functools.partial(self.callback_save, version_name))
+        return True
+        
+    def callback_save(self, version_name):
+        logging.debug('callback_save', version_name)
         self.current_plot_id = version_name
         self.current = self.proxy.get_version()
-        self.versionSaved.emit(self.current)
-        return True
+        self.versionSaved.emit(self.current)      
 
     def new_version(self):
         """Create a new version"""
