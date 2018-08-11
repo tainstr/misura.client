@@ -19,12 +19,12 @@ nativem4 = os.path.join(iutils_testing.data_dir, 'test_video.h5')
 class MisuraDocument(unittest.TestCase):
 
     def setUp(self):
-        f = indexer.SharedFile(nativem4)
+        f = indexer.SharedFile(nativem4, mode='r')
         self.original_elapsed_time = f.get_node_attr('/conf', 'elapsed')
         f.close()
 
     def tearDown(self):
-        f = indexer.SharedFile(nativem4)
+        f = indexer.SharedFile(nativem4, mode='r')
         f.set_node_attr('/conf', 'elapsed', self.original_elapsed_time)
         f.close()
 
@@ -32,7 +32,7 @@ class MisuraDocument(unittest.TestCase):
     def test_update(self):
         # Reduce elapsed time by a half
         elapsed_time = self.original_elapsed_time / 2.
-        f = indexer.SharedFile(nativem4)
+        f = indexer.SharedFile(nativem4, mode='a')
         f.set_node_attr('/conf', 'elapsed', elapsed_time)
         doc = filedata.MisuraDocument(proxy=f)
         doc.reloadData()
@@ -63,6 +63,19 @@ class MisuraDocument(unittest.TestCase):
         doc = filedata.MisuraDocument(filename=nativem4)
         doc.reloadData()
         row = doc.get_row(5)
+        
+    def test_cache(self):
+        f = indexer.SharedFile(nativem4, mode='r')
+        doc = filedata.MisuraDocument(proxy=f)
+        doc.reloadData()
+        n = '0:hsm/sample0/h'
+        ds0 = doc.data.pop(n)
+        data0 = ds0.data
+        doc.add_cache(ds0, n)
+        self.assertEqual(ds0.data, [])
+        ds1 = doc.get_cache(n)
+        self.assertTrue((data0==ds1.data).all())
+        
 
 
 if __name__ == "__main__":
