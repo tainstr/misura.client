@@ -129,8 +129,8 @@ class MisuraDocument(document.Document):
             self.create_proxy_decoders(proxy, linked.prefix)
 
     def add_cache(self, ds, name, overwrite=True):
-        """Writes the dataset `ds` onto an filesystem cache. 
-        The caller must empty `ds` from any data in order to free memory"""
+        """Writes the dataset `ds` onto the filesystem cache. 
+        The caller must then empty `ds` from any data in order to free memory"""
         if name in self.cache:
             if not overwrite:
                 return False
@@ -144,25 +144,38 @@ class MisuraDocument(document.Document):
         if hasattr(ds, 'document'):
             del ds.document
         ds.m_name = name
-        open(filename, 'wb').write(dumps(ds))
+        # Separate data attributes
+        data = {}
+        for col in ds.columns:
+            data[col] = getattr(ds, col)
+            setattr(ds, col, [])
+        open(filename, 'wb').write(dumps(data))
+        open(filename+'m', 'wb').write(dumps(ds))
         logging.debug('Cached', name, filename)
         self.available_data[name] = ds
         ds.document = self
         return True
 
-    def get_cache(self, name):
+    def get_cache(self, name, load_data=True):
         if self.data.has_key(name):
             return self.data[name]
         filename = self.cache.get(name, False)
         if not filename or not os.path.exists(filename):
             logging.debug('No dataset in cache', name, filename)
             return False
-        ds = loads(open(filename, 'rb').read())
+        
+        ds = loads(open(filename+'m', 'rb').read())
         ds.document = self
         # Restore correct linked instances
         if ds.linked and ds.linked.filename:
             p = getUsedPrefixes(self)
             ds.linked = p[ds.linked.filename]
+        if not load_data:
+            return ds
+        # Restore data attributes
+        data = loads(open(filename, 'rb').read())
+        for attr, val in data.items():
+            setattr(ds, attr, val)
         return ds
 
     def load_rule(self, filename, rule, **kw):

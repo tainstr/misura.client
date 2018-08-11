@@ -704,13 +704,13 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             if self._doc.data.has_key(pcol):
                 logging.debug('Dataset is already in document', col0)
                 return False
-
+        
         # Try reading cached data
         ds = False
         data = []
         opt = {}
         if pcol in self._doc.cache:
-            ds = self._doc.get_cache(pcol)
+            ds = self._doc.get_cache(pcol, load_data=m_update)
             data = ds.data
             opt = getattr(ds, 'm_opt', False)
             logging.debug('Got data from cache', pcol, len(data), opt)
