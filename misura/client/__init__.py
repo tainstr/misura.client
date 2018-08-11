@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sip
+from misura.canon.csutil import isWindows
 API_NAMES = ["QDate", "QDateTime", "QString",
              "QTextStream", "QTime", "QUrl", "QVariant"]
 API_VERSION = 2
@@ -49,6 +50,10 @@ def configure_logger(log_file_name=False, logdir=None, logsize=None, level=None)
     from misura.canon.logger import formatter
 
     class ClosedFileHandler(logging.handlers.RotatingFileHandler):
+        """Close and re-open the output file for each record. If an error occurrs, 
+        buffer the record and retry at next emit.
+        Overcome Windows errors when logging from multiple threads or processes.
+        """        
         def __init__(self, *a, **k):
             super(self.__class__, self).__init__(*a, **k)
             self.buffer = []
@@ -64,6 +69,7 @@ def configure_logger(log_file_name=False, logdir=None, logsize=None, level=None)
                 print 'Logging error', len(self.buffer), record
             self.close()
 
+    HandlerClass = ClosedFileHandler if isWindows else logging.handlers.RotatingFileHandler
     
     root = logging.getLogger()
     logdir = logdir or confdb['logdir']
@@ -74,7 +80,7 @@ def configure_logger(log_file_name=False, logdir=None, logsize=None, level=None)
     
     if log_file_name:
         log_file = os.path.join(logdir, log_file_name)
-        rotating_file_handler = ClosedFileHandler(log_file, maxBytes=logsize, 
+        rotating_file_handler = HandlerClass(log_file, maxBytes=logsize, 
                                                                      backupCount=confdb['lognumber'])
         root.addHandler(rotating_file_handler)
     
