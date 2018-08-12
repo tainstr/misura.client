@@ -12,11 +12,11 @@ from misura.client import _
 from live import registry
 
 def color_level(level):
-    if level>=40:
+    if level>40:
         return QtGui.QColor('red')
-    elif level>=30:
+    elif level>30:
         return QtGui.QColor('orange')
-    elif level>=20:
+    elif level>20:
         return QtGui.QColor('blue')
     return QtGui.QColor('black')   
 
@@ -24,7 +24,7 @@ def decorate(level, role):
     if role == Qt.FontRole:
         current_font = QtGui.QFont()
         current_font.setBold(level>=30)
-        current_font.setItalic(level<10)
+        current_font.setItalic(level<=10)
         return current_font
     
     if role == Qt.ForegroundRole:

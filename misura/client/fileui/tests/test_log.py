@@ -7,7 +7,7 @@ from misura.client.tests import iutils_testing
 from misura.client import fileui
 from misura.client.fileui.log import ReferenceLogModel
 from misura.canon import indexer
-from PyQt4 import QtGui, QtCore
+
 
 log_paths = [u'/beholder/s61304002/encoder/log',
   u'/beholder/s61304002/encoder/x/log',
@@ -17,6 +17,13 @@ log_paths = [u'/beholder/s61304002/encoder/log',
   u'/kiln/log',
   u'/kiln/regulator/log',
   u'/log']
+
+menu_levels = [u'',
+  u'Debug',
+  u'Info',
+  u'Warning',
+  u'Error',
+  u'Critical']
 
 class ReferenceLogModelTest(unittest.TestCase):
 
@@ -57,7 +64,7 @@ class OfflineLogTest(unittest.TestCase):
         log = fileui.OfflineLog(fp)
         log.build_menu()
         labels = [a.text() for a in log.menu.actions()]
-        self.assertEqual(labels, log_paths)
+        self.assertEqual(labels, log_paths+menu_levels)
 
 
 if __name__ == "__main__":
