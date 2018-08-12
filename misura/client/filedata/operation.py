@@ -98,6 +98,8 @@ class ImportParamsMisura(base.ImportParamsBase):
         'overwrite': True,
         # keep data within the operation object - no real import to document
         'dryrun': False,
+        # rebuild the entire available map
+        'rebuild': True
     })
 
 
@@ -450,6 +452,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
         version = kw.get('version', '')
         kw['version'] = version
+        rebuild = kw.get('rebuild', False)
+        kw['rebuild'] = rebuild
         rules = rule.splitlines()
         if version:
             for i, rule in enumerate(rules):
@@ -814,7 +818,11 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
         # First import cycle
         logging.debug('PRIMARY IMPORT')
-        for p, col0 in enumerate(['t'] + self.available):
+        if self.params.dryrun or (not self.params.rebuild):
+            target = self.autoload
+        else:
+            target = ['t'] + self.available
+        for p, col0 in enumerate(target):
             self._dataset_import(
                 p, col0, time_sequence, availds, names, error_map, sub_map0)
 
