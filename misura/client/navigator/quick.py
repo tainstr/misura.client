@@ -77,7 +77,7 @@ class QuickOps(object):
             # self.deleteData(node=node, remove_dataset=False, recursive=False)
             ds.data = np.array([])
             self.doc.available_data[node.path] = ds
-            self.model().pause(False)
+            self.pause(False)
             self.doc.setModified()
 
             return
@@ -132,7 +132,7 @@ class QuickOps(object):
     @node
     def deleteData(self, node=False, remove_dataset=True, recursive=True):
         """Delete a dataset and all depending graphical widgets."""
-        self.model().pause(0)
+        self.pause(0)
         if not node:
             return True
         node_path = node.path

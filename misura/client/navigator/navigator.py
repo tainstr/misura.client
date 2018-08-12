@@ -683,8 +683,14 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         
         # menu.popup(self.mapToGlobal(pt))
         # Synchronous call to menu, otherise selection is lost on live update
-        self.model().pause(1)
+        self.pause(1)
         pt.setX(pt.x()+15)
+        menu.setEnabled(True)
         menu.exec_(self.mapToGlobal(pt))
-        self.model().pause(0)
+        logging.debug('Ended menu execution')
+        self.pause(0)
         self.update_view()
+        
+    def pause(self, do=True):
+        self.model().pause(do)
+        self.setEnabled(not do)
