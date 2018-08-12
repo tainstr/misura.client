@@ -321,7 +321,7 @@ class Tasks(QtGui.QTabWidget):
             self.hide()
             self.hide_signal.emit()
         n = max(len(self.progress), len(self.tasks))
-        self.setMinimumHeight(min(n,10)*50+100)
+        self.setMinimumHeight(min(n,10)*50+150)
 
     def hideEvent(self, e):
         self.user_show = False
