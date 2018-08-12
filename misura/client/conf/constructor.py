@@ -488,7 +488,7 @@ class Interface(QtGui.QTabWidget):
 
     """Tabbed interface builder for dictionary of options"""
     first_show = True
-    
+    changeset = -1
     def __init__(self, server, remObj=False, prop_dict=False, parent=None, context='Option', fixed=False):
         QtGui.QTabWidget.__init__(self, parent)
         self._lock = threading.Lock()
@@ -555,7 +555,13 @@ class Interface(QtGui.QTabWidget):
         """Rebuild the full widget"""
         if self._deleted:
             logging.debug('Interface.rebuild: deleted')
-            return 
+            return False
+        if not self.remObj.is_live():
+            logging.debug('Check changeset', self.remObj['fullpath'], self.remObj._changeset, self.changeset)
+            if self.remObj._changeset<=self.changeset:
+                return False
+            self.changeset = self.remObj._changeset
+            
         if self.sectionsMap:
             i = self.currentIndex()
             self._prev_section = self.sectionsMap.keys()[i]
