@@ -140,14 +140,14 @@ class LiveLogModel(AbstractLogModel):
             self._data.append((st, p, fmsg))
             self._levels.append(p)
             if p>=self.level:
-                self._filtered.append(len(self._levels))
+                self._filtered.append(len(self._levels)-1)
             app+=1
 
         rm = len(self._data) - self.max_rows
         if rm>0:
-            self._data = self._data[:-rm]
-            self._levels = self._levels[:-rm]
-            self._filtered = [f-1 for f in self._filtered[:-rm]]
+            self._data = self._data[rm:]
+            self._levels = self._levels[rm:]
+            self._filtered = [f-rm for f in self._filtered[rm:]]
                 
          
         self.current_buf = buf[:]
