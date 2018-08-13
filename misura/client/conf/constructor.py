@@ -595,8 +595,7 @@ class Interface(QtGui.QTabWidget):
         for handle in prop_dict.keys():
             opt = prop_dict[handle]
             a = list(set(opt['attr']))
-            if confdb.rule_opt_hide(fp+handle):
-                logging.debug('Hidden by configuration', fp+handle)                
+            if confdb.rule_opt_hide(fp+handle):             
                 if 'ClientHide' not in a:
                     a.append('ClientHide')
                     logging.debug('Set ClientHide attributes', fp, handle, a)

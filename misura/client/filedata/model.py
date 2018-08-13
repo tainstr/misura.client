@@ -193,11 +193,10 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
         self.emit(QtCore.SIGNAL('endResetModel()'))
         self.paused = False
-
-        self.changeset = self.doc.changeset
         self.keys = set(self.doc.data.keys())
-        self.available_keys = set(self.doc.available_data.keys())
+        self.available_keys = set(self.doc.available_data.keys())       
         self.doc.enableUpdates()
+        self.changeset = self.doc.changeset
         self.emit(QtCore.SIGNAL('modelReset()'))
         return True
 
