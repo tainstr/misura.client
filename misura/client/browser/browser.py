@@ -156,7 +156,12 @@ class MainWindow(QtGui.QMainWindow):
             QtGui.QIcon(os.path.join(parameters.pathArt, 'browser.svg')))
 
     def closeEvent(self, event):
+        for i in range(1,self.tab.count()):
+            logging.debug('Closing tab:', i)
+            self.close_tab(i)
+        ret = QtGui.QMainWindow.closeEvent(self, event)
         iutils.app.quit()
+        return ret
         
     def convert_file(self, path):
         filedata.convert_file(self,path)
