@@ -248,6 +248,7 @@ class VersionMenu(QtGui.QMenu):
         vers = self.proxy.get_versions()
         version_name, version_date = vers[version_id]
         pid = 'Save: {}'.format(version_name)
+        
         self.thread = RunMethod(self.doc.save_version_and_plot, version_name, pid=pid)
         self.thread.pid = pid
         self.thread.do()

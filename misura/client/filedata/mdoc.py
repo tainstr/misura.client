@@ -44,6 +44,8 @@ class MisuraDocument(document.Document):
     root = False
     changeset_ignore = 0
     sigConfProxyModified = QtCore.pyqtSignal()
+    sig_save_started = QtCore.pyqtSignal()
+    sig_save_done = QtCore.pyqtSignal()
     
     @property
     def tasks(self):
@@ -418,6 +420,7 @@ class MisuraDocument(document.Document):
         plots = set([])  # filename where plot is already saved
         proxies = {}
         pid = pid or 'Save: {}'.format(version_name)
+        self.sig_save_started.emit()
         if self.tasks is not False:
             self.tasks.jobs(len(self.data)+len(self.cache), pid)
         for i, (name, ds) in enumerate(self.iter_data_and_cache()):
@@ -482,6 +485,7 @@ class MisuraDocument(document.Document):
             proxy.save_data(name, ds.data, time_data, opt=ds.m_opt)
         proxy.header(refresh=True)
         proxy.flush()
+        self.sig_save_done.emit()
         return True
 
     def save(self, filename, mode='vsz'):

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Tree visualization of opened misura Files in a document."""
 import os
-
+import functools
 from misura.canon.logger import get_module_logging
 from misura.client.filedata.operation import getUsedPrefixes
 logging = get_module_logging(__name__)
@@ -267,6 +267,9 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         
         if hasattr(self.mainwindow.plot,'set_navigator'):
             self.mainwindow.plot.set_navigator(self)
+            
+        self.doc.sig_save_started.connect(functools.partial(self.pause, 1))
+        self.doc.sig_save_done.connect(functools.partial(self.pause, 0))
             
     def open_file(self, path, **kw):
         logging.info('OPEN FILE', path)
