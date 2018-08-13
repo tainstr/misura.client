@@ -333,7 +333,9 @@ class MisuraProxy(common_proxy.CommonProxy):
     @lockme()
     def describe(self, *args):
         if self._refresh_interval <= 0:
-            return self.remObj.describe(*args)
+            d = self.remObj.describe(*args)
+            self._desc[self._Method__name] = d
+            return d
         t = time()
         key = '::describe::'
         if t - self._refresh_last[self._Method__name].get(key, 0) > self._refresh_interval or \
@@ -358,6 +360,13 @@ class MisuraProxy(common_proxy.CommonProxy):
         t = self._ctime + self._dtime
         r = self.remObj.search_log(t - 1, t + 1)
         return r
+    
+    def __len__(self):
+        d = self._desc.get(self._Method__name, {})
+        d = len(d)
+        if not d:
+            d = len(self.remObj.keys())
+        return d
 
     @reconnect
     @lockme()
