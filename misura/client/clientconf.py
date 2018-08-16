@@ -550,17 +550,18 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     def mem(self, name, *arg):
         """Memoize a recent datum"""
         logging.debug("mem ", name, arg)
+        # Avoid saving duplicate values
+        arg = list(unicode(a) for a in arg)
+        self.rem(name, arg[0], save=False)
         tname = tabname(name)
         tab = list(self[tname])
         logging.debug('mem', name, tab)
-        # Avoid saving duplicate values
-        arg = list(unicode(a) for a in arg)
-        # Adjust headers
-        if len(arg) < len(tab[0]):
-            arg += [''] * (len(tab[0]) - len(arg))
-        # Update order
-        if arg in tab:
-            tab.remove(arg)
+        ## Adjust headers
+        #if len(arg) < len(tab[0]):
+        #    arg += [''] * (len(tab[0]) - len(arg))
+        ## Update order
+        #if arg in tab:
+        #    tab.remove(arg)
         tab.append(arg)
         lim = self.desc['h' + name]['current']
         if len(tab) - 1 > lim:
@@ -571,20 +572,26 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self.save()
         return True
 
-    def rem(self, name, key):
+    def rem(self, name, key, save=True):
         """Forget a recent datum"""
         key = str(key)
         tname = tabname(name)
         tab = self[tname]
-        # Keys list
-        v = [r[0] for r in tab[1:]]
-        if key not in v:
+        done = 0
+        while True:
+            v = [r[0] for r in tab[1:]]
+            if not key in v:
+                break
+            i = v.index(key)
+            tab.pop(i + 1)  # preserve the header
+            logging.debug('rem', name, key, i)
+            done += 1
+        if not done:
             return False
-        i = v.index(key)
-        tab.pop(i + 1)  # preserve the header
         self[tname] = tab
-        self.emit(QtCore.SIGNAL('rem()'))
-        self.save()
+        if save:
+            self.emit(QtCore.SIGNAL('rem()'))
+            self.save()
         return True
 
     def close(self):
