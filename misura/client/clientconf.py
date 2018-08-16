@@ -556,12 +556,6 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         tname = tabname(name)
         tab = list(self[tname])
         logging.debug('mem', name, tab)
-        ## Adjust headers
-        #if len(arg) < len(tab[0]):
-        #    arg += [''] * (len(tab[0]) - len(arg))
-        ## Update order
-        #if arg in tab:
-        #    tab.remove(arg)
         tab.append(arg)
         lim = self.desc['h' + name]['current']
         if len(tab) - 1 > lim:
