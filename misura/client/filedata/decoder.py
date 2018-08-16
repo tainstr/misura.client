@@ -118,7 +118,7 @@ class DataDecoder(QtCore.QThread):
         sleep(.05)
         self.terminate()
         if self.proxy:
-            self.proxy.close()
+            self.proxy.close(all_handlers=False)
 
     def setDataPath(self, datapath):
         if self.isRunning():

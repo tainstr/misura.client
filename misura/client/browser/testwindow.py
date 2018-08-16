@@ -232,12 +232,20 @@ class TestWindow(acquisition.MainWindow):
         return True
 
     def closeEvent(self, ev):
+        logging.debug('TestWindow.closeEvent')
+        if not self.check_save(nosync=True):
+            ev.ignore()
+            return True 
         ret = self.close()
         if ret:
             ret = QtGui.QMainWindow.closeEvent(self, ev)
         return ret
     
-    def check_save(self):
+    def check_save(self, nosync=True):
+        """Check if changes occurred to the Veusz document or the configuration proxy,
+        and ask to save on current or new version.
+        Returns true if saved or discarded, false if action aborted."""
+        ret = True
         effective_changeset = self.doc.changeset-self.doc.changeset_ignore
         conf_changeset = self.server.recursive_changeset()
         logging.debug('Checking changesets', effective_changeset, self.doc.changeset,  
@@ -258,13 +266,16 @@ class TestWindow(acquisition.MainWindow):
             elif r==QtGui.QMessageBox.Ok:
                 logging.debug('Saving a version on close', ver)
                 v = fileui.VersionMenu(self.doc, self.doc.proxy)
-                v.save_version()
-        return True
+                ret = v.save_version(nosync=nosync)
+                if not nosync:
+                    self.reset_changeset()
+        return ret
     
     def close(self):                
+        r = acquisition.MainWindow.close(self)
+        logging.debug('TestWindow.close')
         self.play.close()
         self.fixedDoc.proxy.close()
-        return acquisition.MainWindow.close(self)
 
     def set_idx(self, idx):
         logging.debug('TestWindow.set_idx', self.play.isRunning(), idx)

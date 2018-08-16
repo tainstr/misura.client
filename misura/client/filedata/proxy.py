@@ -75,7 +75,7 @@ class RemoteFileProxy(object):
         """Do nothing on remote objects!"""
         return True
 
-    def close(self):
+    def close(self, *a, **k):
         """Do nothing on remote objects!"""
         return True
 

@@ -231,7 +231,7 @@ class VersionMenu(QtGui.QMenu):
         logging.debug('load_version', v)
         self.versionChanged.emit(v)
 
-    def save_version(self, version_id=False):
+    def save_version(self, version_id=False, nosync=True):
         """Save configuration in current version"""
         # Try to create a new version
         logging.debug('save_version', version_id)
@@ -251,8 +251,12 @@ class VersionMenu(QtGui.QMenu):
         
         self.thread = RunMethod(self.doc.save_version_and_plot, version_name, pid=pid)
         self.thread.pid = pid
-        self.thread.do()
         self.thread.notifier.done.connect(functools.partial(self.callback_save, version_name))
+        if nosync:
+            self.thread.do()
+        else:
+            logging.debug('Saving synchronously...')
+            self.thread.run()
         return True
         
     def callback_save(self, version_name):

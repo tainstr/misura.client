@@ -486,6 +486,8 @@ class MisuraDocument(document.Document):
         proxy.header(refresh=True)
         proxy.flush()
         self.sig_save_done.emit()
+        if self.tasks:
+            self.tasks.done(pid)
         return True
 
     def save(self, filename, mode='vsz'):

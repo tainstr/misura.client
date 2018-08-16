@@ -158,7 +158,9 @@ class MainWindow(QtGui.QMainWindow):
     def closeEvent(self, event):
         for i in range(1,self.tab.count()):
             logging.debug('Closing tab:', i)
-            self.close_tab(i)
+            if not self.close_tab(i):
+                event.ignore()
+                return False
         ret = QtGui.QMainWindow.closeEvent(self, event)
         iutils.app.quit()
         return ret
@@ -252,13 +254,16 @@ class MainWindow(QtGui.QMainWindow):
     def close_tab(self, idx):
         logging.debug('Tab close requested', idx)
         if idx == 0:
-            return
+            return False
         w = self.tab.widget(idx)
-        if w.check_save():
+        if w.check_save(nosync=False):
             self.tab.removeTab(idx)
             w.close()
             # explicitly destroy the widget
-            del w
+            #del w
+            return True
+        # Failed to close the tab
+        return False
 
     def remove_close_button_from_tab(self, tab_index):
         self.tab.tabBar().tabButton(

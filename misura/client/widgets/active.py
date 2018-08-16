@@ -159,6 +159,7 @@ class RunMethod(QtCore.QRunnable):
         registry.tasks.job(n, self.pid, msg or self.pid)
 
     def run(self):
+        """Run the task. Call directly to execute synchronously."""
         self.running = True
         registry.tasks.jobs(self.step, self.pid, self.abort)
         logging.debug(
@@ -181,6 +182,7 @@ class RunMethod(QtCore.QRunnable):
         self.running = False
         
     def do(self):
+        """Run the task in a separate thread"""
         QtCore.QThreadPool.globalInstance().start(self)
 
 
