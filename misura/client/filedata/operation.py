@@ -497,18 +497,23 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # open the file
         fp = getattr(doc, 'proxy', False)
         logging.debug('FILENAME', self.filename, type(fp), fp)
+        if fp and fp.isopen() and fp.get_version()!=self.params.version:
+            logging.debug('Changing version', repr(fp.get_version()), 
+                          repr(self.params.version))
+            fp.set_version(self.params.version)
         if fp is False or not fp.isopen():
-            logging.debug('Opening a new file proxy', self.filename)
+            logging.debug('Opening a new file proxy', self.filename, repr(self.params.version))
             self.proxy = getFileProxy(
                 self.filename, version=self.params.version, mode='r')
         else:
             self.proxy = fp
         job(1, label='Configuration')
         if not self.proxy.isopen():
-            self.proxy.reopen()
-        LF.version = self.proxy.get_version()
+            self.proxy.reopen() 
+        self.params.version = self.proxy.get_version()
+        LF.params.version = self.params.version
         doc.proxies[self.proxy.get_path()] = self.proxy
-        self.params.version = LF.version
+        logging.debug('Effective version is now', repr(self.params.version))
         if not len(self.proxy.conf):
             logging.debug('Reloading proxy conf')
             self.proxy.load_conf()

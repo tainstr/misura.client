@@ -84,7 +84,7 @@ class VersionMenu(QtGui.QMenu):
     @property
     def proxy(self):
         # TODO: submenu for each proxy in doc
-        if self._proxy:
+        if self._proxy is not None:
             return self._proxy
         if not self.doc:
             return False
@@ -182,6 +182,8 @@ class VersionMenu(QtGui.QMenu):
 
     def redraw(self):
         self.clear()
+        if not self.proxy:
+            self.proxy.reopen(mode='r')
         vd = self.proxy.get_versions()
         logging.debug('Got info', vd)
         if vd is None:

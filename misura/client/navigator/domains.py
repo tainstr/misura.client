@@ -82,11 +82,21 @@ class DataNavigatorDomain(NavigatorDomain):
         self.model().refresh(True)
 
     @node
-    def reloadFile(self, node=False):
-        logging.debug('RELOADING')
-        if not node.linked:
+    def reloadFile(self, node=False, version=None):
+        logging.debug('RELOADING', node.path, repr(version))
+        linked = node.linked
+        if not linked:
+            logging.warning('Cannot reload unlinked dataset', node.path)
             return False
-        logging.debug(node.linked.reloadLinks(self.doc))
+        if version is not None:
+            # propagate new version information to all datasets
+            for ds in self.doc.data.values():
+                if ds.linked and ds.linked.params.filename==node.linked.params.filename:
+                    ds.linked.params.version = version
+            linked.params.version=version
+        r = linked.reloadLinks(self.doc)
+        self.doc.setModified()
+        logging.debug('reloadLinks', r)
 
     @node
     def recalculate_metadata(self, node=False):
@@ -288,13 +298,15 @@ class DataNavigatorDomain(NavigatorDomain):
     def add_versions_menu(self, node=False, menu=None):
         if not node:
             return False
-        proxy = self.doc.proxies.get(node.linked.params.filename, False)
+        proxy = self.doc.proxies.get(node.linked.params.filename, None)
         logging.debug('add_versions_menu', node, node.linked.params.filename, proxy)
-        if proxy:
+        if proxy is not None:
             versions = VersionMenu(self.doc, proxy=proxy, parent=menu)
             if menu:
-                menu.addMenu(versions) 
+                menu.addMenu(versions)
+            versions.versionChanged.connect(functools.partial(self.reloadFile, node))
             return versions
+        logging.warning('Cannot create versions menu')
         return False
 
     def add_file_menu(self, menu, node):

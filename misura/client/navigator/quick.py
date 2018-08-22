@@ -54,7 +54,7 @@ class QuickOps(object):
 #
     def _load(self, node):
         """Load or reload a dataset"""
-        self.doc._load(node.path, node.linked.filename, version=node.linked.version)
+        self.doc._load(node.path, node.linked.filename, version=node.linked.params.version)
         
     @node
     def load_rule(self, node, rule, overwrite=True):

@@ -18,8 +18,6 @@ class LinkedMisuraFile(base.LinkedFileBase):
         """List of samples contained in this file"""
         self.prefix = ''
         """Dataset prefix"""
-        self.version = -1
-        """SharedFile version"""
         self.conf = option.ConfigurationProxy()
         """Additional configuration parameters"""
         self.instr = option.ConfigurationProxy()
