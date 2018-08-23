@@ -9,9 +9,11 @@
 !define PRODUCT_VERSION "4.3-${DATE}"
 !define PRODUCT_PUBLISHER "TA Instruments / Waters LLC"
 !define PRODUCT_WEB_SITE "http://misura.readthedocs.io"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\misura.exe"
+!define TASK_NAME "misura.exe"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${TASK_NAME}"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
+
 
 SetCompressor /solid lzma
 ;SetCompress off
@@ -34,7 +36,7 @@ SetCompressor /solid lzma
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\misura.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\${TASK_NAME}"
 !define MUI_FINISHPAGE_LINK "Open Misura Documentation"
 !define MUI_FINISHPAGE_LINK_LOCATION "${PRODUCT_WEB_SITE}"
 !insertmacro MUI_PAGE_FINISH
@@ -54,6 +56,19 @@ InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
 
+; taken from https://stackoverflow.com/a/47174096
+!macro IsRunning 
+  DetailPrint "Checking open instance..."
+  Delete $TEMP\misuraproc.tmp
+  ExecWait "cmd /c for /f $\"tokens=1,2$\" %i in ('tasklist') do (if /i %i EQU ${TASK_NAME} fsutil file createnew $TEMP\misuraproc.tmp 0)"
+  IfFileExists $TEMP\misuraproc.tmp 0 notRunning
+   ;we have atleast one main window active
+   MessageBox MB_OK|MB_ICONEXCLAMATION "Misura is running. Please close all instances and retry. If no Misura window is visible, check for misura.exe in the task manager or reboot." /SD IDOK
+   Quit
+  notRunning:
+	DetailPrint "No running ${TASK_NAME} instance was found"
+!macroend
+
 ; taken from http://stackoverflow.com/questions/719631/how-do-i-require-user-to-uninstall-previous-version-with-nsis
 ; The "" makes the section hidden.
 Section -SecUninstallPrevious
@@ -67,9 +82,11 @@ Function UninstallPrevious
     ${If} $R0 == ""
         Goto Done
     ${EndIf}
-
+	
+	!insertmacro IsRunning
+	
     DetailPrint "Removing previous installation."
-
+	
     ; Run the uninstaller
     ExecWait '"$R0" _?=$INSTDIR'
 
@@ -87,12 +104,12 @@ Section "Misura" SEC01
   File "${PYINST_DIR}\*.manifest"
 
   CreateDirectory "$SMPROGRAMS\Misura"
-  CreateShortCut "$SMPROGRAMS\Misura\Misura Browser.lnk" "$INSTDIR\misura.exe" --browser "$INSTDIR\art\browser.ico"
-  CreateShortCut "$DESKTOP\Misura Browser.lnk" "$INSTDIR\misura.exe" --browser "$INSTDIR\art\browser.ico"
-  CreateShortCut "$SMPROGRAMS\Misura\Misura Acquisition.lnk" "$INSTDIR\misura.exe" --acquisition "$INSTDIR\art\misura.ico"
-  CreateShortCut "$DESKTOP\Misura Acquisition.lnk" "$INSTDIR\misura.exe" --acquisition "$INSTDIR\art\misura.ico"
-  CreateShortCut "$SMPROGRAMS\Misura\Misura Graphics.lnk" "$INSTDIR\misura.exe" --graphics "$INSTDIR\art\graphics.ico"
-  CreateShortCut "$DESKTOP\Misura Graphics.lnk" "$INSTDIR\misura.exe" --graphics "$INSTDIR\art\graphics.ico"
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Browser.lnk" "$INSTDIR\${TASK_NAME}" --browser "$INSTDIR\art\browser.ico"
+  CreateShortCut "$DESKTOP\Misura Browser.lnk" "$INSTDIR\${TASK_NAME}" --browser "$INSTDIR\art\browser.ico"
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Acquisition.lnk" "$INSTDIR\${TASK_NAME}" --acquisition "$INSTDIR\art\misura.ico"
+  CreateShortCut "$DESKTOP\Misura Acquisition.lnk" "$INSTDIR\${TASK_NAME}" --acquisition "$INSTDIR\art\misura.ico"
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Graphics.lnk" "$INSTDIR\${TASK_NAME}" --graphics "$INSTDIR\art\graphics.ico"
+  CreateShortCut "$DESKTOP\Misura Graphics.lnk" "$INSTDIR\${TASK_NAME}" --graphics "$INSTDIR\art\graphics.ico"
   SetOverwrite ifnewer
 
   File "${PYINST_DIR}\README"
@@ -147,12 +164,12 @@ Section "Misura" SEC01
 
   WriteRegStr HKCR ".vsz" "" "MisuraGraphics.Document"
   WriteRegStr HKCR "MisuraGraphics.Document" "" "Misura Graphics Document"
-  WriteRegStr HKCR "MisuraGraphics.Document\shell\open\command" "" '"$INSTDIR\misura.exe" --graphics "%1"'
+  WriteRegStr HKCR "MisuraGraphics.Document\shell\open\command" "" '"$INSTDIR\${TASK_NAME}" --graphics "%1"'
   WriteRegStr HKCR "MisuraGraphics.Document\DefaultIcon" "" '"$INSTDIR\icons\graphics.ico"'
   
   WriteRegStr HKCR ".h5" "" "Misura.Document"
   WriteRegStr HKCR "Misura.Document" "" "Misura Document"
-  WriteRegStr HKCR "Misura.Document\shell\open\command" "" '"$INSTDIR\misura.exe" --browser "%1"'
+  WriteRegStr HKCR "Misura.Document\shell\open\command" "" '"$INSTDIR\${TASK_NAME}" --browser "%1"'
   WriteRegStr HKCR "Misura.Document\DefaultIcon" "" '"$INSTDIR\icons\browser.ico"'
   
   
@@ -203,10 +220,10 @@ SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\misura.exe"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\${TASK_NAME}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\misura.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\${TASK_NAME}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
@@ -222,6 +239,7 @@ Function un.onInit
   MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "Are you sure you want to completely remove $(^Name) and all of its components?" IDYES +2
   Abort
 FunctionEnd
+
 
 Section -Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}.url"
