@@ -5,11 +5,12 @@ logging = get_module_logging(__name__)
 from PyQt4 import QtGui, QtCore
 import functools
 from .. import parameters as params
+from ..iutils import theme_icon
 import os
 
-def add_button(parent, layout, icon_path, text, size, row, column, rowspan=1, columnspan=1):
+def add_button(parent, layout, name, text, size, row, column, rowspan=1, columnspan=1):
     button = QtGui.QToolButton(parent)
-    button.setIcon(QtGui.QIcon(icon_path))
+    button.setIcon(theme_icon(name))
     button.setText(text)
     button.setIconSize(QtCore.QSize(size, size))
     button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -26,6 +27,7 @@ class InstrumentSelector(QtGui.QWidget):
         self.redraw()
 
     def redraw(self):
+        logging.debug('InstrumentSelector.redraw')
         while True:
             item = self.lay.takeAt(0)
             if item in [0, None]:
@@ -59,7 +61,7 @@ class InstrumentSelector(QtGui.QWidget):
 
             button = add_button(self,
                                 current_instrument_layout,
-                                os.path.join(params.pathArt, name + '.svg'),
+                                name,
                                 title,
                                 200,
                                 0,
