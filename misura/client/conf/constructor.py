@@ -762,7 +762,7 @@ class Interface(QtGui.QTabWidget):
         
     def resizeEvent(self, ev):
         self.move_search()
-        return super(self.__class__, self).resizeEvent(ev)
+        return QtGui.QTabWidget.resizeEvent(self, ev)
         
     def move_search(self):
         w = self.size().width()
