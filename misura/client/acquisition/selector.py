@@ -10,7 +10,10 @@ import os
 
 def add_button(parent, layout, name, text, size, row, column, rowspan=1, columnspan=1):
     button = QtGui.QToolButton(parent)
-    button.setIcon(theme_icon(name))
+    icon = theme_icon(name)
+    if icon.isNull():
+        icon = theme_icon('unknown')
+    button.setIcon(icon)
     button.setText(text)
     button.setIconSize(QtCore.QSize(size, size))
     button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
