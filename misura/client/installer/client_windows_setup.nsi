@@ -36,7 +36,7 @@ SetCompressor /solid lzma
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\${TASK_NAME}"
+;!define MUI_FINISHPAGE_RUN "$INSTDIR\${TASK_NAME}"
 !define MUI_FINISHPAGE_LINK "Open Misura Documentation"
 !define MUI_FINISHPAGE_LINK_LOCATION "${PRODUCT_WEB_SITE}"
 !insertmacro MUI_PAGE_FINISH
