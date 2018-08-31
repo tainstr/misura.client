@@ -98,11 +98,12 @@ def export(sh, frame='/hsm/sample0/frame',
     ti = 0
     if prog:
         prog.setMaximum(N-i)
+    logging.debug('Set progress bar', N, i, N-i)
     pg = 0
     while i < N:
         # Get image
         t, img = ref[i]
-# 		print 'exporting {:.2f} {} {:.0f}'.format(100.*i/N,i,t)
+        print 'exporting {:.2f} {} {:.0f}'.format(100.*i/N,i,t)
         if isinstance(ref, reference.Binary):
             im = cv.imdecode(np.frombuffer(img, dtype='uint8'), 1)
         elif isinstance(ref, reference.Profile) or isinstance(ref, reference.CumulativeProfile):
@@ -202,7 +203,7 @@ class VideoExporter(QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent=parent)
         self.setWindowTitle(_('Video Export Configuration'))
         self.lay = QtGui.QFormLayout()
-        self.setLayout(self.lay)
+        
         self.sh = sh
         
         src = src.split('/')
@@ -224,7 +225,7 @@ class VideoExporter(QtGui.QDialog):
         self.wg = conf.Interface(self.cfg, self.cfg, ropts)
         self.lay.addRow(self.wg)
 
-        self.out = QtGui.QLineEdit()
+        self.out = QtGui.QLineEdit(self)
         self.out.setText(sh.get_path() + '.avi')
         self.lbl_out = QtGui.QPushButton(_("Output file"))
         self.lbl_out.pressed.connect(self.change_output)
@@ -237,6 +238,7 @@ class VideoExporter(QtGui.QDialog):
         self.btn_ko.setEnabled(False)
         self.lay.addRow(self.btn_ko, self.btn_ok)
         self.prog = False
+        self.setLayout(self.lay)
 
     def export(self):
         """Start export thread"""

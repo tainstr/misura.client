@@ -556,7 +556,7 @@ class Interface(QtGui.QTabWidget):
         if self._deleted:
             logging.debug('Interface.rebuild: deleted')
             return False
-        if not self.remObj.is_live():
+        if not self.remObj.is_live() and 'fullpath' in self.remObj:
             logging.debug('Check changeset', self.remObj['fullpath'], self.remObj._changeset, self.changeset)
             if self.remObj._changeset<=self.changeset:
                 return False
