@@ -65,6 +65,34 @@ def smooth(x, window=10, method='hanning'):
     y = y[window:-window + 1]
     return y
 
+def smooth_discard(x, percent=10., drop='absolute', **kw):
+    y = smooth(x, **kw)
+    d = abs(x-y)
+    s = np.argsort(d)
+    if drop=='absolute':
+        # Delete all elements which exceeds the stdev by percent%
+        m = (d.mean()+d.std())*(100+percent)/100.
+        s1 = []
+        for idx in s[::-1]:
+            if d[idx]>m:
+                s1.append(idx)
+            else:
+                break
+        s = np.array(s1)
+        n = None # take all
+    elif drop=='relative':
+        # Delete most distant percent% elements
+        n = -int(len(s)*percent/100.)
+    else:
+        raise BaseException('Unknown parameter drop: '+drop)
+     
+    if len(s):
+        x = np.delete(x, s[n:])
+        y = np.delete(y, s[n:])
+    else:
+        logging.debug('smooth_discard: not filtering')
+    # New unfiltered, new filtered 
+    return y, x   
 
 def derive(v, method, order=1):
     """Derive one time an array, always returning an array of the same length"""
