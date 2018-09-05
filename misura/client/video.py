@@ -87,7 +87,9 @@ def export(sh, frame='/hsm/sample0/frame',
         x_translation -= 25
         y_translation -= max((50, d/3))
         y_translation = max((0, y_translation))
-
+    # Ensure even dimensions for broad codec compatibility
+    wMax += wMax%2
+    hMax += hMax%2
     logging.debug('Max resolution', wMax, hMax)    
     out = cv.VideoWriter(output, fourcc, framerate, (wMax, hMax))
     index_acquisition_T = csutil.find_nearest_val(vT, acquisition_start_temperature, seed=0)
