@@ -226,8 +226,11 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
     def slotDocExport(self):
         """Export the graph."""
         if self.exdialog:
-            self.exdialog.hide()
-            self.exdialog.close()
+            try:
+                self.exdialog.hide()
+                self.exdialog.close()
+            except:
+                pass
             del self.exdialog
         from veusz.dialogs.export import ExportDialog
         dialog = ExportDialog(self, self.document, self.filename)
