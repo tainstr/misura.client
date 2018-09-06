@@ -107,9 +107,14 @@ def read_file(profile, startTime=10, endTime=-1, maxLayers=500, cut=0, deplete=1
         t, ((w, h), x, y) = profile[i]
         x = x.astype(np.float32)-x[0]
         y = y.astype(np.float32)
+        n = len(x)
         if cut or deplete:
+            
             x = x[scut:ecut:deplete]
             y = y[scut:ecut:deplete]
+        if not len(x):
+            logging.debug('Cutting error', n, len(x), scut, ecut, deplete)
+            continue
         _minx = min(x)
         if _minx<minX:
             minX=_minx
