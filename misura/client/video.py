@@ -113,8 +113,8 @@ def export(sh, frame='/hsm/sample0/frame',
             im = np.ones((hMax, wMax), np.uint8) * 255
             # Color black area contained in path
             ((w, h), x, y) = img
-            x -= x_translation
-            y -= y_translation
+            x -= np.uint16(x_translation)
+            y -= np.uint16(y_translation)
             if centerx:
                 x += np.uint16(wMax/2. - int(x.mean()))
             if centery:
