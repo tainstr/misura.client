@@ -200,6 +200,10 @@ class SpinboxAction(QtGui.QWidgetAction):
 
 def ir(a): return int(round(a, 0))
 
+default_signals = {'NaN': 'Invalid',
+                   -np.inf: 'Negative infinity',
+                   +np.inf: 'Positive infinity',
+                   None: 'None'}
 
 class aNumber(ActiveWidget):
     zoom_factor = 1.
@@ -594,11 +598,30 @@ class aNumber(ActiveWidget):
             self.spinbox.blockSignals(False)
             if self.slider:
                 self.slider.blockSignals(False)
-        c = str(int(self.current))
-        if c in self.prop.get('valueSignals', {}):
-            self.readonly_label.setText(str(self.prop['valueSignals'][c]))
+        sig = self.prop.get('valueSignals', {}).copy()
+        sig.update(default_signals)
+        c = 'NaN' if np.isnan(self.current) else self.current
+        lbl = sig.get(c, False) or sig.get(str(int(c)), False)
+        if lbl:
+            self.readonly_label.setText(lbl)
+            self.readonly_label.show()
         else:
             self.readonly_label.setText(self.spinbox.text())
+            if not self.readonly:
+                self.readonly_label.hide()
+            
+    def adapt(self, val):
+        """Protect against NaN and inf"""
+        val = ActiveWidget.adapt(self, val)
+        if val is None:
+            return None
+        if np.isnan(val):
+            return 0
+        if not np.isfinite(val):
+            if self.double:
+                return np.sign(val)*MAX
+            return np.sign(val)*MAXINT
+        return val
 
     #@lockme()
     def setRange(self, m=None, M=None, step=0):
