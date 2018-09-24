@@ -693,6 +693,24 @@ class Interface(QtGui.QTabWidget):
         wg = sec.highlight_option(handle)
         logging.debug('HIGHLIGHT OPT', handle)
         return wg
+    
+    def hide_widget(self, wg):
+        """Hide `handle` widget from the interface"""
+        wg.hide()
+        wg.label_widget.hide()
+        self.filtered.add(wg)
+        
+    def hide_option(self, handle):
+        self.hide_widget(self.widgetsMap[handle])
+        
+    def show_widget(self, wg):
+        wg.show()
+        wg.label_widget.show()
+        if wg in self.filtered:
+            self.filtered.remove(wg)
+            
+    def show_option(self, handle):
+        self.show_widget(self.widgetsMap[handle])
 
     def scroll_to(self, area, x, y):
         area.ensureVisible(x, y - 50)
@@ -791,22 +809,15 @@ class Interface(QtGui.QTabWidget):
     def filter_text(self, query=False):
         if not query or not self.search.isVisible():
             for wg in self.filtered:
-                wg.show()
-                wg.label_widget.show()
-            self.filtered = set()
+                self.show_widget(wg)
             return 0
         i = 0
         for wg in self.widgetsMap.values():
             if match_widget_filter(wg, query):
-                wg.show()
-                wg.label_widget.show()
-                if wg in self.filtered:
-                    self.filtered.remove(wg)
+                self.show_widget(wg)
                 i += 1
             else:
-                wg.hide()
-                wg.label_widget.hide()
-                self.filtered.add(wg)
+                self.hide_widget(wg)
         return i
 
 
