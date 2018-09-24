@@ -180,6 +180,9 @@ Section "Misura" SEC01
 	WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_flash" "0"
 	WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_m3" "0"
 	WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_adv" "0"
+	
+	; Grant full permissions on installation folder to avoid main-1 error
+	AccessControl::GrantOnFile "$INSTDIR" "(BU)" "FullAccess"
 SectionEnd
 
 
