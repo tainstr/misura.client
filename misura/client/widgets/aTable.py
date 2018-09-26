@@ -122,14 +122,14 @@ class aTablePointDelegate(QtGui.QItemDelegate):
         p = mod.tableObj.prop.get('precision', 2)
         if hasattr(p, '__len__'):
             p = p[col]
-
+        
         colType = mod.header[col][1]
         if colType == 'Float':
             wg = QtGui.QDoubleSpinBox(parent)
             wg.setRange(MIN, MAX)
             val = float(mod.data(index))
-            if p==0: p=2
             dc = extend_decimals(val, p)
+            if dc<p: dc = p
             wg.setDecimals(dc)
         elif colType == 'Integer':
             wg = QtGui.QSpinBox(parent)
@@ -230,6 +230,8 @@ class aTableModel(QtCore.QAbstractTableModel):
         val = self.raw_value(col, row)
         if val is None:
             return None
+        if self.header[col][1] not in ('Float', 'Integer'):
+            return val
         # handle conversion from option unit to client-side unit
         if self.unit != 'None' and self.csunit != 'None':
             u, cu = self.unit[col], self.csunit[col]
@@ -239,6 +241,8 @@ class aTableModel(QtCore.QAbstractTableModel):
             p = self.precision
             if hasattr(p, '__len__'):
                 p = p[col]
+            if p=='None':
+                return val
             dc = extend_decimals(val, p)
             ps = '{:.' + str(dc) + 'f}'
             val = ps.format(val)
