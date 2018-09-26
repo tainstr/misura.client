@@ -528,7 +528,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             domain.build_base_menu(base_menu, node)
         if tree_actions:
             self.add_tree_actions(base_menu)
-        self.act_del.setEnabled(bool(node))
+            self.act_del.setEnabled(bool(node))
         return base_menu
 
     def update_group_menu(self, node, group_menu, tree_actions=False):
@@ -537,7 +537,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             domain.build_group_menu(group_menu, node)
         if tree_actions:
             self.add_tree_actions(group_menu)
-        self.act_del.setEnabled(bool(node))
+            self.act_del.setEnabled(bool(node))
         return group_menu
 
     def update_file_menu(self, node, file_menu, tree_actions=False):
@@ -547,7 +547,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             domain.build_file_menu(file_menu, node)
         if tree_actions:
             self.add_tree_actions(file_menu, node)
-        self.act_del.setEnabled(bool(node))
+            self.act_del.setEnabled(bool(node))
         return file_menu
 
     def update_sample_menu(self, node, sample_menu, tree_actions=False):
@@ -556,7 +556,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             domain.build_sample_menu(sample_menu, node)
         if tree_actions:
             self.add_tree_actions(sample_menu)
-        self.act_del.setEnabled(bool(node))
+            self.act_del.setEnabled(bool(node))
         return sample_menu
 
     def update_dataset_menu(self, node, dataset_menu, tree_actions=False):
@@ -565,7 +565,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             domain.build_dataset_menu(dataset_menu, node)
         if tree_actions:
             self.add_tree_actions(dataset_menu)
-        self.act_del.setEnabled(bool(node))
+            self.act_del.setEnabled(bool(node))
         return dataset_menu
 
     def update_derived_menu(self, node, der_menu):
