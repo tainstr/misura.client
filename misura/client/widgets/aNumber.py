@@ -217,6 +217,8 @@ class aNumber(ActiveWidget):
     step_changed = QtCore.pyqtSignal(float)
     arrow_plus = False
     arrow_minus = False
+    max=None
+    min=None
 
     def __init__(self, server, remObj, prop, parent=None, slider_class=FocusableSlider):
         self.slider_class = slider_class
@@ -700,25 +702,32 @@ class aNumber(ActiveWidget):
         self.step_changed.emit(self.step)
 
     def set_tooltip(self):
+        if ActiveWidget.set_tooltip(self) == False:
+            return False
+        if self.max is None:
+            return False
         tp = self.prop.get('toolTip', '')
-        if tp: 
+        if tp:
             tp += '\n'
-        mx, mn = 'inf', '-inf'
-        if self.max and ((self.double and self.max < MAX) or (self.max < MAXINT)):
+        mx, mn = '-', '-'
+        sp = self.step or '-'
+        if self.max!=None and ((self.double and self.max < MAX) or (self.max < MAXINT)):
             mx = self.spinbox.textFromValue(self.max)
-        if self.min and ((self.double and self.min > MIN) or (self.min > MININT)):
+        if self.min!=None and ((self.double and self.min > MIN) or (self.min > MININT)):
             mn = self.spinbox.textFromValue(self.min)
-        tp += _('Range: {} >> {}\nStep: {}\n').format(mn, mx, self.step)
+        tp += _('Range: {} >> {}\nStep: {}\n').format(mn, mx, sp)
         tp += _('Precision: {}').format(self.precision)
         if self.slider:
             tp += _(' Zoom: {}').format(self.zoom_factor * self.slider.zoomed)
         err = self.prop.get('error', None)
         if err:
             tp += _('Error: {}').format(err)
+        
         if self.slider:
             self.slider.setToolTip(tp)
         self.spinbox.setToolTip(tp)
         self.setToolTip(tp)
+        return tp
 
 
 class aNumberAction(QtGui.QWidgetAction):

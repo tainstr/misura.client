@@ -223,7 +223,6 @@ class Active(object):
         self.hot = 'Hot' in self.attr
         self.label = _(self.name)
         return self.prop
-        
 
     def isVisible(self):
         """Compatibility function with QWidget"""
@@ -520,6 +519,19 @@ class ActiveWidget(Active, QtGui.QWidget):
                 self.clear_layout(w.layout())
             else:
                 w1.deleteLater()
+                
+    def set_tooltip(self):
+        if not hasattr(self,'lay'):
+            return False
+        tp = self.prop.get('toolTip','')
+        for i in range(self.lay.count()):
+            item = self.lay.itemAt(i)
+            if not item: continue
+            wg = item.widget()
+            if not wg: continue 
+            wg.setToolTip(tp)
+        self.setToolTip(tp)
+        return tp
     
     def redraw(self):
         self.clear_layout()
@@ -564,7 +576,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.connect(
             self, QtCore.SIGNAL('redraw()'), self.redraw, QtCore.Qt.QueuedConnection)
         self.connect(
-            self, QtCore.SIGNAL('changedOption()'), self.changed_option, QtCore.Qt.QueuedConnection)        
+            self, QtCore.SIGNAL('changedOption()'), self.changed_option, QtCore.Qt.QueuedConnection)
+        self.set_tooltip() 
         
     def new_window(self):
         """Displays a copy of the widget in a new window"""
