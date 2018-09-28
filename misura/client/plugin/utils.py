@@ -14,7 +14,7 @@ from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 
 from misura.client.iutils import searchFirstOccurrence, iter_widgets
-
+from misura.canon.csutil import smooth
 
 def convert_datapoint_units(convert_func, dsname, doc):
     """Convert all DataPoint widgets in `doc` using dataset `dsname`
@@ -55,17 +55,7 @@ def rectify(xData):
     return x, xd, err
 
 
-def smooth(x, window=10, method='hanning'):
-    """method='flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'kaiser'"""
-    s = np.r_[2 * x[0] - x[window - 1::-1], x, 2 * x[-1] - x[-1:-window:-1]]
-    # print(len(s))
-    if method == 'flat':  # moving average
-        w = np.ones(window, 'd')
-    else:
-        w = eval('np.' + method + '(window)')
-    y = np.convolve(w / w.sum(), s, mode='same')
-    y = y[window:-window + 1]
-    return y
+
 
 def _update_filter(new, old):
     """Add new filter to old filter in old array indexes"""
