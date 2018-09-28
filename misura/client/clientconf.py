@@ -568,7 +568,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
 
     def rem(self, name, key, save=True):
         """Forget a recent datum"""
-        key = str(key)
+        key = unicode(key)
         tname = tabname(name)
         tab = self[tname]
         done = 0

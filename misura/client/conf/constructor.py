@@ -340,7 +340,7 @@ def match_widget_filter(wg, query):
         return True
     if query in wg.label.lower():
         return True
-    if query in str(wg.current).lower():
+    if query in unicode(wg.current).lower():
         return True
     return False
 
