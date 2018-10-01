@@ -105,6 +105,10 @@ def orgSections(prop_dict, configuration_level=5):
             sections['Main'].append(prop)
             continue
         spl = handle.split(spl)
+        # If section requires no separate tab:
+        if 'NoTab' in prop_dict.get(spl[0],{}).get('attr',[]):
+            sections['Main'].append(prop)
+            continue
         sections[spl[0]].append(prop)
     return sections
 
