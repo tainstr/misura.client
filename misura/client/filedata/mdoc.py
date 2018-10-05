@@ -409,7 +409,15 @@ class MisuraDocument(document.Document):
         """Iterate through all datasets and all cached datasets, yielding name, ds"""
         for name, ds in self.data.iteritems():
             yield name, ds
-        for name in self.cache.keys():
+        keys = []
+        # Move local keys to the end of the iteration
+        # (used during save operations)
+        for k in self.cache.keys():
+            if k[-2:] in ('_t','_T'):
+                keys.append(k)
+            else:
+                keys.insert(0, k)
+        for name in keys:
             ds = self.get_cache(name)
             if ds is False:
                 continue
@@ -421,6 +429,7 @@ class MisuraDocument(document.Document):
         proxies = {}
         pid = pid or 'Save: {}'.format(version_name)
         self.sig_save_started.emit()
+        excluded_time_datasets = set()
         if self.tasks is not False:
             self.tasks.jobs(len(self.data)+len(self.cache), pid)
         for i, (name, ds) in enumerate(self.iter_data_and_cache()):
@@ -473,12 +482,17 @@ class MisuraDocument(document.Document):
                 #TODO: detect current page
                 r, vsz_text = self.save_plot(proxy, version_name, text=vsz_text)
                 plots.add(vfn)
+                # TODO: keep those at the end of the iteration!
             if name[-2:]=='_t':
+                if name in excluded_time_datasets:
+                    logging.debug('Excluding an already associated time dataset', name)
+                    continue
                 time_name = 't'
                 time_ds = ds
             else:
                 time_name = get_best_x_for(name, ds.linked.prefix, self.data.keys()+self.cache.keys(), '_t')
                 time_ds = self.get_cache(time_name)
+                excluded_time_datasets.add(time_name)
             # Ensure time is in seconds
             time_data = units.Converter.convert(time_ds.unit, 'second', time_ds.data)
             logging.debug('Writing dataset', name)
