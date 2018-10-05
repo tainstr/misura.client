@@ -49,6 +49,8 @@ def getUsedPrefixes(doc):
     logging.debug('getUsedPrefixes', p, doc.data.keys())
     return p
 
+VERSION_LATEST = -1
+VERSION_UNSET = -2
 
 def get_linked(doc, params, create=True):
     opf = getUsedPrefixes(doc)
@@ -65,11 +67,13 @@ def get_linked(doc, params, create=True):
         base, n, pre = iutils.guessNextName(prefix[:-1])
         prefix = pre + ':'
     params.prefix = prefix
+    params.version = VERSION_LATEST
     LF = linked.LinkedMisuraFile(params)
     LF.prefix = prefix
     logging.debug('get_linked', prefix, params.filename)
     LF.conf = False
     return LF
+
 
 
 class ImportParamsMisura(base.ImportParamsBase):
@@ -84,7 +88,7 @@ class ImportParamsMisura(base.ImportParamsBase):
     defaults.update({
         'prefix': '0:',
         'uid': '',
-        'version': -1,  # means latest
+        'version': VERSION_UNSET,  # means not set
         'reduce': False,
         'reducen': 1000,
         'time_interval': 1,  # interpolation interval for time coord
@@ -450,7 +454,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
     @classmethod
     def from_rule(cls, rule, linked_filename, **kw):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
-        version = kw.get('version', '')
+        version = kw.get('version', -2)
         kw['version'] = version
         rebuild = kw.get('rebuild', False)
         kw['rebuild'] = rebuild
@@ -497,9 +501,15 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         # open the file
         fp = getattr(doc, 'proxy', False)
         logging.debug('FILENAME', self.filename, type(fp), fp)
+        if self.params.version==VERSION_UNSET:
+            logging.debug('params.version is not set: inheriting from LinkedFile', LF.params.version)
+            self.params.version = LF.params.version
         if fp and fp.isopen() and fp.get_version()!=self.params.version:
-            logging.debug('Changing version', repr(fp.get_version()), 
-                          repr(self.params.version))
+            logging.debug('Changing version from {} to {}'.format(
+                        repr(fp.get_version()), 
+                        repr(self.params.version)
+                        )
+                )
             fp.set_version(self.params.version)
         if fp is False or not fp.isopen():
             logging.debug('Opening a new file proxy', self.filename, repr(self.params.version))

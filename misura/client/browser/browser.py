@@ -256,7 +256,7 @@ class MainWindow(QtGui.QMainWindow):
         if idx == 0:
             return False
         w = self.tab.widget(idx)
-        if w.check_save(nosync=False):
+        if w and w.check_save(nosync=False):
             self.tab.removeTab(idx)
             w.close()
             # explicitly destroy the widget
