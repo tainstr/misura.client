@@ -438,7 +438,7 @@ class Converter(dataimport.Converter):
         timecol, unidx = np.unique(timecol, return_index=True)
         # Set first point as zero time
         timecol -= timecol[0]
-        ini_area = 0
+        ini_area = 0.0
         dim = set(['d', 'h', 'w', 'camA', 'camB']).intersection(
             set(header))
         ini0 = self.test[m3db.fprv.Inizio_Sint]
@@ -458,12 +458,13 @@ class Converter(dataimport.Converter):
             # Skip invalid data
             if np.isnan(data).all():
                 continue
+            data[~np.isfinite(data)] = 0.0
+             
             # Unit and client-side unit
-            
             if col == 'h':
                 ini1 = 3000.
             elif col == 'A':
-                ini1 = ini_area
+                ini1 = -data[0]
             elif col == 'w':
                 ini1 = 2000.
             elif col in ['d', 'camA', 'camB']:
@@ -484,7 +485,7 @@ class Converter(dataimport.Converter):
                 data = data / 100.
                 unit = 'percent'
             elif col == 'A':
-                data = -data[0]*ini_area
+                data = -data
                 unit = 'micron^2'
             elif col == 'P':
                 data = data / 10.
