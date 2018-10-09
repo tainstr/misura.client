@@ -160,21 +160,28 @@ def table_to_datasets(proxy, opt, doc):
         logging.debug('Skip empty table')
         return False
     value_idxes = range(tab.shape[0])
+    rem = []
     if timecol_idx in value_idxes:
-        value_idxes.remove(timecol_idx)
+        rem.append(timecol_idx)
     if Tcol_idx in value_idxes:
-        value_idxes.remove(Tcol_idx)
+        rem.append(Tcol_idx)
     if Ecol_idx in value_idxes:
-        value_idxes.remove(Ecol_idx)
+        rem.append(Ecol_idx)
     # Precedence to temperature column
     if Scol_idx!=Tcol_idx and Scol_idx>=0:
-        value_idxes.remove(Scol_idx)
+        rem.append(Scol_idx)
         
     # Remove reference columns
     ref_indexes = search_column_name(column_names, is_reference_col)
     ref_indexes = [e[1] for e in ref_indexes]
     for idx in ref_indexes:
+        rem.append(idx)
+    
+    # Remove all collected indexes
+    # in reverse order
+    for idx in sorted(rem, reverse=True):
         value_idxes.remove(idx)
+    
         
     if len(value_idxes) == 0:
         logging.debug(
