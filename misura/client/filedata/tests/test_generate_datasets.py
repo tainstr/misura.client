@@ -34,7 +34,7 @@ class GenerateDatasetsUtilities(unittest.TestCase):
     def test_search_column_name(self):
         def check(names, func, expected):
             r = gd.search_column_name(names,
-                                      func)
+                                      func)[0]
             self.assertEqual(r, expected)
 
         check(['time', 'a', 'b'], gd.is_time_col, ('time', 0))

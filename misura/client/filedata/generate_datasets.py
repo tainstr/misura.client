@@ -29,7 +29,8 @@ possible_error_names = ('error', 'err', 'uncertainty')
 
 is_error_col = lambda col: contains(col.lower(), possible_error_names)
 
-
+possible_reference_names = ('ref', 'reference')
+is_reference_col = lambda col: contains(col.lower().split(' ')[0], possible_reference_names)
 
 def new_dataset_operation(original_dataset, data, name, label, path, unit='volt', opt=False, error=None):
     """Create a new dataset by copying `original_dataset` and overwriting with `data`.
@@ -67,6 +68,7 @@ def search_column_name(column_names_list, is_col=lambda col: False):
     """Search for `column_names_list` checking with is_col() function"""
     idx = -1
     col_name = False
+    ret = []
     for i, col in enumerate(column_names_list):
         if is_col(col):
             #if col_name:
@@ -75,9 +77,10 @@ def search_column_name(column_names_list, is_col=lambda col: False):
             logging.debug('Found', col, i)
             col_name = col
             idx = i
-            # Stop at first found
-            break
-    return col_name, idx
+            ret.append((col_name, idx))
+    if not ret:
+        return [(idx, col_name)]
+    return ret
 
 
 def add_datasets_to_doc(datasets, doc, original_dataset=False):
@@ -125,20 +128,22 @@ def table_to_datasets(proxy, opt, doc):
     column_names = [e[0] for e in header]
 
     timecol_name, timecol_idx = search_column_name(column_names,
-                                                   is_time_col)
+                                                   is_time_col)[0]
 
     Tcol_name, Tcol_idx = search_column_name(column_names,
-                                             is_T_col)
+                                             is_T_col)[0]
     
     Scol_name, Scol_idx = search_column_name(column_names, 
-                                             is_S_col)
+                                             is_S_col)[0]
+    
+    
     
     if Tcol_idx<0 and Scol_idx>=0:
         Tcol_name, Tcol_idx = Scol_name, Scol_idx
     
     Ecol_name, Ecol_idx = search_column_name(column_names,
-                                             is_error_col)
-
+                                             is_error_col)[0]
+    
     if (timecol_name == False) and (Tcol_name == False):
         logging.debug(
             'Neither time nor temperature columns were found', header)
@@ -164,7 +169,13 @@ def table_to_datasets(proxy, opt, doc):
     # Precedence to temperature column
     if Scol_idx!=Tcol_idx and Scol_idx>=0:
         value_idxes.remove(Scol_idx)
-
+        
+    # Remove reference columns
+    ref_indexes = search_column_name(column_names, is_reference_col)
+    ref_indexes = [e[1] for e in ref_indexes]
+    for idx in ref_indexes:
+        value_idxes.remove(idx)
+        
     if len(value_idxes) == 0:
         logging.debug(
             'No value columns found in table', len(tab), tab, value_idxes, header)
