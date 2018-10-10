@@ -222,7 +222,7 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         valid_x, valid_y = [], []
         for i, x in enumerate(fields['x']):
             y = fields['y'][i]
-            if not (doc.data.has_key(x)and doc.data.has_key(y)):
+            if not (doc.data.has_key(x) and doc.data.has_key(y)):
                 continue
             valid_x.append(x)
             valid_y.append(y)

@@ -29,6 +29,8 @@ possible_error_names = ('error', 'err', 'uncertainty')
 
 is_error_col = lambda col: contains(col.lower(), possible_error_names)
 
+
+is_ref_col = lambda col: col.lower().split(' ')[0] == 'ref'
 possible_reference_names = ('ref', 'reference')
 is_reference_col = lambda col: contains(col.lower().split(' ')[0], possible_reference_names)
 
@@ -79,7 +81,7 @@ def search_column_name(column_names_list, is_col=lambda col: False):
             idx = i
             ret.append((col_name, idx))
     if not ret:
-        return [(idx, col_name)]
+        return [(col_name, idx)]
     return ret
 
 
@@ -160,28 +162,25 @@ def table_to_datasets(proxy, opt, doc):
         logging.debug('Skip empty table')
         return False
     value_idxes = range(tab.shape[0])
-    rem = []
     if timecol_idx in value_idxes:
-        rem.append(timecol_idx)
+        value_idxes.remove(timecol_idx)
     if Tcol_idx in value_idxes:
-        rem.append(Tcol_idx)
+        value_idxes.remove(Tcol_idx)
     if Ecol_idx in value_idxes:
-        rem.append(Ecol_idx)
+        value_idxes.remove(Ecol_idx)
     # Precedence to temperature column
-    if Scol_idx!=Tcol_idx and Scol_idx>=0:
-        rem.append(Scol_idx)
+    if Scol_idx!=Tcol_idx and Scol_idx>=0 and Scol_idx in value_idxes:
+        value_idxes.remove(Scol_idx)
         
     # Remove reference columns
-    ref_indexes = search_column_name(column_names, is_reference_col)
+    ref_indexes = []
+    foo, ref_idx = search_column_name(column_names, is_ref_col)[0]
+    if ref_idx>=0:
+        ref_indexes = search_column_name(column_names, is_reference_col)
     ref_indexes = [e[1] for e in ref_indexes]
     for idx in ref_indexes:
-        rem.append(idx)
-    
-    # Remove all collected indexes
-    # in reverse order
-    for idx in sorted(rem, reverse=True):
-        value_idxes.remove(idx)
-    
+        if idx>0 and idx in value_idxes:
+            value_idxes.remove(idx)
         
     if len(value_idxes) == 0:
         logging.debug(
@@ -212,7 +211,6 @@ def table_to_datasets(proxy, opt, doc):
         if Ecol_name:
             err = tab[Ecol_idx]
             err[np.equal(err, np.nan)] = 0
-        
         opt1['unit'] = opt1['unit'][idx]
         datasets[base_path] = (tab[idx], opt['handle'], opt['name'], err, opt1)
         add_tT(base_path)

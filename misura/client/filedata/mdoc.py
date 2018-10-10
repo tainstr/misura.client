@@ -164,7 +164,7 @@ class MisuraDocument(document.Document):
         ds.document = self
         return True
 
-    def get_cache(self, name, load_data=True):
+    def get_cache(self, name, load_data=True, add_to_doc=False):
         if self.data.has_key(name):
             return self.data[name]
         filename = self.cache.get(name, False)
@@ -184,6 +184,8 @@ class MisuraDocument(document.Document):
         data = np.load(open(filename, 'rb'))
         for i, col in enumerate(ds.columns):
             setattr(ds, col, data[i])
+        if add_to_doc:
+            self.data[name] = ds
         return ds
 
     def load_rule(self, filename, rule, **kw):
