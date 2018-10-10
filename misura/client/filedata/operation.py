@@ -357,7 +357,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
 
 def extend_rule(rule, version=False):
     rule += '|^(/summary/)?' + rule
-    if version:
+    if isinstance(version, basestring):
         rule += '|^({}/summary/)?'.format(version) + rule
         rule += '|^({}/)?'.format(version) + rule
     return rule
@@ -442,7 +442,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             dataset_name = dataset_name.split(':')[1]
 
         #rule = '^(/summary/)?' + dataset_name + '$'
-        rule = extend_rule(dataset_name + '$', kw.get('version', False))
+        rule = extend_rule(dataset_name + '$', kw.get('version', VERSION_UNSET))
         p = ImportParamsMisura(filename=linked_filename,
                                rule_exc='',
                                rule_load=rule,
@@ -454,7 +454,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
     @classmethod
     def from_rule(cls, rule, linked_filename, **kw):
         """Create an import operation from a `dataset_name` contained in `linked_filename`"""
-        version = kw.get('version', -2)
+        version = kw.get('version', VERSION_UNSET)
         kw['version'] = version
         rebuild = kw.get('rebuild', False)
         kw['rebuild'] = rebuild
