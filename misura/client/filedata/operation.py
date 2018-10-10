@@ -33,7 +33,6 @@ from misura.canon.plugin import default_plot_rules
 
 sep = '/'
 
-
 class EmptyDataset(BaseException):
     pass
 
