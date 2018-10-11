@@ -11,6 +11,7 @@ from misura.canon.csutil import isWindows
 import numpy as np
 
 from misura.canon.logger import get_module_logging
+from __builtin__ import False
 logging = get_module_logging(__name__)
 
 from traceback import print_exc
@@ -212,6 +213,8 @@ class aNumber(ActiveWidget):
     error = None
     slider_class = FocusableSlider
     spinbox = False
+    minbox = False
+    maxbox = False
     slider = False
     range_menu = False
     step_changed = QtCore.pyqtSignal(float)
@@ -237,6 +240,13 @@ class aNumber(ActiveWidget):
         self.zoomact.triggered.connect(self.toggle_zoom)
         
         
+    @property
+    def show_range(self):
+        if not self.prop.get('show_range', False):
+            return False
+        if None in [self.prop.get('min', None), self.prop.get('max', None)]:
+            return False
+        return True
 
     def changed_option(self):
         self.precision = self.prop.get('precision', -1)
@@ -279,7 +289,6 @@ class aNumber(ActiveWidget):
         self.update(minmax=False)
         self.build_range_menu()
         self.set_enabled()
-        
         self.set_tooltip()
         
         
@@ -315,6 +324,7 @@ class aNumber(ActiveWidget):
         self.spinbox = ScientificSpinbox(parent=self)
         self.spinbox.setKeyboardTracking(False)
         self.lay.insertWidget(self.lay.count() - 2, self.spinbox)
+        
         self.changed_option()
 
     def toggle_arrows(self, show=None):
@@ -338,6 +348,27 @@ class aNumber(ActiveWidget):
             self.slider.zoom_factor = self.zoom_factor
         self.setZoom()
         logging.debug('Toggle zoom2', self.zoom_factor)
+        
+    def create_range(self):
+        if self.minbox:
+            return False
+        self.minbox = ScientificSpinbox(parent=self)
+        self.minbox.setKeyboardTracking(False)
+        self.minbox.valueChanged.connect(self.edited_min_max_box)
+        self.minbox.setToolTip(_('Minimum'))
+        self.minbox.setFrame(False)
+        self.minbox.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.minbox.setAlignment(QtCore.Qt.AlignRight)
+        self.lay.insertWidget(self.lay.count() - 5, self.minbox)
+    
+        self.maxbox = ScientificSpinbox(parent=self)
+        self.maxbox.setKeyboardTracking(False)
+        self.maxbox.setFrame(False)
+        self.maxbox.valueChanged.connect(self.edited_min_max_box)
+        self.maxbox.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.maxbox.setToolTip(_('Maximum'))
+        self.lay.insertWidget(self.lay.count() - 2, self.maxbox)     
+        return True   
 
     def build_range_menu(self):
         # TODO: update ranges when unit changes!!!
@@ -362,7 +393,17 @@ class aNumber(ActiveWidget):
                                              double=False, parent=self)
         self.range_menu.addAction(self.range_precision)
         self.range_menu.aboutToHide.connect(self.set_range_menu)
+        
+        if self.show_range:
+            self.create_range()
+            self.minbox.setValue(mn)
+            self.maxbox.setValue(mx)
         return True
+    
+    def edited_min_max_box(self):
+        self.range_min.spinbox.setValue(self.minbox.value())
+        self.range_max.spinbox.setValue(self.maxbox.value())
+        self.set_range_minimum_maximum_step()
 
     def update_range_menu(self):
         """Populate range menu"""
@@ -372,7 +413,12 @@ class aNumber(ActiveWidget):
         self.range_step.spinbox.setValue(s or 0)
         self.range_zoom.spinbox.setValue(self.zoom_factor)
         self.range_precision.spinbox.setValue(self.precision or 0)
-
+        
+        if self.show_range:
+            self.minbox.setValue(m or 0)
+            self.minbox.set_precision(self.precision)
+            self.maxbox.setValue(M or 0)
+            self.maxbox.set_precision(self.precision)
         
     def set_range_minimum_maximum_step(self):
         """Apply min/max/step from range menu"""
@@ -398,6 +444,10 @@ class aNumber(ActiveWidget):
         self.setRange(self.prop['min'], 
                       self.prop['max'], 
                       self.prop['step'])
+        
+        if self.show_range:
+            self.minbox.setValue(self.min)
+            self.maxbox.setValue(self.max)
         return True
 
     def set_zoom_factor(self):
@@ -409,6 +459,8 @@ class aNumber(ActiveWidget):
     def set_precision(self):
         self.precision = self.range_precision.spinbox.value()
         self.spinbox.set_precision(self.precision)
+        self.minbox.set_precision(self.precision)
+        self.maxbox.set_precision(self.precision)
         self.set_tooltip()
         self.update()
         
