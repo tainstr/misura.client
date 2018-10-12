@@ -644,31 +644,30 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         r = []
         best_t = get_best_x_for(pcol, self.LF.prefix, dataset_names, '_t')
         best_T = get_best_x_for(pcol, self.LF.prefix, dataset_names, '_T')
-        if best_t != self.LF.prefix + 't' or best_T != self.LF.prefix + 'kiln/T':
-            logging.debug('local datasets already defined for', pcol)
-            return r
+        # Not local dataset was found (back to global t): need to define one
+        if best_t == self.LF.prefix + 't':
+            # Get time column from document or from cache
+            # Search a t child
+            vcol = pcol.split(sep)
+            parent = '/'.join(vcol[:-1])
+            subcol = pcol + '_t'
+            subt = self.search_data(subcol)
+            # Search a t sibling
+            if subt is False:
+                subt = self.search_data(parent + '_t')
+            if subt:
+                r.append(subt)
+            elif (sub_time_sequence is not False):
+                subvar = vcol[-1] + '_t'
+                subt = create_dataset(self.proxy, sub_time_sequence, subcol,
+                                      subvar, subvar, subvar,
+                                      linked_file=self.LF, reference_sample=self.refsmp,
+                                      rule_unit=self.rule_unit,
+                                      unit='second')
+                r.append(subt)
         
-        # Get time column from document or from cache
-        # Search a t child
-        vcol = pcol.split(sep)
-        parent = '/'.join(vcol[:-1])
-        subcol = pcol + '_t'
-        subt = self.search_data(subcol)
-        # Search a t sibling
-        if subt is False:
-            subt = self.search_data(parent + '_t')
-        if subt:
-            r.append(subt)
-        elif (sub_time_sequence is not False):
-            subvar = vcol[-1] + '_t'
-            subt = create_dataset(self.proxy, sub_time_sequence, subcol,
-                                  subvar, subvar, subvar,
-                                  linked_file=self.LF, reference_sample=self.refsmp,
-                                  rule_unit=self.rule_unit,
-                                  unit='second')
-            r.append(subt)
-        # Neither subT is possible
-        if not r:
+        if not r or best_T != self.LF.prefix + 'kiln/T':
+            # Neither subT is possible, or local already defined
             return r
         sub_time_sequence = subt.data
         # Get existing, created or cached ds

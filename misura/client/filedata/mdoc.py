@@ -431,7 +431,7 @@ class MisuraDocument(document.Document):
         proxies = {}
         pid = pid or 'Save: {}'.format(version_name)
         self.sig_save_started.emit()
-        excluded_time_datasets = set()
+        excluded_datasets = set()
         if self.tasks is not False:
             self.tasks.jobs(len(self.data)+len(self.cache), pid)
         for i, (name, ds) in enumerate(self.iter_data_and_cache()):
@@ -450,6 +450,7 @@ class MisuraDocument(document.Document):
             # Exclude dataset not linked to any real option, except local t,T ds
             if (not conf or not conf.has_key(node.name())) and not is_local:
                 logging.debug('Skipping invalid dataset:', name, node.name())
+                excluded_datasets.add(name)
                 continue
             proxy, proxy_version = proxies.get(vfn, (False, version_name))
             # Ensure conf is saved into proper version
@@ -486,7 +487,7 @@ class MisuraDocument(document.Document):
                 plots.add(vfn)
                 # TODO: keep those at the end of the iteration!
             if name[-2:]=='_t':
-                if name in excluded_time_datasets:
+                if name in excluded_datasets:
                     logging.debug('Excluding an already associated time dataset', name)
                     continue
                 time_name = 't'
@@ -494,7 +495,7 @@ class MisuraDocument(document.Document):
             else:
                 time_name = get_best_x_for(name, ds.linked.prefix, self.data.keys()+self.cache.keys(), '_t')
                 time_ds = self.get_cache(time_name)
-                excluded_time_datasets.add(time_name)
+                excluded_datasets.add(time_name)
             # Ensure time is in seconds
             time_data = units.Converter.convert(time_ds.unit, 'second', time_ds.data)
             logging.debug('Writing dataset', name)
