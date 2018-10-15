@@ -8,7 +8,7 @@ from PyQt4 import QtGui, QtCore
 
 from misura.canon.plugin import dataimport
 from misura.canon.plugin import default_plot_plugins, default_plot_rules
-
+from misura.canon.indexer import SharedFile
 from .. import _
 from ..clientconf import confdb
 from .. import widgets
@@ -16,19 +16,21 @@ from .. import widgets
 
 from operation import jobs, job, done
 
+CONVERT_ABORT = QtGui.QMessageBox.RejectRole
+CONVERT_OVERWRITE = QtGui.QMessageBox.ActionRole
+CONVERT_RENAME = QtGui.QMessageBox.YesRole
+CONVERT_OPEN = QtGui.QMessageBox.AcceptRole
 
 def confirm_overwrite(path, parent=None):
     msg = QtGui.QMessageBox(QtGui.QMessageBox.Warning, _('Overwrite destination file?'),
                             _('Destination file will be overwritten:\n{}'.format(path)),
                             parent=parent)
-    ow = msg.addButton(_('Overwrite'), 1)
-    re = msg.addButton(_('Rename'), 2)
-    op = msg.addButton(_('Open'), 3)
-    ex = msg.addButton(_('Cancel'), 0)
-    v = {ow: 1, re: 2, ex: 0, op: 3}
+    msg.setEscapeButton(msg.addButton(_('Cancel'), CONVERT_ABORT))
+    msg.addButton(_('Overwrite'), CONVERT_OVERWRITE)
+    msg.addButton(_('Rename'), CONVERT_RENAME)
+    msg.addButton(_('Open'), CONVERT_OPEN)
     msg.exec_()
-    ret = v[msg.clickedButton()]
-    return ret
+    return msg.buttonRole(msg.clickedButton())
 
 def convert_file(caller, path):
     """Caller must implement:
@@ -53,17 +55,20 @@ def convert_file(caller, path):
     if outpath is False:
         logging.info('Conversion aborted - cannot determine outpath', path, outpath)
         return False
-    ok = 1
+    ok = CONVERT_OVERWRITE
     if os.path.exists(outpath):
         ok = confirm_overwrite(outpath, caller)
-        if not ok:
+        if ok == CONVERT_ABORT:
             logging.debug('Overwrite cancelled')
             return False
-    if ok == 3:
+        if ok == CONVERT_OVERWRITE:
+            SharedFile.close_handlers(outpath)
+            
+    if ok == CONVERT_OPEN:
         caller.converter.outpath = outpath
         caller._open_converted()
         return True
-    elif ok == 2:
+    elif ok == CONVERT_RENAME:
         dname = os.path.dirname(outpath)
         fname = os.path.basename(outpath)[:-3]
         i = 1
@@ -71,8 +76,9 @@ def convert_file(caller, path):
             outpath = os.path.join(dname, fname + str(i) + '.h5')
             logging.debug('Renamed to', outpath)
             i += 1
+        
+    # Renaming/overwriting
     caller.converter.outpath = outpath
-    # Go
     run = widgets.RunMethod(caller.converter.convert, path,
                             jobs, job, done)
     run.step = 100
