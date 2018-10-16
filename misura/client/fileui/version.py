@@ -231,6 +231,7 @@ class VersionMenu(QtGui.QMenu):
         if latest_plot:
             self.load_latest_plot()
         logging.debug('load_version', v)
+        self.doc.set_linked_version(self.proxy.get_path(), v)
         self.versionChanged.emit(v)
 
     def save_version(self, version_id=False, nosync=True):

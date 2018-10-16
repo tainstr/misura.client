@@ -185,20 +185,23 @@ class TestWindow(acquisition.MainWindow):
             self.menuVersions.versionSaved.connect(self.reset_changeset)
         self.myMenuBar.measure.addMenu(self.menuVersions)
         
-    def slot_version_changed(self):
+    def slot_version_changed(self, new=None):
         """Proxy version changed. Need to refresh all ConfigurationInterface objects"""
+        logging.debug('slot_version_changed', repr(new))
+                
         self.server = self.fixedDoc.proxy.conf
         self.remote = self.server.instrument_obj
         self.add_measure()
         self.add_sumtab()
         self.add_table()
         self.add_menubar()
-
+        
         self.create_version_plot_menus()
+        
         self.navigator.set_doc(self.doc)
         self.measureTab.results.set_doc(self.doc)
-        
-        
+        if self.name == 'flash':
+            self.navigator.status.add(filedata.dstats.outline)
 
     def slot_page_changed(self):
         p = self.summaryPlot.plot.getPageNumber()

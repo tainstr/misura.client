@@ -517,7 +517,26 @@ class MisuraDocument(document.Document):
         except:
             logging.critical(format_exc())
             raise
-        return r        
+        return r 
+    
+    def set_linked_version(self, filename, version):
+        """Set the new version for a file proxy"""
+        linkedfiles = set()
+        for name, ds in self.data.items():
+            if ds.linked and ds.linked.params.filename==filename:
+                logging.debug('Resetting version', ds, name, version)
+                ds.linked.params.version = version
+                ds.linked.params.version=version
+                linkedfiles.add(ds.linked)
+                
+        if not len(linkedfiles):
+            logging.debug('No dataset found at the required version', version)
+            return False
+        for linked in linkedfiles:
+            logging.debug('Reloading links', linked)    
+            r = linked.reloadLinks(self)
+        self.setModified()
+        return True    
         
                 
                 
