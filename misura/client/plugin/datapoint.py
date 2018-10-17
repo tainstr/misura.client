@@ -135,7 +135,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
                        'Inflection', 'Stationary', 'None'], 'Nearest (Fixed X)',
             settingstrue=['searchRange','critical_x'], settingsfalse=[], showfn=lambda val: not val.startswith('Nearest'),
             descr='Search nearest critical point',
-            usertext='Search nearest'),
+            usertext='Place nearest'),
             4)
         s.add(setting.Float(
             'searchRange', 10,
@@ -153,13 +153,13 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             'secondPoint', '',
             descr='Second Data Point for passing-through line placement.',
             widgettypes=('datapoint',),
-            usertext='Second Data Point'),
+            usertext='Second Data Point', formatting=True),
             7)
         s.add(setting.WidgetChoice(
             'pt2ptLine', '',
             descr='Dispose this line as passing through this and second data point.',
             widgettypes=('datapointline',),
-            usertext='Passing-through Line'),
+            usertext='Passing-through Line', formatting=True),
             8)
 
         # OVERRIDES
