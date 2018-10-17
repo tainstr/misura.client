@@ -64,7 +64,8 @@ def find_unused(u, group):
 
 persistent_styles = ('PlotLine/color', 'MarkerFill/color', 'MarkerLine/color', 
                      'PlotLine/width', 'PlotLine/hide',
-                     'PlotLine/style', 'marker', 'markerSize', 'color', 'thinfactor')
+                     'PlotLine/style', 'marker', 'markerSize', 'color', 'thinfactor',
+                     'key')
 
 
 def save_plot_style_in_dataset_attr(plot, cmd):
