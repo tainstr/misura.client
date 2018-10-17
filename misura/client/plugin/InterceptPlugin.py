@@ -24,7 +24,7 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
     description_full = 'Intercept all curves pertaining to a file, sample or dataset by placing descriptive datapoints'
 
     def __init__(self, target=[], axis='X', val=0., search='Nearest (Fixed X)', searchRange=25, critical_x='',
-                 text='Intercept\\\\%(xlabel)s=%(x).0f\\\\%(ylabel)s=%(y)E', currentwidget=False):
+                 text='Intercept\\\\%(ylabel)s=%(y).1E\\\\T=%(T).1f\\\\t=%(t)i', currentwidget=False):
         """Make list of fields."""
         self.fields = [
             plugins.FieldDatasetMulti(

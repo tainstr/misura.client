@@ -197,11 +197,12 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
                                  formatting=True),
               1)
         s.add(setting.Str(
-            'labelText', '%(xlabel)s=%(x)i \\\\%(ylabel)s=%(y)E',
+            'labelText', '%(ylabel)s=%(y).2E \\\\T=%(T)i\\\\t=%(t)i',
             descr='Output label text',
             usertext='Output label text',
             formatting=True),
             2)
+        
         s.add(setting.WidgetChoice(
             'coordLabel', '',
             descr='Write coordinates to this label.',
@@ -209,13 +210,14 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             usertext='Coord. label',
             formatting=True),
             3)
-
+        
         s.add(setting.BoolSwitch('showTangent', False,
                                  descr='Show Tangent',
                                  usertext='Show tangent line',
                                  settingstrue=['tangentLine'],
                                  formatting=True),
-              4)
+            4)
+        
         s.add(setting.WidgetChoice(
             'tangentLine', '',
             descr='Dispose this line as tangent to curve xy.',
@@ -229,7 +231,7 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
                                  usertext='Show perpendicular line',
                                  settingstrue=['perpendicularLine'],
                                  formatting=True),
-              6)
+            6)
         s.add(setting.WidgetChoice(
             'perpendicularLine', '',
             descr='Dispose this line as perpendicular to curve xy.',

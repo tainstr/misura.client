@@ -4,6 +4,7 @@
 import veusz.document as document
 from veusz.widgets.textlabel import TextLabel
 
+
 class DataPointLabel(TextLabel):
     typename = 'datapointlabel'
     description = "Label for datapoints"
@@ -24,11 +25,17 @@ class DataPointLabel(TextLabel):
     def update(self):
         """Update output label with the coordinates of the point."""
         datapoint = self.parent
-
+        from misura.client import axis_selection as axsel
+        data = self.document.data
+        y = datapoint.parent.settings.yData
+        tname = axsel.get_best_x_for(y, data[y].linked.prefix, data, '_t')
+        Tname = axsel.get_best_x_for(y, data[y].linked.prefix, data, '_T')
         text_values = {'xlabel': datapoint.xAx.settings.label,
                        'ylabel': datapoint.yAx.settings.label,
                        'x': datapoint.x,
-                       'y': datapoint.y}
+                       'y': datapoint.y,
+                       't': data[tname].data[datapoint.point_index],
+                       'T': data[Tname].data[datapoint.point_index],}
         datapoint.toset(self, 'label', datapoint.settings.labelText % text_values)
         datapoint.toset(self, 'positioning', 'axes')
         datapoint.cpset(datapoint, self, 'xAxis')
