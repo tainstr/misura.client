@@ -70,7 +70,10 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plugins.FieldCombo("mode",
                                descr="Translation Mode:",
                                items=['Translate Values', 'Create new datasets', 'Translate Axes'],
-                               default="Create new datasets")
+                               default="Create new datasets"),
+            plugins.FieldBool("plot",
+                               descr="Update plot",
+                               default=True),
         ]
 
     def apply(self, cmd, fields):
@@ -121,16 +124,17 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         reference_dataset = doc.data[reference_curve.settings.yData]
 
         delta = translating_dataset.data[translating_curve_nearest_value_index] - reference_dataset.data[reference_curve_nearest_value_index]
-        print 'MODE', fields['mode']
         if fields['mode'] in ('Translate Values', 'Create new datasets'):
             message = "Translated curve '%s' by %E %s." % (translating_dataset_name, delta, getattr(translating_dataset, 'unit', ''))
             if fields['mode'].startswith('Create'):
-                self.translate_derived(translating_dataset_name, delta)
+                new_name = self.translate_derived(translating_dataset_name, delta)
             else:
-                self.translate_values(
+                new_name = self.translate_values(
                     translating_dataset,
                     translating_dataset_name,
                 delta)
+            if fields['plot']:
+                self.toset(translating_curve, 'yData', new_name)
         else:
             message = "Translated Y axis by %E %s." % (delta, getattr(translating_dataset, 'unit', ''))
             self.translate_axis(
@@ -178,14 +182,14 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         translated_dataset.data = translated_data
         op = document.OperationDatasetSet(dataset_name, translated_dataset)
         self.ops.append(op)
-        return True
+        return dataset_name
     
     def translate_derived(self, dataset_name, delta):
         op = document.OperationDatasetPlugin(AddDatasetPlugin(), {'ds_in': dataset_name, 
                                                                     'ds_out': dataset_name+'/sync',
                                                                     'value': -delta})
         self.ops.append(op)  
-        return True
+        return dataset_name+'/sync'
 
 
 

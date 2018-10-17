@@ -269,6 +269,11 @@ class DocumentModel(QtCore.QAbstractItemModel):
             plotwg = False
         else:
             plotwg = self.doc.resolveFullWidgetPath(plotpath[0])
+            
+        if role == Qt.UserRole:
+            if not plotwg:
+                return ''
+            return plotwg.settings.key
 
         if role == Qt.DecorationRole:
             return get_item_icon(plotwg, ent)
@@ -304,9 +309,14 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
                     if getattr(node.ds, 'm_label', False):
                         t = node.ds.m_label + " (%s)"
-
+                        
                     t = t % node.legend
-
+                    
+                    #Add plot key
+                    key = self.decorate(node, Qt.UserRole)
+                    if key:
+                        t += ' '+key
+                    
                     return t
             elif isinstance(node, NodeEntry):
                 r = node.name()
