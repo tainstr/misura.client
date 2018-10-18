@@ -22,6 +22,7 @@ from OverwritePlugin import OverwritePlugin
 from ColorizePlugin import ColorizePlugin
 from FFTPlugin import FFTPlugin
 from BandPassPlugin import BandPassPlugin
+
 # Misura specific plugins
 from MakeDefaultDoc import MakeDefaultDoc, makeDefaultDoc
 from InitialDimensionPlugin import InitialDimensionPlugin
@@ -34,8 +35,9 @@ from MotorCorrectionPlugin import MotorCorrectionPlugin
 from SimFlexPlugin import SimFlexPlugin
 from ArrangePlugin import ArrangePlugin, save_plot_style_in_dataset_attr
 from ReportPlugin import ReportPlugin
-from ViscosityPlugin import ViscosityPlugin, viscosity_calc
+from SwitchOrdinatePlugin import SwitchOrdinatePlugin
 
+from ViscosityPlugin import ViscosityPlugin, viscosity_calc
 from SurfaceTensionPlugin import SurfaceTensionPlugin
 
 

@@ -142,6 +142,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             descr='Critical search range',
             usertext='Search range'),
             5)
+        
+
 
         s.add(setting.Dataset(
             'critical_x','',
@@ -161,6 +163,12 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
             widgettypes=('datapointline',),
             usertext='Passing-through Line', formatting=True),
             8)
+        
+        s.add(setting.Int(
+            'pointIndex', 10,
+            descr='Point index',
+            usertext='Point index'),
+            9)
 
         # OVERRIDES
         n = setting.Choice('positioning',
@@ -457,6 +465,8 @@ class DataPoint(utils.OperationWrapper, veusz.widgets.BoxShape):
 
         self.ops.append(document.OperationSettingSet(ox_set, float(self.x)))
         self.ops.append(document.OperationSettingSet(oy_set, float(self.y)))
+        self.ops.append(document.OperationSettingSet(self.settings.get('pointIndex'), 
+                                                     self.point_index))
         return True
 
     def critical_search(self, src):
