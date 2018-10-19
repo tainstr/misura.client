@@ -526,7 +526,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Populate Cameras
         self.tasks.job(-1, pid, 'Show cameras')
-        paths = self.remote['devices']
+        paths = self.remote['devices'] if not self.fixedDoc else []
         logging.debug('setInstrument PATHS:', paths)
 
         for path in paths:
