@@ -26,7 +26,7 @@ import parameters as params
 from . import _
 from copy import deepcopy
 
-default_misuradb_path = os.path.expanduser("~/MisuraData/misuradb")
+default_misuradb_path = os.path.expanduser("~/MisuraData/misuradb.sqlite")
 
 default_desc = {}
 

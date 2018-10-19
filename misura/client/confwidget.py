@@ -44,6 +44,7 @@ class Path(QtGui.QWidget):
         self.emit(QtCore.SIGNAL('newDb()'))
 
     def save(self):
+        check_default_database()
         confdb.save()
 
     def change(self):
@@ -331,9 +332,18 @@ missing_db_msg = _("""The default database was not found in the configured path:
 Please be sure any external/network drive is connected.
 Please select now a new or existing database file (Ok), 
 or (Cancel) to accept the default path:\n""") + default_misuradb_path
+invalid_db_msg = _('The Misura database cannot reside within the installation folder:\
+\n\n{}\n\t resides in: \n{}\n\n\
+Please choose another file path, otherwise the database will be wiped every time Misura is updated.')
 
 def check_default_database():
+    from . import parameters as params
     db = confdb['database']
+    if db.startswith(params.pathClient):
+        QtGui.QMessageBox.critical(None, _('Invalid database path'), 
+                                   invalid_db_msg.format(db, 
+                                                        params.pathClient))
+        db = ''   
     if not os.path.exists(db):
         if not db:
             r = QtGui.QMessageBox.warning(None, _('No default database was configured'), empty_db_msg,
@@ -346,10 +356,17 @@ def check_default_database():
             confdb['database'] = default_misuradb_path
         else:
             fname = QtGui.QFileDialog.getSaveFileName(
-                None, 'Choose the default database path', 'database.sqlite', "SQLite (*.sqlite)")
+                None, 'Choose the default database path', default_misuradb_path, "SQLite (*.sqlite)")
+            if fname.startswith(params.pathClient):
+                QtGui.QMessageBox.critical(None, _('Invalid database path'), 
+                                           invalid_db_msg.format(fname, 
+                                                                 params.pathClient))
+                # Reconfigure
+                return check_default_database()
             if fname:
                 confdb['database'] = fname
             else:
                 confdb['database'] = default_misuradb_path
+        
         confdb.save()
     return True
