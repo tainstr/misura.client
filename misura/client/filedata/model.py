@@ -173,10 +173,10 @@ class DocumentModel(QtCore.QAbstractItemModel):
     def refresh(self, force=False):
         if not force:
             if self.paused:
-                logging.debug('NOT REFRESHING MODEL', self.paused)
+                #logging.debug('NOT REFRESHING MODEL', self.paused)
                 return False
             elif self.keys == set(self.doc.data.keys()) and self.available_keys == set(self.doc.available_data.keys()):
-                logging.debug('model.refresh(): NOTHING CHANGED')
+                #logging.debug('model.refresh(): NOTHING CHANGED')
                 return False
 
         logging.debug('REFRESHING MODEL', self.paused, force)
