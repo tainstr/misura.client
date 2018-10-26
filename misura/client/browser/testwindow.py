@@ -248,6 +248,10 @@ class TestWindow(acquisition.MainWindow):
         """Check if changes occurred to the Veusz document or the configuration proxy,
         and ask to save on current or new version.
         Returns true if saved or discarded, false if action aborted."""
+        #FIXME: this happens when multiple tests are loaded in the same window. 
+        # Version should be checked per-proxy!
+        if not self.doc.proxy:
+            return True
         ret = True
         effective_changeset = self.doc.changeset-self.doc.changeset_ignore
         conf_changeset = self.server.recursive_changeset()
