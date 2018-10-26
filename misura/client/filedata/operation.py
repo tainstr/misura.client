@@ -644,7 +644,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         r = []
         best_t = get_best_x_for(pcol, self.LF.prefix, dataset_names, '_t')
         best_T = get_best_x_for(pcol, self.LF.prefix, dataset_names, '_T')
-        # Not local dataset was found (back to global t): need to define one
+        # No local dataset was found (back to global t): need to define one
         if best_t == self.LF.prefix + 't':
             # Get time column from document or from cache
             # Search a t child
@@ -666,8 +666,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                                       unit='second')
                 r.append(subt)
         
-        if not r or best_T != self.LF.prefix + 'kiln/T':
+        if not r: # or best_T != self.LF.prefix + 'kiln/T':
             # Neither subT is possible, or local already defined
+            logging.debug('No time sequence found for local dataset', pcol)
             return r
         sub_time_sequence = subt.data
         # Get existing, created or cached ds
@@ -692,7 +693,8 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             logging.error(
                 'No temperature dataset found for local dataset', pcol)
             return r
-        # Generate a new local T dataset
+        # Generate a new local T dataset from the time dataset 
+        # and the best T found (usually, kiln/T)
         temperature_function = InterpolatedUnivariateSpline(
             time_sequence, T.data, k=1)
         sub_temperature_sequence = temperature_function(sub_time_sequence)
