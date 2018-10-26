@@ -15,7 +15,7 @@ from misura.client.clientconf import confdb
 
 class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
 
-    def __init__(self, page='', title='', time=True, temp=True, grid=False):
+    def __init__(self, page='', title='', time=True, temp=True, grid=False, keep_data=False):
         """Make list of fields."""
 
         self.fields = [
@@ -28,7 +28,9 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
            veusz.plugins.FieldBool(
                 "temp", descr="Create temperature page", default=temp),
            veusz.plugins.FieldBool(
-                "grid", descr="Host graphs in a grid", default=grid)
+                "grid", descr="Host graphs in a grid", default=grid),
+           veusz.plugins.FieldBool(
+                "keep_data", descr="Keep data on wipe", default=keep_data),
         ]
 
     def adjust_graph(self, g, label):
@@ -131,7 +133,14 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
     def wipe_doc_preserving_filename(self):
         name = self.doc.filename
         pname = self.doc.proxy_filename
-        self.doc.wipe()
+        if self.fields.get('keep_data', False):
+            
+            for page in self.doc.basewidget.children:
+                self.ops.append(document.OperationWidgetDelete(page))
+                
+            self.apply_ops('Wipe document widgets')
+        else:
+            self.doc.wipe()
         self.doc.filename = name
         self.doc.proxy_filename = pname
 

@@ -7,7 +7,7 @@ from misura.canon.logger import get_module_logging
 from misura.client.filedata.operation import getUsedPrefixes
 logging = get_module_logging(__name__)
 from misura.canon.plugin import navigator_domains
-from misura.canon.plugin.domains import node, nodes
+from misura.canon.plugin.domains import node
 import veusz.document as document
 import veusz.plugins
 import veusz.dialogs
@@ -283,10 +283,24 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         plugin_class, plot_rule_func = filedata.get_default_plot_plugin_class(op.instrument)
         plot_rule = plot_rule_func(confdb, op.proxy.conf)
         p = plugin_class()
-        logging.debug('Default plot on imported names', op.imported_names)
-        result = p.apply(self._mainwindow.cmd, {'dsn': op.imported_names, 
+        #dsn = op.imported_names
+        dsn = self.doc.data.keys()
+        logging.debug('Default plot on imported names', repr(plot_rule), op.imported_names)
+        result = p.apply(self._mainwindow.cmd, {'dsn': dsn, 
                                        'rule': plot_rule})
         return op
+    
+    def reset_document(self):
+        """Wipe the current document, reopen each previously contained file and 
+        create default plots accordingly"""
+        files = getUsedPrefixes(self.doc).keys()
+        op = document.OperationToolsPlugin(plugin.MakeDefaultDoc(), {'keep_data':True})
+        self.doc.applyOperation(op)
+        logging.debug('reset_document: wiped')
+        for filename in files:
+            logging.debug('reset_document', filename)
+            self.open_file(filename)
+        
         
     def convert_file(self, path):
         logging.info('CONVERT FILE', path)
@@ -348,7 +362,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if not self.previous_selection:
             self.previous_selection = self.current_node_path
         page = self.get_page()
-        self.model().set_page(page.path)
+        if page:
+            self.model().set_page(page.path)
         self.model().refresh(True)
         self.ensure_sync_of_view_and_model()
 
@@ -479,6 +494,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.acts_status.append(self.act_del)
         act = menu.addAction(_('Update view (F5)'), self.update_view)
         self.acts_status.append(act)
+        menu.addSeparator()
+        menu.addAction(_('Reset plot'), self.reset_document)
         return True
     
     @node
@@ -529,6 +546,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if tree_actions:
             self.add_tree_actions(base_menu)
             self.act_del.setEnabled(bool(node))
+
         return base_menu
 
     def update_group_menu(self, node, group_menu, tree_actions=False):

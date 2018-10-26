@@ -108,7 +108,9 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         gobj = doc.resolveFullWidgetPath(graph)
         preop = []
-        preop.append(document.OperationWidgetAdd(gobj, 'xy', name=name))
+        # Create only if missing
+        if not gobj.getChild(name):
+            preop.append(document.OperationWidgetAdd(gobj, 'xy', name=name))
         create = True
         for obj in gobj.children:
             if obj.name == yAxis:
@@ -119,9 +121,10 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                 gobj, 'axis-function', name=yAxis, direction='vertical'))
 
         # Create graph and axis (if needed)
-        logging.debug('applying operations', preop)
-        doc.applyOperation(
-            document.OperationMultiple(preop, descr='PlotDataset:Create'))
+        if len(preop):
+            logging.debug('applying operations', preop)
+            doc.applyOperation(
+                document.OperationMultiple(preop, descr='PlotDataset:Create'))
 
         obj = gobj.getChild(name)
         n = len(doc.data[yData].data)
