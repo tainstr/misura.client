@@ -97,6 +97,7 @@ class NavigatorToolbar(QtGui.QToolBar):
         self.navigator.buildContextMenu(menu=self)
         for a in self.actions():          
             if a.icon().isNull():
+                print('ZZZZZ', a.text())
                 self.removeAction(a)
         self.add_save_menu()
         
@@ -301,6 +302,10 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             logging.debug('reset_document', filename)
             self.open_file(filename)
         
+        # Autoresize if in browser
+        getattr(self.mainwindow.plot.parent(), 'fitSize', 
+                lambda *a: 1)()
+        
         
     def convert_file(self, path):
         logging.info('CONVERT FILE', path)
@@ -494,9 +499,15 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.acts_status.append(self.act_del)
         act = menu.addAction(_('Update view (F5)'), self.update_view)
         self.acts_status.append(act)
-        menu.addSeparator()
-        menu.addAction(_('Reset plot'), self.reset_document)
         return True
+    
+    def add_reset_plot_action(self, menu):
+        menu.addSeparator()
+        menu.addAction(iutils.theme_icon('document-new'), 
+                       _('Reset plot'), 
+                       self.reset_document)
+        return True
+        
     
     @node
     def collapse_siblings(self, node=False):
@@ -546,7 +557,6 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if tree_actions:
             self.add_tree_actions(base_menu)
             self.act_del.setEnabled(bool(node))
-
         return base_menu
 
     def update_group_menu(self, node, group_menu, tree_actions=False):
@@ -690,6 +700,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         # No active selection
         else:
             menu = self.update_base_menu(node, menu or self.base_menu, tree_actions=tree_actions)
+        self.add_reset_plot_action(menu)
         return menu
 
 
