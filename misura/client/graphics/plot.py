@@ -65,8 +65,13 @@ class Plot(VeuszPlot):
         # CANNOT work with heating/cooling! 
         #wg = self.doc.resolveFullWidgetPath('/temperature/temp/idx')
         #wg.settings.get('xPos').setOnModified(self.move_line_temp)
-        wg = self.doc.resolveFullWidgetPath('/time/time/idx')
-        wg.settings.get('xPos').setOnModified(self.move_line_time)
+        try:
+            wg = self.doc.resolveFullWidgetPath('/time/time/idx')
+            wg.settings.get('xPos').setOnModified(self.move_line_time)
+        except:
+            logging.warning('idx_connect: no time page')
+            return False
+        return True
 
     def idx_disconnect(self):
         """Disconnect index line motion events"""
