@@ -532,9 +532,11 @@ class MisuraDocument(document.Document):
         if not len(linkedfiles):
             logging.debug('No dataset found at the required version', version)
             return False
+        self.model.pause(True)
         for linked in linkedfiles:
-            logging.debug('Reloading links', linked)    
+            logging.debug('Reloading links', linked)
             r = linked.reloadLinks(self)
+        self.model.pause(False)
         self.setModified()
         return True    
         

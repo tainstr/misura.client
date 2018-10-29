@@ -51,7 +51,8 @@ QTreeView::item:selected:!active {
 }"""
 
 class NavigatorToolbar(QtGui.QToolBar):
-    versionChanged = QtCore.pyqtSignal(('QString'))
+    versionChanged = QtCore.pyqtSignal(str)
+    versionRemoved = QtCore.pyqtSignal(str, str)
     plotChanged = QtCore.pyqtSignal(str, str)
     versionSaved = QtCore.pyqtSignal(str)
     plotSaved = QtCore.pyqtSignal(str)
@@ -89,6 +90,7 @@ class NavigatorToolbar(QtGui.QToolBar):
         self.save_menu.versionSaved.connect(self.versionSaved.emit)
         self.save_menu.plotSaved.connect(self.plotSaved.emit)
         self.save_menu.versionChanged.connect(self.versionChanged.emit)
+        self.save_menu.versionRemoved.connect(self.versionRemoved.emit)
         self.save_menu.plotChanged.connect(self.plotChanged.emit)
         return True
         
@@ -273,6 +275,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.doc.sig_save_done.connect(functools.partial(self.pause, 0))
             
     def open_file(self, path, **kw):
+        self.pause(True)
         logging.info('OPEN FILE', path)
         self.doc.proxy = False
         op = filedata.OperationMisuraImport(
@@ -289,6 +292,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         logging.debug('Default plot on imported names', repr(plot_rule), op.imported_names)
         result = p.apply(self._mainwindow.cmd, {'dsn': dsn, 
                                        'rule': plot_rule})
+        self.pause(False)
         return op
     
     def reset_document(self):

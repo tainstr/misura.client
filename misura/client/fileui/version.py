@@ -69,6 +69,7 @@ class VersionMenu(QtGui.QMenu):
     versionChanged = QtCore.pyqtSignal(('QString'))
     plotChanged = QtCore.pyqtSignal(str, str)
     versionSaved = QtCore.pyqtSignal(str)
+    versionRemoved = QtCore.pyqtSignal(str, str) # old, new
     plotSaved = QtCore.pyqtSignal(str)
     current_plot_id = False
     doc = False
@@ -292,6 +293,7 @@ class VersionMenu(QtGui.QMenu):
 
     def remove_version(self, version=False):
         """Delete current plot or plot_id folder structure"""
+        #mode = self.proxy.get_mode()
         if not version:
             version = self.proxy.get_version()
         if not version:
@@ -307,7 +309,11 @@ class VersionMenu(QtGui.QMenu):
             return False
         # Return to original version
         if version == self.current:
-            self.load_version(0)
+            self.load_version('')
+        #if self.proxy.get_mode()!=mode:
+        #    logging.debug('remove_version: restoring original mode', mode)
+        #    self.proxy.reopen(mode)
+        self.versionRemoved.emit(version, self.current)
         return True
 
     def signature(self):

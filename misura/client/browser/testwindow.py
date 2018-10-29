@@ -182,6 +182,7 @@ class TestWindow(acquisition.MainWindow):
         if not self.menuVersions:
             self.menuVersions = fileui.VersionMenu(self.fixedDoc, self.fixedDoc.proxy)
             self.menuVersions.versionChanged.connect(partial(self.slot_version_changed))
+            self.menuVersions.versionRemoved.connect(partial(self.slot_version_removed))
             self.menuVersions.versionSaved.connect(self.reset_changeset)
         self.myMenuBar.measure.addMenu(self.menuVersions)
         
@@ -202,6 +203,13 @@ class TestWindow(acquisition.MainWindow):
         self.measureTab.results.set_doc(self.doc)
         if self.name == 'flash':
             self.navigator.status.add(filedata.dstats.outline)
+        
+    def slot_version_removed(self, removed_version, new_version):
+        """If the current version was removed and the file reverts to its original version,
+        the entire plot must be wiped."""
+        logging.debug('slot_version_removed', repr(removed_version), repr(new_version))
+        if not new_version:
+            self.navigator.reset_document()
 
     def slot_page_changed(self):
         p = self.summaryPlot.plot.getPageNumber()
@@ -209,7 +217,7 @@ class TestWindow(acquisition.MainWindow):
         if page == self.plot_page:
             return False
         self.plot_page = page
-
+        logging.debug('slot_page_changed', page)
         hierarchy, level, page_idx = calc_plot_hierarchy(self.fixedDoc, page)
         if level < 0:
             return False
