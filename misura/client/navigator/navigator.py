@@ -399,14 +399,18 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def expand_node_path(self, node, select=False):
         jdx = self.model().index_path(node)
-        if len(jdx) > 0:
-            self.setExpanded(jdx[-1], True)
-            if select:
-                # Select also
-                self.selectionModel().setCurrentIndex(jdx[-1], QtGui.QItemSelectionModel.Select)
-            # Qt bug: without scrollTo, expansion is not effective!!!
-            self.scrollTo(jdx[-1])
-        
+        if len(jdx) == 0:
+            logging.debug('expand_node_path: empty')
+            return jdx
+        self.setExpanded(jdx[-1], True)
+        if select==2:
+            self.selectionModel().clear()
+        if select:
+            # Select also
+            self.selectionModel().setCurrentIndex(jdx[-1], QtGui.QItemSelectionModel.Select)
+        # Qt bug: without scrollTo, expansion is not effective!!!
+        self.scrollTo(jdx[-1])
+    
         return jdx
 
     def expand_plotted_nodes(self):

@@ -113,6 +113,7 @@ class NodeEntry(object):
     _path = False  # auto calc
     """Node full path or dataset key in doc.data"""
     _root = False
+    _depth = None
     _model_path = False
     parent = False
     """Parent node"""
@@ -289,16 +290,31 @@ class NodeEntry(object):
                 break
         return e
 
-    @property
-    def root(self):
+    
+    def calc_root(self):
         """Retrieve the root node of the tree"""
         if self._root:
             return self._root
         item = self
+        depth = 0
         while item.parent is not False:
             item = item.parent
+            depth += 1
         self._root = item
-        return self._root
+        self._depth = depth
+        return self._root, self._depth
+    
+    @property
+    def root(self):
+        if self._root:
+            return self._root
+        return self.calc_root()[0]
+    
+    @property
+    def depth(self):
+        if self._depth is not None:
+            return self._depth
+        return self.calc_root()[1]
     
     def set_filter(self, rule):
         """Set the filtering regular expression"""
