@@ -22,6 +22,7 @@ def cycleFormat(t, T):
     return [T, rates, stasis]
 
 
+
 def drawCycleOnGraph(cmd, tTc,  label='ThermalCycle', wdg=False, color='red', size='8pt'):
     if not wdg:
         wdg = 'tc' + label
@@ -34,24 +35,31 @@ def drawCycleOnGraph(cmd, tTc,  label='ThermalCycle', wdg=False, color='red', si
         t.append(vt)
         T.append(vT)
     nT, rates, stasis = cycleFormat(t, T)
-    if not label:
-        label = ''
-    else:
-        label += '\\\\'
-    label += ' \\deg{C}    |  \\deg{C}/m  | m \\\\'
+    
+    label1 = u'<math>\n'
+    if label:
+        label1 += u'<mfrac><mtext>{}</mtext>'.format(label)
+    label1 +=u'<mtable columnlines="solid">\n'
+    label1 += u'<mtr> <mtd>°C</mtd> <mtd>°C/m</mtd> <mtd>m</mtd> </mtr>\n'
     for i, iT in enumerate(nT):
         ir = rates[i]
         ist = stasis[i]
         iT = '%4.0f' % iT
         ir = '%3.1f' % (ir * 60)
         ist = '%3.1f' % (ist / 60)
-        label += ' %-6s| %-7s| %-7s\\\\' % (iT, ir, ist)
+        label1 += u'<mtr> <mtd>%-6s</mtd> <mtd>%-7s</mtd> <mtd>%-7s</mtd> </mtr>\n' % (iT, ir, ist)
+    label1 += u'</mtable>\n'
+    if label:
+        label1 += u'</mfrac>\n'
+    label1 += u'</math>'
+    
     try:
         assert cmd.WidgetType(wdg)=='label'
     except:
         cmd.Add('label', name=wdg)
+    
     cmd.To(wdg)
-    cmd.Set('label', label)
+    cmd.Set('label', label1)
     cmd.Set('Text/color', color)
     cmd.Set('Text/size', size)
     cmd.Set('Text/font', 'Mono')
