@@ -99,7 +99,6 @@ class NavigatorToolbar(QtGui.QToolBar):
         self.navigator.buildContextMenu(menu=self)
         for a in self.actions():          
             if a.icon().isNull():
-                print('ZZZZZ', a.text())
                 self.removeAction(a)
         self.add_save_menu()
         

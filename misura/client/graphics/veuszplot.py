@@ -111,7 +111,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         self.dataset_menu.aboutToShow.connect(partial(self.hovered_node, node))
         menu.addMenu(self.dataset_menu)
         
-        self.hovered = {}
+        self.hovered = False
         
         self.group_menu = QtGui.QMenu(node.parent.name().capitalize())
         sub_menu_func = partial(self.build_recursive_menu, 
@@ -122,30 +122,25 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         
     def hovered_node(self, node=False, qaction=False):
         logging.debug('hovered_node', node)
-        if node:
-            self.hovered[node.depth] = node
-        if len(self.hovered):
-            select_node = self.hovered[max(self.hovered.keys())]
-            self.navigator.expand_node_path(select_node, select=2)
-        
-    def unhovered_node(self, node, qaction=False):
-        del self.hovered[node.depth]
-        self.hovered_node()
+        if self.hovered!=node:
+            self.navigator.expand_node_path(node, select=2)
+            self.hovered = node 
         
     def build_recursive_menu(self, node, menu, qaction=False):
         # Build main menu
         menu.clear()
         self.navigator.buildContextMenu(node, menu=menu)
-        menu.hovered.connect(partial(self.hovered_node, node))
-        menu.aboutToHide.connect(partial(self.unhovered_node, node))
+        # Select the corresponding node on the navigator when
+        # an action is highlighted
+        for a in menu.actions():
+            a.hovered.connect(partial(self.hovered_node, node))
+        
         # Build visible children menu
         mod = self.navigator.model()
         idx0 = mod.indexFromNode(node)
         ch = mod.list_children(idx0)
-        logging.debug('build_recursive_menu0', node, idx0, ch)
         for idx in ch:
             subnode = mod.nodeFromIndex(idx)
-            logging.debug('build_recursive_menu', subnode.name())
             submenu = menu.addMenu(subnode.name())
             #submenu.aboutToShow.connect(partial(self.hovered_node, subnode))
             #submenu.aboutToHide.connect(partial(self.hovered_node, node))
