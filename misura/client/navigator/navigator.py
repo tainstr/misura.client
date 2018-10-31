@@ -110,6 +110,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     convert = QtCore.pyqtSignal(str)
     converter = False
     doc = False
+    hovered = False
     
     def __init__(self, parent=None, doc=None, mainwindow=None, context='Graphics', menu=True, status=set([filedata.dstats.loaded]), cols=1):
         QtGui.QTreeView.__init__(self, parent)
@@ -709,6 +710,39 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             menu = self.update_base_menu(node, menu or self.base_menu, tree_actions=tree_actions)
         self.add_reset_plot_action(menu)
         return menu
+    
+    def hovered_node(self, node=False, qaction=False):
+        logging.debug('hovered_node', node)
+        if self.hovered!=node:
+            self.expand_node_path(node, select=2)
+            self.hovered = node 
+        
+    def build_recursive_menu(self, node, menu, qaction=False):
+        """Build a recursive menu out of `menu`, starting from `node`"""
+        # Build main menu
+        menu.clear()
+        self.buildContextMenu(node, menu=menu)
+        # Select the corresponding node on the navigator when
+        # an action is highlighted
+        for a in menu.actions():
+            a.hovered.connect(functools.partial(self.hovered_node, node))
+        
+        # Build visible children menu
+        mod = self.model()
+        idx0 = mod.indexFromNode(node)
+        ch = mod.list_children(idx0)
+        for idx in ch:
+            subnode = mod.nodeFromIndex(idx)
+            submenu = menu.addMenu(subnode.name())
+            #submenu.aboutToShow.connect(partial(self.hovered_node, subnode))
+            #submenu.aboutToHide.connect(partial(self.hovered_node, node))
+            self.buildContextMenu(subnode, menu=submenu)
+            
+            # Recurse
+            sub_menu_func = functools.partial(self.build_recursive_menu, 
+                                    subnode, 
+                                    submenu)
+            submenu.aboutToShow.connect(sub_menu_func)
 
 
     def showContextMenu(self, pt):

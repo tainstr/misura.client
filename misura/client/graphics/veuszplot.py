@@ -108,49 +108,15 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
             return
         
         self.dataset_menu = self.navigator.buildContextMenu(node)
-        self.dataset_menu.aboutToShow.connect(partial(self.hovered_node, node))
+        self.dataset_menu.aboutToShow.connect(partial(self.navigator.hovered_node, node))
         menu.addMenu(self.dataset_menu)
         
-        self.hovered = False
-        
         self.group_menu = QtGui.QMenu(node.parent.name().capitalize())
-        sub_menu_func = partial(self.build_recursive_menu, 
+        sub_menu_func = partial(self.navigator.build_recursive_menu, 
                                 node.parent, 
                                 self.group_menu)
         self.group_menu.aboutToShow.connect(sub_menu_func)
         menu.addMenu(self.group_menu)
-        
-    def hovered_node(self, node=False, qaction=False):
-        logging.debug('hovered_node', node)
-        if self.hovered!=node:
-            self.navigator.expand_node_path(node, select=2)
-            self.hovered = node 
-        
-    def build_recursive_menu(self, node, menu, qaction=False):
-        # Build main menu
-        menu.clear()
-        self.navigator.buildContextMenu(node, menu=menu)
-        # Select the corresponding node on the navigator when
-        # an action is highlighted
-        for a in menu.actions():
-            a.hovered.connect(partial(self.hovered_node, node))
-        
-        # Build visible children menu
-        mod = self.navigator.model()
-        idx0 = mod.indexFromNode(node)
-        ch = mod.list_children(idx0)
-        for idx in ch:
-            subnode = mod.nodeFromIndex(idx)
-            submenu = menu.addMenu(subnode.name())
-            #submenu.aboutToShow.connect(partial(self.hovered_node, subnode))
-            #submenu.aboutToHide.connect(partial(self.hovered_node, node))
-            self.navigator.buildContextMenu(subnode, menu=submenu)
-            
-            # Recurse
-            sub_menu_func = partial(self.build_recursive_menu, 
-                                    subnode, 
-                                    submenu)
-            submenu.aboutToShow.connect(sub_menu_func)
             
         
         
