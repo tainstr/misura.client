@@ -12,8 +12,11 @@ from misura.client import _
 class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
     typename = 'optionlabel'
     description = "Label for option"
-
+    connected = False
+    _proxy = False
+    
     def __init__(self, *args, **kwargs):
+        self.connected = False
         widgets.TextLabel.__init__(self, *args, **kwargs)
         if type(self) == OptionLabel:
             self.readDefaults()
@@ -41,25 +44,46 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
                           usertext='Formatter'),
               1)
         s.add(setting.Int(
-            'changeset', 0,
+            'changeset', -1,
             descr='Changeset',
             usertext='Changeset'),
             100) # hidden=True,
         
+        # Default text size
+        s.Text.size = '8pt'
+        
+        
+    def check_update(self, *a):
+        logging.debug('check_update', a, self.settings.option, self.settings.changeset, self.proxy._changeset)
+        if self.settings.changeset<self.proxy._changeset:
+            self.update()
+            return True
+        return False
+    
+    @property
+    def proxy(self):
+        if self._proxy:
+            return self._proxy
+        y = self.settings.yData
+        self._proxy, self.opt_name = self.document.data[y].linked.conf.from_column(self.settings.option)
+        return self._proxy
+        
         
     def update(self):
         """Update OptionLabel with the current option text"""
-        from misura.client import axis_selection as axsel
         self.doc = self.document
-        data = self.document.data
-        y = self.settings.yData
+        if not self.connected:
+            self.document.signalModified.connect(self.check_update)
+            self.connected = True
+            
         opt = self.settings.option
         fmt = self.settings.format
-        obj, name = data[y].linked.conf.from_column(opt)
-        logging.debug('OptionLabel', self.settings.option, y, opt, name, obj)
-        self.toset(self, 'changeset', obj._changeset)
-        self.opt = obj.gete(name)
-        val = obj[name]
+        
+        logging.debug('OptionLabel', self.settings.option, self.settings.yData, 
+                      opt, self.proxy, self.opt_name)
+        self.toset(self, 'changeset', self.proxy._changeset)
+        self.opt = self.proxy.gete(self.opt_name)
+        val = self.proxy[self.opt_name]
         typ = self.opt['type']
         if fmt and typ!='Table':
             fmt = '{:'+fmt+'}'
@@ -73,6 +97,11 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         
         self.toset(self, 'label', val)
         self.apply_ops()
+        
+    def draw(self, *a, **k):
+        self.check_update()
+        return super(OptionLabel,self).draw(*a, **k)
+        
     
     def cvt_Integer(self, val):
         if val<1e6:
