@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 import veusz.document as document
 from veusz.widgets.textlabel import TextLabel
 

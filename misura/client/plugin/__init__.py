@@ -40,7 +40,7 @@ from SwitchOrdinatePlugin import SwitchOrdinatePlugin
 from ViscosityPlugin import ViscosityPlugin, viscosity_calc
 from SurfaceTensionPlugin import SurfaceTensionPlugin
 
-
+from OptionLabel import OptionLabel
 
 # FIELDS
 from FieldConfigurationProxy import FieldConfigurationProxy
