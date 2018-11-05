@@ -102,8 +102,14 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
     
     def create_label(self, proxy, opt_name):
         """Create label fragment for `opt_name` of `proxy`"""
-        fmt = self.settings.format
+        if not proxy:
+            return None
+        if not opt_name in proxy:
+            return None
         opt = proxy.gete(opt_name)
+        if 'Hidden' in opt['attr']:
+            return None
+        fmt = self.settings.format
         val = proxy[opt_name]
         typ = opt['type']
         name = ''
@@ -137,11 +143,15 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         logging.debug('OptionLabel', self.settings.option, self.settings.dataset, 
                     self.proxy, self.opt_name)
         self.toset(self, 'changeset', self.changeset)
-        
+        split = ',' if ',' in self.settings.option else ';'
+        opts = self.settings.option.split(split)
         label = ''
         newline = '\\\\'
         for i, proxy in enumerate(self.proxy):
             new = self.create_label(proxy, self.opt_name[i])
+            if new is None:
+                logging.info('Not creating option for', i, opts[i])
+                continue
             # Remove closing tag
             if '</math>' in new:
                 new = new.replace('</math>', '')
