@@ -17,6 +17,7 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
     
     def __init__(self, *args, **kwargs):
         self.connected = False
+        self.opt_name = []
         widgets.TextLabel.__init__(self, *args, **kwargs)
         if type(self) == OptionLabel:
             self.readDefaults()
@@ -24,6 +25,8 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         self.addAction(widgets.widget.Action('up', self.update,
                                                    descr='Update Label',
                                                    usertext='Update Label'))
+        for name in ('prefix', 'format', 'option','dataset', 'showName'):
+            self.settings.get(name).setOnModified(self.update)
    
         
     @classmethod
@@ -31,7 +34,7 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         """Construct list of settings."""
         widgets.TextLabel.addSettings(s)
         s.add( setting.Dataset(
-            'yData', 'y',
+            'dataset', '',
             descr=_('Dataset pointing to the containing option'),
             usertext=_('Dataset')), 0 ) 
         
@@ -47,6 +50,11 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
                           descr='Formatter',
                           usertext='Formatter'),
               3)
+        s.add(setting.Bool('showName', False,
+                          descr='Show name',
+                          usertext='Show name',
+                          formatting=True),
+              1)
         s.add(setting.Int(
             'changeset', -1,
             descr='Changeset',
@@ -56,10 +64,15 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         # Default text size
         s.Text.size = '8pt'
         
+    @property
+    def changeset(self):
+        if not self.proxy:
+            return -1
+        return max([p._changeset for p in self.proxy])
         
     def check_update(self, *a):
-        logging.debug('check_update', a, self.settings.option, self.settings.changeset, self.proxy._changeset)
-        if self.settings.changeset<self.proxy._changeset:
+        logging.debug('check_update', a, self.settings.option, self.settings.changeset, self.changeset)
+        if self.settings.changeset<self.changeset:
             self.update()
             return True
         return False
@@ -68,9 +81,48 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
     def proxy(self):
         if self._proxy:
             return self._proxy
-        y = self.settings.yData
-        self._proxy, self.opt_name = self.document.data[y].linked.conf.from_column(self.settings.option)
+        ds = self.settings.dataset
+        y = self.document.data.get(ds, False)
+        if not y:
+            return []
+        if not y.linked:
+            logging.debug('No linked file for', ds)
+            return []
+        if not y.linked.conf:
+            logging.debug('No configuration for linked file', ds)
+            return []
+        self._proxy = []
+        self.opt_name = []
+        split = ',' if ',' in self.settings.option else ';'
+        for opt in self.settings.option.split(split):
+            p, n= y.linked.conf.from_column(opt)
+            self._proxy.append(p)
+            self.opt_name.append(n) 
         return self._proxy
+    
+    def create_label(self, proxy, opt_name):
+        """Create label fragment for `opt_name` of `proxy`"""
+        fmt = self.settings.format
+        opt = proxy.gete(opt_name)
+        val = proxy[opt_name]
+        typ = opt['type']
+        name = ''
+        if self.settings.showName:
+            name = opt['name']+': '
+        if fmt and typ!='Table':
+            fmt = '{:'+fmt+'}'
+            val = name+fmt.format(val)
+        else:
+            if typ in ['String', 'TextArea']:
+                func = lambda val,opt: '{}'.format(val)
+            else:
+                func = getattr(self, 'cvt_'+typ, 
+                               lambda *a: 'NotSupported: {}'.format(typ))
+            val = func(val, opt)
+            if name and typ!='Table':
+                val = name+val
+         
+        return val    
         
         
     def update(self):
@@ -79,29 +131,38 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         if not self.connected:
             self.document.signalModified.connect(self.check_update)
             self.connected = True
-            
-        opt = self.settings.option
-        fmt = self.settings.format
-        pre = self.settings.prefix
-        logging.debug('OptionLabel', self.settings.option, self.settings.yData, 
-                      opt, self.proxy, self.opt_name)
-        self.toset(self, 'changeset', self.proxy._changeset)
-        self.opt = self.proxy.gete(self.opt_name)
-        val = self.proxy[self.opt_name]
-        typ = self.opt['type']
-        if fmt and typ!='Table':
-            fmt = '{:'+fmt+'}'
-            val = pre + ' ' + fmt.format(val)
-        else:
-            if typ in ['String', 'TextArea']:
-                func = pre + ' '+str
-            else:
-                func = getattr(self, 'cvt_'+typ, lambda val: 'NotSupported: {}'.format(typ))
-            val = func(val)
-            if typ!='Table':
-                val = pre + ' '+ val
+        # Force proxy reset
+        self._proxy = False
+
+        logging.debug('OptionLabel', self.settings.option, self.settings.dataset, 
+                    self.proxy, self.opt_name)
+        self.toset(self, 'changeset', self.changeset)
         
-        self.toset(self, 'label', val)
+        label = ''
+        newline = '\\\\'
+        for i, proxy in enumerate(self.proxy):
+            new = self.create_label(proxy, self.opt_name[i])
+            # Remove closing tag
+            if '</math>' in new:
+                new = new.replace('</math>', '')
+                newline = '\n'
+            # Remove also opening tag if already found
+            if '<math>' in label:
+                new = new.replace('<math>','')
+            label += new
+            if i<len(self.proxy):
+                label+=newline
+        
+        pre = self.settings.prefix
+        
+        # Add closing tag
+        if '<math>' in label:
+            label+='</math>'
+        # Add prefix:
+        elif pre:
+            label = pre + ' '+ label
+        
+        self.toset(self, 'label', label)
         self.apply_ops()
         
     def draw(self, *a, **k):
@@ -109,28 +170,31 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         return super(OptionLabel,self).draw(*a, **k)
         
     
-    def cvt_Integer(self, val):
+    def cvt_Integer(self, val, opt):
         if val<1e6:
             return str(val)
-        return '{:E}'.format(val)
+        return '{:E}'.format(val, opt)
     
-    def cvt_Float(self, val):
+    def cvt_Float(self, val, opt):
+        if opt.get('precision',-1)>0:
+            fmt = '{:.'+str(opt['precision'])+'f}'
+            return fmt.format(val)
         return '{:.4E}'.format(val)
     
-    def cvt_Meta(self, val):
+    def cvt_Meta(self, val, opt):
         r = ''
         for k,v in val.items():
             r += '{}:{:.2E}\\\\'.format(k,v)
         return r
     
-    def cvt_Table(self, val):
+    def cvt_Table(self, val, opt):
         """Create a MathML table"""
         if len(val)<=1:
             return 'Empty table'
         header0 = val[0]
         N = len(header0)
-        visible = self.opt.get('visible', [1]*N)
-        precision0 = self.opt.get('precision', [None]*N)
+        visible = opt.get('visible', [1]*N)
+        precision0 = opt.get('precision', [None]*N)
         N = sum(visible)
         header = []
         precision = []
@@ -142,6 +206,8 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         # Build table
         r = u'<math>\n'
         pre = self.settings.prefix
+        if self.settings.showName and not pre:
+            pre = opt['name']
         if pre:
             r+=u'<mfrac><mtext>{}</mtext>\n'.format(pre)
         r+=u'<mtable columnlines="solid">\n'
