@@ -205,11 +205,12 @@ class MainWindow(QtGui.QMainWindow):
         
     def slotUpdateNearWidget(self, widget):
         txt = widget.path
-        for s in ('notes', 'key', 'label'):
+        for s in ('notes', 'key', 'option', 'label'):
             if s in widget.settings:
                 txt = widget.settings.get(s).val
                 break
-        self.widgetnamelabel.setText(txt)
+        txt = txt[:45] + (txt[45:] and '..')
+        self.widgetnamelabel.setText(txt.replace('\n','\\n')+' ')
         
     def slotUpdatePickerLabel(self, info):
         """Display the picked point"""
