@@ -39,10 +39,14 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
                           descr='Option path',
                           usertext='Option path'),
               1)
+        s.add(setting.Str('prefix', '',
+                          descr='Prefix',
+                          usertext='Prefix'),
+              2)
         s.add(setting.Str('format', '',
                           descr='Formatter',
                           usertext='Formatter'),
-              1)
+              3)
         s.add(setting.Int(
             'changeset', -1,
             descr='Changeset',
@@ -78,7 +82,7 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
             
         opt = self.settings.option
         fmt = self.settings.format
-        
+        pre = self.settings.prefix
         logging.debug('OptionLabel', self.settings.option, self.settings.yData, 
                       opt, self.proxy, self.opt_name)
         self.toset(self, 'changeset', self.proxy._changeset)
@@ -87,13 +91,15 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         typ = self.opt['type']
         if fmt and typ!='Table':
             fmt = '{:'+fmt+'}'
-            val = fmt.format(val)
+            val = pre + ' ' + fmt.format(val)
         else:
             if typ in ['String', 'TextArea']:
-                func = str
+                func = pre + ' '+str
             else:
                 func = getattr(self, 'cvt_'+typ, lambda val: 'NotSupported: {}'.format(typ))
             val = func(val)
+            if typ!='Table':
+                val = pre + ' '+ val
         
         self.toset(self, 'label', val)
         self.apply_ops()
@@ -134,7 +140,13 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
                 precision.append(precision0[i])
                 
         # Build table
-        r = u'<math>\n<mtable columnlines="solid">\n'
+        r = u'<math>\n'
+        pre = self.settings.prefix
+        if pre:
+            r+=u'<mfrac><mtext>{}</mtext>\n'.format(pre)
+        r+=u'<mtable columnlines="solid">\n'
+        
+        
         header_fmt = u'<mtr> ' + (u'<mtd><mtext>{}</mtext></mtd> ')*N + u'</mtr>\n'
         r += header_fmt.format(*[ h[0].replace('&','+') for h in header])
         
@@ -164,7 +176,10 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
                     row.append(z)
             r+= row_fmt.format(*row)
         
-        r += u'</mtable>\n</math>' 
+        r += u'</mtable>\n'
+        if pre:
+            r+= u'</mfrac>\n'
+        r += u'</math>' 
         return r
         
 
