@@ -94,7 +94,7 @@ class LocalTasks(QtGui.QWidget):
         self.log.setFont(QtGui.QFont('TypeWriter',  7, 50, False))
         self.log.hide()
         self.more = QtGui.QPushButton(_('Log'), parent=self)
-        self.connect(self.more, QtCore.SIGNAL('clicked()'), self.toggle_log)
+        self.more.clicked.connect(self.toggle_log)
 
         # Progress bars widget
         self.mw = QtGui.QWidget(parent=self)
@@ -148,6 +148,7 @@ class LocalTasks(QtGui.QWidget):
         self.log_messages += msg + '\n'
         if self.log.isVisible():
             self.log.append(msg)
+        logging.debug('LocalTasks.msg', msg)
 
     @lockme()
     def _jobs(self, tot, pid='Operation', abort = lambda *a, **k: 0):

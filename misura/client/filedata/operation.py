@@ -320,7 +320,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     if opt:
         resolve_unit(ds, opt, unit)
     else:
-        logging.debug('No OPT')
+        logging.debug('No OPT: keep unit', prefixed_dataset_name, unit)
         ds.unit = unit
         ds.old_unit = unit
 
