@@ -9,6 +9,14 @@ from veusz import widgets
 import veusz.setting as setting
 from misura.client import _
 
+def clean_row(row, header):
+    for i,h in enumerate(header):
+        if len(h)==2 and h[1]=='Float':
+            if row[i] is None:
+                row[i] = 0
+    return row
+
+
 class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
     typename = 'optionlabel'
     description = "Label for option"
@@ -244,13 +252,15 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
             row_fmt += u'}</mtd>'
         row_fmt += u'</mtr>\n'
         
+
+        
         # Rows
         for row0 in val[1:]:
             row = []
             for i,z in enumerate(row0):
                 if visible[i]:
                     row.append(z)
-            r+= row_fmt.format(*row)
+            r+= row_fmt.format(*clean_row(row, header))
         
         r += u'</mtable>\n'
         if pre:
