@@ -22,6 +22,7 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
     description = "Label for option"
     connected = False
     _proxy = False
+    current_changeset = 0
     
     def __init__(self, *args, **kwargs):
         self.connected = False
@@ -79,8 +80,8 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         return max([p._changeset for p in self.proxy])
         
     def check_update(self, *a):
-        logging.debug('check_update', a, self.settings.option, self.settings.changeset, self.changeset)
-        if self.settings.changeset<self.changeset:
+        logging.debug('check_update', a, self.settings.option, self.current_changeset, self.changeset)
+        if self.changeset and self.current_changeset<self.changeset:
             self.update()
             return True
         return False
@@ -149,7 +150,8 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         self._proxy = False
 
         logging.debug('OptionLabel', self.settings.option, self.settings.dataset, 
-                    self.proxy, self.opt_name)
+                    self.proxy, self.opt_name, self.changeset)
+        self.current_changeset = self.changeset
         self.toset(self, 'changeset', self.changeset)
         split = ',' if ',' in self.settings.option else ';'
         opts = self.settings.option.split(split)
