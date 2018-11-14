@@ -64,11 +64,6 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
                           usertext='Show name',
                           formatting=True),
               1)
-        s.add(setting.Int(
-            'changeset', -1,
-            descr='Changeset',
-            usertext='Changeset'),
-            100) # hidden=True,
         
         # Default text size
         s.Text.size = '8pt'
@@ -152,7 +147,6 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         logging.debug('OptionLabel', self.settings.option, self.settings.dataset, 
                     self.proxy, self.opt_name, self.changeset)
         self.current_changeset = self.changeset
-        self.toset(self, 'changeset', self.changeset)
         split = ',' if ',' in self.settings.option else ';'
         opts = self.settings.option.split(split)
         label = ''
