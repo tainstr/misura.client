@@ -168,7 +168,8 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
                 image_reference = {'dataset': smp_path + '/' + fields['image_dataset'],
                                    'filename': test.params.filename,
                                    'target': pt['time']}
-                self.dict_toset(page.getChild(sh), image_reference)
+                imgref = page.getChild(sh)
+                self.dict_toset(imgref, image_reference)
                 T = '%i{{\\deg}}C' % round(pt['temp'], 0)
                 self.toset(page.getChild('lbl_' + sh), 'label', shn + ', ' + T)
                 msg += T + '\\\\'

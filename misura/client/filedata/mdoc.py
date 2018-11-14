@@ -500,6 +500,8 @@ class MisuraDocument(document.Document):
             time_data = units.Converter.convert(time_ds.unit, 'second', time_ds.data)
             logging.debug('Writing dataset', name)
             proxy.save_data(name, ds.data, time_data, opt=ds.m_opt)
+        if not proxy:
+            return True
         proxy.header(refresh=True)
         proxy.flush()
         self.sig_save_done.emit()
