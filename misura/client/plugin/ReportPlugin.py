@@ -101,7 +101,9 @@ class ReportPlugin(OperationWrapper, plugins.ToolsPlugin):
             d = fields['template_file_name']
         else:
             d = os.path.join(tpath, fields['template_file_name'])
-        logo = os.path.join(params.pathArt, 'logo.png')
+        logo = confdb['rule_logo']
+        if not os.path.exists(logo):
+            logo = os.path.join(params.pathArt, 'logo.png')
         tpl = open(d, 'rb').read().replace("u'report'", "u'{}'".format(report_path[1:]))
         command_interpreter.run(tpl)
         
