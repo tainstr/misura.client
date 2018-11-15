@@ -344,6 +344,7 @@ class DataNavigatorDomain(NavigatorDomain):
 
     def add_derived_dataset_menu(self, menu, node):
         self.add_keep(menu, node)
+        menu.addAction(iutils.theme_icon('edit'), _('Edit (V)'), self.edit_dataset)
         menu.addAction(_('Delete'), self.navigator.deleteData)
 
     def create_table(self, header):
