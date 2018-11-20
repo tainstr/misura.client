@@ -186,7 +186,7 @@ class StorageSync(object):
         r = self.maindb.searchUID(uid, full=True)
         ret = r and os.path.exists(r[0])
         if not ret:
-            print('Not downloaded', uid, r[0])
+            print('Not downloaded', uid, r if not r else r[0])
         return ret    
 
     def __len__(self):
