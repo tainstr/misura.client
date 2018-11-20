@@ -163,12 +163,10 @@ class StorageSync(object):
             logging.error('StorageSync.collect: Impossible to retrieve remote storage list.')
             return 0
         
-        def already_downloaded(uid):
-            r = self.maindb.searchUID(uid, full=True)
-            return r and os.path.exists(r[0])
+
 
         not_downloaded_tests = [
-            test for test in all_tests if not already_downloaded(test[2])
+            test for test in all_tests if not self.already_downloaded(test[2])
         ]
 
         not_processed_tests = [
@@ -183,6 +181,13 @@ class StorageSync(object):
             not_processed_tests)
 
         return len(not_processed_tests)
+
+    def already_downloaded(self, uid):
+        r = self.maindb.searchUID(uid, full=True)
+        ret = r and os.path.exists(r[0])
+        if not ret:
+            print('Not downloaded', uid, r[0])
+        return ret    
 
     def __len__(self):
         """Returns the length of the approval queue"""
@@ -292,17 +297,19 @@ class SyncWidget(QtGui.QTabWidget):
             return
         self.dbpath = dbpath
 
-        approve_sync_table = self.tab_approve = self.add_sync_table('sync_approve',
+        self.approve_sync_table = self.tab_approve = self.add_sync_table('sync_approve',
                                                                     _('Waiting approval'))
+            
 
-        def check_for_new_downloads():
-            self.storage_sync.collect()
-            approve_sync_table.model().select()
-
-        approve_sync_table.menu.addAction(_('Check for new downloads'), check_for_new_downloads)
+        self.approve_sync_table.menu.addAction(_('Check for new downloads'), self.check_for_new_downloads)
 
         self.tab_error = self.add_sync_table('sync_error', _('Errors'))
         self.tab_exclude = self.add_sync_table('sync_exclude', _('Ignored'))
+        
+    def check_for_new_downloads(self):
+        logging.debug('Check for new downloads')
+        self.storage_sync.collect()
+        self.approve_sync_table.model().select()
 
 
     def add_sync_table(self, table_name, title):
