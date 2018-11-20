@@ -158,6 +158,8 @@ def not_interpolated(proxy, col, startt, endt):
     return data.transpose()
 
 def memory_saving_interpolation(x,y,x1,k=1):
+    """InterpolatedUnivariateSpline is much faster, but less memory efficient.
+    Switch between the two according to the dimension of the dataset."""
     if len(x)<1e6:
         f = InterpolatedUnivariateSpline(x,y,k=k)
     else:

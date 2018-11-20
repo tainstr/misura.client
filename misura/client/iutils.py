@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 """Standard interface construction utilities"""
 import os
+import psutil
 import sys
 import collections
 from collections import OrderedDict, defaultdict
 from time import sleep
 import signal
 from pickle import loads, dumps
+from misura.canon.csutil import isWindows
 
 import veusz.dialogs.exceptiondialog
 veusz.dialogs.exceptiondialog._emailUrl = None
@@ -52,6 +54,30 @@ def initClient():
     initNetwork()
     initRegistry()
     activate_plugins(confdb)
+    
+
+process = psutil.Process(os.getpid())
+limit = 2e9 if isWindows else 4e9
+last_ram = 1e9
+def memory_check():
+    """This is a palliative message box which will warn the user whenever approaching the 
+    maximum addressable memory by a 32bit process."""
+    global last_ram
+    ram = process.memory_info().rss
+    r = False
+    if ram>limit*0.9:
+        if ram>last_ram:
+            r = True
+            print('RAM increased:', ram, last_ram)
+            msg = '{:.1f}GB < {:.1f}GB'.format(ram/1e9, limit/1e9)
+            msg = 'Misura is approaching maximum RAM usage:\n\t{}'.format(msg)
+            msg += '\nPlease some close tests or unload some data.'
+            QtGui.QMessageBox.critical(None, 'Memory Limit', msg)
+    last_ram = ram
+    return (r, ram)
+        
+        
+    
 
 
 def initTranslations(app):

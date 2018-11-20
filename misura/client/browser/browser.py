@@ -107,6 +107,9 @@ class MainWindow(QtGui.QMainWindow):
         self.tab.addTab(self.area, _('Databases'))
         self.tab.setTabsClosable(True)
         self.tab.setDocumentMode(True)
+        self.memory_timer = QtCore.QTimer()
+        self.memory_timer.timeout.connect(iutils.memory_check)
+        self.memory_timer.start(2000)
 
         
         database_tab_index = 0
@@ -154,6 +157,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setWindowIcon(
             QtGui.QIcon(os.path.join(parameters.pathArt, 'browser.svg')))
+        
 
     def closeEvent(self, event):
         for i in range(1,self.tab.count()):
