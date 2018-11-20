@@ -7,7 +7,7 @@ from exceptions import BaseException
 import numpy as np
 from copy import deepcopy
 import re
-from scipy.interpolate import InterpolatedUnivariateSpline
+from scipy.interpolate import InterpolatedUnivariateSpline, interp1d
 
 import veusz.dataimport.base as base
 
@@ -157,6 +157,13 @@ def not_interpolated(proxy, col, startt, endt):
         data = np.concatenate((data, ap))
     return data.transpose()
 
+def memory_saving_interpolation(x,y,x1,k=1):
+    if len(x)<1e6:
+        f = InterpolatedUnivariateSpline(x,y,k=k)
+    else:
+        # interp1d is more memory efficient
+        f = interp1d(x,y)
+    return f(x1)
 
 def interpolated(proxy, col, ztime_sequence):
     """Retrieve `col` from `proxy` and interpolate it around `ztime_sequence`"""
@@ -167,8 +174,7 @@ def interpolated(proxy, col, ztime_sequence):
     # Empty column
     if val is False or len(val) == 0:
         return val
-    f = InterpolatedUnivariateSpline(t, val, k=1)
-    r = f(ztime_sequence)
+    r = memory_saving_interpolation(t, val, ztime_sequence)
     return r
 
 
@@ -695,10 +701,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
             return r
         # Generate a new local T dataset from the time dataset 
         # and the best T found (usually, kiln/T)
-        temperature_function = InterpolatedUnivariateSpline(
-            time_sequence, T.data, k=1)
-        sub_temperature_sequence = temperature_function(sub_time_sequence)
-
+        sub_temperature_sequence = memory_saving_interpolation(time_sequence, 
+                                                               T.data, 
+                                                               sub_time_sequence)
         subvar = vcol[-1] + '_T'
         subT = create_dataset(self.proxy, sub_temperature_sequence, subcol,
                               subvar, subvar, subvar,
