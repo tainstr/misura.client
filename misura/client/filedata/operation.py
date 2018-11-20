@@ -161,7 +161,10 @@ def memory_saving_interpolation(x,y,x1,k=1):
     """InterpolatedUnivariateSpline is much faster, but less memory efficient.
     Switch between the two according to the dimension of the dataset."""
     if len(x)<1e6:
-        f = InterpolatedUnivariateSpline(x,y,k=k)
+        try:
+            f = InterpolatedUnivariateSpline(x,y,k=k)
+        except:
+            f = interp1d(x,y)
     else:
         # interp1d is more memory efficient
         f = interp1d(x,y)
