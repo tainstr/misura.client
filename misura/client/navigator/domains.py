@@ -678,7 +678,7 @@ class MathNavigatorDomain(NavigatorDomain):
 
         from misura.client import plugin
         p = plugin.DeriveDatasetPlugin(
-            ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '/d', smooth=w)
+            ds_y=node.path, ds_x=ds_x, ds_out=node.m_name + '/der', smooth=w)
         d = PluginDialog(
             self.mainwindow, self.doc, p, plugin.DeriveDatasetPlugin)
         self.mainwindow.showDialog(d)
