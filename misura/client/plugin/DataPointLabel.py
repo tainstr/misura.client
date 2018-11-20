@@ -28,16 +28,30 @@ class DataPointLabel(TextLabel):
         datapoint = self.parent
         from misura.client import axis_selection as axsel
         data = self.document.data
-        y = datapoint.parent.settings.yData
-        tname = axsel.get_best_x_for(y, data[y].linked.prefix, data, '_t')
-        Tname = axsel.get_best_x_for(y, data[y].linked.prefix, data, '_T')
         text_values = {'xlabel': datapoint.xAx.settings.label,
                        'ylabel': datapoint.yAx.settings.label,
                        'x': datapoint.x,
                        'y': datapoint.y,
-                       't': data[tname].data[datapoint.point_index],
-                       'T': data[Tname].data[datapoint.point_index],}
-        datapoint.toset(self, 'label', datapoint.settings.labelText % text_values)
+                       }
+        
+        y = datapoint.parent.settings.yData
+        linked = data[y].linked
+        text = datapoint.settings.labelText
+        if linked and linked.prefix:
+            tname = axsel.get_best_x_for(y, linked.prefix, data, '_t')
+            Tname = axsel.get_best_x_for(y, linked.prefix, data, '_T')
+            text_values.update({'t': data[tname].data[datapoint.point_index],
+                       'T': data[Tname].data[datapoint.point_index],})
+        else:
+            # Purge time/temperature labels
+            text1 =[]
+            for line in text.split('\\\\'):
+                if '%(t)' in line or '%(T)' in line:
+                    continue
+                text1.append(line)
+            text = '\\\\'.join(text1)
+                       
+        datapoint.toset(self, 'label', text % text_values)
         datapoint.toset(self, 'positioning', 'axes')
         datapoint.cpset(datapoint, self, 'xAxis')
         datapoint.cpset(datapoint, self, 'yAxis')
