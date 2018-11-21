@@ -34,13 +34,15 @@ is_ref_col = lambda col: col.lower().split(' ')[0] == 'ref'
 possible_reference_names = ('ref', 'reference')
 is_reference_col = lambda col: contains(col.lower().split(' ')[0], possible_reference_names)
 
-def new_dataset_operation(original_dataset, data, name, label, path, unit='volt', opt=False, error=None):
+def new_dataset_operation(original_dataset, data, name, label, path, unit=False, opt=False, error=None):
     """Create a new dataset by copying `original_dataset` and overwriting with `data`.
     Returns an operation to be executed by the document."""
     old_unit = unit
     if opt:
         if unit is False:
             unit = opt.get('csunit', False)
+            if unit is False:
+                unit = opt.get('unit', False)
         old_unit = opt.get('unit', unit)
     old_unit = getattr(original_dataset, 'old_unit', old_unit)
     if not opt:
@@ -87,7 +89,6 @@ def search_column_name(column_names_list, is_col=lambda col: False):
 
 def add_datasets_to_doc(datasets, doc, original_dataset=False):
     """Create proper Veusz datasets and include in doc via operations"""
-    unit = False
     ops = []
     # TODO: find a way to reliably detect the original_dataset for multi-test
     # docs!
@@ -95,8 +96,9 @@ def add_datasets_to_doc(datasets, doc, original_dataset=False):
         original_dataset = doc.data['0:t']
     for (pure_dataset_name, values) in datasets.iteritems():
         (data, variable_name, label, error, opt) = values[:5]
+        
         op = new_dataset_operation(original_dataset, data, variable_name, label, pure_dataset_name,
-                                   unit=unit, error=error, opt=opt)
+                                   error=error, opt=opt)
         ops.append(op)
 
     if len(ops) > 0:
