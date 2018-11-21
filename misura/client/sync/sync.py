@@ -185,8 +185,6 @@ class StorageSync(object):
     def already_downloaded(self, uid):
         r = self.maindb.searchUID(uid, full=True)
         ret = r and os.path.exists(r[0])
-        if not ret:
-            print('Not downloaded', uid, r if not r else r[0])
         return ret    
 
     def __len__(self):
@@ -302,6 +300,7 @@ class SyncWidget(QtGui.QTabWidget):
             
 
         self.approve_sync_table.menu.addAction(_('Check for new downloads'), self.check_for_new_downloads)
+        self.approve_sync_table.menu.addAction(_('Refresh remote database'), self.refresh_remote)
 
         self.tab_error = self.add_sync_table('sync_error', _('Errors'))
         self.tab_exclude = self.add_sync_table('sync_exclude', _('Ignored'))
@@ -310,6 +309,9 @@ class SyncWidget(QtGui.QTabWidget):
         logging.debug('Check for new downloads')
         self.storage_sync.collect()
         self.approve_sync_table.model().select()
+        
+    def refresh_remote(self):
+        self.storage_sync.server.storage.refresh()
 
 
     def add_sync_table(self, table_name, title):
