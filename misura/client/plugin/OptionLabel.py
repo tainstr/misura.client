@@ -101,7 +101,7 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         for opt in self.settings.option.split(split):
             p, n= y.linked.conf.from_column(opt)
             self._proxy.append(p)
-            self.opt_name.append(n) 
+            self.opt_name.append(n)
         return self._proxy
     
     def create_label(self, proxy, opt_name):
