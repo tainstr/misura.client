@@ -128,8 +128,8 @@ CONDADIR=`dirname "$CONDADIR"`
 CONDADIR=`dirname "$CONDADIR"`
 cp "$CONDADIR"/Library/bin/mkl_* "$OUTPUT_MISURA4_DIR/"
 
-# Allow 4GB memory
-"$INSTALLER_DIR/4gb_patch.exe" "$OUTPUT_MISURA4_DIR/misura.exe"
+# Allow 4GB memory - already done by pyinstaller
+# python "$INSTALLER_DIR/large_address_aware.py" 
 
 mv "$OUTPUT_MISURA4_DIR" "$DISTRIBUTION_DIR/misura4"
 "C:\Program Files (x86)\NSIS\makensis.exe" "$INSTALLER_DIR/client_windows_setup.nsi"
