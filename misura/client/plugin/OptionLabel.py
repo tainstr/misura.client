@@ -123,8 +123,8 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
             fmt = '{:'+fmt+'}'
             val = name+fmt.format(val)
         else:
-            if typ in ['String', 'TextArea']:
-                func = lambda val,opt: '{}'.format(val)
+            if typ in ['String', 'TextArea', 'Chooser', 'Date']:
+                func = lambda val,opt: '{}'.format(val).replace('\n','\\\\')
             else:
                 func = getattr(self, 'cvt_'+typ, 
                                lambda *a: 'NotSupported: {}'.format(typ))
@@ -198,6 +198,8 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
     def cvt_Meta(self, val, opt):
         r = ''
         for k,v in val.items():
+            if v in ('None', None):
+                v = 0
             r += '{}:{:.2E}\\\\'.format(k,v)
         return r
     

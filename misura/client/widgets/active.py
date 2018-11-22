@@ -427,10 +427,14 @@ class LabelUnit(QtGui.QLabel):
 
     def start_drag(self):
         """Begin a drag and drop event"""
-        drag = QtGui.QDrag(self)
+        wg = self.parent()
+        drag = QtGui.QDrag(wg)
         mimeData = QtCore.QMimeData()
-        mimeData.setData("text/plain", self.prop['kid'])
+        kid = (wg.remObj['fullpath']+'/'+wg.handle).replace('//','/')
+        mimeData.setData("misura/option", '{}:{}'.format(id(wg.server), kid))
+        mimeData.setData("text/plain", '{}: {}'.format(self.prop['name'], self.prop['current']))
         drag.setMimeData(mimeData)
+        logging.debug('start drag', mimeData.text())
         drag.exec_()
 
     def show_menu(self, event):

@@ -428,7 +428,8 @@ class Graphics(mainwindow.MainWindow):
         
         
     def dragMoveEvent(self, event):
-        veuszplot.process_image_dragMoveEvent(event)
+        veuszplot.process_dragMoveEvent(event)
+        
     def dropEvent(self,event):
         veuszplot.process_image_dropEvent(self.plot, event)
 

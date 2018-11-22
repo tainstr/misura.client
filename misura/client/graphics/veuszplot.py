@@ -46,29 +46,77 @@ def with_busy_cursor(function_to_decorate):
 
     return wrapper
 
-def process_image_dragMoveEvent(event):
-        logging.debug('dragMoveEvent', event.mimeData())
-        if event.mimeData().hasFormat("image/png"):
+def process_dragMoveEvent(event):
+        #logging.debug('dragMoveEvent', event.mimeData())
+        accept = event.mimeData().hasFormat("image/png")
+        accept += event.mimeData().hasFormat("text/option")
+        if accept:
             event.acceptProposedAction()  
-            
-def process_image_dropEvent(plot_window, drop_event):
-        pix = drop_event.mimeData().data("image/png")
+        
+def process_dropEvent(plot_window, drop_event):
+    if drop_event.mimeData().hasFormat("misura/option"):
+        return process_option_dropEvent(plot_window, drop_event)
+    
+    elif drop_event.mimeData().hasFormat("image/png"):
+        return process_image_dropEvent(plot_window, drop_event)
+    
+    elif drop_event.mimeData().hasFormat("text/plain"):
+        return process_text_dropEvent(plot_window, drop_event)
+    
+def get_current_graph(plot_window):
         p = plot_window.getPageNumber()
         page = plot_window.document.basewidget.children[p]
         graph = searchFirstOccurrence(page, 'graph')
         cmd = document.CommandInterface(plot_window.document)
-        name = unicode(drop_event.mimeData().data("text/plain"))
-        name = name.replace(':/',':').replace('/','_')
-        cmd.To(graph.path)
-        try:
-            cmd.Remove(name)
-        except:
-            pass
-        cmd.Add('imagefile', name=name, autoadd=False)
-        cmd.To(name)
-        cmd.Set('filename', '{embedded}')
-        cmd.Set('embeddedImageData', unicode(b64encode(pix)))    
-
+        return graph, cmd
+            
+def process_image_dropEvent(plot_window, drop_event):
+    graph, cmd = get_current_graph(plot_window)
+    pix = drop_event.mimeData().data("image/png")
+    name = unicode(drop_event.mimeData().data("text/plain"))
+    name = name.replace(':/',':').replace('/','_')
+    cmd.To(graph.path)
+    try:
+        cmd.Remove(name)
+    except:
+        pass
+    cmd.Add('imagefile', name=name, autoadd=False, 
+            filename='{embedded}', 
+            embeddedImageData=unicode(b64encode(pix)))
+    
+def get_configuration_id(doc, cid):
+    found = False, False
+    for name, ds in doc.data.items():
+        if not getattr(ds, 'linked', False):
+            continue
+        if not getattr(ds.linked, 'conf'):
+            continue
+        if str(id(ds.linked.conf))==cid:
+            found = name, ds
+            break
+    return found
+        
+def process_option_dropEvent(plot_window, drop_event):
+    graph, cmd = get_current_graph(plot_window)
+    cid, opt_path = unicode(drop_event.mimeData().data("misura/option")).split(':')
+    dsname, ds = get_configuration_id(plot_window.document, cid)
+    if not dsname:
+        logging.error('No dataset associated with conf id:', cid, opt_path)
+    name = opt_path.replace(':/',':').replace('/','_')
+    cmd.To(graph.path)
+    try:
+        cmd.Remove(name)
+    except:
+        pass
+    cmd.Add('optionlabel', name=name, autoadd=False, showName=True,
+            option=opt_path, dataset=dsname)
+    
+def process_text_dropEvent(plot_window, drop_event):
+    graph, cmd = get_current_graph(plot_window)
+    text = unicode(drop_event.mimeData().data("text/plain"))
+    cmd.To(graph.path)
+    cmd.Add('label', autoadd=False, label=text)
+    
 
 class VeuszPlotWindow(plotwindow.PlotWindow):
     sigNearestWidget = QtCore.pyqtSignal(object)
@@ -83,10 +131,10 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         self.setAcceptDrops(True)
         
     def dragMoveEvent(self, event):
-        process_image_dragMoveEvent(event)
+        process_dragMoveEvent(event)
 
     def dropEvent(self, drop_event):
-        process_image_dropEvent(self, drop_event)
+        process_dropEvent(self, drop_event)
 
     def moveToLastPage(self):
         number_of_pages = self.document.getNumberPages()
