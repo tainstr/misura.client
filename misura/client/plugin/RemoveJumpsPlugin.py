@@ -104,6 +104,7 @@ class RemoveJumpsPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         abort = box.addButton(_('Abort'), qm.DestructiveRole)
         box.setDefaultButton(ignore)
         box.setEscapeButton(abort)
+        box.move(50,100)
         box.exec_()
         btn = box.buttonRole(box.clickedButton())
         if btn == qm.DestructiveRole:
