@@ -168,6 +168,15 @@ class DocumentModel(QtCore.QAbstractItemModel):
             self._plots = get_plotted_tree(self.doc.basewidget)
             self.changeset = self.doc.changeset
         return self._plots
+    
+    def recreate_tree(self):
+        new_tree = NodeEntry()
+        new_tree.set_doc(self.doc)
+        if self.tree:
+            new_tree.set_filter(self.tree.regex_rule)
+        self.tree.__del__()
+        del self.tree
+        self.tree = new_tree
 
     @lockme()
     def refresh(self, force=False):
@@ -183,11 +192,9 @@ class DocumentModel(QtCore.QAbstractItemModel):
         self.paused = True
         self.doc.suspendUpdates()
         self.emit(QtCore.SIGNAL('beginResetModel()'))
-        new_tree = NodeEntry()
-        new_tree.set_doc(self.doc)
-        if self.tree:
-            new_tree.set_filter(self.tree.regex_rule)
-        self.tree = new_tree
+        
+        self.recreate_tree()
+        
         self._plots = False
         self._lock.release()
 
@@ -353,8 +360,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
         assert row < len(lst), 'index() ' + str(parent) + \
             str(row) + str(lst) + str(self.status)
         child = lst[row]
-        # Update entries dictionary ???
-        self.doc.ent[child.path] = child
         idx = self.createIndex(row, column, child.model_path)
         return idx
 

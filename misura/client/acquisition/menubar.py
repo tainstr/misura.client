@@ -82,7 +82,6 @@ class MenuBar(QtGui.QMenuBar):
     def set_browser_mode(self):
         self.connectTo = QtGui.QMenu()
         self.instruments = QtGui.QMenu()
-        #       self.chooser.setView(self.tree)
 
     def setAddr(self, addr):
         addr = str(addr)

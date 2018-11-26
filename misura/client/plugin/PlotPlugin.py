@@ -241,7 +241,6 @@ class PlotDatasetPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             # If the ds is recursively derived, substitute it by its entry
             if not hasattr(ds, 'm_smp'):
                 logging.debug('Retrieving ent', y)
-                #ds = doc.ent.get(y, ds)
                 ds = doc.model.tree.traverse(y)
 
             # Get the curve and axis name

@@ -7,6 +7,7 @@ from veusz import document
 from compiler.ast import flatten
 import collections
 import re
+import numpy as np
 
 from misura.client.clientconf import confdb
 
@@ -73,6 +74,9 @@ class AllDocDataAccessor(object):
                 return self.available_data[k]
             return True
         return False
+    
+    def __contains__(self, k):
+        return self.has_key(k)
 
     def get(self, k, *a):
         val = self.has_key(k)
@@ -137,13 +141,23 @@ class NodeEntry(object):
         self._model_path = model_path
         if parent is not False:
             parent.append(self)
-        if doc is not False:
-            if not hasattr(doc, 'ent'):
-                doc.ent = {}
-            doc.ent[self.path] = self
 
     def name(self):
         return self._name
+    
+    def __del__(self):
+        self.linked = False
+        self.doc = False
+        self._root = False
+        self.parent = False
+        self._parents = []
+        self.alldoc = {}
+        
+        for ent in self._children.values()+self.parents:
+            ent.__del__()
+        self._children = {}
+        
+
 
     def copy(self):
         c = self.__class__()
@@ -206,7 +220,7 @@ class NodeEntry(object):
     @property
     def data(self):
         if not self.ds:
-            return []
+            return np.array([])
         return self.ds.data
 
     @property
@@ -262,8 +276,6 @@ class NodeEntry(object):
                     item1 = e
                     break
                 
-        #if not item1:
-        #    logging.warning('NodeEntry.traverse FAILED', path, sub, parent, isLeaf, item1,  [e.path for e in item.children.values()])
         return item1
 
     def traverse_model_path(self, path):
@@ -452,7 +464,6 @@ class NodeEntry(object):
         self._children = collections.OrderedDict()
         self.linked = False
         self.parent = False
-        doc.ent = {}
         self.doc = doc
         self.alldoc = AllDocDataAccessor(doc)
         self.names = {}

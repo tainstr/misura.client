@@ -77,9 +77,6 @@ def memory_check(warn=False):
             QtGui.QMessageBox.critical(None, 'Memory Limit', msg)
     last_ram = ram
     return (r, ram)
-        
-        
-    
 
 
 def initTranslations(app):

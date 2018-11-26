@@ -571,8 +571,9 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
         logging.debug('got elapsed', elapsed)
         # Create time dataset
         time_sequence = []
-        if self._doc.data.has_key(self.prefix + 't'):
-            logging.debug('Document already have a time sequence for this prefix', self.prefix)
+        if (self.prefix + 't') in self._doc.data:
+            logging.debug('Document already have a time sequence for this prefix', 
+                          self.prefix)
             ds = self._doc.data[self.prefix + 't']
             try:
                 ds = units.convert(ds, 'second')

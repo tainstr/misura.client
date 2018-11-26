@@ -265,6 +265,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.doc.signalModified.connect(self.refresh_model)
         self.doc.sigConfProxyModified.connect(self.update_view)
         self.mod.sigPageChanged.connect(self.ensure_sync_of_view_and_model)
+        self.mod.modelReset.connect(self.ensure_sync_of_view_and_model)
         if self.ncols>1:
             self.setColumnWidth(0, 400)
         
@@ -368,13 +369,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if len(self.doc.suspendupdates)>0:
             logging.debug('Cannot update_view: suspendedupdates!')
             return
-        if not self.previous_selection:
-            self.previous_selection = self.current_node_path
+        #if not self.previous_selection:
+        self.previous_selection = self.current_node_path
         page = self.get_page()
         if page:
             self.model().set_page(page.path)
         self.model().refresh(True)
-        self.ensure_sync_of_view_and_model()
+        #self.ensure_sync_of_view_and_model()
 
     def refresh_model(self, ismodified=True):
         if not self.previous_selection:
@@ -385,10 +386,9 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if self.doc.auto_changeset+2!=self.doc.changeset:
             self.ensure_sync_of_view_and_model()
 
-    def ensure_sync_of_view_and_model(self):
-        self.collapseAll()
+    def ensure_sync_of_view_and_model(self, *foo):
+        logging.debug('ensure_sync_of_view_and_model')
         self.restore_selection()
-        self.expand_plotted_nodes()
 
     @property
     def current_node_path(self):
@@ -410,20 +410,21 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             self.selectionModel().setCurrentIndex(jdx[-1], QtGui.QItemSelectionModel.Select)
         # Qt bug: without scrollTo, expansion is not effective!!!
         self.scrollTo(jdx[-1])
-    
         return jdx
 
     def expand_plotted_nodes(self):
         self.collapseAll()
         for node in self.model().list_plotted():
             if node:
+                logging.debug('expand_plotted_nodes', node.path)
                 self.expand_node_path(node, select=False)
 
     def restore_selection(self):
         """Restore previous selection after a model reset."""
         self.expand_plotted_nodes()
-
+        logging.debug('restore_selection', self.previous_selection)
         if not self.previous_selection:
+            print('QQQQQQQQ')
             return
 
         node = self.model().tree.traverse(self.previous_selection)

@@ -83,7 +83,6 @@ class MisuraDocument(document.Document):
         self.proxies = {}
         self.cached_pages = set()
         self.accessed_pages = []
-        self.ent = {}
         self.proxy = False
         self.proxy_filename = False
         self.header = []
@@ -171,7 +170,8 @@ class MisuraDocument(document.Document):
         data = []
         for col in ds.columns:
             data.append(getattr(ds, col))
-            setattr(ds, col, np.array([]))
+            if data[-1] is not None:
+                setattr(ds, col, np.array([]))
         o = open(filename, 'wb')
         np.save(o, data)
         #o.write(dumps(data))
