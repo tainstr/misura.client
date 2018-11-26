@@ -77,7 +77,6 @@ class InterceptPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         cmd: veusz command line interface object (exporting commands)
         fields: dict mapping field names to values
         """
-        self.ops = []
         self.doc = cmd.document
         cur = fields['currentwidget']
         g = self.doc.resolveFullWidgetPath(cur)

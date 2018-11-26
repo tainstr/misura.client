@@ -36,6 +36,7 @@ from SimFlexPlugin import SimFlexPlugin
 from ArrangePlugin import ArrangePlugin, save_plot_style_in_dataset_attr
 from ReportPlugin import ReportPlugin
 from SwitchOrdinatePlugin import SwitchOrdinatePlugin
+from RemoveJumpsPlugin import RemoveJumpsPlugin
 
 from ViscosityPlugin import ViscosityPlugin, viscosity_calc
 from SurfaceTensionPlugin import SurfaceTensionPlugin

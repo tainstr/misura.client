@@ -412,6 +412,7 @@ class Graphics(mainwindow.MainWindow):
         self.datadock.hide()
         
         def doPick(mouse_position):
+            """Overwrite picker tool with InterceptPlugin"""
             plotwindow.PlotWindow.doPick(self.plot, mouse_position)
             self.treeedit.selectWidget(self.plot.pickerwidgets[0].parent)
             plugin.InterceptPlugin.clicked_curve(mouse_position, self)

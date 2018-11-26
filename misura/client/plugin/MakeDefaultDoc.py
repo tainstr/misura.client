@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Simple plotting for browser and live acquisition."""
+"""Create default Misura document"""
 from base64 import b64encode
 import os
 
@@ -16,7 +16,7 @@ from misura.client.clientconf import confdb
 class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
 
     def __init__(self, page='', title='', time=True, temp=True, grid=False, keep_data=False):
-        """Make list of fields."""
+        """Create default Misura document"""
 
         self.fields = [
             veusz.plugins.FieldText(

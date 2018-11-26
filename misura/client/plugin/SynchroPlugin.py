@@ -81,7 +81,6 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         cmd: veusz command line interface object (exporting commands)
         fields: dict mapping field names to values
         """
-        self.ops = []
         self.cmd = cmd
         doc = cmd.document
         self.doc = doc

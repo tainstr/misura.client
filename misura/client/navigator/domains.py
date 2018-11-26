@@ -421,6 +421,17 @@ class PlottingNavigatorDomain(NavigatorDomain):
         p = plugin.InterceptPlugin(target=dslist, axis='X', critical_x=xnames[0])
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.InterceptPlugin)
         self.mainwindow.showDialog(d)
+        
+    @node
+    def remove_jumps(self, node=False):
+        page = self.navigator.get_page().path
+        plotpath = self.navigator.widget_path_for(node, prefix=page)
+        if not len(plotpath) > 1:
+            return False
+        from misura.client import plugin
+        p = plugin.RemoveJumpsPlugin(curve=plotpath)
+        op = document.OperationToolsPlugin(p, {'curve': plotpath})
+        self.doc.applyOperation(op)
 
     def add_plotted(self, menu, node, is_plotted=False):
         """Add plot/unplot action"""
@@ -550,18 +561,21 @@ class PlottingNavigatorDomain(NavigatorDomain):
         menu.addAction(_('Delete'), self.navigator.deleteChildren)
         return True
 
-    def add_dataset_menu(self, menu, node):
+    def add_dataset_menu(self, menu, node, derived=False):
         menu.addSeparator()
         is_plotted = self.is_plotted(node) >0
         self.add_plotted(menu, node, is_plotted)
         if is_plotted:
             menu.addAction(_('Intercept this curve'), self.intercept)
+            if not derived:
+                menu.addAction(_('Remove jumps'), self.remove_jumps)
             self.add_styles(menu, node)
         return True
 
-    add_derived_dataset_menu = add_dataset_menu
+    def add_derived_dataset_menu(self, menu, node):
+        return self.add_dataset_menu(menu, node, derived=True)
 
-
+    
     @nodes
     def synchronize(self, nodes=[]):
         from misura.client import plugin
@@ -685,7 +699,6 @@ class MathNavigatorDomain(NavigatorDomain):
             self.mainwindow, self.doc, p, plugin.DeriveDatasetPlugin)
         self.mainwindow.showDialog(d)
 
-
     def add_dataset_menu(self, menu, node):
         menu.addSeparator()
         menu.addAction(_('Smooth (Alt+S)'), self.smooth)
@@ -704,9 +717,9 @@ class MathNavigatorDomain(NavigatorDomain):
                         self.navigator, 
                         self.smooth_and_plot,
                         context=QtCore.Qt.WidgetWithChildrenShortcut)
-        
-    add_derived_dataset_menu = add_dataset_menu
-
+    
+    add_derived_dataset_menu = add_dataset_menu    
+    
     @nodes
     def correct(self, nodes=[]):
         """Call the CurveOperationPlugin on the current nodes"""
