@@ -57,18 +57,20 @@ def initClient():
     
 
 process = psutil.Process(os.getpid())
-limit = 2e9 if isWindows else 4e9
+limit = 4e9
+security_limit = 4e9*0.9
 last_ram = 1e9
-def memory_check():
+
+def memory_check(warn=False):
     """This is a palliative message box which will warn the user whenever approaching the 
     maximum addressable memory by a 32bit process."""
     global last_ram
     ram = process.memory_info().rss
     r = False
-    if ram>limit*0.9:
-        if ram>last_ram:
-            r = True
-            print('RAM increased:', ram, last_ram)
+    if ram>security_limit:
+        r = True
+        print('Running out of RAM:', ram, last_ram)
+        if warn and ram>last_ram:
             msg = '{:.1f}GB < {:.1f}GB'.format(ram/1e9, limit/1e9)
             msg = 'Misura is approaching maximum RAM usage:\n\t{}'.format(msg)
             msg += '\nPlease some close tests or unload some data.'
@@ -362,6 +364,7 @@ def get_plotted_tree(base, m=False):
     if m is False:
         m = {'plot': OrderedDict(),
              'dataset': OrderedDict(),
+             'xdataset': OrderedDict(),
              'axis': OrderedDict(),
              'xaxis': OrderedDict(),
              'sample': [],
@@ -374,15 +377,23 @@ def get_plotted_tree(base, m=False):
             m = get_plotted_tree(wg, m)
         elif wg.typename == 'xy':
             dsn = wg.settings.yData
+            xdsn = wg.settings.xData
             ds = wg.document.data.get(dsn, False)
             if ds is False:
                 continue
-            if not m['plot'].has_key(wg.path):
+            
+            if wg.path not in m['plot']:
                 m['plot'][wg.path] = []
             m['plot'][wg.path].append(dsn)
-            if not m['dataset'].has_key(dsn):
+            
+            if dsn not in m['dataset']:
                 m['dataset'][dsn] = []
             m['dataset'][dsn].append(wg.path)
+            
+            if xdsn not in m['xdataset']:
+                m['xdataset'][xdsn] = []
+            m['xdataset'][xdsn].append(wg.path)
+            
             # Fill page: plots map
             page = searchFirstOccurrence(wg, 'page', -1)
             m['page'][page.name].append(wg.path)

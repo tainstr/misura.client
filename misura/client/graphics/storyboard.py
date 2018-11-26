@@ -123,6 +123,9 @@ class Storyboard(QtGui.QWidget):
             if changeset>=self.doc.changeset:
                 logging.debug('Not updating page', changeset, self.doc.changeset)
                 return False
+        if page.name in self.doc.cached_pages:
+            logging.debug('Not updating cached page', page.name)
+            return False
             
         pageNum = self.doc.basewidget.children.index(page)
         fp = self.fpath(page)
@@ -141,18 +144,9 @@ class Storyboard(QtGui.QWidget):
             lbl.setStyleSheet("QToolButton { font: 12px}")
             lbl.setCheckable(True)
             show_func = functools.partial(self.slot_select_page, page.name)
-            list_children_func = functools.partial(
-                self.slot_list_children, page.name)
-            del_func = functools.partial(self.slot_delete_page, page.name)
-            export_func = functools.partial(self.slot_export_page, pageNum)
-            del_children_func = functools.partial(self.slot_delete_children, page)
             lbl.clicked.connect(show_func)
             menu = QtGui.QMenu()
-            menu.addAction(_('Show'), show_func)
-            menu.addAction(_('List children'), list_children_func)
-            menu.addAction(_('Delete'), del_func)
-            menu.addAction(_('Delete recursively'), del_children_func)
-            menu.addAction(_('Export'), export_func)
+            menu.aboutToShow.connect(functools.partial(self.build_page_menu, menu, page, pageNum))
             lbl.setMenu(menu)
 
         else:
@@ -167,6 +161,32 @@ class Storyboard(QtGui.QWidget):
         lbl.setIconSize(pix.size())
         self.cache[page.name] = lbl, self.doc.changeset
         return True
+    
+    def build_page_menu(self, menu, page, pageNum):
+        menu.clear()
+        list_children_func = functools.partial(
+            self.slot_list_children, page.name)
+        del_func = functools.partial(self.slot_delete_page, page.name)
+        export_func = functools.partial(self.slot_export_page, pageNum)
+        del_children_func = functools.partial(self.slot_delete_children, page)
+        show_func = functools.partial(self.slot_select_page, page.name)
+        menu.addAction(_('Show'), show_func)
+        menu.addAction(_('List children'), list_children_func)
+        menu.addAction(_('Delete'), del_func)
+        menu.addAction(_('Delete recursively'), del_children_func)
+        menu.addAction(_('Export'), export_func)
+        if page.name not in self.doc.cached_pages:
+            cache_func = functools.partial(self.slot_cache_page, page.name)
+            menu.addAction(_('Cache page'), cache_func)
+        else:
+            retrieve_func = functools.partial(self.slot_retrieve_page, page.name)
+            menu.addAction(_('Retrieve from cache'), retrieve_func)
+    
+    def slot_cache_page(self, path):
+        self.doc.cache_page(path)
+        
+    def slot_retrieve_page(self, path):
+        self.doc.retrieve_page(path)
     
     def highlight(self):
         for k in self.cache:

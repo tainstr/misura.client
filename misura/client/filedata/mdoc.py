@@ -5,8 +5,11 @@ import threading
 from pickle import loads, dumps
 import tempfile
 import os
+import gc
+import sys
 import cStringIO
 from traceback import format_exc
+from compiler.ast import flatten
 
 from PyQt4 import QtCore
 from tables.file import _open_files
@@ -14,6 +17,7 @@ import numpy as np
 
 import veusz.document as document
 import veusz.plugins as vsplugins
+from veusz.utils import iter_widgets
 
 from misura.canon.logger import get_module_logging
 from misura.canon.plugin import default_plot_rules
@@ -29,10 +33,21 @@ from .. import parameters as params
 from misura.client.axis_selection import get_best_x_for
 from misura.client.filedata.dataset import MisuraDataset
 from misura.client.live import registry
+from misura.client.iutils import get_plotted_tree, memory_check
+
 MAX = 10**5
 MIN = -10**5
 
 logging = get_module_logging(__name__)
+
+def list_datasets_in_page(page):
+    datasets = set()
+    for curve in iter_widgets(page, 'xy', 1):
+        if not curve:
+            continue
+        datasets.add(curve.settings.xData)
+        datasets.add(curve.settings.yData)
+    return datasets
 
 class MisuraDocument(document.Document):
 
@@ -66,6 +81,8 @@ class MisuraDocument(document.Document):
         self.no_update = set([]) # Skip those datasets
         self.cache = {}  # File-system cache
         self.proxies = {}
+        self.cached_pages = set()
+        self.accessed_pages = []
         self.ent = {}
         self.proxy = False
         self.proxy_filename = False
@@ -77,7 +94,6 @@ class MisuraDocument(document.Document):
         # Available datasets in the output file
         self.available_data = {}
         self.model = DocumentModel(self)
-
         self.decoders = {}
         if proxy:
             self.proxy = proxy
@@ -155,9 +171,10 @@ class MisuraDocument(document.Document):
         data = []
         for col in ds.columns:
             data.append(getattr(ds, col))
-            setattr(ds, col, [])
+            setattr(ds, col, np.array([]))
         o = open(filename, 'wb')
         np.save(o, data)
+        #o.write(dumps(data))
         open(filename+'m', 'wb').write(dumps(ds))
         logging.debug('Cached', name, filename)
         self.available_data[name] = ds
@@ -182,11 +199,124 @@ class MisuraDocument(document.Document):
             return ds
         # Restore data attributes
         data = np.load(open(filename, 'rb'))
+        #data = loads(open(filename, 'rb').read())
         for i, col in enumerate(ds.columns):
             setattr(ds, col, data[i])
         if add_to_doc:
             self.data[name] = ds
+            self.available_data.pop(name)
         return ds
+    
+    
+    def cache_page(self, name):
+        """Empty all datasets which are unique to page `name`"""
+        if name.startswith('/'):
+            name = name[1:]
+        if name in self.cached_pages:
+            logging.debug('Cannot cache_page again', name)
+            return False
+        
+        page = self.basewidget.getChild(name)
+        datasets = list_datasets_in_page(page)
+        
+        # List all datasets acting as sources to plugin-datasets
+        plotted = get_plotted_tree(self.basewidget)
+        sources = set()
+        plotted_datasets = set(plotted['dataset'].keys()+plotted['xdataset'].keys())
+        for dataset_name, dataset in self.data.items():
+            # Skip non-plugins
+            if not hasattr(dataset, 'pluginmanager'):
+                # If dataset is not plotted anyware, it is eligible for caching
+                if dataset_name not in plotted_datasets and len(dataset.data):
+                    datasets.add(dataset_name)
+                continue
+            sources += set(flatten(dataset.pluginmanager.fields.values()))
+        
+        # Remove any dataset used in other pages
+        for dataset_name in list(datasets):
+            N = len(self.data[dataset_name].data)
+            rem = False
+            if dataset_name in sources:
+                # Do not cache datasets which are source of plugins
+                rem = True
+            if dataset_name in self.cache and N==0:
+                logging.warning('Page contained an already cached dataset', dataset_name)
+                rem = True
+            if not N:
+                # Do not cache empty datasets
+                rem = True
+            
+            if rem:
+                datasets.remove(dataset_name)
+                continue
+            
+            # Remove dataset plotted somewhere else
+            if dataset_name not in plotted_datasets:
+                continue
+            for wgpath in plotted['dataset'].get(dataset_name,[])+plotted['xdataset'].get(dataset_name,[]):
+                if wgpath.startswith('/'+name):
+                    # this same page
+                    continue
+                # At first occurrence in other page, remove and stop
+                logging.debug('Not caching', dataset_name)
+                datasets.remove(dataset_name)
+                break
+        
+        for dataset_name in datasets:
+            dataset = self.data[dataset_name]
+            if self.add_cache(dataset, dataset_name, overwrite=True):
+                self.data[dataset_name] = dataset
+            logging.debug('cached', dataset_name, len(dataset.data))
+            
+        self.cached_pages.add(name)
+        if name in self.accessed_pages:
+            self.accessed_pages.remove(name)
+        if len(datasets):
+            self.setModified(True)
+            gc.collect()
+        return True
+            
+    def retrieve_page(self, name):
+        """Retireve from cache any dataset in page `name`"""
+        if name.startswith('/'):
+            name = name[1:]
+        if name not in self.cached_pages:
+            logging.debug('retrieve_page: page not cached', name)
+            return False
+        page = self.basewidget.getChild(name)
+        datasets = list_datasets_in_page(page)
+        n = 0
+        for dataset_name in datasets:
+            if not dataset_name in self.cache:
+                logging.debug('retrieve_page: not cached', dataset_name)
+                continue
+            if dataset_name in self.data:
+                old_ds = self.data.pop(dataset_name)
+            self.get_cache(dataset_name, add_to_doc=True)
+            logging.debug('retrieve_page: loaded', dataset_name)
+            n+=1
+        self.cached_pages.remove(name)
+        if n>0:
+            self.setModified(True)
+        return True
+    
+    def manage_page_cache(self, active_page_name=False):
+        if active_page_name in self.cached_pages:
+            self.retrieve_page(active_page_name)
+        if active_page_name:
+            if active_page_name in self.accessed_pages:
+                self.accessed_pages.remove(active_page_name)
+            self.accessed_pages.append(active_page_name) 
+        
+        n = 0
+        while len(self.accessed_pages)>1 and memory_check(warn=False)[0]:
+            self.cache_page(self.accessed_pages.pop(0))
+            n+=1
+        if n:
+            logging.debug('Wiping document history')
+            self.clearHistory()
+        
+        
 
     def load_rule(self, filename, rule, **kw):
         op = OperationMisuraImport.from_rule(

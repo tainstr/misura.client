@@ -240,6 +240,7 @@ class TestWindow(acquisition.MainWindow):
             for c in sorted(most_commons[-1]):
                 paths.append(p + '/' + c)
         self.measureTab.refresh_nodes(paths)
+        self.doc.manage_page_cache(page.name)
         return True
 
     def closeEvent(self, ev):
