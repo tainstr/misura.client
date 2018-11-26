@@ -304,7 +304,7 @@ class VersionMenu(QtGui.QMenu):
             self.proxy.remove_version(version)
             logging.debug('Removed version', version)
         except:
-            self.log.error('Could not remove version:', format_exc())
+            logging.error('Could not remove version:', format_exc())
             QtGui.QMessageBox.information(self, _('Could not remove version'),format_exc())
             return False
         # Return to original version
