@@ -96,7 +96,7 @@ class NavigatorToolbar(QtGui.QToolBar):
         
     def update_navtoolbar(self, *foo):
         self.clear()
-        self.navigator.buildContextMenu(menu=self)
+        self.navigator.buildContextMenu(menu=self, tree_actions=True)
         for a in self.actions():          
             if a.icon().isNull():
                 self.removeAction(a)
@@ -488,19 +488,19 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
 
     def add_tree_actions(self, menu, node=False):
         menu.addSeparator()
-        menu.addAction(_('Expand all (E)'), self.expandAll)
-        menu.addAction(_('Collapse siblings (C)'), self.collapse_siblings)
-        menu.addAction(_('Expand plotted (Alt+E)'), self.expand_plotted_nodes)
+        menu.addAction(iutils.theme_icon('nav_expand'), _('Expand all (E)'), self.expandAll)
+        menu.addAction(iutils.theme_icon('nav_collapse'), _('Collapse siblings (C)'), self.collapse_siblings)
+        menu.addAction(iutils.theme_icon('nav_expand_plotted'), _('Expand plotted (Alt+E)'), self.expand_plotted_nodes)
         self.acts_status = []
         for i, s in enumerate(filedata.dstats):
             name = filedata.dstats._fields[i]
-            act = menu.addAction(
+            act = menu.addAction(iutils.theme_icon('nav_'+name.capitalize()),
                 _(name.capitalize()), self.set_status)
             act.setCheckable(True)
             if s in self.status:
                 act.setChecked(True)
             self.acts_status.append(act)
-        act = menu.addAction(_('Set filter (CTRL+F)'), self.edit_regex_rule)
+        act = menu.addAction(iutils.theme_icon('nav_filter'),_('Set filter (CTRL+F)'), self.edit_regex_rule)
         self.acts_status.append(act)
         if not node:
             self.act_del = menu.addAction(_('Delete'), self.deleteChildren)
