@@ -302,6 +302,7 @@ class MisuraDocument(document.Document):
         return True
     
     def manage_page_cache(self, active_page_name=False):
+        return
         if active_page_name in self.cached_pages:
             self.retrieve_page(active_page_name)
         if active_page_name:

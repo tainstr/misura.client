@@ -16,6 +16,13 @@ from ..iutils import theme_icon
 from PyQt4 import QtGui, QtCore
 from veusz.document.operations import OperationWidgetDelete
 
+class PlotPreviewLabel(QtGui.QToolButton):
+        
+    def mousePressEvent(self, event):
+        if event.button()==QtCore.Qt.RightButton:
+            self.showMenu()
+            return 
+        return QtGui.QToolButton.mousePressEvent(self, event)
 
 class Storyboard(QtGui.QWidget):
 
@@ -139,7 +146,7 @@ class Storyboard(QtGui.QWidget):
 
         # Build the label
         if page.name not in self.cache:
-            lbl = QtGui.QToolButton(parent=self.container)
+            lbl = PlotPreviewLabel(parent=self.container)
             lbl.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
             lbl.setStyleSheet("QToolButton { font: 12px}")
             lbl.setCheckable(True)

@@ -202,13 +202,6 @@ class AbstractMisuraDataset(object):
     def m_pos(self, nval):
         self.attr['m_pos'] = nval
         
-#     @property
-#     def m_smp(self):
-#         return self.attr['m_smp']
-#     @m_smp.setter
-#     def m_smp(self, nval):
-#         self.attr['m_smp'] = nval
-        
     @property
     def m_var(self):
         return self.attr['m_var']
