@@ -396,7 +396,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if node:
             return node.path
         return False
-
+    
     def expand_node_path(self, node, select=False):
         jdx = self.model().index_path(node)
         if len(jdx) == 0:
@@ -424,7 +424,6 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.expand_plotted_nodes()
         logging.debug('restore_selection', self.previous_selection)
         if not self.previous_selection:
-            print('QQQQQQQQ')
             return
 
         node = self.model().tree.traverse(self.previous_selection)

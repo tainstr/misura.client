@@ -145,8 +145,9 @@ class NodeEntry(object):
     def name(self):
         return self._name
     
-    def __del__(self):
-        self.linked = False
+    def free(self):
+        return
+        self._linked = False
         self.doc = False
         self._root = False
         self.parent = False
@@ -154,7 +155,7 @@ class NodeEntry(object):
         self.alldoc = {}
         
         for ent in self._children.values()+self.parents:
-            ent.__del__()
+            ent.free()
         self._children = {}
         
 
@@ -253,11 +254,13 @@ class NodeEntry(object):
         return '%s.%i.%i.(%s):%i' % (self._name, self.idx, len(self.children), self.parent, self.status)
 
     def append(self, item):
-        self._children[item._name] = item
         item.parent = self
+        self._children[item._name] = item
+        
 
     def get(self, *a):
-        return self.children.get(*a)
+        ret = self.children.get(*a)
+        return ret
 
     def traverse(self, path):
         item = self
@@ -372,6 +375,8 @@ class NodeEntry(object):
 
     def insert(self, path, status=dstats.loaded):
         """Insert a pure node"""
+        if not self.doc:
+            return
         if (path in self.doc.data) and isinstance(self.doc.data[path], document.datasets.Dataset1DPlugin):
             return False
         splt = self.splt
@@ -405,7 +410,7 @@ class NodeEntry(object):
 
     def remove(self, child):
         k = child._name
-        if not self._children.has_key(k):
+        if k not in self._children:
             return False
         self._children.pop(k)
         return True

@@ -174,8 +174,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         new_tree.set_doc(self.doc)
         if self.tree:
             new_tree.set_filter(self.tree.regex_rule)
-        self.tree.__del__()
-        del self.tree
+        self.tree.free()
         self.tree = new_tree
 
     @lockme()

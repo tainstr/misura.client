@@ -203,8 +203,10 @@ class MisuraDocument(document.Document):
         for i, col in enumerate(ds.columns):
             setattr(ds, col, data[i])
         if add_to_doc:
+            self.data.pop(name, False)
+            self.available_data.pop(name, False)
             self.data[name] = ds
-            self.available_data.pop(name)
+            
         return ds
     
     
@@ -232,7 +234,7 @@ class MisuraDocument(document.Document):
                 continue
             sources += set(flatten(dataset.pluginmanager.fields.values()))
         
-        # Remove any dataset used in other pages
+        # Remove any dataset not used in other pages
         for dataset_name in list(datasets):
             N = len(self.data[dataset_name].data)
             rem = False
@@ -264,8 +266,7 @@ class MisuraDocument(document.Document):
         
         for dataset_name in datasets:
             dataset = self.data[dataset_name]
-            if self.add_cache(dataset, dataset_name, overwrite=True):
-                self.data[dataset_name] = dataset
+            self.add_cache(dataset, dataset_name, overwrite=True)
             logging.debug('cached', dataset_name, len(dataset.data))
             
         self.cached_pages.add(name)
@@ -290,8 +291,8 @@ class MisuraDocument(document.Document):
             if not dataset_name in self.cache:
                 logging.debug('retrieve_page: not cached', dataset_name)
                 continue
-            if dataset_name in self.data:
-                old_ds = self.data.pop(dataset_name)
+            
+            old_ds = self.data.pop(dataset_name, False)
             self.get_cache(dataset_name, add_to_doc=True)
             logging.debug('retrieve_page: loaded', dataset_name)
             n+=1
