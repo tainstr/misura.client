@@ -513,6 +513,8 @@ class UploadThread(QtCore.QThread):
 
 
 def getDatabaseWidget(path, new=False, browser=False):
+    if not os.path.exists(path):
+        return False
     path = str(path)
     spy = indexer.Indexer(path, [os.path.dirname(path)])
     if new:

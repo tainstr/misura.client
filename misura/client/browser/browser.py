@@ -158,6 +158,8 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowIcon(
             QtGui.QIcon(os.path.join(parameters.pathArt, 'browser.svg')))
         
+        self.open_database(confdb['database'])
+        
 
     def closeEvent(self, event):
         for i in range(1,self.tab.count()):
@@ -213,6 +215,8 @@ class MainWindow(QtGui.QMainWindow):
 
     def open_database(self, path, new=False):
         idb = getDatabaseWidget(path, new=new, browser=self)
+        if not idb:
+            logging.error('Failed opening database widget at', path)
         win = self.area.addSubWindow(idb)
         win.show()
         confdb.mem_database(path)
