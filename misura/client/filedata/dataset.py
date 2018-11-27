@@ -53,8 +53,10 @@ class Sample(object):
         return self.conf.has_key(key)
         
 class AbstractMisuraDataset(object):
+    clean_attributes = ('m_smp', 'm_opt','m_conf')#, 'linked')
     def __init__(self, linked=False):
         self.attr = {'label': ''}
+        self.m_conf = None
         self.m_opt = False
 # 		assert linked!=False
         self.m_keep = True
@@ -85,6 +87,17 @@ class AbstractMisuraDataset(object):
     @m_label.setter
     def m_label(self, nval):
         self.attr['label'] = nval
+        
+    def __getstate__(self):
+        result = self.__dict__.copy()
+        for k in self.clean_attributes:
+            result.pop(k)
+        return result
+    
+    def __setstate__(self, state):
+        map(lambda a: setattr(self, *a), state.items())
+        for k in self.clean_attributes:
+            setattr(self, k, None)
         
     def _get_unit(self, name, alt=None):
         """Get proper unit based on Table column, if

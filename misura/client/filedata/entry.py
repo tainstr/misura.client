@@ -361,10 +361,12 @@ class NodeEntry(object):
 
     def get_configuration(self):
         if not self.linked:
+            logging.debug('Node does not have a linked file')
             return False
         path = self.conf_path
         configuration_proxy = getattr(self.linked, 'conf', False)
         if not configuration_proxy:
+            logging.debug('Linked file has not conf')
             return False
         
         if len(path)>1:

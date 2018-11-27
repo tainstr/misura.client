@@ -164,7 +164,7 @@ class MisuraDocument(document.Document):
         
         self.cache[name] = filename
         if hasattr(ds, 'document'):
-            del ds.document
+            ds.document = None
         ds.m_name = name
         # Separate data attributes
         data = []
@@ -174,8 +174,8 @@ class MisuraDocument(document.Document):
                 setattr(ds, col, np.array([]))
         o = open(filename, 'wb')
         np.save(o, data)
-        #o.write(dumps(data))
-        open(filename+'m', 'wb').write(dumps(ds))
+        o.close()
+        ##o.write(dumps(data))
         logging.debug('Cached', name, filename)
         self.available_data[name] = ds
         ds.document = self
@@ -188,9 +188,8 @@ class MisuraDocument(document.Document):
         if not filename or not os.path.exists(filename):
             logging.debug('No dataset in cache', name, filename)
             return False
-        
-        ds = loads(open(filename+'m', 'rb').read())
-        ds.document = self
+        # Retrieve dataset from available cache
+        ds = self.available_data[name]
         # Restore correct linked instances
         if ds.linked and ds.linked.filename:
             p = getUsedPrefixes(self)
