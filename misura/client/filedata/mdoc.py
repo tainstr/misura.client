@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 """Interfaces for local and remote file access"""
 import threading
-from pickle import loads, dumps
 import tempfile
 import os
-import gc
-import sys
 import cStringIO
 from traceback import format_exc
 from compiler.ast import flatten
+import gc
 
 from PyQt4 import QtCore
 from tables.file import _open_files
@@ -273,7 +271,6 @@ class MisuraDocument(document.Document):
             self.accessed_pages.remove(name)
         if len(datasets):
             self.setModified(True)
-            gc.collect()
         return True
             
     def retrieve_page(self, name):
@@ -301,7 +298,6 @@ class MisuraDocument(document.Document):
         return True
     
     def manage_page_cache(self, active_page_name=False):
-        return
         if active_page_name in self.cached_pages:
             self.retrieve_page(active_page_name)
         if active_page_name:
@@ -316,6 +312,7 @@ class MisuraDocument(document.Document):
         if n:
             logging.debug('Wiping document history')
             self.clearHistory()
+            gc.collect()
         
         
 
