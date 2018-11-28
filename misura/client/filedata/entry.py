@@ -138,6 +138,7 @@ class NodeEntry(object):
         self._name = name
         self._children = collections.OrderedDict()
         self._path = path
+        self._parents = []
         self._model_path = model_path
         if parent is not False:
             parent.append(self)
@@ -146,19 +147,17 @@ class NodeEntry(object):
         return self._name
     
     def free(self):
-        return
         self._linked = False
         self.doc = False
         self._root = False
         self.parent = False
         self._parents = []
         self.alldoc = {}
-        
+        self.names = {}
+        self.status_cache = (None, False)
         for ent in self._children.values()+self.parents:
             ent.free()
-        self._children = {}
-        
-
+        self._children = collections.OrderedDict()
 
     def copy(self):
         c = self.__class__()
@@ -468,12 +467,9 @@ class NodeEntry(object):
         """Build a Hierarchy out of `doc`
         `status`: default status"""
         old = self.copy()
-        self._children = collections.OrderedDict()
-        self.linked = False
-        self.parent = False
+        self.free()
         self.doc = doc
         self.alldoc = AllDocDataAccessor(doc)
-        self.names = {}
         for dn, d in self.alldoc.items():
             dn1 = dn
             if hasattr(d, 'm_var'):

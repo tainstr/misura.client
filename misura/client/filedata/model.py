@@ -169,13 +169,9 @@ class DocumentModel(QtCore.QAbstractItemModel):
             self.changeset = self.doc.changeset
         return self._plots
     
-    def recreate_tree(self):
-        new_tree = NodeEntry()
-        new_tree.set_doc(self.doc)
-        if self.tree:
-            new_tree.set_filter(self.tree.regex_rule)
-        self.tree.free()
-        self.tree = new_tree
+      
+    def resetInternalData(self):
+        self.tree.set_doc(self.doc)
 
     @lockme()
     def refresh(self, force=False):
@@ -190,20 +186,16 @@ class DocumentModel(QtCore.QAbstractItemModel):
         logging.debug('REFRESHING MODEL', self.paused, force)
         self.paused = True
         self.doc.suspendUpdates()
-        self.emit(QtCore.SIGNAL('beginResetModel()'))
-        
-        self.recreate_tree()
-        
+        self.beginResetModel()
         self._plots = False
-        self._lock.release()
-
-        self.emit(QtCore.SIGNAL('endResetModel()'))
-        self.paused = False
         self.keys = set(self.doc.data.keys())
-        self.available_keys = set(self.doc.available_data.keys())       
+        self.available_keys = set(self.doc.available_data.keys()) 
+        self.changeset = self.doc.changeset   
+        self.resetInternalData()
+        self._lock.release()
+        self.paused = False
         self.doc.enableUpdates()
-        self.changeset = self.doc.changeset
-        self.emit(QtCore.SIGNAL('modelReset()'))
+        self.endResetModel()
         return True
 
     def is_plotted(self, key, page=False):
@@ -398,7 +390,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
         """Returns the sequence of model indexes starting from a node."""
         obj = node
         n = []
-        while obj != self.tree:
+        while obj.parent:
             n.append(obj)
             obj = obj.parent
             if obj is None:
@@ -412,7 +404,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
             if obj in all_objs:
                 i = all_objs.index(obj)
                 jdx.append(self.createIndex(i, 0, obj.model_path))
-        #logging.debug('index_path', jdx)
+        logging.debug('index_path', node.path, jdx)
         return jdx
 
     #####

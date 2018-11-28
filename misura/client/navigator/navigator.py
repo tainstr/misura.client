@@ -375,7 +375,6 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if page:
             self.model().set_page(page.path)
         self.model().refresh(True)
-        #self.ensure_sync_of_view_and_model()
 
     def refresh_model(self, ismodified=True):
         if not self.previous_selection:
@@ -383,8 +382,11 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if ismodified:
             if self.model().refresh(False):
                 self.ensure_sync_of_view_and_model()
-        if self.doc.auto_changeset+2!=self.doc.changeset:
-            self.ensure_sync_of_view_and_model()
+                return True
+        #if self.doc.auto_changeset+2!=self.doc.changeset:
+        #    self.ensure_sync_of_view_and_model()
+        #    return True
+        return False
 
     def ensure_sync_of_view_and_model(self, *foo):
         logging.debug('ensure_sync_of_view_and_model')
@@ -430,6 +432,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.previous_selection = False
         if not node:
             return
+        logging.debug('EXPANDING previous_selection', node.path)
         self.expand_node_path(node, select=True)
 
 
@@ -762,7 +765,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         menu.exec_(self.mapToGlobal(pt))
         logging.debug('Ended menu execution')
         self.pause(0)
-        self.update_view()
+        #self.update_view()
         
     def pause(self, do=True):
         self.model().pause(do)
