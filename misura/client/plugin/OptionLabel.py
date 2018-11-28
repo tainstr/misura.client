@@ -116,10 +116,11 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         typ = opt['type']
         # Resolve RoleIO pointers
         while typ=='RoleIO':
-            proxy, opt_name = proxy.from_column(opt['options'][0])
-            if not proxy or not opt_name or opt_name not in proxy:
+            proxy = proxy.root.toPath(opt['options'][0])
+            if not proxy:
                 logging.info('Cannot resolve RoleIO', opt_name, opt['options'])
                 return None
+            opt_name = opt['options'][2]
             opt = proxy.gete(opt_name)
             typ = opt['type']
         fmt = self.settings.format
