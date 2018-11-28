@@ -58,7 +58,7 @@ def initClient():
 
 process = psutil.Process(os.getpid())
 limit = 4e9
-security_limit = 4e9*0.9
+security_limit = 2.5e9
 last_ram = 1e9
 
 def memory_check(warn=False):

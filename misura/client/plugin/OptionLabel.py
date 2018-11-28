@@ -4,10 +4,12 @@
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import veusz.document as document
-from . import utils
+
 from veusz import widgets
 import veusz.setting as setting
+from . import utils
 from misura.client import _
+from .OptionAbstractWidget import OptionAbstractWidget
 
 def clean_row(row, header):
     for i,h in enumerate(header):
@@ -16,13 +18,9 @@ def clean_row(row, header):
                 row[i] = 0
     return row
 
-
-class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
+class OptionLabel(utils.OperationWrapper, OptionAbstractWidget, widgets.TextLabel):
     typename = 'optionlabel'
     description = "Label for option"
-    connected = False
-    _proxy = False
-    current_changeset = 0
     
     def __init__(self, *args, **kwargs):
         self.connected = False
@@ -36,6 +34,12 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
                                                    usertext='Update Label'))
         for name in ('prefix', 'format', 'option','dataset', 'showName'):
             self.settings.get(name).setOnModified(self.update)
+            
+    def get_proxies_and_options(self, conf):
+        split = ',' if ',' in self.settings.option else ';'
+        for opt in self.settings.option.split(split):
+            proxy, name= conf.from_column(opt)
+            yield proxy, name
    
         
     @classmethod
@@ -44,7 +48,7 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         widgets.TextLabel.addSettings(s)
         s.add( setting.Dataset(
             'dataset', '',
-            descr=_('Dataset pointing to the containing option'),
+            descr=_('Dataset pointing to the containing options'),
             usertext=_('Dataset')), 0 ) 
         
         s.add(setting.Str('option', '',
@@ -68,41 +72,7 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         # Default text size
         s.Text.size = '8pt'
         
-    @property
-    def changeset(self):
-        if not self.proxy:
-            return -1
-        return max([p._changeset for p in self.proxy])
-        
-    def check_update(self, *a):
-        logging.debug('check_update', a, self.settings.option, self.current_changeset, self.changeset)
-        if self.changeset and self.current_changeset<self.changeset:
-            self.update()
-            return True
-        return False
-    
-    @property
-    def proxy(self):
-        if self._proxy:
-            return self._proxy
-        ds = self.settings.dataset
-        y = self.document.data.get(ds, False)
-        if not y:
-            return []
-        if not y.linked:
-            logging.debug('No linked file for', ds)
-            return []
-        if not y.linked.conf:
-            logging.debug('No configuration for linked file', ds)
-            return []
-        self._proxy = []
-        self.opt_name = []
-        split = ',' if ',' in self.settings.option else ';'
-        for opt in self.settings.option.split(split):
-            p, n= y.linked.conf.from_column(opt)
-            self._proxy.append(p)
-            self.opt_name.append(n)
-        return self._proxy
+
     
     def create_label(self, proxy, opt_name):
         """Create label fragment for `opt_name` of `proxy`"""
@@ -140,22 +110,16 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
             val = func(val, opt)
             if name and typ!='Table':
                 val = name+val
-         
         return val    
         
         
     def update(self):
         """Update OptionLabel with the current option text"""
-        self.doc = self.document
-        if not self.connected:
-            self.document.signalModified.connect(self.check_update)
-            self.connected = True
-        # Force proxy reset
-        self._proxy = False
-
+        OptionAbstractWidget.update(self)
+        
         logging.debug('OptionLabel', self.settings.option, self.settings.dataset, 
                     self.proxy, self.opt_name, self.changeset)
-        self.current_changeset = self.changeset
+        
         split = ',' if ',' in self.settings.option else ';'
         opts = self.settings.option.split(split)
         label = ''
@@ -187,10 +151,6 @@ class OptionLabel(utils.OperationWrapper, widgets.TextLabel):
         
         self.toset(self, 'label', label)
         self.apply_ops()
-        
-    def draw(self, *a, **k):
-        self.check_update()
-        return super(OptionLabel,self).draw(*a, **k)
         
     
     def cvt_Integer(self, val, opt):

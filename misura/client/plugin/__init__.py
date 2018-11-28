@@ -42,6 +42,7 @@ from ViscosityPlugin import ViscosityPlugin, viscosity_calc
 from SurfaceTensionPlugin import SurfaceTensionPlugin
 
 from OptionLabel import OptionLabel
+from OptionLine import OptionLine
 
 # FIELDS
 from FieldConfigurationProxy import FieldConfigurationProxy
