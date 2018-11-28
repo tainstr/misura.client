@@ -53,11 +53,11 @@ class Sample(object):
         return self.conf.has_key(key)
         
 class AbstractMisuraDataset(object):
-    clean_attributes = ('m_smp', 'm_opt','m_conf')#, 'linked')
+    clean_attributes = ('m_smp', 'm_opt','m_conf', 'linked')
     def __init__(self, linked=False):
         self.attr = {'label': ''}
-        self.m_conf = None
         self.m_opt = False
+        self.m_conf = False
 # 		assert linked!=False
         self.m_keep = True
         """Save on commit"""
@@ -88,13 +88,13 @@ class AbstractMisuraDataset(object):
     def m_label(self, nval):
         self.attr['label'] = nval
         
-    def __getstate__(self):
+    def deprecated__getstate__(self):
         result = self.__dict__.copy()
         for k in self.clean_attributes:
             result.pop(k)
         return result
     
-    def __setstate__(self, state):
+    def deprecated__setstate__(self, state):
         map(lambda a: setattr(self, *a), state.items())
         for k in self.clean_attributes:
             setattr(self, k, None)

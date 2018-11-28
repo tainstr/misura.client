@@ -217,6 +217,7 @@ class MainWindow(QtGui.QMainWindow):
         idb = getDatabaseWidget(path, new=new, browser=self)
         if not idb:
             logging.error('Failed opening database widget at', path)
+            return False
         win = self.area.addSubWindow(idb)
         win.show()
         confdb.mem_database(path)
@@ -224,6 +225,7 @@ class MainWindow(QtGui.QMainWindow):
             idb, QtCore.SIGNAL('selectedFile(QString)'), self.open_file)
         self.connect(
             idb, QtCore.SIGNAL('selectedFile(QString,int)'), self.open_file)
+        return idb
 
     def new_database(self, path):
         self.open_database(path, new=True)

@@ -402,7 +402,7 @@ def convert_func(ds, to_unit):
     return ret
 
 
-def convert(ds, to_unit):
+def convert(ds, to_unit, return_copy=True):
     """Convert dataset `ds` to `to_unit`.
     Returns a new dataset."""
     # In case ds derived from a plugin, return the original plugin dataset
@@ -410,8 +410,9 @@ def convert(ds, to_unit):
     from_unit, to_unit, from_group, to_group = get_from_unit(ds, to_unit)
     logging.debug('Convert', from_unit, to_unit, ds)
     func = convert_func(ds, to_unit)
-
-    ds1 = copy(ds)
+    ds1 = ds
+    if return_copy:
+        ds1 = copy(ds)
     out = func(np.array(ds1.data))
     ds1.data = plugins.numpyCopyOrNone(out)
     ds1.unit = to_unit

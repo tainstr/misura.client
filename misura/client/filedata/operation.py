@@ -334,7 +334,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
         logging.debug('No OPT: keep unit', prefixed_dataset_name, unit)
         ds.unit = unit
         ds.old_unit = unit
-
+    
 
     # Read additional metadata
     if len(data) > 0 and prefixed_dataset_name[-2:] not in ('_t', '_T', ':t'):
@@ -345,7 +345,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
         nu = rule_unit(hdf_dataset_name)
         if unit and nu:
             logging.debug('Conveting units:', hdf_dataset_name, unit, nu, ds.unit, ds.old_unit)
-            ds = units.convert(ds, nu[0])
+            ds = units.convert(ds, nu[0], return_copy=False)
             logging.debug('New dataset unit', ds.unit, ds.old_unit, nu[0])
     elif prefixed_dataset_name.endswith('_t'):
         ds.m_opt = option.ao(
@@ -353,7 +353,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     elif prefixed_dataset_name.endswith('_T'):
         ds.m_opt = option.ao(
             {}, variable_name, 'Float', 0, 'Temperature', unit=ds.unit)[variable_name]
-
+        
     # Add the hierarchy tags
     for sub, parent, leaf in iterpath(pure_dataset_name):
         if leaf and parent:
@@ -576,7 +576,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
                           self.prefix)
             ds = self._doc.data[self.prefix + 't']
             try:
-                ds = units.convert(ds, 'second')
+                ds = units.convert(ds, 'second', return_copy=False)
             except:
                 pass
             time_sequence = ds.data
