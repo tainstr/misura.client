@@ -111,7 +111,7 @@ class VersionMenu(QtGui.QMenu):
     def save_plot(self, name=False, page=1):
         """Save overwrite plot in current name"""
         if not name:
-            plot_id = self.current_plot_id
+            plot_id = self.current_plot_id or 'auto'
         else:
             plot_id = validate_filename(name, bad=[' '])
         r = self.doc.save_plot(self.proxy, plot_id, page, name)

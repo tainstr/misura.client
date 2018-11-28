@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from traceback import format_exc
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import veusz.setting as setting
@@ -101,8 +102,13 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         if not self.proxy:
             logging.debug('Incomplete settings - not updating')
             return 
-        const = self.proxy[0][self.opt_name[0]]
-        slope = self.proxy[1][self.opt_name[1]]
+        try:
+            const = self.proxy[0][self.opt_name[0]]
+            slope = self.proxy[1][self.opt_name[1]]
+        except:
+            logging.error(self.proxy,self.opt_name)
+            logging.error(format_exc())
+            return False
         if self.settings.invert:
             rg = yAxis.getPlottedRange()
             self.settings.yAxis = curve.settings.xAxis
