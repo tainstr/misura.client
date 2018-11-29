@@ -107,7 +107,7 @@ def build_aggregate_view(root, targets, devs, handle=False):
             dev = root.toPath(fullpath)
             wg = build(root, dev, dev.gete(t), parent=w, force=True)
             wg.label_widget.setText(
-                '{} ({}): {}'.format(dev['name'], dev['devpath'], _(wg.prop['name'])))
+                u'{} ({}): {}'.format(dev['name'], dev['devpath'], _(wg.prop['name'])))
             lay.addRow(wg.label_widget, wg)
     win = QtGui.QScrollArea()
     win.setWidgetResizable(True)
@@ -119,7 +119,7 @@ def build_aggregate_view(root, targets, devs, handle=False):
 def build_aggregation_menu(root, dev, menu, target='name', win_map=False):
     if win_map is False:
         win_map = {}
-    dmenu = menu.addMenu('{} ({})'.format(dev['name'], dev['devpath']))
+    dmenu = menu.addMenu(u'{} ({})'.format(dev['name'], dev['devpath']))
     dmenu.addAction(_('View'), functools.partial(
         explore_child_aggregate, dev, target, win_map))
     nav_menu = dmenu.addMenu(_('Navigator'))
@@ -179,7 +179,7 @@ def explore_child_aggregate(dev, target, win_map={}):
     from ..conf import Interface
     win = Interface(dev.root, dev)
     win.setWindowTitle(
-        _('Explore aggregation: {} ({})').format(dev['name'], dev['devpath']))
+        _(u'Explore aggregation: {} ({})').format(dev['name'], dev['devpath']))
     win_map[dev['fullpath']] = win
     win.show()
     win.highlight_option(target)
@@ -187,7 +187,7 @@ def explore_child_aggregate(dev, target, win_map={}):
 def list_aggregate(dev, aggregate, handle, win_map={}):
     f, targets, values, devs = dev.collect_aggregate(aggregate, handle)[:4]
     win = build_aggregate_view(dev.root, targets, devs, handle)
-    win.setWindowTitle(_('Explore aggregation: {} ({})').format(dev['name'], handle))
+    win.setWindowTitle(_(u'Explore aggregation: {} ({})').format(dev['name'], handle))
     win.show()
     win_map[id(win)] = win     
     return win
