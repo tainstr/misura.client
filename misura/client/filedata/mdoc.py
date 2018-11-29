@@ -225,11 +225,16 @@ class MisuraDocument(document.Document):
         for dataset_name, dataset in self.data.items():
             # Skip non-plugins
             if not hasattr(dataset, 'pluginmanager'):
-                # If dataset is not plotted anyware, it is eligible for caching
+                # If dataset is not plotted anywere, it is eligible for caching
                 if dataset_name not in plotted_datasets and len(dataset.data):
                     datasets.add(dataset_name)
                 continue
             sources += set(flatten(dataset.pluginmanager.fields.values()))
+        
+        # Set page as cached
+        self.cached_pages.add(name)
+        if name in self.accessed_pages:
+            self.accessed_pages.remove(name)
         
         # Remove any dataset not used in other pages
         for dataset_name in list(datasets):
@@ -252,23 +257,22 @@ class MisuraDocument(document.Document):
             # Remove dataset plotted somewhere else
             if dataset_name not in plotted_datasets:
                 continue
-            for wgpath in plotted['dataset'].get(dataset_name,[])+plotted['xdataset'].get(dataset_name,[]):
-                if wgpath.startswith('/'+name):
-                    # this same page
-                    continue
-                # At first occurrence in other page, remove and stop
-                logging.debug('Not caching', dataset_name)
+            # Set of curves involving this dataset
+            involved_pages = set(plotted['dataset'].get(dataset_name,[])+plotted['xdataset'].get(dataset_name,[]))
+            # Convert to set page names
+            involved_pages = set([page.split('/')[1] for page in involved_pages])
+            # Select only pages which are not already cached
+            involved_pages = involved_pages.difference(self.cached_pages)
+            if len(involved_pages)>0:
+                logging.debug('Not caching', dataset_name, involved_pages)
                 datasets.remove(dataset_name)
-                break
         
+        # Cache remaining datasets
         for dataset_name in datasets:
             dataset = self.data[dataset_name]
             self.add_cache(dataset, dataset_name, overwrite=True)
             logging.debug('cached', dataset_name, len(dataset.data))
             
-        self.cached_pages.add(name)
-        if name in self.accessed_pages:
-            self.accessed_pages.remove(name)
         if len(datasets):
             self.setModified(True)
         return True
