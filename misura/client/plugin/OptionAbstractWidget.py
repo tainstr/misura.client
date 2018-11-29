@@ -17,7 +17,7 @@ class OptionAbstractWidget(object):
         return max([p._changeset for p in self.proxy])
         
     def check_update(self, *a):
-        logging.debug('check_update', a, self.current_changeset, self.changeset)
+        #logging.debug('check_update', self.path, a, self.current_changeset, self.changeset)
         if self.changeset and self.current_changeset<self.changeset:
             self.update()
             return True
