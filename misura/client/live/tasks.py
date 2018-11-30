@@ -174,6 +174,8 @@ class LocalTasks(QtGui.QWidget):
         lay.addWidget(pb)
         lay.addWidget(btn)
         wg.setLayout(lay)
+        wg.lbl = lbl
+        wg.btn = btn
         wg.pb = pb
         self.mlay.addWidget(wg)
         self.prog[pid] = wg
@@ -214,9 +216,6 @@ class LocalTasks(QtGui.QWidget):
         if step >= mx and step != 0:
             self._lock.release()
             self._done(pid)
-        #else:
-            #if random()<1./(wg.pb.maximum()+1):
-            #    self.ch.emit()
         return True
 
     def job(self, step, pid='Operation', label=''):
@@ -244,6 +243,19 @@ class LocalTasks(QtGui.QWidget):
         """Thread-safe call for _done()"""
         self.emit(QtCore.SIGNAL('sig_done(QString)'), pid)
         self.emit(QtCore.SIGNAL('sig_done()'))
+        
+    def failed(self, pid='Operation', reason='Unspecified Error'):
+        wg = self.prog.get(pid, False)
+        if not wg:
+            return False
+        msg = 'FAILED: {}, {}'.format(pid, reason)
+        self.msg(msg)
+        wg.lbl.setStyleSheet("color: red")
+        wg.btn.setStyleSheet("background-color: red")
+        wg.pb.setStyleSheet(wg.pb.styleSheet()+"\nQProgressBar::chunk:horizontal {background-color: red};")
+        for el in  [wg, wg.pb, wg.lbl, wg.btn]:
+            el.setToolTip('FAILED TASK\n{}\n{}'.format(pid, '\n'.join(reason)))
+        
 
 
 class Tasks(QtGui.QTabWidget):
