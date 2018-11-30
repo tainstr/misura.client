@@ -28,8 +28,17 @@ class OptionAbstractWidget(object):
         if self._proxy:
             return self._proxy
         ds = self.settings.dataset
-        y = self.document.data.get(ds, False)
+        y = self.document.get_from_data_or_available(ds, False)
+        # Search for a datasets starting with y:
+        if not y and '/' in ds:
+            prefix = ds.split('/')[0]
+            logging.debug('Dataset not found, scanning prefix', ds, prefix)
+            for d, yds in self.document.iter_data_and_available():
+                if d.startswith(prefix):
+                    y = yds
+                    break
         if not y:
+            logging.debug('Dataset not found: will return an empty label',ds)
             return []
         if not y.linked:
             logging.debug('No linked file for', ds)

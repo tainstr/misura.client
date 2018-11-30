@@ -107,6 +107,22 @@ class MisuraDocument(document.Document):
             self.proxies[self.proxy_filename] = self.proxy
         self.create_proxy_decoders(self.proxy, '0:')
         
+    def get_from_data_or_available(self, *a):
+        dsn = a[0]
+        r = self.data.get(dsn, self.available_data.get(dsn, False))
+        if r is not False:
+            return r
+        elif len(a>1):
+            return a[1]
+        raise KeyError('Dataset not in document data nor available, '+dsn)
+    
+    def iter_data_and_available(self):
+        for key, ds in self.data.items():
+            yield key, ds
+        for key, ds in self.available_data.items():
+            yield key, ds
+            
+        
     #Table export utils
     def get_column_func(self, name):
         return self.data[name].data
@@ -179,8 +195,8 @@ class MisuraDocument(document.Document):
         ds.document = self
         return True
 
-    def get_cache(self, name, load_data=True, add_to_doc=False):
-        if self.data.has_key(name):
+    def get_cache(self, name, load_data=True, add_to_doc=False, overwrite=False):
+        if not overwrite and name in self.data:
             return self.data[name]
         filename = self.cache.get(name, False)
         if not filename or not os.path.exists(filename):
@@ -292,8 +308,7 @@ class MisuraDocument(document.Document):
                 logging.debug('retrieve_page: not cached', dataset_name)
                 continue
             
-            old_ds = self.data.pop(dataset_name, False)
-            self.get_cache(dataset_name, add_to_doc=True)
+            self.get_cache(dataset_name, add_to_doc=True, overwrite=True)
             logging.debug('retrieve_page: loaded', dataset_name)
             n+=1
         logging.debug('retrieve_page: loaded', n)
