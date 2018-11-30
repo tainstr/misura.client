@@ -187,7 +187,7 @@ class MisuraDocument(document.Document):
             logging.debug('No dataset in cache', name, filename)
             return False
         # Retrieve dataset from available cache
-        ds = self.available_data[name]
+        ds = self.data.get(name, self.available_data.get(name))
         # Restore correct linked instances
         if ds.linked and ds.linked.filename:
             p = getUsedPrefixes(self)
@@ -296,6 +296,7 @@ class MisuraDocument(document.Document):
             self.get_cache(dataset_name, add_to_doc=True)
             logging.debug('retrieve_page: loaded', dataset_name)
             n+=1
+        logging.debug('retrieve_page: loaded', n)
         self.cached_pages.remove(name)
         if n>0:
             self.setModified(True)
