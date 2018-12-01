@@ -261,10 +261,18 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
 
     def edit_properties(self, pos, frm=False):
         widget = self.identify_widget(pos)
+        
         self.w = treeeditwindow.PropertyList(
             self.document, showformatsettings=frm)
         s = treeeditwindow.SettingsProxySingle(self.document, widget.settings)
         self.w.updateProperties(s)
+        self.w.setWindowTitle('{} for {} at {}'.format({False:'Properties',True:'Formatting'}[frm], 
+                                                 widget.typename, widget.path))
+        
+        # Show line tab:
+        if frm and widget.typename == 'xy':
+            tabbed = self.w.childlist[0]
+            tabbed.setCurrentIndex(1)
         self.w.show()
         
     def delete_widget(self, pos):
