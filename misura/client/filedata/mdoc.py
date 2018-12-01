@@ -112,7 +112,7 @@ class MisuraDocument(document.Document):
         r = self.data.get(dsn, self.available_data.get(dsn, False))
         if r is not False:
             return r
-        elif len(a>1):
+        elif len(a)>1:
             return a[1]
         raise KeyError('Dataset not in document data nor available, '+dsn)
     

@@ -36,7 +36,7 @@ class OptionAbstractWidget(object):
             prefix = ds.split('/')[0]
             logging.debug('Dataset not found, scanning prefix', ds, prefix)
             for d, yds in self.document.iter_data_and_available():
-                if d.startswith(prefix):
+                if d.startswith(prefix) and hasattr(yds, 'linked'):
                     y = yds
                     break
         if not y:
