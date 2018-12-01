@@ -4,7 +4,6 @@
 import os
 from functools import partial
 from base64 import b64encode
-
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from veusz import qtall as qt4
@@ -21,7 +20,7 @@ import veusz.setting.settingdb as setdb
 import veusz.windows.treeeditwindow as treeeditwindow
 import veusz.document as document
 from veusz.dialogs import dataeditdialog
-from veusz.document import registerImportCommand
+from veusz.document import registerImportCommand, operations
 
 import veusz.windows.plotwindow as plotwindow
 from veusz.windows import consolewindow
@@ -151,6 +150,12 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
             return
         if widget.typename != 'xy':
             return
+        
+        menu.addSeparator()
+        
+        m = menu.addMenu(_('Style'))
+        m.aboutToShow.connect(partial(self.show_style_menu, widget, m))
+        
         dsn = widget.settings.yData
         node = self.document.model.tree.traverse(dsn)
         if not node:
@@ -166,8 +171,34 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
                                 self.group_menu)
         self.group_menu.aboutToShow.connect(sub_menu_func)
         menu.addMenu(self.group_menu)
-            
         
+    def build_style_menu(self, setting, widget,  menu):
+        """Build a specific section of the style menu"""
+        ctrl = setting.makeControl(menu)
+        ctrl.hide()
+        ctrl = getattr(ctrl, 'combo', ctrl)
+        for i, txt in enumerate(setting.vallist):
+            val = setting.fromText(txt)
+            func = partial(self.set_from_menu, setting, widget, val)
+            a = menu.addAction(ctrl.itemIcon(i), txt, func)
+            a.setCheckable(True)
+            if i==ctrl.currentIndex():
+                a.setChecked(True)
+        self._ctrl = ctrl
+        menu.addSeparator()
+        
+    def set_from_menu(self, setting, widget, val):
+        logging.debug('set_from_menu', setting.path, val)
+        self.document.applyOperation(operations.OperationSettingSet(setting, val))
+    
+            
+    def show_style_menu(self, widget, menu, *a):
+        """Populate the style menu with line styles and colors"""
+        print('show_style_menu', widget.path)
+        for s in widget.settings['PlotLine'].getSettingList():
+            if s.name in ['style', 'color']:
+                self.build_style_menu(s, widget, menu)
+                
         
     def mouseMoveEvent(self, event):
         ret = plotwindow.PlotWindow.mouseMoveEvent(self, event)
@@ -188,10 +219,10 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         menu.addAction('Formatting', self.f1)
         self.fdel = partial(self.delete_widget, pos)
         menu.addAction('Delete selected', self.fdel)
+        
         self.widget_menu(menu, pos)
         
-        
-
+        menu.addSeparator()
         # add some useful entries
         menu.addAction(self.vzactions['view.zoommenu'])
         menu.addSeparator()
