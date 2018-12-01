@@ -24,6 +24,7 @@ from veusz.dialogs import dataeditdialog
 from veusz.document import registerImportCommand
 
 import veusz.windows.plotwindow as plotwindow
+from veusz.windows import consolewindow
 import veusz.setting as setting
 from veusz.document import OperationWidgetDelete
 
@@ -264,7 +265,8 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         
         self.w = treeeditwindow.PropertyList(
             self.document, showformatsettings=frm)
-        s = treeeditwindow.SettingsProxySingle(self.document, widget.settings)
+        self.w.getConsole = lambda *a: consolewindow.ConsoleWindow(self.document)
+        s = treeeditwindow.SettingsProxySingle(self.document, widget.settings, widget.actions)
         self.w.updateProperties(s)
         self.w.setWindowTitle('{} for {} at {}'.format({False:'Properties',True:'Formatting'}[frm], 
                                                  widget.typename, widget.path))
@@ -273,6 +275,8 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         if frm and widget.typename == 'xy':
             tabbed = self.w.childlist[0]
             tabbed.setCurrentIndex(1)
+        elif not frm:
+            self.w._addActions(s, len(self.w.childlist))
         self.w.show()
         
     def delete_widget(self, pos):
