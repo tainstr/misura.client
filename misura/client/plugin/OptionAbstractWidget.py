@@ -29,6 +29,8 @@ class OptionAbstractWidget(object):
             return self._proxy
         ds = self.settings.dataset
         y = self.document.get_from_data_or_available(ds, False)
+        # Ensure it is not a derived or native dataset
+        y = y if hasattr(y, 'linked') else False
         # Search for a datasets starting with y:
         if not y and '/' in ds:
             prefix = ds.split('/')[0]
