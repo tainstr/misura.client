@@ -808,13 +808,12 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
         u = node.unit
         if not u:
             return
-        un = menu.addMenu(_('Units'))
         kgroup, f, p = units.get_unit_info(u, units.from_base)
         same = units.from_base.get(kgroup, {u: lambda v: v}).keys()
         logging.debug( kgroup, same)
         for u1 in same:
-            p = functools.partial(self.set_unit, convert=u1)
-            act = un.addAction(_(u1), p)
+            p = functools.partial(self.set_unit, node, convert=u1)
+            act = menu.addAction(_(u1), p)
             act.setCheckable(True)
             if u1 == u:
                 act.setChecked(True)
@@ -825,7 +824,8 @@ class MeasurementUnitsNavigatorDomain(NavigatorDomain):
         menu.addSeparator()
         if not node.path.endswith(':t'):
             self.add_percent(menu, node)
-        self.add_unit(menu, node)
+        un = menu.addMenu(_('Units'))
+        self.add_unit(un, node)
 
 
 navigator_domains += PlottingNavigatorDomain, MathNavigatorDomain, MeasurementUnitsNavigatorDomain, DataNavigatorDomain

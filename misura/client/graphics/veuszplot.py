@@ -148,18 +148,28 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         widget = self.identify_widget(pos)
         if widget is None:
             return
+        
         if widget.typename != 'xy':
             return
         
         menu.addSeparator()
         
         m = menu.addMenu(_('Style'))
-        m.aboutToShow.connect(partial(self.show_style_menu, widget, m))
+        m.aboutToShow.connect(partial(self.show_style_menu, widget, m, 'PlotLine', 'style'))
+        m = menu.addMenu(_('Color'))
+        m.aboutToShow.connect(partial(self.show_style_menu, widget, m, 'PlotLine', 'color'))
+        
         
         dsn = widget.settings.yData
         node = self.document.model.tree.traverse(dsn)
         if not node:
             return
+        
+        
+        m = menu.addMenu(_('X Unit'))
+        m.aboutToShow.connect(partial(self.show_units_menu, m, widget.settings.xData))
+        m = menu.addMenu(_('Y Unit'))
+        m.aboutToShow.connect(partial(self.show_units_menu, m, dsn))
         
         self.dataset_menu = self.navigator.buildContextMenu(node)
         self.dataset_menu.aboutToShow.connect(partial(self.navigator.hovered_node, node))
@@ -171,6 +181,12 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
                                 self.group_menu)
         self.group_menu.aboutToShow.connect(sub_menu_func)
         menu.addMenu(self.group_menu)
+        
+    def show_units_menu(self, menu, dataset):
+        menu.clear()
+        node = self.document.model.tree.traverse(dataset)
+        dom = self.navigator.domainsMap['MeasurementUnitsNavigatorDomain']
+        dom.add_unit(menu, node)
         
     def build_style_menu(self, setting, widget,  menu):
         """Build a specific section of the style menu"""
@@ -192,12 +208,10 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         self.document.applyOperation(operations.OperationSettingSet(setting, val))
     
             
-    def show_style_menu(self, widget, menu, *a):
+    def show_style_menu(self, widget, menu, subopt, opt, *a):
         """Populate the style menu with line styles and colors"""
-        print('show_style_menu', widget.path)
-        for s in widget.settings['PlotLine'].getSettingList():
-            if s.name in ['style', 'color']:
-                self.build_style_menu(s, widget, menu)
+        print('show_style_menu', widget.path, subopt, opt)
+        self.build_style_menu(widget.settings[subopt].get(opt), widget, menu)
                 
         
     def mouseMoveEvent(self, event):
