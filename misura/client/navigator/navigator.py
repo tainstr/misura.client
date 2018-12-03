@@ -631,6 +631,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         else:
             self.cmd.currentwidget = self.get_page()
         up = kw.get('update_navigator_selection', True)
+        if not self.cmd.currentwidget:
+            return None
         if self.cmd.currentwidget.typename =='xy' and up:
             dsn = self.cmd.currentwidget.settings.yData
             node = self.model().tree.traverse(dsn)

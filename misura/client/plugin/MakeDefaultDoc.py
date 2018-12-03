@@ -45,8 +45,10 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
 
     
     def create_page_and_grid(self, page):
-        self.ops.append(
-                            (document.OperationWidgetAdd(self.doc.basewidget, 'page', name=page)))
+        logging.debug('create_page_and_grid', page)
+        self.ops.append(document.OperationWidgetAdd(self.doc.basewidget, 
+                                                    'page', 
+                                                    name=page))
         self.apply_ops(descr='MakeDefaultPlot: Page '+page)
         wg = self.doc.basewidget.getChild(page)
         if self.fields.get('grid', False):
@@ -59,8 +61,9 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
     def make_title(self, page_wg, title):
         if self.fields.get('grid', False):
             page_wg = page_wg.parent
-        self.ops.append(
-                (document.OperationWidgetAdd(page_wg, 'label', name='title')))
+        self.ops.append(document.OperationWidgetAdd(page_wg, 
+                                                    'label', 
+                                                    name='title'))
         self.apply_ops(descr='MakeDefaultPlot: Title')
         props = {'xPos': 0.1, 'yPos': 1, 'label': title, 'alignVert': 'top'}
         label=page_wg.getChild('title')
@@ -117,8 +120,8 @@ class MakeDefaultDoc(utils.OperationWrapper, veusz.plugins.ToolsPlugin):
         if not base_page:
             self.wipe_doc_preserving_filename()
         else:
-            page_T = base_page + '_T'
-            page_t = base_page + '_t'
+            page_T = base_page + '_T' if base_page!='temperature' else page_T
+            page_t = base_page + '_t' if base_page!='time' else page_t
 
         self.dict_toset(doc.basewidget, {'width': '20cm', 'height': '20cm'})
         if fields.get('temp', True):

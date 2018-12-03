@@ -218,7 +218,8 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         ret = plotwindow.PlotWindow.mouseMoveEvent(self, event)
         pos = self.mapToScene(event.pos())
         widget = self.identify_widget(pos)
-        self.sigNearestWidget.emit(widget)
+        if widget:
+            self.sigNearestWidget.emit(widget)
         return ret
         
     def contextMenuEvent(self, event):
@@ -298,6 +299,8 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         f.close()
         
     def identify_widget(self, pos):
+        if not len(self.document.basewidget.children):
+            return None
         widget = self.painthelper.identifyWidgetAtPoint(
             pos.x(), pos.y(), antialias=self.antialias)
         if widget is None:

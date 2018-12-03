@@ -80,7 +80,9 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             pass
         logging.debug('GRAPH MISSING', graph)
         vgraph = graph.split('/')
-        page = vgraph[1][:-2]
+        page = vgraph[1]
+        if page[-2:] in ('_t', '_T'):
+            page = page[:-2]
         has_grid = vgraph[-2] == 'grid'
         logging.debug('MakeDefaultPlot', page, has_grid, graph)
         istime = graph.endswith('/time') or graph.endswith('_time')
