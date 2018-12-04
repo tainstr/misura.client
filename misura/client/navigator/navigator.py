@@ -128,6 +128,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.setSelectionBehavior(QtGui.QTreeView.SelectItems)
         self.setSelectionMode(QtGui.QTreeView.ExtendedSelection)
         self.setUniformRowHeights(True)
+        self.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.setIconSize(QtCore.QSize(24, 16))
         self.connect(self, QtCore.SIGNAL('clicked(QModelIndex)'), self.select)
         self.connect(self, QtCore.SIGNAL('updateView()'), self.update_view, QtCore.Qt.QueuedConnection)
@@ -252,7 +253,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return self.selectedIndexes()
 
     def set_doc(self, doc):
-        self.previous_selection = False
+        self.previous_selection = False, False
         self.doc = doc
         self.cmd = document.CommandInterface(self.doc)
         self.setWindowTitle(_('Opened Misura Tests'))
@@ -396,8 +397,8 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     def current_node_path(self):
         node = self.model().data(self.currentIndex(), role=QtCore.Qt.UserRole)
         if node:
-            return node.path
-        return False
+            return node.path, self.visualRect(self.currentIndex())
+        return False, False
     
     def expand_node_path(self, node, select=False):
         jdx = self.model().index_path(node)
@@ -418,24 +419,32 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.collapseAll()
         for node in self.model().list_plotted():
             if node:
-                logging.debug('expand_plotted_nodes', node.path)
                 self.expand_node_path(node, select=False)
 
     def restore_selection(self):
         """Restore previous selection after a model reset."""
         self.expand_plotted_nodes()
         logging.debug('restore_selection', self.previous_selection)
-        if not self.previous_selection:
+        if not self.previous_selection[0]:
             return
 
-        node = self.model().tree.traverse(self.previous_selection)
-        self.previous_selection = False
+        node = self.model().tree.traverse(self.previous_selection[0])
+        
         if not node:
+            self.previous_selection = False, False
             return
-        logging.debug('EXPANDING previous_selection', node.path)
+        logging.debug('EXPANDING previous_selection', node.path, self.previous_selection)
         self.expand_node_path(node, select=True)
-
-
+        # Restore visual position
+        rect0 = self.previous_selection[1]
+        rect1 = self.visualRect(self.model().indexFromNode(node))
+        delta = rect1.y()-rect0.y()
+        b = self.verticalScrollBar()
+        v1 = min(b.value()+delta, b.maximum())
+        v2 = max(v1, b.minimum())
+        b.setValue(v2)
+        rect1 = self.visualRect(self.model().indexFromNode(node))
+        self.previous_selection = self.previous_selection[0], rect1
 
     def set_status(self):
         self.previous_selection = self.current_node_path
@@ -458,7 +467,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         node = self.model().data(idx, role=Qt.UserRole)
         self.emit(QtCore.SIGNAL('select()'))
         plotpath = self.model().is_plotted(node.path)
-        self.previous_selection = node.path
+        self.previous_selection = self.current_node_path
         logging.debug('Select: plotted on', node.path, plotpath)
         if len(plotpath) == 0:
             return
@@ -472,14 +481,13 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
             r = domain.double_clicked(node)
             if r:
                 logging.debug('double_clicked', node.path, domain)
-                self.restore_selection()
                 return True
         return False        
 
     def double_clicked(self, index):
         self.sync_currentwidget(update_navigator_selection=False)
         node = self.model().data(index, role=Qt.UserRole)
-        self.previous_selection = node.path
+        self.previous_selection = self.current_node_path
         if isinstance(node, filedata.DatasetEntry):
             done = self.plot(node)
         else:

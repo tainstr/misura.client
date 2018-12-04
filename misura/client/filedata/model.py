@@ -404,7 +404,6 @@ class DocumentModel(QtCore.QAbstractItemModel):
             if obj in all_objs:
                 i = all_objs.index(obj)
                 jdx.append(self.createIndex(i, 0, obj.model_path))
-        logging.debug('index_path', node.path, jdx)
         return jdx
 
     #####
