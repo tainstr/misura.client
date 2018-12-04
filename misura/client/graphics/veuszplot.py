@@ -211,6 +211,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
     def show_style_menu(self, widget, menu, subopt, opt, *a):
         """Populate the style menu with line styles and colors"""
         print('show_style_menu', widget.path, subopt, opt)
+        menu.clear()
         self.build_style_menu(widget.settings[subopt].get(opt), widget, menu)
                 
         

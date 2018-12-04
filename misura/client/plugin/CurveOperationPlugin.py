@@ -27,6 +27,7 @@ class CurveOperationPlugin(plugins.DatasetPlugin):
 
     def __init__(self, ax='', ay='', bx='', by='', relative=False, smooth=True, tolerance=10., operation='A-B', ds_out=''):
         """Define input fields for plugin."""
+        self.cache = []
         self.fields = [
             plugins.FieldDataset('ay', 'Target A: Y dataset', default=ay),
             plugins.FieldDataset('ax', 'Target A: X dataset', default=ax),
@@ -72,7 +73,17 @@ class CurveOperationPlugin(plugins.DatasetPlugin):
         ax = np.array(helper.getDataset(fields['ax']).data)
         by = np.array(helper.getDataset(fields['by']).data)
         bx = np.array(helper.getDataset(fields['bx']).data)
-        out, error = curve_operation(ax, ay, bx, by, fields['relative'], fields['smooth'], fields['tolerance'], fields['operation'])
+        c = [ax,ay,bx,by]
+        if not self.cache:
+            self.cache = c
+            dirty = True
+        else:
+            dirty = sum([ np.all(c[i]==self.cache[i]) for i in xrange(4)])<4
+            if not dirty:
+                out, error = self.cache[-2:]
+        if dirty:
+            out, error = curve_operation(ax, ay, bx, by, fields['relative'], fields['smooth'], fields['tolerance'], fields['operation'])
+            self.cache += [out,error]
         self.error = error
         self.ds_out.update(data=out)
         return out
