@@ -332,6 +332,7 @@ Function .OnInit
 	ReadRegStr $R0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_acq"
 	DetailPrint "cmp_acq $R0"
 	${If} $R0 == "1"
+	${OrIf} $R0 == ""
 	   !insertmacro SelectSection ${CMP_ACQ}
 	${EndIf}
 
@@ -339,6 +340,7 @@ Function .OnInit
 	ReadRegStr $R0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_graph"
 	DetailPrint "cmp_graph $R0"
 	${If} $R0 == "1"
+	${OrIf} $R0 == ""
 	   !insertmacro SelectSection ${CMP_GRAPH}
 	${EndIf}
 
