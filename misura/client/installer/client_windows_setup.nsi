@@ -106,10 +106,7 @@ Section "Misura" SEC01
   CreateDirectory "$SMPROGRAMS\Misura"
   CreateShortCut "$SMPROGRAMS\Misura\Misura Browser.lnk" "$INSTDIR\${TASK_NAME}" --browser "$INSTDIR\art\browser.ico"
   CreateShortCut "$DESKTOP\Misura Browser.lnk" "$INSTDIR\${TASK_NAME}" --browser "$INSTDIR\art\browser.ico"
-  CreateShortCut "$SMPROGRAMS\Misura\Misura Acquisition.lnk" "$INSTDIR\${TASK_NAME}" --acquisition "$INSTDIR\art\misura.ico"
-  CreateShortCut "$DESKTOP\Misura Acquisition.lnk" "$INSTDIR\${TASK_NAME}" --acquisition "$INSTDIR\art\misura.ico"
-  CreateShortCut "$SMPROGRAMS\Misura\Misura Graphics.lnk" "$INSTDIR\${TASK_NAME}" --graphics "$INSTDIR\art\graphics.ico"
-  CreateShortCut "$DESKTOP\Misura Graphics.lnk" "$INSTDIR\${TASK_NAME}" --graphics "$INSTDIR\art\graphics.ico"
+
   SetOverwrite ifnewer
 
   File "${PYINST_DIR}\README"
@@ -185,30 +182,53 @@ Section "Misura" SEC01
 	AccessControl::GrantOnFile "$INSTDIR" "(BU)" "FullAccess"
 SectionEnd
 
-
-
-Section "Flash diffusivity" CMP_FLASH
+Section "Acquisition (ODP)" CMP_ACQ
 
   SectionIn 1
   SetOutPath "$INSTDIR"
+  SetOverwrite try
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Acquisition.lnk" "$INSTDIR\${TASK_NAME}" --acquisition "$INSTDIR\art\misura.ico"
+  CreateShortCut "$DESKTOP\Misura Acquisition.lnk" "$INSTDIR\${TASK_NAME}" --acquisition "$INSTDIR\art\misura.ico"
+  ; Remember selection
+  WriteINIStr "$INSTDIR\installer_options.ini" "main" "acq" 1
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_acq" "1"
+
+SectionEnd
+
+Section "Advanced Graphics" CMP_GRAPH
+
+  SectionIn 2
+  SetOutPath "$INSTDIR"
+  SetOverwrite try
+  CreateShortCut "$SMPROGRAMS\Misura\Misura Graphics.lnk" "$INSTDIR\${TASK_NAME}" --graphics "$INSTDIR\art\graphics.ico"
+  CreateShortCut "$DESKTOP\Misura Graphics.lnk" "$INSTDIR\${TASK_NAME}" --graphics "$INSTDIR\art\graphics.ico"
+  ; Remember selection
+  WriteINIStr "$INSTDIR\installer_options.ini" "main" "graph" 1
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_graph" "1"
+
+SectionEnd
+
+Section "Flash diffusivity" CMP_FLASH
+
+  SectionIn 3
+  SetOutPath "$INSTDIR"
   WriteINIStr "$INSTDIR\installer_options.ini" "main" "flash" 1
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_flash" "1"
-  
 
 SectionEnd
 
 Section "Misura3 compatibility" CMP_M3
 
-  SectionIn 2
+  SectionIn 4
   SetOutPath "$INSTDIR"
   WriteINIStr "$INSTDIR\installer_options.ini" "main" "m3" 1
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_m3" "1"
 
 SectionEnd
 
-Section "Advanced mode" CMP_ADV
+Section "Advanced Mode" CMP_ADV
 
-  SectionIn 3
+  SectionIn 5
   SetOutPath "$INSTDIR"
   WriteINIStr "$INSTDIR\installer_options.ini" "main" "adv" 1
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_adv" "1"
@@ -308,6 +328,20 @@ Section -Uninstall
 SectionEnd
 
 Function .OnInit
+	!insertmacro UnselectSection ${CMP_ACQ}
+	ReadRegStr $R0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_acq"
+	DetailPrint "cmp_acq $R0"
+	${If} $R0 == "1"
+	   !insertmacro SelectSection ${CMP_ACQ}
+	${EndIf}
+
+	!insertmacro UnselectSection ${CMP_GRAPH}
+	ReadRegStr $R0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_graph"
+	DetailPrint "cmp_graph $R0"
+	${If} $R0 == "1"
+	   !insertmacro SelectSection ${CMP_GRAPH}
+	${EndIf}
+
 	!insertmacro UnselectSection ${CMP_M3}
 	ReadRegStr $R0 ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "inst_m3"
 	DetailPrint "cmp_m3 $R0"
