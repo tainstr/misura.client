@@ -240,8 +240,14 @@ class TestWindow(acquisition.MainWindow):
             for c in sorted(most_commons[-1]):
                 paths.append(p + '/' + c)
         self.measureTab.refresh_nodes(paths)
-        self.doc.manage_page_cache(page.name)
         return True
+    
+    def slot_manage_cache(self):
+        p = self.summaryPlot.plot.getPageNumber()
+        page = self.doc.basewidget.children[p]
+        logging.debug('slot_manage_cache',page.name)
+        self.doc.manage_page_cache(page.name)
+        
 
     def closeEvent(self, ev):
         logging.debug('TestWindow.closeEvent')

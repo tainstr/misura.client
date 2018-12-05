@@ -98,6 +98,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
         super(QtGui.QMainWindow, self).__init__(parent)
+        self.opened_windows = []
         self.tab = QtGui.QTabWidget()
         self.tab_bar = TestsTabBar()
         self.tab_bar.dropped.connect(self.convert_file)
@@ -119,9 +120,9 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle(_('Misura Browser'))
         self.myMenuBar = menubar.BrowserMenuBar(parent=self)
         self.setMenuWidget(self.myMenuBar)
-
-        self.connect(
-            self.tab, QtCore.SIGNAL('tabCloseRequested(int)'), self.close_tab)
+        
+        self.tab.tabCloseRequested.connect(self.close_tab)
+        self.tab.currentChanged.connect(self.current_tab_changed)
 
         self.connect(self, QtCore.SIGNAL(
             'do_open(QString)'), self.open_file)
@@ -196,8 +197,8 @@ class MainWindow(QtGui.QMainWindow):
             self.myMenuBar.recentFile.conf.rem_file(path)
             QtGui.QMessageBox.warning(self, 'Error', str(error))
             return False
-
         tw = testwindow.TestWindow(doc)
+        doc.model.sigPageChanged.connect(self.manage_caches)
         instrument = doc.proxy.conf['runningInstrument']
         cw = self.centralWidget()
         icon = QtGui.QIcon(os.path.join(parameters.pathArt, 'small_' + instrument + '.svg'))
@@ -205,9 +206,26 @@ class MainWindow(QtGui.QMainWindow):
         self.tab_bar.setTabToolTip(idx, tw.toolTip())
         tw.loaded_version.connect(self.update_tooltip)
         confdb.mem_file(path, tw.remote.measure['name'])
+        self.opened_windows.append(tw)
         cw.setCurrentIndex(idx)
         self.update_tooltip(tw)
         return tw
+    
+    def current_tab_changed(self, idx):
+        """Refresh accessed tests queue"""
+        if idx==0:
+            return
+        w = self.tab.widget(idx)
+        if w in self.opened_windows:
+            self.opened_windows.remove(w)
+        self.opened_windows.append(w)
+    
+    def manage_caches(self, *a):
+        for w in self.opened_windows:
+            if not iutils.memory_check(warn=False)[0]:
+                break
+            logging.debug('manage_caches', w.windowTitle())
+            w.slot_manage_cache()
     
     def update_tooltip(self, test_window):
         idx = self.tab.indexOf(test_window)
@@ -267,6 +285,8 @@ class MainWindow(QtGui.QMainWindow):
             return False
         w = self.tab.widget(idx)
         if w and w.check_save(nosync=False):
+            if w in self.opened_windows:
+                self.opened_windows.remove(w)
             self.tab.removeTab(idx)
             w.close()
             # explicitly destroy the widget

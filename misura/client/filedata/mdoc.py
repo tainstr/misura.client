@@ -318,13 +318,15 @@ class MisuraDocument(document.Document):
         return True
     
     def manage_page_cache(self, active_page_name=False):
+        # Retrieve current page if cached
         if active_page_name in self.cached_pages:
             self.retrieve_page(active_page_name)
+        # Move active page to the end of the queue
         if active_page_name:
             if active_page_name in self.accessed_pages:
                 self.accessed_pages.remove(active_page_name)
             self.accessed_pages.append(active_page_name) 
-        
+        # Cache all pages, starting from the oldest, except the newest (active)
         n = 0
         while len(self.accessed_pages)>1 and memory_check(warn=False)[0]:
             self.cache_page(self.accessed_pages.pop(0))
@@ -333,8 +335,6 @@ class MisuraDocument(document.Document):
             logging.debug('Wiping document history')
             self.clearHistory()
             gc.collect()
-        
-        
 
     def load_rule(self, filename, rule, **kw):
         op = OperationMisuraImport.from_rule(
