@@ -146,6 +146,18 @@ class NodeEntry(object):
     def name(self):
         return self._name
     
+    def __iter__(self):
+        return self._children.__iter__()
+    
+    def items(self):
+        return self._children.items()
+    
+    def values(self):
+        return self._children.values()
+    
+    def keys(self):
+        return self._children.keys()
+    
     def free(self):
         self._linked = False
         self.doc = False
