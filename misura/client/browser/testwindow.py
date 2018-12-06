@@ -18,6 +18,10 @@ from ..graphics import Breadcrumb, Storyboard
 from ..navigator import NavigatorToolbar
 from misura.client.iutils import calc_plot_hierarchy, most_involved_node
 
+message_busy = 'The selected window cannot be closed, \
+because one or more tasks are in progress.\n\
+Please retry later.'
+
 class TestWindow(acquisition.MainWindow):
 
     """View of a single test file"""
@@ -251,15 +255,15 @@ class TestWindow(acquisition.MainWindow):
         self.doc.manage_page_cache(page.name)
         
 
-    def closeEvent(self, ev):
-        logging.debug('TestWindow.closeEvent')
-        if not self.check_save(nosync=True):
-            ev.ignore()
-            return True 
-        ret = self.close()
-        if ret:
-            ret = QtGui.QMainWindow.closeEvent(self, ev)
-        return ret
+    #def closeEvent(self, ev):
+    #    logging.debug('TestWindow.closeEvent')
+    #    if not self.check_save(nosync=True):
+    #        ev.ignore()
+    #        return True 
+    #    ret = self.close()
+    #    if ret:
+    #        ret = QtGui.QMainWindow.closeEvent(self, ev)
+    #    return ret
     
     def check_save(self, nosync=True):
         """Check if changes occurred to the Veusz document or the configuration proxy,
@@ -269,6 +273,11 @@ class TestWindow(acquisition.MainWindow):
         # Version should be checked per-proxy!
         if not self.doc.proxy:
             return True
+        if not self.navigator.isEnabled():
+            QtGui.QMessageBox.information(self, 
+                                          _('Cannot close test: '+self.windowTitle()), 
+                                          _(message_busy))
+            return False
         ret = True
         effective_changeset = self.doc.changeset-self.doc.changeset_ignore
         conf_changeset = self.server.recursive_changeset()
@@ -281,7 +290,7 @@ class TestWindow(acquisition.MainWindow):
                 ver = _('a new version')
             else:
                 ver = _('on version: ')+ver             
-            r = QtGui.QMessageBox.question(self, _('Save changes'), 
+            r = QtGui.QMessageBox.question(self, _('Save changes to '+self.windowTitle()), 
                                        _('Some changes were detected. \nWould you like to save ')+ver+' ?',
                                        QtGui.QMessageBox.Ok|QtGui.QMessageBox.Discard|QtGui.QMessageBox.Abort)
             if r==QtGui.QMessageBox.Abort:
