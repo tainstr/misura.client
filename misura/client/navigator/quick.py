@@ -79,9 +79,10 @@ class QuickOps(object):
             self.doc.available_data[node.path] = ds
             self.pause(False)
             self.doc.setModified()
-
             return
         self._load(node)
+        # Return the new node in the new tree
+        return self.doc.model.tree.traverse_path(node.path)
         
     @node
     def plot(self, node=False):
@@ -93,7 +94,7 @@ class QuickOps(object):
             return
         # Load if no data
         if len(node.data) == 0:
-            self.load(node)
+            node = self.load(node)
         yname = node.path
 
         from misura.client import plugin
