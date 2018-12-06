@@ -12,6 +12,7 @@ from veusz import utils as vutils
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from misura.canon import csutil
+from misura.canon.plugin import NullTasks
 from misura.client import configure_logger
 
 from .. import _
@@ -97,6 +98,8 @@ class MainWindow(QtGui.QMainWindow):
 
     @property
     def tasks(self):
+        if not self.remote:
+            return NullTasks()
         if getattr(self, '_tasks', False):
             return self._tasks
 
@@ -611,7 +614,7 @@ class MainWindow(QtGui.QMainWindow):
             self.name = name
             logging.debug('Setting remote ', remote, self.remote, name)
             title = _('Misura Acquisition: %s (%s)') %  (name, self.remote['comment'])
-    
+            
         self.setWindowTitle(title)
         self.tray_icon.setToolTip(title)
         pid = self.instrument_pid()
