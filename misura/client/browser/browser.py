@@ -198,7 +198,7 @@ class MainWindow(QtGui.QMainWindow):
             QtGui.QMessageBox.warning(self, 'Error', str(error))
             return False
         tw = testwindow.TestWindow(doc)
-        doc.model.sigPageChanged.connect(self.manage_caches)
+        tw.fixedDoc.model.sigPageChanged.connect(self.manage_caches)
         instrument = doc.proxy.conf['runningInstrument']
         cw = self.centralWidget()
         icon = QtGui.QIcon(os.path.join(parameters.pathArt, 'small_' + instrument + '.svg'))
@@ -221,10 +221,9 @@ class MainWindow(QtGui.QMainWindow):
         self.opened_windows.append(w)
     
     def manage_caches(self, *a):
+        logging.debug('manage_caches', self.opened_windows)
         for w in self.opened_windows:
-            if not iutils.memory_check(warn=False)[0]:
-                break
-            logging.debug('manage_caches', w.windowTitle())
+            logging.debug('manage_caches for window:', w.windowTitle())
             w.slot_manage_cache()
     
     def update_tooltip(self, test_window):

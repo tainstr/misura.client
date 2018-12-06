@@ -38,6 +38,7 @@ class TestWindow(acquisition.MainWindow):
     menuVersions = False
     navtoolbar = False
     initial_veusz_doc_changeset = -1
+    sigDocPageChanged = QtCore.pyqtSignal()
     
     def load_version(self, v=-1):
         self.fixedDoc.paused = True
@@ -240,6 +241,7 @@ class TestWindow(acquisition.MainWindow):
             for c in sorted(most_commons[-1]):
                 paths.append(p + '/' + c)
         self.measureTab.refresh_nodes(paths)
+        self.sigDocPageChanged.emit()
         return True
     
     def slot_manage_cache(self):
