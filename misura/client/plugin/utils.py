@@ -84,19 +84,13 @@ def _update_filter(new, old):
 def smooth_discard(x, percent=10., drop='absolute', passes=1, **kw):
     y = smooth(x, **kw)
     d = abs(x-y)
-    s = np.argsort(d)
     if drop=='absolute':
         # Delete all elements which exceeds the stdev by percent%
         m = (d.mean()+d.std())*(100+percent)/100.
-        s1 = []
-        for idx in s[::-1]:
-            if d[idx]>m:
-                s1.append(idx)
-            else:
-                break
-        s = np.array(s1)
+        s = np.where(d>m)[0]
         n = None # take all
     elif drop=='relative':
+        s = np.argsort(d)
         # Delete most distant percent% elements
         n = -int(len(s)*percent/100.)
     else:
@@ -119,7 +113,6 @@ def smooth_discard(x, percent=10., drop='absolute', passes=1, **kw):
     # Delete raw only in the end
     else:
         x = np.delete(x, s) 
-    print('AAAAA', len(y), len(x), len(s))
     # Smoothed filtered, raw filtered, filter
     return y, x, s
 
