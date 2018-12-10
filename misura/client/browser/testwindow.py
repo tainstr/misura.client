@@ -253,17 +253,6 @@ class TestWindow(acquisition.MainWindow):
         page = self.doc.basewidget.children[p]
         logging.debug('slot_manage_cache',page.name)
         self.doc.manage_page_cache(page.name)
-        
-
-    #def closeEvent(self, ev):
-    #    logging.debug('TestWindow.closeEvent')
-    #    if not self.check_save(nosync=True):
-    #        ev.ignore()
-    #        return True 
-    #    ret = self.close()
-    #    if ret:
-    #        ret = QtGui.QMainWindow.closeEvent(self, ev)
-    #    return ret
     
     def check_save(self, nosync=True):
         """Check if changes occurred to the Veusz document or the configuration proxy,

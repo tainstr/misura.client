@@ -5,17 +5,17 @@ from textwrap import wrap, fill
 
 
 def wr(k, v, n=18, inter=' '):
-    k = wrap('{}:'.format(k), n)
+    k = wrap(u'{}:'.format(k), n)
     for i, e in enumerate(k):
-        e = '\\bold{{' + e + '}}'
+        e = u'\\bold{{' + e + u'}}'
         k[i] = e
-    k = '\\\\'.join(k)
-    k = k.replace('_', '\\_')
+    k = u'\\\\'.join(k)
+    k = k.replace(u'_', u'\\_')
 
-    v = wrap('{}'.format(v), n)
-    v = '\\\\'.join(v)
-    v = v.replace('_', '\\_')
-    r = '{}{}{}'.format(k, inter, v)
+    v = wrap(u'{}'.format(v), n)
+    v = u'\\\\'.join(v)
+    v = v.replace(u'_', u'\\_')
+    r = u'{}{}{}'.format(k, inter, v)
     logging.debug('wrapped', k, v, r)
     return r
 
@@ -37,16 +37,16 @@ def render_meta(obj, notfound=False, n=30, inter=' ', full=False, zt=0):
                 continue
             v = notfound
         else:
-            v = '{} {{\\deg}}C'.format(int(c['temp']))
+            v = u'{} {{\\deg}}C'.format(int(c['temp']))
             if full:
                 if c['value'] not in invalid:
-                    v += ', {:.2f}'.format(c['value'])
+                    v += u', {:.2f}'.format(c['value'])
                 if c['time'] not in invalid:
                     t = c['time']
                     if t > zt:
                         t -= zt
                     logging.debug('render time', c['time'], t, zt)
-                    v += ', {}'.format(datetime.timedelta(seconds=int(t)))
+                    v += u', {}'.format(datetime.timedelta(seconds=int(t)))
         w = wr(m['name'], v, n=n, inter=inter)
-        msg += '\\\\' + w
+        msg += u'\\\\' + w
     return msg
