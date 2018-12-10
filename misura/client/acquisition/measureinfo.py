@@ -81,6 +81,8 @@ class MeasureInfo(QtGui.QTabWidget):
             self.fromthermalCycleView = True
 
     def checkCurve(self):
+        if self.fixedDoc:
+            return 
         if not hasattr(self.thermalCycleView, 'check_if_saved'):
             return 
         remote_equals, saved_equals = self.thermalCycleView.check_if_saved()

@@ -308,20 +308,11 @@ class KidRegistry(QtCore.QThread):
         Will call control_loop() until self.stream is True."""
         logging.debug('Starting registry in new thread', len(self.rid))
         self.setPriority(QtCore.QThread.IdlePriority)
-        t0 = time()
-#       self.obj=False
+        #t0 = time()
         self.stream = True
         self.lastdoc = False
-#       if self.taskswg:
-#           self.taskswg.sync.moveToThread(self)
         while self.stream:
-            # Sleep only if loops are shorter than interval
-            #           print 'KidRegistry.run', len(self.rid)
-            t = time()
-            d = self.interval - (t - t0)
-            if d > 0:
-                sleep(d)
-            t0 = t
+            sleep(self.interval)
             try:
                 # Everything good
                 if self.control_loop():
