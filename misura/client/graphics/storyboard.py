@@ -7,7 +7,7 @@ import functools
 import textwrap
 
 from veusz import document
-
+from veusz.utils import pixmapAsHtml
 from misura.client.iutils import calc_plot_hierarchy
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
@@ -166,6 +166,9 @@ class Storyboard(QtGui.QWidget):
         size = QtCore.QSize(200, 100)
         pix = icon.pixmap(size)
         lbl.setIconSize(pix.size())
+        tooltip = "<html>{}</html>".format(pixmapAsHtml(icon.pixmap(QtCore.QSize(1000, 500))))
+        lbl.setToolTip(tooltip)
+        lbl.setStyleSheet("QToolTip { color: #0000; background-color: #ffff; border: none; }")
         self.cache[page.name] = lbl, self.doc.changeset
         return True
     
