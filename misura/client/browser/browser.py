@@ -164,11 +164,13 @@ class MainWindow(QtGui.QMainWindow):
 
     def closeEvent(self, event):
         logging.debug('closeEvent')
-        for i in range(1,self.tab.count()):
+        i = 0
+        while self.tab.count()>1:
             logging.debug('Closing tab:', i)
-            if not self.close_tab(i):
+            if not self.close_tab(1):
                 event.ignore()
                 return True
+            i += 1
         ret = QtGui.QMainWindow.closeEvent(self, event)
         iutils.app.quit()
         return ret
