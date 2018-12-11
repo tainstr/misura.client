@@ -14,7 +14,7 @@ from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 
 from misura.client.iutils import searchFirstOccurrence, iter_widgets
-from misura.canon.csutil import smooth
+from misura.canon.csutil import smooth, smooth_discard
 
 def convert_datapoint_units(convert_func, dsname, doc):
     """Convert all DataPoint widgets in `doc` using dataset `dsname`
@@ -54,67 +54,6 @@ def rectify(xData):
     x[1:] = x[0] + xs
     return x, xd, err
 
-
-
-
-def _update_filter(new, old):
-    """Add new filter to old filter in old array indexes"""
-    j = 0
-    nj = 0
-    n = len(new)
-    print('start', new, old)
-    for o in old:
-        if o>=j:
-            j+=o-j+1
-        
-        while nj<n-1 and new[nj]+1<j: 
-            nj += 1
-        
-        if new[nj]+1<j:
-            break
-            
-        new[nj:] += 1
-        
-        #print(o, new, j, nj)
-        
-
-        
-    return np.sort(np.concatenate((old,new)))
-
-def smooth_discard(x, percent=10., drop='absolute', passes=1, **kw):
-    y = smooth(x, **kw)
-    d = abs(x-y)
-    if drop=='absolute':
-        # Delete all elements which exceeds the stdev by percent%
-        m = (d.mean()+d.std())*(100+percent)/100.
-        s = np.where(d>m)[0]
-        n = None # take all
-    elif drop=='relative':
-        s = np.argsort(d)
-        # Delete most distant percent% elements
-        n = -int(len(s)*percent/100.)
-    else:
-        raise BaseException('Unknown parameter drop: '+drop)
-     
-    if not len(s):
-        logging.debug('smooth_discard: not filtering', drop, percent, passes)
-        return y, x, s
-    # Delete selected far points
-    s = s[n:]
-    
-    y = np.delete(y, s)
-    # Multi-pass filtering
-    if passes>1:
-        logging.debug('smooth pass', passes, len(y), len(s))
-        y, x1, s1 = smooth_discard(y, percent=percent, drop=drop, passes=passes-1, **kw)
-        # Concatenate filters
-        if len(s) and len(s1):
-            s = _update_filter(s1, s)
-    # Delete raw only in the end
-    else:
-        x = np.delete(x, s) 
-    # Smoothed filtered, raw filtered, filter
-    return y, x, s
 
 def derive(v, method, order=1):
     """Derive one time an array, always returning an array of the same length"""

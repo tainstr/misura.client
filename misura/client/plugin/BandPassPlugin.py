@@ -3,36 +3,10 @@
 """Butterworth bandpass plugin"""
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
+from misura.canon.csutil import butter_bandpass_filter
+
 import veusz.plugins as plugins
 import numpy as np
-from scipy.signal import butter, lfilter
-
-def butter_bandpass(lowcut, highcut, fs, order=5, btype='band'):
-    nyq = 0.5 * fs
-    low = lowcut / nyq
-    high = highcut / nyq
-    if btype.startswith('band'):
-        b, a = butter(order, [low, high], btype=btype)
-    elif btype=='lowpass':
-        b, a = butter(order, high, btype=btype)
-    else:
-        b, a = butter(order, low, btype=btype)
-        
-    return b, a
-
-
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=5, invert=False):
-    btype = 'band'
-    if lowcut<=0:
-        btype = 'lowpass'
-    elif highcut>fs:
-        bytpe = 'highpass'
-    # Invert the meaning
-    if invert:
-        btype = {'h': 'lowpass', 'l':'highpass', 'b': 'bandstop'}[btype[0]]
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order, btype=btype)
-    y = lfilter(b, a, data)
-    return y
 
 class BandPassPlugin(plugins.DatasetPlugin):
 
