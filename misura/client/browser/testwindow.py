@@ -126,6 +126,7 @@ class TestWindow(acquisition.MainWindow):
         
         self.reset_changeset()
         self.loaded_version.emit(self.fixedDoc.proxy.get_version())
+        self.navigator.expand_plotted_nodes()
         
     def get_tooltip(self):
         """This is shown in tabbar"""
@@ -208,6 +209,7 @@ class TestWindow(acquisition.MainWindow):
         self.measureTab.results.set_doc(self.doc)
         if self.name == 'flash':
             self.navigator.status.add(filedata.dstats.outline)
+        self.navigator.expand_plotted_nodes()
         
     def slot_version_removed(self, removed_version, new_version):
         """If the current version was removed and the file reverts to its original version,

@@ -260,9 +260,9 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         self.mod = self.doc.model
         self.mod.ncols = self.ncols
         self.setModel(self.mod)
-        self.expandAll()
         self.selection = QtGui.QItemSelectionModel(self.model())
         self.set_status()
+        self.expandAll()
         self.doc.signalModified.connect(self.refresh_model)
         self.doc.sigConfProxyModified.connect(self.update_view)
         self.mod.sigPageChanged.connect(self.ensure_sync_of_view_and_model)
@@ -416,6 +416,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return jdx
 
     def expand_plotted_nodes(self):
+        logging.debug('expand_plotted_nodes')
         self.collapseAll()
         for node in self.model().list_plotted():
             if node:
@@ -455,7 +456,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
                 final.add(s)
         if len(final) == 0:
             logging.debug('no valid status requested')
-            return
+            final = self.status
         self.status = final
         self.model().status = final
         logging.debug('STATUS SET TO', final)
