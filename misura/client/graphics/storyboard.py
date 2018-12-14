@@ -75,7 +75,7 @@ class Storyboard(QtGui.QWidget):
 
     def slot_up(self):
         self.level_modifier -= 1
-        self.update()
+        return self.update()
 
     def slot_down(self):
         self.level_modifier += 1
@@ -211,13 +211,15 @@ class Storyboard(QtGui.QWidget):
             return []
         page_name, page_plots, crumbs, notes = hierarchy[level][page_idx]
         N = len(hierarchy)
+        maxmod = N-level-1
+        minmod = -level
         level += level_modifier
         if level < 0:
             level = 0
         if level >= N:
             level = N - 1
-
-        return hierarchy[level]
+        
+        return hierarchy[level], minmod, maxmod
             
             
     def update(self, *args, **kwargs):
@@ -253,7 +255,8 @@ class Storyboard(QtGui.QWidget):
         if self.page != oldpage:
             self.update_page_image()
             
-        for page_name, page_plots, crumbs, notes in self.iter_page_level(page, self.level_modifier):
+        selected_hierarchy, minmod, maxmod = self.iter_page_level(page, self.level_modifier)
+        for (page_name, page_plots, crumbs, notes) in selected_hierarchy:
             if self.parent_modifier:
                 if not page_name.startswith(self.parent_modifier):
                     continue
@@ -271,8 +274,16 @@ class Storyboard(QtGui.QWidget):
             lbl.setText(txt)
             self.lay.addWidget(lbl)
             lbl.show()
-            
+        self.limit_level_modifier(minmod, maxmod)
         self.highlight()
+        
+    def limit_level_modifier(self, minmod, maxmod):
+        if self._level_modifier > maxmod:
+            self.level_modifier = maxmod
+            self._level_modifier = maxmod
+        elif self._level_modifier < minmod:
+            self.level_modifier = minmod
+            self._level_modifier = minmod
 
     def slot_list_children(self, page_name):
         if page_name.lower().endswith('_t'):
@@ -299,6 +310,7 @@ class Storyboard(QtGui.QWidget):
         return p
 
     def slot_delete_page(self, page_name):
+        """Delete selected `page_name`"""
         p = -1
         for i, page in enumerate(self.doc.basewidget.children):
             if page.name == page_name:
@@ -310,11 +322,13 @@ class Storyboard(QtGui.QWidget):
         self.update(force=True)
         
     def slot_delete_children(self, page):
+        """Recursively delete all child pages starting from selected `page`"""
         parent_modifier = page.name
         if parent_modifier.lower().endswith('_t'):
             parent_modifier = parent_modifier[:-2]
         ops = []
-        for page_name, page_plots, crumbs, notes in self.iter_page_level(page, +1):
+        selected_hierarchy, minmod, maxmod = self.iter_page_level(page, +1)
+        for page_name, page_plots, crumbs, notes in selected_hierarchy:
             if not page_name.startswith(parent_modifier):
                 continue
             if page_name == page.name:
