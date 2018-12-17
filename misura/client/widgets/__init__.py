@@ -18,7 +18,7 @@ from aProgress import aProgress, RoleProgress
 from aString import aString
 from aScript import aScript
 from aTable import aTable, table_model_export
-from aProfile import aProfile
+from aProfile import aProfile, Profile
 from aTime import aTime, aDelay
 from aFileList import aFileList
 from presets import PresetManager

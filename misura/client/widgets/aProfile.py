@@ -10,7 +10,7 @@ logging = get_module_logging(__name__)
 
 
 class Profile(QtGui.QGraphicsView):
-
+    
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
         self.scene = QtGui.QGraphicsScene(parent)
@@ -19,17 +19,27 @@ class Profile(QtGui.QGraphicsView):
 
     def updateSize(self, sz):
         self.setMinimumSize(sz[0], sz[1])
-
-    def update(self, x, y):
-        """Update graphics scene"""
+        
+    def clear(self):
         # Remove old path if present
         if self.path:
             self.scene.removeItem(self.path)
-            self.path = False
+            self.path = False        
+
+    def update(self, x, y):
+        """Update graphics scene"""
+        self.clear()
         # Discart malformed profiles
         if len(x) <= 1 or len(x) != len(y):
-            logging.debug("Malformed profile", prf)
+            logging.debug("Malformed profile", x,y)
             return
+        # Scale
+        x = np.array(x).astype(np.float32)
+        x -= min(x)
+        y = np.array(y).astype(np.float32)
+        y -= min(y)
+        x = 0.9*self.width()*x/max(x)
+        y = 0.9*self.height()*y/max(y)
         # Convert x,y, vectors into a QPointF list
         lst = list(QtCore.QPointF(ix, y[i]) for i, ix in enumerate(x))
         # Create a QPainterPath and add a QPolygonF
