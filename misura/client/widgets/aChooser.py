@@ -132,19 +132,39 @@ class FurnacePositionChooser(async_aChooser):
         self.btn_pause.setMaximumWidth(50)
         
         async_aChooser.__init__(self, server, path, prop, parent=parent)
-
+        
+        self.go_timer= QtCore.QTimer()
+        self.go_timer.setInterval(1000)
+        self.go_timer.timeout.connect(self.check_stopped)
         
     def go_open(self):
         QtCore.QTimer.singleShot(0, lambda: self.remObj.set(self.handle, 0))
+        self.go_timer.start()
     
     def go_close(self):
         QtCore.QTimer.singleShot(0, lambda: self.remObj.set(self.handle, 1))
+        self.go_timer.start()
         
     def go_pause(self):
         self.remObj.set(self.handle, 3)
+        self.go_timer.start()
+        
+    def check_stopped(self):
+        if self.get()!=2:
+            self.go_timer.stop()
+            
             
     def changed_option(self, *a, **k):
         r = async_aChooser.changed_option(self, *a, **k)
+        self.color_buttons()
+        return r
+    
+    def update(self):
+        r = super(FurnacePositionChooser, self).update()
+        self.color_buttons()
+        return r
+        
+    def color_buttons(self):
         if self.current!=-1:
             if self.lay.indexOf(self.btn_open)==-1 or self.lay.indexOf(self.btn_open)==-1:
                 self.lay.addWidget(self.btn_open)
@@ -155,14 +175,18 @@ class FurnacePositionChooser(async_aChooser):
         else:
             self.btn_open.hide()
             self.btn_close.hide()
+        default = self.palette().color(self.backgroundRole()).name()
         self.btn_pause.setFlat(self.current != 2)
         if self.current == 0:
             self.btn_close.setStyleSheet("background-color: 'red';")
             self.btn_open.setFlat(True)
+            self.btn_open.setStyleSheet("background-color: '{}';".format(default))
         elif self.current == 1:
             self.btn_close.setStyleSheet("background-color: 'green';")
             self.btn_open.setFlat(False)
+            self.btn_open.setStyleSheet("background-color: '{}';".format(default))
+        elif self.current == 2:
+            self.btn_close.setStyleSheet("background-color: 'orange';")
+            self.btn_open.setStyleSheet("background-color: 'orange';")
             
-
-        return r
     
