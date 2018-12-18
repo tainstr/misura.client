@@ -295,8 +295,10 @@ class aNumber(ActiveWidget):
     def redraw(self):
         # Create the layout
         super(aNumber, self).redraw()
+        draw_slider = None not in [self.prop.get('min', None), self.prop.get('max', None)]
+        draw_slider *= 'NoSlider' not in self.prop.get('attr',[])
         # If max/min are defined, create the slider widget
-        if None not in [self.prop.get('min', None), self.prop.get('max', None)]:
+        if draw_slider:
             self.slider = self.slider_class(QtCore.Qt.Horizontal, parent=self)
             self.slider.zoom.connect(self.setZoom)
 
@@ -359,7 +361,14 @@ class aNumber(ActiveWidget):
         self.minbox.setFrame(False)
         self.minbox.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.minbox.setAlignment(QtCore.Qt.AlignRight)
-        self.lay.insertWidget(self.lay.count() - 5, self.minbox)
+        self.minbox.setSuffix(' < ')
+        if self.slider:
+            min_pos = self.lay.count() - 5
+            max_pos = self.lay.count() - 2
+        else:
+            min_pos = self.lay.count() - 3
+            max_pos = self.lay.count() - 0
+        self.lay.insertWidget(min_pos, self.minbox)
     
         self.maxbox = ScientificSpinbox(parent=self)
         self.maxbox.setKeyboardTracking(False)
@@ -367,7 +376,8 @@ class aNumber(ActiveWidget):
         self.maxbox.valueChanged.connect(self.edited_min_max_box)
         self.maxbox.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.maxbox.setToolTip(_('Maximum'))
-        self.lay.insertWidget(self.lay.count() - 2, self.maxbox)     
+        self.maxbox.setPrefix(' < ')
+        self.lay.insertWidget(max_pos, self.maxbox)     
         return True   
 
     def build_range_menu(self):
