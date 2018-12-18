@@ -58,7 +58,7 @@ def sort_children(prop_dict):
     return prop_dict
 
 
-def orgSections(prop_dict, configuration_level=5):
+def orgSections(prop_dict, flat=False, configuration_level=5):
     """Reorder keys according to their sections"""
     # Move children options into their parent's "children" key
     prop_dict = prop_dict.copy()
@@ -92,6 +92,9 @@ def orgSections(prop_dict, configuration_level=5):
     prop_dict = sort_children(prop_dict)
     # Sectioning
     sections = collections.defaultdict(list)
+    if flat:
+        sections['Main'] = list(prop_dict.values())
+        return sections
     for handle, prop in prop_dict.iteritems():
         if not prop.has_key('readLevel'):
             prop['readLevel'] = -1
@@ -183,7 +186,7 @@ class OptionsGroup(QtGui.QGroupBox):
     def collapse(self):
         self.child_section.hide()
         self.more.setIcon(iutils.theme_icon('add'))
-        self.setChecked(False)                         
+        self.setChecked(False)        
         
     def hide_show(self):
         """Hide or show option's child_section"""
@@ -209,7 +212,16 @@ class OptionsGroup(QtGui.QGroupBox):
     @property
     def widgetsMap(self):
         return self.child_section.widgetsMap
-        
+    
+
+    def check_visibility(self, filtered):
+        vis = set(self.widgetsMap.values())-filtered
+        if vis:
+            self.show()
+            return False
+        else:
+            self.hide()
+            return True
 
         
 class Section(QtGui.QGroupBox):
@@ -237,7 +249,7 @@ class Section(QtGui.QGroupBox):
         self.groupsMap = {}
         for prop in prop_list:
             self.build(prop)
-            
+    
     def hide_frame(self):
         self.setStyleSheet("""QGroupBox { background-color: transparent; 
         border: 0px solid gray; border-radius: 0px; 
@@ -246,6 +258,17 @@ class Section(QtGui.QGroupBox):
         self.setTitle('')
         self.setChecked(True)
         self.setCheckable(False)
+        
+    def check_visibility(self, filtered):
+        for group in self.groupsMap.values():
+            group.check_visibility(filtered)
+        vis = set(self.widgetsMap.values())-filtered
+        if vis:
+            self.show()
+            return False
+        else:
+            self.hide()
+            return True
 
     def enable_disable(self, status=True):
         if status:
@@ -360,7 +383,12 @@ class SectionBox(QtGui.QWidget):
         status_list = []
         results_list = []
         config_list = []
-
+        
+        # Do not draw sections if parent is flat
+        if parent.flat:
+            config_list = prop_list[:]
+            prop_list = []
+        
         for opt in prop_list:
             attr = opt.get('attr', False)
             if ('Config' in attr):
@@ -419,8 +447,13 @@ class SectionBox(QtGui.QWidget):
 
         self.lay.addStretch(1)
         self.reorder()
-        
 
+    def check_visibility(self, filtered):
+        r = 0
+        for sec in self.sections:
+            r +=sec.check_visibility(filtered)
+        return bool(r)
+        
         
     def expand(self):
         for s in self.sections:
@@ -493,7 +526,8 @@ class Interface(QtGui.QTabWidget):
     """Tabbed interface builder for dictionary of options"""
     first_show = True
     changeset = -1
-    def __init__(self, server, remObj=False, prop_dict=False, parent=None, context='Option', fixed=False):
+    flat = False
+    def __init__(self, server, remObj=False, prop_dict=False, parent=None, context='Option', fixed=False, flat=False):
         QtGui.QTabWidget.__init__(self, parent)
         self._lock = threading.Lock()
         self.server = server
@@ -506,6 +540,7 @@ class Interface(QtGui.QTabWidget):
         self.prop_keys = []
         self.sectionsMap = False
         self.fixed = fixed
+        self.flat = flat
         self.rebuild(prop_dict)
         self.menu = QtGui.QMenu(self)
         self.menu.addAction(_('Search (Ctrl+F)'), self.activate_search)
@@ -543,7 +578,13 @@ class Interface(QtGui.QTabWidget):
                 self.removeTab(j)
                 sections.pop(j)
         return True
-            
+    
+
+    def check_visibility(self, visibility=None):
+        for sec in self.sectionsMap.values():
+            sec.check_visibility(self.filtered)
+                        
+
 
     def showEvent(self, event):
         if self.first_show:
@@ -611,7 +652,7 @@ class Interface(QtGui.QTabWidget):
                     self.remObj.setattr(handle, 'attr', a)
                     opt['attr']=a
             
-        self.sections = orgSections(prop_dict, self.remObj._readLevel)
+        self.sections = orgSections(prop_dict, self.flat, self.remObj._readLevel)
         self.prop_dict = prop_dict
         self.prop_keys = self.prop_dict.keys()
         self.name = ''
@@ -715,6 +756,14 @@ class Interface(QtGui.QTabWidget):
             
     def show_option(self, handle):
         self.show_widget(self.widgetsMap[handle])
+        
+    def show_only_options(self, keys):
+        for key, wg in self.widgetsMap.items():
+            if key in keys:
+                self.show_widget(wg)
+            else:
+                self.hide_widget(wg)
+        self.check_visibility()
 
     def scroll_to(self, area, x, y):
         area.ensureVisible(x, y - 50)
@@ -798,6 +847,7 @@ class Interface(QtGui.QTabWidget):
         for sec in self.sectionsMap.itervalues():
             for s in sec.sections:
                 s.collapse_children()
+        self.check_visibility()
         
     def activate_search(self):
         for sec in self.sectionsMap.itervalues():
@@ -812,8 +862,9 @@ class Interface(QtGui.QTabWidget):
             
     def filter_text(self, query=False):
         if not query or not self.search.isVisible():
-            for wg in self.filtered:
+            for wg in self.filtered.copy():
                 self.show_widget(wg)
+            self.check_visibility()
             return 0
         i = 0
         for wg in self.widgetsMap.values():
@@ -822,6 +873,7 @@ class Interface(QtGui.QTabWidget):
                 i += 1
             else:
                 self.hide_widget(wg)
+        self.check_visibility()
         return i
 
 

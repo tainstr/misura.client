@@ -493,6 +493,7 @@ class ActiveWidget(Active, QtGui.QWidget):
     get_on_leave = True
     """Update on mouse leave"""
     enable_check = False
+    visibility_changed = QtCore.pyqtSignal(bool)
     
     def __init__(self, server, remObj, prop, parent=None, context='Option'):
         Active.__init__(self, server, remObj, prop, context)
@@ -881,10 +882,12 @@ class ActiveWidget(Active, QtGui.QWidget):
 
     def showEvent(self, e):
         self.register()
+        self.visibility_changed.emit(True)
         return QtGui.QWidget.showEvent(self, e)
 
     def hideEvent(self, e):
         self.unregister()
+        self.visibility_changed.emit(False)
         return QtGui.QWidget.hideEvent(self, e)
 
     def receive_drop(self, event):
