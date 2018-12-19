@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Tree visualization of opened misura Files in a document."""
 import os
+import re
 import functools
 from misura.canon.logger import get_module_logging
 from misura.client.filedata.operation import getUsedPrefixes
@@ -183,6 +184,12 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         if found:
             return p
         return False
+    
+    def match_node_path(self, node, rule):
+        if (not node) or (not node.path):
+            return False
+        regex = re.compile(rule.replace('\n', '|'))
+        return regex.search(node.path)
     
     def show_widget_key(self, key):
         """Shows existing widgets or subwindows by key"""
