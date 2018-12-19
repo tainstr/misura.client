@@ -218,7 +218,8 @@ class OptionsGroup(QtGui.QGroupBox):
         vis = set(self.widgetsMap.values())-filtered
         if vis:
             self.show()
-            self.more.show()
+            if self.wg.isVisible():
+                self.more.show()
             return False
         else:
             self.more.hide()
@@ -405,19 +406,19 @@ class SectionBox(QtGui.QWidget):
                 config_list.append(opt)
 
         self.status_section = Section(server, remObj, status_list,  title=_('Status'), color='red',
-                                      parent=None, context=context)
+                                      parent=self, context=context)
         self.results_section = Section(server, remObj, results_list, title=_('Results'), color='green',
-                                       parent=None, context=context)
+                                       parent=self, context=context)
         self.config_section = Section(server, remObj, config_list, title=_('Configuration'), color='gray',
-                                      parent=None, context=context)
+                                      parent=self, context=context)
         
         self.sections = [self.config_section, self.status_section, self.results_section]
-
+        [sec.hide() for sec in self.sections]
         self.widgetsMap = {}
         self.widgetsMap.update(self.status_section.widgetsMap)
         self.widgetsMap.update(self.results_section.widgetsMap)
         self.widgetsMap.update(self.config_section.widgetsMap)
-
+        
         lens = [len(sec.widgetsMap) > 0 for sec in self.sections]
         # None active!
         if sum(lens) < 1:
@@ -427,6 +428,7 @@ class SectionBox(QtGui.QWidget):
             i = lens.index(True)
             sec = self.sections[i]
             self.lay.addWidget(sec)
+            sec.show()
             sec.hide_frame()
             return
 
@@ -436,6 +438,7 @@ class SectionBox(QtGui.QWidget):
                 sec.hide()
             else:
                 self.lay.addWidget(sec)
+                sec.show()
 
         # Prioritize sections
         add_section(self.config_section)
@@ -725,7 +728,6 @@ class Interface(QtGui.QTabWidget):
 
         # hide tabBar if just one section
         self.tabBar().setVisible(len(self.sections.keys()) > 1)
-
         for sec in self.sectionsMap.itervalues():
             self.widgetsMap.update(sec.widgetsMap)
 
@@ -760,12 +762,14 @@ class Interface(QtGui.QTabWidget):
         self.show_widget(self.widgetsMap[handle])
         
     def show_only_options(self, keys):
+        self.expand_all()
         for key, wg in self.widgetsMap.items():
             if key in keys:
                 self.show_widget(wg)
             else:
                 self.hide_widget(wg)
         self.check_visibility()
+        
 
     def scroll_to(self, area, x, y):
         area.ensureVisible(x, y - 50)
@@ -841,21 +845,26 @@ class Interface(QtGui.QTabWidget):
         w = self.size().width()
         self.search.move(w-self.search.width()-10, 5)
         
+    def expand_all(self):
+        for sec in self.sectionsMap.itervalues():
+            sec.expand()
+            for s in sec.sections:
+                s.expand_children()
+                
+    def collapse_all(self):
+        for sec in self.sectionsMap.itervalues():
+            for s in sec.sections:
+                s.collapse_children()
         
     def deactivate_search(self):
         self.search.hide()
         self.search.setText('')
         self.search.releaseKeyboard()
-        for sec in self.sectionsMap.itervalues():
-            for s in sec.sections:
-                s.collapse_children()
+        self.collapse_all()
         self.check_visibility()
         
     def activate_search(self):
-        for sec in self.sectionsMap.itervalues():
-            sec.expand()
-            for s in sec.sections:
-                s.expand_children()
+        self.expand_all()
         self.search.show()
         self.search.raise_()
         self.search.setFocus()
@@ -877,6 +886,11 @@ class Interface(QtGui.QTabWidget):
                 self.hide_widget(wg)
         self.check_visibility()
         return i
+    
+    def connect_client_changed(self, callable):
+        """Connects all clientChanged signals to `callable`"""
+        for wg in self.widgetsMap.values():
+            wg.client_changed.connect(callable)
 
 
 class InterfaceDialog(QtGui.QDialog):
