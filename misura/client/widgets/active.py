@@ -196,6 +196,7 @@ class Active(object):
     """Current server-side value"""
     unit = None
     prop = None
+    
 
     def __init__(self, server, remObj, prop, context='Option', connect=True):
         self._lock = threading.Lock()
@@ -272,6 +273,10 @@ class Active(object):
         """Perform an hard-reset of the widget"""
         self.emit(QtCore.SIGNAL('redraw()'))
         
+    def emit_client_changed(self):
+        """A set() call originated from the client-side caused the current value to change"""
+        self.emit(QtCore.SIGNAL('client_changed()'))
+        
     def redraw(self):
         pass
     
@@ -312,12 +317,17 @@ class Active(object):
         if val == self.current:
             logging.debug('Not setting',self.handle, repr(val), repr(self.current))
             return True
+        old = self.current
         out = self.remObj.set(self.handle,  val)
-        return self.get()
+        r = self.get()
+        if self.current!=old:
+            self.emit_client_changed()
+        return r
 
     def set_raw(self, val):
         """Set value directly, without adapt2srv conversion.
         Enable if disabled."""
+        old = self.current
         self.remObj.set(self.handle, val)
         enable = None
         if self.remObj.hasattr(self.handle, 'flags'):
@@ -326,7 +336,10 @@ class Active(object):
         if enable==False:
             self.remObj.setattr(self.handle, 'flags', {'enabled': True})
             self._check_flags()
-        self.get()
+        r = self.get()
+        if self.current!=old:
+            self.emit_client_changed()
+        return r
 
     def _get(self, rem=None):
         self.register()
@@ -381,7 +394,8 @@ class Active(object):
 
 
 class ActiveObject(Active, QtCore.QObject):
-
+    client_changed = QtCore.pyqtSignal()
+    
     def __init__(self, server, remObj, prop, parent=None, context='Option'):
         Active.__init__(self, server, remObj, prop, context)
         QtCore.QObject.__init__(self, parent=parent)
@@ -494,7 +508,7 @@ class ActiveWidget(Active, QtGui.QWidget):
     """Update on mouse leave"""
     enable_check = False
     visibility_changed = QtCore.pyqtSignal(bool)
-    
+    client_changed = QtCore.pyqtSignal()
     def __init__(self, server, remObj, prop, parent=None, context='Option'):
         Active.__init__(self, server, remObj, prop, context)
         QtGui.QWidget.__init__(self, parent)
