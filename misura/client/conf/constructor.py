@@ -218,8 +218,10 @@ class OptionsGroup(QtGui.QGroupBox):
         vis = set(self.widgetsMap.values())-filtered
         if vis:
             self.show()
+            self.more.show()
             return False
         else:
+            self.more.hide()
             self.hide()
             return True
 
@@ -445,7 +447,7 @@ class SectionBox(QtGui.QWidget):
             add_section(self.status_section)
             add_section(self.results_section)
 
-        self.lay.addStretch(1)
+        self.lay.addStretch(10)
         self.reorder()
 
     def check_visibility(self, filtered):
