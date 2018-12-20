@@ -3,7 +3,7 @@
 """Genering rendering utilities for a Misura Option object"""
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
-
+from PyQt4 import QtCore
 
 class OptionAbstractWidget(object):
     current_changeset = 0
@@ -50,9 +50,18 @@ class OptionAbstractWidget(object):
             return []
         self._proxy = []
         self.opt_name = []
+        from misura.client.live import registry
         for p, n in self.get_proxies_and_options(y.linked.conf):
             self._proxy.append(p)
             self.opt_name.append(n)
+            if p and n and n in p:
+                kid = p.getattr(n, 'kid')
+                for c in '/:;,-=+#@.\\':
+                    kid = kid.replace(c,'_')
+                
+                registry.disconnect(registry, QtCore.SIGNAL('client_changed_'+kid+'()'), self.update)
+                registry.connect(registry, QtCore.SIGNAL('client_changed_'+kid+'()'), self.update, 
+                                 QtCore.Qt.QueuedConnection)
         return self._proxy
     
     def get_proxies_and_options(self):

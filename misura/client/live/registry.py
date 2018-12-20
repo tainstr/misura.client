@@ -9,6 +9,7 @@ from cPickle import loads
 import threading
 import collections 
 from traceback import format_exc
+import functools
 
 from misura.canon import option
 from misura.canon.csutil import lockme, profile
@@ -130,8 +131,15 @@ class KidRegistry(QtCore.QThread):
             self.times[kid] = 0
         if w in self.rid[kid]:
             return kid
+        w.client_changed.connect(functools.partial(self.emit_client_changed, kid), QtCore.Qt.QueuedConnection)
         self.rid[kid].append(w)
         return kid
+    
+    def emit_client_changed(self, kid):
+        logging.debug('emit_client_changed', kid)
+        for c in '/:;,-=+#@.\\':
+            kid = kid.replace(c,'_')
+        self.emit(QtCore.SIGNAL('client_changed_'+kid+'()'))
 
 # FIXME: should be locked. It was unlocked for performance, but SHOULD BE LOCKED
 #   @lockme()
