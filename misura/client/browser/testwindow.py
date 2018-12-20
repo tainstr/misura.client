@@ -127,6 +127,8 @@ class TestWindow(acquisition.MainWindow):
         self.reset_changeset()
         self.loaded_version.emit(self.fixedDoc.proxy.get_version())
         self.navigator.expand_plotted_nodes()
+        root = list(self.navigator.model().tree.children.values())[0]
+        self.navigator.expand_node_path(root, select=True)
         
     def get_tooltip(self):
         """This is shown in tabbar"""
