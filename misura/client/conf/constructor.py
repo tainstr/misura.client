@@ -242,6 +242,7 @@ class Section(QtGui.QGroupBox):
         margin-top: 10px; margin-bottom: 10px; }
         QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; padding: 0px 5px; }""" % (color, ))
         self.setCheckable(True)
+        self.setChecked(True)
         self.clicked.connect(self.enable_disable)
         self.lay = QtGui.QFormLayout()
         self.lay.setLabelAlignment(QtCore.Qt.AlignRight)
@@ -283,9 +284,15 @@ class Section(QtGui.QGroupBox):
         for w in self.groupsMap.itervalues():
             w.show()
             #w.expand()
+        widths = []
+        heights = 0
         for w in self.widgetsMap.itervalues():
             w.show()
             w.label_widget.show()
+            s = w.sizeHint()
+            widths.append(s.width())
+            heights += s.height()
+        self.setMinimumHeight(int(heights*0.8))
         self.setMaximumHeight(16777215)
         self.setChecked(True)
 
@@ -297,6 +304,7 @@ class Section(QtGui.QGroupBox):
         for w in self.widgetsMap.itervalues():
             w.hide()
             w.label_widget.hide()
+        self.setMinimumHeight(0)
         self.setMaximumHeight(40)
         self.setChecked(False)
         return True
@@ -586,6 +594,8 @@ class Interface(QtGui.QTabWidget):
     
 
     def check_visibility(self, visibility=None):
+        if visibility:
+            self.filtered = visibility
         for sec in self.sectionsMap.values():
             sec.check_visibility(self.filtered)
                         

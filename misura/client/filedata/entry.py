@@ -155,9 +155,6 @@ class NodeEntry(object):
     def values(self):
         return self._children.values()
     
-    def keys(self):
-        return self._children.keys()
-    
     def free(self):
         self._linked = False
         self.doc = False
