@@ -24,7 +24,7 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         self.addAction(widgets.widget.Action('up', self.update,
                                                    descr='Update Line',
                                                    usertext='Update Line'))
-        self.addAction(widgets.widget.Action('apply', self.update,
+        self.addAction(widgets.widget.Action('apply', self.apply,
                                                    descr='Apply',
                                                    usertext='Apply line position to configuration'))
         for name in ('invert', 'intercept', 'slope','dataset'):
@@ -101,13 +101,13 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
             proxy, name= conf.from_column(opt)
             yield proxy, name
             
-    def calc_intercept(self):
+    def get_intercept(self):
         const = 0
         for i in xrange(self.settings.intercept.count('+')+1):
             const += self.proxy[i][self.opt_name[i]]
         return const*self.settings.scale
     
-    def calc_slope(self):
+    def get_slope(self):
         ic = self.settings.intercept.count('+')+1
         sc = self.settings.slope.count('+')+1
         slope = 0
@@ -116,6 +116,18 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
                 break
             slope += self.proxy[i][self.opt_name[i]]
         return slope*self.settings.scale
+    
+    def set_intercept(self, val):
+        """In case of summation, only the first will be taken"""
+        ic = self.settings.intercept.count('+')+1
+        for i in xrange(1,ic):
+            val -= self.proxy[i][self.opt_name[i]]
+        self.proxy[0][self.opt_name[0]] = val/self.settings.scale
+        
+    def set_slope(self, val):
+        """In case of summation, only the first will be taken"""
+        ic = self.settings.intercept.count('+')+1
+        self.proxy[ic][self.opt_name[ic]] = val/self.settings.scale
         
     def update(self):
         OptionAbstractWidget.update(self)
@@ -128,8 +140,8 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
             logging.debug('Incomplete settings - not updating')
             return 
         try:
-            const = self.calc_intercept()
-            slope = self.calc_slope()
+            const = self.get_intercept()
+            slope = self.get_slope()
         except:
             logging.error(self.proxy,self.opt_name)
             logging.error(format_exc())
@@ -149,10 +161,30 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         self.settings.yPos2 = ymax
         self.doc.setModified(True)
         
+    def updateControlItem(self, *a, **k):
+        r = super(OptionLine, self).updateControlItem(*a, **k)
+        self.apply()
+        return r
         
-    def push_update(self):
+        
+    def apply(self):
         """Send current line settings to the Misura configuration"""
-        pass
+        x1, y1 = self.settings.xPos[0], self.settings.yPos[0]
+        x2, y2 = self.settings.xPos2[0], self.settings.yPos2[0]
+        if self.settings.invert:
+            ys = x1, x2
+            x1, x2 = y1, y2
+            y1, y2 = ys
+        dx = x2-x1
+        if abs(dx)>0:
+            slope = (y2-y1)/(x2-x1)
+            const = y2-slope*x2 
+        else:
+            slope = 0.
+            const = y1 
+        self.set_slope(slope)
+        self.set_intercept(const)
+        
     
     def draw(self, posn, phelper, outerbounds = None):
         self.check_update()
