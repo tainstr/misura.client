@@ -40,7 +40,7 @@ class OptionAbstractWidget(object):
                     y = yds
                     break
         if not y:
-            logging.debug('Dataset not found: will return an empty label',ds)
+            logging.debug('Dataset not found: will return an empty widget',ds)
             return []
         if not y.linked:
             logging.debug('No linked file for', ds)

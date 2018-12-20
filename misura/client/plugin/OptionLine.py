@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from traceback import format_exc
 from misura.canon.logger import get_module_logging
+from django.contrib.gis.gdal.raster import const
 logging = get_module_logging(__name__)
 import veusz.setting as setting
 import veusz.document as document
@@ -46,18 +47,23 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
             usertext=_('Dataset')), 0 ) 
         
         s.add(setting.Str('intercept', '',
-                          descr='Option path',
-                          usertext='Option path'),
+                          descr='Intercept option path',
+                          usertext='Intercept option path'),
               1)
         s.add(setting.Str('slope', '',
-                          descr='Option path',
-                          usertext='Option path'),
+                          descr='Slope option path',
+                          usertext='Slope option path'),
+              1)
+        s.add(setting.Float('scale', 1.,
+                          descr='Scale values by factor',
+                          usertext='Scale'),
               1)
         s.add(setting.Bool('invert', False,
                           descr='Invert coordinates (y->x)',
                           usertext='Invert coordinates',
                           formatting=True),
               1)
+        
         
         #############
         # Modify/hide existing settings
@@ -66,10 +72,10 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         mode.set('point-to-point')
         mode.hidden = True
         
-        s.get('xPos').hidden = True
-        s.get('yPos').hidden = True
-        s.get('xPos2').hidden = True
-        s.get('yPos2').hidden = True
+        #s.get('xPos').hidden = True
+        #s.get('yPos').hidden = True
+        #s.get('xPos2').hidden = True
+        #s.get('yPos2').hidden = True
         s.get('xAxis').hidden = True
         s.get('yAxis').hidden = True
         s.get('length').hidden = True
@@ -88,40 +94,59 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
 
         
     def get_proxies_and_options(self, conf):
-        for opt in (self.settings.intercept, self.settings.slope):
+        # Allow intercept to be defined by a + operation
+        opts = list(self.settings.intercept.split('+'))
+        opts += list(self.settings.slope.split('+'))
+        for opt in opts:
             proxy, name= conf.from_column(opt)
             yield proxy, name
+            
+    def calc_intercept(self):
+        const = 0
+        for i in xrange(self.settings.intercept.count('+')+1):
+            const += self.proxy[i][self.opt_name[i]]
+        return const*self.settings.scale
+    
+    def calc_slope(self):
+        ic = self.settings.intercept.count('+')+1
+        sc = self.settings.slope.count('+')+1
+        slope = 0
+        for i in xrange(ic, ic+sc):
+            if not self.opt_name[i]:
+                break
+            slope += self.proxy[i][self.opt_name[i]]
+        return slope*self.settings.scale
         
     def update(self):
         OptionAbstractWidget.update(self)
         curve = self.parent
-
         graph = curve.parent
-        xAxis = graph.getChild(self.settings.xAxis)
-        yAxis = graph.getChild(self.settings.yAxis)
-        if not self.proxy:
+        # Curve axis - original
+        xAxis = graph.getChild(curve.settings.xAxis)
+        yAxis = graph.getChild(curve.settings.yAxis)
+        if not self.proxy or not xAxis or not yAxis:
             logging.debug('Incomplete settings - not updating')
             return 
         try:
-            const = self.proxy[0][self.opt_name[0]]
-            slope = self.proxy[1][self.opt_name[1]]
+            const = self.calc_intercept()
+            slope = self.calc_slope()
         except:
             logging.error(self.proxy,self.opt_name)
             logging.error(format_exc())
             return False
         if self.settings.invert:
-            rg = yAxis.getPlottedRange()
-            self.settings.yAxis = curve.settings.xAxis
-            self.settings.xAxis = curve.settings.yAxis
+            ymin, ymax = yAxis.getPlottedRange()
+            xmin, xmax = const+slope*ymin, const+slope*ymax
         else:
-            rg = xAxis.getPlottedRange()
-            self.settings.xAxis = curve.settings.xAxis
-            self.settings.yAxis = curve.settings.yAxis
-        xmin, xmax = rg
+            xmin, xmax = xAxis.getPlottedRange()
+            ymin, ymax = const+slope*xmin, const+slope*xmax
+            
+        self.settings.xAxis = curve.settings.xAxis
+        self.settings.yAxis = curve.settings.yAxis
         self.settings.xPos = xmin
-        self.settings.yPos = const+slope*xmin
+        self.settings.yPos = ymin
         self.settings.xPos2 = xmax
-        self.settings.yPos2 = const+slope*xmax
+        self.settings.yPos2 = ymax
         self.doc.setModified(True)
         
         

@@ -68,14 +68,8 @@ class TestWindow(acquisition.MainWindow):
         self.title = self.remote.measure['name']
         self.setWindowTitle('Test: ' + self.remote.measure['name'])
 
-        # Menu Bar mod
-
-        
+        # Menu Bar mod      
         self.create_version_plot_menus()
-        
-        #self.measure_toolbar = QtGui.QToolBar(self)
-        #self.addToolBar(QtCore.Qt.TopToolBarArea, self.measure_toolbar)
-        
         
         if self.vtoolbar:
             self.vtoolbar.hide()
