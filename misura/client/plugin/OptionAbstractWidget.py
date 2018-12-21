@@ -55,12 +55,9 @@ class OptionAbstractWidget(object):
             self._proxy.append(p)
             self.opt_name.append(n)
             if p and n and n in p:
-                kid = p.getattr(n, 'kid')
-                for c in '/:;,-=+#@.\\':
-                    kid = kid.replace(c,'_')
-                
-                registry.disconnect(registry, QtCore.SIGNAL('client_changed_'+kid+'()'), self.update)
-                registry.connect(registry, QtCore.SIGNAL('client_changed_'+kid+'()'), self.update, 
+                sig = 'client_changed_{}()'.format(p.plain_kid(n))
+                registry.disconnect(registry, QtCore.SIGNAL(sig), self.update)
+                registry.connect(registry, QtCore.SIGNAL(sig), self.update, 
                                  QtCore.Qt.QueuedConnection)
         return self._proxy
     
