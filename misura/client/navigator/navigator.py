@@ -97,7 +97,8 @@ class NavigatorToolbar(QtGui.QToolBar):
         
     def update_navtoolbar(self, *foo):
         self.clear()
-        self.navigator.buildContextMenu(menu=self, tree_actions=True)
+        self.navigator.buildContextMenu(menu=self, 
+                                        tree_actions=self.navigator.isVisible())
         for a in self.actions():          
             if a.icon().isNull():
                 self.removeAction(a)
