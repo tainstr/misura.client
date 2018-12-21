@@ -50,14 +50,26 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
                           descr='Intercept option path',
                           usertext='Intercept option path'),
               1)
+        s.add(setting.Bool('intercept_ro', False,
+                          descr='Forbid changing intercapt on plot',
+                          usertext='Set intercept read-only'),
+              2)
         s.add(setting.Str('slope', '',
                           descr='Slope option path',
                           usertext='Slope option path'),
-              1)
+              3)
+        s.add(setting.Bool('slope_ro', True,
+                          descr='Forbid changing slope on plot',
+                          usertext='Set slope read-only'),
+              4)
+        s.add(setting.Str('updaters', '',
+                          descr='Options forcing an update when changed',
+                          usertext='Updater options'),
+              5)
         s.add(setting.Float('scale', 1.,
                           descr='Scale values by factor',
                           usertext='Scale'),
-              1)
+              6)
         s.add(setting.Bool('invert', False,
                           descr='Invert coordinates (y->x)',
                           usertext='Invert coordinates',
@@ -72,10 +84,10 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         mode.set('point-to-point')
         mode.hidden = True
         
-        #s.get('xPos').hidden = True
-        #s.get('yPos').hidden = True
-        #s.get('xPos2').hidden = True
-        #s.get('yPos2').hidden = True
+        s.get('xPos').hidden = True
+        s.get('yPos').hidden = True
+        s.get('xPos2').hidden = True
+        s.get('yPos2').hidden = True
         s.get('xAxis').hidden = True
         s.get('yAxis').hidden = True
         s.get('length').hidden = True
@@ -97,6 +109,7 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         # Allow intercept to be defined by a + operation
         opts = list(self.settings.intercept.split('+'))
         opts += list(self.settings.slope.split('+'))
+        opts += list(self.settings.updaters.split(';'))
         for opt in opts:
             proxy, name= conf.from_column(opt)
             yield proxy, name
@@ -119,13 +132,18 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
     
     def set_intercept(self, val):
         """In case of summation, only the first will be taken"""
+        if self.settings.intercept_ro:
+            return
         ic = self.settings.intercept.count('+')+1
+        # Subtract any subsequent addendum
         for i in xrange(1,ic):
             val -= self.proxy[i][self.opt_name[i]]
         self.proxy[0][self.opt_name[0]] = val/self.settings.scale
         
     def set_slope(self, val):
         """In case of summation, only the first will be taken"""
+        if self.settings.slope_ro:
+            return
         ic = self.settings.intercept.count('+')+1
         self.proxy[ic][self.opt_name[ic]] = val/self.settings.scale
         
@@ -164,6 +182,7 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
     def updateControlItem(self, *a, **k):
         r = super(OptionLine, self).updateControlItem(*a, **k)
         self.apply()
+        self.update()
         return r
         
         
@@ -176,9 +195,13 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
             x1, x2 = y1, y2
             y1, y2 = ys
         dx = x2-x1
+        slope = self.get_slope()
+        const = self.get_intercept()
         if abs(dx)>0:
-            slope = (y2-y1)/(x2-x1)
-            const = y2-slope*x2 
+            if not self.settings.slope_ro:
+                slope = (y2-y1)/(x2-x1)
+            if not self.settings.intercept_ro:
+                const = y2-slope*x2 
         else:
             slope = 0.
             const = y1 
