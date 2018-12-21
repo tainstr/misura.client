@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 from traceback import format_exc
 from misura.canon.logger import get_module_logging
-from django.contrib.gis.gdal.raster import const
 logging = get_module_logging(__name__)
 import veusz.setting as setting
 import veusz.document as document
