@@ -139,6 +139,9 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         for i in xrange(1,ic):
             val -= self.proxy[i][self.opt_name[i]]
         self.proxy[0][self.opt_name[0]] = val/self.settings.scale
+        from misura.client.live import registry
+        kid = self.proxy[0].getattr(self.opt_name[0], 'kid')
+        registry.force_redraw([kid])
         
     def set_slope(self, val):
         """In case of summation, only the first will be taken"""
@@ -146,6 +149,10 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
             return
         ic = self.settings.intercept.count('+')+1
         self.proxy[ic][self.opt_name[ic]] = val/self.settings.scale
+        from misura.client.live import registry
+        kid = self.proxy[ic].getattr(self.opt_name[ic], 'kid')
+        registry.force_redraw([kid])
+        
         
     def update(self):
         OptionAbstractWidget.update(self)
@@ -207,6 +214,7 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
             const = y1 
         self.set_slope(slope)
         self.set_intercept(const)
+        
         
     
     def draw(self, posn, phelper, outerbounds = None):
