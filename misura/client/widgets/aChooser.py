@@ -39,6 +39,12 @@ class aChooser(ActiveWidget):
         new_idx = self.adapt2gui(result)
         if new_idx != idx:
             self.changed_option()
+            
+    def _get(self, *a, **k):
+        r = super(aChooser, self)._get(*a, **k)
+        if self.adapt2srv(self.combo.currentIndex())!=self.current:
+            self.emitChanged()
+        return r
 
     def changed_option(self, reget=True):
         # Get new property
