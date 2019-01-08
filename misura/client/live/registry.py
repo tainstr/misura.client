@@ -140,6 +140,12 @@ class KidRegistry(QtCore.QThread):
         for c in '/:;,-=+#@.\\':
             kid = kid.replace(c,'_')
         self.emit(QtCore.SIGNAL('client_changed_'+kid+'()'))
+        
+    def reconnect(self, sig, callable):
+        self.disconnect(self, QtCore.SIGNAL(sig), callable)
+        self.connect(self, QtCore.SIGNAL(sig), callable, 
+                                 QtCore.Qt.QueuedConnection)
+        
 
 # FIXME: should be locked. It was unlocked for performance, but SHOULD BE LOCKED
 #   @lockme()

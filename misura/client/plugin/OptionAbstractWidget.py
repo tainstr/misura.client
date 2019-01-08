@@ -56,9 +56,7 @@ class OptionAbstractWidget(object):
             self.opt_name.append(n)
             if p and n and n in p:
                 sig = 'client_changed_{}()'.format(p.plain_kid(n))
-                registry.disconnect(registry, QtCore.SIGNAL(sig), self.update)
-                registry.connect(registry, QtCore.SIGNAL(sig), self.update, 
-                                 QtCore.Qt.QueuedConnection)
+                registry.reconnect(sig, self.update)
         return self._proxy
     
     def get_proxies_and_options(self):
