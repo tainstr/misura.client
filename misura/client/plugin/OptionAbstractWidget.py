@@ -28,6 +28,9 @@ class OptionAbstractWidget(object):
         if self._proxy:
             return self._proxy
         ds = self.settings.dataset
+        if not ds:
+            logging.debug('No dataset defined', ds, self.path)
+            return False
         y = self.document.get_from_data_or_available(ds, False)
         # Ensure it is not a derived or native dataset
         y = y if hasattr(y, 'linked') else False

@@ -26,8 +26,8 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         self.addAction(widgets.widget.Action('apply', self.apply,
                                                    descr='Apply',
                                                    usertext='Apply line position to configuration'))
-        for name in ('invert', 'intercept', 'slope','dataset'):
-            self.settings.get(name).setOnModified(self.update)
+        #for name in ('invert', 'intercept', 'slope'):
+        #    self.settings.get(name).setOnModified(self.update)
 
     @classmethod
     def allowedParentTypes(klass):
@@ -154,19 +154,23 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         
         
     def update(self):
-        OptionAbstractWidget.update(self)
         curve = self.parent
+        if not self.settings.dataset:
+            logging.debug('Resetting dataset to parent', curve.settings.yData)
+            self.settings.dataset = curve.settings.yData
+        OptionAbstractWidget.update(self)
         graph = curve.parent
         # Curve axis - original
         xAxis = graph.getChild(curve.settings.xAxis)
         yAxis = graph.getChild(curve.settings.yAxis)
         if not self.proxy or not xAxis or not yAxis:
-            logging.debug('Incomplete settings - not updating')
-            return 
+            logging.debug('Incomplete settings - not updating', self.path, self.proxy, xAxis, yAxis)
+            return False
         try:
             const = self.get_intercept()
             slope = self.get_slope()
         except:
+            logging.error('Cannot update option line', self.path)
             logging.error(self.proxy,self.opt_name)
             logging.error(format_exc())
             return False
@@ -184,6 +188,8 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         self.settings.xPos2 = xmax
         self.settings.yPos2 = ymax
         self.doc.setModified(True)
+        logging.debug('end update', self.path, self.opt_name)
+        return True
         
     def updateControlItem(self, *a, **k):
         r = super(OptionLine, self).updateControlItem(*a, **k)
