@@ -158,7 +158,8 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         m.aboutToShow.connect(partial(self.show_style_menu, widget, m, 'PlotLine', 'style'))
         m = menu.addMenu(_('Color'))
         m.aboutToShow.connect(partial(self.show_style_menu, widget, m, 'PlotLine', 'color'))
-        
+        m = menu.addMenu(_('Width'))
+        m.aboutToShow.connect(partial(self.show_style_menu, widget, m, 'PlotLine', 'width'))
         
         dsn = widget.settings.yData
         node = self.document.model.tree.traverse(dsn)
@@ -193,7 +194,8 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         ctrl = setting.makeControl(menu)
         ctrl.hide()
         ctrl = getattr(ctrl, 'combo', ctrl)
-        for i, txt in enumerate(setting.vallist):
+        for i in xrange(ctrl.count()):
+            txt = ctrl.itemText(i)
             val = setting.fromText(txt)
             func = partial(self.set_from_menu, setting, widget, val)
             a = menu.addAction(ctrl.itemIcon(i), txt, func)
