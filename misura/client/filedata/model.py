@@ -257,16 +257,21 @@ class DocumentModel(QtCore.QAbstractItemModel):
 
     def decorate(self, ent, role):
         """Find text color and icon decorations for dataset ds"""
+        plotwg = False
+        is_dataset = isinstance(ent, DatasetEntry) 
+        if is_dataset:
+            plotpath = self.is_plotted(ent.path)
+            if len(plotpath):
+                plotwg = self.doc.resolveFullWidgetPath(plotpath[0])
+        
         if role == Qt.FontRole:
             current_font = QtGui.QFont()
-            current_font.setBold(len(ent.data) > 0 and dstats.available in self.status)
+            has_data = len(ent.data) > 0
+            current_font.setBold(has_data and dstats.available in self.status)
+            current_font.setItalic(is_dataset and not plotwg)
             return current_font
-
-        plotpath = self.is_plotted(ent.path)
-        if len(plotpath) == 0:
-            plotwg = False
-        else:
-            plotwg = self.doc.resolveFullWidgetPath(plotpath[0])
+            
+        
             
         if role == Qt.UserRole:
             if not plotwg:
