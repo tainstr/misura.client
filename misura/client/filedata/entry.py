@@ -49,6 +49,10 @@ def find_pos(dslist, p=0):
     return p
 
 
+def natural_keys(node):
+    """See http://www.codinghorror.com/blog/archives/001018.html"""
+    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', node.name())]
+
 class AllDocDataAccessor(object):
 
     """Simulates a document with access to all data, comprising loadable datasets not in the document."""
@@ -470,6 +474,7 @@ class NodeEntry(object):
             if depth > 0 or depth < 0:  # depth=0 will block!
                 r += child.recursive_status(st, depth=depth - 1)
         self.status_cache = (key, r)
+        r.sort(key=natural_keys)
         return r
 
     def set_doc(self, doc, default_status=dstats.available):
