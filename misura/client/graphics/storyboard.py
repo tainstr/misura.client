@@ -17,20 +17,22 @@ from PyQt4 import QtGui, QtCore
 from veusz.document.operations import OperationWidgetDelete
 
 class PlotPreviewLabel(QtGui.QToolButton):
-        
+    
     def mousePressEvent(self, event):
         if event.button()==QtCore.Qt.RightButton:
             self.showMenu()
+            event.accept()
             return 
         return QtGui.QToolButton.mousePressEvent(self, event)
+    
 
 class Storyboard(QtGui.QWidget):
-
+    
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent=parent)
         self.base_lay = QtGui.QHBoxLayout()
         self.setLayout(self.base_lay)
-
+        self.multiselection = []
         self.doc = False
         self.page = False
         self.images = {}
@@ -72,6 +74,21 @@ class Storyboard(QtGui.QWidget):
         #clay.addWidget(self.levelFilter)
         self.controls.setMaximumWidth(75)
         self.base_lay.addWidget(self.controls)
+        
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Delete:
+            self.slot_delete_selected_pages()
+            event.accept()
+            return
+        if event.key() == QtCore.Qt.Key_E:
+            self.slot_export_page()
+            event.accept()
+            return
+        if event.key() == QtCore.Qt.Key_Escape:
+            self.highlight()
+            event.accept()
+            return
+        return QtGui.QWidget.keyPressEvent(self, event)
 
     def slot_up(self):
         self.level_modifier -= 1
@@ -172,6 +189,7 @@ class Storyboard(QtGui.QWidget):
         self.cache[page.name] = lbl, self.doc.changeset
         return True
     
+    
     def build_page_menu(self, menu, page, pageNum):
         menu.clear()
         list_children_func = functools.partial(
@@ -182,9 +200,9 @@ class Storyboard(QtGui.QWidget):
         show_func = functools.partial(self.slot_select_page, page.name)
         menu.addAction(_('Show'), show_func)
         menu.addAction(_('List children'), list_children_func)
-        menu.addAction(_('Delete'), del_func)
+        menu.addAction(_('Delete')+ ' - (Del)', del_func)
         menu.addAction(_('Delete recursively'), del_children_func)
-        menu.addAction(_('Export'), export_func)
+        menu.addAction(_('Export'+ ' - (E)'), export_func)
         if page.name not in self.doc.cached_pages:
             cache_func = functools.partial(self.slot_cache_page, page.name)
             menu.addAction(_('Cache page'), cache_func)
@@ -202,6 +220,7 @@ class Storyboard(QtGui.QWidget):
         for k in self.cache:
             lbl = self.cache[k][0]
             lbl.setChecked(k==self.page.name)
+        self.multiselection = []
             
             
     def iter_page_level(self, page, level_modifier=0):
@@ -293,23 +312,34 @@ class Storyboard(QtGui.QWidget):
         self.levelFilter.setToolTip(self.parent_modifier)
         self.slot_down()
         
+    @property
+    def multiselect(self):
+        return QtGui.QApplication.keyboardModifiers() == QtCore.Qt.ControlModifier
+    
+    def highlight_multiselection(self):
+        for k, (lbl, cs) in self.cache.items():
+            lbl.setChecked(k in self.multiselection)
  
     def slot_select_page(self, page_name):
         p = -1
         for i, page in enumerate(self.doc.basewidget.children):
             if page.name == page_name:
-                self.plot.plot.setPageNumber(i)
                 p = 1
+                if self.multiselect:
+                    self.multiselection.append(page_name)
+                    self.highlight_multiselection()
+                    break
+                self.plot.plot.setPageNumber(i)
                 break
         if p < 0:
             logging.debug('Selected page was not found! Update...', page_name)
             self.update(force=True)
-        else:
+        elif not self.multiselect:
             if page==self.page:
                 self.highlight()
         return p
 
-    def slot_delete_page(self, page_name):
+    def slot_delete_page(self, page_name, force=False):
         """Delete selected `page_name`"""
         p = -1
         for i, page in enumerate(self.doc.basewidget.children):
@@ -320,6 +350,12 @@ class Storyboard(QtGui.QWidget):
                 p = i
                 break
         self.update(force=True)
+        
+    def slot_delete_selected_pages(self):
+        for page_name in self.multiselection:
+            logging.debug('slot_delete_selected_pages', page_name)
+            self.slot_delete_page(page_name, force=True)
+        self.highlight()
         
     def slot_delete_children(self, page):
         """Recursively delete all child pages starting from selected `page`"""
@@ -341,5 +377,14 @@ class Storyboard(QtGui.QWidget):
         op = document.OperationMultiple(ops, "DeletePageChildren")
         self.doc.applyOperation(op)
         
-    def slot_export_page(self, page_num):
+    def slot_export_page(self, page_num=None):
+        # Export all selected pages
+        if page_num is None:
+            selected = list(self.multiselection)
+            page_num = []
+            for i, page in enumerate(self.doc.basewidget.children):
+                if page.name in selected:
+                    page_num.append(i)
+            
         self.plot.plot.slotPageExport(page_num=page_num)
+        self.highlight()
