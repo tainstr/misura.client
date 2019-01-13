@@ -8,7 +8,7 @@ from compiler.ast import flatten
 import collections
 import re
 import numpy as np
-
+from misura.canon.csutil import natural_keys
 from misura.client.clientconf import confdb
 
 sep = '/'
@@ -49,9 +49,8 @@ def find_pos(dslist, p=0):
     return p
 
 
-def natural_keys(node):
-    """See http://www.codinghorror.com/blog/archives/001018.html"""
-    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', node.name())]
+def node_natural_keys(node):
+    return natural_keys(node.name())
 
 class AllDocDataAccessor(object):
 
@@ -474,7 +473,7 @@ class NodeEntry(object):
             if depth > 0 or depth < 0:  # depth=0 will block!
                 r += child.recursive_status(st, depth=depth - 1)
         self.status_cache = (key, r)
-        r.sort(key=natural_keys)
+        r.sort(key=node_natural_keys)
         return r
 
     def set_doc(self, doc, default_status=dstats.available):

@@ -7,7 +7,7 @@ Global instrument parametrization and setup."""
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from .. import network
-
+from misura.canon.csutil import natural_keys
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 
@@ -71,6 +71,8 @@ class Item(object):
             #logging.debug('index_path', name, i, node)
         return idx, node
 
+def item_natural_keys(item):
+    return natural_keys(item.name)
 
 def recursiveModel(base, parent=False, model=False, force=False):
     if parent == False:
@@ -92,8 +94,9 @@ def recursiveModel(base, parent=False, model=False, force=False):
         obj = base.child(path)
         item = recursiveModel(obj, item, model[path], force=force)
         parent.children.append(item)
-        # was: name
-        parent.names.append(path)
+        
+    parent.children.sort(key=item_natural_keys)
+    parent.names = [item.name for item in parent.children]
     base._recursiveModel = parent
     return parent
 
