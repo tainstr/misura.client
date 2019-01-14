@@ -98,6 +98,7 @@ class TestWindow(acquisition.MainWindow):
             self.breadbar.hide()
         else:
             self.navigator.status.add(filedata.dstats.outline)
+            self.measureTab.setCurrentIndex(1)
             try:
                 self.summaryPlot.cmd.Remove('/time')
             except:
