@@ -552,7 +552,7 @@ class PlottingNavigatorDomain(NavigatorDomain):
             act_save_style.setChecked(True)
 
     def build_file_menu(self, menu, node):
-        menu.addAction(_('Thermal Legend'), self.thermalLegend)
+        menu.addAction(iutils.theme_icon('thermal_legend'), _('Thermal Legend'), self.thermalLegend)
         menu.addAction(_('Intercept all curves'), self.intercept)
         return True
 

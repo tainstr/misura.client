@@ -30,14 +30,14 @@
      showgrid="false"
      borderopacity="1.0"
      inkscape:current-layer="svg2"
-     inkscape:cx="148.87289"
+     inkscape:cx="-146.52624"
      inkscape:cy="40.187994"
      inkscape:window-y="24"
      inkscape:window-height="1056"
      inkscape:pageopacity="0.0"
      showguides="true" />
   <svg:path
-     style="fill:none;fill-rule:evenodd;stroke:#1e335c;stroke-width:9.75048733;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     style="fill:none;fill-rule:evenodd;stroke:#1e335c;stroke-width:13.875;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
      d="M 138.90988,9.9416859 C 116.73429,38.9519 99.109382,119.64141 89.895316,179.74452 77.592193,145.91201 61.965721,101.97574 34.180926,63.283337 52.882848,198.68208 -20.436138,207.51164 40.285943,306.4055 l 0.0053,0 c 20.99713,32.04244 74.214897,14.90368 105.151077,41.19516 23.46924,-19.27467 54.60179,-28.30239 67.8878,-52.44232 11.05629,-21.59218 13.56688,-46.60417 8.66389,-70.60284 C 213.59905,192.96783 162.11275,127.37651 239.64969,46.673517 193.54946,71.725282 168.49784,109.82447 154.26837,146.016 140.71464,105.82087 130.63592,53.304966 138.90988,9.9416859 Z"
      id="path2043"
      inkscape:connector-curvature="0"
@@ -71,7 +71,7 @@
     </rdf:RDF>
   </svg:metadata>
   <svg:path
-     style="fill:none;fill-rule:evenodd;stroke:#009bde;stroke-width:9.38254356;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     style="fill:none;fill-rule:evenodd;stroke:#009bde;stroke-width:13.875;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
      d="m 44.056589,211.72703 c 22.880211,65.41789 -31.41016,63.62541 81.001371,116.12625 1.98695,1.68744 3.68247,2.19603 5.56079,2.59436 3.96752,1.82703 8.11702,3.71257 12.48041,5.67169 0.21535,0.16766 0.427,0.32803 0.64888,0.50703 0.0581,-0.15834 0.12902,-0.34459 0.18837,-0.50518 7.44007,-2.08267 32.8714,-16.61937 36.63011,-36.04901 2.29385,-11.83306 -18.75059,-45.93432 -9.55173,-67.5255 -25.52396,19.29516 -20.7884,38.64418 -26.04052,61.5929 -0.79996,-1.36508 -1.69084,-2.69086 -2.674,-3.96741 -7.91667,-9.05857 -21.92619,-36.67285 -25.29047,-59.426 -3.65639,16.62281 -7.08139,32.55836 -7.49347,47.76249 -12.199762,-9.66397 -29.848943,-21.38776 -65.459741,-66.78162 z"
      id="path2049"
      inkscape:connector-curvature="0" />
