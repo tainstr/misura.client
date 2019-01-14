@@ -73,7 +73,9 @@ def _export(loaded, get_column_func,
     i = 0
     while i < nmax:
         vals = [get(v, i) for v in dat]
-        f.write(msg.format(*vals))
+        line = msg.format(*vals)
+        line = line.replace('.', QtCore.QLocale().decimalPoint())
+        f.write(line)
         i += 1
     f.close()
 

@@ -224,7 +224,8 @@ def num_to_string(val):
         s = '%.1f' % val
     else:
         s = '%.2E' % val
-    return s
+    pt = QtCore.QLocale().decimalPoint()
+    return s.replace('.', pt)
 
 
 def getOpts():
