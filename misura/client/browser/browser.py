@@ -188,10 +188,17 @@ class MainWindow(QtGui.QMainWindow):
     def open_file(self, path, tab_index=-1, **kw):
         path = unicode(path)
         logging.debug('Browser MainWindow.open_file', path, tab_index)
+        for i in xrange(1,self.tab.count()):
+            tab_path = self.tab.widget(i).fixedDoc.proxy.get_path()
+            if path == tab_path:
+                logging.debug('File is already opened: switching to tab', i)
+                self.tab.setCurrentIndex(i)
+                return False
+            
         if tab_index>0:
             tab = self.tab.widget(tab_index)
             tab.measureTab.results.navigator.open_file(path)
-            return
+            return False
         
         try:
             doc = filedata.MisuraDocument(path)
