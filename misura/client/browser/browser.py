@@ -186,10 +186,10 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMessageBox.warning(self, _("Failed conversion"), error)
 
     def open_file(self, path, tab_index=-1, **kw):
-        path = unicode(path)
+        path = os.path.abspath(unicode(path))
         logging.debug('Browser MainWindow.open_file', path, tab_index)
         for i in xrange(1,self.tab.count()):
-            tab_path = self.tab.widget(i).fixedDoc.proxy.get_path()
+            tab_path = os.path.abspath(self.tab.widget(i).fixedDoc.proxy.get_path())
             if path == tab_path:
                 logging.debug('File is already opened: switching to tab', i)
                 self.tab.setCurrentIndex(i)
