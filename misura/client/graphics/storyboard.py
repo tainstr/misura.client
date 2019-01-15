@@ -26,7 +26,7 @@ class PlotPreviewLabel(QtGui.QToolButton):
         return QtGui.QToolButton.mousePressEvent(self, event)
     
 
-class Storyboard(QtGui.QWidget):
+class PlotsBoard(QtGui.QWidget):
     
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent=parent)
@@ -226,7 +226,7 @@ class Storyboard(QtGui.QWidget):
     def iter_page_level(self, page, level_modifier=0):
         hierarchy, level, page_idx = calc_plot_hierarchy(self.doc, page)
         if level < 0:
-            logging.debug('Storyboard.iter_page_level: negative level requested')
+            logging.debug('PlotsBoard.iter_page_level: negative level requested')
             return []
         page_name, page_plots, crumbs, notes = hierarchy[level][page_idx]
         N = len(hierarchy)
@@ -252,7 +252,7 @@ class Storyboard(QtGui.QWidget):
         page = self.doc.basewidget.children[p]
         no_change = page == self.page and self.level_modifier == self._level_modifier and self.parent_modifier == self._parent_modifier
         if no_change and not force:
-            logging.debug('Storyboard.update: no change',
+            logging.debug('PlotsBoard.update: no change',
                           page.name, self.page.name)
             self.highlight()
             return False

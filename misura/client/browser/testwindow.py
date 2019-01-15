@@ -14,7 +14,7 @@ from .. import fileui
 from .. import acquisition
 from ..live import registry
 from misura.canon.csutil import profile
-from ..graphics import Breadcrumb, Storyboard
+from ..graphics import Breadcrumb, PlotsBoard
 from ..navigator import NavigatorToolbar
 from misura.client.iutils import calc_plot_hierarchy, most_involved_node
 
@@ -173,7 +173,7 @@ class TestWindow(acquisition.MainWindow):
             self.rem('plotboardDock', 'plotboard')            
         self.plotboardDock = QtGui.QDockWidget(self.centralWidget())
         self.plotboardDock.setWindowTitle('Plots Board')
-        self.plotboard = Storyboard(self)
+        self.plotboard = PlotsBoard(self)
         self.plotboard.set_plot(self.summaryPlot)
         self.plotboardDock.setWidget(self.plotboard)
         self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.plotboardDock) 
