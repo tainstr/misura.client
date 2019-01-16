@@ -151,6 +151,7 @@ class ImageStrip(QtGui.QWidget):
         thread.pid = 'Creating images report'
         thread.abort = self.do_abort_export
         QtCore.QThreadPool.globalInstance().start(thread)
+        return thread
     
     def do_abort_export(self):
         self.export_aborted = True

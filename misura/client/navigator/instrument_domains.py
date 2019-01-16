@@ -26,8 +26,8 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
         self.threads = {}
         self.extrusions = {}
         
-    @node
-    def show_storyboard(self, node):
+    
+    def create_storyboard(self, node):
         obj = self.storyboards.get(node.path, False)
         if obj:
             obj.show()
@@ -38,6 +38,11 @@ class ImageAnalysisNavigatorDomain(NavigatorDomain):
         logging.debug('Storyboard path', path)
         obj.setPath(path)
         self.storyboards[node.path] = obj
+        return obj
+    
+    @node
+    def show_storyboard(self, node):
+        obj = self.create_storyboard(node)
         obj.show()
         
     @node
@@ -189,6 +194,10 @@ class MicroscopeSampleNavigatorDomain(ImageAnalysisNavigatorDomain):
         d = PluginDialog(self.mainwindow, self.doc, p, cls)
         self.mainwindow.showDialog(d)
         
+    @node
+    def export_images(self, node=False):
+        storyboard = self.create_storyboard(node)
+        storyboard.strip.export_images()
             
     def add_sample_menu(self, menu, node):
         j = 0
@@ -200,6 +209,7 @@ class MicroscopeSampleNavigatorDomain(ImageAnalysisNavigatorDomain):
         menu.addAction(_('Viscosity'), self.viscosity)
         menu.addAction(_('Show Characteristic Points'), self.showPoints)
         menu.addAction(iutils.theme_icon('report'), _('Report'), self.hsm_report)
+        menu.addAction(_('Export images'), self.export_images)
         # Add generic image analysis entries
         ImageAnalysisNavigatorDomain.add_sample_menu(self, menu, node)
         return True
