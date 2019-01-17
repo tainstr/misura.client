@@ -352,12 +352,11 @@ class PlotsBoard(QtGui.QWidget):
         self.update(force=True)
         
     def slot_delete_selected_pages(self):
+        if not self.multiselection:
+            self.slot_delete_page(self.page.name)
         for page_name in self.multiselection:
             logging.debug('slot_delete_selected_pages', page_name)
             self.slot_delete_page(page_name, force=True)
-        if not self.multiselection:
-            self.slot_delete_page(self.page.name)
-        self.highlight()
         
     def slot_delete_children(self, page):
         """Recursively delete all child pages starting from selected `page`"""
