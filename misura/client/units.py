@@ -309,6 +309,8 @@ class Converter(object):
     @classmethod
     def convert(cls, from_unit, to_unit, val):
         """Direct conversion of `val` from `from_unit` to `to_unit`"""
+        if val is None:
+            return val
         func = cls.convert_func(from_unit, to_unit)
         return func(val)
 
