@@ -377,7 +377,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         colType = self.header[icol][1]
         row = self.rows[irow]
         if colType == 'Boolean':
-            s = value.toBool()
+            s = value=='True'
             s = s == True
             value = s
         elif colType == 'Float':
