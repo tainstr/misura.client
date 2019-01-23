@@ -466,7 +466,8 @@ class MisuraProxy(common_proxy.CommonProxy):
 
     def child(self, name):
         obj = self.toPath([name])
-        obj._parent = self
+        if obj:
+            obj._parent = self
         return obj
 
     @reconnect

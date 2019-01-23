@@ -161,22 +161,24 @@ ao(default_desc, 'm3_plugins', 'TextArea', 'thegram', 'Import plugins by name')
 # Option panels
 ao(default_desc, 'opt', 'Section', 'Options', 'Options')
 # rule, position
+i = xrange(50).__iter__().next
 rule_opt_status = [[('Option', 'String'), ('Position', 'Integer'), ('Force', 'Boolean')],
-                   ['^/isRunning$', 1, 0],
-                   ['^/kiln/analysis$', 2, 0],
-                   ['/measure/name$', 3, 0],
-                   ['/measure/elapsed$', 4, 0],
-                   ['^/kiln/T$', 5, 1],
-                   ['^/kiln/S$', 6, 1],
-                   ['^/kiln/P$', 7, 1],
-                   ['^/kiln/Ts$', 8, 1],
-                   ['^/kiln/Tk$', 9, 1],
-                   ['^/kiln/Th$', 10, 1],
-                   ['^/kiln/Te$', 11, 1],
-                   ['^/hsm/sample\d/h$', 12, 0],
-                   ['^(horizontal|vertical|flex)?/sample\d/d$', 13, 0],
-                   ['^(horizontal|vertical|flex)?/sample\d/initialDimension$', 14, 0],
-                   ['^/dta/sample\d/deltaT$', 15, 0],
+                   ['^/isRunning$', i(), 0],
+                   ['^/kiln/analysis$', i(), 0],
+                   ['/measure/name$', i(), 0],
+                   ['/measure/elapsed$', i(), 0],
+                   ['^/kiln/T$', i(), 1],
+                   ['^/kiln/S$', i(), 1],
+                   ['^/kiln/P$', i(), 1],
+                   ['^/kiln/Ts$', i(), 1],
+                   ['^/kiln/Tk$', i(), 1],
+                   ['^/kiln/Th$', i(), 1],
+                   ['^/kiln/Te$', i(), 1],
+                   ['^/smaug/1921200202020/rate$', i(), 0],
+                   ['^/hsm/sample\d/h$', i(), 0],
+                   ['^(horizontal|vertical|flex)?/sample\d/d$', i(), 0],
+                   ['^(horizontal|vertical|flex)?/sample\d/initialDimension$', i(), 0],
+                   ['^/dta/sample\d/deltaT$', i(), 0],
                    ]
 
 ao(default_desc, 'opt_status', 'Table', rule_opt_status, 'Status')

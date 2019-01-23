@@ -35,8 +35,26 @@ class Status(QtGui.QWidget):
         
         # Collect available ordered options
         opts = {} # position: (parent, handle)
-        opts = add_object_options(server, opts)
-        opts = add_object_options(server.kiln, opts)
+        for row in confdb['opt_status'][1:]:
+            if not row[0].startswith('^/'):
+                continue
+            rule=row[0].replace('^/', '').replace('$','').split('/')
+            obj = server
+            while len(rule)>1 and rule[0].isalnum():
+                # Child object name
+                try:
+                    obj = obj.child(rule.pop(0))
+                except:
+                    obj = None
+                if not obj:
+                    break
+            # If object was found
+            if obj:
+                try:
+                    opts = add_object_options(obj, opts)
+                except:
+                    pass
+            
         opts = add_object_options(remObj.measure, opts)
         for i in range(remObj.measure['nSamples'] + 1):
             name = 'sample' + str(i)
