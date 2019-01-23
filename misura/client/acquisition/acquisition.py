@@ -702,6 +702,8 @@ class MainWindow(QtGui.QMainWindow):
         logging.debug('summaryPlot')
         self.tasks.job(-1, pid, 'Sync graph with document')
         self.summaryPlot.set_doc(doc)
+        if not self.fixedDoc:
+            self.summaryPlot.plot.actionSetTimeout(2000, True)
         self.connect_statusbar()
 
         logging.debug('navigator')

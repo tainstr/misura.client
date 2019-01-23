@@ -127,7 +127,6 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         self.sigUpdatePage.connect(self.update_page)
         self.navigator = False
         registerImportCommand('MoveToLastPage', self.moveToLastPage)
-        self.actionSetTimeout(250, True)
         self.setAcceptDrops(True)
         
     def dragMoveEvent(self, event):
