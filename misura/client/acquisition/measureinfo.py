@@ -229,6 +229,9 @@ class MeasureInfo(QtGui.QTabWidget):
             "background-color:" + ('red;' if is_running else 'green;'))
 
         # Update isRunning widget
+        if not '/isRunning' in self.statusView.widgets:
+            # Not initialized
+            return 
         self.statusView.widgets['/isRunning']._get(is_running)
         
         

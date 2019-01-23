@@ -176,6 +176,7 @@ rule_opt_status = [[('Option', 'String'), ('Position', 'Integer'), ('Force', 'Bo
                    ['^/kiln/Te$', i(), 1],
                    ['^/smaug/1921200202020/rate$', i(), 0],
                    ['^/hsm/sample\d/h$', i(), 0],
+                   ['^/hsm/measure/nSamples$', i(), 0],
                    ['^(horizontal|vertical|flex)?/sample\d/d$', i(), 0],
                    ['^(horizontal|vertical|flex)?/sample\d/initialDimension$', i(), 0],
                    ['^/dta/sample\d/deltaT$', i(), 0],
