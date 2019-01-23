@@ -19,7 +19,11 @@ def add_object_options(remObj, opts):
             continue
         pos, force = pos
         if pos:
+            if h1 in opts['kid']:
+                continue
+            opts['kid'].add(h1)
             opts[pos] = (remObj, handle, force)
+            
     return opts
             
 
@@ -34,7 +38,16 @@ class Status(QtGui.QWidget):
         self.lay.setRowWrapPolicy(QtGui.QFormLayout.WrapLongRows)
         
         # Collect available ordered options
-        opts = {} # position: (parent, handle)
+        opts = {'kid': set()} # position: (parent, handle)
+        opts = add_object_options(remObj.measure, opts)
+        
+        for i in range(remObj.measure['nSamples'] + 1):
+            name = 'sample' + str(i)
+            if not remObj.has_child(name):
+                continue
+            smp = getattr(remObj, name)
+            opts = add_object_options(smp, opts)
+        
         for row in confdb['opt_status'][1:]:
             if not row[0].startswith('^/'):
                 continue
@@ -44,10 +57,14 @@ class Status(QtGui.QWidget):
                 # Child object name
                 try:
                     obj = obj.child(rule.pop(0))
+                    if 'initInstrument' in obj and obj['fullpath']!=remObj['fullpath'] and obj['devpath']!='kiln':
+                        logging.debug('Skip foreign instrument', obj['fullpath'], row[0])
+                        obj = None
                 except:
                     obj = None
                 if not obj:
                     break
+                
             # If object was found
             if obj:
                 try:
@@ -55,16 +72,9 @@ class Status(QtGui.QWidget):
                 except:
                     pass
             
-        opts = add_object_options(remObj.measure, opts)
-        for i in range(remObj.measure['nSamples'] + 1):
-            name = 'sample' + str(i)
-            if not remObj.has_child(name):
-                continue
-            smp = getattr(remObj, name)
-            opts = add_object_options(smp, opts)
-        
         done_motor = False
         positions = sorted(opts.keys())
+        positions.remove('kid')
         for pos in positions:
             # Inject motor after third position
             if pos>3 and not done_motor:
