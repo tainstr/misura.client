@@ -226,7 +226,7 @@ class QuickOps(object):
     def deleteDatas(self, nodes=[]):
         """Call deleteData on each selected node"""
         for n in nodes:
-            self.deleteData(node=n)
+            self.deleteData(node=n.path)
 
 
     def widget_path_for(self, node, prefix=''):
