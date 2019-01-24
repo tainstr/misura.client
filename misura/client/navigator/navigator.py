@@ -303,6 +303,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         result = p.apply(self._mainwindow.cmd, {'dsn': dsn, 
                                        'rule': plot_rule})
         self.pause(False)
+        self.refresh_model()
         return op
     
     def reset_document(self):
