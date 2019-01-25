@@ -162,6 +162,7 @@ ao(default_desc, 'm3_plugins', 'TextArea', 'thegram', 'Import plugins by name')
 ao(default_desc, 'opt', 'Section', 'Options', 'Options')
 # rule, position
 i = xrange(50).__iter__().next
+i()
 rule_opt_status = [[('Option', 'String'), ('Position', 'Integer'), ('Force', 'Boolean')],
                    ['^/isRunning$', i(), 0],
                    ['^/kiln/analysis$', i(), 0],

@@ -22,6 +22,8 @@ def add_object_options(remObj, opts):
             if h1 in opts['kid']:
                 continue
             opts['kid'].add(h1)
+            while pos in opts:
+                pos += 0.01
             opts[pos] = (remObj, handle, force)
             
     return opts
@@ -39,9 +41,10 @@ class Status(QtGui.QWidget):
         
         # Collect available ordered options
         opts = {'kid': set()} # position: (parent, handle)
+        opts = add_object_options(server, opts)
         opts = add_object_options(remObj.measure, opts)
-        
-        for i in range(remObj.measure['nSamples'] + 1):
+        Nsamples = remObj.measure['nSamples']
+        for i in xrange(Nsamples + 1):
             name = 'sample' + str(i)
             if not remObj.has_child(name):
                 continue
@@ -57,7 +60,7 @@ class Status(QtGui.QWidget):
                 # Child object name
                 try:
                     obj = obj.child(rule.pop(0))
-                    if 'initInstrument' in obj and obj['fullpath']!=remObj['fullpath'] and obj['devpath']!='kiln':
+                    if ('initTest' in obj) and obj['fullpath']!=remObj['fullpath'] and obj['devpath']!='kiln':
                         logging.debug('Skip foreign instrument', obj['fullpath'], row[0])
                         obj = None
                 except:
@@ -90,6 +93,9 @@ class Status(QtGui.QWidget):
                 wg.value.force_update = force
             else:
                 wg.force_update = force
+            if Nsamples>1 and parent['devpath'].startswith('sample') and 'ii' in parent:
+                lbl = wg.label_widget
+                lbl.setText(lbl.text()+' ({})'.format(parent['idx']))
             
             self.insert_widget(wg)
         self.setLayout(self.lay)
