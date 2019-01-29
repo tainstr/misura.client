@@ -43,8 +43,7 @@ class Status(QtGui.QWidget):
         opts = {'kid': set()} # position: (parent, handle)
         opts = add_object_options(server, opts)
         opts = add_object_options(remObj.measure, opts)
-        Nsamples = remObj.measure['nSamples']
-        for i in xrange(Nsamples + 1):
+        for i in xrange(remObj.measure['nSamples'] + 1):
             name = 'sample' + str(i)
             if not remObj.has_child(name):
                 continue
@@ -93,9 +92,10 @@ class Status(QtGui.QWidget):
                 wg.value.force_update = force
             else:
                 wg.force_update = force
-            if Nsamples>1 and parent['devpath'].startswith('sample') and 'ii' in parent:
+            dp = parent['devpath'] 
+            if dp.startswith('sample') and 'ii' in parent:
                 lbl = wg.label_widget
-                lbl.setText(lbl.text()+' ({})'.format(parent['idx']))
+                lbl.setText(lbl.text()+' ({})'.format(dp[6:]))
             
             self.insert_widget(wg)
         self.setLayout(self.lay)
