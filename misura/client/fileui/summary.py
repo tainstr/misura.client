@@ -186,11 +186,13 @@ class SummaryHeader(QtGui.QHeaderView):
 
 
 class SummaryView(QtGui.QTableView):
-
+    sig_user_changed_idx = QtCore.pyqtSignal(int)
+    
     def __init__(self, parent=None):
         QtGui.QTableView.__init__(self, parent=None)
         self.setHorizontalHeader(SummaryHeader(parent=self))
         self.setWindowTitle(_("Data Table"))
+        self.clicked.connect(self.send_current_idx)
 
     def set_doc(self, doc, key=False):
         m = SummaryModel()
@@ -213,6 +215,7 @@ class SummaryView(QtGui.QTableView):
         return super(SummaryView, self).showEvent(event)
 
     def set_idx(self, idx=-1):
+        logging.debug('SummaryView.set_idx', idx)
         if idx < 0:
             idx = 0
         cidx = self.currentIndex()
@@ -223,6 +226,15 @@ class SummaryView(QtGui.QTableView):
         logging.debug('row, col', idx, col)
         midx = self.model().index(idx, col)
         self.setCurrentIndex(midx)
+        self.selectRow(idx)
+        
+    def set_time(self, t=-1):
+        self.set_idx(int(t))
+        
+    def send_current_idx(self, *a):
+        idx = self.currentIndex().row()
+        logging.debug('send_current_idx', idx)
+        self.sig_user_changed_idx.emit(idx)
 
     def hide_show(self, col):
         pass
@@ -249,6 +261,9 @@ class SummaryWidget(QtGui.QWidget):
   
     def set_idx(self, *a, **k):
         return self.table.set_idx(*a, **k)
+    
+    def set_time(self, *a, **k):
+        return self.table.set_time(*a, **k)
         
     def model(self):
         return self.table.model()

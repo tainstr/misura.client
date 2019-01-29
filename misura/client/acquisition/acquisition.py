@@ -726,6 +726,13 @@ class MainWindow(QtGui.QMainWindow):
             'set_time(float)'), self.navigator.set_time)
         self.connect(self.summaryPlot, QtCore.SIGNAL(
             'move_line(float)'), self.imageSlider.set_time)
+        
+        self.connect(self.summaryPlot, QtCore.SIGNAL(
+            'move_line(float)'), self.dataTable.set_time)
+        self.connect(self.summaryPlot, QtCore.SIGNAL(
+            'set_idx(int)'), self.dataTable.set_idx)
+        self.dataTable.sig_user_changed_idx.connect(self.imageSlider.set_time)
+        self.dataTable.sig_user_changed_idx.connect(self.summaryPlot.set_time)
         self.tasks.done(pid)
 
     max_retry = 10

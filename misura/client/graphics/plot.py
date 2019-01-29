@@ -254,6 +254,7 @@ class Plot(VeuszPlot):
             #self.cmd.Set('length', 1.)
         self.idx = seq
         self.idx_connect()
+        self.emit(QtCore.SIGNAL('set_idx(int)'), self.idx)
 
     def set_time(self, t):
         """Moves the position line according to the requested point in time"""
