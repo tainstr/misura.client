@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from traceback import format_exc
 from PyQt4 import QtGui, QtCore
 from .. import widgets
 from ..clientconf import confdb
@@ -63,6 +64,7 @@ class Status(QtGui.QWidget):
                         logging.debug('Skip foreign instrument', obj['fullpath'], row[0])
                         obj = None
                 except:
+                    logging.debug('Skip rule', row[0], format_exc())
                     obj = None
                 if not obj:
                     break

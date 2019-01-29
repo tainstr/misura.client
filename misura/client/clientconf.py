@@ -179,8 +179,8 @@ rule_opt_status = [[('Option', 'String'), ('Position', 'Integer'), ('Force', 'Bo
                    ['^/hsm/measure/nSamples$', i(), 0],
                    ['/sample\d/name$', i(), 0],
                    ['^/hsm/sample\d/h$', i(), 0],
-                   ['^(horizontal|vertical|flex)?/sample\d/d$', i(), 0],
-                   ['^(horizontal|vertical|flex)?/sample\d/initialDimension$', i(), 0],
+                   ['^/(horizontal|vertical|flex)?/sample\d/d$', i(), 0],
+                   ['^/(horizontal|vertical|flex)?/sample\d/initialDimension$', i(), 0],
                    ['^/dta/sample\d/deltaT$', i(), 0],
                    ]
 
