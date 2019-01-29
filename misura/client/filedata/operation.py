@@ -565,7 +565,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
     def get_time_sequence(self, instrobj):
         # Detect main time dataset
-        elapsed0 = self.proxy.get_node_attr('/conf', 'elapsed')
+        elapsed0 = int(self.proxy.get_node_attr('/conf', 'elapsed'))
         elapsed = int(instrobj.measure['elapsed'])
         elapsed = max(elapsed, elapsed0)
         logging.debug('got elapsed', elapsed)
