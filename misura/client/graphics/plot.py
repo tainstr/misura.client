@@ -37,24 +37,27 @@ class Plot(VeuszPlot):
         self.doc = doc
         self.idx = 0
         for g in ['/time/time', '/temperature/temp']:
-            self.cmd.To(g)
-            self.cmd.Set('topMargin', '16pt')
-            self.cmd.Add('line', name='idx')
-            self.cmd.To('idx')
-            self.cmd.Set('mode', 'length-angle')
-            self.cmd.Set('positioning', 'relative')
-            self.cmd.Set('angle', 90.)
-            self.cmd.Set('length', 1.)
-            self.cmd.Set('xPos', 0.)
-            self.cmd.Set('yPos', 1.)
-            self.cmd.Set('clip', True)
-            self.cmd.Set('Line/color', 'red')
-            self.cmd.Set('Line/width', '2pt')
-            self.cmd.To('..')
+            self.create_idx_line(g)
 
         self.reset()
         self.default_plot()
         self.idx_connect()
+        
+    def create_idx_line(self, graph_path):
+        self.cmd.To(graph_path)
+        self.cmd.Set('topMargin', '16pt')
+        self.cmd.Add('line', name='idx')
+        self.cmd.To('idx')
+        self.cmd.Set('mode', 'length-angle')
+        self.cmd.Set('positioning', 'relative')
+        self.cmd.Set('angle', 90.)
+        self.cmd.Set('length', 1.)
+        self.cmd.Set('xPos', 0.)
+        self.cmd.Set('yPos', 1.)
+        self.cmd.Set('clip', True)
+        self.cmd.Set('Line/color', 'red')
+        self.cmd.Set('Line/width', '2pt')
+        self.cmd.To('..')
 
     @property
     def model(self):
@@ -75,12 +78,12 @@ class Plot(VeuszPlot):
 
     def idx_disconnect(self):
         """Disconnect index line motion events"""
-        wg = self.doc.resolveFullWidgetPath('/temperature/temp/idx')
+        wg = self.idx_line('/temperature/temp/')
         try:
             wg.settings.get('xPos').removeOnModified(self.move_line_temp)
         except:
             pass
-        wg = self.doc.resolveFullWidgetPath('/time/time/idx')
+        wg = self.idx_line('/time/time/')
         try:
             wg.settings.get('xPos').removeOnModified(self.move_line_time)
         except:
@@ -210,6 +213,16 @@ class Plot(VeuszPlot):
         """Add new points to current datasets and save a temporary file"""
         self.reloadData(update=True)
         self.set_idx()
+        
+    def idx_line(self, graph_path):
+        """Returns or creates idx line"""
+        try:
+            idx = self.doc.resolveFullWidgetPath(graph_path + 'idx')
+        except:
+            logging.debug('Recreating idx line in', graph_path)
+            self.create_idx_line(graph_path)
+            idx = self.doc.resolveFullWidgetPath(graph_path + 'idx')
+        return idx
 
     def set_idx(self, seq=-1):
         """Moves the position line according to the requested point sequence index."""
@@ -229,9 +242,13 @@ class Plot(VeuszPlot):
             rel = (xval - rg[0]) / (rg[1] - rg[0])
             logging.debug('Red bar relative position:', g, dsn, seq,
                           rel, xval, rg, xax.autorange, xax.plottedrange)
-            self.cmd.To(g + 'idx')
-            self.cmd.Set('xPos', rel)
-            self.cmd.Set('length', 1.)
+            idx = self.idx_line(g)
+            idx.settings.xPos = rel
+            idx.settings.length = 1.
+            self.doc.setModified(True)
+            #self.cmd.To(g + 'idx')
+            #self.cmd.Set('xPos', rel)
+            #self.cmd.Set('length', 1.)
         self.idx = seq
         self.idx_connect()
 
