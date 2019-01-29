@@ -129,6 +129,7 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
         return text
 
     def valueFromText(self, text):
+        text = text.lstrip(self.prefix()).rstrip(self.suffix())
         if not self.double:
             return int(text)
         text = text.replace(self.locale().groupSeparator(),
@@ -146,23 +147,24 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
         return v
 
     def validate(self, text, pos):
-        if text in ('', '-', '+', '.', ','):
+        if text in ('', '-', '+', '.', ',', self.prefix(), self.suffix()):
             return (QtGui.QValidator.Intermediate, text, pos)
+        text1 = text.lstrip(self.prefix()).rstrip(self.suffix())
         if not self.double:
             try:
-                int(text)
+                int(text1)
                 return (QtGui.QValidator.Acceptable, text, pos)
             except:
                 return (QtGui.QValidator.Invalid, text, pos)
-        v, ok = self.locale().toFloat(text)
+        v, ok = self.locale().toFloat(text1)
         if not ok:
             try:
-                v = float(text)
+                v = float(text1)
                 ok = True
             except:
                 pass
         if not ok:
-            t = text.lower().replace(self.locale().decimalPoint(), '.')
+            t = text1.lower().replace(self.locale().decimalPoint(), '.')
             if t.endswith('e') or t.endswith('e-') or t.endswith('e+'):
                 ok = True
                 return (QtGui.QValidator.Intermediate, text, pos)
@@ -356,12 +358,13 @@ class aNumber(ActiveWidget):
             return False
         self.minbox = ScientificSpinbox(parent=self)
         self.minbox.setKeyboardTracking(False)
-        self.minbox.valueChanged.connect(self.edited_min_max_box)
+        self.minbox.editingFinished.connect(self.edited_min_max_box)
         self.minbox.setToolTip(_('Minimum'))
         self.minbox.setFrame(False)
         self.minbox.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.minbox.setAlignment(QtCore.Qt.AlignRight)
         self.minbox.setSuffix(' < ')
+        self.minbox.setRange(MININT,MAXINT)
         if self.slider:
             min_pos = self.lay.count() - 5
             max_pos = self.lay.count() - 2
@@ -373,10 +376,11 @@ class aNumber(ActiveWidget):
         self.maxbox = ScientificSpinbox(parent=self)
         self.maxbox.setKeyboardTracking(False)
         self.maxbox.setFrame(False)
-        self.maxbox.valueChanged.connect(self.edited_min_max_box)
+        self.maxbox.editingFinished.connect(self.edited_min_max_box)
         self.maxbox.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
         self.maxbox.setToolTip(_('Maximum'))
         self.maxbox.setPrefix(' < ')
+        self.maxbox.setRange(MININT,MAXINT)
         self.lay.insertWidget(max_pos, self.maxbox)     
         return True   
 

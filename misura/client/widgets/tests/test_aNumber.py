@@ -83,7 +83,7 @@ class aNumber(unittest.TestCase):
         
     def test_MIN_MAX_dbl(self):
         self.root.sete(
-            'Test', option.ao({}, 'Test', 'Float', 5, 'Float bounds', min=-10,  max=10)['Test'])
+            'Test', option.ao({}, 'Test', 'Float', 5, 'Float bounds', min=-10,  max=10, show_range=True)['Test'])
         w = self.wgGen()
         self.assertEqual(w.current, 5)
         self.assertTrue(w.slider)
