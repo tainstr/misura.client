@@ -65,11 +65,14 @@ class Plot(VeuszPlot):
 
     def idx_connect(self):
         """Reconnect index line motion events"""
-        # CANNOT work with heating/cooling! 
-        #wg = self.doc.resolveFullWidgetPath('/temperature/temp/idx')
-        #wg.settings.get('xPos').setOnModified(self.move_line_temp)
         try:
-            wg = self.doc.resolveFullWidgetPath('/time/time/idx')
+            wg = self.idx_line('/temperature/temp/')
+            wg.settings.get('xPos').setOnModified(self.move_line_temp)
+        except:
+            logging.warning('idx_connect: no temperature page')
+            return False
+        try:
+            wg = self.idx_line('/time/time/')
             wg.settings.get('xPos').setOnModified(self.move_line_time)
         except:
             logging.warning('idx_connect: no time page')
