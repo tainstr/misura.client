@@ -373,7 +373,7 @@ class ThermalCycleDesigner(QtGui.QSplitter):
         
     def toggle_plot(self, visible):
         sz = self.sizes()
-        if sum(sz[-3:]) == 0 or visible:
+        if sz[-1] == 0 or visible:
             sz[-1] = 500
             sz[-2] = 200
             sz[-3] = 500
