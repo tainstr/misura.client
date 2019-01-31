@@ -81,7 +81,7 @@ class OptionLabel(utils.OperationWrapper, OptionAbstractWidget, widgets.TextLabe
         if not opt_name in proxy:
             return None
         opt = proxy.gete(opt_name)
-        if 'Hidden' in opt['attr']:
+        if 'Hidden' in opt['attr'] or 'ClientHide' in opt['attr']:
             return None
         typ = opt['type']
         # Resolve RoleIO pointers
@@ -91,6 +91,8 @@ class OptionLabel(utils.OperationWrapper, OptionAbstractWidget, widgets.TextLabe
                 logging.info('Cannot resolve RoleIO', opt_name, opt['options'])
                 return None
             opt_name = opt['options'][2]
+            if not opt_name in proxy:
+                return None
             opt = proxy.gete(opt_name)
             typ = opt['type']
         fmt = self.settings.format

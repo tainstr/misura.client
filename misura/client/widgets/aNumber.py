@@ -473,8 +473,9 @@ class aNumber(ActiveWidget):
     def set_precision(self):
         self.precision = self.range_precision.spinbox.value()
         self.spinbox.set_precision(self.precision)
-        self.minbox.set_precision(self.precision)
-        self.maxbox.set_precision(self.precision)
+        if self.minbox:
+            self.minbox.set_precision(self.precision)
+            self.maxbox.set_precision(self.precision)
         self.set_tooltip()
         self.update()
         
