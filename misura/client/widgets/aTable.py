@@ -211,6 +211,7 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.unit = 'None'
         self.csunit = 'None'
         self.precision = 'None'
+        self._rotated = self.tableObj.prop.get('rotate', False)
         self.up()
 
     def rowCount(self, index=QtCore.QModelIndex()):
@@ -553,6 +554,7 @@ class aTableModel(QtCore.QAbstractTableModel):
     @rotated.setter
     def rotated(self, new):
         self._rotated = new
+        self.tableObj.prop.set('rotate', new)
 
     def change_visibility(self, col, orientation, status=True):
         """Hide/show `col` according to `status`"""
