@@ -130,7 +130,11 @@ class RoleIO(ActiveWidget):
                 self.label_widget.hide()
                 self.hide()
                 raise RuntimeError('RoleIO points towards an hidden option.')
-            self.value = build(self.server, obj, refopt)
+            value = build(self.server, obj, refopt)
+            if not value:
+                logging.info('Cannot build role', self.handle, opt)
+                return
+            self.value = value
             if self.io_menu:
                 self.emenu.removeAction(self.io_menu)
             self.io_menu = self.emenu.addMenu(self.value.emenu)

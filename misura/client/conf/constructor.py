@@ -61,8 +61,9 @@ def sort_children(prop_dict):
 def orgSections(prop_dict, flat=False, configuration_level=5):
     """Reorder keys according to their sections"""
     # Move children options into their parent's "children" key
+    allowed_keys = prop_dict.keys()
     prop_dict = prop_dict.copy()
-    for handle in prop_dict.keys():
+    for handle in allowed_keys:
         prop = prop_dict.get(handle, False)
         if prop is False:
             continue
@@ -87,7 +88,13 @@ def orgSections(prop_dict, flat=False, configuration_level=5):
         del prop_dict[handle]
         # Update the parent on the main dictionary
         prop_dict[parent] = parentopt
-
+        
+    # Cleanup unwanted children
+    for opt in prop_dict.values():
+        children = opt['children'] 
+        remove_keys = set(children.keys())-set(allowed_keys)
+        map(children.pop, remove_keys)
+    
     # Sorting
     prop_dict = sort_children(prop_dict)
     # Sectioning
@@ -559,7 +566,7 @@ class Interface(QtGui.QTabWidget):
         self.menu.addAction(_('Search (Ctrl+F)'), self.activate_search)
         self.menu.addAction(_('Exit search (Esc)'), self.deactivate_search)
         self.menu.addAction(_('Table'), self.show_details)
-        self.menu.addAction(_('Rebuild'), self.rebuild)
+        self.menu.addAction(_('Rebuild'), functools.partial(self.rebuild, force=True, redraw=True))
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.connect(
             self, QtCore.SIGNAL('customContextMenuRequested(QPoint)'), self.showMenu)
@@ -709,7 +716,7 @@ class Interface(QtGui.QTabWidget):
         wg.sigScrollTo.connect(f)
         self._funcs.append(f)
         sname = 'Main'
-        if self.prop_dict.has_key(sname):
+        if sname in self.prop_dict:
             if self.prop_dict[sname]['type'] == 'Section':
                 sname = self.prop_dict[sname]['name']
         self.addTab(area, _('Main'))
@@ -727,7 +734,7 @@ class Interface(QtGui.QTabWidget):
             area.setWidgetResizable(True)
             self.areasMap[section] = area
             sname = section
-            if self.prop_dict.has_key(sname):
+            if sname in self.prop_dict:
                 if self.prop_dict[sname]['type'] == 'Section':
                     sname = self.prop_dict[sname]['name']
             self.addTab(area, _(sname))
