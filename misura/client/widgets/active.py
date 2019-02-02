@@ -315,7 +315,7 @@ class Active(object):
         """Set a new value `val` to server. Convert val into server units."""
         val = self.adapt2srv(val)
         if val == self.current:
-            logging.debug('Not setting',self.handle, repr(val), repr(self.current))
+            logging.debug('Not setting',self.handle, repr(val), repr(self.current), id(self.parent()), self.parent().isVisible())
             return True
         old = self.current
         out = self.remObj.set(self.handle,  val)
@@ -512,8 +512,8 @@ class ActiveWidget(Active, QtGui.QWidget):
     def __init__(self, server, remObj, prop, parent=None, context='Option'):
         Active.__init__(self, server, remObj, prop, context)
         QtGui.QWidget.__init__(self, parent)
-        self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
+        self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self._win_map = {}
         self.label = self.tr(self.name)
@@ -616,6 +616,8 @@ class ActiveWidget(Active, QtGui.QWidget):
     @lockme()
     def closeEvent(self, event):
         self.menu_timer.stop()
+        self.unregister()
+        self.blockSignals(True)
         return super(ActiveWidget, self).closeEvent(event)
 
     @property

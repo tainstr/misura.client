@@ -7,6 +7,7 @@ logging = get_module_logging(__name__)
 import functools
 import os
 import collections
+from traceback import print_exc
 import threading
 
 from misura.canon import option
@@ -136,11 +137,17 @@ class ClickableLabel(QtGui.QPushButton):
 class ChildSection(QtGui.QWidget):
     def __init__(self, *a, **k):
         super(QtGui.QWidget, self).__init__(*a, **k)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         self.widgetsMap={}
+        
+    def closeEvent(self, ev):
+        ev.accept()
+        return default_closeEvent(self)
 
 class OptionsGroup(QtGui.QGroupBox):
     def __init__(self, wg, child_section, parent=None):
         QtGui.QGroupBox.__init__(self, parent=parent)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         self.wg = wg
         self.child_section = child_section
         
@@ -220,6 +227,10 @@ class OptionsGroup(QtGui.QGroupBox):
     def widgetsMap(self):
         return self.child_section.widgetsMap
     
+    @widgetsMap.setter
+    def widgetsMap(self, w):
+        self.child_section.widgetsMap = w
+    
 
     def check_visibility(self, filtered):
         vis = set(self.widgetsMap.values())-filtered
@@ -232,12 +243,17 @@ class OptionsGroup(QtGui.QGroupBox):
             self.more.hide()
             self.hide()
             return True
+        
+    def closeEvent(self, ev):
+        ev.accept()
+        return default_closeEvent(self)
 
         
 class Section(QtGui.QGroupBox):
     """Form builder for a list of options"""
     def __init__(self, server, remObj, prop_list, title='Group', color='gray', parent=None, context='Option'):
         QtGui.QGroupBox.__init__(self, parent)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         self.setTitle(title)
         prop_list.sort(prop_sorter)
         self.p = []
@@ -260,6 +276,10 @@ class Section(QtGui.QGroupBox):
         self.groupsMap = {}
         for prop in prop_list:
             self.build(prop)
+            
+    def closeEvent(self, ev):
+        ev.accept()
+        return default_closeEvent(self)
     
     def hide_frame(self):
         self.setStyleSheet("""QGroupBox { background-color: transparent; 
@@ -394,6 +414,7 @@ class SectionBox(QtGui.QWidget):
     sigScrollTo = QtCore.pyqtSignal(int, int)
     def __init__(self, server, remObj, prop_list, parent=None, context='Option'):
         QtGui.QWidget.__init__(self, parent=parent)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         self.lay = QtGui.QVBoxLayout()
         self.setLayout(self.lay)
         self.server = server
@@ -427,21 +448,21 @@ class SectionBox(QtGui.QWidget):
         self.config_section = Section(server, remObj, config_list, title=_('Configuration'), color='gray',
                                       parent=self, context=context)
         
-        self.sections = [self.config_section, self.status_section, self.results_section]
-        [sec.hide() for sec in self.sections]
+        self.subsections = [self.config_section, self.status_section, self.results_section]
+        [sec.hide() for sec in self.subsections]
         self.widgetsMap = {}
         self.widgetsMap.update(self.status_section.widgetsMap)
         self.widgetsMap.update(self.results_section.widgetsMap)
         self.widgetsMap.update(self.config_section.widgetsMap)
         
-        lens = [len(sec.widgetsMap) > 0 for sec in self.sections]
+        lens = [len(sec.widgetsMap) > 0 for sec in self.subsections]
         # None active!
         if sum(lens) < 1:
             return
         # Just one active section:
         if sum(lens) == 1:
             i = lens.index(True)
-            sec = self.sections[i]
+            sec = self.subsections[i]
             self.lay.addWidget(sec)
             sec.show()
             sec.hide_frame()
@@ -467,32 +488,36 @@ class SectionBox(QtGui.QWidget):
 
         self.lay.addStretch(10)
         self.reorder()
+        
+    def closeEvent(self, ev):
+        ev.accept()
+        return default_closeEvent(self)
 
     def check_visibility(self, filtered):
         r = 0
-        for sec in self.sections:
+        for sec in self.subsections:
             r +=sec.check_visibility(filtered)
         return bool(r)
         
         
     def expand(self):
-        for s in self.sections:
+        for s in self.subsections:
             s.expand()
             
     def collapse(self):
-        for s in self.sections:
+        for s in self.subsections:
             s.collapse()
 
     def get_status(self):
         status = [True,True,True]
         # Hide everything
-        for i,w in enumerate(self.sections):
+        for i,w in enumerate(self.subsections):
             status[i] = w.isChecked() and len(w.widgetsMap)>0
         return status
     
     def set_status(self, status):
         for i, st in enumerate(status):
-            w = self.sections[i]
+            w = self.subsections[i]
             if st and len(w.widgetsMap)>0:
                 w.expand()
                 self.sigScrollTo.emit(w.pos().x(), w.pos().y() + 50)
@@ -540,6 +565,24 @@ class SectionBox(QtGui.QWidget):
 class SectionScroll(QtGui.QScrollArea):
     def wheelEvent(self, ev):
         ev.ignore()
+        
+def default_closeEvent(obj):
+    objs = getattr(obj, 'subsections', [])
+    if objs:
+        obj.subsections = []
+    for attr in ('sectionsMap', 'widgetsMap', 'groupsMap'):
+        sub = getattr(obj, attr, False)
+        if sub:
+            objs += sub.values()
+            print(type(obj),attr)
+            setattr(obj, attr, {})
+    obj.blockSignals(True)
+    for sub in objs:
+        sub.close()
+        sub.deleteLater()
+        sub.blockSignals(True)
+    
+    
 
 class Interface(QtGui.QTabWidget):
 
@@ -549,6 +592,7 @@ class Interface(QtGui.QTabWidget):
     flat = False
     def __init__(self, server, remObj=False, prop_dict=False, parent=None, context='Option', fixed=False, flat=False):
         QtGui.QTabWidget.__init__(self, parent)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
         self._lock = threading.Lock()
         self.server = server
         if remObj is False:
@@ -582,6 +626,14 @@ class Interface(QtGui.QTabWidget):
         QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Escape), 
                         self, 
                         self.deactivate_search)
+        
+        
+    def closeEvent(self, ev):
+        ev.accept()
+        self.clear()
+        self._deleted = True
+        return default_closeEvent(self)
+    
 
     def show_section(self, name, hide=False):
         """Set `name` as section the active tab. 
@@ -624,13 +676,17 @@ class Interface(QtGui.QTabWidget):
             logging.debug('Interface.rebuild: deleted')
             return False
         if not self.remObj.is_live() and 'fullpath' in self.remObj:
-            logging.debug('Check changeset', self.remObj['fullpath'], self.remObj._changeset, self.changeset)
+            logging.debug('Check changeset', self.remObj['fullpath'], self.remObj._changeset, self.changeset, id(self))
             if self.remObj._changeset<=self.changeset:
                 return False
             self.changeset = self.remObj._changeset
             
         if self.sectionsMap:
-            i = self.currentIndex()
+            try:
+                i = self.currentIndex()
+            except:
+                print_exc()
+                return
             self._prev_section = self.sectionsMap.keys()[i]
             self._prev_section_status = self.sectionsMap[self._prev_section].get_status() 
         if not prop_dict and self.fixed:
@@ -653,7 +709,6 @@ class Interface(QtGui.QTabWidget):
             logging.critical('Impossible to get object description',
                              self.remObj._Method__name)
             return
-        self.clear()
         # Check if the option should be hidden by configuration opt_hide:
         fp = ''
         if 'fullpath' in prop_dict:
@@ -703,7 +758,10 @@ class Interface(QtGui.QTabWidget):
             sec.reorder()
 
     def redraw(self, foo=0):
-        self.close()
+        if self._deleted:
+            logging.debug('Interface.redraw: deleted')
+            return False
+        self.clear()
         wg = SectionBox(
             self.server, self.remObj, self.sections['Main'], parent=self)
         self.sectionsMap = collections.OrderedDict({'Main': wg})
@@ -791,7 +849,7 @@ class Interface(QtGui.QTabWidget):
     def scroll_to(self, area, x, y):
         area.ensureVisible(x, y - 50)
 
-    def close(self):
+    def __close(self):
         if not self.sectionsMap:
             return
         for wg in self.sectionsMap.itervalues():
@@ -865,12 +923,12 @@ class Interface(QtGui.QTabWidget):
     def expand_all(self):
         for sec in self.sectionsMap.itervalues():
             sec.expand()
-            for s in sec.sections:
+            for s in sec.subsections:
                 s.expand_children()
                 
     def collapse_all(self):
         for sec in self.sectionsMap.itervalues():
-            for s in sec.sections:
+            for s in sec.subsections:
                 s.collapse_children()
         
     def deactivate_search(self):
