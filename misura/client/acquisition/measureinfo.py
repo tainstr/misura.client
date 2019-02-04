@@ -200,6 +200,15 @@ class MeasureInfo(QtGui.QTabWidget):
             self.nodeViews[n] = wg
             self.nodes.append(n)
             logging.debug('Inserted tab node', n, j)
+            
+        # Deleting
+        missing = set(self.nodeViews.keys())-set(self.nodes)
+        for n in missing:
+            logging.debug('Deleting unused nodeView', n)
+            wg = self.nodeViews.pop(n) 
+            wg.close()
+            wg.deleteLater()
+        
         return True
 
     def show_menu(self, pos):
