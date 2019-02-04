@@ -29,7 +29,7 @@ def build(server, remObj, prop, parent=None, force=False):
     from aTime import aTime, aDelay
     from aFileList import aFileList
     from presets import PresetManager
-    from role import Role,  RoleIO
+    from role import Role,  RoleIO, PointlessRoleError
     from cycle import ThermalCycleChooser
     arg = (server, remObj, prop, parent)
     A = prop.get('attr', [])
@@ -85,13 +85,18 @@ def build(server, remObj, prop, parent=None, force=False):
             obj = aProfile(*arg)
         elif prop['kid'] == '/progress':
             obj = RoleProgress(*arg)
+    except PointlessRoleError:
+        logging.debug('PontlessRole', prop, *arg)
+        if obj:
+            obj.hide()
+            obj.close()
+        return False
     except:
         logging.debug('Building ', prop, 'of', remObj, 'error:')
         logging.debug(format_exc())
         if obj:
             obj.hide()
             obj.close()
-            del obj
         return False
     return obj
 

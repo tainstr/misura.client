@@ -77,6 +77,10 @@ class Role(ActiveWidget):
         return d.exec_()
 
 
+class PointlessRoleError(RuntimeError):
+    pass
+
+
 class RoleIO(ActiveWidget):
     isIO = True
     value = None
@@ -129,7 +133,7 @@ class RoleIO(ActiveWidget):
             if refopt is False or ('Hidden' in [refopt['type']]+refopt['attr']):
                 self.label_widget.hide()
                 self.hide()
-                raise RuntimeError('RoleIO points towards an hidden option.')
+                raise PointlessRoleError()
             value = build(self.server, obj, refopt)
             if not value:
                 logging.info('Cannot build role', self.handle, opt)
