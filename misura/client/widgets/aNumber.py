@@ -82,6 +82,7 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
     flexibleChanged = QtCore.pyqtSignal(object)
     float_decimals = 0
     precision = -1
+    minimal_size = False
 
     def __init__(self, double=True, scientific_decimals=8, parent=None):
         QtGui.QDoubleSpinBox.__init__(self, parent=parent)
@@ -101,6 +102,7 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
         p = self.precision if self.precision >= 0 else 2
         dc = extend_decimals(self.value(), p)
         self.float_decimals = dc
+        
 
     def set_precision(self, p):
         self.precision = p
@@ -126,6 +128,8 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
             text = pre.format(value).replace('.', self.locale().decimalPoint())
         else:
             text = str(int(value))
+        if self.minimal_size:
+            self.setMaximumWidth(7*len(self.text()))
         return text
 
     def valueFromText(self, text):
@@ -144,6 +148,8 @@ class ScientificSpinbox(QtGui.QDoubleSpinBox):
             v, ok = self.locale().toFloat(text)
         if not ok:
             v = 0
+        if self.minimal_size:
+            self.setMaximumWidth(7*len(self.text()))
         return v
 
     def validate(self, text, pos):
@@ -358,6 +364,7 @@ class aNumber(ActiveWidget):
             return False
         self.minbox = ScientificSpinbox(parent=self)
         self.minbox.setKeyboardTracking(False)
+        self.minbox.minimal_size = True
         self.minbox.editingFinished.connect(self.edited_min_max_box)
         self.minbox.setToolTip(_('Minimum'))
         self.minbox.setFrame(False)
@@ -375,6 +382,7 @@ class aNumber(ActiveWidget):
     
         self.maxbox = ScientificSpinbox(parent=self)
         self.maxbox.setKeyboardTracking(False)
+        self.maxbox.minimal_size = True
         self.maxbox.setFrame(False)
         self.maxbox.editingFinished.connect(self.edited_min_max_box)
         self.maxbox.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
