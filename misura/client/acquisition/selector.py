@@ -78,8 +78,7 @@ class InstrumentSelector(QtGui.QWidget):
             for current_column, preset in enumerate(presets):
                 button = add_button(self,
                                     current_instrument_layout,
-                                    os.path.join(params.pathArt,
-                                                 preset.split('_')[-1] + '.png'),
+                                    preset,
                                     ' '.join(preset.split('_')[:-1]),
                                     50,
                                     1,
