@@ -317,7 +317,7 @@ class DocumentModel(QtCore.QAbstractItemModel):
                     
                     #Add plot key
                     key = self.decorate(node, Qt.UserRole)
-                    if key:
+                    if key and not key.startswith('RPC|'):
                         t += ' '+key
                     
                     return t
