@@ -165,7 +165,7 @@ Section "Misura" SEC01
   WriteRegStr HKCR "MisuraGraphics.Document\DefaultIcon" "" '"$INSTDIR\icons\graphics.ico"'
   
   WriteRegStr HKCR ".h5" "" "Misura.Document"
-  WriteRegStr HKCR "Misura.Document" "" "Misura Document"
+  WriteRegStr HKCR "Misura.Document" "" "Misura HDF5 Document"
   WriteRegStr HKCR "Misura.Document\shell\open\command" "" '"$INSTDIR\${TASK_NAME}" --browser "%1"'
   WriteRegStr HKCR "Misura.Document\DefaultIcon" "" '"$INSTDIR\icons\browser.ico"'
   
