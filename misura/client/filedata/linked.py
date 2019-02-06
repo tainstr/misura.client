@@ -12,7 +12,11 @@ class LinkedMisuraFile(base.LinkedFileBase):
     mtype = 'LinkedMisuraFile'
 
     def __init__(self, params):
-        params.filename = os.path.abspath(params.filename)
+        if params.filename and not params.filename.startswith('https://'):
+            params.filename = os.path.abspath(params.filename)
+            self.basename = os.path.basename(unicode(params.filename))
+        else:
+            self.basename = False
         base.LinkedFileBase.__init__(self, params)
         self.samples = []
         """List of samples contained in this file"""
@@ -33,7 +37,7 @@ class LinkedMisuraFile(base.LinkedFileBase):
         """File title"""
 #		self.filename=params.filename
         
-        self.basename = os.path.basename(unicode(params.filename))
+        
 
     def saveToFile(self, fileobj, relpath=None):
         """Save the link to the document file."""

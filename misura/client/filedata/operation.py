@@ -65,6 +65,7 @@ def get_linked(doc, params, create=True):
     while prefix in used:
         base, n, pre = iutils.guessNextName(prefix[:-1])
         prefix = pre + ':'
+        print('get_linked guess', prefix)
     params.prefix = prefix
     params.version = VERSION_LATEST
     LF = linked.LinkedMisuraFile(params)
@@ -128,7 +129,7 @@ def not_interpolated(proxy, col, startt, endt):
     logging.debug('not interpolating col', col, startt, endt)
     # Take first point to get column start time
     zt = proxy.col(col, 0)
-    if zt is None or len(zt) == 0:
+    if zt is None or zt is False or len(zt) == 0:
         logging.debug('Skipping column: no data', col, zt)
         return False, False
     zt = zt[0]
@@ -429,7 +430,6 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
         QtCore.QObject.__init__(self)
         base.OperationDataImportBase.__init__(self, params)
-
         self.linked = True
         self.filename = params.filename
         self.uid = params.uid
@@ -488,6 +488,7 @@ class OperationMisuraImport(QtCore.QObject, base.OperationDataImportBase):
 
     def get_file_proxy(self):
         """Try to open a FileProxy and a LinkedFile from the parameters (filename and uid)"""
+        logging.debug('get_file_proxy',self.uid,self.filename)
         doc = self._doc
         if self.uid:
             new = clientconf.confdb.resolve_uid(self.uid)
