@@ -290,6 +290,7 @@ def resolve_unit(ds, opt, default):
         ds.old_unit = default
         return False
     ds.m_opt = opt
+    col = opt.get('column', -1)
     obj, io = option.resolve_role(ds.m_conf, opt)
     io = io or opt
     original_unit = io.get('unit', ds.old_unit)
@@ -299,9 +300,9 @@ def resolve_unit(ds, opt, default):
     if original_unit == 'None':
         original_unit = client_unit
     if hasattr(client_unit, '__iter__'):
-        client_unit = client_unit[-1]
+        client_unit = client_unit[col]
     if hasattr(client_unit, '__iter__'):
-        original_unit = original_unit[-1]
+        original_unit = original_unit[col]
     ds.unit = client_unit
     ds.old_unit = original_unit
     return True

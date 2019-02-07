@@ -103,7 +103,7 @@ class AbstractMisuraDataset(object):
         """Get proper unit based on Table column, if
         dataset represents a column in the table"""
         u = self.m_opt.get(name, alt)
-        if not self.m_opt['type']=='Table' or u==alt or isinstance(u, basestring):
+        if self.m_opt['type']!='Table' or u==alt or isinstance(u, basestring):
             return u
         #FIXME: Ineffective, see design issue FLTD-348
         i = self.m_opt.get('column', -1)
@@ -113,10 +113,11 @@ class AbstractMisuraDataset(object):
         """Set proper unit based on Table column,if
         dataset represents a column in the table"""
         u = self.m_opt.get(name, None)
-        if not self.m_opt['type']=='Table' or u==None or isinstance(u, basestring):
+        if self.m_opt['type']!='Table' or u==None or isinstance(u, basestring):
             self.m_opt[name] = nval 
             return 
-        #FIXME: Ineffective, see design issue FLTD-348
+        if name not in self.m_opt:
+            self.m_opt[name] = self.m_opt['unit']
         i = self.m_opt.get('column', -1)
         self.m_opt[name][i] = nval
                 
@@ -125,7 +126,10 @@ class AbstractMisuraDataset(object):
     def unit(self):
         u = self.attr['unit']
         if isinstance(u, list):
-            u=u[-1]
+            i = -1
+            if self.m_opt:
+                i = self.m_opt.get('column', -1)
+            u=u[i]
         return u
     
     @unit.setter

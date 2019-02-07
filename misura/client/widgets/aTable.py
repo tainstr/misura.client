@@ -609,6 +609,7 @@ class aTableModel(QtCore.QAbstractTableModel):
 
     def change_unit(self, col, to_unit):
         self.csunit[col] = to_unit
+        self.tableObj.set_unit(self.csunit)
 
     @property
     def visible_indexes(self):
