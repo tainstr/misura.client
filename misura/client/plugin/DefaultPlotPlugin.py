@@ -36,6 +36,16 @@ class DefaultPlotPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         ]
         self.created = [] # created graphs
         
+    def set_ranges(self, graph_path, axis_name, ranges):
+        logging.debug('set_ranges', graph_path, axis_name, ranges)
+        g = self.doc.resolveFullWidgetPath(graph_path)
+        x = g.getChild(axis_name)
+        if x:
+            self.toset(x, 'min', ranges[0])
+            self.toset(x, 'max', ranges[1])
+        else:
+            logging.error('DefaultPlotPlugin: cannot apply ranges: no axis!', graph_path, axis_name, ranges)
+        
     def get_time_datasets(self, names, graph):
         x = []
         y = []
