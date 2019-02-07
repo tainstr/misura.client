@@ -259,7 +259,10 @@ def get_unit_hdf_attr(fileproxy, hdf_dataset_name, unit_attr):
         u = False
     elif hasattr(u, '__iter__'):
         # FIXME: if it comes from a table, should parse header and take correct idx!
-        u = u[-1]
+        column = fileproxy.get_node_attr(hdf_dataset_name, 'column')
+        if column in ['', 'None', None, []]:
+            column = -1
+        u = u[column]
     return u
 
 def dataset_measurement_unit(hdf_dataset_name, fileproxy, data, m_var):
@@ -362,7 +365,7 @@ def create_dataset(fileproxy, data, prefixed_dataset_name,
     if hdf_dataset_name:
         assign_label(ds, hdf_dataset_name)
     #logging.debug('done create_dataset', prefixed_dataset_name,
-    #              pure_dataset_name, hdf_dataset_name, variable_name)
+    #              pure_dataset_name, hdf_dataset_name, variable_name, ds.unit, ds.old_unit)
     return ds
 
 

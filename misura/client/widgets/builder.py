@@ -86,7 +86,7 @@ def build(server, remObj, prop, parent=None, force=False):
         elif prop['kid'] == '/progress':
             obj = RoleProgress(*arg)
     except PointlessRoleError:
-        logging.debug('PontlessRole', prop, *arg)
+        logging.debug('PointlessRole', prop, *arg)
         if obj:
             obj.hide()
             obj.close()

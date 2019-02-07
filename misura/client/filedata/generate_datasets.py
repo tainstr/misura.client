@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Automated option->dataset generation utilities"""
 import numpy as np
-from copy import copy
+from copy import copy, deepcopy
 import re
 
 from misura.canon import option
@@ -194,18 +194,18 @@ def table_to_datasets(proxy, opt, doc):
             u = unit[timecol_idx]
             if not u:
                 u = 'second'
-            topt = option.ao({}, handle+'_t', 'Float', 0, 'Time', unit=u).popitem()[1]
+            topt = option.ao({}, handle+'_t', 'Float', 0, 'Time', column=timecol_idx, unit=u).popitem()[1]
             datasets[
                 path + '_t'] = (tab[timecol_idx], path + '_t', 'Time', None, topt)
         if Tcol_name:
             u = unit[Tcol_idx]
             if not u:
                 u = 'celsius'
-            Topt = option.ao({}, handle+'_T', 'Float', 0, 'Temperature', unit=u).popitem()[1]
+            Topt = option.ao({}, handle+'_T', 'Float', 0, 'Temperature', column=Tcol_idx, unit=u).popitem()[1]
             datasets[
                 path + '_T'] = (tab[Tcol_idx], path + '_T', 'Temperature', None, Topt)
     
-    opt1 = opt.copy()
+    opt1 = deepcopy(opt)
     
     if len(value_idxes) == 1:
         idx = value_idxes[0]
@@ -214,16 +214,19 @@ def table_to_datasets(proxy, opt, doc):
             err = tab[Ecol_idx]
             err[np.equal(err, np.nan)] = 0
         opt1['unit'] = opt1['unit'][idx]
+        opt1['column'] = idx
         datasets[base_path] = (tab[idx], opt['handle'], opt['name'], err, opt1)
         add_tT(base_path)
     else:
         logging.debug('Generating multi column datasets', value_idxes, column_names)
         for idx in value_idxes:
+            opt1 = deepcopy(opt)
             name = column_names[idx]
             sub_path = base_path + '/' + name
             
             if 'unit' in opt1 and isinstance(opt1['unit'], list):
                 opt1['unit'] = opt1['unit'][idx]
+            opt1['column'] = idx
             datasets[sub_path] = (tab[idx], name, opt['name'] + ' - ' + name, 
                                   None, opt1)
         add_tT(base_path)
