@@ -141,6 +141,18 @@ def build_recursive_aggregation_menu(root, main_dev, aggregation, handles_map, m
     if win_map is False:
         win_map = {}
     
+    # Leaf node: last aggregation targets
+    if not aggregation:
+        for dev in main_dev.devices:
+            fullpath = dev['fullpath']
+            dmenu = menu_map.get(fullpath, False)
+            if not dmenu:
+                menu_map[fullpath] = menu.addMenu(dev['name'])
+            f = functools.partial(
+                root.navigator.build_menu_from_configuration, dev, dmenu)
+            dmenu.menuAction().hovered.connect(f)
+        return False
+    
     fullpath = main_dev['fullpath']
     handle = handles_map.get(fullpath)
     f, targets, values, devs = main_dev.collect_aggregate(aggregation, handle)[:4]
@@ -170,14 +182,15 @@ def build_recursive_aggregation_menu(root, main_dev, aggregation, handles_map, m
                 menu_map[fullpath] = dmenu
             prop = dev.gete(t)
             agg = prop.get('aggregate', "")
-            if not agg:
-                continue
+            #if not agg:
+            #    continue
             dmenu.addSeparator()
             handles_map[fullpath] = t
             # Dynamically create deeper layers on request
             f = functools.partial(build_recursive_aggregation_menu,
                 root, dev, agg, handles_map, dmenu, menu_map=menu_map, win_map=win_map)
             dmenu.menuAction().hovered.connect(f)
+    return True
 
 
 def explore_child_aggregate(dev, target, win_map={}):
