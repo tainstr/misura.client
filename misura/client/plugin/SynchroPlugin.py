@@ -74,6 +74,12 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
             plugins.FieldBool("plot",
                                descr="Update plot",
                                default=True),
+            plugins.FieldInt("mean",
+                               descr="Mean surrounding points",
+                               default=0),
+            plugins.FieldBool("label",
+                               descr="Print translation values",
+                               default=False),
         ]
 
     def apply(self, cmd, fields):
@@ -100,10 +106,11 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
                                               doc)
             except:
                 break
-
-        message = message[2:]
-        label_name = 'sync_info_' + reference_curve.settings.yData.replace('/', ':')
-        add_label_to(reference_curve, message, label_name, doc, self.toset)
+        
+        if fields.get('label', False):
+            message = message[2:]
+            label_name = 'sync_info_' + reference_curve.settings.yData.replace('/', ':')
+            add_label_to(reference_curve, message, label_name, doc, self.toset)
         self.apply_ops()
 
     def synchronize_curves(self, reference_curve, translating_curve, fields, doc):
@@ -121,8 +128,14 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
         translating_dataset = doc.data[translating_dataset_name]
 
         reference_dataset = doc.data[reference_curve.settings.yData]
-
-        delta = translating_dataset.data[translating_curve_nearest_value_index] - reference_dataset.data[reference_curve_nearest_value_index]
+        
+        mean = fields['mean']
+        tra_len = len(translating_dataset)-1
+        translating_value = translating_dataset.data[max(0,translating_curve_nearest_value_index-mean):min(tra_len,translating_curve_nearest_value_index+mean)].mean()
+        ref_len = len(translating_dataset)-1
+        reference_value = reference_dataset.data[max(0,reference_curve_nearest_value_index-mean):min(ref_len, reference_curve_nearest_value_index+mean)].mean()
+        
+        delta = translating_value - reference_value
         if fields['mode'] in ('Translate Values', 'Create new datasets'):
             message = "Translated curve '%s' by %E %s." % (translating_dataset_name, delta, getattr(translating_dataset, 'unit', ''))
             if fields['mode'].startswith('Create'):
