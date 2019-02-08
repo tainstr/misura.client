@@ -22,14 +22,16 @@ class aTable(unittest.TestCase):
 
     def test(self):
         self.root.sete('test', option.ao({}, 'test', 'Table', [
-                       [('ColStr', 'String'), ('ColInt', 'Integer'), ('ColFloat', 'Float')], ['pippo', 1, 0.5]])['test'])
+                       [('ColStr', 'String'), ('ColInt', 'Integer'), ('ColFloat', 'Float')], 
+                       ['pippo', 1, 0.5],
+                       ['ciccio', 2, 1.5]])['test'])
         widget = self.wgGen()
         view = widget.table
         model = view.model()
         self.assertFalse(model.rotated)
         
         #Shape
-        self.assertEqual(model.rowCount(), 1)
+        self.assertEqual(model.rowCount(), 2)
         self.assertEqual(model.columnCount(), 3)
         
         # Hor header
@@ -45,7 +47,7 @@ class aTable(unittest.TestCase):
         model.set_visible_col(0, 1)
         
         model.set_visible_row(0, 0)
-        self.assertEqual(model.rowCount(), 1)
+        self.assertEqual(model.rowCount(), 2)
         # Nothing left
         self.assertEqual(model.headerData(0, QtCore.Qt.Vertical),  None)
         model.set_visible_row(0, 1)

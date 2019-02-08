@@ -3,7 +3,7 @@
 from functools import partial
 import os
 import io
-
+from traceback import print_exc
 import numpy as np
 
 from .. import _
@@ -14,6 +14,8 @@ from misura.client.clientconf import settings
 from . import builder
 from _collections import defaultdict
 from misura.canon.option.aggregative import calc_aggregate_subelements
+
+from veusz.utils.colormap import _defaultmaps, stepCMap
 
 def _export(loaded, get_column_func,
             path='/tmp/misura/m.csv',
@@ -122,6 +124,9 @@ class aTablePointDelegate(QtGui.QItemDelegate):
         mod = index.model()
         col = index.column()
         p = mod.tableObj.prop.get('precision', 2)
+        # Do not allow editing the output row
+        if index.row()==len(mod.rows):
+            return False
         if hasattr(p, '__len__'):
             p = p[col]
         
@@ -208,6 +213,8 @@ class aTableModel(QtCore.QAbstractTableModel):
         self.header_struct = {}
         self.visible_headers = []  # visible headers
         self.visible_data = []  # visible data rows
+        self.mean_row = [] # mean columns row
+        self.column_ranges = [] # max error row in case of mean
         self.unit = 'None'
         self.csunit = 'None'
         self.precision = 'None'
@@ -217,7 +224,7 @@ class aTableModel(QtCore.QAbstractTableModel):
     def rowCount(self, index=QtCore.QModelIndex()):
         if self.rotated:
             return len(self.header)
-        return len(self.rows)
+        return len(self.rows)+(len(self.mean_row)>0)
 
     def columnCount(self, index=QtCore.QModelIndex()):
         if self.rotated:
@@ -225,7 +232,10 @@ class aTableModel(QtCore.QAbstractTableModel):
         return len(self.header)
     
     def raw_value(self, col, row):
-        row = self.rows[row]
+        if row==len(self.rows) and self.mean_row:
+            row = self.mean_row
+        else:
+            row = self.rows[row]
         val = row[col]
         return val
     
@@ -253,13 +263,26 @@ class aTableModel(QtCore.QAbstractTableModel):
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
         if not index.isValid() or not (0 <= index.row() <= self.rowCount()):
-            return 0
+            return 
         row = index.row()
         col = index.column()
         if self.rotated:
             a = col
             col = row
             row = a
+        
+        if role == QtCore.Qt.ForegroundRole and self.mean_row \
+                    and row<len(self.rows) and self.mean_row[col] is not None:
+            mean = self.mean_row[col]
+            rv = self.raw_value(col, row)
+            v = 0.5+(rv-mean)/self.column_ranges[col]
+            c = int((len(self.rows)-1)*v)
+            rgb = self.colormap[c]
+            
+            brush = QtGui.QBrush()
+            brush.setColor(QtGui.QColor(*rgb))
+            return brush
+            
         if role == QtCore.Qt.DecorationRole:
             if self.header[col][1]!='Boolean':
                 return
@@ -326,6 +349,28 @@ class aTableModel(QtCore.QAbstractTableModel):
             for i,name in enumerate(h):
                 self.header_struct[i].add(name)
                 
+    def calc_mean_row(self):
+        self.mean_row = []
+        self.column_ranges = []
+        if 'MeanByColumn' not in self.tableObj.prop['attr']:
+            return False
+        if not len(self.rows)>1 or not len(self.rows[0])>0:
+            logging.debug('Not enough data for MeanByColumn')
+            return False
+        cols = np.array(self.rows).transpose()
+        for i in xrange(len(cols)):
+            try:
+                col = cols[i][:].astype(float)
+                self.mean_row.append(col.mean())
+                self.column_ranges.append(col.max()-col.min())
+            except:
+                print_exc()
+                self.mean_row.append(None)
+                self.column_ranges.append(None)
+        self.colormap = stepCMap(_defaultmaps['cool-warm'], len(self.rows))[1:]
+        return True
+    
+                
     def up(self, validate=True):
         r = self._rotated
         self._rotated = False
@@ -347,6 +392,7 @@ class aTableModel(QtCore.QAbstractTableModel):
             self.tableObj.update_option()
             self.up(validate=False)
         self._rotated = r
+        self.calc_mean_row()
         QtCore.QAbstractTableModel.reset(self)
         return v
 
@@ -376,6 +422,9 @@ class aTableModel(QtCore.QAbstractTableModel):
             icol = irow
             irow = a
         colType = self.header[icol][1]
+        if irow==len(self.rows) and self.mean_row:
+            logging.debug('Cannot edit mean row')
+            return False
         row = self.rows[irow]
         if colType == 'Boolean':
             s = value=='True'
@@ -554,7 +603,7 @@ class aTableModel(QtCore.QAbstractTableModel):
     @rotated.setter
     def rotated(self, new):
         self._rotated = new
-        self.tableObj.prop.set('rotate', new)
+        self.tableObj.prop['rotate']= new
 
     def change_visibility(self, col, orientation, status=True):
         """Hide/show `col` according to `status`"""
@@ -682,6 +731,23 @@ class aTableView(QtGui.QTableView):
     @property
     def rotated(self):
         return self.model().rotated
+    
+    @property
+    def prop(self):
+        return self.tableObj.prop
+    
+    @property
+    def remObj(self):
+        return self.tableObj.remObj
+    
+    def toggle_mean_row(self):
+        if 'MeanByColumn' not in self.prop['attr']:
+            self.remObj.add_attr(self.tableObj.handle, 'MeanByColumn')
+        elif 'MeanByColumn' in self.prop['attr']:
+            self.remObj.del_attr(self.tableObj.handle, 'MeanByColumn')
+        self.tableObj.update_option()
+        logging.debug('set_mean_row', self.prop['attr'])
+        self.model().up()
 
     def showMenu(self, pt):
         index = self.indexAt(pt)
@@ -698,6 +764,7 @@ class aTableView(QtGui.QTableView):
         if self.selectionModel().hasSelection():
             menu.addAction(_('Copy'), self.copy_selection, QtGui.QKeySequence.Copy)
         menu.addAction(_('Export'), self.export, QtGui.QKeySequence.Save)
+        
         self.make_rotation_action(menu)
         menu_zoom = menu.addMenu(_('Zoom'))
         act_zoom = ZoomAction(menu_zoom)
@@ -853,6 +920,10 @@ class aTableView(QtGui.QTableView):
         if not self.tableObj.readonly:
             menu.addAction(_('Add row'), self.addRow)
         
+        
+        act = menu.addAction(_('Mean by column'), self.toggle_mean_row)
+        act.setCheckable(True)
+        act.setChecked('MeanByColumn' in self.prop['attr'])
         menu.popup(header.mapToGlobal(pt))
 
     def export(self):
