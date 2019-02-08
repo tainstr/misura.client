@@ -282,6 +282,11 @@ class aTableModel(QtCore.QAbstractTableModel):
             brush = QtGui.QBrush()
             brush.setColor(QtGui.QColor(*rgb))
             return brush
+        
+        elif role == QtCore.Qt.FontRole and row==len(self.rows):
+            font = QtGui.QFont()
+            font.setBold(True)
+            return font
             
         if role == QtCore.Qt.DecorationRole:
             if self.header[col][1]!='Boolean':
