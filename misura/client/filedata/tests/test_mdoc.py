@@ -72,7 +72,7 @@ class MisuraDocument(unittest.TestCase):
         ds0 = doc.data.pop(n)
         data0 = ds0.data
         doc.add_cache(ds0, n)
-        self.assertEqual(ds0.data, [])
+        self.assertEqual(len(ds0.data), 0)
         ds1 = doc.get_cache(n)
         self.assertTrue((data0==ds1.data).all())
         

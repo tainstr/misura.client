@@ -176,7 +176,7 @@ class VersionMenu(QtGui.QMenu):
             logging.debug('No plots for selected version', version)
             return False
         menu.addSeparator()
-        for plot_id, (title, date, render, render_format) in p.iteritems():
+        for plot_id, (title, date, render, render_format) in p.items():
             pmenu = PlotSubMenu(self, version, plot_id, title,
                                 date, render, render_format, parent=menu)
             menu.addMenu(pmenu)
@@ -192,7 +192,7 @@ class VersionMenu(QtGui.QMenu):
         self.current = self.proxy.get_version()
         logging.debug('Current version', self.current)
         self.loadActs = []
-        for v, info in vd.iteritems():
+        for v, info in vd.items():
             logging.debug('Found version', v, info)
             p = functools.partial(self.load_version, v)
             vermenu = self.addMenu(' - '.join(info))

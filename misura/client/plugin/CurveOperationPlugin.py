@@ -149,11 +149,12 @@ def curve_operation(ax, ay, bx, by, relative=True, smooth=True, tolerance=10., o
                 'X Datasets are not comparable in the required tolerance.')
 
     N = len(rbx)
-    margin = 1 + int(N / 10)
-    step = 2 + int((N - 2 * margin) / 100)
+    margin = 5 + int(N / 10)
+    step = 5 + int((N - 2 * margin) / 100)
     logging.debug( 'interpolating', len(rbx), len(rby), margin, step)
     
     knots = rbx[margin:-margin:step]
+    #knots = [5, 10, 15]
     bsp = interpolate.LSQUnivariateSpline(rbx, rby, knots)
     #bsp = interpolate.UnivariateSpline(rbx, rby)
     #errror = bsp.get_residuals()
