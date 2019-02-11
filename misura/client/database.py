@@ -7,6 +7,7 @@ logging = get_module_logging(__name__)
 import datetime
 import functools
 from misura.client import _, parameters
+from misura.client.clientconf import confdb
 from misura.canon import csutil, indexer
 
 
@@ -516,7 +517,7 @@ def getDatabaseWidget(path, new=False, browser=False):
     if not os.path.exists(path):
         return False
     path = str(path)
-    spy = indexer.Indexer(path, [os.path.dirname(path)])
+    spy = indexer.Indexer(path, [os.path.dirname(path)], toi=confdb['toi'])
     if new:
         spy.rebuild()
     idb = DatabaseWidget(spy, browser=browser)

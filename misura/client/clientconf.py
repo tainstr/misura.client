@@ -40,6 +40,8 @@ ao(default_desc, 'refresh', **{'name': 'Remote Server Refresh Rate (ms)',
 
 ao(default_desc, 'database', **
    {'name': 'Default Database', 'current': '', 'type': 'FilePath'})
+ao(default_desc, 'toi', **
+   {'name': 'Total option indexing', 'current': False, 'type': 'Boolean'})
 ao(default_desc, 'hserver', **
    {'name': 'Recent Servers', 'current': 5, 'max': 20, 'min': 0, 'type': 'Integer'})
 ao(default_desc, 'saveLogin', **
@@ -531,7 +533,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
 
         if path and os.path.exists(path):
             logging.debug('Creating indexer at', path)
-            self.index = Indexer(path)
+            self.index = Indexer(path, toi=self['toi'])
             return True
         else:
             logging.debug('Default database not found:', path)
