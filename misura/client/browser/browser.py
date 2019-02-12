@@ -35,10 +35,15 @@ def decode_drop_event(drop_event):
     urls = drop_event.mimeData().urls()
     logging.debug('dropEvent', urls)
     for url in urls:
-        url = url.toString().replace('file://', '')
         # on windows, remove also the first "/"
         if os.name.lower() == 'nt':
-            url = url[1:]
+            url = url.toString()
+            if url.startswith('file:///'):
+                url = url[8:]
+            elif url.startswith('file:'):
+                url = url[5:]
+        else:
+            url = url.replace('file://', '')
         return url
     return False
 
