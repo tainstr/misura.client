@@ -42,6 +42,7 @@ def convert_file(caller, path):
         caller.emit(QtCore.SIGNAL('do_open(QString)'), path)
         #caller.open_file(path)
         return True
+    path = path.replace(r'\\', ' /')
     caller.converter = False
     caller.converter = dataimport.get_converter(path)
     if not caller.converter:
