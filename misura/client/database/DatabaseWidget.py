@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import functools
 from PyQt4 import QtCore, QtGui
 
 from misura.canon.logger import get_module_logging
@@ -15,6 +16,7 @@ class DatabaseWidget(QtGui.QWidget):
 
     def __init__(self, remote=False, parent=None, browser=False):
         QtGui.QWidget.__init__(self, parent)
+        self.visibility = {}
         self.remote = remote
         loc = remote.addr
         if loc == 'LOCAL':
@@ -76,15 +78,77 @@ class DatabaseWidget(QtGui.QWidget):
 
         self.menu.addAction(_('Refresh'), self.refresh)
         self.menu.addAction(_('Rebuild'), self.rebuild)
+        
+        self.view_actions = {}
+        vmenu = self.menu.addMenu(_('Load views'))
+        act = vmenu .addAction(_('Tests'), functools.partial(self.load_table, 'test'))
+        act.setCheckable(True)
+        act.setChecked(True)
+        self.view_actions['test'] = act
+        act = vmenu.addAction(_('Samples'), functools.partial(self.load_table, 'view_sample'))
+        act.setCheckable(True)
+        self.view_actions['view_sample'] = act
+        act = vmenu.addAction(_('Microscope samples'), functools.partial(self.load_table, 'view_sample_hsm'))
+        act.setCheckable(True)
+        self.view_actions['view_sample_hsm'] = act
+        
+        act = vmenu.addAction(_('Versions'), functools.partial(self.load_table, 'view_versions'))
+        act.setCheckable(True)
+        self.view_actions['view_versions'] = act
+        
+        act = vmenu.addAction(_('Plots'), functools.partial(self.load_table, 'view_plots'))
+        act.setCheckable(True)
+        self.view_actions['view_plots'] = act
+        
+        
         self.bar = QtGui.QProgressBar(self)
         self.lay.addWidget(self.bar)
         self.bar.hide()
 
         self.resize(QtGui.QApplication.desktop().screen().rect().width(
         ) / 2, QtGui.QApplication.desktop().screen().rect().height() / 2)
+        
+    def load_table(self, name):
+        hh = self.table.horizontalHeader()
+        self.visibility[self.table.model().table] = hh.visibility() 
+        self.table.model().table = name
+        self.up()
+        hh = self.table.reset_header()
+        self.table.model().orderby = self.ncol('zerotime')
+        for tab, act in self.view_actions.items():
+            act.setChecked(tab==name)
+            
+        hh.restore_visual_indexes()
+        if self.table.model().table == 'test':
+            self.switch_name_iid_serial()
+        
+        visibles = self.visibility.get(name, [])
+        logging.debug('Recovered visibility for', name, visibles)
+        for col, visible in enumerate(visibles):
+            hh.setSectionHidden(col, visible)
+            
+        if not visibles:
+            self.hide_defaults()
+        
+    def hide_defaults(self):
+        hidden_sections = ['id', 'uid', 'verify', 'file', 'flavour']
+        t = self.table.model().table 
+        if t!='test':
+            hidden_sections += ['nSamples', 'fullpath']
+        if t!='version':
+            hidden_sections += ['version']
+        if t=='plots':
+            hidden_sections += ['script', 'render','render_format', 'hash']
+        hh = self.table.horizontalHeader()
+        hh.hide_sections(hidden_sections)
+        d = self.ncol('date')
+        if d>=0:
+            hh.setSortIndicator(d, 0)
+        else:
+            hh.setSortIndicator(0, 0)
 
     def _rebuild(self):
-        from .live import registry
+        from ..live import registry
         self.remote.tasks = registry.tasks
         self.remote.rebuild()
         self.up()
@@ -109,12 +173,25 @@ class DatabaseWidget(QtGui.QWidget):
         r.abort = self.remote.abort
         QtCore.QThreadPool.globalInstance().start(r)
         
+    def switch_name_iid_serial(self):
+        hh = self.table.horizontalHeader()
+        incremental_id_column = self.ncol('verify')+1
+        for logical, visual in ((self.ncol('name'), 0),
+                                (incremental_id_column, 1), 
+                                (self.ncol('serial_column'), 2)):
+            vi = hh.visualIndex(logical)
+            if 0<vi!=visual:
+                hh.moveSection(vi, visual)
+            
+            
 
     def up(self):
-        logging.debug('DATABASEWIDGET UP')
+        if not self.table.model().table:
+            self.load_table('test')
         self.table.model().up()
         header = self.table.model().header
         sh = self.table.model().sheader
+        
         hh = self.table.horizontalHeader()
         self.qfilter.clear()
         self.qfilter.addItem(_('All'), '*')
@@ -124,22 +201,15 @@ class DatabaseWidget(QtGui.QWidget):
                 continue
             self.qfilter.addItem(_(sh[i]), h)
         
-        hh = self.table.horizontalHeader()
-        for logical, visual in ((name_column, 0),
-                                (incremental_id_column, 1), 
-                                (serial_column, 2)):
-            vi = hh.visualIndex(logical)
-            if 0<vi!=visual:
-                hh.moveSection(vi, visual)
-
-        hh.hideSection(id_column)
-        hh.hideSection(uid_column)
-        hh.hideSection(verify_column)
-        hh.hideSection(file_column)
-        hh.hideSection(flavour_column)
-
-        self.table.resizeColumnToContents(name_column)
+        if not self.table.model().table in self.visibility:
+            self.hide_defaults()
+        
+        self.table.resizeColumnToContents(self.ncol('name'))
         self.update_pages()
+        
+    def ncol(self, name):
+        return self.table.model().ncol(name)  
+        
         
     def update_pages(self):
         r=2
@@ -174,8 +244,10 @@ class DatabaseWidget(QtGui.QWidget):
         q={}
         if d=='*':
             operator = 0 #OR
-            for col in ('file', 'serial', 'uid', 'id', 'instrument', 'flavour', 'name', 'comment'):
-                q[col] = val
+            for col in ('file', 'serial', 'uid', 'id', 'instrument', 
+                        'flavour', 'name', 'comment', 'sample', 'version', 'testName'):
+                if col in self.table.model().header:
+                    q[col] = val
         else:
             operator = 1 # AND    
             q[d] = val
@@ -239,6 +311,7 @@ class UploadThread(QtCore.QThread):
         self.emit(QtCore.SIGNAL('value(int)'), i)
 
     def run(self):
+        from misura.canon import csutil
         csutil.chunked_upload(self.storage.upload, self.filename, self.sigfunc)
         self.emit(QtCore.SIGNAL('ok()'))
 

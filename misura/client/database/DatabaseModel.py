@@ -11,40 +11,35 @@ from misura.canon import indexer
 from .. import _
 
 
-file_column = 0
-serial_column = 1
-uid_column = 2
-id_column = 3
-zero_time_column = 4
-instrument_column = 5
-flavour_column = 6
-name_column = 7
-elapsed_column = 8
-number_of_samples_column = 9
-comment_column = 10
-verify_column = 11
-incremental_id_column = 12
-
 class DatabaseModel(QtCore.QAbstractTableModel):
-
+    
     def __init__(self, remote=False, tests=[], header=[]):
         QtCore.QAbstractTableModel.__init__(self)
         self.remote = remote
         self.tests = tests
         self.header = header
-        self.orderby = 'zerotime'
+        self.orderby = 0
         self.order = 'DESC'
         self.limit = 1000
         self.offset = 0
-
+        self.table = False
+        
+    def ncol(self, name):
+        if name not in self.header:
+            return -1
+        return self.header.index(name)
+    
     def rowCount(self, index=QtCore.QModelIndex()):
         return len(self.tests)
 
     def columnCount(self, index=QtCore.QModelIndex()):
         return len(self.header)
     
+    def get_len(self):
+        return self.remote.get_len(self.table)
+    
     def has_next(self):
-        return self.offset+self.limit<self.remote.get_len()
+        return self.offset+self.limit<self.get_len()
     
     def has_prev(self):
         return self.offset>0
@@ -60,7 +55,7 @@ class DatabaseModel(QtCore.QAbstractTableModel):
         self.select()
         
     def pages(self):
-        N=self.remote.get_len()/self.limit
+        N=self.get_len()/self.limit
         current = self.offset/self.limit
         return current, N
     
@@ -74,7 +69,7 @@ class DatabaseModel(QtCore.QAbstractTableModel):
             return 0
         row = self.tests[index.row()]
         col = index.column()
-        if role == QtCore.Qt.DecorationRole and col==instrument_column:
+        if role == QtCore.Qt.DecorationRole and col==self.ncol('instrument'):
             instrument = row[col]
             icon = QtGui.QIcon(os.path.join(parameters.pathArt, 'small_' + instrument + '.svg'))
             return icon
@@ -87,9 +82,11 @@ class DatabaseModel(QtCore.QAbstractTableModel):
         return val
 
     def setData(self, index, value, role):
-        uid = self.tests[index.row()][uid_column]
+        name_column = self.ncol('name')
+        comment_column = self.ncol('comment')
+        uid = self.tests[index.row()][self.ncol('uid')]
         name = self.tests[index.row()][name_column]
-        file_name = self.tests[index.row()][file_column]
+        file_name = self.tests[index.row()][self.ncol('file')]
 
         update_functions = {
             name_column: self.remote.change_name,
@@ -110,13 +107,13 @@ class DatabaseModel(QtCore.QAbstractTableModel):
     def flags(self, index):
         flags = QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
 
-        if index.column() == name_column or index.column() == comment_column:
+        if self.table=='test' and (index.column() == self.ncol('name') or index.column() == self.ncol('comment')):
             flags = flags | QtCore.Qt.ItemIsEditable
 
         return QtCore.Qt.ItemFlags(flags)
     
     def sort(self, column, order):
-        self.orderby=indexer.indexer.testColumnDefault[column]
+        self.orderby = column
         self.order = ['DESC', 'ASC'][order]
         self.select()
 
@@ -127,9 +124,13 @@ class DatabaseModel(QtCore.QAbstractTableModel):
         """TODO: rename to select()"""
         if not self.remote:
             return
-        self.tests = self.remote.query(conditions, operator, self.orderby, 
-                                       self.order, self.limit, self.offset)
-        self.header = self.remote.header()
+        if not self.table:
+            return
+        self.beginResetModel()
+        self.header = self.remote.header(self.table)
+        self.tests = self.remote.query(conditions, operator, self.header[self.orderby], 
+                        self.order, self.limit, self.offset, self.table)
+        
         self.sheader = []
         for h in self.header:
             translation_key = 'dbcol:' + h
@@ -138,5 +139,7 @@ class DatabaseModel(QtCore.QAbstractTableModel):
                 translation = h.capitalize()
 
             self.sheader.append(translation)
-
-        QtCore.QAbstractTableModel.reset(self)
+        self.resetInternalData()
+        self.endResetModel()
+        
+        

@@ -6,7 +6,7 @@ from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import functools
 from .. import _
-from .DatabaseModel import DatabaseModel, name_column, comment_column
+from .DatabaseModel import DatabaseModel
 from .DatabaseHeader import DatabaseHeader
 
 
@@ -58,7 +58,7 @@ class DatabaseTable(QtGui.QTableView):
         self.setEditTriggers(QtGui.QAbstractItemView.EditKeyPressed)
         self.connect(
             self, QtCore.SIGNAL('doubleClicked(QModelIndex)'), self.select)
-        self.setHorizontalHeader(DatabaseHeader(parent=self))
+        self.reset_header()
         
         self.setSortingEnabled(True)
         
@@ -79,17 +79,24 @@ class DatabaseTable(QtGui.QTableView):
         self.menu.addAction(_('View folder'), self.view_folder)
         self.menu.addAction(_('Delete'), self.delete)
         
+    def reset_header(self):
+        hh = DatabaseHeader(parent=self)
+        self.setHorizontalHeader(hh)
+        hh.show()
+        return hh
         
+    def ncol(self, name):
+        return self.model().ncol(name)
         
     def edit_name(self):
         record = self.selectionModel().selectedIndexes()[0]
-        record = record.sibling(record.row(), name_column)
+        record = record.sibling(record.row(), self.ncol('name'))
         self.scrollTo(record)
         self.edit(record)
     
     def edit_comment(self):
         record = self.selectionModel().selectedIndexes()[0]
-        record = record.sibling(record.row(), comment_column)
+        record = record.sibling(record.row(), self.ncol('comment'))
         self.scrollTo(record)
         self.edit(record)
 

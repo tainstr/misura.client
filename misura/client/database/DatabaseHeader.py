@@ -17,8 +17,6 @@ class DatabaseHeader(QtGui.QHeaderView):
         self.setMovable(True)
         self.setClickable(True)
         self.setSortIndicatorShown(True)
-        # Default sorting on column DATE, descending
-        self.setSortIndicator(4, 0)
         
 
     def show_menu(self, pt):
@@ -32,6 +30,35 @@ class DatabaseHeader(QtGui.QHeaderView):
 
     def switch(self, i):
         if self.isSectionHidden(i):
+            logging.debug('showSection', i, self.model().header[i])
             self.showSection(i)
         else:
+            logging.debug('hideSection', i, self.model().header[i])
             self.hideSection(i)
+            
+    def show_all_sections(self):
+        for sec in xrange(len(self.model().header)):
+            logging.debug('Showing section', self.model().header[sec], sec)
+            self.setSectionHidden(sec, False)
+        self.reset()
+            
+    def hide_sections(self, sections):
+        self.show_all_sections()
+        for sec in sections:
+            n = self.model().ncol(sec)
+            if n<0:
+                continue
+            logging.debug('Hiding section', sec, n)
+            self.setSectionHidden(n, True)
+            
+    def restore_visual_indexes(self):
+        for i in xrange(len(self.model().header)):
+            j = self.visualIndex(i)
+            if i!=j:
+                self.moveSection(i,j)
+                
+    def visibility(self):
+        ret = []
+        for sec in xrange(len(self.model().header)):
+            ret.append(self.isSectionHidden(sec))
+        return ret
