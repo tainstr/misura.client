@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 """Standard interface construction utilities"""
 import os
-import psutil
+try:
+    import psutil
+except:
+    psutil = False
 import sys
 import collections
 from collections import OrderedDict, defaultdict
@@ -55,8 +58,10 @@ def initClient():
     initRegistry()
     activate_plugins(confdb)
     
-
-process = psutil.Process(os.getpid())
+if psutil:
+    process = psutil.Process(os.getpid())
+else:
+    process = -1
 limit = 4e9
 security_limit = 2.5e9
 last_ram = 1e9
@@ -65,6 +70,8 @@ def memory_check(warn=False):
     """This is a palliative message box which will warn the user whenever approaching the 
     maximum addressable memory by a 32bit process."""
     global last_ram
+    if not process:
+        return (False, 0)
     ram = process.memory_info().rss
     r = False
     if ram>security_limit:
