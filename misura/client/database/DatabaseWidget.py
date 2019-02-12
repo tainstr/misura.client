@@ -273,7 +273,7 @@ def getDatabaseWidget(path, new=False, browser=False):
     if not os.path.exists(path):
         return False
     path = str(path)
-    spy = indexer.Indexer(path, [os.path.dirname(path)], toi=confdb['toi'])
+    spy = indexer.Indexer(path, [os.path.dirname(path)])
     if new:
         spy.rebuild()
     idb = DatabaseWidget(spy, browser=browser)
