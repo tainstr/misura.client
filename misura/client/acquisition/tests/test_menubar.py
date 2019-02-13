@@ -3,10 +3,14 @@
 """Tests Archive"""
 import unittest
 
+try:
+    from misura.droid import server
+except:
+    server = False
 
 from misura.client.acquisition import menubar
 from test_controls import Parent
-from misura.droid import server
+
 
 from PyQt4 import QtGui, QtCore
 
@@ -20,7 +24,8 @@ class Parent(QtGui.QWidget):
     plotboardDock = False
     controls = False
 
-    def setInstrument(self, instrument): self.ins = instrument
+    def setInstrument(self, instrument): 
+        self.ins = instrument
 
     def init_instrument(self):
         return True
@@ -28,9 +33,11 @@ class Parent(QtGui.QWidget):
     def delayed_start(self):
         return True
 
+@unittest.skipIf(not server, 'MenuBar test requires misura.droid module')
 class MenuBar(unittest.TestCase):
 
     def setUp(self):
+        
         self.root = server.MainServer(plug='misura.droid.instrument.Instrument')
         self.root._readLevel = 5
         self.remote_instrument = self.root.instruments[0]
