@@ -5,7 +5,7 @@ from time import time
 import collections
 import threading
 from traceback import format_exc
-
+import re
 import numpy as np
 
 from misura.canon.logger import get_module_logging
@@ -836,9 +836,26 @@ class ActiveWidget(Active, QtGui.QWidget):
         build_option_menu(comparison, self.compare_group, self.compare_group_menu, set_func)
         
     def build_database_menu(self):
-        return
-        ret = confdb.index.query_recent_option(self.prop['type'], self.remObj['fullpath'], self.handle)
-        print('ZZZZZ', ret)
+        self.database_menu.clear()
+        fullpath = self.remObj['fullpath']
+        #TODO: we should get real regex into sqlite for this to work...
+        # Sample wildcard
+        sn = re.findall(r'^/[\w]+/sample(\d+)/[\w+]?', fullpath)
+        if sn:
+            sn1 = '_'*len(sn[0])
+            fullpath = fullpath.replace('/sample{}/'.format(sn[0]), '/sample'+sn1+'/')
+        
+        # Shot wildcard
+        sn = re.findall(r'^/flash/sample[_]+/T[-]?\d+/N(\d+)/[\w+]?', fullpath)
+        if sn:
+            sn1 = '_'*len(sn[0])
+            fullpath = fullpath.replace('/N{}/'.format(sn[0]), '/N'+sn1+'/')       
+        
+        
+        ret = confdb.index.query_recent_option(self.prop['type'], fullpath, self.handle)
+        for (t, test, value) in ret:
+            func = functools.partial(self.set, value)
+            act = self.database_menu.addAction('{}, {} on {}'.format(value, test, t), func)
         
 
     def isVisible(self):
