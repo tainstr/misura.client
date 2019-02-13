@@ -196,7 +196,6 @@ class DatabaseWidget(QtGui.QWidget):
         self.qfilter.clear()
         self.qfilter.addItem(_('All'), '*')
         for i, h in enumerate(header):
-            logging.debug('qfilter', i, h)
             if hh.isSectionHidden(i):
                 continue
             self.qfilter.addItem(_(sh[i]), h)

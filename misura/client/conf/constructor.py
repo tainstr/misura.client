@@ -574,7 +574,6 @@ def default_closeEvent(obj):
         sub = getattr(obj, attr, False)
         if sub:
             objs += sub.values()
-            print(type(obj),attr)
             setattr(obj, attr, {})
     obj.blockSignals(True)
     for sub in objs:

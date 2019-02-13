@@ -97,7 +97,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
         """Construct list of settings."""
         veusz.widgets.Axis.addSettings(s)
         s.add(setting.Choice(
-            'trans', ['Axis', 'Values'], 'Values',
+            'trans', ['Axis', 'Values','Plots'], 'Plots',
             descr='Translation mode',
             usertext='Translation mode',),
             2)
@@ -130,6 +130,17 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
     @property
     def doc(self):
         return self.document
+    
+    def get_translated_curve(self, original_curve):
+        original_ds = original_curve.settings.yData
+        if original_ds.endswith('_trans'):
+            return original_ds
+        
+        new_ds = original_ds+'_trans'
+        op = document.OperationDatasetDuplicate(original_ds, new_ds)
+        self.doc.applyOperation(op)
+        original_curve.settings.yData = new_ds
+        return new_ds
 
     def actionUp(self):
         logging.debug('SYNC LINE UP')
@@ -157,6 +168,9 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
                     logging.debug('No reference curve defined')
                     return
                 break
+            
+            if not obj.settings.xData or not obj.settings.yData:
+                continue
             xax = self.parent.getChild(obj.settings.xAxis)
             # Get the y axis
             yax = self.parent.getChild(obj.settings.yAxis)
@@ -182,10 +196,14 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
                 axmap[yax.name] = obj
                 objmap[obj] = (yax, 0)
                 continue
-
+            
             # Getting curve data
             xtr = doc.data[obj.settings.xData].data
             yds_name = obj.settings.yData
+            # Replace with translated ds
+            if trmode =='Plots' and i>0:
+                yds_name = self.get_translated_curve(obj)
+                
             yds = doc.data[yds_name]
             ytr = yds.data
             # Search the nearest X value on trans X-array
@@ -196,7 +214,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
             d = ytri - yval_ref
             objmap[obj] = (yax, d)
             # Create axes - only for axis translation
-            if trmode == 'Values':
+            if trmode in ('Values', 'Plots'):
                 new = yds.data - d
                 # Create a copy of the dataset
                 ydsn = copy.copy(yds)
@@ -230,21 +248,23 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
                 axmap[axname] = obj
                 self.axmap[obj.path] = (
                     axname, yax.name, (yax.settings.min, yax.settings.max))
-# 			else:
-# 				self.axmap[obj.path]=(yax.name,yax.name,(yax.settings.min,yax.settings.max))
+                
+        # Remove unused restore info
+        ucs = set([obj.path for obj in objmap.keys()])
+        for uc in set(self.axmap.keys()) - ucs:
+            del self.axmap[uc]
 
-        if trmode == 'Values':
+        if trmode in ('Values', 'Plots'):
             # Remove dissociated objects
             ucs = set([obj.path for obj in objmap.keys()])
             for uc in set(self.trcum.keys()) - ucs:
                 del self.trcum[uc]
             self.apply_ops('SynAxis: Translation')
             return
+        
+            
 
-        # Remove unused restore info
-        ucs = set([obj.path for obj in objmap.keys()])
-        for uc in set(self.axmap.keys()) - ucs:
-            del self.axmap[uc]
+
 
         self.trcum = {}
         # Apply axis creation
