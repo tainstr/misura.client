@@ -15,16 +15,63 @@ def translateCoord(ax, vc):
     return [ax.plottedrange[0] + c * (ax.plottedrange[1] - ax.plottedrange[0]) for c in vc]
 
 
+class WidgetChoiceControl(setting.controls.WidgetSelector):
+    """Choose a widget."""
+
+    def __init__(self, setting, document, parent):
+        """Initialise and populate combobox."""
+
+        setting.controls.WidgetSelector.__init__(self, setting, document, parent)
+        self._populateEntries()
+
+    def _populateEntries(self):
+        """Build up a list of widgets for combobox."""
+
+        widgets = self.setting.getWidgetList()
+
+        # we only need the list of names
+        names = list(widgets.keys())
+        names.sort()
+
+        setting.controls.utils.populateCombo(self, names)
+
+class WidgetChoiceSwitch(setting.WidgetChoice):
+    """Show or hide other settings based on the choice given here."""
+
+    def __init__(self, name, val, widgettypes={}, settingstrue=[], settingsfalse=[],
+                 showfn=lambda val: bool(val), **args):
+        """Enables/disables a set of settings if True or False
+        settingsfalse and settingstrue are lists of names of settings
+        which are hidden/shown to user depending on showfn(val)."""
+
+        self.sfalse = settingsfalse
+        self.strue = settingstrue
+        self.showfn = showfn
+        setting.WidgetChoice.__init__(self, name, val, widgettypes={},  **args)
+
+            
+    def makeControl(self, *args):
+        """Allows user to choose an image widget or enter a name."""
+        return setting.controls.WidgetChoice(self, self.getDocument(), *args)
+    
+    def copy(self):
+        return self._copyHelper((), (),
+                                {'settingsfalse': self.sfalse,
+                                 'settingstrue': self.strue,
+                                 'showfn': self.showfn})
+
 class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
     typename = 'synaxis'
     description = 'Synchronizing Axis'
     allowusercreation = True
-    ncurves = 3
+    ncurves = 24
     """Enable this number of curves"""
 
     def __init__(self, parent, name=None):
         veusz.widgets.Axis.__init__(self, parent, name=name)
-
+        if type(self) == SynAxis:
+            self.readDefaults()
+        
         self.addAction(veusz.widgets.widget.Action('up', self.actionUp,
                                                    descr='Update Synchronizing Axis',
                                                    usertext='Update Synchronizing Axis'))
@@ -32,7 +79,8 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
         self.addAction(veusz.widgets.widget.Action('restore', self.actionRestore,
                                                    descr='Restore',
                                                    usertext='Restore'))
-
+        
+        
         self.settings.direction = 'vertical'
         self.settings.TickLabels.hide = True
         self.settings.MajorTicks.hide = True
@@ -49,10 +97,17 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
         """Construct list of settings."""
         veusz.widgets.Axis.addSettings(s)
         s.add(setting.Choice(
-            'trans', ['Axis', 'Values'], 'Axis',
+            'trans', ['Axis', 'Values'], 'Values',
             descr='Translation mode',
             usertext='Translation mode',),
             2)
+        
+        s.add(setting.Int(
+            'mean', 10,
+            descr='Mean surrounding points',
+            usertext='Mean surrounding points',),
+            2)
+
         s.add(setting.WidgetChoice(
             'curve0', '',
             descr='Reference curve',
@@ -61,12 +116,16 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
             3)
         for i in range(klass.ncurves):
             u = str(i + 1)
+            u1 = str(i + 2)
             s.add(setting.WidgetChoice(
                 'curve' + u, '',
                 descr='Sync curve ' + u,
                 widgettypes=('xy',),
                 usertext='Sync curve ' + u),
                 i + 4)
+        
+        s.Line.width = '2pt'
+        s.Line.color = 'red'
 
     @property
     def doc(self):
@@ -119,7 +178,7 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
                 dst = np.abs(xref - pos)
                 i = np.where(dst == dst.min())[0][0]
                 # Get the corresponding Y value on the ref Y-array
-                yval_ref = yref[i]
+                yval_ref = np.mean(yref[i-self.settings.mean:i+self.settings.mean])
                 axmap[yax.name] = obj
                 objmap[obj] = (yax, 0)
                 continue
@@ -133,7 +192,8 @@ class SynAxis(utils.OperationWrapper, veusz.widgets.Axis):
             dst = np.abs(xtr - pos)
             i = np.where(dst == dst.min())[0][0]
             # Delta
-            d = ytr[i] - yval_ref
+            ytri = np.mean(ytr[i-self.settings.mean:i+self.settings.mean])
+            d = ytri - yval_ref
             objmap[obj] = (yax, d)
             # Create axes - only for axis translation
             if trmode == 'Values':
