@@ -110,7 +110,6 @@ class ImportParamsMisura(base.ImportParamsBase):
 def read_data(proxy, col):
     """Read `col` node from `proxy`"""
     data0 = np.array(proxy.col(col, (0, None)))
-    # FIXME: now superfluous?
     # FixedTimeArray
     if data0.shape[1] == 1:
         t0 = proxy.get_node_attr(col, 't0')

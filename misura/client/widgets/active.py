@@ -572,6 +572,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         self.emenu = QtGui.QMenu(self)
         self.presets_menu = QtGui.QMenu(_('Presets'), parent=self)
         self.presets_menu.aboutToShow.connect(self.build_presets_menu)
+        self.database_menu = QtGui.QMenu(_('Database'), parent=self)
+        self.database_menu.aboutToShow.connect(self.build_database_menu)
         self.compare_menu = QtGui.QMenu(_('Compare'), parent=self)
         self.compare_menu.aboutToShow.connect(self.build_compare_menu)
         self.compare_group_menu = QtGui.QMenu(_('Compare group'), parent=self)
@@ -757,6 +759,8 @@ class ActiveWidget(Active, QtGui.QWidget):
         #else:
         #    # ONLY if offline
         self.emenu.addMenu(self.compare_menu)
+        if self.prop['type'] in ['Float', 'Integer','String']:
+            self.emenu.addMenu(self.database_menu)
         if len(self.prop.get('children', [])):
             self.emenu.addMenu(self.compare_group_menu)
         self.nav_menu = self.emenu.addMenu(_('Navigator'))
@@ -830,6 +834,11 @@ class ActiveWidget(Active, QtGui.QWidget):
         wm[self.handle] = self
         set_func = lambda keyvals: [wm[k].set_raw(v) for k,v in keyvals]
         build_option_menu(comparison, self.compare_group, self.compare_group_menu, set_func)
+        
+    def build_database_menu(self):
+        return
+        ret = confdb.index.query_recent_option(self.prop['type'], self.remObj['fullpath'], self.handle)
+        print('ZZZZZ', ret)
         
 
     def isVisible(self):
