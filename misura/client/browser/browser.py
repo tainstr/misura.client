@@ -43,7 +43,7 @@ def decode_drop_event(drop_event):
             elif url.startswith('file:'):
                 url = url[5:]
         else:
-            url = url.replace('file://', '')
+            url = url.toString().replace('file://', '')
         return url
     return False
 
