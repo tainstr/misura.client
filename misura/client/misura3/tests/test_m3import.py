@@ -35,7 +35,7 @@ dil_names = set(['0:t', '0:kiln/T', '0:horizontal/sample0/d', '0:kiln/S', '0:hor
                  '0:/horizontal/sample0/camB', '0:kiln/P', '0:horizontal/sample0/Mov'])
 flex_names = set(['0:t', '0:kiln/T', '0:flex/sample0/d',
                   '0:kiln/S', '0:flex/sample0/camA', '0:kiln/P', '0:flex/sample0/Mov'])
-
+@unittest.skipTest('Need a test db')
 class Convert(unittest.TestCase):
 
     """Verify conversion from Misura3 to Misura4 files. Windows-only!"""

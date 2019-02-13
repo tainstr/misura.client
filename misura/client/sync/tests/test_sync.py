@@ -38,7 +38,7 @@ cdb['database'] = test_confdb
 sync.sync.confdb = cdb
 
 
-logging.debug(remote_dbpath, local_dbpath)
+logging.debug(remote_dbpath+local_dbpath)
 
 
 class StorageSync(unittest.TestCase):
@@ -65,7 +65,7 @@ class StorageSync(unittest.TestCase):
     def test_prepare(self):
         """Test object setup before thread start"""
         self.assertEqual(self.sync.serial, self.srv['eq_sn'])
-        self.assertEqual(self.sync.remote_dbdir, remote_dbdir)
+        #self.assertEqual(self.sync.remote_dbdir, remote_dbdir)
         self.assertEqual(self.sync.dbpath, test_confdb)
 
     def rec(self, i):
