@@ -38,7 +38,6 @@ class DatabaseHeader(QtGui.QHeaderView):
             
     def show_all_sections(self):
         for sec in xrange(len(self.model().header)):
-            logging.debug('Showing section', self.model().header[sec], sec)
             self.setSectionHidden(sec, False)
         self.reset()
             
@@ -48,7 +47,6 @@ class DatabaseHeader(QtGui.QHeaderView):
             n = self.model().ncol(sec)
             if n<0:
                 continue
-            logging.debug('Hiding section', sec, n)
             self.setSectionHidden(n, True)
             
     def restore_visual_indexes(self):

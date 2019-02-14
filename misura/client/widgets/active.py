@@ -7,6 +7,7 @@ import threading
 from traceback import format_exc
 import re
 import numpy as np
+import datetime
 
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
@@ -570,14 +571,21 @@ class ActiveWidget(Active, QtGui.QWidget):
         
         
         self.emenu = QtGui.QMenu(self)
+        self.recent_menu = QtGui.QMenu(_('Recent'), parent=self)
+        self.recent_menu.aboutToShow.connect(self.build_recent_menu)
+        
         self.presets_menu = QtGui.QMenu(_('Presets'), parent=self)
         self.presets_menu.aboutToShow.connect(self.build_presets_menu)
+        
         self.database_menu = QtGui.QMenu(_('Database'), parent=self)
         self.database_menu.aboutToShow.connect(self.build_database_menu)
+        
         self.compare_menu = QtGui.QMenu(_('Compare'), parent=self)
         self.compare_menu.aboutToShow.connect(self.build_compare_menu)
+        
         self.compare_group_menu = QtGui.QMenu(_('Compare group'), parent=self)
         self.compare_group_menu.aboutToShow.connect(self.build_compare_group_menu)
+        
         self.build_extended_menu()
         
         
@@ -742,10 +750,12 @@ class ActiveWidget(Active, QtGui.QWidget):
                 
         if not self.readonly:
             self.emenu.addAction(_('Reset to default value'), self.set_default)
-            
+            if not hasattr(self,'addr'):
+                self.emenu.addMenu(self.recent_menu)
         self.emenu.addAction(_('Check for modification'), self.get)
         self.emenu.addAction(_('Option Info'), self.show_info)
         self.emenu.addAction(_('Detach'), self.new_window)
+        
         
         if 'fullpath' in self.remObj:
             self.emenu.addAction('Hide this option', self.set_option_hidden)
@@ -856,6 +866,14 @@ class ActiveWidget(Active, QtGui.QWidget):
         for (t, test, value) in ret:
             func = functools.partial(self.set, value)
             act = self.database_menu.addAction('{}, {} on {}'.format(value, test, t), func)
+            
+    def build_recent_menu(self):
+        self.recent_menu.clear()
+        times, values = self.remObj.getattr(self.handle, 'chron')
+        for i, t in enumerate(times[::-1]):
+            v = values[i]
+            t = datetime.timedelta(seconds=int(time()-t))
+            self.recent_menu.addAction('{} on {} ago'.format(v, t), functools.partial(self.set, v))
         
 
     def isVisible(self):
