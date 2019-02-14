@@ -870,11 +870,16 @@ class ActiveWidget(Active, QtGui.QWidget):
     def build_recent_menu(self):
         self.recent_menu.clear()
         times, values = self.remObj.getattr(self.handle, 'chron')
-        for i, t in enumerate(times[::-1]):
-            v = values[i]
-            t = datetime.timedelta(seconds=int(time()-t))
+        if len(times)<2:
+            print times, values
+            return False
+        t0 = time()
+        v1 = values[-2::-1]
+        for i, t in enumerate(times[-2::-1]):
+            v = v1[i]
+            t = datetime.timedelta(seconds=int(t0-t))
             self.recent_menu.addAction('{} on {} ago'.format(v, t), functools.partial(self.set, v))
-        
+        return True
 
     def isVisible(self):
         try:
