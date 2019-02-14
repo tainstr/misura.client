@@ -750,7 +750,7 @@ class ActiveWidget(Active, QtGui.QWidget):
                 
         if not self.readonly:
             self.emenu.addAction(_('Reset to default value'), self.set_default)
-            if not hasattr(self,'addr'):
+            if not hasattr(self.remObj,'_remoteDict'):
                 self.emenu.addMenu(self.recent_menu)
         self.emenu.addAction(_('Check for modification'), self.get)
         self.emenu.addAction(_('Option Info'), self.show_info)
