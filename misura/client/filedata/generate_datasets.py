@@ -94,7 +94,7 @@ def add_datasets_to_doc(datasets, doc, original_dataset=False):
     # docs!
     if not original_dataset:
         original_dataset = doc.data['0:t']
-    for (pure_dataset_name, values) in datasets.iteritems():
+    for (pure_dataset_name, values) in datasets.items():
         (data, variable_name, label, error, opt) = values[:5]
         
         op = new_dataset_operation(original_dataset, data, variable_name, label, pure_dataset_name,
@@ -107,7 +107,7 @@ def add_datasets_to_doc(datasets, doc, original_dataset=False):
     return len(ops)
 
 
-def table_to_datasets(proxy, opt, doc):
+def table_to_datasets(proxy, opt):
     """Generate time, temp, etc datasets from Table-type `opt`."""
     tab = opt['current']
     header = tab[0]
@@ -120,14 +120,14 @@ def table_to_datasets(proxy, opt, doc):
         unit = [False] * Ncol
     # Invalid table
     if Ncol == 0:
-        return False
+        return {}
     logging.debug(
         'table_to_datasets', proxy['fullpath'], opt['handle'], header)
     column_types = [e[1] for e in header]
     s = set(column_types)
     if len(s) > 1 or s.pop() != 'Float':
         print 'Skipping table header for non-Floats', s
-        return False
+        return {}
     # Search for time/temp columns
     column_names = [e[0] for e in header]
 
@@ -151,7 +151,7 @@ def table_to_datasets(proxy, opt, doc):
     if (timecol_name == False) and (Tcol_name == False):
         logging.debug(
             'Neither time nor temperature columns were found', header)
-        return False
+        return {}
     handle = opt['handle']
     base_path = proxy['fullpath'] + handle
     datasets = {}
@@ -162,7 +162,7 @@ def table_to_datasets(proxy, opt, doc):
     tab = tab.astype('float')
     if len(tab) == 0:
         logging.debug('Skip empty table')
-        return False
+        return {}
     value_idxes = range(tab.shape[0])
     if timecol_idx in value_idxes:
         value_idxes.remove(timecol_idx)
@@ -187,7 +187,7 @@ def table_to_datasets(proxy, opt, doc):
     if len(value_idxes) == 0:
         logging.debug(
             'No value columns found in table', len(tab), tab, value_idxes, header)
-        return False
+        return {}
 
     def add_tT(path):
         if timecol_name:
@@ -230,12 +230,12 @@ def table_to_datasets(proxy, opt, doc):
             datasets[sub_path] = (tab[idx], name, opt['name'] + ' - ' + name, 
                                   None, opt1)
         add_tT(base_path)
-    add_datasets_to_doc(datasets, doc)
-    return True
+    return datasets
 
 
-def generate_datasets(proxy, doc, rule=False):
+def generate_datasets(proxy, rule=False):
     """Generate all datasets from proxy's options"""
+    datasets = {}
     if rule:
         rule = re.compile(rule)
     for key, opt in proxy.describe().iteritems():
@@ -244,12 +244,17 @@ def generate_datasets(proxy, doc, rule=False):
         if opt['type'] == 'Table':
             if opt.get('aggregate','').startswith('merge_tables'):
                 continue
-            table_to_datasets(proxy, opt, doc)
+            datasets.update(table_to_datasets(proxy, opt))
+    return datasets
 
 
-def recurse_generate_datasets(base_proxy, doc, rule=False):
+def recurse_generate_datasets(base_proxy, rule=False, datasets=False):
     """Generates all datasets for proxy and recursively downward 
     to the portion of tree stemming from proxy."""
-    generate_datasets(base_proxy, doc, rule=rule)
+    datasets = datasets if datasets is not False else {}
+    datasets.update(generate_datasets(base_proxy, rule=rule))
     for proxy in base_proxy.devices:
-        recurse_generate_datasets(proxy, doc, rule=rule)
+        recurse_generate_datasets(proxy, rule=rule, datasets=datasets)
+    return datasets
+        
+    

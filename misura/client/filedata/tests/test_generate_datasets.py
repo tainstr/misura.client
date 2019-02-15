@@ -12,6 +12,7 @@ from misura.client.tests import iutils_testing
 from misura.client.filedata import generate_datasets as gd
 from misura.client import filedata
 from misura.canon import indexer, option
+from misura.client.filedata.generate_datasets import add_datasets_to_doc
 
 nativem4 = os.path.join(iutils_testing.data_dir, 'test_video.h5')
 
@@ -84,6 +85,7 @@ class GenerateDatasets(unittest.TestCase):
         self.check_dataset(self.doc.data['0:a/b/c'], unit=False)
         
     def check_generated(self, proxy):
+        print(self.doc.data.keys())
         self.assertIn('0:ok', self.doc.data)
         self.assertEqual(list(self.doc.data['0:ok'].data), [3, 30, 300])
         self.assertIn('0:ok_t', self.doc.data)
@@ -101,23 +103,27 @@ class GenerateDatasets(unittest.TestCase):
     def test_table_to_datasets(self):
         self.cleanup()
         proxy = make_conf_proxy()
-        gd.table_to_datasets(proxy, proxy.gete('non_float'), self.doc)
-        self.assertNotIn('0:ok', self.doc.data)
-        gd.table_to_datasets(proxy, proxy.gete('double_time'), self.doc)
-        self.assertNotIn('0:ok', self.doc.data)
-        gd.table_to_datasets(proxy, proxy.gete('ok'), self.doc)
+        d = gd.table_to_datasets(proxy, proxy.gete('non_float'))
+        self.assertNotIn('0:ok', d)
+        d.update(gd.table_to_datasets(proxy, proxy.gete('double_time')))
+        self.assertNotIn('0:ok', d)
+        d.update(gd.table_to_datasets(proxy, proxy.gete('ok')))
+        gd.add_datasets_to_doc(d, self.doc)
         self.check_generated(proxy)
         
     def test_generate_datasets(self):
         self.cleanup()
         proxy = make_conf_proxy()
-        gd.generate_datasets(proxy, self.doc)
+        d = gd.generate_datasets(proxy)
+        add_datasets_to_doc(d, self.doc)
         self.check_generated(proxy)
         self.cleanup()
-        gd.generate_datasets(proxy, self.doc, '^ok$')
+        d = gd.generate_datasets(proxy, '^ok$')
+        add_datasets_to_doc(d, self.doc)
         self.check_generated(proxy)
         self.cleanup()        
-        gd.generate_datasets(proxy, self.doc, '_float$')
+        d = gd.generate_datasets(proxy, '_float$')
+        add_datasets_to_doc(d, self.doc)
         self.assertNotIn('0:ok', self.doc.data)    
         
         
