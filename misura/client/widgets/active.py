@@ -861,8 +861,15 @@ class ActiveWidget(Active, QtGui.QWidget):
             sn1 = '_'*len(sn[0])
             fullpath = fullpath.replace('/N{}/'.format(sn[0]), '/N'+sn1+'/')       
         
+        mro = None
+        if 'mro' in self.remObj:
+            fullpath = None
+            mro = self.remObj['mro']
         
-        ret = confdb.index.query_recent_option(self.prop['type'], fullpath, self.handle)
+        ret = confdb.index.query_recent_option(self.prop['type'], 
+                                               fullpath=fullpath, 
+                                               handle=self.handle, 
+                                               mro=mro)
         for (t, test, value) in ret:
             func = functools.partial(self.set, value)
             act = self.database_menu.addAction('{}, {} on {}'.format(value, test, t), func)
