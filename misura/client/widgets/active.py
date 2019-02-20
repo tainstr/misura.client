@@ -876,9 +876,10 @@ class ActiveWidget(Active, QtGui.QWidget):
             
     def build_recent_menu(self):
         self.recent_menu.clear()
+        if 'chron' not in self.prop:
+            return False
         times, values = self.remObj.getattr(self.handle, 'chron')
         if len(times)<2:
-            print times, values
             return False
         t0 = time()
         v1 = values[-2::-1]

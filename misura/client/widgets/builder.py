@@ -19,7 +19,6 @@ def build(server, remObj, prop, parent=None, force=False):
     from aChooser import aChooser, async_aChooser, FurnacePositionChooser
     from aDict import aDict
     from aMeta import aMeta
-    from aMaterial import aMaterial
     from aNumber import aNumber
     from aProgress import aProgress, RoleProgress
     from aString import aString
@@ -42,10 +41,7 @@ def build(server, remObj, prop, parent=None, force=False):
     obj = False
     try:
         if T in ['String', 'ReadOnly', 'Date', 'FilePath']:
-            if prop['handle'] == 'material':
-                obj = aMaterial(*arg)
-            else:
-                obj = aString(*arg)
+            obj = aString(*arg)
         elif T == 'FileList':
             obj = aFileList(*arg)
         elif T == 'TextArea':

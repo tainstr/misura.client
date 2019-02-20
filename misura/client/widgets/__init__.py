@@ -12,7 +12,6 @@ from aButton import aButton, informative_message_box
 from aChooser import aChooser, async_aChooser, FurnacePositionChooser
 from aDict import aDict
 from aMeta import aMeta
-from aMaterial import aMaterial
 from aNumber import aNumber,  aNumberAction,  FocusableSlider
 from aProgress import aProgress, RoleProgress
 from aString import aString
