@@ -36,6 +36,13 @@ def add_label_to(curve, message, label_name, doc, toset):
     toset(label, 'label', message)
     toset(label, 'xPos', 0.1)
     toset(label, 'yPos', 0.9)
+    
+def get_mean_around_index(v, idx, mean):
+    if not mean:
+        return v[idx]
+    start = max(0, idx-mean)
+    end = min(len(v), idx+mean)
+    return v[start:end].mean()
 
 class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
@@ -129,11 +136,11 @@ class SynchroPlugin(utils.OperationWrapper, plugins.ToolsPlugin):
 
         reference_dataset = doc.data[reference_curve.settings.yData]
         
-        mean = fields['mean']
-        tra_len = len(translating_dataset)-1
-        translating_value = translating_dataset.data[max(0,translating_curve_nearest_value_index-mean):min(tra_len,translating_curve_nearest_value_index+mean)].mean()
-        ref_len = len(translating_dataset)-1
-        reference_value = reference_dataset.data[max(0,reference_curve_nearest_value_index-mean):min(ref_len, reference_curve_nearest_value_index+mean)].mean()
+        # Returns NONE!
+                
+        mean = int(min(fields['mean'], len(translating_dataset)/10))
+        translating_value = get_mean_around_index(translating_dataset.data, translating_curve_nearest_value_index, mean)
+        reference_value = get_mean_around_index(reference_dataset.data, reference_curve_nearest_value_index, mean)
         
         delta = translating_value - reference_value
         if fields['mode'] in ('Translate Values', 'Create new datasets'):
