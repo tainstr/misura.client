@@ -112,9 +112,12 @@ class DatabaseWidget(QtGui.QWidget):
         hh = self.table.horizontalHeader()
         self.visibility[self.table.model().table] = hh.visibility() 
         self.table.model().table = name
+        self.table.model().update_header()
+        z = self.ncol('zerotime')
+        if z>=0:
+            self.table.model().orderby = z 
         self.up()
         hh = self.table.reset_header()
-        self.table.model().orderby = self.ncol('zerotime')
         for tab, act in self.view_actions.items():
             act.setChecked(tab==name)
             
@@ -141,7 +144,7 @@ class DatabaseWidget(QtGui.QWidget):
             hidden_sections += ['script', 'render','render_format', 'hash']
         hh = self.table.horizontalHeader()
         hh.hide_sections(hidden_sections)
-        d = self.ncol('date')
+        d = self.ncol('zerotime')
         if d>=0:
             hh.setSortIndicator(d, 0)
         else:

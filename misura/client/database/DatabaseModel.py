@@ -18,7 +18,7 @@ class DatabaseModel(QtCore.QAbstractTableModel):
         self.remote = remote
         self.tests = tests
         self.header = header
-        self.orderby = 0
+        self.orderby = 4
         self.order = 'DESC'
         self.limit = 1000
         self.offset = 0
@@ -119,6 +119,10 @@ class DatabaseModel(QtCore.QAbstractTableModel):
 
     def select(self):
         self.up()
+        
+    def update_header(self):
+        self.header = self.remote.header(self.table)
+        return self.header
 
     def up(self, conditions={}, operator=1):
         """TODO: rename to select()"""
@@ -126,9 +130,17 @@ class DatabaseModel(QtCore.QAbstractTableModel):
             return
         if not self.table:
             return
+        
+        oby = self.orderby 
+        if oby<0 or oby>=len(self.header):
+            oby = self.ncol('zerotime')
+        if oby>=0:
+            oby = self.header[oby]
+        else:
+            oby = False
+        
         self.beginResetModel()
-        self.header = self.remote.header(self.table)
-        self.tests = self.remote.query(conditions, operator, self.header[self.orderby], 
+        self.tests = self.remote.query(conditions, operator, oby, 
                         self.order, self.limit, self.offset, self.table)
         
         self.sheader = []
