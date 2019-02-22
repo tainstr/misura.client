@@ -810,9 +810,9 @@ class aTableView(QtGui.QTableView):
         # See if target option is an aggregation in its turn
         p = dev.gete(t)
         aggregation = p.get('aggregate', '')
-        if aggregation:
-            builder.build_recursive_aggregation_menu(root, dev, aggregation,
-                                                     targets_map, dmenu, win_map=self.tableObj._win_map)
+        builder.build_recursive_aggregation_menu(root, dev, aggregation,
+                        targets_map, dmenu, win_map=self.tableObj._win_map)
+        
 
         return menu
 

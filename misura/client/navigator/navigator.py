@@ -708,6 +708,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     
     @node
     def buildContextMenu(self, node=False, sel=[], menu=False, tree_actions=False):
+        #TODO: way to buildContextMenu WITHOUT actually selecting the node!
         n = len(sel)
         if node is None or not node.parent:
             menu = self.update_base_menu(node, menu or self.base_menu, tree_actions=tree_actions)

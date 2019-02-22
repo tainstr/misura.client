@@ -118,6 +118,8 @@ def build_aggregate_view(root, targets, devs, handle=False):
 
 
 def build_aggregation_menu(root, dev, menu, target='name', win_map=False):
+    """Adds the View and Navigator actions to an aggregation menu or submenu"""
+    logging.debug('build_aggregation_menu', dev['fullpath'], target)
     if win_map is False:
         win_map = {}
     dmenu = menu.addMenu(u'{} ({})'.format(dev['name'], dev['devpath']))
@@ -130,20 +132,26 @@ def build_aggregation_menu(root, dev, menu, target='name', win_map=False):
     return dmenu
 
 
-def build_recursive_aggregation_menu(root, main_dev, aggregation, handles_map, menu, menu_map=False, win_map=False, col=None):
-    """Resolve aggregation chain"""
+def build_recursive_aggregation_menu(root, main_dev, aggregation, handles_map, 
+                                     menu, menu_map=False, win_map=False, col=None):
+    """Resolve aggregation chain, appending aggregated sub-devices to `menu`"""
+    logging.debug('build_recursive_aggregation_menu', 
+                  root['fullpath'], main_dev['fullpath'], aggregation, col)
+    
     if menu_map is False:
         menu_map = {}  # dev:menu
     if win_map is False:
         win_map = {}
+    logging.debug(handles_map.keys(), menu_map.keys(), win_map.keys())
     
-    # Leaf node: last aggregation targets
+    # Leaf node: last aggregation targets, go down one more level
     if not aggregation:
         for dev in main_dev.devices:
             fullpath = dev['fullpath']
             dmenu = menu_map.get(fullpath, False)
             if not dmenu:
-                menu_map[fullpath] = menu.addMenu(dev['name'])
+                dmenu = menu.addMenu(dev['name'])
+                menu_map[fullpath] = dmenu
             f = functools.partial(
                 root.navigator.build_menu_from_configuration, dev, dmenu)
             dmenu.menuAction().hovered.connect(f)
@@ -170,16 +178,17 @@ def build_recursive_aggregation_menu(root, main_dev, aggregation, handles_map, m
             # Special target to explicitly skip the device
             if t == '#SKIP#':
                 continue
+            
+            agg = dev.gete(t).get('aggregate', "")
             # Get a cached menu
             dmenu = menu_map.get(fullpath, False)
+            
             if not dmenu:
                 dmenu = build_aggregation_menu(
                     root, dev, menu, target=t, win_map=win_map)
                 menu_map[fullpath] = dmenu
-            prop = dev.gete(t)
-            agg = prop.get('aggregate', "")
-            #if not agg:
-            #    continue
+            
+            
             dmenu.addSeparator()
             handles_map[fullpath] = t
             # Dynamically create deeper layers on request
