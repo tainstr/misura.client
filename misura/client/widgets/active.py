@@ -90,10 +90,7 @@ def build_presets_menu(comparison, container, menu, set_func, set_to_preset_func
         p0 = lambda preset: set_to_preset_func(preset, val)
         p = functools.partial(map, p0, presets)
         menu.addAction(_('Copy current to all'), p)
-        container['**applyall**'] = (p, val, p0)       
-        
-        
-         
+        container['**applyall**'] = (p, val, p0)
             
 def build_option_menu(comparison, container, menu, set_func):
     menu.clear()
@@ -752,8 +749,10 @@ class ActiveWidget(Active, QtGui.QWidget):
             self.emenu.addAction(_('Reset to default value'), self.set_default)
             if not hasattr(self.remObj,'_remoteDict'):
                 self.emenu.addMenu(self.recent_menu)
-        self.emenu.addAction(_('Check for modification'), self.get)
-        self.emenu.addAction(_('Option Info'), self.show_info)
+        if hasattr(self.remObj,'_remoteDict'):
+            self.emenu.addAction(_('Check for modification'), self.get)
+        if self.remObj._writeLevel>3:
+            self.emenu.addAction(_('Option Info'), self.show_info)
         self.emenu.addAction(_('Detach'), self.new_window)
         
         
