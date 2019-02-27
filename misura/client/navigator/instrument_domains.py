@@ -288,10 +288,33 @@ class FlexSampleNavigatorDomain(NavigatorDomain):
         p = plugin.ReportPlugin(node, 'report_flex.vsz', 'd')
         d = PluginDialog(self.mainwindow, self.doc, p, plugin.ReportPlugin)
         self.mainwindow.showDialog(d)
+        
+    @node
+    def absolute_fleximeter(self, node=False):
+        from misura.client import plugin
+        # Load required datasets
+        smp = node.children
+        for sub in ('Center','Right', 'Left'):
+            sub_ds, sub_node = self.dsnode(smp[sub].children['d'])
+            if len(sub_ds)==0:
+                self.navigator._load(sub_node)
+        
+        n = node.path
+        p = plugin.AbsoluteFlexPlugin(n+'/Center/d',
+                                      n+'/Right/d',
+                                      n+'/Left/d',
+                                      ds_out=n+'/d2',
+                                      ds_radius=n+'/radius2',)
+        
+        d = PluginDialog(self.mainwindow, self.doc, p, plugin.AbsoluteFlexPlugin)
+        self.mainwindow.showDialog(d)
     
     def add_sample_menu(self, menu, node): 
         menu.addAction(_('Report'), self.report)
+        menu.addAction(_('Absolute fleximeter'), self.absolute_fleximeter)
         return True
+    
+    
      
 navigator_domains += [MicroscopeSampleNavigatorDomain,
             HorizontalSampleNavigatorDomain, VerticalSampleNavigatorDomain,  
