@@ -541,7 +541,8 @@ class DatasetEntry(NodeEntry):
                 continue
             if not isinstance(ds, document.datasets.Dataset1DPlugin):
                 continue
-            involved = flatten(ds.pluginmanager.fields.values())
+            involved = set(flatten(ds.pluginmanager.fields.values()))
+            involved = involved-set(ds.pluginmanager.datasetnames)
             if self.path in involved:
                 sub = name.replace('/', '-').replace(':', '_')
                 model_path = self.model_path + '/' + sub
