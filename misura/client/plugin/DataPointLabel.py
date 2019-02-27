@@ -4,7 +4,7 @@ from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import veusz.document as document
 from veusz.widgets.textlabel import TextLabel
-
+from veusz import widgets
 
 class DataPointLabel(TextLabel):
     typename = 'datapointlabel'
@@ -22,6 +22,15 @@ class DataPointLabel(TextLabel):
         """Get types of widgets this can be a child of."""
         from misura.client.plugin.datapoint import DataPoint
         return (DataPoint,)
+    
+    @classmethod
+    def addSettings(klass, s):
+        """Construct list of settings."""
+        widgets.TextLabel.addSettings(s)
+        pos = s.get('positioning')
+        pos.default = 'axes'
+        pos.set('axes')
+        pos.hidden = True
 
     def update(self):
         """Update output label with the coordinates of the point."""
@@ -50,9 +59,9 @@ class DataPointLabel(TextLabel):
                     continue
                 text1.append(line)
             text = '\\\\'.join(text1)
-                       
+        
+        # Add to parent's operations queue   
         datapoint.toset(self, 'label', text % text_values)
-        datapoint.toset(self, 'positioning', 'axes')
         datapoint.cpset(datapoint, self, 'xAxis')
         datapoint.cpset(datapoint, self, 'yAxis')
         xsig = 5

@@ -5,10 +5,12 @@ from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 import veusz.setting as setting
 import veusz.document as document
+from veusz.document.operations import OperationWidgetAdd
 from veusz import widgets
 from .OptionAbstractWidget import OptionAbstractWidget
 from . import utils
 from misura.client import _
+
 
 class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
     typename = 'optionline'
@@ -26,8 +28,10 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         self.addAction(widgets.widget.Action('apply', self.apply,
                                                    descr='Apply',
                                                    usertext='Apply line position to configuration'))
+        self.line_label = False
         #for name in ('invert', 'intercept', 'slope'):
         #    self.settings.get(name).setOnModified(self.update)
+        self.settings.get('legend').setOnModified(self.set_legend)
 
     @classmethod
     def allowedParentTypes(klass):
@@ -44,7 +48,10 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
             'dataset', '',
             descr=_('Dataset pointing to the containing options'),
             usertext=_('Dataset')), 0 ) 
-        
+        s.add(setting.Str('legend', '',
+                          descr='Legend',
+                          usertext='Legend'),
+              1)
         s.add(setting.Str('intercept', '',
                           descr='Intercept option path',
                           usertext='Intercept option path'),
@@ -69,6 +76,8 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
                           descr='Scale values by factor',
                           usertext='Scale'),
               6)
+        
+        
         s.add(setting.Bool('invert', False,
                           descr='Invert coordinates (y->x)',
                           usertext='Invert coordinates',
@@ -188,8 +197,22 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         self.settings.xPos2 = xmax
         self.settings.yPos2 = ymax
         self.doc.setModified(True)
+        self.set_legend()
         logging.debug('end update', self.path, self.opt_name)
         return True
+    
+    def set_legend(self):
+        legend = self.settings.legend
+        if not self.line_label:
+            logging.debug('Creating child LineLabel...')
+            op = OperationWidgetAdd(self, 'linelabel', name='legend')
+            self.doc.applyOperation(op)
+            self.line_label = self.getChild('legend')
+        self.line_label.settings.label = legend
+        self.line_label.settings.hide = not bool(legend)
+        self.line_label.settings.angle = -90.*self.settings.invert
+        self.line_label.update()
+        
         
     def updateControlItem(self, *a, **k):
         r = super(OptionLine, self).updateControlItem(*a, **k)
@@ -240,3 +263,4 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         
 
 document.thefactory.register(OptionLine)
+

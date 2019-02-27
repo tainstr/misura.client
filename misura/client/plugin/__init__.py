@@ -43,6 +43,7 @@ from SurfaceTensionPlugin import SurfaceTensionPlugin
 
 from OptionLabel import OptionLabel
 from OptionLine import OptionLine
+from LineLabel import LineLabel
 
 # FIELDS
 from FieldConfigurationProxy import FieldConfigurationProxy
