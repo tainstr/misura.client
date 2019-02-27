@@ -112,8 +112,10 @@ def read_data(proxy, col):
     data0 = np.array(proxy.col(col, (0, None)))
     # FixedTimeArray
     if data0.shape[1] == 1:
-        t0 = proxy.get_node_attr(col, 't0')
-        dt = proxy.get_node_attr(col, 'dt')
+        logging.debug('column shape:', col, data0.shape, data0.shape[1])
+        vcol = proxy.versioned(col)
+        t0 = proxy.get_node_attr(vcol, 't0')
+        dt = proxy.get_node_attr(vcol, 'dt')
         n = data0.shape[0]
         t = np.linspace(t0, t0+n*dt, n)
         return np.array([t, data0[:,0]]).transpose()
