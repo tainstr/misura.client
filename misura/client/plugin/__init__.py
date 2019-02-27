@@ -38,6 +38,8 @@ from ReportPlugin import ReportPlugin
 from SwitchOrdinatePlugin import SwitchOrdinatePlugin
 from RemoveJumpsPlugin import RemoveJumpsPlugin
 
+from AbsoluteFlexPlugin import AbsoluteFlexPlugin
+
 from ViscosityPlugin import ViscosityPlugin, viscosity_calc
 from SurfaceTensionPlugin import SurfaceTensionPlugin
 
