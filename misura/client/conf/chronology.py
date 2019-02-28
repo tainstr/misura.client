@@ -18,10 +18,9 @@ from .. import iutils
 from PyQt4 import QtGui, QtCore
 
 COL_CHECK = 0
-COL_LABEL = 1
-COL_CURRENT = 2
-COL_DEFAULT = 3
-COL_BASE = 4
+COL_CURRENT = 1
+COL_DEFAULT = 2
+COL_BASE = 3
 
 readonly_types = ['Float', 'Integer', 'String', 'TextArea']
 
@@ -34,8 +33,8 @@ class ChronologyTable(QtGui.QTableWidget):
     sig_applied = QtCore.pyqtSignal()
     
     def __init__(self, interface, parent=None):
-        # Min 4 columns: check, label, current, default
-        super(ChronologyTable, self).__init__(0, 4, parent=parent)
+        # Min 3 columns: check, current, default
+        super(ChronologyTable, self).__init__(0, 3, parent=parent)
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectColumns)
         self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.virtual_widgets = {}
@@ -50,6 +49,7 @@ class ChronologyTable(QtGui.QTableWidget):
         self.virtual_widgets = collections.defaultdict(collections.defaultdict) # row: col: widget
         self.checks = {}
         self.keys = []
+        self.vheader = []
         self.chron = collections.defaultdict(collections.defaultdict) # time: row: widget
         # Create widgets and rows
         i = -1
@@ -90,13 +90,14 @@ class ChronologyTable(QtGui.QTableWidget):
             
             self.insertRow(i)
             self.setCellWidget(i, COL_CHECK, self.checks[key])
-            self.setCellWidget(i, COL_LABEL, wg.label_widget)
+            self.vheader.append(opt['name'])
+            wg.label_widget.hide()
             self.setCellWidget(i, COL_CURRENT, get_label(wg))
             if opt['current']!=opt['factory_default']:
                 self.setCellWidget(i, COL_DEFAULT, get_label(shadow))
                 
         self.create_chron_columns()
-        
+        self.setVerticalHeaderLabels(self.vheader)
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
         self.selectionModel().currentColumnChanged.connect(self.select_column)
@@ -130,7 +131,7 @@ class ChronologyTable(QtGui.QTableWidget):
         
     def select_column(self, current, previous):
         col = current.column()
-        if col==0:
+        if col==COL_CHECK:
             return
         
         # Clean old virtuals
@@ -141,7 +142,7 @@ class ChronologyTable(QtGui.QTableWidget):
         self.virtual_widgets = collections.defaultdict(collections.defaultdict) 
         
         
-        if col<4:
+        if col<COL_BASE:
             logging.debug('Null selection')
             return
         
