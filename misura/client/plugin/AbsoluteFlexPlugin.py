@@ -7,11 +7,11 @@ import numpy as np
 import SmoothDatasetPlugin
 from utils import MisuraPluginDataset1D
 from misura.canon.circle import absolute_flex
-
+from . import utils
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__file__)
 
-class AbsoluteFlexPlugin(plugins.DatasetPlugin):
+class AbsoluteFlexPlugin(utils.CachedResultFragment, plugins.DatasetPlugin):
 
     """Re-calculate Absolute Fleximeter displacement from calibration factors and thrre-point displacements"""
     # tuple of strings to build position on menu
@@ -24,6 +24,8 @@ class AbsoluteFlexPlugin(plugins.DatasetPlugin):
     # string goes in dialog box
     description_full = (
         'Re-calculate Absolute Fleximeter displacement from calibration factors and thrre-point displacements')
+    
+    cached_dataset_fields = ['ds_middle','ds_right','ds_left']
 
     def __init__(self, ds_middle='', ds_right='', ds_left='', right_calibration=35000., 
                  left_calibration=35000., percent=0., smooth=5, smode='Output',ds_out='absflex', ds_radius='absradius'):
@@ -67,45 +69,51 @@ class AbsoluteFlexPlugin(plugins.DatasetPlugin):
         self.ds_radius.old_unit = 'micron'
         # return list of datasets
         return [self.ds_out, self.ds_radius]
-
-    def updateDatasets(self, fields, helper):
-        """Calculate coefficient
-        """
-        smooth = fields['smooth']
-        smode = fields['smode']
-
-        Mds = helper.getDataset(fields['ds_middle'])
-        Rds = helper.getDataset(fields['ds_right'])
-        Lds = helper.getDataset(fields['ds_left'])
+    
+    def calculate_absolute_flex(self):
+        smooth = self.cached_fields['smooth']
+        smode = self.cached_fields['smode']
         
-        M = Mds.data
-        R = Rds.data
-        L = Lds.data
+        M = self.cached_datasets['ds_middle']
+        R = self.cached_datasets['ds_right']
+        L = self.cached_datasets['ds_left']
         
         # Smooth input curves
         if smooth > 0 and smode == 'Input':
             M = SmoothDatasetPlugin.smooth(M, smooth, 'hanning')
             R = SmoothDatasetPlugin.smooth(R, smooth, 'hanning')
             L = SmoothDatasetPlugin.smooth(L, smooth, 'hanning')
-                
         
-            
         #TODO: convert to array math
         out = []
         rad = []
-        Rcal = fields['right_calibration']
-        Lcal = fields['left_calibration']
+        Rcal = self.cached_fields['right_calibration']
+        Lcal = self.cached_fields['left_calibration']
         for i in xrange(len(M)):
             res = absolute_flex(M[i],R[i],L[i], Rcal, Lcal)
             out.append(res['d'])
             rad.append(res['radius'])
-            
+        
         out = np.array(out)
         rad = np.array(rad)
-        
+            
         # Smooth output curve
         if smooth > 0 and smode == 'Output':
             out = SmoothDatasetPlugin.smooth(out, smooth, 'hanning')
+            rad = SmoothDatasetPlugin.smooth(rad, smooth, 'hanning')
+            
+        return out,rad
+            
+    
+    def updateDatasets(self, fields, helper):
+        """Calculate coefficient
+        """
+        if self.is_cache_dirty(fields, helper):
+            out, rad = self.calculate_absolute_flex()
+            self.cached_result = [out,rad]
+        else:
+            out,rad = self.cached_result
+
         self.ds_out.update(data=out)
         self.ds_radius.update(data=rad)
         return [self.ds_out]

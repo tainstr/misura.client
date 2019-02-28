@@ -77,6 +77,44 @@ def xyderive(x, y, order, method):
         y = y / x
     return y
 
+class CachedResultFragment(object):
+    """Extension fragment for caching plugin results"""
+    cached_dataset_fields = []
+    cached_result = None    
+    cached_datasets = None #{}
+    cached_fields = None #{}
+    
+    def is_cache_dirty(self, fields, helper):
+        # Collect cached datasets and cached fields
+        c = {}
+        fc = {}
+        for field, value in fields.items():
+            if field not in self.cached_dataset_fields:
+                fc[field] = value
+                continue 
+            d = np.array(helper.getDataset(value).data)
+            c[field] = d
+            
+        # Initialize the cache
+        if not self.cached_datasets:
+            self.cached_datasets = c
+            self.cached_fields = fc
+            return True
+        
+        # Detect changes in other non-dataset fields
+        for field, value in fc.items():
+            if value!=fields[field]:
+                return True
+            
+        # Expensive elementwise comparison
+        dirty = sum([ np.all(c[i]==self.cached_datasets[i]) for i in self.cached_dataset_fields])
+        dirty = dirty < len(self.cached_dataset_fields)
+        # Store updated cache
+        self.cached_datasets = c
+        self.cached_fields = fc
+        return dirty
+
+
 
 class OperationWrapper(plugins.OperationWrapper):
 

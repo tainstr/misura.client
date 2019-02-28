@@ -563,6 +563,8 @@ class SectionBox(QtGui.QWidget):
     
 
 class SectionScroll(QtGui.QScrollArea):
+    """Disable wheelEvent on Interface area, as it interferes with complex 
+    ActiveWidgets (aChooser, aNumber)"""
     def wheelEvent(self, ev):
         ev.ignore()
         

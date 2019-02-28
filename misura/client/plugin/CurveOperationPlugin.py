@@ -7,10 +7,10 @@ import veusz.plugins as plugins
 import numpy as np
 from scipy import interpolate
 import numexpr
-import utils
+from . import utils
 
 
-class CurveOperationPlugin(plugins.DatasetPlugin):
+class CurveOperationPlugin(utils.CachedResultFragment, plugins.DatasetPlugin):
 
     """Dataset plugin to perform operations between couples of x,y datasets."""
     # tuple of strings to build position on menu
@@ -24,10 +24,12 @@ class CurveOperationPlugin(plugins.DatasetPlugin):
     description_full = ('Perform operations between (X,Y) curves.'
                         'Use A and B to refer to curves. Supports numexpr expressions.'
                         'Output curve will have the same number of points as A.')
+    
+    cached_dataset_fields = ['ay','ax','by','bx']
 
     def __init__(self, ax='', ay='', bx='', by='', relative=False, smooth=True, tolerance=10., operation='A-B', ds_out=''):
         """Define input fields for plugin."""
-        self.cache = []
+        
         self.fields = [
             plugins.FieldDataset('ay', 'Target A: Y dataset', default=ay),
             plugins.FieldDataset('ax', 'Target A: X dataset', default=ax),
@@ -67,23 +69,18 @@ class CurveOperationPlugin(plugins.DatasetPlugin):
         self.error = 0
         # return list of datasets
         return [self.ds_out]
+    
 
     def updateDatasets(self, fields, helper):
-        ay = np.array(helper.getDataset(fields['ay']).data)
-        ax = np.array(helper.getDataset(fields['ax']).data)
-        by = np.array(helper.getDataset(fields['by']).data)
-        bx = np.array(helper.getDataset(fields['bx']).data)
-        c = [ax,ay,bx,by]
-        if not self.cache:
-            self.cache = c
-            dirty = True
+        if self.is_cache_dirty(fields, helper):
+            c = self.cached_datasets
+            out, error = curve_operation(c['ax'], c['ay'], c['bx'], c['by'], 
+                                     fields['relative'], fields['smooth'], 
+                                     fields['tolerance'], fields['operation'])
         else:
-            dirty = sum([ np.all(c[i]==self.cache[i]) for i in xrange(4)])<4
-            if not dirty:
-                out, error = self.cache[-2:]
-        if dirty:
-            out, error = curve_operation(ax, ay, bx, by, fields['relative'], fields['smooth'], fields['tolerance'], fields['operation'])
-            self.cache += [out,error]
+            out, error = self.cached_result
+            
+        self.cached_result = [out, error]
         self.error = error
         self.ds_out.update(data=out)
         return out
