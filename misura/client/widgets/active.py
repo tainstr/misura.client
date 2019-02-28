@@ -349,7 +349,7 @@ class Active(object):
 
     def _check_flags(self, *args):
         rem_flags = self.remObj.getFlags(self.handle, *args)
-        if rem_flags and (rem_flags['enabled'] is not None):
+        if rem_flags and (rem_flags.get('enabled', None) is not None):
             self.enable_check.setChecked(rem_flags['enabled'])
 
     def _call_function_then_emitchanged_and_checkflags(self, function, *args):

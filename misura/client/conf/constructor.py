@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Programmatic interface construction utilities"""
 from misura.canon.logger import get_module_logging
-from __builtin__ import False
 logging = get_module_logging(__name__)
 import functools
 import os
@@ -22,6 +21,7 @@ from ..clientconf import confdb
 
 from PyQt4 import QtGui, QtCore, QtSvg
 
+from .chronology import ChronologyTable
 
 def desc2html(desc):
     """Crea una rappresentazione HTML del dizionario di descrizione."""
@@ -610,6 +610,7 @@ class Interface(QtGui.QTabWidget):
         self.menu = QtGui.QMenu(self)
         self.menu.addAction(_('Search (Ctrl+F)'), self.activate_search)
         self.menu.addAction(_('Exit search (Esc)'), self.deactivate_search)
+        self.menu.addAction(_('Chronology'), self.show_chronology)
         self.menu.addAction(_('Table'), self.show_details)
         self.menu.addAction(_('Rebuild'), functools.partial(self.rebuild, force=True, redraw=True))
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -874,6 +875,16 @@ class Interface(QtGui.QTabWidget):
 
     def showMenu(self, pt):
         self.menu.popup(self.mapToGlobal(pt))
+        
+    _chron = None
+    def show_chronology(self):
+        if self._chron:
+            self._chron.hide()
+            self._chron.close()
+        self._chron = ChronologyTable(self, parent=None)
+        self._chron.show()
+        
+        
 
     def show_details(self):
         """Show full configuration as HTML table"""
