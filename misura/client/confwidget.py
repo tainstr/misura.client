@@ -356,7 +356,10 @@ def check_default_database():
             confdb['database'] = default_misuradb_path
         else:
             fname = QtGui.QFileDialog.getSaveFileName(
-                None, 'Choose the default database path', default_misuradb_path, "SQLite (*.sqlite)")
+                None, 'Choose the default database path', 
+                default_misuradb_path, 
+                "SQLite (*.sqlite);;Misuradb (misuradb)",
+                options = QtGui.QFileDialog.DontConfirmOverwrite)
             if fname.startswith(params.pathClient):
                 QtGui.QMessageBox.critical(None, _('Invalid database path'), 
                                            invalid_db_msg.format(fname, 
