@@ -21,7 +21,7 @@ from ..clientconf import confdb
 
 from PyQt4 import QtGui, QtCore, QtSvg
 
-from .chronology import ChronologyTable
+from .chronology import ChronologyWidget
 
 def desc2html(desc):
     """Crea una rappresentazione HTML del dizionario di descrizione."""
@@ -878,11 +878,13 @@ class Interface(QtGui.QTabWidget):
         
     _chron = None
     def show_chronology(self):
+        """Show chronology explorer for global reset"""
         if self._chron:
             self._chron.hide()
             self._chron.close()
-        self._chron = ChronologyTable(self, parent=None)
+        self._chron = ChronologyWidget(self, parent=None)
         self._chron.show()
+        self._chron.table.sig_applied.connect(self._chron.close)
         
         
 

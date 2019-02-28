@@ -31,6 +31,8 @@ def get_label(wg):
     return wg
 
 class ChronologyTable(QtGui.QTableWidget):
+    sig_applied = QtCore.pyqtSignal()
+    
     def __init__(self, interface, parent=None):
         # Min 4 columns: check, label, current, default
         super(ChronologyTable, self).__init__(0, 4, parent=parent)
@@ -47,6 +49,7 @@ class ChronologyTable(QtGui.QTableWidget):
         self.default_widgets = {}
         self.virtual_widgets = collections.defaultdict(collections.defaultdict) # row: col: widget
         self.checks = {}
+        self.keys = []
         self.chron = collections.defaultdict(collections.defaultdict) # time: row: widget
         # Create widgets and rows
         i = -1
@@ -68,7 +71,7 @@ class ChronologyTable(QtGui.QTableWidget):
             if not wg:
                 self.desc.pop(key)
                 continue
-            
+            self.keys.append(key)
             self.widgets[key] = wg
             self.checks[key] = QtGui.QCheckBox()
             
@@ -104,6 +107,7 @@ class ChronologyTable(QtGui.QTableWidget):
         shadow_opt = deepcopy(opt)
         shadow_opt['current'] = val
         wg = widgets.build(shadow_remObj.root, shadow_remObj, shadow_opt)
+        wg.label_widget.hide()
         wg.get = lambda *a, **k: True
         wg.set = lambda *a, **k: True
         return wg
@@ -126,9 +130,6 @@ class ChronologyTable(QtGui.QTableWidget):
         
     def select_column(self, current, previous):
         col = current.column()
-        if col<4:
-            logging.debug('Clear selection')
-            self.selectionModel().clearSelection()
         if col==0:
             return
         
@@ -157,14 +158,52 @@ class ChronologyTable(QtGui.QTableWidget):
         for row, colwg in self.virtual_widgets.items():
             for col1, wg in colwg.items():
                 wg = self.shadow(wg.prop, wg.current)
+                logging.debug('Setting virtual', row, col1, col, wg.handle, wg.current)
                 self.setCellWidget(row, col, get_label(wg))
     
         
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
         
-    def apply_selection(self):
-        pass     
+    def select_all(self):
+        status = [self.checks[key].isChecked() for key in self.keys]
+        # If all are checked, unselect all
+        if sum(status)==len(status):
+            st = False
+        else:
+            # Select all
+            st = True
+        logging.debug('select_all', st)
+        map(lambda c: c.setChecked(st), self.checks.values())
+        
+    def apply(self):
+        col = self.currentColumn()
+        if col<COL_DEFAULT:
+            logging.debug('Cannot apply: invalid column')
+            return False
+        
+        new_values = {}
+        for row in xrange(self.rowCount()):
+            key = self.keys[row]
+            if not self.checks[key].isChecked():
+                logging.debug('Skipping unchecked: ', key)
+                continue
+            if col==COL_DEFAULT:
+                wg = self.default_widgets[key]
+            elif self.virtual_widgets.get(row, {}).get(col, None):
+                wg = self.virtual_widgets[row][col]
+            else:
+                logging.debug('Cannot find proper value for', key, row, col)
+                continue
+                
+            new_values[key] = wg.current
+            print('ZZZZZZ', key, wg.current)
+            
+        from misura.client.live import registry
+        for key, value in new_values.items():
+            self.remObj.set(key, value)
+            registry.force_redraw(self.remObj.getattr(key, 'kid'))
+        self.sig_applied.emit()
         
         
     @property
@@ -174,3 +213,28 @@ class ChronologyTable(QtGui.QTableWidget):
 
 #TODO: ChronologyWidget with apply/cancel button and options: un/select all + show default
 
+class ChronologyWidget(QtGui.QWidget):
+    def __init__(self, interface, parent=None):
+        super(ChronologyWidget, self).__init__(parent)
+        lay = QtGui.QVBoxLayout()
+        self.table = ChronologyTable(interface, parent=self)
+        self.setWindowTitle(self.table.windowTitle())
+        lay.addWidget(self.table)
+        btn_select = QtGui.QPushButton(_('Un/select all'))
+        btn_select.clicked.connect(self.table.select_all)
+        lay.addWidget(btn_select)
+        self.btn_apply = QtGui.QPushButton(_('Apply column values'))
+        self.btn_apply.clicked.connect(self.table.apply)
+        self.btn_apply.setEnabled(False)
+        lay.addWidget(self.btn_apply)
+        self.setLayout(lay)
+        self.table.selectionModel().currentColumnChanged.connect(self.select_column)
+        
+    def select_column(self, current, previous):
+        """Enabled/disable apply button"""
+        en = current.column()>=COL_DEFAULT
+        self.btn_apply.setEnabled(en)
+        
+        
+    
+    
