@@ -6,14 +6,11 @@ logging = get_module_logging(__name__)
 from time import time
 import datetime
 import functools
-import os
 import collections
-from traceback import print_exc
-import threading
 from copy import deepcopy
 from .. import _
 from .. import widgets
-from .. import iutils
+
 
 from PyQt4 import QtGui, QtCore
 
@@ -71,15 +68,21 @@ class ChronologyTable(QtGui.QTableWidget):
             if not wg:
                 self.desc.pop(key)
                 continue
-            self.keys.append(key)
-            self.widgets[key] = wg
-            self.checks[key] = QtGui.QCheckBox()
-            
-            # Shadow widget
-            shadow = self.shadow(opt, opt['factory_default'])
-            self.default_widgets[key] = shadow 
             
             i += 1
+            self.insertRow(i)
+            
+            self.keys.append(key)
+            self.widgets[key] = wg
+            # Shadow widget
+            shadow = self.shadow(opt, opt['factory_default'])
+            self.default_widgets[key] = shadow
+            
+            # Checkbox widget
+            c = QtGui.QCheckBox()
+            f = functools.partial(self.toggled_check, i)
+            c.toggled.connect(f)
+            self.checks[key] = c 
             
             # Generate chronology entries
             for j, t in enumerate(chron[0]):
@@ -87,8 +90,6 @@ class ChronologyTable(QtGui.QTableWidget):
                 cwg = self.shadow(opt, val)
                 self.chron[t][i] = cwg
             
-            
-            self.insertRow(i)
             self.setCellWidget(i, COL_CHECK, self.checks[key])
             self.vheader.append(opt['name'])
             wg.label_widget.hide()
@@ -101,6 +102,17 @@ class ChronologyTable(QtGui.QTableWidget):
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
         self.selectionModel().currentColumnChanged.connect(self.select_column)
+        
+        # Check all rows:
+        self.select_all()
+        
+    def toggled_check(self, row, status):
+        logging.debug('toggled_check', row, status)
+        item = self.verticalHeaderItem(row)
+        f = item.font()
+        f.setUnderline(status)
+        item.setFont(f)
+        
         
     def shadow(self, opt, val):
         #TODO: improve appearance of shadow widgets for table cells
@@ -129,11 +141,7 @@ class ChronologyTable(QtGui.QTableWidget):
         
         self.setHorizontalHeaderLabels(self.header)
         
-    def select_column(self, current, previous):
-        col = current.column()
-        if col==COL_CHECK:
-            return
-        
+    def clean_virtuals(self):
         # Clean old virtuals
         for row, item in self.virtual_widgets.items():
             for col in item.keys():
@@ -141,15 +149,23 @@ class ChronologyTable(QtGui.QTableWidget):
                 self.removeCellWidget(row, col)
         self.virtual_widgets = collections.defaultdict(collections.defaultdict) 
         
+    def select_column(self, current, previous=None):
+        col = current.column()
+        if col==COL_CHECK:
+            return
+        
+        self.clean_virtuals()
         
         if col<COL_BASE:
-            logging.debug('Null selection')
+            logging.debug('Invalid selection')
             return
         
         # List all times after selected t
         t = self.times[col-COL_BASE]
         
         for row in xrange(self.rowCount()):
+            if not self.is_row_checked(row):
+                continue
             for col1, t1 in enumerate(self.times[:col-COL_BASE+1]):
                 wg = self.chron[t1].get(row, False)
                 if wg and col1!=col:
@@ -157,14 +173,22 @@ class ChronologyTable(QtGui.QTableWidget):
         
         # Set latest item on column
         for row, colwg in self.virtual_widgets.items():
+            if not self.is_row_checked(row):
+                continue
             for col1, wg in colwg.items():
                 wg = self.shadow(wg.prop, wg.current)
                 logging.debug('Setting virtual', row, col1, col, wg.handle, wg.current)
-                self.setCellWidget(row, col, get_label(wg))
+                lbl = get_label(wg)
+                self.setCellWidget(row, col, lbl)
+                lbl.show()
+                
     
         
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
+        
+    def is_row_checked(self, row):
+        return self.checks[self.keys[row]].isChecked()
         
     def select_all(self):
         status = [self.checks[key].isChecked() for key in self.keys]
@@ -176,6 +200,9 @@ class ChronologyTable(QtGui.QTableWidget):
             st = True
         logging.debug('select_all', st)
         map(lambda c: c.setChecked(st), self.checks.values())
+        # Redraw virtual column
+        if self.currentColumn()>=COL_BASE:
+            self.select_column(self.currentIndex())
         
     def apply(self):
         col = self.currentColumn()
