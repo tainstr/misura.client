@@ -39,7 +39,7 @@ class ChronologyTable(QtGui.QTableWidget):
         self.desc = deepcopy(self.interface.remObj.describe())
         self.setWindowTitle(_('Chronology for {}, {}').format(self.desc['name']['current'], 
                                                             self.desc['fullpath']['current']))
-        self.header = ['?', _('Name'),_('Current'), _('Default')]
+        self.header = ['?', _('Current'), _('Default')]
         
         self.widgets = {}
         self.default_widgets = {}
