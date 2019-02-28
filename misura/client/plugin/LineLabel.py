@@ -31,7 +31,7 @@ class LineLabel(TextLabel):
         pos.set('axes')
         pos.hidden = True
         
-        s.Text.size = '6pt'
+        s.Text.size = '8pt'
         
         s.get('xAxis').hidden = True
         s.get('yAxis').hidden = True
