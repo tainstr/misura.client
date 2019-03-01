@@ -1,16 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import functools
-from PyQt4 import QtCore, QtGui
+import os
 
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 
+from misura.canon import indexer
 from .. import _
-from ..clientconf import confdb
-
-from .DatabaseModel import *
 from .DatabaseTable import DatabaseTable, iter_selected
+from PyQt4 import QtCore, QtGui
 
 class DatabaseWidget(QtGui.QWidget):
 

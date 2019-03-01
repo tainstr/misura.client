@@ -7,7 +7,6 @@ logging = get_module_logging(__name__)
 import datetime
 
 from misura.client import parameters
-from misura.canon import indexer
 from .. import _
 
 
@@ -85,7 +84,6 @@ class DatabaseModel(QtCore.QAbstractTableModel):
         name_column = self.ncol('name')
         comment_column = self.ncol('comment')
         uid = self.tests[index.row()][self.ncol('uid')]
-        name = self.tests[index.row()][name_column]
         file_name = self.tests[index.row()][self.ncol('file')]
 
         update_functions = {
