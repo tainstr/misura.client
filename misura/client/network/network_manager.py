@@ -26,7 +26,11 @@ timeout = 2
 
 
 class NetworkManager(QtCore.QThread):
-
+    addr = ''
+    connected = False
+    remote = None
+    transport = False
+    
     def __init__(self):
         self.scan = True
         """Ciclo di scansione attivo?"""
@@ -43,13 +47,6 @@ class NetworkManager(QtCore.QThread):
                 regtype=regtype, callBack=self.browse_callback)
         except:
             logging.debug(format_exc())
-        self.addr = ''
-        """Indirizzo cui si è connessi"""
-        self.connected = False
-        """È stata stabilita una connessione?"""
-        self.remote = None
-        """Oggetto MisuraProxy per la connessione corrente"""
-        self.transport = False
 
     def query_record_callback(self, sdRef, flags, interfaceIndex, errorCode, fullname,
                               rrtype, rrclass, rdata, ttl):
@@ -108,7 +105,7 @@ class NetworkManager(QtCore.QThread):
             logging.debug('Found error ', errorCode)
             return
         if serviceName[:7] != 'misura':
-            logging.debug('Wrong service name:', fullname)
+            logging.debug('Wrong service name:', serviceName)
             return
         fullname = serviceName + '.' + regtype + replyDomain
         # If flags means the service has been lost, remove it

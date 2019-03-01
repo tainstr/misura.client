@@ -16,8 +16,8 @@ import Cookie
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 
-from mproxy import MisuraProxy, reconnect, urlauth, dataurl, remote_dbdir
-from wake_on_lan import wake_on_lan
+from .mproxy import MisuraProxy, reconnect, urlauth, dataurl, remote_dbdir
+from .wake_on_lan import wake_on_lan
 
 import sip
 API_NAMES = ["QDate", "QDateTime", "QString",
@@ -28,10 +28,10 @@ for name in API_NAMES:
 from PyQt4 import QtCore
 
 
-from info import ServerInfo
-from manager import NetworkManager
+from .info import ServerInfo
+from misura.client.network.network_manager import NetworkManager
 
-from transfer_thread import TransferThread
+from .transfer_thread import TransferThread
 
 global ess
 ess = ServerInfo()

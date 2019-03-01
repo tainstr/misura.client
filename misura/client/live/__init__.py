@@ -4,6 +4,6 @@
 
 from tasks import RemoteTasks, LocalTasks,  Tasks
 from processor import SampleProcessor, FrameProcessor
-from registry import KidRegistry
+from kid_registry import KidRegistry
 
 registry = KidRegistry()

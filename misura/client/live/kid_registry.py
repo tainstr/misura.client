@@ -4,20 +4,18 @@
 
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
-from time import sleep, time
-from cPickle import loads
+from time import sleep
+
 import threading
 import collections 
 from traceback import format_exc
 import functools
 
-from misura.canon import option
-from misura.canon.csutil import lockme, profile
+from misura.canon.csutil import lockme
 from misura.canon.plugin.dataimport import NullTasks
 from misura.client.network import manager as net
-from misura.client import _
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtCore
 from tasks import Tasks
 
 # TODO: we should NEVER reference widgets here, just KIDs (except pending
