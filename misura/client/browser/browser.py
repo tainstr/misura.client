@@ -303,8 +303,6 @@ class MainWindow(QtGui.QMainWindow):
                 self.opened_windows.remove(w)
             self.tab.removeTab(idx)
             w.close()
-            # explicitly destroy the widget
-            #del w
             return True
         # Failed to close the tab
         return False

@@ -7,13 +7,12 @@ logging = get_module_logging(__name__)
 from PyQt4 import QtGui, QtCore
 
 import veusz.utils
-
+from ..clientconf import confdb
 from .. import _
 from .. import filedata
 from .. import fileui
 from .. import acquisition
 from ..live import registry
-from misura.canon.csutil import profile
 from ..graphics import Breadcrumb, PlotsBoard
 from ..navigator import NavigatorToolbar
 from misura.client.iutils import calc_plot_hierarchy, most_involved_node
@@ -89,27 +88,12 @@ class TestWindow(acquisition.MainWindow):
         
         self.add_breadcrumb()
         self.add_plotboard()
-        
-
-        # TODO: cleanup this! Should pass through some sort of plugin or config
-        # mechanism...
-        if self.name not in ['flash']:
-            self.plotboardDock.hide()
-            self.breadbar.hide()
-        else:
-            self.navigator.status.add(filedata.dstats.outline)
-            self.measureTab.setCurrentIndex(1)
-            try:
-                self.summaryPlot.cmd.Remove('/time')
-            except:
-                pass
-
-        
+                
         self.doc.model.sigPageChanged.connect(self.slot_page_changed)
         
         self.add_playback()
 
-        self.graphWin.showMaximized()
+        
         self.removeToolBar(self.controls)
         self.connect(self.play, QtCore.SIGNAL('set_idx(int)'), self.set_idx)
         self.connect(self.imageSlider, QtCore.SIGNAL('set_idx(int)'), 
@@ -124,6 +108,45 @@ class TestWindow(acquisition.MainWindow):
         self.navigator.expand_plotted_nodes()
         root = list(self.navigator.model().tree.children.values())[0]
         self.navigator.expand_node_path(root, select=True)
+        
+        # TODO: cleanup this! Should pass through some sort of plugin or config
+        # mechanism...
+        getattr(self, 'init_instrument_'+self.name, self.init_instrument)()
+        
+    def init_instrument(self):
+        """Generic instrument initialization"""
+        self.plotboardDock.hide()
+        self.breadbar.hide()
+        self.graphWin.showMaximized()
+
+        
+    def init_instrument_flash(self):
+        self.navigator.status.add(filedata.dstats.outline)
+        self.measureTab.setCurrentIndex(1)
+        try:
+            self.summaryPlot.cmd.Remove('/time')
+        except:
+            pass
+        onOpen = confdb['flash_open']
+        if onOpen =='Ask':
+            m = QtGui.QMessageBox(self)
+            m.setWindowTitle(_('Select how to open Flash tests'))
+            m.setText(_('Choose if to create a default plot or start the Flash Wizard'))
+            m.setInformativeText(_('You can save your preference under \nHelp->Client Configuration->Flash->Show on opening'))
+            m.addButton(_('Start the Wizard'), QtGui.QMessageBox.AcceptRole)
+            m.addButton(_('Default Plot'), QtGui.QMessageBox.RejectRole)
+            m.exec_()
+            
+            if m.result()==QtGui.QMessageBox.AcceptRole:
+                onOpen = 'Wizard'
+        if onOpen == 'Wizard':
+            self.graphWin.showMinimized()
+            dom = self.navigator.domainsMap['FlashNavigatorDomain']
+            dom.wizard()
+        else:
+            self.graphWin.showMaximized()
+                
+                
         
     def get_tooltip(self):
         """This is shown in tabbar"""
