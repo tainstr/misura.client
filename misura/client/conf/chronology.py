@@ -28,6 +28,7 @@ def get_label(wg):
 
 class ChronologyTable(QtGui.QTableWidget):
     sig_applied = QtCore.pyqtSignal()
+    shadow_remObj = False
     
     def __init__(self, interface, parent=None):
         # Min 3 columns: check, current, default
@@ -116,10 +117,12 @@ class ChronologyTable(QtGui.QTableWidget):
         
     def shadow(self, opt, val):
         #TODO: improve appearance of shadow widgets for table cells
-        shadow_remObj = deepcopy(self.remObj)
+        if not self.shadow_remObj:
+            self.shadow_remObj = deepcopy(self.remObj)
+            self.shadow_remObj.set = lambda *a, **k: None
         shadow_opt = deepcopy(opt)
         shadow_opt['current'] = val
-        wg = widgets.build(shadow_remObj.root, shadow_remObj, shadow_opt)
+        wg = widgets.build(self.shadow_remObj.root, self.shadow_remObj, shadow_opt)
         wg.label_widget.hide()
         wg.get = lambda *a, **k: True
         wg.set = lambda *a, **k: True
@@ -225,12 +228,13 @@ class ChronologyTable(QtGui.QTableWidget):
                 continue
                 
             new_values[key] = wg.current
-            print('ZZZZZZ', key, wg.current)
             
         from misura.client.live import registry
+        kids = []
         for key, value in new_values.items():
             self.remObj.set(key, value)
-            registry.force_redraw(self.remObj.getattr(key, 'kid'))
+            kids.append(self.remObj.getattr(key, 'kid'))
+        registry.force_redraw(kids)
         self.sig_applied.emit()
         
         
@@ -241,9 +245,9 @@ class ChronologyTable(QtGui.QTableWidget):
 
 #TODO: ChronologyWidget with apply/cancel button and options: un/select all + show default
 
-class ChronologyWidget(QtGui.QWidget):
+class ChronologyDialog(QtGui.QDialog):
     def __init__(self, interface, parent=None):
-        super(ChronologyWidget, self).__init__(parent)
+        super(ChronologyDialog, self).__init__(parent)
         lay = QtGui.QVBoxLayout()
         self.table = ChronologyTable(interface, parent=self)
         self.setWindowTitle(self.table.windowTitle())
@@ -253,6 +257,7 @@ class ChronologyWidget(QtGui.QWidget):
         lay.addWidget(btn_select)
         self.btn_apply = QtGui.QPushButton(_('Apply column values'))
         self.btn_apply.clicked.connect(self.table.apply)
+        self.btn_apply.clicked.connect(self.accept)
         self.btn_apply.setEnabled(False)
         lay.addWidget(self.btn_apply)
         self.setLayout(lay)
