@@ -9,6 +9,7 @@ from misura.client.filedata.operation import getUsedPrefixes
 logging = get_module_logging(__name__)
 from misura.canon.plugin import navigator_domains
 from misura.canon.plugin.domains import node
+from misura.canon.option import match_node_path
 import veusz.document as document
 import veusz.plugins
 import veusz.dialogs
@@ -187,10 +188,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
         return False
     
     def match_node_path(self, node, rule):
-        if (not node) or (not node.path):
-            return False
-        regex = re.compile(rule.replace('\n', '|'))
-        return regex.search(node.path)
+        return match_node_path(node, rule)
     
     def show_widget_key(self, key):
         """Shows existing widgets or subwindows by key"""

@@ -206,7 +206,7 @@ class OptionLine(utils.OperationWrapper, OptionAbstractWidget, widgets.Line):
         if not self.line_label:
             logging.debug('Creating child LineLabel...')
             op = OperationWidgetAdd(self, 'linelabel', name='legend')
-            self.doc.applyOperation(op)
+            self.document.applyOperation(op)
             self.line_label = self.getChild('legend')
         self.line_label.settings.label = legend
         self.line_label.settings.hide = not bool(legend)
