@@ -153,19 +153,18 @@ class DatabaseWidget(QtGui.QWidget):
         from ..live import registry
         self.remote.tasks = registry.tasks
         self.remote.rebuild()
-        self.up()
         
     def rebuild(self):
         from ..widgets import RunMethod
         r = RunMethod(self._rebuild)
         r.pid = 'Rebuilding database'
         r.abort = self.remote.abort
+        r.notifier.done.connect(self.up)
         QtCore.QThreadPool.globalInstance().start(r)        
 
     def _refresh(self):
         from ..live import registry
         self.remote.tasks = registry.tasks
-        self.remote.refresh()
         self.up()
         
     def refresh(self):
@@ -173,6 +172,7 @@ class DatabaseWidget(QtGui.QWidget):
         r = RunMethod(self._refresh)
         r.pid = 'Refreshing database'
         r.abort = self.remote.abort
+        r.notifier.done.connect(self.up)
         QtCore.QThreadPool.globalInstance().start(r)
         
     def switch_name_iid_serial(self):
