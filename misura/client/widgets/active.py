@@ -878,7 +878,7 @@ class ActiveWidget(Active, QtGui.QWidget):
         if 'chron' not in self.prop:
             return False
         times, values = self.remObj.getattr(self.handle, 'chron')
-        if len(times)<2:
+        if not len(times):
             return False
         t0 = time()
         v1 = values[-2::-1]
