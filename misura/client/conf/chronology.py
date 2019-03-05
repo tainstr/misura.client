@@ -61,7 +61,11 @@ class ChronologyTable(QtGui.QTableWidget):
                 self.desc.pop(key)
                 continue
             chron = opt.get('chron', [[],[]])
-            if opt['current']==opt['factory_default'] and not chron[0]:
+            cur = opt['current']
+            fd = opt['factory_default']
+            if None in (cur, fd):
+                continue
+            if cur==fd and not chron[0]:
                 self.desc.pop(key)
                 continue
             wg = widgets.build(self.remObj.root, self.remObj, opt)
@@ -76,7 +80,7 @@ class ChronologyTable(QtGui.QTableWidget):
             self.keys.append(key)
             self.widgets[key] = wg
             # Shadow widget
-            shadow = self.shadow(opt, opt['factory_default'])
+            shadow = self.shadow(opt, fd)
             self.default_widgets[key] = shadow
             
             # Checkbox widget
@@ -95,7 +99,7 @@ class ChronologyTable(QtGui.QTableWidget):
             self.vheader.append(opt['name'])
             wg.label_widget.hide()
             self.setCellWidget(i, COL_CURRENT, get_label(wg))
-            if opt['current']!=opt['factory_default']:
+            if cur!=fd:
                 self.setCellWidget(i, COL_DEFAULT, get_label(shadow))
                 
         self.create_chron_columns()
