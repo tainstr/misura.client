@@ -133,13 +133,18 @@ class ChronologyTable(QtGui.QTableWidget):
         return wg
     
     def create_chron_columns(self):
-        self.header = self.header[:COL_BASE]
         # Extract sorted time columns
         self.times = sorted(self.chron.keys(), reverse=True)
-        t0 = time()
+        
 
         # Expand column count
         self.setColumnCount(COL_BASE+len(self.times))
+        self.fill_chron_columns()
+        
+        
+    def fill_chron_columns(self):
+        t0 = time()
+        self.header = self.header[:COL_BASE]
         for col, t in enumerate(self.times):
             t1 = datetime.timedelta(seconds=int(t0-t))
             self.header.append('-{}'.format(t1))
@@ -166,24 +171,35 @@ class ChronologyTable(QtGui.QTableWidget):
         if col<COL_BASE:
             logging.debug('Invalid selection')
             return
-        
-        # List all times after selected t
-        t = self.times[col-COL_BASE]
-        
+        Nt = len(self.times)
+        # Check row by row (options)
         for row in xrange(self.rowCount()):
+            # Skip if not checked
             if not self.is_row_checked(row):
                 continue
-            for col1, t1 in enumerate(self.times[:col-COL_BASE+1]):
+            # Search nearest column in the past
+            for j, t1 in enumerate(self.times[col-COL_BASE:]):
                 wg = self.chron[t1].get(row, False)
-                if wg and col1!=col:
+                if j==0:
+                    if wg:
+                        break
+                    continue
+                
+                col1 = j+col-COL_BASE
+                # Nothing found: keep searching in the past
+                if not wg:
+                    continue
+                # List only if different from current value
+                if wg.current!=self.widgets[wg.handle].current:
                     self.virtual_widgets[row][col] = wg
+                break
         
         # Set latest item on column
         for row, colwg in self.virtual_widgets.items():
             if not self.is_row_checked(row):
                 continue
-            for col1, wg in colwg.items():
-                wg = self.shadow(wg.prop, wg.current)
+            for col1, wg0 in colwg.items():
+                wg = self.shadow(wg0.prop, wg0.current)
                 logging.debug('Setting virtual', row, col1, col, wg.handle, wg.current)
                 lbl = get_label(wg)
                 self.setCellWidget(row, col, lbl)
