@@ -30,7 +30,7 @@ class ChronologyTable(QtGui.QTableWidget):
     sig_applied = QtCore.pyqtSignal()
     shadow_remObj = False
     
-    def __init__(self, interface, parent=None):
+    def __init__(self, interface, handles=False, parent=None):
         # Min 3 columns: check, current, default
         super(ChronologyTable, self).__init__(0, 3, parent=parent)
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectColumns)
@@ -52,6 +52,8 @@ class ChronologyTable(QtGui.QTableWidget):
         # Create widgets and rows
         i = -1
         for key, opt in self.desc.copy().items():
+            if handles and key not in handles:
+                continue
             a = set(opt['attr'])
             ra = set(['Result', 'Status', 'ReadOnly'])
             if len(ra-a)<len(ra):
@@ -266,10 +268,10 @@ class ChronologyTable(QtGui.QTableWidget):
 #TODO: ChronologyWidget with apply/cancel button and options: un/select all + show default
 
 class ChronologyDialog(QtGui.QDialog):
-    def __init__(self, interface, parent=None):
+    def __init__(self, interface, handles=False, parent=None):
         super(ChronologyDialog, self).__init__(parent)
         lay = QtGui.QVBoxLayout()
-        self.table = ChronologyTable(interface, parent=self)
+        self.table = ChronologyTable(interface, handles, parent=self)
         self.setWindowTitle(self.table.windowTitle())
         lay.addWidget(self.table)
         btn_select = QtGui.QPushButton(_('Un/select all'))

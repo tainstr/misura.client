@@ -882,7 +882,12 @@ class Interface(QtGui.QTabWidget):
         if self._chron:
             self._chron.hide()
             self._chron.close()
-        self._chron = ChronologyDialog(self, parent=None)
+        handles = False
+        i = self.currentIndex()
+        if self.count() and i>=0:
+            area = self.currentWidget()
+            handles = area.widget().widgetsMap.keys()
+        self._chron = ChronologyDialog(self, handles, parent=None)
         self._chron.exec_()
         self._chron.table.sig_applied.connect(self._chron.close)
         
