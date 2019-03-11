@@ -26,7 +26,7 @@ import veusz.windows.plotwindow as plotwindow
 from veusz.windows import consolewindow
 import veusz.setting as setting
 from veusz.document import OperationWidgetDelete
-
+from veusz.compat import cstrerror
 
 
 
@@ -128,6 +128,7 @@ class VeuszPlotWindow(plotwindow.PlotWindow):
         self.navigator = False
         registerImportCommand('MoveToLastPage', self.moveToLastPage)
         self.setAcceptDrops(True)
+        
         
     def dragMoveEvent(self, event):
         process_dragMoveEvent(event)
@@ -531,6 +532,7 @@ class VeuszPlot(QtGui.QWidget):
             self.ci.run("Load('/opt/misura/misura/client/art/plot.vst')")
 
         plugin.makeDefaultDoc(self.cmd)
+        self.loadDefaultStylesheet()
 
         # Override the zoompage action in order to fit the plot into widget
         # dimension.
@@ -544,6 +546,24 @@ class VeuszPlot(QtGui.QWidget):
         self.treeedit.widgetsSelected.connect(self.plot.selectedWidgets)
         self.treeedit.sigPageChanged.connect(self.plot.setPageNumber)
         self.document.model.sigPageChanged.connect(self.sync_page)
+        
+        
+    def loadDefaultStylesheet(self):
+        """Loads the default stylesheet for the new document."""
+        filename = setdb['stylesheet_default']
+        if filename:
+            try:
+                self.document.applyOperation(
+                    document.OperationLoadStyleSheet(filename) )
+            except EnvironmentError as e:
+                qt4.QMessageBox.warning(
+                    self, _("Error - Veusz"),
+                    _("Unable to load default stylesheet '%s'\n\n%s") %
+                    (filename, cstrerror(e)))
+            else:
+                # reset any modified flag
+                self.document.setModified(False)
+                self.document.changeset = 0
 
     def sync_page(self, page=-1):
         self.plot.update_page()
