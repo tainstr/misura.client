@@ -285,7 +285,7 @@ class Navigator(quick.QuickOps, QtGui.QTreeView):
     def open_file(self, path, **kw):
         self.pause(True)
         logging.info('OPEN FILE', path)
-        self.doc.proxy = False
+        #self.doc.proxy = False
         op = filedata.OperationMisuraImport(
             filedata.ImportParamsMisura(filename=path, gen_rule_load=True)
         )

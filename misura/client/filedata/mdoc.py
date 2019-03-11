@@ -575,7 +575,20 @@ class MisuraDocument(document.Document):
                 continue
             logging.debug('Saving cached dataset', name)
             yield name, ds
-    
+            
+    def list_opened_filenames(self):
+        ret = set()
+        for (name, ds) in self.iter_data_and_cache():
+            if not ds.linked or not os.path.exists(ds.linked.filename):
+                logging.debug('list_opened_filenames: Skipping unlinked dataset', name, ds.linked)
+                continue
+            if getattr(ds.linked, 'mtype', False)!='LinkedMisuraFile':
+                logging.debug('list_opened_filenames: Skipping non-misura dataset', name, ds.linked)
+                continue
+            ret.add(os.path.abspath(ds.linked.filename))
+        return ret
+            
+                
     def save_version_and_plot(self, version_name, vsz_text=False, pid=False):
         plots = set([])  # filename where plot is already saved
         proxies = {}

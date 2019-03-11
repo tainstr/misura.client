@@ -280,21 +280,26 @@ class TestWindow(acquisition.MainWindow):
         """Check if changes occurred to the Veusz document or the configuration proxy,
         and ask to save on current or new version.
         Returns true if saved or discarded, false if action aborted."""
-        #FIXME: this happens when multiple tests are loaded in the same window. 
-        # Version should be checked per-proxy!
-        if not self.doc.proxy:
-            return True
         if not self.navigator.isEnabled():
             QtGui.QMessageBox.information(self, 
                                           _('Cannot close test: '+self.windowTitle()), 
                                           _(message_busy))
             return False
+        
+        
+        
+        #FIXME: this happens when multiple tests are loaded in the same window. 
+        # Version should be checked per-proxy!
+        fn = self.doc.list_opened_filenames()
+        multi_test = len(fn)==0 or len(fn)>1 
+        
         ret = True
         effective_changeset = self.doc.changeset-self.doc.changeset_ignore
+        #FIXME: here I should check all server versions from all proxies
         conf_changeset = self.server.recursive_changeset()
         logging.debug('Checking changesets', effective_changeset, self.doc.changeset,  
                       self.initial_veusz_doc_changeset, conf_changeset, self.initial_server_changeset)
-        if effective_changeset > self.initial_veusz_doc_changeset or conf_changeset>self.initial_server_changeset:
+        if effective_changeset > self.initial_veusz_doc_changeset or conf_changeset>self.initial_server_changeset or multi_test:
             ver = self.doc.proxy.get_version()
             logging.debug('got version', repr(ver))
             if not ver:

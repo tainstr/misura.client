@@ -194,6 +194,8 @@ class MainWindow(QtGui.QMainWindow):
         path = os.path.abspath(unicode(path))
         logging.debug('Browser MainWindow.open_file', path, tab_index)
         for i in xrange(1,self.tab.count()):
+            if tab_index>0:
+                break
             tab_path = os.path.abspath(self.tab.widget(i).fixedDoc.proxy.get_path())
             if path == tab_path:
                 logging.debug('File is already opened: switching to tab', i)
