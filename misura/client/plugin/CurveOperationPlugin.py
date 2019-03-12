@@ -127,7 +127,10 @@ def curve_operation(ax, ay, bx, by, relative=True, smooth=True, tolerance=10., o
     if bx is ax:
         out = numexpr.evaluate(op, local_dict={'a': ay, 'b': by})
         return out, 0
-
+    ax = np.array(ax).astype(np.float64)
+    ay = np.array(ay).astype(np.float64)
+    bx = np.array(bx).astype(np.float64)
+    by = np.array(by).astype(np.float64)
     # Smooth x data
     if smooth:
         ax = utils.smooth(ax)
@@ -151,7 +154,6 @@ def curve_operation(ax, ay, bx, by, relative=True, smooth=True, tolerance=10., o
     logging.debug( 'interpolating', len(rbx), len(rby), margin, step)
     
     knots = rbx[margin:-margin:step]
-    #knots = [5, 10, 15]
     bsp = interpolate.LSQUnivariateSpline(rbx, rby, knots)
     #bsp = interpolate.UnivariateSpline(rbx, rby)
     #errror = bsp.get_residuals()

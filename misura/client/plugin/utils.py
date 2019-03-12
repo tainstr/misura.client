@@ -44,6 +44,10 @@ def rectify(xData):
     x = xData.copy()
     # Absolute value of point derivatives
     xd = np.diff(x)
+    # Avoid plateau
+    p = np.where(xd==0)[0]
+    xd[p] = 1e-14
+    
     # Rectification entity estimation
     xe = np.sign(np.diff(xd))
     err = 1. * (abs(xe).sum() - xe.sum()) / len(xe)

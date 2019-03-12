@@ -3,7 +3,8 @@
 """Database synchronization service and widget"""
 import unittest
 import os
-import logging
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 
 from misura.canon import indexer
 from misura.canon import option
@@ -33,12 +34,13 @@ if os.path.exists(test_confdb):
     os.remove(test_confdb)
 cdb = ConfDb(test_confdb)
 cdb['database'] = test_confdb
-# Monkey-patch confdb object in sync module, which was originally imported
-# from clientconf.
-sync.sync.confdb = cdb
 
-
-logging.debug(remote_dbpath+local_dbpath)
+def setUpModule():
+    logging.debug('setUpModule', __name__)
+    # Monkey-patch confdb object in sync module, which was originally imported
+    # from clientconf.
+    sync.sync.confdb = cdb
+    logging.debug(remote_dbpath+local_dbpath)
 
 
 class StorageSync(unittest.TestCase):

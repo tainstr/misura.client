@@ -3,6 +3,8 @@
 """Testing CalibrationFactorPlugin."""
 import unittest
 import os
+from misura.canon.logger import get_module_logging
+logging = get_module_logging(__name__)
 import veusz.document as document
 from misura.client import filedata
 from misura.client.tests import iutils_testing as iut
