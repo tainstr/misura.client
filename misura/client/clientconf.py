@@ -80,9 +80,9 @@ ao(default_desc, 'maxcpu', **{'name': 'Maximum number of CPU', 'current': cpu,
 ##############
 # Autoupdate
 ao(default_desc, 'updateUrl', 'String',
-   'ftp://webshare.tainstruments.com/pub/Software/Misura/4/',
+   'https://bitbucket.org/tainstr/misura.client/downloads/',
    'AutoUpdate site address')
-ao(default_desc, 'updateUser', 'String', 'taguest',
+ao(default_desc, 'updateUser', 'String', '',
    'AutoUpdate site username', parent='updateUrl')
 ao(default_desc, 'updatePassword', 'String', '',
    'AutoUpdate site password', parent='updateUrl')
@@ -435,6 +435,10 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if os.name != 'nt':
             self['m3_enable'] = False
             self.setattr('m3_enable', 'attr', ['ReadOnly', 'Hidden'])
+        if 'webshare' in self['updateUrl']:
+            self['updateUrl'] = self.getattr('updateUrl','factory_default')
+            self['updateUser'] = ''
+            self['updatePassword'] = ''
 
     def migrate_desc(self):
         """Migrate saved newdesc to current hard-coded configuration structure default_desc"""
