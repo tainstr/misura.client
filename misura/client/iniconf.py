@@ -126,7 +126,7 @@ def restore(srv, file_path='ini.ini', serials=None, override=[], jobs=lambda *a:
             fp = '/'.join(fp)
             logging.debug('Setting', fp, opt, key, 'to', val)
             
-            obj = srv.toPath(fp)
+            obj = srv.toPath(fp) if fp else srv
             if obj is None:
                 logging.error('Target object does not exist:', fp)
                 continue
