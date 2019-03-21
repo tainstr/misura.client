@@ -36,7 +36,7 @@ translators = []
 
 network.manager.connect(network.manager,
                         QtCore.SIGNAL(
-                            'connected(QString,QString,QString,QString,QString,QString,bool)'),
+                            'connected(QString,QString,QString,QString,QString,bool)'),
                         confdb.mem_server)
 network.manager.connect(network.manager,
                         QtCore.SIGNAL('found(QString)'),

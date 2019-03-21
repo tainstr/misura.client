@@ -88,7 +88,7 @@ def simpleConnection(addr, user='', password='', mac='', save=True):
         return False, obj
     
     manager.emit(QtCore.SIGNAL(
-        'connected(QString,QString,QString,QString,QString,QString,bool)'), addr, user, password, obj['eq_mac'], obj['eq_sn'], obj['name'], save)
+        'connected(QString,QString,QString,QString,QString,bool)'), addr, user, password, obj['eq_mac'], obj['name'], save)
     return True, obj
 
 

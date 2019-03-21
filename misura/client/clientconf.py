@@ -652,7 +652,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if not save:
             user = ''
             password = ''
-        logging.debug('mem_server', addr, user, password, mac, name)
+        logging.debug('mem_server', addr, user, password, mac, name, save)
         return self.mem('server', addr, user, password, mac, name)
 
     def rem_server(self, addr):
