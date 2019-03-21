@@ -17,26 +17,32 @@ from misura.client.clientconf import ConfDb
 PORT = 34987
 # TODO: simple service
 
-path = os.path.join(determine_path(__file__), 'data')
-remote_dbdir = os.path.join(path, 'remote')
-if not os.path.exists(remote_dbdir):
-    os.makedirs(remote_dbdir)
-remote_dbpath = os.path.join(remote_dbdir, 'remote_db.sqlite')
-
-local_dbdir = os.path.join(path, 'local')
-if not os.path.exists(local_dbdir):
-    os.makedirs(local_dbdir)
-local_dbpath = os.path.join(local_dbdir, 'local_db.sqlite')
-
-
-test_confdb = os.path.join(path, 'conf_db.sqlite')
-if os.path.exists(test_confdb):
-    os.remove(test_confdb)
-cdb = ConfDb(test_confdb)
-cdb['database'] = test_confdb
-
 def setUpModule():
+    global cdb, remote_dbpath, local_dbpath, test_confdb
     logging.debug('setUpModule', __name__)
+    path = os.path.join(determine_path(__file__), 'data')
+    remote_dbdir = os.path.join(path, 'remote')
+    if not os.path.exists(remote_dbdir):
+        os.makedirs(remote_dbdir)
+    remote_dbpath = os.path.join(remote_dbdir, 'remote_db.sqlite')
+    
+    local_dbdir = os.path.join(path, 'local')
+    if not os.path.exists(local_dbdir):
+        os.makedirs(local_dbdir)
+    local_dbpath = os.path.join(local_dbdir, 'local_db.sqlite')
+    
+    
+    test_confdb = os.path.join(path, 'conf_db.sqlite')
+    
+    for p in (remote_dbpath, local_dbpath, test_confdb):
+        if os.path.exists(p):
+            os.remove(p)
+        if os.path.exists(p+".sync"):
+            os.remove(p+".sync")
+            
+    cdb = ConfDb(test_confdb)
+    cdb['database'] = test_confdb
+
     # Monkey-patch confdb object in sync module, which was originally imported
     # from clientconf.
     sync.sync.confdb = cdb
@@ -59,6 +65,7 @@ class StorageSync(unittest.TestCase):
         cls.server = p
         cls.local = indexer.Indexer(local_dbpath)
         iut.enableSignalDebugging()
+    
 
     def setUp(self):
         self.sync = sync.StorageSync()
