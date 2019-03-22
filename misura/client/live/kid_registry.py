@@ -134,7 +134,7 @@ class KidRegistry(QtCore.QThread):
         return kid
     
     def emit_client_changed(self, kid):
-        logging.debug('emit_client_changed', kid)
+        #logging.debug('emit_client_changed', kid)
         for c in '/:;,-=+#@.\\':
             kid = kid.replace(c,'_')
         self.emit(QtCore.SIGNAL('client_changed_'+kid+'()'))
