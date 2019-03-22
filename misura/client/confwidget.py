@@ -226,6 +226,7 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
     """Recent objects list widget"""
     open_new = QtCore.pyqtSignal(str)
     select = QtCore.pyqtSignal(str)
+    add_to = QtCore.pyqtSignal(str, int)
     convert = QtCore.pyqtSignal(str)
     
     def __init__(self, conf, category, parent=None):
@@ -304,9 +305,19 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         self.menu.addAction(_('Open'), self.select_item)
         self.menu.addAction(_('Remove recent'), self.remove_recent)
         if self.category=='file':
-            self.menu.addSeparator()
+            self.add_to_browser_windows(item)
         
         self.menu.exec_(self.list.mapToGlobal(pt))
+        
+    def add_to_browser_windows(self, item):
+        browser = self.parent().parent().parent().parent().parent().parent().parent()
+        self.menu.addSeparator()
+        for i,tab in enumerate(browser.list_tabs()[1:]):
+            open_function = functools.partial(self.add_to.emit,
+                                              item.data(QtCore.Qt.UserRole),
+                                              i+1)
+            self.menu.addAction(tab.title, open_function)
+            
         
         
     def remove_recent(self, item=False):

@@ -148,6 +148,7 @@ class MainWindow(QtGui.QMainWindow):
         # Recent objects greeter window:
         greeter = confwidget.Greeter(parent=self)
         greeter.file.select.connect(self.open_file)
+        greeter.file.add_to.connect(self.open_file)
         greeter.file.convert.connect(self.convert_file)
         greeter.database.select.connect(self.open_database)
 
