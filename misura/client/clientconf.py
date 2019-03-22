@@ -66,9 +66,9 @@ ao(default_desc, 'loglevel', **{'name': 'Logging Level', 'current': 30,
 ao(default_desc, 'lognotify', **{'name': 'Popup notification level', 'current': 40,
                                  'max': 50, 'min': -1, 'step': 10, 'type': 'Integer', 'parent': 'logdir'})
 ao(default_desc, 'logsize', **{'name': 'Size of each log file', 'current':
-                               2048, 'min': 0, 'unit': 'kilobyte', 'type': 'Integer', 'parent': 'logdir'})
+                               20000, 'min': 0, 'unit': 'kilobyte', 'type': 'Integer', 'parent': 'logdir'})
 ao(default_desc, 'lognumber', **{'name': 'Max number of logfiles to be kept',
-                                 'current': 50, 'min': 0, 'type': 'Integer', 'parent': 'logdir'})
+                                 'current': 5, 'min': 0, 'type': 'Integer', 'parent': 'logdir'})
 
 ao(default_desc, 'templates', **{'name': 'Templates directory',
                                  'current': os.path.expanduser("~/MisuraData/templates"),
@@ -181,7 +181,8 @@ rule_opt_status = [[('Option', 'String'), ('Position', 'Integer'), ('Force', 'Bo
                    ['^/hsm/sample\d/h$', i(), 0],
                    ['^/(horizontal|vertical|flex)?/sample\d/d$', i(), 0],
                    ['^/(horizontal|vertical|flex)?/sample\d/initialDimension$', i(), 0],
-                   ['^/dta/sample\d/deltaT$', i(), 0],
+                   ['^/dta/sample0/deltaT$', i(), 0],
+                    ['^/dta/sample0/DTA$', i(), 0],
                    ]
 
 ao(default_desc, 'opt_status', 'Table', rule_opt_status, 'Status')
