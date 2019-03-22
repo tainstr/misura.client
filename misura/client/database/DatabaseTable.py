@@ -101,6 +101,8 @@ class DatabaseTable(QtGui.QTableView):
         self.edit(record)
 
     def showMenu(self, pt):
+        if self.model().table=='errors':
+            return
         if self.menu_add_to:
             self.menu_add_to.clear()
             for i,tab in enumerate(self.browser.list_tabs()[1:]):
@@ -111,6 +113,8 @@ class DatabaseTable(QtGui.QTableView):
         
 
     def select(self, idx=-1):
+        if self.model().table=='errors':
+            return
         self.selected_tab_index = -1
         self.emit(QtCore.SIGNAL('selected()'))
         

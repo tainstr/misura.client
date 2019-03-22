@@ -99,7 +99,10 @@ class DatabaseWidget(QtGui.QWidget):
         act.setCheckable(True)
         self.view_actions['view_plots'] = act
         
-        
+        act = vmenu.addAction(_('Errors'), functools.partial(self.load_table, 'errors'))
+        act.setCheckable(True)
+        self.view_actions['errors'] = act  
+     
         self.bar = QtGui.QProgressBar(self)
         self.lay.addWidget(self.bar)
         self.bar.hide()
@@ -117,6 +120,11 @@ class DatabaseWidget(QtGui.QWidget):
             self.table.model().orderby = z 
         self.up()
         hh = self.table.reset_header()
+        
+        if name == 'errors':
+            hh.show_all_sections()
+            self.table.resizeRowsToContents()
+            return
         for tab, act in self.view_actions.items():
             act.setChecked(tab==name)
             
