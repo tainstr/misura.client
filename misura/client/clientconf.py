@@ -128,6 +128,8 @@ ao(default_desc, 'rule_unit', 'Table', rule_unit, 'Dataset units')
 
 rule_plot = r'''hsm/sample\d/Vol$
 /sample\d/d$
+/dta/sample\d/DTA$
+/dta/sample\d/deltaT$
 ^(/summary/)?kiln/T$'''
 ao(default_desc, 'rule_plot', 'TextArea', rule_plot, 'Auto Plot')
 
