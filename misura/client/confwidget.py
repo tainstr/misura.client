@@ -227,16 +227,19 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
     open_new = QtCore.pyqtSignal(str)
     select = QtCore.pyqtSignal(str)
     convert = QtCore.pyqtSignal(str)
+    
     def __init__(self, conf, category, parent=None):
         QtGui.QWidget.__init__(self, parent)
         RecentInterface.__init__(self, conf, category)
         self.setWindowTitle(_('Recent ' + self.name + 's:'))
         self.lay = QtGui.QVBoxLayout()
-
+        self.menu = QtGui.QMenu()
         self.lay.addWidget(QtGui.QLabel('Recent ' + self.name + 's:'))
 
         self.list = QtGui.QListWidget(self)
         self.list.itemDoubleClicked.connect(self.select_item)
+        self.list.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.list.customContextMenuRequested.connect(self.show_context_menu)
         self.list.itemSelectionChanged.connect(self.pre_select_item)
         self.connect(self.conf, QtCore.SIGNAL('mem()'), self.redraw)
         self.connect(self.conf, QtCore.SIGNAL('rem()'), self.redraw)
@@ -290,7 +293,28 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         if not item:
             self.open_button.setEnabled(False)
             return False
-        return item        
+        return item   
+        
+    
+    def show_context_menu(self, pt):
+        item = self.pre_select_item()
+        if not item:
+            logging.debug('No item selected: cannot show context menu')
+        self.menu.clear()
+        self.menu.addAction(_('Open'), self.select_item)
+        self.menu.addAction(_('Remove recent'), self.remove_recent)
+        if self.category=='file':
+            self.menu.addSeparator()
+        
+        self.menu.exec_(self.list.mapToGlobal(pt))
+        
+        
+    def remove_recent(self, item=False):
+        item = self.pre_select_item(item)
+        sig = item.data(QtCore.Qt.UserRole)
+        logging.debug('Removing recent:', item.text(), sig)
+        self.conf.rem(self.category, sig)
+           
 
     def select_item(self, item=False):
         """Emit the 'select(QString)' signal with the path of the object"""
@@ -298,6 +322,7 @@ class RecentWidget(RecentInterface, QtGui.QWidget):
         if item:
             self.select.emit(
                       item.data(QtCore.Qt.UserRole))
+            
         
 
 class Greeter(QtGui.QWidget):
