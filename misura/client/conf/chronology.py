@@ -236,6 +236,10 @@ class ChronologyTable(QtGui.QTableWidget):
             return False
         
         new_values = {}
+        
+        t = self.chron.keys()[::-1][col-COL_BASE]
+        print('KKKKKK', self.chron.keys(), col, COL_BASE, t)
+        print('WWWWW', self.chron[t])
         for row in xrange(self.rowCount()):
             key = self.keys[row]
             if not self.checks[key].isChecked():
@@ -245,11 +249,14 @@ class ChronologyTable(QtGui.QTableWidget):
                 wg = self.default_widgets[key]
             elif self.virtual_widgets.get(row, {}).get(col, None):
                 wg = self.virtual_widgets[row][col]
+            elif self.chron.get(t,{}).get(row, False):
+                wg = self.chron[t][row]
             else:
                 logging.debug('Cannot find proper value for', key, row, col)
                 continue
-                
+            
             new_values[key] = wg.current
+            logging.debug('Resetting', key, new_values[key])
             
         from misura.client.live import registry
         kids = []
