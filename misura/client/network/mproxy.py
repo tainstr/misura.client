@@ -23,6 +23,8 @@ def urlauth(url):
     """Decode and strip away the auth part of an url.
     Returns user, password and clean url"""
     url = urllib.unquote(url)
+    if not '@' in url:
+        return False, False, url
     i = url.find('://') + 3
     e = url.find('@', i) + 1
     auth = url[i:e][:-1]

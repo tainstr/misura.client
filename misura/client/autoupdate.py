@@ -145,6 +145,13 @@ def get_version_date(versionString):
             current = fi(line)
     return current
     
+def get_tempdir():
+    if os.name=='nt':
+        tempdir = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop') 
+    else:
+        tempdir = os.path.join(os.path.expanduser('~')) 
+    return tempdir
+
 def check_server_updates(remote, parent=None):
     current = -1
     latest = -1
@@ -164,11 +171,7 @@ def check_server_updates(remote, parent=None):
     else:
         # Take latest version
         latest = conf.get('latest', 'server')
-    
-    if os.name=='nt':
-        tempdir = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop') 
-    else:
-        tempdir = os.path.join(os.path.expanduser('~'))  
+    tempdir = get_tempdir()
     server_url = conf.get('url', latest)
     server_out = os.path.join(tempdir, 'misura_pkg_{}.tar'.format(latest))
     logging.debug('Downloading server package', server_url)
@@ -178,6 +181,8 @@ def check_server_updates(remote, parent=None):
     tt = TransferThread(server_url, server_out)
     tt.dlFinished.connect(updater)
     tt.updater = updater
+    if not registry.taskswg:
+        registry.set_manager()
     tt.set_tasks(registry.tasks)
     tt.start()
     return tt
@@ -224,7 +229,7 @@ def check_client_updates(parent):
         logging.info('No update was found', current, client)
         return False
     logging.debug('Updating', iclient, current)
-    tempdir = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+    tempdir = get_tempdir()
     client_out = os.path.join(tempdir, 'misura_client_{}.exe'.format(client))
     url = conf.get('url', str(client))
     updater = ClientUpdater(client_out)

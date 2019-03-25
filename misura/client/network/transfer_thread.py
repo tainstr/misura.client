@@ -131,6 +131,8 @@ class TransferThread(QtCore.QThread):
         if not url.startswith('http'):
             return url
         user, passwd, url = urlauth(url)
+        if not user:
+            return url
         # Connection to data
         auth_handler = urllib2.HTTPBasicAuthHandler()
         auth_handler.add_password(
