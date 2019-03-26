@@ -177,6 +177,12 @@ class MainWindow(QtGui.QMainWindow):
                 event.ignore()
                 return True
             i += 1
+            
+        try:
+            confdb._lock.acquire(block=True, timeout=5)
+            confdb._lock.release()
+        except:
+            logging.debug(format_exc())
         ret = QtGui.QMainWindow.closeEvent(self, event)
         iutils.app.quit()
         return ret
