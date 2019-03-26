@@ -15,7 +15,7 @@ except:
 
 from PyQt4 import QtCore
 
-from misura.canon import option
+from misura.canon import option, indexer
 from misura.canon import csutil
 from misura.canon.option import ao
 from misura.canon.indexer import Indexer
@@ -317,6 +317,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         QtCore.QObject.__init__(self)
         option.ConfigurationProxy.__init__(self)
         self.store = option.SqlStore()
+        self._lock = indexer.FileSystemLock()
         if not path:
             return None
         # Load/create
@@ -434,7 +435,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         option.ConfigurationProxy._writeLevel = self['authLevel']
         if os.path.exists(self['database']):
             logging.debug('Found default database', self['database'])
-            self.mem_database(self['database'], 'Default')
+            self.mem_database(self['database'], 'Default', save=False)
         if os.name != 'nt':
             self['m3_enable'] = False
             self.setattr('m3_enable', 'attr', ['ReadOnly', 'Hidden'])
@@ -468,15 +469,16 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         if path:
             self.path = path
             csutil.ensure_directory_existence(path)
+        self._lock.set_path(self.path)
+        self._lock.acquire(timeout=3)
         self.conn = sqlite3.connect(
             self.path, detect_types=sqlite3.PARSE_DECLTYPES)
         self.conn.text_factory = unicode
         cursor = self.conn.cursor()
-
         self.load_configuration(cursor)
         cursor.close()
-
         self.conn.commit()
+        self._lock.release()
 
         # Forget recent tables defined with old headers
         for tname in recent_tables:
@@ -551,15 +553,17 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     def save(self, path=False):
         """Save to an existent client configuration database."""
         logging.debug('SAVING')
-        cursor = self.conn.cursor()
         self.clean_rules()
+        self._lock.acquire(timeout=3)
+        cursor = self.conn.cursor()
         self.store.write_table(cursor, 'conf', desc=self.desc)
         cursor.close()
         self.conn.commit()
+        self._lock.release()
         self.reset_rules()
         self.create_index()
 
-    def mem(self, name, *arg):
+    def mem(self, name, *arg, **kwarg):
         """Memoize a recent datum"""
         logging.debug("mem ", name, arg)
         # Avoid saving duplicate values
@@ -575,7 +579,8 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         
         self[tname] = tab
         self.emit(QtCore.SIGNAL('mem()'))
-        self.save()
+        if kwarg.get('save', True):
+            self.save()
         return True
 
     def rem(self, name, key, save=True):
@@ -603,24 +608,28 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
     def close(self):
         if self.conn:
             self.conn.close()
+        try:
+            self._lock.release()
+        except:
+            pass
 
-    def mem_file(self, path, name=''):
-        self.mem('file', path, name)
+    def mem_file(self, path, name='', save=True):
+        self.mem('file', path, name, save=save)
 
-    def rem_file(self, path):
-        self.rem('file', path)
+    def rem_file(self, path, save=True):
+        self.rem('file', path, save=save)
 
-    def mem_database(self, path, name=''):
-        self.mem('database', path, name)
+    def mem_database(self, path, name='', save=True):
+        self.mem('database', path, name, save=save)
 
-    def rem_database(self, path):
-        self.rem('database', path)
+    def rem_database(self, path, save=True):
+        self.rem('database', path, save=save)
 
-    def mem_m3database(self, path, name=''):
-        self.mem('m3database', path, name)
+    def mem_m3database(self, path, name='', save=True):
+        self.mem('m3database', path, name, save=save)
 
-    def rem_m3database(self, path):
-        self.rem('m3database', path)
+    def rem_m3database(self, path, save=True):
+        self.rem('m3database', path, save=save)
 
     def found_server(self, addr):
         addr = str(addr)
