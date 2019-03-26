@@ -237,9 +237,8 @@ class ChronologyTable(QtGui.QTableWidget):
         
         new_values = {}
         
-        t = self.chron.keys()[::-1][col-COL_BASE]
-        print('KKKKKK', self.chron.keys(), col, COL_BASE, t)
-        print('WWWWW', self.chron[t])
+        if col>COL_DEFAULT:
+            t = self.times[col-COL_BASE]
         for row in xrange(self.rowCount()):
             key = self.keys[row]
             if not self.checks[key].isChecked():
