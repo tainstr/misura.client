@@ -3,6 +3,7 @@
 """Simple plotting for browser and live acquisition."""
 import os
 from functools import partial
+from traceback import format_exc
 from base64 import b64encode
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
@@ -501,8 +502,11 @@ class VeuszPlot(QtGui.QWidget):
         pass
 
     def enable_shortcuts(self):
-        for action in self.plot.vzactions.itervalues():
-            self.addAction(action)
+        for name, action in self.plot.vzactions.iteritems():
+            try:
+                self.addAction(action)
+            except:
+                logging.debug(format_exc(), name, action)
 
     def set_doc(self, doc=False):
         self.treeedit.close()

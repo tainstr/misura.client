@@ -318,6 +318,7 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         option.ConfigurationProxy.__init__(self)
         self.store = option.SqlStore()
         self._lock = indexer.FileSystemLock()
+        self._lock.copy_on_lock = True
         if not path:
             return None
         # Load/create
@@ -408,22 +409,23 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         self._rule_opt_tc = False
         self._rule_nav_hide = False
 
-    def load_configuration(self, cursor):
+    def load_configuration(self):
         # Configuration table
+        loaded = False
+        self.conn = sqlite3.connect(self.path, 
+                    detect_types=sqlite3.PARSE_DECLTYPES)
+        self.conn.text_factory = unicode
+        cursor = self.conn.cursor()
         conf_table_exists = cursor.execute(
             "select 1 from sqlite_master where type='table' and name='conf'").fetchone()
-        loaded = False
         if conf_table_exists:
-            try:
-                stored_desc = self.store.read_table(cursor, 'conf')
-                desc = default_desc.copy()
-                desc.update(stored_desc)
-                self.desc = desc
-                logging.debug('Loaded configuration', self.desc)
-                loaded = True
-            except:
-                logging.error('Loading configuration from',
-                              self.path, format_exc())
+            stored_desc = self.store.read_table(cursor, 'conf')
+            desc = default_desc.copy()
+            desc.update(stored_desc)
+            self.desc = desc
+            logging.debug('Loaded configuration', self.desc)
+            loaded = True
+            
         if not loaded:
             logging.debug('Recreating client configuration')
             for key, val in default_desc.iteritems():
@@ -443,6 +445,9 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             self['updateUrl'] = self.getattr('updateUrl','factory_default')
             self['updateUser'] = ''
             self['updatePassword'] = ''
+        cursor.close()
+        self.conn.commit()
+        return loaded
 
     def migrate_desc(self):
         """Migrate saved newdesc to current hard-coded configuration structure default_desc"""
@@ -471,13 +476,17 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             csutil.ensure_directory_existence(path)
         self._lock.set_path(self.path)
         self._lock.acquire(timeout=3)
-        self.conn = sqlite3.connect(
-            self.path, detect_types=sqlite3.PARSE_DECLTYPES)
-        self.conn.text_factory = unicode
-        cursor = self.conn.cursor()
-        self.load_configuration(cursor)
-        cursor.close()
-        self.conn.commit()
+        if not os.path.exists(self.path):
+            self._lock.recover_backup()
+        loaded = False
+        try:
+            loaded = self.load_configuration()
+        except:
+            logging.critical('Cannot load client configuration', self.path, format_exc())
+            os.remove(self.path)
+        if (not loaded) and self._lock.recover_backup():
+            logging.debug('Loading configuration backup')
+            self.load_configuration()
         self._lock.release()
 
         # Forget recent tables defined with old headers
