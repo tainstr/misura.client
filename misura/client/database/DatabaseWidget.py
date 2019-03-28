@@ -173,6 +173,7 @@ class DatabaseWidget(QtGui.QWidget):
     def _refresh(self):
         from ..live import registry
         self.remote.tasks = registry.tasks
+        self.remote.refresh()
         self.up()
         
     def refresh(self):
