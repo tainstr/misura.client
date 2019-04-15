@@ -13,7 +13,7 @@ from misura.canon.option import match_node_path
 from misura.client.widgets.active import RunMethod
 from misura.canon.plugin import node
 
-from ..model.parameters import execute_queue 
+from thegram.model.parameters import execute_queue 
 from ..plugin.Baseline import BaselinePlugin
 from ..plugin import check_complete_sample, check_complete_segment, check_complete_test
 from misura.client.conf import InterfaceDialog

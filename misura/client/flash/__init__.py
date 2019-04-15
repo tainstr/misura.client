@@ -1,9 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from traceback import print_exc
-from . import flashline
+
 from . import reference_files
 
+from misura.canon import determine_path
+flashdir = determine_path()  # Executable path
 
 # Additional configuration options
 from misura.canon.option import ao, ConfigurationProxy
@@ -142,8 +144,6 @@ def set_laser_geometry(conf, key, old, new):
         registry.force_redraw([conf.getattr(nkey, 'kid')])
     return new
 
-ConfigurationProxy.callbacks_set.add(set_laser_geometry)
-ConfigurationProxy.callbacks_get.add(list_laser_geometries)
 
 def add_thegram_options(confdb1):
     global confdb
@@ -254,25 +254,17 @@ def generate_default_plot_rule(confdb, conf=False):
     logging.debug('generate_default_plot_rule', repr(confdb['flash_test_plot']), repr(rule))
     return rule
 
+try:
+    import thegram
+    from . import flashline
+    from . import callbacks
+    
+    ConfigurationProxy.callbacks_set.add(set_laser_geometry)
+    ConfigurationProxy.callbacks_get.add(list_laser_geometries)
+    clientconf_update_functions.append(add_thegram_options)
+    default_plot_rules['flash'] = generate_default_plot_rule
+except:
+    logging.debug('Cannot import thegram module. Flash UI extension is disabled.')
+    print_exc()
 
-clientconf_update_functions.append(add_thegram_options)
-default_plot_rules['flash'] = generate_default_plot_rule
 
-
-import os
-import sys
-
-
-def determine_path(root=__file__):
-    """Borrowed from wxglade.py"""
-    try:
-        #       root = __file__
-        if os.path.islink(root):
-            root = os.path.realpath(root)
-        return os.path.dirname(os.path.abspath(root))
-    except:
-        print("I'm sorry, but something is wrong.")
-        print("There is no __file__ variable. Please contact the author.")
-        sys.exit()
-
-flashdir = determine_path()  # Executable path

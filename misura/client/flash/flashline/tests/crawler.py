@@ -9,7 +9,7 @@ import logging, logging.handlers
 import multiprocessing
 from misura.canon.logger import Log as log
 
-from thegram.flashline import Converter
+from misura.client.flash.flashline import Converter
 from misura.client.clientconf import confdb
 from veusz.widgets import root
 

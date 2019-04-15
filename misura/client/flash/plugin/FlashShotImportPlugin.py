@@ -5,7 +5,7 @@ import numpy as np
 from veusz import plugins
 from misura.client import _
 
-from thegram.flashline import dataparser
+from misura.client.flash.flashline import dataparser
 
 class FlashShotImportPlugin(plugins.ImportPlugin):
     """An example plugin for reading a set of unformatted numbers

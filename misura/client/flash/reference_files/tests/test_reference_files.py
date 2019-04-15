@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 import os
-from thegram import reference_files
+from misura.client.flash import reference_files
 
 print(dir(reference_files))
 

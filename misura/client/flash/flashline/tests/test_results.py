@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import unittest
-from thegram.flashline import results
-from thegram.flashline.tests import testdir
+from misura.client.flash.flashline import results
+from misura.client.flash.flashline.tests import testdir
 
 
 class Results(unittest.TestCase):

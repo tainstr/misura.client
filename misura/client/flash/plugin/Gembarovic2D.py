@@ -6,7 +6,7 @@ from pickle import loads
 
 from veusz import plugins
 
-from ..model import gembarovic
+from thegram.model import gembarovic
 
 from AbstractModel import AbstractFlashModelPlugin
 

@@ -6,7 +6,7 @@ from pickle import loads
 
 from veusz import plugins
 
-from ..model import inplane
+from thegram.model import inplane
 
 from AbstractModel import AbstractFlashModelPlugin
 

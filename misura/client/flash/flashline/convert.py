@@ -16,13 +16,13 @@ from scipy.interpolate import interp1d
 from misura.canon import option, indexer, reference
 from misura.canon.option import ao
 from misura.canon.logger import get_module_logging
-from thegram.reference_files import calc_reference_data
-from thegram.flashline.debug_table import fake_debug_table
+from misura.client.flash.reference_files import calc_reference_data
+from misura.client.flash.flashline.debug_table import fake_debug_table
 from __builtin__ import True
 mlogging = get_module_logging(__name__)
 from misura.canon.plugin import dataimport
-from ..reference_files import list_reference_files
-from ..model.baseline import _run_baseline_on_proxy
+from misura.client.flash.reference_files import list_reference_files
+
 
 from . import dataparser
 from .dataparser import get_data
@@ -1150,5 +1150,12 @@ class Converter(dataimport.Converter):
         self.tree = tree
         return self.outpath
 
+try:
+    from thegram.model.baseline import _run_baseline_on_proxy
+    dataimport.data_importers.add(Converter)
+except:
+    logging.debug('Cannot find a valid baseline model. FlashLine import is disabled.')
+    from traceback import print_exc
+    print_exc()
 
-dataimport.data_importers.add(Converter)
+

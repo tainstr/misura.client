@@ -12,7 +12,7 @@ from misura.client.filedata.generate_datasets import new_dataset_operation
 from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 
-from ..model.baseline import _run_baseline_on_proxy
+from thegram.model.baseline import _run_baseline_on_proxy
 
 
 def run_baseline_on_proxy(configuration_proxy, t, raw, laser, node):

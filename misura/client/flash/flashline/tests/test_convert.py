@@ -10,10 +10,10 @@ from misura.client.tests import iutils_testing
 import veusz.document as document
 import veusz.widgets
 
-from thegram import flashline
-from thegram.flashline import convert
+from misura.client.flash import flashline
+from misura.client.flash.flashline import convert
 
-from thegram.flashline.tests import testdir
+from misura.client.flash.flashline.tests import testdir
 
 #test_path = '/home/daniele/Sviluppo/thegram/1322MOshinythin/TestInformation.xml'
 #segment = 'T100'

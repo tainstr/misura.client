@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from thegram.flashline import debug_table
-from thegram.flashline.tests import testdir
+from misura.client.flash.flashline import debug_table
+from misura.client.flash.flashline.tests import testdir
 
 
 class DebugTable(unittest.TestCase):

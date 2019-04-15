@@ -3,8 +3,8 @@
 import unittest
 import numpy as np
 
-from thegram.flashline import log_files 
-from thegram.flashline.tests import testdir
+from misura.client.flash.flashline import log_files 
+from misura.client.flash.flashline.tests import testdir
 
 
 class LogFiles(unittest.TestCase):

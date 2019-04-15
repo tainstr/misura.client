@@ -9,7 +9,7 @@ from veusz import plugins
 from misura.client import _
 from misura.client.plugin.PlotPlugin import bounded_axes
 
-from ..model import three_layers
+from thegram.model import three_layers
 
 from AbstractModel import AbstractFlashModelPlugin, fallback, confdb
 

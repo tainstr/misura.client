@@ -10,8 +10,8 @@ from misura.canon.logger import get_module_logging
 logging = get_module_logging(__name__)
 from misura.canon.csutil import isWindows
 
-from thegram.flashline.convert import result_handles
-from thegram.plugin import model_plugins
+from misura.client.flash.flashline.convert import result_handles
+from misura.client.flash.plugin import model_plugins
 
 #TODO: look for fixed length fields formatting!
 

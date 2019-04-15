@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import unittest
-import thegram.flashline.dataparser as dataparser
-from thegram.flashline.tests import testdir
+import misura.client.flash.flashline.dataparser as dataparser
+from misura.client.flash.flashline.tests import testdir
 
 #testdir = '/home/daniele/Sviluppo/thegram/1273MO/'
 # testdir = 'D:\Sviluppo/thegram/1273MO\'

@@ -17,8 +17,8 @@ import veusz.widgets
 
 from misura.client import plugin  # Force wrapping of thegram plugins
 
-from thegram.plugin.tests import testdir
-from thegram.plugin.TwoLayers import TwoLayersPlugin
+from misura.client.flash.plugin.tests import testdir
+from misura.client.flash.plugin.TwoLayers import TwoLayersPlugin
 
 nativem4 = testdir + '../../flashline/tests/data/1273MO.h5'
 

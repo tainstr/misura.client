@@ -21,8 +21,8 @@ from misura.client.filedata.generate_datasets import recurse_generate_datasets, 
 from misura.client.clientconf import confdb
 
 import Baseline
-from ..model import parameters, shapefit
-from ..model.parameters import fallback
+from thegram.model import parameters, shapefit
+from thegram.model.parameters import fallback
 
 from PyQt4 import QtGui
 

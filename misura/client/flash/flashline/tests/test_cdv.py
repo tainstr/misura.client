@@ -3,8 +3,8 @@
 import os
 import unittest
 
-from thegram.flashline import cdv
-from thegram.flashline.tests import testdir
+from misura.client.flash.flashline import cdv
+from misura.client.flash.flashline.tests import testdir
 
 smp_path = os.path.join(testdir, 'MO6_1')
 cdv1_path = os.path.join(smp_path, '00101001.cdv')

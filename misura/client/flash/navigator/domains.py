@@ -31,7 +31,7 @@ from ..plugin.SummaryPlotPlugin import SummaryPlotPlugin
 from ..plugin.ShotPlotPlugin import ShotPlotPlugin
 from ..widgets import ResultsAll, ResultsSingle
 
-from thegram.flashline.convert import result_handles
+from misura.client.flash.flashline.convert import result_handles
 
 
 
