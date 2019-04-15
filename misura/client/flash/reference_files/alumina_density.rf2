@@ -1,0 +1,13 @@
+Alumina Density
+Version 2.0  data file
+ 2   Density (kg/m³)
+50     ; Min Temp Fit 
+1600     ; Max Temp Fit  
+1600     ; Max Temp Material  
+10       ; Eq Type 
+5       ; Num Coeffs 
+3852.263428  
+-0.072962  
+-2.055301e-05 
+-3.952281e-09 
+3.693192e-12 

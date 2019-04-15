@@ -1,0 +1,11 @@
+Title:     MOSBLG-1 
+File ID:   MO6_1   Test Number: 1273MO   AS-JG-EE   
+Thickness: 0.3152 (cm)     Parker
+
+Segment Temperature   Avg     Shots 
+            (C)     (cm²/s)  
+   1        383Q     0.4518  0.4519 0.4522 0.4514 
+   2        984Q     0.3671  0.3673 0.3671 0.3670 
+   3       1188      0.3439  0.3436 0.3444 0.3436 
+   4       1388Q     0.3178  0.3179 0.3181 0.3174 
+   5       1589Q     0.2956  0.2953 0.2959 0.2956 

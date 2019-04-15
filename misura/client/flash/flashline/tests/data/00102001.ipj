@@ -1,0 +1,39 @@
+
+
+ C:\TA\DLF1200\Data\2070_InPlane0030_0050\Cu0050\00102001.fw0 
+
+Baseline    =    -6.911167 +/- 0.010491
+T_max       =     0.209565 +/- 0.018913
+Diffusivity =     1.117339 +/- 0.165375
+Param m     =     0.737854 +/- 0.512421
+Slope       =    -0.000632 +/- 0.089781
+ 
+ 
+Temperature:                27.440 C
+Thickness:                   0.005 cm 
+Radius:                      1.270 cm 
+Irradiated Radius Inner:   0.71500 cm 
+Irradiated Radius Outer:   1.02870 cm 
+Viewed Radius:             0.25400 cm 
+ 
+ 
+  CHI-SQUARE = 0.856790    (3100 DOF)
+        NPAR = 5
+       NFREE = 5
+     NPEGGED = 0
+       NITER = 8
+        NFEV = 44
+
+
+Estimate Diffusivity   =  1.2524 
+Estimate Biot Number   =  0.1000 
+Estimate Temp-Rise-Max =  2.0000 
+
+Number Points  =    3105 
+Deplete Factor =       4 
+
+Baseline Shift =  0.0000 (V)
+
+Start Time     =  0.0000 (s)
+End Time       =  0.8280 (s)
+

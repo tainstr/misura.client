@@ -1,0 +1,14 @@
+Alumina Specific Heat
+Version 2.0  data file
+ 1   Specific Heat (J/(kg·K))
+20     ; Min Temp Fit 
+1600     ; Max Temp Fit  
+1600     ; Max Temp Material  
+10       ; Eq Type 
+6       ; Num Coeffs 
+726.745178  
+2.117538  
+-0.004116  
+4.335339e-06 
+-2.241433e-09 
+4.469030e-13 

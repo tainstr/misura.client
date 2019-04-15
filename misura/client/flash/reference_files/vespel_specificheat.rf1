@@ -1,0 +1,21 @@
+Vespel Specific Heat
+Version 2.0  data file
+ 1   Specific Heat (J/(kg·K))
+50     ; Min Temp Fit 
+800     ; Max Temp Fit  
+800     ; Max Temp Material  
+25       ; Eq Type 
+12       ; Num Coeffs
+    25.0000   1004.8
+    50.0000   1089.6
+    75.0000   1154.4
+   100.0000   1239.4
+   125.0000   1281.4
+   150.0000   1354.3
+   175.0000   1446.4
+   200.0000   1508.6
+   225.0000   1569.3
+   250.0000   1603.6
+   275.0000   1688.5
+   300.0000   1761.7
+

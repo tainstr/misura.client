@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestInformation> 
+<TestTitle>InPlaneCu0030_0050</TestTitle>
+<TestID>2070_InPlane0030_0050</TestID>
+<Operator>W</Operator>
+<DateData> <TimeInSeconds>1490626942</TimeInSeconds>
+<WeekDayName>Mon</WeekDayName>
+<FullWeekDayName>Monday</FullWeekDayName>
+<MonthName>Mar</MonthName>
+<FullMonthName>March</FullMonthName>
+<MonthNumber>03</MonthNumber>
+<DayOfMonth>27</DayOfMonth>
+<DayOfYear>086</DayOfYear>
+<YearNumber>2017</YearNumber>
+</DateData>
+<AllSamplesInformation> <NumberSamples>2</NumberSamples>
+<SampleInformation> <Position>1</Position>
+<SampleTitle>Cu0030</SampleTitle>
+<SampleFileID>Cu0030</SampleFileID>
+<Thickness>0.0030</Thickness>
+<Diameter>2.5400</Diameter>
+<Weight>1.0000</Weight>
+<SampleTestType>3</SampleTestType>
+<SampleTestTypeString>In Plane </SampleTestTypeString>
+<CapsuleType>11</CapsuleType>
+<CapsuleTitle>InPlane3 1.43</CapsuleTitle>
+<CapsuleFileName>C:\TA\DLF1200\InPlaneLowTemp3.capsl</CapsuleFileName>
+<ViewedRadius>0.25400</ViewedRadius>
+<IrradiatedRadiusInner>0.71500</IrradiatedRadiusInner>
+<IrradiatedRadiusOuter>1.02870</IrradiatedRadiusOuter>
+<ExpansionType>0</ExpansionType>
+</SampleInformation><SampleInformation> <Position>2</Position>
+<SampleTitle>Gu0050</SampleTitle>
+<SampleFileID>Cu0050</SampleFileID>
+<Thickness>0.0050</Thickness>
+<Diameter>2.5400</Diameter>
+<Weight>1.0000</Weight>
+<SampleTestType>3</SampleTestType>
+<SampleTestTypeString>In Plane </SampleTestTypeString>
+<CapsuleType>11</CapsuleType>
+<CapsuleTitle>InPlane3 1.43</CapsuleTitle>
+<CapsuleFileName>C:\TA\DLF1200\InPlaneLowTemp3.capsl</CapsuleFileName>
+<ViewedRadius>0.25400</ViewedRadius>
+<IrradiatedRadiusInner>0.71500</IrradiatedRadiusInner>
+<IrradiatedRadiusOuter>1.02870</IrradiatedRadiusOuter>
+<ExpansionType>0</ExpansionType>
+</SampleInformation></AllSamplesInformation><FurnaceInformation> <FurnaceTitle>DLF-1200</FurnaceTitle>
+<FurnaceDescription>DLF-1200 Furnace</FurnaceDescription>
+<FurnaceType>13</FurnaceType>
+</FurnaceInformation><VersionInformation> <SoftwareBuildVersion>17.0510</SoftwareBuildVersion>
+<SoftwareVersion>15.1700</SoftwareVersion>
+<FlashLineBuildVersion>18782</FlashLineBuildVersion>
+</VersionInformation><InstrumentName>DLF-1200_RD</InstrumentName>
+<UniqueName>74dcc882-886a-43e4-b0df-7a5b58a2fa1f</UniqueName>
+<EMName>NA</EMName>
+<DLFName>NA</DLFName>
+<ComputerName>Flash6-eng-W7</ComputerName>
+<MCCSN>123456</MCCSN>
+<TuneByGasName>Nitrogen</TuneByGasName>
+<CarouselConfigType>2</CarouselConfigType>
+<CarouselCartridgeType>3</CarouselCartridgeType>
+<CarouselNumberPositions>2</CarouselNumberPositions>
+<CarouselFileName>C:\TA\DLF1200\DLF1200.cpos</CarouselFileName>
+<FurnaceUsed_CarouselType>1</FurnaceUsed_CarouselType>
+<FurnaceUsed_CarouselSubType>42</FurnaceUsed_CarouselSubType>
+<SantaParams_DetectorType>1</SantaParams_DetectorType>
+<DetectorType>1</DetectorType>
+<DetectorSubType>0</DetectorSubType>
+<DetectorSubTypeName>NA</DetectorSubTypeName>
+<ServiceModeType>0</ServiceModeType>
+<MfgModeType>0</MfgModeType>
+<OSVersionBits>32</OSVersionBits>
+<OSMajorVersion>6</OSMajorVersion>
+<OSMinorVersion>1</OSMinorVersion>
+<OSVersionString>Windows 7 SP1</OSVersionString>
+</TestInformation>

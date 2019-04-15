@@ -1,0 +1,15 @@
+ C:\TA\DLF1200\Data\2070_InPlane0030_0050\Cu0050\00102001.fw0 
+ Temperature: 27.440000 C
+ Thickness: 0.005000 cm 
+ Radius: 1.270000 cm 
+ IrradiatedRadiusInner: 0.715000 cm 
+ IrradiatedRadiusOuter: 1.028700 cm 
+ ViewedRadius: 0.254000 cm 
+ Number of Points: 3104 
+ Jump: 2 
+ Baseline    = -6.911167 +/- 0.010491 
+ T_max       = 0.209565 +/- 0.018913 
+ Diffusivity = 1.117339 +/- 0.165375 
+ Param m     = 0.737854 +/- 0.512421 
+ Slope       = -0.000632 +/- 0.089781 
+

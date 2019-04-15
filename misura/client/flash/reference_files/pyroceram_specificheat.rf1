@@ -1,0 +1,19 @@
+Pyroceram Specific Heat
+Version 2.0  data file
+ 1   Specific Heat (J/(kg·K))
+100     ; Min Temp Fit 
+1000     ; Max Temp Fit  
+1000     ; Max Temp Material  
+25       ; Eq Type 
+10       ; Num Coeffs ( pairs) 
+    20.00000   808.0
+   100.00000   882.9
+   200.00000   987.9
+   300.00000  1078.0
+   400.00000  1073.8
+   500.00000  1127.2
+   600.00000  1180.85
+   700.00000  1189.88
+   800.00000  1203.77
+   900.00000  1215.36
+  1000.00000  1248.75

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestInformation> 
+<TestTitle>Rebuilt Eng unit #2, new lower and upper baffels</TestTitle>
+<TestID>1273MO</TestID>
+<Operator>AS-JG-EE</Operator>
+<DateData> <TimeInSeconds>1447275671</TimeInSeconds>
+<WeekDayName>Wed</WeekDayName>
+<FullWeekDayName>Wednesday</FullWeekDayName>
+<MonthName>Nov</MonthName>
+<FullMonthName>November</FullMonthName>
+<MonthNumber>11</MonthNumber>
+<DayOfMonth>11</DayOfMonth>
+<DayOfYear>315</DayOfYear>
+<YearNumber>2015</YearNumber>
+</DateData>
+<AllSamplesInformation> <NumberSamples>4</NumberSamples>
+<SampleInformation> <Position>1</Position>
+<SampleTitle>MOSBLG-1</SampleTitle>
+<SampleFileID>MO6_1</SampleFileID>
+<Thickness>0.3152</Thickness>
+<Diameter>1.2700</Diameter>
+<Weight>3.9688</Weight>
+<SpecificHeatReferenceFile>C:\TA\DLF1600\MOLLY.RF1</SpecificHeatReferenceFile>
+<DensityFile>C:\TA\DLF1600\MOLLY.RF2</DensityFile>
+<SampleTestType>2</SampleTestType>
+<ExpansionType>0</ExpansionType>
+</SampleInformation><SampleInformation> <Position>2</Position>
+<SampleTitle>MOSBLG-2</SampleTitle>
+<SampleFileID>MO6_2</SampleFileID>
+<Thickness>0.3026</Thickness>
+<Diameter>1.2700</Diameter>
+<Weight>3.9193</Weight>
+<DensityFile>C:\TA\DLF1600\MOLLY.RF2</DensityFile>
+<SampleTestType>2</SampleTestType>
+<ExpansionType>0</ExpansionType>
+</SampleInformation><SampleInformation> <Position>3</Position>
+<SampleTitle>MOSBLG-3</SampleTitle>
+<SampleFileID>MO6_3</SampleFileID>
+<Thickness>0.2980</Thickness>
+<Diameter>1.2700</Diameter>
+<Weight>3.8664</Weight>
+<DensityFile>C:\TA\DLF1600\MOLLY.RF2</DensityFile>
+<SampleTestType>2</SampleTestType>
+<ExpansionType>0</ExpansionType>
+</SampleInformation><SampleInformation> <Position>4</Position>
+<SampleTitle>MOSBLG-4</SampleTitle>
+<SampleFileID>MO6_4</SampleFileID>
+<Thickness>0.3030</Thickness>
+<Diameter>1.2700</Diameter>
+<Weight>3.9272</Weight>
+<DensityFile>C:\TA\DLF1600\MOLLY.RF2</DensityFile>
+<SampleTestType>2</SampleTestType>
+<ExpansionType>0</ExpansionType>
+</SampleInformation></AllSamplesInformation><FurnaceInformation> <FurnaceTitle>T1600</FurnaceTitle>
+<FurnaceDescription>1600 Furnace</FurnaceDescription>
+<FurnaceType>13</FurnaceType>
+</FurnaceInformation><VersionInformation> <SoftwareBuildVersion>15.3150</SoftwareBuildVersion>
+<SoftwareVersion>15.1400</SoftwareVersion>
+<FlashLineBuildVersion>15315</FlashLineBuildVersion>
+</VersionInformation><InstrumentName>RD1600_2</InstrumentName>
+<UniqueName>2d4ef581-ca90-4a82-aeec-b7e97518e097</UniqueName>
+<EMName>NA</EMName>
+<DLFName>Proto1</DLFName>
+<ComputerName>FlashENG-W7-PC</ComputerName>
+<MCCSN>376651</MCCSN>
+<TuneByGasName>NA</TuneByGasName>
+<CarouselConfigType>1</CarouselConfigType>
+<CarouselCartridgeType>0</CarouselCartridgeType>
+<CarouselNumberPositions>6</CarouselNumberPositions>
+<FurnaceUsed_CarouselType>1</FurnaceUsed_CarouselType>
+<FurnaceUsed_CarouselSubType>0</FurnaceUsed_CarouselSubType>
+<SantaParams_DetectorType>1</SantaParams_DetectorType>
+<DetectorSubType>0</DetectorSubType>
+<DetectorSubTypeName>NA</DetectorSubTypeName>
+<ServiceModeType>1</ServiceModeType>
+<MfgModeType>0</MfgModeType>
+</TestInformation>

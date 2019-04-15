@@ -1,0 +1,11 @@
+Title:     MOSBLG-1 
+File ID:   MO6_1   Test Number: 1273MO   AS-JG-EE   
+Thickness: 0.3152 (cm)     Koski Loss .8/.4 
+
+Segment Temperature    Avg    Shots 
+           (°C)      (cm²/s)         
+   1        383Q     0.0288  0.0270 0.0301 0.0292 
+   2        984Q     0.0489  0.0487 0.0487 0.0493 
+   3       1188      0.0710  0.0729 0.0706 0.0696 
+   4       1388Q     0.0735  0.0690 0.0784 0.0731 
+   5       1589Q     0.0885  0.0898 0.0853 0.0902 

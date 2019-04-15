@@ -1,0 +1,18 @@
+Copper Diffusivity
+Version 2.0  data file
+ 5 Diffusivity (cm/s²)
+25       ; Min Temp 
+900       ; Max Temp 
+900       ; Max Temp Material
+25        ; Eq Type
+10       ; Num Pairs
+      25.00  1.17100 
+     100.00  1.12800 
+     200.00  1.08100 
+     300.00  1.04200 
+     400.00  1.01000 
+     500.00  0.97900 
+     600.00  0.94800 
+     700.00  0.91500 
+     800.00  0.87900 
+     900.00  0.83900 

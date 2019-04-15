@@ -1,0 +1,11 @@
+Title:     MOSBLG-1 
+File ID:   MO6_1   Test Number: 1273MO   AS-JG-EE   
+Thickness: 0.3152 (cm)     Goodness of Fit 
+
+Segment Temperature    CT    Moment  Log    NonL   Degio Parker 
+
+   1        383Q     0.9992  0.9990 0.9986 1.0000 0.9995 0.9780 
+   2        984Q     0.9990  0.9995 0.9974 1.0000 0.9992 0.9680 
+   3       1188      0.9997  0.9993 0.9942 0.9999 0.9993 0.9325 
+   4       1388Q     0.9996  0.9993 0.9929 1.0000 0.9989 0.9319 
+   5       1589Q     0.9995  0.9995 0.9885 1.0000 0.9980 0.9163 

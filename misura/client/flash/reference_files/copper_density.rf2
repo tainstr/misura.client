@@ -1,0 +1,11 @@
+Copper Density
+Version 2.0  data file
+ 2   Density (kg/m³)
+50     ; Min Temp Fit 
+800     ; Max Temp Fit  
+800     ; Max Temp Material  
+10       ; Eq Type 
+3       ; Num Coeffs 
+8968.782227  
+-0.444428  
+-8.221979e-05 

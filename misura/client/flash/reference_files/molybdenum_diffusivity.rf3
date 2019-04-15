@@ -1,0 +1,18 @@
+Molybdenum  Diffusivity  
+Version 2.0  data file
+ 3   Diffusivity (cm²/s)
+25     ; Min Temp Fit 
+2500     ; Max Temp Fit  
+2500     ; Max Temp Material  
+25       ; Eq Type 
+10      ; Num Coeffs ( pairs) 
+     25.00000    0.5370
+   100.00000     0.5169
+   200.00000     0.4833
+   400.00000     0.4338
+   600.00000     0.3992
+   800.00000     0.3722
+  1000.00000     0.3473
+  1200.00000     0.3265
+  1400.00000     0.3028
+  1600.00000     0.2861
