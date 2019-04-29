@@ -445,6 +445,8 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
             self['updateUrl'] = self.getattr('updateUrl','factory_default')
             self['updateUser'] = ''
             self['updatePassword'] = ''
+        if 'thegram' in self['m3_plugins']:
+            self['m3_plugins'] = self['m3_plugins'].replace('thegram', 'misura.client.flash')
         cursor.close()
         self.conn.commit()
         return loaded
@@ -527,13 +529,13 @@ class ConfDb(option.ConfigurationProxy, QtCore.QObject):
         # FLASH
         if self['inst_flash']:
             m3p = self['m3_plugins']
-            if 'thegram' not in m3p:
+            if 'misura.client.flash' not in m3p:
                 if m3p and not m3p.endswith('\n'):
                     m3p += '\n'
-                self['m3_plugins'] = m3p+'thegram'
+                self['m3_plugins'] = m3p+'misura.client.flash'
         else: 
             # Disable plugin
-            self['m3_plugin'] = m3p.replace('thegram', '').replace('\n\n', '\n')
+            self['m3_plugin'] = m3p.replace('misura.client.flash', '').replace('\n\n', '\n')
             
         # ADV
         if self['inst_adv']:
